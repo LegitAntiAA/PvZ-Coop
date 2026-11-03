@@ -263,6 +263,9 @@ struct NetConfig
 	bool mUnlockAllMinigames;
 	bool mEnableCoop;			// master switch
 	int  mBaseSnapshotHz;
+	int  mWindowWidth;			// 0 = default 1066
+	int  mWindowHeight;			// 0 = default 600
+	bool mBorderlessFullscreen;	// fullscreen = borderless desktop (native res)
 
 	NetConfig() { Reset(); }
 	void Reset()
@@ -271,6 +274,9 @@ struct NetConfig
 		mUnlockAllMinigames = false;
 		mEnableCoop = true;
 		mBaseSnapshotHz = NET_SNAPSHOT_HZ_DEFAULT;
+		mWindowWidth = 0;
+		mWindowHeight = 0;
+		mBorderlessFullscreen = true;
 	}
 };
 

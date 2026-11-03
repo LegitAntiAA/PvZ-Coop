@@ -24,6 +24,7 @@ void LawnMower::LawnMowerInitialize(int theRow)
     mLastPortalX = -1;
     mNetId = 0;
     mNetGhost = false;
+    mNetTargetX = 0.0f;
 
     ReanimationType aReanimType;
     if (mBoard->StageHasRoof())

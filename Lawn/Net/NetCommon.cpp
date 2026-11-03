@@ -74,6 +74,12 @@ bool NetLoadConfig(NetConfig& theConfig)
 			theConfig.mEnableCoop = (aValue == "1" || aValue == "true" || aValue == "yes");
 		else if (aKey == "base_snapshot_rate")
 			theConfig.mBaseSnapshotHz = atoi(aValue.c_str());
+		else if (aKey == "window_width")
+			theConfig.mWindowWidth = atoi(aValue.c_str());
+		else if (aKey == "window_height")
+			theConfig.mWindowHeight = atoi(aValue.c_str());
+		else if (aKey == "borderless_fullscreen")
+			theConfig.mBorderlessFullscreen = (aValue == "1" || aValue == "true" || aValue == "yes");
 	}
 	fclose(aFile);
 
@@ -95,6 +101,9 @@ bool NetSaveConfig(const NetConfig& theConfig)
 	fprintf(aFile, "unlock_all_minigames=%d\n", theConfig.mUnlockAllMinigames ? 1 : 0);
 	fprintf(aFile, "enable_coop=%d\n", theConfig.mEnableCoop ? 1 : 0);
 	fprintf(aFile, "base_snapshot_rate=%d\n", theConfig.mBaseSnapshotHz);
+	fprintf(aFile, "window_width=%d\n", theConfig.mWindowWidth);
+	fprintf(aFile, "window_height=%d\n", theConfig.mWindowHeight);
+	fprintf(aFile, "borderless_fullscreen=%d\n", theConfig.mBorderlessFullscreen ? 1 : 0);
 	fclose(aFile);
 	return true;
 }

@@ -586,7 +586,7 @@ public:
 	int								NetTdPathPosToCell(float thePos, int& theRow, int& theCol);
 	static void						GenerateTowerDefensePath(std::vector<uint8_t>& thePath);
 	static void						SetTowerDefensePath(const std::vector<uint8_t>& thePath);
-	void							NetGhostUpdateZombie(Zombie* theZombie);
+	void							NetGhostUpdateZombie(Zombie* theZombie, uint8_t theAnimKey);
 	void							NetGhostUpdateOthers();
 };
 extern bool gShownMoreSunTutorial;

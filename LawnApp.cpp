@@ -368,18 +368,25 @@ void LawnApp::MakeWindow()
 	}
 
 #define _WIDE_SCREEN
+	int aBaseWidth = 1066;
+	int aBaseHeight = 600;
 #ifdef _ULTRA_WIDESCREEN
-	mWidth = 1280;
-	mHeight = 720;
-
-	mDDInterface->mWideScreenOffsetX = 240;
-	mDDInterface->mWideScreenOffsetY = 60;
-#elif defined(_WIDE_SCREEN)
-	mWidth = 1066;
-	mHeight = 600;
-
-	mDDInterface->mWideScreenOffsetX = 133;
+	aBaseWidth = 1280;
+	aBaseHeight = 720;
 #endif
+
+	// coop.ini: user-selected window size (e.g. 1366x768 / 1920x1080)
+	if (mNetManager && mNetManager->mConfig.mWindowWidth > 0)
+		aBaseWidth = mNetManager->mConfig.mWindowWidth;
+	if (mNetManager && mNetManager->mConfig.mWindowHeight > 0)
+		aBaseHeight = mNetManager->mConfig.mWindowHeight;
+
+	mWidth = aBaseWidth;
+	mHeight = aBaseHeight;
+
+	// generic widescreen centering (matches the presets: 1066->133, 1280->240/60)
+	mDDInterface->mWideScreenOffsetX = (mWidth - 800) / 2;
+	mDDInterface->mWideScreenOffsetY = (mHeight - 600) / 2;
 
 	gBoardBounds = Rect{ 0, 0, mWidth, mHeight };
 
@@ -394,6 +401,9 @@ void LawnApp::MakeWindow()
 	mSDLRenderer = SDL_CreateRenderer(mSDLWindow, nullptr);
 	SDL_SetRenderVSync(mSDLRenderer, mEnableVsync);
 	SDL_SetRenderLogicalPresentation(mSDLRenderer, mWidth, mHeight, SDL_LOGICAL_PRESENTATION_LETTERBOX);
+	// borderless fullscreen desktop: native monitor resolution with letterboxed scaling
+	if (mNetManager && mNetManager->mConfig.mBorderlessFullscreen && !IsParticleEditor())
+		SDL_SetWindowFullscreenMode(mSDLWindow, nullptr);
 	mHWnd = (HWND)SDL_GetPointerProperty(SDL_GetWindowProperties(mSDLWindow), SDL_PROP_WINDOW_WIN32_HWND_POINTER, NULL);
 
 	mWidgetManager->mWidth = mWidth;
@@ -3270,7 +3280,7 @@ void LawnApp::PlayFoley(FoleyType theFoleyType)
 		mSoundSystem->PlayFoley(theFoleyType);
 
 		// co-op: host shares gameplay foley with clients
-		if (mNetManager && mNetManager->IsHosting() && !gNetSuppressSounds)
+		if (mNetManager && mNetManager->IsHosting() && !LawnNet::gNetSuppressSounds)
 		{
 			LawnNet::NetBuffer anEvent;
 			anEvent.WriteU16((uint16_t)theFoleyType);
@@ -3288,7 +3298,7 @@ void LawnApp::PlayFoleyPitch(FoleyType theFoleyType, float thePitch)
 		mSoundSystem->PlayFoleyPitch(theFoleyType, thePitch);
 
 		// co-op: host shares gameplay foley with clients
-		if (mNetManager && mNetManager->IsHosting() && !gNetSuppressSounds)
+		if (mNetManager && mNetManager->IsHosting() && !LawnNet::gNetSuppressSounds)
 		{
 			LawnNet::NetBuffer anEvent;
 			anEvent.WriteU16((uint16_t)theFoleyType);
@@ -4752,7 +4762,7 @@ void LawnApp::PlaySample(int theSoundNum)
 		SexyAppBase::PlaySample(theSoundNum);
 
 		// co-op: host shares gameplay sounds with clients
-		if (mNetManager && mNetManager->IsHosting() && !gNetSuppressSounds)
+		if (mNetManager && mNetManager->IsHosting() && !LawnNet::gNetSuppressSounds)
 		{
 			LawnNet::NetBuffer anEvent;
 			anEvent.WriteU16((uint16_t)theSoundNum);
@@ -4767,6 +4777,9 @@ void LawnApp::SwitchScreenMode(bool wantWindowed, bool is3d, bool force)
 	//SexyAppBase::SwitchScreenMode(wantWindowed, is3d, force);
 	mIsWindowed = wantWindowed;
 	SDL_SetWindowFullscreen(mSDLWindow, !wantWindowed);
+	// borderless fullscreen desktop mode (native resolution, no mode switch)
+	if (mNetManager && mNetManager->mConfig.mBorderlessFullscreen)
+		SDL_SetWindowFullscreenMode(mSDLWindow, nullptr);
 
 	NewOptionsDialog* aNewOptionsDialog = (NewOptionsDialog*)GetDialog(Dialogs::DIALOG_NEWOPTIONS);
 	if (aNewOptionsDialog)

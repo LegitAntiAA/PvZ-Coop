@@ -1,5 +1,6 @@
 #include "NetManager.h"
 #include "../../LawnApp.h"
+#include "../Board.h"
 #include "../../SexyAppFramework/Common.h"
 
 namespace LawnNet
@@ -72,7 +73,7 @@ bool NetManager::StartHost()
 	anAddr.sin_port = htons(NET_DEFAULT_PORT);
 	anAddr.sin_addr.s_addr = INADDR_ANY;
 
-	if (bind(aListener, (sockaddr*)&anAddr, sizeof(anAddr)) == SOCKET_ERROR ||
+	if (::bind(aListener, (sockaddr*)&anAddr, sizeof(anAddr)) == SOCKET_ERROR ||
 		listen(aListener, 4) == SOCKET_ERROR)
 	{
 		closesocket(aListener);

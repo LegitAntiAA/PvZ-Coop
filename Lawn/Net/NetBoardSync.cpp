@@ -7,6 +7,9 @@
 #include "../LawnMower.h"
 #include "../GridItem.h"
 #include "../SeedPacket.h"
+#include "../CursorObject.h"
+#include "../Challenge.h"
+#include "../../Sexy.TodLib/Reanimator.h"
 #include "../System/PlayerInfo.h"
 #include "../../GameConstants.h"
 #include "../../SexyAppFramework/Graphics.h"
@@ -325,7 +328,7 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 		aBody.WriteU16(aMower->mNetId);
 		aBody.WriteU8((uint8_t)aMower->mRow);
 		aBody.WriteU8((uint8_t)aMower->mMowerState);
-		aBody.WriteI16((int16_t)(aMower->mX * 4));
+		aBody.WriteI16((int16_t)(aMower->mPosX * 4));
 		aCount++;
 	}
 	b.WriteU8(aCount);
@@ -415,8 +418,7 @@ void Board::NetDrainMessages()
 	if (!aNet)
 		return;
 
-	PerfTimer anApplyTimer;
-	anApplyTimer.Start();
+	uint32_t anApplyStart = GetTickCount();
 
 	while (!aNet->mPendingBoardMsgs.empty())
 	{
@@ -428,7 +430,7 @@ void Board::NetDrainMessages()
 			NetApplySnapshot(aMsg.mData);
 	}
 
-	mNetLastApplyMs = (int)anApplyTimer.GetDuration();
+	mNetLastApplyMs = (int)(GetTickCount() - anApplyStart);
 }
 
 void Board::NetApplyEvent(NetBuffer& b)
@@ -537,9 +539,9 @@ void Board::NetApplyEvent(NetBuffer& b)
 	{
 		uint8_t aRow = b.ReadU8Or();
 		LawnMower* aMower = FindLawnMowerInRow(aRow);
-		if (aMower && aMower->mMowerState == LAWNMOWER_WAITING && !aMower->mDead)
+		if (aMower && aMower->mMowerState == MOWER_READY && !aMower->mDead)
 		{
-			aMower->mMowerState = LAWNMOWER_TRIGGERED;
+			aMower->mMowerState = MOWER_TRIGGERED;
 			aMower->mDead = false;
 		}
 		break;
@@ -886,7 +888,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 			gNetSuppressSounds = false;
 		}
 		aMower->mMowerState = (LawnMowerState)aState;
-		aMower->mX = aX / 4;
+		aMower->mPosX = aX / 4.0f;
 		aMower->mNetTargetX = aX / 4.0f;
 	}
 	{
@@ -1020,7 +1022,7 @@ void Board::NetGhostUpdateOthers()
 	{
 		if (aMower->mDead || !aMower->mNetGhost)
 			continue;
-		aMower->mX += (int)((aMower->mNetTargetX - aMower->mX) * 0.3f);
+		aMower->mPosX += (aMower->mNetTargetX - aMower->mPosX) * 0.3f;
 	}
 }
 
