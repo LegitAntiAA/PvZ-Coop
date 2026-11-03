@@ -1,6 +1,7 @@
 #include "NetManager.h"
 #include "../../LawnApp.h"
 #include "../Board.h"
+#include "../Widget/StoreScreen.h"
 #include "../../SexyAppFramework/Common.h"
 
 namespace LawnNet
@@ -402,6 +403,9 @@ void NetManager::HandleMessage(NetSession* theSession, uint8_t theMsgType, NetBu
 	case NETMSG_TEAM_SELECT:
 		OnClientTeamSelect(theSession, thePayload);
 		break;
+	case NETMSG_STORE_ACTION:
+		OnStoreAction(theSession, thePayload);
+		break;
 	case NETMSG_STATS:
 		OnClientStats(theSession, thePayload);
 		break;
@@ -788,6 +792,23 @@ void NetManager::BroadcastStartGame(int theGameMode, int theLevel, uint32_t theB
 	for (uint8_t aCell : mStartTDPath)
 		aMsg.WriteU8(aCell);
 	BroadcastMessage(NETMSG_START_GAME, aMsg);
+}
+
+void NetManager::SendStoreAction(const NetBuffer& thePayload)
+{
+	if (mMode != MODE_CLIENT || !mHostConn)
+		return;
+	mHostConn->SendMessage(NETMSG_STORE_ACTION, thePayload);
+}
+
+void NetManager::OnStoreAction(NetSession* theSession, NetBuffer& thePayload)
+{
+	if (!mApp || !mApp->NetIsHost())
+		return;
+	uint8_t anItem = thePayload.ReadU8Or();
+	StoreScreen* aStore = (StoreScreen*)mApp->GetDialog(Dialogs::DIALOG_STORE);
+	if (aStore)
+		aStore->NetApplyPurchase((StoreItem)anItem);
 }
 
 void NetManager::SendInput(bool theDown, int theClickCount, int theX, int theY)

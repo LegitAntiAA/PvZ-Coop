@@ -8,6 +8,7 @@
 #include "../ZenGarden.h"
 #include "../SeedPacket.h"
 #include "../../LawnApp.h"
+#include "../Net/NetManager.h"
 #include "../../Resources.h"
 #include "../System/Music.h"
 #include "SeedChooserScreen.h"
@@ -976,7 +977,22 @@ void StoreScreen::PurchaseItem(StoreItem theStoreItem)
 
         if (aComfirmResult == ID_OK)
         {
+            // co-op client: purchases go through the host's profile
+            if (mApp->NetIsClient())
+            {
+                if (mApp->mNetManager)
+                {
+                    LawnNet::NetBuffer aMsg;
+                    aMsg.WriteU8((uint8_t)theStoreItem);
+                    mApp->mNetManager->SendStoreAction(aMsg);
+                    SetBubbleText(3400, 800, false);
+                }
+                return;
+            }
+
             mApp->mPlayerInfo->AddCoins(-GetItemCost(theStoreItem));
+            if (mApp->NetIsHost())
+                mApp->NetBroadcastProfile();
             if (theStoreItem == STORE_ITEM_PACKET_UPGRADE)
             {
                 ++mApp->mPlayerInfo->mPurchases[theStoreItem];
@@ -1211,4 +1227,68 @@ void StoreScreen::SetupForIntro(int theDialogIndex)
     mHatchOpen = false;
     mBackButton->mLabel = TodStringTranslate(_S("[STORE_NEXT_LEVEL_BUTTON]"));
     EnableButtons(false);
+}
+
+// ==========================================================================
+// Co-op: host applies a client's purchase request (no dialogs, no effects)
+// ==========================================================================
+void StoreScreen::NetApplyPurchase(StoreItem theStoreItem)
+{
+    if (!CanAffordItem(theStoreItem))
+        return;
+
+    mApp->mPlayerInfo->AddCoins(-GetItemCost(theStoreItem));
+
+    if (theStoreItem == STORE_ITEM_PACKET_UPGRADE)
+    {
+        ++mApp->mPlayerInfo->mPurchases[theStoreItem];
+    }
+    else if (theStoreItem == STORE_ITEM_BONUS_LAWN_MOWER)
+    {
+        mApp->mPlayerInfo->mPurchases[theStoreItem]++;
+    }
+    else if (theStoreItem == STORE_ITEM_RAKE)
+    {
+        mApp->mPlayerInfo->mPurchases[theStoreItem] = 3;
+    }
+    else if (theStoreItem == STORE_ITEM_STINKY_THE_SNAIL)
+    {
+        mApp->mPlayerInfo->mPurchases[theStoreItem] = _time32(nullptr);
+    }
+    else if (theStoreItem == STORE_ITEM_FERTILIZER || theStoreItem == STORE_ITEM_BUG_SPRAY)
+    {
+        if (mApp->mPlayerInfo->mPurchases[theStoreItem] < PURCHASE_COUNT_OFFSET)
+            mApp->mPlayerInfo->mPurchases[theStoreItem] = PURCHASE_COUNT_OFFSET;
+        mApp->mPlayerInfo->mPurchases[theStoreItem] += 5;
+    }
+    else if (theStoreItem == STORE_ITEM_TREE_FOOD)
+    {
+        if (mApp->mPlayerInfo->mPurchases[theStoreItem] < PURCHASE_COUNT_OFFSET)
+            mApp->mPlayerInfo->mPurchases[theStoreItem] = PURCHASE_COUNT_OFFSET;
+        mApp->mPlayerInfo->mPurchases[theStoreItem]++;
+    }
+    else if (theStoreItem == STORE_ITEM_TREE_OF_WISDOM)
+    {
+        mApp->mPlayerInfo->mPurchases[theStoreItem] = 1;
+        mApp->mPlayerInfo->mChallengeRecords[GAMEMODE_TREE_OF_WISDOM] = 1;
+    }
+    else if (IsPottedPlant(theStoreItem))
+    {
+        mApp->mZenGarden->AddPottedPlant(&mPottedPlantSpecs);
+        mPottedPlantSpecs.InitializePottedPlant(SEED_MARIGOLD);
+        mPottedPlantSpecs.mDrawVariation = (DrawVariation)RandRangeInt(VARIATION_MARIGOLD_WHITE, VARIATION_MARIGOLD_LIGHT_GREEN);
+        mApp->mPlayerInfo->mPurchases[theStoreItem] = GetCurrentDaysSince2000();
+    }
+    else
+    {
+        TOD_ASSERT(theStoreItem >= STORE_ITEM_PLANT_GATLINGPEA && theStoreItem < (StoreItem)MAX_PURCHASES);
+        mApp->mPlayerInfo->mPurchases[theStoreItem] = 1;
+    }
+
+    if (mApp->mBoard)
+        mApp->mBoard->mSeedBank->UpdateWidth();
+    if (mApp->mSeedChooserScreen)
+        mApp->mSeedChooserScreen->UpdateAfterPurchase();
+
+    mApp->NetBroadcastProfile();
 }

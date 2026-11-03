@@ -91,6 +91,7 @@ public:
 
 	// ---- outgoing helpers ----
 	void SendInput(bool theDown, int theClickCount, int theX, int theY); // client -> host
+	void SendStoreAction(const NetBuffer& thePayload);                  // client -> host buy request
 	void SendCursor(int theCursorType, int theHeldSeed, int theHeldImitater, uint8_t theFlags, int theX, int theY);
 	void SendPauseState(bool thePaused);		// host
 	void SendBoardEvent(const NetBuffer& thePayload, uint8_t theEventType);
@@ -132,6 +133,7 @@ private:
 	void OnClientSeedPick(NetSession* theSession, NetBuffer& thePayload, bool theUnpick);
 	void OnClientTeamSelect(NetSession* theSession, NetBuffer& thePayload);
 	void OnClientStats(NetSession* theSession, NetBuffer& thePayload);
+	void OnStoreAction(NetSession* theSession, NetBuffer& thePayload);
 
 	// client-side message handlers
 	void OnLobbyState(NetBuffer& thePayload);

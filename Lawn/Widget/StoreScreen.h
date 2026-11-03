@@ -83,6 +83,7 @@ public:
     static /*inline*/ int		GetItemCost(StoreItem theStoreItem);
     /*inline*/ bool             CanAffordItem(StoreItem theStoreItem);
     void                        PurchaseItem(StoreItem theStoreItem);
+    void                        NetApplyPurchase(StoreItem theStoreItem);
     void                        AdvanceCrazyDaveDialog();
     virtual void                MouseDown(int x, int y, int theClickCount);
     /*inline*/ void             EnableButtons(bool theEnable);
