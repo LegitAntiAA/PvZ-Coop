@@ -529,6 +529,9 @@ EXIT /B 0</Command>
     <ClCompile Include="..\include\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\include\imgui\imgui_widgets.cpp" />
     <ClCompile Include="..\Lawn\Board.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetCommon.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetConnection.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetManager.cpp" />
     <ClCompile Include="..\Lawn\Challenge.cpp" />
     <ClCompile Include="..\Lawn\Coin.cpp" />
     <ClCompile Include="..\Lawn\CursorObject.cpp" />
