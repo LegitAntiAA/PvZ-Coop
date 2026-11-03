@@ -48,6 +48,7 @@ namespace LawnNet
 {
 	class NetManager;
 	class NetBuffer;
+	class NetLobbyPanel;
 }
 
 namespace Sexy
@@ -172,6 +173,7 @@ public:
 
 	// ---- co-op networking ----
 	LawnNet::NetManager*			mNetManager;
+	LawnNet::NetLobbyPanel*			mNetLobbyPanel;
 	uint32_t						mNetBoardSeed;			// shared board RNG seed for coop level creation
 	bool							mNetBlockProfileSave;	// client: never write host-synced profile to disk
 	bool							mNetCoopGameOverHandled;

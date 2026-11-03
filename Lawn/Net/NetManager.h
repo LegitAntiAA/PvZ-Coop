@@ -62,8 +62,8 @@ public:
 	void Update();
 
 	// ---- session control ----
-	bool StartHost();							// begin listening
-	bool StartClient(const char* theIP);		// begin connecting (async)
+	bool StartHost(uint16_t thePort = NET_DEFAULT_PORT);	// begin listening
+	bool StartClient(const char* theIP, uint16_t thePort = NET_DEFAULT_PORT);		// begin connecting (async)
 	void CancelConnect();
 	void Disconnect();
 	bool IsHosting() const { return mMode == MODE_HOST; }
@@ -77,6 +77,7 @@ public:
 	int GetMySlot() const { return mMySlot; }
 	int GetPlayerCount() const;
 	const NetPlayerInfo& GetPlayer(int theSlot) const { return mPlayers[theSlot]; }
+	NetPlayerInfo& GetPlayerMutable(int theSlot) { return mPlayers[theSlot]; }
 	bool IsPlayerActive(int theSlot) const { return mPlayers[theSlot].mActive; }
 	void SetMyTeam(uint8_t theTeam);			// client: request; host: apply
 	uint8_t GetMyTeam() const;

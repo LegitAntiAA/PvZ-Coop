@@ -533,6 +533,7 @@ EXIT /B 0</Command>
     <ClCompile Include="..\Lawn\Net\NetConnection.cpp" />
     <ClCompile Include="..\Lawn\Net\NetManager.cpp" />
     <ClCompile Include="..\Lawn\Net\NetBoardSync.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetLobbyPanel.cpp" />
     <ClCompile Include="..\Lawn\Challenge.cpp" />
     <ClCompile Include="..\Lawn\Coin.cpp" />
     <ClCompile Include="..\Lawn\CursorObject.cpp" />

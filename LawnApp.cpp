@@ -50,6 +50,7 @@
 #include "SexyAppFramework/resource.h"
 
 #include "Lawn/Net/NetManager.h"
+#include "Lawn/Net/NetLobbyPanel.h"
 
 #include "Lawn/SeedPacket.h"
 
@@ -849,6 +850,7 @@ LawnApp::LawnApp()
 	mCustomCursorsEnabled = false;
 	mPlayerInfo = nullptr;
 	mNetManager = nullptr;
+	mNetLobbyPanel = nullptr;
 	mNetBoardSeed = 0;
 	mNetBlockProfileSave = false;
 	mNetCoopGameOverHandled = false;
@@ -2680,6 +2682,13 @@ void LawnApp::UpdateFrames()
 		mNetManager->Update();
 		if (mNetManager->IsHosting())
 			NetHandleRemoteInputs();
+
+		// menu lobby panel (created lazily once the widget manager is up)
+		if (mWidgetManager && !mNetLobbyPanel)
+		{
+			mNetLobbyPanel = new LawnNet::NetLobbyPanel(this);
+			mWidgetManager->AddWidget(mNetLobbyPanel);
+		}
 	}
 
 #ifdef _DEBUG
@@ -4992,6 +5001,14 @@ bool LawnApp::NetIsClient() const
 
 void LawnApp::NetShutdown()
 {
+	if (mNetLobbyPanel)
+	{
+		if (mWidgetManager)
+			mWidgetManager->RemoveWidget(mNetLobbyPanel);
+		delete mNetLobbyPanel;
+		mNetLobbyPanel = nullptr;
+	}
+
 	if (mNetManager)
 	{
 		mNetManager->Shutdown();

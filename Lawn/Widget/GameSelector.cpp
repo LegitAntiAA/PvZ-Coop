@@ -4,6 +4,7 @@
 #include "../ZenGarden.h"
 #include "GameSelector.h"
 #include "../../LawnApp.h"
+#include "../Net/NetManager.h"
 #include "AlmanacDialog.h"
 #include "../../Resources.h"
 #include "../System/Music.h"
@@ -1998,6 +1999,25 @@ void GameSelector::ButtonDepress(int theId)
 {
 	if (mSlideCounter > 0 || mStartingGame)
 		return;
+
+	// co-op client: only the host picks games / opens the store / zen garden
+	if (mApp->NetIsClient())
+	{
+		switch (theId)
+		{
+		case GameSelector::GameSelector_Adventure:
+		case GameSelector::GameSelector_Minigame:
+		case GameSelector::GameSelector_Puzzle:
+		case GameSelector::GameSelector_Survival:
+		case GameSelector::GameSelector_Store:
+		case GameSelector::GameSelector_ZenGarden:
+		case GameSelector::GameSelector_ChangeUser:
+			mApp->LawnMessageBox(Dialogs::DIALOG_MESSAGE, _S("Co-op"), _S("Only the host can start games."), _S("[DIALOG_BUTTON_OK]"), _S(""), Dialog::BUTTONS_FOOTER);
+			return;
+		default:
+			break;
+		}
+	}
 
 	if (theId == GameSelector::GameSelector_Minigame && mMinigamesLocked)
 	{

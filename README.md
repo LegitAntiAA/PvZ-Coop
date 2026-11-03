@@ -1,31 +1,137 @@
 
-# stabledecompile
+# PvZ Co-op (stabledecompile fork)
 
-A Project focused in making modding both GOTY and OG possible, adding features and contents from different platforms of the Franchise, and bug fixes.
+English | [Русский](#русский)
 
-#### Features
-- [x]  Compile on x64 and x86 Platform
-- [x]  Build with OG or GOTY version
-- [x]  Replaced the legacy DirectX 7 graphics API with SDL3 for modern platform support
-- [x]  Add Video playback via FFmpeg
-- [x]  Ported Achievements
-- [x]  Ported Zombatar
-- [x]  Implemented Microphone input via PortAudio
-- [x]  Implemented Multiple PAK File Support
-- [x]  Restored and finished scrapped content
-- [x]  Added Screen Saver
-- [x]  Fixed bugs and oversights from the original release
-- [x]  Added Mobile Minigames and Last Stand Content `GameConstant.h`  
-- [x]  Build with Bloom and Doom Contents `GameConstant.h` 
-- [x]  Added Quality of Life defines `GameConstant.h` 
+## What is this
 
-#### Planned Features
-- [x]  Particle Editor *`In progress`*
-- [ ]  Add Console Minigames and PvP Content
-- [ ]  Font Builder
-- [ ]  Aspect Ratio Changer / Widescreen
-- [ ]  Implement More-Settings Screen
-- [ ]  Unicode Support for Multi Lang.
+A fork of the **stabledecompile** Plants vs. Zombies project that adds **full online co-op** to the classic game.
+Play the entire campaign, every minigame, survival and custom modes together over a LAN or a VPN (e.g. **Radmin VPN**, Hamachi, ZeroTier).
+
+### The concept
+
+- **Host-authoritative server-client architecture.** The host runs the *only* real simulation. Clients are smart renderers: they receive full-state snapshots (~15–30 Hz, adaptive) and send back raw input events. This makes desyncs impossible by design — the client never simulates gameplay.
+- **Up to 4 players** (1 host + 3 clients). Player colors are relative: you always see yourself uncolored, other players appear **blue / red / green** on your HUD (seed packets, cursors, held-plant silhouettes).
+- **Shared economy.** Sun money is shared; the host's profile (level, coins, store purchases, challenge records) is the authority for everyone.
+- **Shared seed picking.** The seed bank is split between players: `bank size / player count` picks each, no duplicates across players. In the bank your packets come first, other players' packets are tinted with their color, show their cooldowns and cannot be clicked by you.
+- **Everything is synchronized**: pausing (host-only), win/lose, scene transitions, minigames, the store, wave banners, sounds, cursors (visible even in the menu, with nickname + ping).
+
+### New game modes (all playable solo or in co-op)
+
+1. **Endless** — infinite waves; zombies get stronger over time.
+2. **Endless T** — the same, plus a day/night cycle and random fog/storm events.
+3. **Endless S** — the same as endless, but every 10 waves you re-pick your seeds.
+4. **Endless ST** — Endless T + re-picking.
+5. **Tower Defense** — a random road is drawn over the lawn and zombies can only walk along it.
+6. **PvP** — one team plays zombies (spawning them with a "brains" currency earned over time and by eating plants), the other plays plants. Teams can be 2v2, 1v3, 3v1 — chosen in the lobby before the game. Cursors are hidden in this mode.
+
+### How to play (Radmin VPN)
+
+1. Download and install [Radmin VPN](https://www.radmin-vpn.com/) (free).
+2. One player creates a network (e.g. `pvzcoop`), everyone else joins it.
+3. The host launches the game, enters their nickname in the **PvZ CO-OP panel** (left side of the main menu) and presses **HOST GAME**.
+4. Other players press **CONNECT** and enter the host's **Radmin VPN IP** (`26.x.x.x`, shown in Radmin VPN) and the port (`27713`).
+5. The player list appears on the left with nicknames and pings. The host starts any game through the normal menu — everyone is pulled in automatically.
+6. Before a PvP game everyone picks a team (PLANTS / ZOMBIES button in the panel).
+
+### Configuration (`coop.ini`, next to the exe)
+
+```ini
+nickname=Player
+unlock_all_minigames=0      ; 1 = every minigame/mode unlocked without adventure progress
+enable_coop=1
+base_snapshot_rate=15       ; starting sync rate (15..30), adapts up automatically
+window_width=0              ; 0 = default 1066, e.g. 1366x768 or 1920x1080
+window_height=0
+borderless_fullscreen=1     ; fullscreen = borderless desktop at native resolution
+```
+
+### Building
+
+- Visual Studio 2022+ (v143/v145 toolset), C++20.
+- Open `PlantsVsZombies.sln`, pick `ReleaseGOTY` + `Win32`/`x64`, build.
+- You must own the original game: copy its folder (with `main.pak` and `properties/`) into the workspace as `Plants Vs. Zombies/` before building — the post-build step copies the game assets.
+
+### Roadmap / status
+
+- [x] TCP transport, framing, threads, ping, adaptive snapshot rate
+- [x] Full-state snapshot sync (plants, zombies, projectiles, coins, mowers, grid items, seed packets)
+- [x] Ghost entities with interpolation on clients
+- [x] Lobby panel in the main menu (nick, IP, port, host/connect, player list, PvP team select)
+- [x] Host-only pause / mode selection; clients' play buttons blocked
+- [x] Remote cursors with nick + ping (menu and board), held-plant silhouettes in player colors
+- [x] Configurable window size, borderless fullscreen
+- [x] Six new modes (4 endless variants, tower defense, PvP)
+- [ ] Deep per-minigame state sync polish (conveyor/scary-potter edge cases)
+- [ ] Playtesting & desync hunting
+
+---
+
+## Русский
+
+## Что это
+
+Форк проекта **stabledecompile** (Plants vs. Zombies), добавляющий в классическую игру **полноценный онлайн-кооператив**.
+Проходите кампанию, все мини-игры, выживания и новые режимы вместе по локальной сети или через VPN (например **Radmin VPN**, Hamachi, ZeroTier).
+
+### Задумка
+
+- **Архитектура «сервер-клиент», авторитет у хоста.** Симуляция — только на хосте. Клиенты — «умные рендереры»: получают полные снапшоты состояния (~15–30 Гц, адаптивно) и отправляют обратно события ввода. Рассинхрон исключён самой архитектурой — клиент не симулирует игру.
+- **До 4 игроков** (1 хост + 3 клиента). Цвета относительные: себя ты видишь обычным, остальные игроки на твоём HUD — **синий / красный / зелёный** (пакеты семян, курсоры, силуэты растений в руках).
+- **Общая экономика.** Солнце общее; профиль хоста (уровень, монеты, покупки, рекорды) — авторитет для всех.
+- **Общий выбор растений.** Банк семян делится между игроками: `размер банка / число игроков` выборов каждому, дубликаты запрещены. В банке сначала твои пакеты, чужие подсвечены их цветом, видны их кулдауны, но нажать их нельзя.
+- **Синхронизировано всё**: пауза (только хост), победы/поражения, переходы между сценами, мини-игры, магазин, баннеры волн, звуки, курсоры (видны даже в меню, с ником и пингом).
+
+### Новые режимы (играются и соло, и в коопе)
+
+1. **Endless** — бесконечные волны; зомби постепенно сильнее.
+2. **Endless T** — то же + смена дня и ночи со временем, случайные туман/гроза.
+3. **Endless S** — то же, но каждые 10 волн можно заново выбрать растения.
+4. **Endless ST** — Endless T + перевыбор растений.
+5. **Tower Defense** — по газону рисуется случайная дорога, зомби могут идти только по ней.
+6. **PvP** — одна команда играет за зомби (спавнит их за «мозги» — валюту, которая копится со временем и за съеденные растения), вторая — за растения. Составы 2х2, 1х3, 3х1 — выбираются в лобби перед игрой. Курсоры в этом режиме скрыты.
+
+### Как играть (Radmin VPN)
+
+1. Скачайте и установите [Radmin VPN](https://www.radmin-vpn.com/) (бесплатно).
+2. Один игрок создаёт сеть (например `pvzcoop`), остальные подключаются.
+3. Хост запускает игру, вводит ник в **панели PvZ CO-OP** (слева в главном меню) и жмёт **HOST GAME**.
+4. Остальные жмут **CONNECT** и вводят **IP хоста из Radmin VPN** (`26.x.x.x`, виден в Radmin VPN) и порт (`27713`).
+5. Слева появляется список игроков с никами и пингом. Хост запускает любую игру через обычное меню — всех перекидывает автоматически.
+6. Перед игрой в PvP все выбирают команду (кнопки PLANTS / ZOMBIES в панели).
+
+### Конфигурация (`coop.ini`, рядом с exe)
+
+```ini
+nickname=Player
+unlock_all_minigames=0      ; 1 = все мини-игры/режимы открыты без прохождения приключения
+enable_coop=1
+base_snapshot_rate=15       ; стартовая частота синхронизации (15..30), растёт автоматически
+window_width=0              ; 0 = по умолчанию 1066, можно 1366x768 или 1920x1080
+window_height=0
+borderless_fullscreen=1     ; полный экран = безрамочный на нативном разрешении
+```
+
+### Сборка
+
+- Visual Studio 2022+ (toolset v143/v145), C++20.
+- Откройте `PlantsVsZombies.sln`, выберите `ReleaseGOTY` + `Win32`/`x64`, соберите.
+- Нужно owning-копия оригинальной игры: скопируйте папку игры (с `main.pak` и `properties/`) в папку проекта как `Plants Vs. Zombies/` перед сборкой — пост-билд скопирует ресурсы.
+
+### Статус
+
+- [x] TCP-транспорт, фрейминг, потоки, пинг, адаптивная частота снапшотов
+- [x] Полные снапшоты состояния (растения, зомби, снаряды, солнца, косилки, объекты сетки, пакеты семян)
+- [x] Ghost-сущности с интерполяцией на клиентах
+- [x] Панель лобби в главном меню (ник, IP, порт, хост/коннект, список игроков, выбор команд PvP)
+- [x] Пауза и запуск игр — только хост; кнопки игр у клиентов заблокированы
+- [x] Чужие курсоры с ником + пингом (меню и поле), силуэты растений в цвете игрока
+- [x] Настраиваемый размер окна, безрамочный полный экран
+- [x] Шесть новых режимов (4 варианта endless, tower defense, PvP)
+- [ ] Тонкая полировка синхронизации отдельных мини-игр
+- [ ] Плейтесты и вылов рассинхронов
+
+---
 
 # DISCLAIMER
 
@@ -46,7 +152,6 @@ If you compile in 2009, then you need the original game files by owning Plants V
 You need to download Visual Studio 2022 ([Download](https://my.visualstudio.com/Downloads?q=visual%20studio%202022&wt.mc_id=o~msft~vscom~older-downloads))
 and download the C++ Build Tools.
 
-
 With your *legally owned copy* of Plants Vs. Zombies, **Copy the game's folder** where the `PlantsVsZombies.exe` is located and **paste it inside the stabledecompile folder** (worksplace)
 
 #### Note:
@@ -54,230 +159,22 @@ The game's folder should have the `properties/` folder and the `main.pak` file. 
 
 Only `Plants Vs Zombies` and `Plants Vs. Zombies` folder names are valid for the build script so you might want to rename them
 
-With all of these done, you should at least have these folders in your workspace:
-```
-assets/
-bin/
-Editor/
-include/
-lib/
-PakLib/
-Plants Vs. Zombies/
-Sexy.TodLib/
-SexyAppFramework/
-tools/
-```
-
-#### Note:
-The dll files inside the `bin/` folder maybe corrupted (1 KB in size), if that is the case, you should redownload the `bin/` folder in this repository.
-
-After this confirming the `Plants Vs. Zombies/` folder is present and no DLL files are corrupted in the `bin/` folder, 
-
-**Open the the `PlantsVsZombies.sln` file** so you can proceed to the next step.
-
 ### 2. Choosing Configuration and Platform
-To determine what configuration and platform you are gonna build on you must consider these factors.
 
-For development, you must use the `Debug` configuration. This configuration has debug tools that will help you find sneaky bugs, see unexpected errors, and fix crashes.
-
-When deploying your mod to the general public, you must use `Release` configuration because it is optimized and it does not come with unwanted debugging tools.
-
-#### Note:
-Debug configurations have built-in exploits and tools. That is why you configure on Release because its built without unnecessary debug tools that may slow down the game or reveal exploits.
-
+For development, use the `Debug` configuration. For deploying your mod to the general public, use `Release`.
 
 ||PvZ OG|PvZ GOTY|
 |---|---|---|
 |Development|Debug|DebugGOTY|
 |Deployment|Release|ReleaseGOTY|
 
-You must choose the correct configuration; one that matches the version of your legal copy of Plants Vs. Zombies. There are content that does not exists on OG but does on GOTY.
+### 3. Building the Executable
 
-For the platform target, you can choose to build with `x64` if your PC's architecture is 64-bits or it can run the executable. 64-bit programs are more performant than older architectures such as x86 / Win32. If your device does not 64-bit program or you want compatability for older devices, choose `Win32(x86)`.
+Build the solution. Output goes to `build/<Configuration>_<Platform>/bin/`. The co-op panel is visible in the main menu.
 
+---
 
-In deployment, I recommend building both `x64` and `Win32` so you have both compatability for older devices and performance opportunity for modern ones.
-
-### 3. Setting the Defines
-*These defines are the built-in features in stable decompile and are totally optional. I suggest you skip to Step 4 if you want the decompile to be as close as the Vanilla game.* 
-
-Before you build our mod, you can change some definitions of it to modify how the mod look and feel. Stabledecompile has built-in defines you can toggle if you want  a certain feature in your mod.
-
-**You can find these defines inside `Lawn/Common/Common Include/GameConstants.h` and scroll down**
-
-Here is a quick look at it:
-```cpp
-#ifdef _GOTY
-#define _HAS_NEW_DANCERS
-#define _HAS_ACHIEVEMENTS
-#define _HAS_ZOMBATAR
-#define _HAS_UNLOCK
-// Unused or Restored
-//#define _HAS_LEVELSELECTOR 
-//#define _HAS_MORESCREEN
-#endif
-
-#ifdef _DEBUG
-#define _SHOW_OUTPUT_CONSOLE
-#define _SHOW_LIMBO_PAGE
-#endif
-
-// Resources
-#define _ALLOW_RESOURCE_PACKS
-
-// Unused or Restored
-//#define _HAS_BLOOM_AND_DOOM_CONTENTS
-#define _HAS_EXTENDED_MINIGAMES
-//#define _HAS_UNUSED_ACHIEVEMENTS
-
-//Ported from other editions
-#define _MOBILE_MINIGAMES
-//#define _DS_MINIGAMES
-//#define _CONSOLE_MINIGAMES
-//#define _REPLANTED_SPEED_CONTROL
-//#define _HAS_NEW_GIGA_ZOMBIES
-//#define _HAS_SCORE_SYSTEM
-
-// Quality Of Life
-//#define _HAS_HEALTHBAR_TOGGLE
-//#define _ALLOW_SWIPE
-//#define _HAS_GAMESELECTOR_SPOTLIGHT
-//#define _HAS_ANIMATED_WOOD_SIGN
-//#define _HAS_KERNELPULT_BUTTER_IDLE
-
-// Quirky stuff
-//#define _HAS_ROOF_SLOPE_ANGLE
-
-// Rebalancing
-//#define _PIERCING_CACTUS
-//#define _SPLASH_SNOWPEA
-```
-
-#### Note: 
-This preview may not be up-to-date with the current changes on the repository.
-
-You can toggle a feature on by removing the `//` (forward slashes) before `#define XXX`. It will enable the feature when you build the program.
-
-Example: `#define _HAS_HEALTHBAR_TOGGLE` defining this will make it so Health bars appear on Zombies when you press on TAB key
-
-If you do not want to include some feature, you should put `//` before `#define XXX`. That will disable the feature when you build the program.
-
-Example: `//#define _SHOW_OUTPUT_CONSOLE` defining this will prevent the Command Prompt from launching when you build with Debug configuration.
-
-### 4. Building the Executable
-By clicking on **Local Windows Debugger** you automatically build the executable and once it completes the task, it will automatially open the Game by itself.
-
-Alternatively, you can press **F6** to build the executable but that won't automatically launch the executable file when visual studio finishes building.
-
-*Building will generate these files inside the `build/` depending on your chosen configuration and platform from Step 2*
-||PvZ OG|PvZ GOTY|
-|---|---|---|
-|Debug (Win32)|`Debug_Win32/`|`DebugGOTY_Win32/`|
-|Debug (x64)|`Debug_x64/`|`DebugGOTY_x64/`|
-|Release (Win32)|`Release_Win32/`|`ReleaseGOTY_Win32/`|
-|Release (x64)|`Release_x64/`|`ReleaseGOTY_x64/`|
-
-Each of these will contain at least 2 folders, the `bin/` folder is where the executable will be created and the rest of the game files.
-
-*Avoiding confusion, there are two bin folders after building, the `bin/` from the root folder is where the DLLs are stored and `bin/` inside one of the folders in `build/` is your output folder.*
-
-The `obj/` folder is your build cache, it makes the solution build faster everytime you build. This is only faster if you have the `.obj` files after you build first time. You may or may not remove this folder. *This is generated every build.*
-
-When building, the `properties/` folder and the `main.pak` from your `Plants Vs. Zombies` folder will be automatically be copied into the output folder.
-
-The files in the `assets/` folder will also be copied into the output folder.
-
-If you modify a file in `assets/` folder, the change will automatically be applied in the output folder. The same goes for when adding a new file.
-
-#### Note:
-*Deleting a file in the `assets/` will not delete the file existing from the output folder. You may want to delete the `build/[Your_Configuratio]_[Platform]/bin/` and build again or you can manually modify files inside the output folder.*
-
-*After it successfully builds the executable and it launches the game, if you get DLL related errors follow these steps:*
-
-#### Step 1:
-
-Download the `bin/` folder from this repository and replace the existing `bin/` folder with the fresh one.
-
-#### Step 2:
-
-Delete the `build/[Your_Configuratio]_[Platform]/bin/` (Output folder) 
-
-#### Step 3: 
-Build the executable again and pray that it works. If it does not contact the developer on the **Stable-Decompile Discord Server ([Join](https://discord.gg/feJPyVt6HH))**
-
-If it works or you had not have this issue before, Congratulations!! You had successfully made a mod in Stabledecompile. In terms of how to add a new plant, zombie, world or stages,
-I suggest you join our discord server community to ask questions and help from everyone in the modding community.
-
-
-# Modding Guide
-### Adding new assets
-You have to create a folder named `extension/` inside the `assets/` folder containing:
-```
-  compiled/particles/
-  compiled/reanim/
-  images/
-  sounds/
-  particles/
-  properties/
-  reanim/
-```
-
-If you add Images, Particles, Texts, and Sounds, you have to create `resources.xml` inside `properties/` and it have to follow this format
-```xml
-  <?xml version="1.0"?>
-  <ResourceManifest>
-      <Resources id="LoadingImages">
-      <SetDefaults path="extension/images" idprefix="IMAGE_" />
-      ... the rest of the code
-```
-The path value on SetDefaults must start with `extension\\` for it to work.
-If you add Reanimations, you need to put them in compiled/reanim/ and the assets in reanim/
-
-#### Note:
-As of the x64-bit support, having the `.reanim` file inside `reanim\` folder is now required for every new reanim added. The same rule applies to trails and particles but in `particles\` folder (trails and particles share the same folder)
-
-Additionally, their compiled file should also exists on the `compiled/` folder. 
-
-Example `compiled\particles\SpikeSplat.xml.compiled`
-
-**This change applies to both x64 and Win32 platform! If you forgot to do this, it may fail to compile the file when you run the executable and errors may occur later**
-
-### Adding Resource Packs
-
-If this is enabled by the modder / distributor, you can use any pak mod like PvZ2Pak by E-Pea. (Note you must use GOTY or 2009 depends on what version you compile)
-Create a folder named **resourcepack/** inside the Output/ folder. Then, copy the folders of the PAK mod...
-  - compiled/particles/
-  - compiled/reanim/
-  - images/
-  - sounds/
-  - particles/
-  - properties/
-  - reanim/
-
-and paste into resourcepack/
-
-You need to modify **properties/resources.xml** inside the resourcepack/ folder and replace every
-```xml 
-<SetDefaults path="xxx" idprefix="..." />
-```
-with 
-```xml 
-<SetDefaults path="resourcepack/xxx" idprefix="..." />
-```
-
-#### Note:
-
-This is how the game look for files in order. **(Highest to Least Priority)**
-```
-resourcepack\ (if enabled)
-extension\
-dependency\
---- (this means it is either outside or inside main.pak)
-```
-*While browsing, if the program finds a file in a folder from this list, it will use that and will not continue looking in other folders. If you want to replace a certain asset then putting it on `extension/` will work i.e. replacing the `logo.png`. This is how resourcepack works in the mod*
-
-
-# Development Team
+# Original stabledecompile credits
 
 ### Lead Programmer
 - InLiothixie
@@ -306,10 +203,5 @@ dependency\
 - [@PortAudio](https://github.com/PortAudio/portaudio) for the amazing portable audio I/O library
 - [@PopLib](https://github.com/teampopwork/PopLib) for the SDL3 inputs and other graphics function
 - [@FFmpeg](https://www.ffmpeg.org/) for the amazing video audio library.
-- [@Codotaku](https://www.youtube.com/@Codotaku) lol I just found this sigma and learned how to make mp4 playback possible with SDL3 in under 100 lines of code
-- [@headshot](thub.com/headshot2017) I may had referred to definitions with changes when developing x64-bit support
-- The GLFW team for their amazing work
-- The PvZ Chinese community who ever made the code hook/injection for SDL3, it was my inspiration and I used it as reference
-- Those who contributed to FFmpeg-Build especially the x86 version. If not for them, video playback wouldn't be possible for x86 targets
 - PopCap for creating the amazing PvZ franchise (and making their game engine public)
 - All the contributors which have worked or are actively working in this amazing project

@@ -53,7 +53,7 @@ void NetManager::Shutdown()
 // -------------------------------------------------------------------------
 // Session control
 // -------------------------------------------------------------------------
-bool NetManager::StartHost()
+bool NetManager::StartHost(uint16_t thePort)
 {
 	Disconnect();
 
@@ -70,7 +70,7 @@ bool NetManager::StartHost()
 	sockaddr_in anAddr;
 	memset(&anAddr, 0, sizeof(anAddr));
 	anAddr.sin_family = AF_INET;
-	anAddr.sin_port = htons(NET_DEFAULT_PORT);
+	anAddr.sin_port = htons(thePort);
 	anAddr.sin_addr.s_addr = INADDR_ANY;
 
 	if (::bind(aListener, (sockaddr*)&anAddr, sizeof(anAddr)) == SOCKET_ERROR ||
@@ -93,7 +93,7 @@ bool NetManager::StartHost()
 	mAcceptThread = std::thread(&NetManager::AcceptThreadProc, this);
 
 	strcpy_s(mConnectStatus, "Hosting on port ");
-	_itoa_s(NET_DEFAULT_PORT, mConnectStatus + strlen(mConnectStatus), 32, 10);
+	_itoa_s(thePort, mConnectStatus + strlen(mConnectStatus), 32, 10);
 	return true;
 }
 
@@ -117,7 +117,7 @@ void NetManager::AcceptThreadProc()
 	}
 }
 
-bool NetManager::StartClient(const char* theIP)
+bool NetManager::StartClient(const char* theIP, uint16_t thePort)
 {
 	Disconnect();
 	if (!NetStartupWSA())
@@ -132,9 +132,9 @@ bool NetManager::StartClient(const char* theIP)
 	strncpy_s(anIP, theIP, 63);
 	anIP[63] = 0;
 
-	mConnectThread = std::thread([this, anIP]()
+	mConnectThread = std::thread([this, anIP, thePort]()
 	{
-		SOCKET aSock = NetConnectTo(anIP, NET_DEFAULT_PORT, 5000);
+		SOCKET aSock = NetConnectTo(anIP, thePort, 5000);
 		if (aSock == INVALID_SOCKET)
 		{
 			strcpy_s(mConnectStatus, "Failed to connect (check IP + Radmin VPN)");
