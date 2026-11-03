@@ -197,6 +197,7 @@ void NetManager::Disconnect()
 	mRemotePaused = false;
 	mRemotePicks.clear();
 	mRemoteUnpicks.clear();
+	mRemoteChooserStates.clear();
 	mPendingChooserStarts.clear();
 	mPendingBoardMsgs.clear();
 	mPendingInputs.clear();
@@ -471,6 +472,7 @@ void NetManager::OnClientSeedPick(NetSession* theSession, NetBuffer& thePayload,
 	ChooserPick aPick;
 	aPick.mSeedType = thePayload.ReadU8Or();
 	aPick.mImitater = theUnpick ? 0xFF : thePayload.ReadU8Or();
+	aPick.mSlot = theSession->mSlot;
 	if (theUnpick)
 		mRemoteUnpicks.push_back(aPick);
 	else
@@ -698,22 +700,17 @@ void NetManager::OnChooserOpen(NetBuffer& thePayload)
 	mChooserBankCount = thePayload.ReadU8Or();
 	mRemotePicks.clear();
 	mRemoteUnpicks.clear();
+
+	// survival repick / any mid-game chooser reopen: mirror it locally
+	if (mApp && mApp->mBoard && !mApp->mSeedChooserScreen)
+		mApp->ShowSeedChooserScreen();
 }
 
 void NetManager::OnChooserState(NetBuffer& thePayload)
 {
-	uint8_t aCount = thePayload.ReadU8Or();
-	bool anUnpick = false;
-	for (int i = 0; i < aCount; i++)
-	{
-		ChooserPick aPick;
-		aPick.mSeedType = thePayload.ReadU8Or();
-		aPick.mImitater = thePayload.ReadU8Or();
-		if (aPick.mImitater == 0xFF)
-			anUnpick = true;
-		mRemotePicks.push_back(aPick);
-	}
-	(void)anUnpick;
+	mRemoteChooserStates.push_back(std::move(thePayload));
+	if (mRemoteChooserStates.size() > 32)
+		mRemoteChooserStates.pop_front();
 }
 
 void NetManager::OnChooserStart(NetBuffer& thePayload)

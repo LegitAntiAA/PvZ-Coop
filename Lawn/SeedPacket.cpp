@@ -9,9 +9,12 @@
 #include "../SexyAppFramework/Font.h"
 #include "../Sexy.TodLib/FilterEffect.h"
 #include "../SexyAppFramework/SexyMatrix.h"
+#include "../LawnApp.h"
+#include "Net/NetManager.h"
 
 SeedPacket::SeedPacket()
 {
+	mNetOwnerSlot = 0;
 	mSlotMachiningPosition = 0.0f;
 	mPacketType = SeedType::SEED_NONE;
 	mImitaterType = SeedType::SEED_NONE;
@@ -697,6 +700,14 @@ void SeedPacket::Draw(Graphics* g)
 		g->PushState();
 
 		DrawSeedPacket(g, mOffsetX, 0.0f, mPacketType, mImitaterType, aPercentDark, aGrayness, false, true);
+
+		// co-op: tint other players' packets with their color
+		if (mApp->NetActive() && mNetOwnerSlot != mApp->mNetManager->GetMySlot() && mPacketType != SeedType::SEED_NONE)
+		{
+			LawnNet::NetColor aColor = LawnNet::GetRelativePlayerColor(mApp->mNetManager->GetMySlot(), mNetOwnerSlot);
+			g->SetColor(Color(aColor.r, aColor.g, aColor.b, 110));
+			g->FillRect(mOffsetX + 2, 2, mWidth - 4, mHeight - 4);
+		}
 		
 		if (aDrawCost)
 		{
@@ -796,6 +807,13 @@ void SeedPacket::MouseDown(int x, int y, int theClickCount)
 {
 	if (mBoard->mPaused || mApp->mGameScene != GameScenes::SCENE_PLAYING || mPacketType == SeedType::SEED_NONE)
 	{
+		return;
+	}
+
+	// co-op: can't pick up other players' seeds (their cooldowns are still visible)
+	if (mApp->NetActive() && mNetOwnerSlot != mApp->mNetManager->GetMySlot())
+	{
+		mApp->PlaySample(SOUND_BUZZER);
 		return;
 	}
 

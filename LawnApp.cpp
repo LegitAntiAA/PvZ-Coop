@@ -1437,6 +1437,27 @@ void LawnApp::ShowSeedChooserScreen()
 	mSeedChooserScreen->Resize(0, 0, mWidth, mHeight);
 	mWidgetManager->AddWidget(mSeedChooserScreen);
 	mWidgetManager->BringToBack(mSeedChooserScreen);
+
+	// co-op: tell everyone the chooser is open + the split
+	if (mNetManager && mNetManager->IsActive())
+	{
+		int aBankCount = mBoard ? mBoard->GetNumSeedsInBank() : 10;
+		int aPlayers = max(1, mNetManager->GetPlayerCount());
+		int aPicksPerPlayer = max(1, aBankCount / aPlayers);
+		if (mNetManager->IsHosting())
+		{
+			// host gets the remainder (odd banks)
+			aPicksPerPlayer = aBankCount - aPicksPerPlayer * (aPlayers - 1);
+			LawnNet::NetBuffer aMsg;
+			aMsg.WriteU8((uint8_t)aPicksPerPlayer);
+			aMsg.WriteU8((uint8_t)aBankCount);
+			mNetManager->BroadcastMessage(LawnNet::NETMSG_CHOOSER_OPEN, aMsg);
+		}
+		mSeedChooserScreen->mCoopPicksPerPlayer = aPicksPerPlayer;
+		mNetManager->mChooserOpen = true;
+		mNetManager->mChooserPicksPerPlayer = aPicksPerPlayer;
+		mNetManager->mChooserBankCount = aBankCount;
+	}
 }
 
 //0x44FE70
@@ -2688,6 +2709,19 @@ void LawnApp::UpdateFrames()
 		{
 			mNetLobbyPanel = new LawnNet::NetLobbyPanel(this);
 			mWidgetManager->AddWidget(mNetLobbyPanel);
+		}
+
+		// client: host pressed "Let's Rock" -> build the combined seed bank
+		if (mNetManager->IsClient() && !mNetManager->mPendingChooserStarts.empty())
+		{
+			LawnNet::NetBuffer aStart = std::move(mNetManager->mPendingChooserStarts.front());
+			mNetManager->mPendingChooserStarts.pop_front();
+			if (mSeedChooserScreen && mBoard)
+			{
+				mSeedChooserScreen->CoopBuildBankFromPayload(aStart);
+				mSeedChooserScreen->mStartButton->SetDisabled(true);
+				mBoard->mCutScene->EndSeedChooser();
+			}
 		}
 	}
 

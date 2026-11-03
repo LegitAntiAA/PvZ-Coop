@@ -20,9 +20,21 @@
 #include "../../SexyAppFramework/MTRand.h"
 #include "../../Sexy.TodLib/TodStringFile.h"
 #include "../../SexyAppFramework/WidgetManager.h"
+#include "../Net/NetManager.h"
+
+using namespace LawnNet;
 //0x483380
 SeedChooserScreen::SeedChooserScreen()
 {
+	mCoopPicksPerPlayer = 0;
+	mCoopMyImitater = SEED_NONE;
+	for (int i = 0; i < 4; i++)
+	{
+		mCoopRemotePickCount[i] = 0;
+		for (int j = 0; j < 12; j++)
+			mCoopRemotePicks[i][j] = SEED_NONE;
+	}
+
 	mApp = (LawnApp*)gSexyAppBase;
 	mBoard = mApp->mBoard;
 	mClip = false;
@@ -561,6 +573,8 @@ void SeedChooserScreen::Draw(Graphics* g)
 	aBoardFrameG.mTransY -= mY;
 	mMenuButton->Draw(&aBoardFrameG);
 	mToolTip->Draw(g);
+
+	CoopDrawRemotePicks(g);
 }
 
 //0x484C30
@@ -657,6 +671,8 @@ void SeedChooserScreen::UpdateCursor()
 //0x4851A0
 void SeedChooserScreen::Update()
 {
+	CoopPollNetwork();
+
 	Widget::Update();
 
 	float aScrollSpeed = 1 + abs(mScrollAmount) * 0.7f;
@@ -863,6 +879,14 @@ void SeedChooserScreen::OnStartButton()
 		!CheckSeedUpgrade(SEED_CATTAIL, SEED_LILYPAD))
 		return;
 
+	if (mCoopPicksPerPlayer > 0 && mApp->mNetManager && mApp->mNetManager->IsHosting())
+	{
+		CoopBroadcastChooserStart();
+		CoopBuildBankFromLocalState();
+		mBoard->mCutScene->EndSeedChooser();
+		return;
+	}
+
 	CloseSeedChooser();
 }
 
@@ -924,6 +948,11 @@ void SeedChooserScreen::ButtonDepress(int theId)
 		mMenuButton->mIsDown = false;
 		UpdateCursor();
 		mApp->DoNewOptions(false);
+	}
+	else if (mApp->NetIsClient() && (theId == SeedChooserScreen::SeedChooserScreen_Start || theId == SeedChooserScreen::SeedChooserScreen_Random))
+	{
+		// co-op client: only the host starts the game
+		mApp->PlaySample(Sexy::SOUND_BUZZER);
 	}
 	else if (mApp->GetSeedsAvailable() >= mBoard->mSeedBank->mNumPackets)
 	{
@@ -1018,11 +1047,24 @@ void SeedChooserScreen::ClickedSeedInBank(ChosenSeed& theChosenSeed)
 	RemoveToolTip();
 	EnableStartButton(false);
 	mApp->PlaySample(Sexy::SOUND_TAP);
+	CoopSendPick(theChosenSeed.mSeedType, SEED_NONE, true);
 }
 
 //0x486030
 void SeedChooserScreen::ClickedSeedInChooser(ChosenSeed& theChosenSeed)
 {
+	// co-op: per-player cap, no duplicates across players
+	if (mCoopPicksPerPlayer > 0)
+	{
+		if (mSeedsInBank >= mCoopPicksPerPlayer)
+			return;
+		if (CoopIsPickedByOthers(theChosenSeed.mSeedType))
+		{
+			mApp->PlaySample(Sexy::SOUND_BUZZER);
+			return;
+		}
+	}
+
 	if (mSeedsInBank == mBoard->mSeedBank->mNumPackets)
 		return;
 
@@ -1040,7 +1082,8 @@ void SeedChooserScreen::ClickedSeedInChooser(ChosenSeed& theChosenSeed)
 
 	RemoveToolTip();
 	mApp->PlaySample(Sexy::SOUND_TAP);
-	if (mSeedsInBank == mBoard->mSeedBank->mNumPackets)
+	CoopSendPick(theChosenSeed.mSeedType, theChosenSeed.mSeedType == SEED_IMITATER ? theChosenSeed.mImitaterType : SEED_NONE, false);
+	if (mSeedsInBank == (mCoopPicksPerPlayer > 0 ? mCoopPicksPerPlayer : mBoard->mSeedBank->mNumPackets))
 		EnableStartButton(true);
 }
 
@@ -1404,4 +1447,338 @@ void SeedChooserScreen::AddedToManager(WidgetManager* theWidgetManager) {
 void SeedChooserScreen::RemovedFromManager(WidgetManager* theWidgetManager) {
 	Widget::RemovedFromManager(theWidgetManager);
 	this->RemoveWidget(mScrollbar);
+}
+// ==========================================================================
+// Co-op shared seed picking
+// ==========================================================================
+
+bool SeedChooserScreen::CoopIsPickedByOthers(int theSeedType) const
+{
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < mCoopRemotePickCount[i] && j < 12; j++)
+			if (mCoopRemotePicks[i][j] == theSeedType)
+				return true;
+	}
+	return false;
+}
+
+void SeedChooserScreen::CoopRecordRemotePick(int theSlot, int theSeedType, bool theUnpick)
+{
+	if (theSlot < 0 || theSlot >= 4)
+		return;
+	if (theUnpick)
+	{
+		for (int j = 0; j < mCoopRemotePickCount[theSlot] && j < 12; j++)
+		{
+			if (mCoopRemotePicks[theSlot][j] == theSeedType)
+			{
+				// shift the rest left
+				for (int k = j; k < mCoopRemotePickCount[theSlot] - 1; k++)
+					mCoopRemotePicks[theSlot][k] = mCoopRemotePicks[theSlot][k + 1];
+				mCoopRemotePicks[theSlot][mCoopRemotePickCount[theSlot] - 1] = SEED_NONE;
+				mCoopRemotePickCount[theSlot]--;
+				break;
+			}
+		}
+	}
+	else
+	{
+		if (mCoopRemotePickCount[theSlot] < 12)
+			mCoopRemotePicks[theSlot][mCoopRemotePickCount[theSlot]++] = theSeedType;
+	}
+}
+
+void SeedChooserScreen::CoopSendPick(int theSeedType, int theImitater, bool theUnpick)
+{
+	LawnNet::NetManager* aNet = mApp->mNetManager;
+	if (!aNet || !aNet->IsActive())
+		return;
+
+	if (aNet->IsClient())
+	{
+		LawnNet::NetBuffer aMsg;
+		aMsg.WriteU8((uint8_t)theSeedType);
+		aMsg.WriteU8((uint8_t)theImitater);
+		aNet->BroadcastMessage(theUnpick ? LawnNet::NETMSG_SEED_UNPICK : LawnNet::NETMSG_SEED_PICK, aMsg);
+	}
+	else if (aNet->IsHosting())
+	{
+		int aMySlot = aNet->GetMySlot();
+		CoopRecordRemotePick(aMySlot, theSeedType, theUnpick);
+		CoopBroadcastChooserState();
+	}
+}
+
+void SeedChooserScreen::CoopBroadcastChooserState()
+{
+	LawnNet::NetManager* aNet = mApp->mNetManager;
+	if (!aNet || !aNet->IsHosting() || !mApp->mSeedChooserScreen)
+		return;
+
+	LawnNet::NetBuffer aMsg;
+	aMsg.WriteU8(4); // slots
+	for (int i = 0; i < 4; i++)
+	{
+		int aCount = (i == aNet->GetMySlot()) ? mSeedsInBank : mCoopRemotePickCount[i];
+		aMsg.WriteU8((uint8_t)min(12, aCount));
+		if (i == aNet->GetMySlot())
+		{
+			// our own picks, in bank order
+			for (int anIndex = 0; anIndex < mBoard->mSeedBank->mNumPackets && anIndex < mSeedsInBank; anIndex++)
+			{
+				SeedType aSeedType = FindSeedInBank(anIndex);
+				if (aSeedType != SEED_NONE)
+				{
+					aMsg.WriteU8((uint8_t)aSeedType);
+					aMsg.WriteU8((uint8_t)(aSeedType == SEED_IMITATER ? mChosenSeeds[aSeedType].mImitaterType : SEED_NONE));
+				}
+			}
+		}
+		else
+		{
+			for (int j = 0; j < mCoopRemotePickCount[i] && j < 12; j++)
+			{
+				aMsg.WriteU8((uint8_t)mCoopRemotePicks[i][j]);
+				aMsg.WriteU8((uint8_t)SEED_NONE);
+			}
+		}
+	}
+	aNet->BroadcastMessage(LawnNet::NETMSG_CHOOSER_STATE, aMsg);
+}
+
+void SeedChooserScreen::CoopDrawRemotePicks(Graphics* g)
+{
+	LawnNet::NetManager* aNet = mApp->mNetManager;
+	if (!aNet || !aNet->IsActive() || mCoopPicksPerPlayer <= 0)
+		return;
+
+	int aDrawX = 15;
+	int aDrawY = mApp->mHeight - 60;
+	TodDrawString(g, _S("Players' picks:"), aDrawX, aDrawY - 14, Sexy::FONT_BRIANNETOD12,
+		Color(230, 215, 180), DrawStringJustification::DS_ALIGN_LEFT);
+
+	int anOffset = 0;
+	for (int i = 0; i < 4; i++)
+	{
+		if (i == aNet->GetMySlot())
+			continue;
+		for (int j = 0; j < mCoopRemotePickCount[i] && j < 12; j++)
+		{
+			SeedType aSeedType = (SeedType)mCoopRemotePicks[i][j];
+			if (aSeedType == SEED_NONE)
+				continue;
+			NetColor aColor = GetRelativePlayerColor(aNet->GetMySlot(), i);
+			g->SetColor(Color(aColor.r, aColor.g, aColor.b, 200));
+			g->FillRect(aDrawX + anOffset * 52, aDrawY, 46, 60);
+			Plant::DrawSeedType(g, aSeedType, SEED_NONE, VARIATION_NORMAL, (float)(aDrawX + anOffset * 52 + 3), (float)(aDrawY + 3));
+			anOffset++;
+		}
+	}
+}
+
+// --------------------------------------------------------------------------
+// Host: broadcast the final combined pick list and start the game
+// --------------------------------------------------------------------------
+void SeedChooserScreen::CoopBroadcastChooserStart()
+{
+	LawnNet::NetManager* aNet = mApp->mNetManager;
+	if (!aNet || !aNet->IsHosting())
+		return;
+
+	LawnNet::NetBuffer aMsg;
+	aMsg.WriteU8((uint8_t)mCoopPicksPerPlayer);
+	aMsg.WriteU8(4);
+	for (int i = 0; i < 4; i++)
+	{
+		int aCount = (i == aNet->GetMySlot()) ? mSeedsInBank : mCoopRemotePickCount[i];
+		aMsg.WriteU8((uint8_t)min(12, aCount));
+		if (i == aNet->GetMySlot())
+		{
+			for (int anIndex = 0; anIndex < mBoard->mSeedBank->mNumPackets && anIndex < mSeedsInBank; anIndex++)
+			{
+				SeedType aSeedType = FindSeedInBank(anIndex);
+				if (aSeedType != SEED_NONE)
+				{
+					aMsg.WriteU8((uint8_t)aSeedType);
+					aMsg.WriteU8((uint8_t)(aSeedType == SEED_IMITATER ? mChosenSeeds[aSeedType].mImitaterType : SEED_NONE));
+				}
+			}
+		}
+		else
+		{
+			for (int j = 0; j < mCoopRemotePickCount[i] && j < 12; j++)
+			{
+				aMsg.WriteU8((uint8_t)mCoopRemotePicks[i][j]);
+				aMsg.WriteU8((uint8_t)SEED_NONE);
+			}
+		}
+	}
+	aNet->BroadcastMessage(LawnNet::NETMSG_CHOOSER_START, aMsg);
+}
+
+// --------------------------------------------------------------------------
+// Build the in-game seed bank: my picks first, then other players' (in
+// viewer-relative slot order), each packet tagged with its owner's slot.
+// --------------------------------------------------------------------------
+static void CoopBuildBankInternal(SeedBank* theBank, int theMySlot,
+	const int thePicks[4][12], const int theCounts[4], const SeedType theImitaters[4][12])
+{
+	int aTotal = 0;
+	for (int i = 0; i < 4; i++)
+		aTotal += min(12, theCounts[i]);
+	aTotal = min(aTotal, SEEDBANK_MAX);
+
+	int aPos = 0;
+	for (int anOffset = 0; anOffset < 4; anOffset++)
+	{
+		int aSlot = (theMySlot + anOffset) % 4;
+		for (int j = 0; j < theCounts[aSlot] && j < 12 && aPos < aTotal; j++)
+		{
+			SeedType aSeedType = (SeedType)thePicks[aSlot][j];
+			if (aSeedType == SEED_NONE)
+				continue;
+			SeedPacket& aPacket = theBank->mSeedPackets[aPos];
+			aPacket.SetPacketType(aSeedType, theImitaters[aSlot][j]);
+			aPacket.mNetOwnerSlot = (unsigned char)aSlot;
+			aPos++;
+		}
+	}
+	theBank->mNumPackets = max(aPos, 1);
+	for (int i = aPos; i < SEEDBANK_MAX; i++)
+		theBank->mSeedPackets[i].SetPacketType(SEED_NONE, SEED_NONE);
+}
+
+void SeedChooserScreen::CoopBuildBankFromLocalState()
+{
+	LawnNet::NetManager* aNet = mApp->mNetManager;
+	if (!aNet || !mBoard)
+		return;
+
+	int aPicks[4][12] = {};
+	int aCounts[4] = {};
+	SeedType anImitaters[4][12] = {};
+
+	int aMySlot = aNet->GetMySlot();
+	for (int anIndex = 0; anIndex < mBoard->mSeedBank->mNumPackets && anIndex < mSeedsInBank && anIndex < 12; anIndex++)
+	{
+		SeedType aSeedType = FindSeedInBank(anIndex);
+		if (aSeedType == SEED_NONE)
+			continue;
+		aPicks[aMySlot][aCounts[aMySlot]] = aSeedType;
+		anImitaters[aMySlot][aCounts[aMySlot]] = (aSeedType == SEED_IMITATER) ? mChosenSeeds[aSeedType].mImitaterType : SEED_NONE;
+		aCounts[aMySlot]++;
+	}
+	for (int i = 0; i < 4; i++)
+	{
+		if (i == aMySlot)
+			continue;
+		for (int j = 0; j < mCoopRemotePickCount[i] && j < 12; j++)
+		{
+			aPicks[i][j] = mCoopRemotePicks[i][j];
+			anImitaters[i][j] = SEED_NONE;
+			aCounts[i] = mCoopRemotePickCount[i];
+		}
+	}
+	CoopBuildBankInternal(mBoard->mSeedBank, aMySlot, aPicks, aCounts, anImitaters);
+}
+
+void SeedChooserScreen::CoopBuildBankFromPayload(LawnNet::NetBuffer& thePayload)
+{
+	if (!mBoard)
+		return;
+
+	LawnNet::NetManager* aNet = mApp->mNetManager;
+	int aMySlot = aNet ? aNet->GetMySlot() : 0;
+
+	/*uint8_t aPicksPerPlayer =*/ thePayload.ReadU8Or();
+	int aPicks[4][12] = {};
+	int aCounts[4] = {};
+	SeedType anImitaters[4][12] = {};
+	for (int i = 0; i < 4; i++)
+	{
+		uint8_t aCount = thePayload.ReadU8Or();
+		aCounts[i] = min((int)aCount, 12);
+		for (int j = 0; j < aCounts[i]; j++)
+		{
+			aPicks[i][j] = thePayload.ReadU8Or();
+			anImitaters[i][j] = (SeedType)thePayload.ReadU8Or();
+		}
+	}
+	CoopBuildBankInternal(mBoard->mSeedBank, aMySlot, aPicks, aCounts, anImitaters);
+}
+
+// --------------------------------------------------------------------------
+// Client: apply the host's authoritative chooser state
+// --------------------------------------------------------------------------
+void SeedChooserScreen::CoopApplyChooserState(LawnNet::NetBuffer& thePayload)
+{
+	int aMySlot = mApp->mNetManager ? mApp->mNetManager->GetMySlot() : 0;
+	uint8_t aSlots = thePayload.ReadU8Or();
+	for (int i = 0; i < 4 && i < (int)aSlots; i++)
+	{
+		uint8_t aCount = thePayload.ReadU8Or();
+		if (i == aMySlot)
+		{
+			// our own picks are authoritative locally; skip payload entries
+			for (int j = 0; j < aCount; j++)
+			{
+				thePayload.ReadU8Or();
+				thePayload.ReadU8Or();
+			}
+			continue;
+		}
+		mCoopRemotePickCount[i] = 0;
+		for (int j = 0; j < aCount && j < 12; j++)
+		{
+			uint8_t aSeed = thePayload.ReadU8Or();
+			thePayload.ReadU8Or(); // imitater
+			mCoopRemotePicks[i][mCoopRemotePickCount[i]++] = aSeed;
+		}
+	}
+}
+
+// --------------------------------------------------------------------------
+// Poll network queues (runs every chooser update on both sides)
+// --------------------------------------------------------------------------
+void SeedChooserScreen::CoopPollNetwork()
+{
+	LawnNet::NetManager* aNet = mApp->mNetManager;
+	if (!aNet || !aNet->IsActive())
+		return;
+
+	// keep the split in sync with the host's authoritative value
+	if (aNet->mChooserPicksPerPlayer > 0)
+		mCoopPicksPerPlayer = aNet->mChooserPicksPerPlayer;
+
+	if (aNet->IsHosting())
+	{
+		// apply client picks queued by the network layer
+		while (!aNet->mRemotePicks.empty())
+		{
+			LawnNet::NetManager::ChooserPick aPick = aNet->mRemotePicks.front();
+			aNet->mRemotePicks.pop_front();
+			if (!CoopIsPickedByOthers(aPick.mSeedType))
+				CoopRecordRemotePick(0, aPick.mSeedType, false); // slot resolved below
+		}
+		// slot bookkeeping: picks arrive without slot info (single shared queue
+		// per client connection); attribute by order is unreliable with 3 clients,
+		// so NetManager tags each queued pick with the sender slot.
+		while (!aNet->mRemoteUnpicks.empty())
+		{
+			LawnNet::NetManager::ChooserPick aPick = aNet->mRemoteUnpicks.front();
+			aNet->mRemoteUnpicks.pop_front();
+			CoopRecordRemotePick(aPick.mSlot, aPick.mSeedType, true);
+		}
+		CoopBroadcastChooserState();
+	}
+	else
+	{
+		while (!aNet->mRemoteChooserStates.empty())
+		{
+			LawnNet::NetBuffer aState = std::move(aNet->mRemoteChooserStates.front());
+			aNet->mRemoteChooserStates.pop_front();
+			CoopApplyChooserState(aState);
+		}
+	}
 }

@@ -4,6 +4,7 @@
 #include "../../ConstEnums.h"
 #include "../../SexyAppFramework/Widget.h"
 #include "ScrollbarWidget.h"
+#include "../Net/NetCommon.h"
 
 using namespace Sexy;
 
@@ -85,6 +86,22 @@ public:
     bool					mSwipeJustReleased;
     bool                    mAllowBetaSeedpackets;
     ScrollbarWidget*        mScrollbar;
+
+    // ---- co-op shared seed picking ----
+    int                     mCoopPicksPerPlayer;                // how many seeds THIS player may pick
+    int                     mCoopRemotePicks[4][12];            // seed types picked by each slot (255 = empty)
+    int                     mCoopRemotePickCount[4];
+    int                     mCoopMyImitater;                    // imitater copy for our pending pick
+    void                    CoopSendPick(int theSeedType, int theImitater, bool theUnpick);
+    bool                    CoopIsPickedByOthers(int theSeedType) const;
+    void                    CoopRecordRemotePick(int theSlot, int theSeedType, bool theUnpick);
+    void                    CoopDrawRemotePicks(Graphics* g);
+    void                    CoopBroadcastChooserState();
+    void                    CoopBroadcastChooserStart();
+    void                    CoopBuildBankFromLocalState();
+    void                    CoopBuildBankFromPayload(LawnNet::NetBuffer& thePayload);
+    void                    CoopApplyChooserState(LawnNet::NetBuffer& thePayload);
+    void                    CoopPollNetwork();
 
 public:
     SeedChooserScreen();
