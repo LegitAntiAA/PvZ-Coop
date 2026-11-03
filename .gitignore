@@ -1,0 +1,14 @@
+build/
+.vs/
+*.obj
+*.pdb
+*.ilk
+*.idb
+*.log
+ipch/
+*.tlog
+*.lastbuildstate
+bin/
+Plants Vs. Zombies/
+Plants Vs Zombies/
+resourcepack/
