@@ -44,6 +44,12 @@ class StoreScreen;
 class AlmanacDialog;
 class TypingCheck;
 
+namespace LawnNet
+{
+	class NetManager;
+	class NetBuffer;
+}
+
 namespace Sexy
 {
 	class Dialog;
@@ -163,6 +169,27 @@ public:
 
 	int								mPlayerLevelRef;
 	bool                            mEnableFPS;
+
+	// ---- co-op networking ----
+	LawnNet::NetManager*			mNetManager;
+	uint32_t						mNetBoardSeed;			// shared board RNG seed for coop level creation
+	bool							mNetBlockProfileSave;	// client: never write host-synced profile to disk
+	bool							mNetCoopGameOverHandled;
+
+public:
+	void							NetInit();
+	void							NetShutdown();
+	bool							NetActive() const;
+	bool							NetIsHost() const;
+	bool							NetIsClient() const;
+	void							NetHostStartGame(GameMode theGameMode, int theLevel);	// host: broadcast + start locally
+	void							NetOnStartGame(LawnNet::NetBuffer& thePayload);			// client: apply
+	void							NetOnHostLost();
+	void							NetOnBackToMenu();
+	void							NetOnSceneCmd(LawnNet::NetBuffer& thePayload);
+	void							NetOnProfileSync(LawnNet::NetBuffer& thePayload);
+	void							NetBroadcastProfile();									// host: push profile to clients
+	void							NetHandleRemoteInputs();								// host: apply queued remote inputs to the board
 
 public:
 	LawnApp();

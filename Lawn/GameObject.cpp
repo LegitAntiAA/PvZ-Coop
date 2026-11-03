@@ -12,6 +12,10 @@ GameObject::GameObject()
 	mVisible = true;
 	mRow = -1;
 	mRenderOrder = RenderLayer::RENDER_LAYER_TOP;
+	mNetId = 0;
+	mNetGhost = false;
+	mNetTargetX = 0;
+	mNetTargetY = 0;
 }
 
 bool GameObject::BeginDraw(Graphics* g)

@@ -186,6 +186,7 @@ public:
     ReanimationID                   mZombatarAccessoryID;
     ReanimationID                   mZombatarHatID;
     ReanimationID                   mZombatarHatLineID;
+    unsigned char                   mNetAnimKey;    // co-op: host-computed anim intent (0 walk, 1 eat, 2 dying)
 
 public:
     Zombie();

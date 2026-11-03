@@ -12,6 +12,7 @@
 #include "Coin.h"
 #include "LawnMower.h"
 #include "GridItem.h"
+#include "Net/NetCommon.h"
 
 #include "../SexyAppFramework/DDInterface.h"
 #include "../SexyAppFramework/SexyMatrix.h"
@@ -553,6 +554,40 @@ public:
 	void							AddedToManager(WidgetManager* theManager);
 	void							RemovedFromManager(WidgetManager* theManager);
 	void							ButtonDepress(int theId);
+
+	// ---- co-op networking ----
+public:
+	unsigned short					mNextNetId;
+	unsigned int					mLastSnapshotTick;
+	float							mNetGhostTimeAcc;
+	int								mNetLastApplyMs;
+	bool							mNetPausedOverlay;			// client: host has paused
+	int								mNetPvPBrainScore;			// zombies team score
+	int								mNetPvPKillScore;			// plants team score
+	int								mNetPvPBrainTimer;			// brain currency trickle
+	std::vector<uint8_t>			mTDPath;					// tower defense: pairs (row, col)
+
+	uint16_t						NetAllocId();
+	void							NetHostTick();				// host: send snapshot/cursor at rate
+	void							NetEncodeSnapshot(LawnNet::NetBuffer& theBuffer);
+	void							NetClientTick();			// client: drain + apply + ghosts
+	void							NetDrainMessages();
+	void							NetApplyEvent(LawnNet::NetBuffer& thePayload);
+	void							NetApplySnapshot(LawnNet::NetBuffer& thePayload);
+	Plant*							NetGetGhostPlant(unsigned short theId);
+	Zombie*							NetGetGhostZombie(unsigned short theId);
+	Projectile*						NetGetGhostProjectile(unsigned short theId);
+	Coin*							NetGetGhostCoin(unsigned short theId);
+	GridItem*						NetGetGhostGridItem(unsigned short theId);
+	LawnMower*						NetGetGhostMower(unsigned short theId);
+	void							NetDrawRemoteCursors(Graphics* g);
+	void							NetDrawTowerDefensePath(Graphics* g);
+	bool							NetTdIsPathCell(int theGridX, int theGridY);
+	int								NetTdPathPosToCell(float thePos, int& theRow, int& theCol);
+	static void						GenerateTowerDefensePath(std::vector<uint8_t>& thePath);
+	static void						SetTowerDefensePath(const std::vector<uint8_t>& thePath);
+	void							NetGhostUpdateZombie(Zombie* theZombie);
+	void							NetGhostUpdateOthers();
 };
 extern bool gShownMoreSunTutorial;
 

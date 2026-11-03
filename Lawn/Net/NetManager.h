@@ -4,7 +4,10 @@
 #include "NetCommon.h"
 #include "NetConnection.h"
 
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif
+#include <winsock2.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <thread>
@@ -81,11 +84,12 @@ public:
 	void SendLobbyState();						// host: broadcast lobby
 
 	// ---- game start (host) ----
-	void BroadcastStartGame(int theGameMode, int theLevel);
+	void BroadcastStartGame(int theGameMode, int theLevel, uint32_t theBoardSeed);
 	// TD path data for the current game (host fills before broadcast)
 	std::vector<uint8_t> mStartTDPath;			// pairs (row, col)
 
 	// ---- outgoing helpers ----
+	void SendInput(bool theDown, int theClickCount, int theX, int theY); // client -> host
 	void SendCursor(int theCursorType, int theHeldSeed, int theHeldImitater, uint8_t theFlags, int theX, int theY);
 	void SendPauseState(bool thePaused);		// host
 	void SendBoardEvent(const NetBuffer& thePayload, uint8_t theEventType);
@@ -147,9 +151,10 @@ private:
 
 	// serialize/parse lobby
 	void EncodeLobbyState(NetBuffer& theBuffer);
-	void BroadcastMessage(uint8_t theMsgType, const NetBuffer& thePayload);
 
 public:
+	void BroadcastMessage(uint8_t theMsgType, const NetBuffer& thePayload);
+
 	// chooser state shared between players (mirrored from host authority)
 	struct ChooserPick { uint8_t mSeedType; uint8_t mImitater; };
 	std::deque<ChooserPick> mRemotePicks;		// client: picks from others to display

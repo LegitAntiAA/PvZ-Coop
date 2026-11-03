@@ -1,4 +1,5 @@
 #include "NetConnection.h"
+#include <mstcpip.h>
 
 #pragma comment(lib, "ws2_32.lib")
 

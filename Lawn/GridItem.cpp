@@ -39,6 +39,8 @@ GridItem::GridItem()
     mTransparentCounter = 0;
     mSunCount = 0;
     mMotionTrailCount = 0;
+    mNetId = 0;
+    mNetGhost = false;
 }
 
 //0x44D000

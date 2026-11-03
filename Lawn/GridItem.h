@@ -47,6 +47,8 @@ public:
 	int						mSunCount;										//+0x50
 	MotionTrailFrame		mMotionTrailFrames[NUM_MOTION_TRAIL_FRAMES];	//+0x54
 	int						mMotionTrailCount;								//+0xE4
+	unsigned short			mNetId;											// co-op: stable id assigned by the host
+	bool					mNetGhost;										// co-op: client-side mirror
 
 public:
 	GridItem();

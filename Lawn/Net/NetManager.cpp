@@ -1,5 +1,5 @@
 #include "NetManager.h"
-#include "../LawnApp.h"
+#include "../../LawnApp.h"
 #include "../../SexyAppFramework/Common.h"
 
 namespace LawnNet
@@ -778,19 +778,30 @@ void NetManager::BroadcastSceneCmd(uint8_t theCmd, int theParam)
 	BroadcastMessage(NETMSG_SCENE_CMD, aMsg);
 }
 
-void NetManager::BroadcastStartGame(int theGameMode, int theLevel)
+void NetManager::BroadcastStartGame(int theGameMode, int theLevel, uint32_t theBoardSeed)
 {
 	NetBuffer aMsg;
 	aMsg.WriteU8((uint8_t)theGameMode);
 	aMsg.WriteI32(theLevel);
 	aMsg.WriteU8((uint8_t)GetPlayerCount());
-	for (int i = 0; i < NET_MAX_PLAYERS; i++)
-		aMsg.WriteU8(mPlayers[i].mTeam);
+	aMsg.WriteU32(theBoardSeed);
 	// TD path
 	aMsg.WriteU8((uint8_t)mStartTDPath.size());
 	for (uint8_t aCell : mStartTDPath)
 		aMsg.WriteU8(aCell);
 	BroadcastMessage(NETMSG_START_GAME, aMsg);
+}
+
+void NetManager::SendInput(bool theDown, int theClickCount, int theX, int theY)
+{
+	if (mMode != MODE_CLIENT || !mHostConn)
+		return;
+	NetBuffer aMsg;
+	aMsg.WriteU8(theDown ? 1 : 0);
+	aMsg.WriteU8((uint8_t)theClickCount);
+	aMsg.WriteI16((int16_t)theX);
+	aMsg.WriteI16((int16_t)theY);
+	mHostConn->SendMessage(NETMSG_INPUT_MOUSE, aMsg);
 }
 
 void NetManager::SendCursor(int theCursorType, int theHeldSeed, int theHeldImitater, uint8_t theFlags, int theX, int theY)

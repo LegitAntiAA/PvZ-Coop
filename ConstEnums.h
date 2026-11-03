@@ -490,6 +490,15 @@ enum GameMode
 #ifdef _CONSOLE_MINIGAMES
     GAMEMODE_CHALLENGE_HEAVY_WEAPON,
 #endif
+
+    // ---- PvZ Co-op custom modes (appended to keep existing indices stable) ----
+    GAMEMODE_COOP_ENDLESS,
+    GAMEMODE_COOP_ENDLESS_T,
+    GAMEMODE_COOP_ENDLESS_S,
+    GAMEMODE_COOP_ENDLESS_ST,
+    GAMEMODE_COOP_TOWER_DEFENSE,
+    GAMEMODE_COOP_PVP,
+
     NUM_GAME_MODES
 };
 enum GameObjectType

@@ -34,6 +34,8 @@ public:
     float               mAltitude;              //+0x38
     MowerHeight         mMowerHeight;           //+0x3C
     int                 mLastPortalX;           //+0x40
+    unsigned short      mNetId;                 // co-op: stable id assigned by the host
+    bool                mNetGhost;              // co-op: client-side mirror
 
 public:
     void                LawnMowerInitialize(int theRow);

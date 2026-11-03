@@ -177,7 +177,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <AdditionalOptions>/wd4996 %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>_LIB;_WINDOWS;_VISUALC_;_JPEGLIB_;OPTIMIZE_SOFTWARE_DRAWING;DO_FIX_BUGS;_ENABLE_DRM_FOR__DEBUGGING;_WIN32;WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_LIB;_WINDOWS;_VISUALC_;_JPEGLIB_;OPTIMIZE_SOFTWARE_DRAWING;DO_FIX_BUGS;_ENABLE_DRM_FOR__DEBUGGING;_WIN32;WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;_WINSOCKAPI_;_HAS_STD_BYTE=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader />
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <AdditionalIncludeDirectories>
@@ -185,7 +185,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINSOCKAPI_;_HAS_STD_BYTE=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Lib>
@@ -226,7 +226,7 @@ EXIT /B 0</Command>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINSOCKAPI_;_HAS_STD_BYTE=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Lib>
@@ -259,7 +259,7 @@ EXIT /B 0</Command>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugGOTY|Win32'">
     <ClCompile>
       <AdditionalOptions>/wd4996 %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>_LIB;_WINDOWS;_VISUALC_;_JPEGLIB_;OPTIMIZE_SOFTWARE_DRAWING;DO_FIX_BUGS;_ENABLE_DRM_FOR__DEBUGGING;_WIN32;WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;_GOTY;GOTY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_LIB;_WINDOWS;_VISUALC_;_JPEGLIB_;OPTIMIZE_SOFTWARE_DRAWING;DO_FIX_BUGS;_ENABLE_DRM_FOR__DEBUGGING;_WIN32;WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;_GOTY;GOTY;_WINSOCKAPI_;_HAS_STD_BYTE=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -269,7 +269,7 @@ EXIT /B 0</Command>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINSOCKAPI_;_HAS_STD_BYTE=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Lib>
@@ -312,7 +312,7 @@ EXIT /B 0</Command>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINSOCKAPI_;_HAS_STD_BYTE=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Lib>
@@ -346,7 +346,7 @@ EXIT /B 0</Command>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <AdditionalOptions>/Oy- /wd4996 %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>_LIB;_WINDOWS;_VISUALC_;_JPEGLIB_;OPTIMIZE_SOFTWARE_DRAWING;DO_FIX_BUGS;_ENABLE_DRM_FOR__DEBUGGING;_WIN32;WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_LIB;_WINDOWS;_VISUALC_;_JPEGLIB_;OPTIMIZE_SOFTWARE_DRAWING;DO_FIX_BUGS;_ENABLE_DRM_FOR__DEBUGGING;_WIN32;WIN32;NDEBUG;_WINSOCKAPI_;_HAS_STD_BYTE=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader />
       <CreateHotpatchableImage>true</CreateHotpatchableImage>
@@ -359,7 +359,7 @@ EXIT /B 0</Command>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINSOCKAPI_;_HAS_STD_BYTE=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Lib>
@@ -403,7 +403,7 @@ EXIT /B 0</Command>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINSOCKAPI_;_HAS_STD_BYTE=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Lib>
@@ -434,7 +434,7 @@ EXIT /B 0</Command>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseGOTY|Win32'">
     <ClCompile>
       <AdditionalOptions>/Oy- /wd4996 %(AdditionalOptions)</AdditionalOptions>
-      <PreprocessorDefinitions>_LIB;_WINDOWS;_VISUALC_;_JPEGLIB_;OPTIMIZE_SOFTWARE_DRAWING;DO_FIX_BUGS;_ENABLE_DRM_FOR__DEBUGGING;_WIN32;WIN32;NDEBUG;_GOTY;GOTY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_LIB;_WINDOWS;_VISUALC_;_JPEGLIB_;OPTIMIZE_SOFTWARE_DRAWING;DO_FIX_BUGS;_ENABLE_DRM_FOR__DEBUGGING;_WIN32;WIN32;NDEBUG;_GOTY;GOTY;_WINSOCKAPI_;_HAS_STD_BYTE=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
@@ -448,7 +448,7 @@ EXIT /B 0</Command>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINSOCKAPI_;_HAS_STD_BYTE=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Lib>
@@ -492,7 +492,7 @@ EXIT /B 0</Command>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINSOCKAPI_;_HAS_STD_BYTE=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Lib>
@@ -532,6 +532,7 @@ EXIT /B 0</Command>
     <ClCompile Include="..\Lawn\Net\NetCommon.cpp" />
     <ClCompile Include="..\Lawn\Net\NetConnection.cpp" />
     <ClCompile Include="..\Lawn\Net\NetManager.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetBoardSync.cpp" />
     <ClCompile Include="..\Lawn\Challenge.cpp" />
     <ClCompile Include="..\Lawn\Coin.cpp" />
     <ClCompile Include="..\Lawn\CursorObject.cpp" />

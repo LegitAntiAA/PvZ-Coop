@@ -49,6 +49,8 @@
 #include "SexyAppFramework/Dialog.h"
 #include "SexyAppFramework/resource.h"
 
+#include "Lawn/Net/NetManager.h"
+
 #include "Lawn/SeedPacket.h"
 
 #include "Sexy.TodLib/Definition.h"
@@ -541,7 +543,11 @@ bool LawnApp::UpdateAppStep(bool* updated)
 							EnforceCursor();
 						}
 
-						mWidgetManager->MouseDown(event.button.x, event.button.y, buttonTrans(event.button.button));
+						// co-op client: during play all board clicks go to the host
+						if (NetIsClient() && mBoard && mGameScene == GameScenes::SCENE_PLAYING && GetDialogCount() == 0)
+							mNetManager->SendInput(true, buttonTrans(event.button.button), x, y);
+						else
+							mWidgetManager->MouseDown(event.button.x, event.button.y, buttonTrans(event.button.button));
 					}
 					break;
 				case SDL_EVENT_MOUSE_BUTTON_UP:
@@ -559,7 +565,11 @@ bool LawnApp::UpdateAppStep(bool* updated)
 							EnforceCursor();
 						}
 
-						mWidgetManager->MouseUp(event.button.x, event.button.y, buttonTrans(event.button.button));
+						// co-op client: during play all board clicks go to the host
+						if (NetIsClient() && mBoard && mGameScene == GameScenes::SCENE_PLAYING && GetDialogCount() == 0)
+							mNetManager->SendInput(false, buttonTrans(event.button.button), x, y);
+						else
+							mWidgetManager->MouseUp(event.button.x, event.button.y, buttonTrans(event.button.button));
 					}
 					break;
 				case SDL_EVENT_MOUSE_MOTION:
@@ -675,24 +685,29 @@ bool LawnApp::UpdateAppStep(bool* updated)
 							mDebugKeysEnabled = !mDebugKeysEnabled;
 						}
 
-						mWidgetManager->KeyDown(GetKeyCodeFromCodeSDL(event.key.key));
+						// co-op client: no pause/options/cheat keys during play (host-only control)
+						bool aClientBlockKeys = NetIsClient() && mBoard && mGameScene == GameScenes::SCENE_PLAYING && GetDialogCount() == 0;
+						if (!aClientBlockKeys)
+						{
+							mWidgetManager->KeyDown(GetKeyCodeFromCodeSDL(event.key.key));
 
-						if (theChar != -1 && !SDL_TextInputActive(mSDLWindow)) {
+							if (theChar != -1 && !SDL_TextInputActive(mSDLWindow)) {
 
-							bool shift = (event.key.mod & SDL_KMOD_SHIFT) != 0;
-							bool caps = (event.key.mod & SDL_KMOD_CAPS) != 0;
+								bool shift = (event.key.mod & SDL_KMOD_SHIFT) != 0;
+								bool caps = (event.key.mod & SDL_KMOD_CAPS) != 0;
 
-							SexyChar c = theChar;
+								SexyChar c = theChar;
 
-							if (isalpha(c))
-							{
-								if (shift ^ caps)
-									c = toupper(c);
-								else
-									c = tolower(c);
+								if (isalpha(c))
+								{
+									if (shift ^ caps)
+										c = toupper(c);
+									else
+										c = tolower(c);
+								}
+								mWidgetManager->KeyChar(c);
 							}
-							mWidgetManager->KeyChar(c);
-						}	
+						}
 					}
 					break;
 				}
@@ -823,6 +838,10 @@ LawnApp::LawnApp()
 	mTitle = aTitleName;
 	mCustomCursorsEnabled = false;
 	mPlayerInfo = nullptr;
+	mNetManager = nullptr;
+	mNetBoardSeed = 0;
+	mNetBlockProfileSave = false;
+	mNetCoopGameOverHandled = false;
 	mLastLevelStats = new LevelStats();
 	mFirstTimeGameSelector = true;
 	mGameMode = GameMode::GAMEMODE_ADVENTURE;
@@ -973,6 +992,8 @@ void LawnApp::Shutdown()
 		return;
 	}
 
+	NetShutdown();
+
 	if (!mShutdown)
 	{
 		for (int i = 0; i < Dialogs::NUM_DIALOGS; i++)
@@ -1116,6 +1137,10 @@ void LawnApp::GotFocus()
 //0x44F460
 void LawnApp::LostFocus()
 {
+	// co-op client never pauses on its own (host controls pausing)
+	if (NetIsClient())
+		return;
+
 	if (!mTodCheatKeys && CanPauseNow())
 	{
 		DoPauseDialog();
@@ -2146,6 +2171,8 @@ void LawnApp::Init()
 	mBoardResult = BoardResult::BOARDRESULT_NONE;
 	mSawYeti = false;
 
+	NetInit();
+
 	SexyApp::Init();
 
 #ifdef _DEBUG
@@ -2634,6 +2661,15 @@ void LawnApp::UpdateFrames()
 	if ((!mActive || mMinimized) && mBoard)
 	{
 		mBoard->ResetFPSStats();
+	}
+
+	// co-op networking pump: process incoming messages first (they may
+	// trigger scene changes / board creation), then remote inputs on the host
+	if (mNetManager)
+	{
+		mNetManager->Update();
+		if (mNetManager->IsHosting())
+			NetHandleRemoteInputs();
 	}
 
 #ifdef _DEBUG
@@ -3232,6 +3268,15 @@ void LawnApp::PlayFoley(FoleyType theFoleyType)
 	if (!mMuteSoundsForCutscene)
 	{
 		mSoundSystem->PlayFoley(theFoleyType);
+
+		// co-op: host shares gameplay foley with clients
+		if (mNetManager && mNetManager->IsHosting() && !gNetSuppressSounds)
+		{
+			LawnNet::NetBuffer anEvent;
+			anEvent.WriteU16((uint16_t)theFoleyType);
+			anEvent.WriteU16(0x4000); // fixed pitch
+			mNetManager->SendBoardEvent(anEvent, LawnNet::BOARDEV_FOLEY);
+		}
 	}
 }
 
@@ -3241,6 +3286,15 @@ void LawnApp::PlayFoleyPitch(FoleyType theFoleyType, float thePitch)
 	if (!mMuteSoundsForCutscene)
 	{
 		mSoundSystem->PlayFoleyPitch(theFoleyType, thePitch);
+
+		// co-op: host shares gameplay foley with clients
+		if (mNetManager && mNetManager->IsHosting() && !gNetSuppressSounds)
+		{
+			LawnNet::NetBuffer anEvent;
+			anEvent.WriteU16((uint16_t)theFoleyType);
+			anEvent.WriteU16((uint16_t)(thePitch * 4096.0f));
+			mNetManager->SendBoardEvent(anEvent, LawnNet::BOARDEV_FOLEY);
+		}
 	}
 }
 
@@ -4696,6 +4750,14 @@ void LawnApp::PlaySample(int theSoundNum)
 	if (!mMuteSoundsForCutscene)
 	{
 		SexyAppBase::PlaySample(theSoundNum);
+
+		// co-op: host shares gameplay sounds with clients
+		if (mNetManager && mNetManager->IsHosting() && !gNetSuppressSounds)
+		{
+			LawnNet::NetBuffer anEvent;
+			anEvent.WriteU16((uint16_t)theSoundNum);
+			mNetManager->SendBoardEvent(anEvent, LawnNet::BOARDEV_SOUND);
+		}
 	}
 }
 
@@ -4888,4 +4950,215 @@ void LawnApp::DoMoreSettingsDialog()
 {
 	MoreSettingsDialog* aDialog = new MoreSettingsDialog(this);
 	AddDialog(Dialogs::DIALOG_MORESETTINGS, aDialog);
+}
+
+// ==========================================================================
+// Co-op networking
+// ==========================================================================
+
+void LawnApp::NetInit()
+{
+	mNetManager = new LawnNet::NetManager();
+	mNetManager->Init(this);
+}
+
+bool LawnApp::NetActive() const
+{
+	return mNetManager != nullptr && mNetManager->IsActive();
+}
+
+bool LawnApp::NetIsHost() const
+{
+	return mNetManager != nullptr && mNetManager->IsHosting();
+}
+
+bool LawnApp::NetIsClient() const
+{
+	return mNetManager != nullptr && mNetManager->IsClient();
+}
+
+void LawnApp::NetShutdown()
+{
+	if (mNetManager)
+	{
+		mNetManager->Shutdown();
+		delete mNetManager;
+		mNetManager = nullptr;
+	}
+}
+
+void LawnApp::NetHostStartGame(GameMode theGameMode, int theLevel)
+{
+	if (!mNetManager || !mNetManager->IsHosting())
+		return;
+
+	// fresh shared board seed so both machines build the same level content
+	mNetBoardSeed = Rand();
+	mNetManager->mStartTDPath.clear();
+	if (theGameMode == GameMode::GAMEMODE_COOP_TOWER_DEFENSE)
+		Board::GenerateTowerDefensePath(mNetManager->mStartTDPath);
+
+	mNetManager->BroadcastStartGame((int)theGameMode, theLevel, mNetBoardSeed);
+
+	// start locally without touching saves
+	if (theGameMode == GameMode::GAMEMODE_ADVENTURE)
+		PreNewGame(theGameMode, false, theLevel);
+	else
+		PreNewGame(theGameMode, false);
+}
+
+void LawnApp::NetOnStartGame(LawnNet::NetBuffer& thePayload)
+{
+	GameMode aMode = (GameMode)thePayload.ReadU8Or();
+	int aLevel = thePayload.ReadI32Or();
+	/*uint8_t aPlayerCount =*/ thePayload.ReadU8Or();
+	uint32_t aBoardSeed = thePayload.ReadU32Or();
+	uint8_t aPathLen = thePayload.ReadU8Or();
+
+	std::vector<uint8_t> aPath;
+	for (int i = 0; i < aPathLen; i++)
+		aPath.push_back(thePayload.ReadU8Or());
+
+	if (mGameSelector)
+		KillGameSelector();
+	if (mChallengeScreen)
+		KillChallengeScreen();
+	if (GetDialog(Dialogs::DIALOG_STORE))
+		KillDialog(Dialogs::DIALOG_STORE);
+
+	mNetBoardSeed = aBoardSeed;
+	mGameMode = aMode;
+	mNetCoopGameOverHandled = false;
+
+	// client always runs with the host's adventure level
+	if (mPlayerInfo && aMode == GameMode::GAMEMODE_ADVENTURE)
+		mPlayerInfo->mLevel = aLevel;
+
+	Board::SetTowerDefensePath(aPath);
+
+	MakeNewBoard();
+	if (!mBoard)
+		return;
+	mBoard->InitLevel();
+	mBoardResult = BoardResult::BOARDRESULT_NONE;
+	mGameScene = GameScenes::SCENE_LEVEL_INTRO;
+	ShowSeedChooserScreen();
+	mBoard->mCutScene->StartLevelIntro();
+}
+
+void LawnApp::NetOnHostLost()
+{
+	if (!mNetManager)
+		return;
+
+	// leave the session and return to the main menu with a message
+	mNetManager->Disconnect();
+
+	KillBoard();
+	if (mSeedChooserScreen)
+		KillSeedChooserScreen();
+	mNetBlockProfileSave = false;
+	PreloadForUser(); // restore our own profile state
+	ShowGameSelector();
+
+	DoDialog(Dialogs::DIALOG_INFO, true, _S("Co-op"), _S("Connection to the host was lost."), _S(""),
+		Dialog::BUTTONS_FOOTER);
+}
+
+void LawnApp::NetOnBackToMenu()
+{
+	if (mBoard || mGameScene != GameScenes::SCENE_MENU)
+	{
+		KillBoard();
+		if (mSeedChooserScreen)
+			KillSeedChooserScreen();
+		ShowGameSelector();
+	}
+}
+
+void LawnApp::NetOnSceneCmd(LawnNet::NetBuffer& thePayload)
+{
+	uint8_t aCmd = thePayload.ReadU8Or();
+	int aParam = thePayload.ReadI32Or();
+
+	switch (aCmd)
+	{
+	case LawnNet::SCENECMD_SHOW_GAME_SELECTOR:
+		KillBoard();
+		ShowGameSelector();
+		break;
+	case LawnNet::SCENECMD_SHOW_CHALLENGE_PAGE:
+		if (mGameSelector)
+			KillGameSelector();
+		ShowChallengeScreen((ChallengePage)aParam);
+		break;
+	case LawnNet::SCENECMD_SHOW_STORE:
+		if (mBoard && !GetDialog(Dialogs::DIALOG_STORE))
+			ShowStoreScreen();
+		break;
+	case LawnNet::SCENECMD_SHOW_SEED_CHOOSER:
+		if (mBoard)
+			ShowSeedChooserScreen();
+		break;
+	case LawnNet::SCENECMD_KILL_BOARD:
+		KillBoard();
+		break;
+	}
+}
+
+void LawnApp::NetBroadcastProfile()
+{
+	if (!mNetManager || !mNetManager->IsHosting() || !mPlayerInfo)
+		return;
+
+	LawnNet::NetBuffer aMsg;
+	PlayerInfo* aP = mPlayerInfo;
+	aMsg.WriteI32(aP->mLevel);
+	aMsg.WriteI32(aP->mCoins);
+	aMsg.WriteI32(aP->mFinishedAdventure);
+	aMsg.WriteI32(aP->mHasUnlockedMinigames);
+	aMsg.WriteI32(aP->mHasUnlockedPuzzleMode);
+	aMsg.WriteI32(aP->mHasUnlockedSurvivalMode);
+	for (int i = 0; i < 80; i++)
+		aMsg.WriteI32((int32_t)aP->mPurchases[i]);
+	for (int i = 0; i < 100; i++)
+		aMsg.WriteI32(aP->mChallengeRecords[i]);
+	mNetManager->BroadcastMessage(LawnNet::NETMSG_PROFILE_SYNC, aMsg);
+}
+
+void LawnApp::NetOnProfileSync(LawnNet::NetBuffer& thePayload)
+{
+	if (!mPlayerInfo)
+		return;
+
+	mNetBlockProfileSave = true;
+	PlayerInfo* aP = mPlayerInfo;
+	aP->mLevel = thePayload.ReadI32Or();
+	aP->mCoins = thePayload.ReadI32Or();
+	aP->mFinishedAdventure = thePayload.ReadI32Or();
+	aP->mHasUnlockedMinigames = thePayload.ReadI32Or();
+	aP->mHasUnlockedPuzzleMode = thePayload.ReadI32Or();
+	aP->mHasUnlockedSurvivalMode = thePayload.ReadI32Or();
+	for (int i = 0; i < 80; i++)
+		aP->mPurchases[i] = thePayload.ReadI32Or();
+	for (int i = 0; i < 100; i++)
+		aP->mChallengeRecords[i] = thePayload.ReadI32Or();
+	mPlayerLevelRef = aP->GetLevel();
+}
+
+void LawnApp::NetHandleRemoteInputs()
+{
+	if (!mNetManager || !mBoard)
+		return;
+
+	while (!mNetManager->mPendingInputs.empty())
+	{
+		LawnNet::NetRemoteInput anInput = mNetManager->mPendingInputs.front();
+		mNetManager->mPendingInputs.pop_front();
+
+		if (anInput.mDown)
+			mBoard->MouseDown(anInput.mX, anInput.mY, anInput.mClickCount);
+		else
+			mBoard->MouseUp(anInput.mX, anInput.mY, anInput.mClickCount);
+	}
 }

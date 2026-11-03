@@ -20,6 +20,10 @@
 namespace LawnNet
 {
 
+// Set while the client creates ghost entities so their init sounds stay silent
+// (the host broadcasts the same sounds via events).
+extern bool gNetSuppressSounds;
+
 static const uint32_t NET_PROTOCOL_VERSION = 1;
 static const uint16_t NET_DEFAULT_PORT = 27713;			// PvZ co-op port
 static const int NET_MAX_PLAYERS = 4;					// 1 host + 3 clients

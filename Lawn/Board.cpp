@@ -31,6 +31,9 @@
 #include "../SexyAppFramework/SoundInstance.h"
 #include "Widget/AchievementsScreen.h"
 #include "../Sexy.TodLib/Definition.h"
+#include "Net/NetManager.h"
+
+using namespace LawnNet;
 
 #include <immintrin.h> 
 
@@ -65,6 +68,20 @@ Board::Board(LawnApp* theApp)
 	{
 		mBoardRandSeed = Rand();
 	}
+	if (mApp->NetActive())
+	{
+		// co-op: both machines build the level from the shared seed
+		mBoardRandSeed = (int)mApp->mNetBoardSeed;
+	}
+	mNextNetId = 0;
+	mLastSnapshotTick = 0;
+	mNetGhostTimeAcc = 0.0f;
+	mNetLastApplyMs = 0;
+	mNetPausedOverlay = false;
+	mNetPvPBrainScore = 0;
+	mNetPvPKillScore = 0;
+	mNetPvPBrainTimer = 0;
+	mTDPath.clear();
 	mCoinBankFadeCount = 0;
 	mLevel = 0;
 	mCursorObject = new CursorObject();
@@ -566,6 +583,11 @@ GridItem* Board::AddALadder(int theGridX, int theGridY)
 	aLadder->mRenderOrder = MakeRenderOrder(RenderLayer::RENDER_LAYER_PLANT, theGridY, 800);
 	aLadder->mGridX = theGridX;
 	aLadder->mGridY = theGridY;
+	if (mApp->NetActive())
+	{
+		aLadder->mNetId = NetAllocId();
+		aLadder->mNetGhost = mApp->NetIsClient();
+	}
 	return aLadder;
 }
 
@@ -577,6 +599,11 @@ GridItem* Board::AddACrater(int theGridX, int theGridY)
 	aCrater->mRenderOrder = MakeRenderOrder(RenderLayer::RENDER_LAYER_GROUND, theGridY, 1);
 	aCrater->mGridX = theGridX;
 	aCrater->mGridY = theGridY;
+	if (mApp->NetActive())
+	{
+		aCrater->mNetId = NetAllocId();
+		aCrater->mNetGhost = mApp->NetIsClient();
+	}
 	return aCrater;
 }
 
@@ -588,6 +615,11 @@ GridItem* Board::AddAGraveStone(int theGridX, int theGridY)
 	aGraveStone->mRenderOrder = MakeRenderOrder(RenderLayer::RENDER_LAYER_GRAVE_STONE, theGridY, 3);
 	aGraveStone->mGridX = theGridX;
 	aGraveStone->mGridY = theGridY;
+	if (mApp->NetActive())
+	{
+		aGraveStone->mNetId = NetAllocId();
+		aGraveStone->mNetGhost = mApp->NetIsClient();
+	}
 	return aGraveStone;
 }
 
@@ -2031,6 +2063,11 @@ void Board::PlaceRake()
 	aRake->mRenderOrder = MakeRenderOrder(RenderLayer::RENDER_LAYER_GRAVE_STONE, aGridY, 9);
 	aRake->mGridItemReanimID = mApp->ReanimationGetID(CreateRakeReanim(aGridX, aGridY, 0));
 	aRake->mGridItemState = GridItemState::GRIDITEM_STATE_RAKE_ATTRACTING;
+	if (mApp->NetActive())
+	{
+		aRake->mNetId = NetAllocId();
+		aRake->mNetGhost = mApp->NetIsClient();
+	}
 }
 
 //0x40BC70
@@ -2073,6 +2110,11 @@ void Board::InitLawnMowers()
 			LawnMower* aLawnMower = mLawnMowers.DataArrayAlloc();
 			aLawnMower->LawnMowerInitialize(aRow);
 			aLawnMower->mVisible = false;
+			if (mApp->NetActive())
+			{
+				aLawnMower->mNetId = NetAllocId();
+				aLawnMower->mNetGhost = mApp->NetIsClient();
+			}
 		}
 	}
 }
@@ -2458,6 +2500,21 @@ Coin* Board::AddCoin(int theX, int theY, CoinType theCoinType, CoinMotion theCoi
 {
 	Coin* aCoin = mCoins.DataArrayAlloc();
 	aCoin->CoinInitialize(theX, theY, theCoinType, theCoinMotion);
+	if (mApp->NetActive())
+	{
+		aCoin->mNetId = NetAllocId();
+		aCoin->mNetGhost = mApp->NetIsClient();
+		if (mApp->NetIsHost())
+		{
+			NetBuffer anEvent;
+			anEvent.WriteU16(aCoin->mNetId);
+			anEvent.WriteU8((uint8_t)theCoinType);
+			anEvent.WriteI16((int16_t)(aCoin->mPosX * 4));
+			anEvent.WriteI16((int16_t)(aCoin->mPosY * 4));
+			anEvent.WriteU16((uint16_t)aCoin->GetSunValue());
+			mApp->mNetManager->SendBoardEvent(anEvent, BOARDEV_SUN_ADDED);
+		}
+	}
 	if (mApp->IsFirstTimeAdventureMode() && mLevel == 1 && mApp->mPlayerInfo->GetLevel() <= 4)
 	{
 		DisplayAdvice(_S("[ADVICE_CLICK_ON_SUN]"), MessageStyle::MESSAGE_STYLE_TUTORIAL_LEVEL1_STAY, AdviceType::ADVICE_CLICK_ON_SUN);
@@ -2527,6 +2584,11 @@ Plant* Board::NewPlant(int theGridX, int theGridY, SeedType theSeedType, SeedTyp
 	Plant* aPlant = mPlants.DataArrayAlloc();
 	aPlant->mIsOnBoard = true;
 	aPlant->PlantInitialize(theGridX, theGridY, theSeedType, theImitaterType);
+	if (mApp->NetActive())
+	{
+		aPlant->mNetId = NetAllocId();
+		aPlant->mNetGhost = mApp->NetIsClient();
+	}
 	return aPlant;
 }
 
@@ -2586,6 +2648,18 @@ Plant* Board::AddPlant(int theGridX, int theGridY, SeedType theSeedType, SeedTyp
 	Plant* aPlant = NewPlant(theGridX, theGridY, theSeedType, theImitaterType);
 	DoPlantingEffects(theGridX, theGridY, aPlant);
 	mChallenge->PlantAdded(aPlant);
+
+	// co-op: tell clients about the new plant immediately
+	if (mApp->NetIsHost())
+	{
+		NetBuffer anEvent;
+		anEvent.WriteU16(aPlant->mNetId);
+		anEvent.WriteU8((uint8_t)theSeedType);
+		anEvent.WriteU8((uint8_t)theImitaterType);
+		anEvent.WriteU8((uint8_t)aPlant->mRow);
+		anEvent.WriteU8((uint8_t)theGridX);
+		mApp->mNetManager->SendBoardEvent(anEvent, BOARDEV_PLANT_ADDED);
+	}
 
 	int aSunPlantsCount = CountPlantByType(SeedType::SEED_SUNSHROOM) + CountPlantByType(SeedType::SEED_SUNFLOWER);
 	if (aSunPlantsCount > mMaxSunPlants)
@@ -2881,6 +2955,17 @@ Projectile* Board::AddProjectile(int theX, int theY, int theRenderOrder, int the
 {
 	Projectile* aProjectile = mProjectiles.DataArrayAlloc();
 	aProjectile->ProjectileInitialize(theX, theY, theRenderOrder, theRow, theProjectileType);
+	if (mApp->NetActive())
+	{
+		aProjectile->mNetId = NetAllocId();
+		aProjectile->mNetGhost = mApp->NetIsClient();
+		if (mApp->NetIsClient())
+		{
+			// ghosts never fire projectiles locally
+			aProjectile->mNetTargetX = (float)theX;
+			aProjectile->mNetTargetY = (float)theY;
+		}
+	}
 	return aProjectile;
 }
 
@@ -3251,7 +3336,31 @@ Zombie* Board::AddZombieInRow(ZombieType theZombieType, int theRow, int theFromW
 	{
 		for (int _i = 0; _i < 3; _i++)
 		{
-			mZombies.DataArrayAlloc()->ZombieInitialize(theRow, ZombieType::ZOMBIE_BOBSLED, false, aZombie, theFromWave);
+			Zombie* aFollower = mZombies.DataArrayAlloc();
+			aFollower->ZombieInitialize(theRow, ZombieType::ZOMBIE_BOBSLED, false, aZombie, theFromWave);
+			if (mApp->NetActive())
+			{
+				aFollower->mNetId = NetAllocId();
+				aFollower->mNetGhost = mApp->NetIsClient();
+			}
+		}
+	}
+
+	// co-op: id + spawn event
+	if (mApp->NetActive())
+	{
+		aZombie->mNetId = NetAllocId();
+		aZombie->mNetGhost = mApp->NetIsClient();
+		if (mApp->NetIsHost())
+		{
+			NetBuffer anEvent;
+			anEvent.WriteU16(aZombie->mNetId);
+			anEvent.WriteU8((uint8_t)theZombieType);
+			anEvent.WriteU8((uint8_t)theRow);
+			anEvent.WriteU8(aVariant ? 1 : 0);
+			anEvent.WriteU8((uint8_t)max(0, theFromWave));
+			anEvent.WriteF32(aZombie->mVelX);
+			mApp->mNetManager->SendBoardEvent(anEvent, BOARDEV_ZOMBIE_ADDED);
 		}
 	}
 
@@ -5527,6 +5636,10 @@ void Board::Pause(bool thePause)
 		return;
 
 	mPaused = thePause;
+	if (mApp->NetIsHost())
+	{
+		mApp->mNetManager->SendPauseState(thePause);
+	}
 	if (thePause && mApp->mPlayerInfo->mCoins > 0)
 	{
 		ShowCoinBank();
@@ -6697,6 +6810,17 @@ void Board::Update()
 {
 	TodHesitationBracket aHesitation("Board::Update");
 
+	// ---- co-op: client boards are driven entirely by the host ----
+	if (mApp->NetIsClient())
+	{
+		Widget::Update();
+		MarkDirty();
+		NetClientTick();
+		mCursorPreview->Update();
+		mCursorObject->Update();
+		return;
+	}
+
 	Widget::Update();
 	MarkDirty();
 
@@ -6830,11 +6954,17 @@ void Board::Update()
 		mChallenge->Update();
 		mCursorPreview->mVisible = false;
 		mCursorObject->mVisible = false;
+		if (mApp->NetIsHost())
+			NetHostTick(); // keep sending state while paused
 		return;
 	}
 
 	if (mTimeStopCounter > 0)
+	{
+		if (mApp->NetIsHost())
+			NetHostTick();
 		return;
+	}
 
 	bool aDisabled = !CanInteractWithBoardButtons() || mIgnoreMouseUp;
 	if (!mMenuButton->mBtnNoDraw)
@@ -6973,6 +7103,10 @@ void Board::Update()
 	mCursorObject->Update();
 	mPrevMouseX = mApp->mWidgetManager->mLastMouseX;
 	mPrevMouseY = mApp->mWidgetManager->mLastMouseY;
+
+	// co-op host: broadcast state after this tick's simulation
+	if (mApp->NetIsHost())
+		NetHostTick();
 }
 
 //0x416080
@@ -9624,6 +9758,17 @@ void Board::Draw(Graphics* g)
 	mDrawCount++;
 	g->Translate(mApp->mDDInterface->mWideScreenOffsetX, mApp->mDDInterface->mWideScreenOffsetY);
 	DrawGameObjects(g);
+
+	// co-op extras: tower defense road, remote cursors, host-pause overlay
+	NetDrawTowerDefensePath(g);
+	NetDrawRemoteCursors(g);
+	if (mApp->NetIsClient() && mPaused)
+	{
+		g->SetColor(Color(0, 0, 0, 140));
+		g->FillRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
+		SexyString aPausedText = _S("PAUSED - waiting for host...");
+		TodDrawString(g, aPausedText, BOARD_WIDTH / 2, BOARD_HEIGHT / 2, Sexy::FONT_BRIANNETOD12, Color(255, 255, 255, 230), DrawStringJustification::DS_ALIGN_CENTER);
+	}
 	g->PopState();
 }
 
