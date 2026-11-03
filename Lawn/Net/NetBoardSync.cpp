@@ -9,6 +9,7 @@
 #include "../SeedPacket.h"
 #include "../CursorObject.h"
 #include "../Challenge.h"
+#include "../Cutscene.h"
 #include "../../Sexy.TodLib/Reanimator.h"
 #include "../System/PlayerInfo.h"
 #include "../../GameConstants.h"
@@ -635,6 +636,13 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	mApp->mNetManager->mRemotePaused = aPaused;
 	if (aLevelComplete)
 		mLevelComplete = true;
+
+	// zombies won: trigger the same cutscene the host shows
+	if (aZombiesWon && mApp->mGameScene != GameScenes::SCENE_ZOMBIES_WON)
+	{
+		mApp->mGameScene = GameScenes::SCENE_ZOMBIES_WON;
+		mCutScene->StartZombiesWon();
+	}
 
 	// ---- seed packets ----
 	uint8_t aNumPackets = b.ReadU8Or();

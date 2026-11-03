@@ -1195,6 +1195,18 @@ void LawnApp::PreNewGame(GameMode theGameMode, bool theLookForSavedGame)
 	//	return;
 	//}
 
+	// co-op host: every game start is broadcast (next level, restarts, survival
+	// stages...) and always fresh (clients don't have the host's save file)
+	if (mNetManager && mNetManager->IsHosting())
+	{
+		mNetBoardSeed = Rand();
+		mNetManager->mStartTDPath.clear();
+		if (theGameMode == GameMode::GAMEMODE_COOP_TOWER_DEFENSE)
+			Board::GenerateTowerDefensePath(mNetManager->mStartTDPath);
+		mNetManager->BroadcastStartGame((int)theGameMode, mPlayerInfo ? mPlayerInfo->mLevel : 1, mNetBoardSeed);
+		theLookForSavedGame = false;
+	}
+
 	mGameMode = theGameMode;
 	if (theLookForSavedGame && TryLoadGame())
 		return;
@@ -1211,6 +1223,17 @@ void LawnApp::PreNewGame(GameMode theGameMode, bool theLookForSavedGame, int the
 	//	ShowGameSelector();
 	//	return;
 	//}
+
+	// co-op host: broadcast (see the overload above)
+	if (mNetManager && mNetManager->IsHosting())
+	{
+		mNetBoardSeed = Rand();
+		mNetManager->mStartTDPath.clear();
+		if (theGameMode == GameMode::GAMEMODE_COOP_TOWER_DEFENSE)
+			Board::GenerateTowerDefensePath(mNetManager->mStartTDPath);
+		mNetManager->BroadcastStartGame((int)theGameMode, theLevel, mNetBoardSeed);
+		theLookForSavedGame = false;
+	}
 
 	mGameMode = theGameMode;
 	if (theLookForSavedGame && TryLoadGame(theLevel))
@@ -1344,6 +1367,10 @@ void LawnApp::KillGameSelector()
 //0x44FA20
 void LawnApp::ShowAwardScreen(AwardType theAwardType, bool theShowAchievements)
 {
+	// co-op host: mirror the award screen on clients
+	if (mNetManager && mNetManager->IsHosting())
+		mNetManager->BroadcastSceneCmd(LawnNet::SCENECMD_SHOW_AWARD, (int)theAwardType);
+
 	mGameScene = GameScenes::SCENE_AWARD;
 	mAwardScreen = new AwardScreen(this, theAwardType, theShowAchievements);
 	mAwardScreen->Resize(0, 0, mWidth, mHeight);
@@ -1387,6 +1414,10 @@ void LawnApp::KillCreditScreen()
 //0x44FC30
 void LawnApp::ShowChallengeScreen(ChallengePage thePage)
 {
+	// co-op host: mirror the challenge screen on clients
+	if (mNetManager && mNetManager->IsHosting())
+		mNetManager->BroadcastSceneCmd(LawnNet::SCENECMD_SHOW_CHALLENGE_PAGE, (int)thePage);
+
 	mGameScene = GameScenes::SCENE_CHALLENGE;
 	mChallengeScreen = new ChallengeScreen(this, thePage);
 	mChallengeScreen->Resize(0, 0, mWidth, mHeight);
@@ -1409,6 +1440,10 @@ void LawnApp::KillChallengeScreen()
 //0x44FD40
 StoreScreen* LawnApp::ShowStoreScreen()
 {
+	// co-op host: mirror the store on clients
+	if (mNetManager && mNetManager->IsHosting())
+		mNetManager->BroadcastSceneCmd(LawnNet::SCENECMD_SHOW_STORE, 0);
+
 	//FinishModelessDialogs();
 	TOD_ASSERT(!GetDialog((int)Dialogs::DIALOG_STORE));
 
@@ -1492,6 +1527,13 @@ void LawnApp::EndLevel()
 //0x44FEB0
 void LawnApp::DoBackToMain()
 {
+	// co-op host: bring everyone back to the menu
+	if (mNetManager && mNetManager->IsHosting())
+	{
+		LawnNet::NetBuffer aMsg;
+		mNetManager->BroadcastMessage(LawnNet::NETMSG_BACK_TO_MENU, aMsg);
+	}
+
 	mMusic->StopAllMusic();
 	mSoundSystem->CancelPausedFoley();
 	WriteCurrentUserConfig();
@@ -2542,6 +2584,10 @@ bool LawnApp::UpdatePlayerProfileForFinishingLevel()
 // GOTY @Patoke: 0x4558E0
 void LawnApp::CheckForGameEnd()
 {
+	// co-op client: the host drives all end-of-game transitions
+	if (NetIsClient())
+		return;
+
 	if (mBoard == nullptr || !mBoard->mLevelComplete)
 		return;
 
@@ -5056,15 +5102,7 @@ void LawnApp::NetHostStartGame(GameMode theGameMode, int theLevel)
 	if (!mNetManager || !mNetManager->IsHosting())
 		return;
 
-	// fresh shared board seed so both machines build the same level content
-	mNetBoardSeed = Rand();
-	mNetManager->mStartTDPath.clear();
-	if (theGameMode == GameMode::GAMEMODE_COOP_TOWER_DEFENSE)
-		Board::GenerateTowerDefensePath(mNetManager->mStartTDPath);
-
-	mNetManager->BroadcastStartGame((int)theGameMode, theLevel, mNetBoardSeed);
-
-	// start locally without touching saves
+	// PreNewGame performs the broadcast + fresh-start logic
 	if (theGameMode == GameMode::GAMEMODE_ADVENTURE)
 		PreNewGame(theGameMode, false, theLevel);
 	else
@@ -5159,6 +5197,10 @@ void LawnApp::NetOnSceneCmd(LawnNet::NetBuffer& thePayload)
 	case LawnNet::SCENECMD_SHOW_STORE:
 		if (mBoard && !GetDialog(Dialogs::DIALOG_STORE))
 			ShowStoreScreen();
+		break;
+	case LawnNet::SCENECMD_SHOW_AWARD:
+		if (mBoard)
+			ShowAwardScreen((AwardType)aParam, false);
 		break;
 	case LawnNet::SCENECMD_SHOW_SEED_CHOOSER:
 		if (mBoard)
