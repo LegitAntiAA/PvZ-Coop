@@ -108,6 +108,8 @@ void Zombie::ZombieInitialize(int theRow, ZombieType theType, bool theVariant, Z
     mFrame = 0;
     mPrevFrame = 0;
     mZombieType = theType;
+    mTdPathPos = 0.0f;
+    mNetKillCounted = false;
     mVariant = theVariant;
     mIsEating = false;
     mJustGotShotCounter = 0;
@@ -4920,6 +4922,21 @@ void Zombie::UpdateBurn()
 void Zombie::Update()
 {
     TOD_ASSERT(!mDead);
+
+    // co-op tower defense: zombies move only along the generated road
+    if (mBoard->IsTowerDefense() && mFromWave >= 0)
+    {
+        UpdateTowerDefense();
+        Animate();
+        return;
+    }
+
+    // co-op pvp: zombie reaching the house scores a brain for the zombie team
+    if (mBoard->IsPvPMode() && mFromWave >= 0 && mPosX < 30.0f)
+    {
+        mBoard->NetPvPZombieScored(this);
+        return;
+    }
 
     mZombieAge++;
     bool doUpdate = false;

@@ -1624,10 +1624,14 @@ void SeedChooserScreen::CoopBroadcastChooserStart()
 static void CoopBuildBankInternal(SeedBank* theBank, int theMySlot,
 	const int thePicks[4][12], const int theCounts[4], const SeedType theImitaters[4][12])
 {
+	int aMaxPlantPackets = SEEDBANK_MAX;
+	if (gLawnApp && gLawnApp->mGameMode == GameMode::GAMEMODE_COOP_PVP)
+		aMaxPlantPackets = SEEDBANK_MAX - 4; // the last 4 slots are the zombie team's cards
+
 	int aTotal = 0;
 	for (int i = 0; i < 4; i++)
 		aTotal += min(12, theCounts[i]);
-	aTotal = min(aTotal, SEEDBANK_MAX);
+	aTotal = min(aTotal, aMaxPlantPackets);
 
 	int aPos = 0;
 	for (int anOffset = 0; anOffset < 4; anOffset++)
@@ -1643,6 +1647,14 @@ static void CoopBuildBankInternal(SeedBank* theBank, int theMySlot,
 			aPacket.mNetOwnerSlot = (unsigned char)aSlot;
 			aPos++;
 		}
+	}
+	if (gLawnApp && gLawnApp->mGameMode == GameMode::GAMEMODE_COOP_PVP)
+	{
+		// append the zombie team's spawn cards
+		theBank->mSeedPackets[aPos++].SetPacketType(SeedType::SEED_ZOMBIE_NORMAL);
+		theBank->mSeedPackets[aPos++].SetPacketType(SeedType::SEED_ZOMBIE_TRAFFIC_CONE);
+		theBank->mSeedPackets[aPos++].SetPacketType(SeedType::SEED_ZOMBIE_PAIL);
+		theBank->mSeedPackets[aPos++].SetPacketType(SeedType::SEED_ZOMBIE_FOOTBALL);
 	}
 	theBank->mNumPackets = max(aPos, 1);
 	for (int i = aPos; i < SEEDBANK_MAX; i++)

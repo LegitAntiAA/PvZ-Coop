@@ -10,6 +10,7 @@
 #include "../CursorObject.h"
 #include "../Challenge.h"
 #include "../Cutscene.h"
+#include "../../Resources.h"
 #include "../../Sexy.TodLib/Reanimator.h"
 #include "../System/PlayerInfo.h"
 #include "../../GameConstants.h"
@@ -184,10 +185,17 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 	b.WriteU16((uint16_t)min(65535, max(0, mChallenge->mChallengeStateCounter)));
 	b.WriteI16((int16_t)max(-32768, min(32767, mChallenge->mChallengeScore)));
 
-	// pvp
+	// weather (endless T)
+	b.WriteU8(mNetDayPhase);
+	b.WriteU16(mNetWeatherTimer);
+	b.WriteU16(mNetFogTimer);
+	b.WriteU16(mNetStormTimer);
+
+	// pvp / td
 	b.WriteU8((uint8_t)min(255, mNetPvPBrainScore));
 	b.WriteU8((uint8_t)min(255, mNetPvPKillScore));
 	b.WriteI32(mNetPvPBrainTimer);
+	b.WriteU8((uint8_t)max(0, mNetTDLives));
 
 	// ---- seed packets ----
 	b.WriteU8((uint8_t)mSeedBank->mNumPackets);
@@ -611,9 +619,15 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	mChallenge->mChallengeStateCounter = b.ReadU16Or();
 	mChallenge->mChallengeScore = b.ReadI16Or();
 
+	mNetDayPhase = b.ReadU8Or();
+	mNetWeatherTimer = b.ReadU16Or();
+	mNetFogTimer = b.ReadU16Or();
+	mNetStormTimer = b.ReadU16Or();
+
 	mNetPvPBrainScore = b.ReadU8Or();
 	mNetPvPKillScore = b.ReadU8Or();
 	mNetPvPBrainTimer = b.ReadI32Or();
+	mNetTDLives = b.ReadU8Or();
 
 	// huge wave warning banner (mirrors host-side advice)
 	static int aLastWave = -1;
@@ -1136,5 +1150,192 @@ void Board::NetDrawTowerDefensePath(Graphics* g)
 		g->SetColor(Color(80, 55, 35, 90));
 		g->FillRect(aX, aY + 20, 80, 4);
 		g->FillRect(aX, aY + 96, 80, 4);
+	}
+}
+
+// ==========================================================================
+// Endless T weather rendering (darkness at night, fog, storm flashes)
+// ==========================================================================
+
+void Board::DrawEndlessWeather(Graphics* g)
+{
+	if (!IsEndlessT())
+		return;
+
+	// night darkness
+	if (mNetDayPhase == 1)
+	{
+		g->SetColor(Color(10, 10, 40, 110));
+		g->FillRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
+	}
+
+	// fog roll from the right
+	if (mNetFogTimer > 0)
+	{
+		g->SetColor(Color(210, 215, 225, 120));
+		g->FillRect(400, 0, BOARD_WIDTH - 400, BOARD_HEIGHT);
+		g->SetColor(Color(190, 195, 210, 70));
+		g->FillRect(300, 0, 100, BOARD_HEIGHT);
+	}
+
+	// storm: lightning flash
+	if (mNetStormTimer > 0)
+	{
+		int aFlash = mMainCounter % 180;
+		if (aFlash < 6)
+		{
+			g->SetColor(Color(255, 255, 255, 130 - aFlash * 15));
+			g->FillRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
+		}
+	}
+}
+
+// ==========================================================================
+// Tower defense + PvP gameplay helpers
+// ==========================================================================
+
+bool Board::IsTowerDefense()
+{
+	return mApp->mGameMode == GameMode::GAMEMODE_COOP_TOWER_DEFENSE;
+}
+
+bool Board::IsPvPMode()
+{
+	return mApp->mGameMode == GameMode::GAMEMODE_COOP_PVP;
+}
+
+bool Board::CanTakeBrains(int theAmount)
+{
+	return mNetPvPBrainTimer >= theAmount;
+}
+
+void Board::TakeBrains(int theAmount)
+{
+	mNetPvPBrainTimer = max(0, mNetPvPBrainTimer - theAmount);
+}
+
+// host-side per-tick updates for the custom modes
+void Board::UpdateTowerDefenseGame()
+{
+	if (!IsTowerDefense() || mApp->NetIsClient())
+		return;
+
+	// TD path zombies are driven by Zombie::UpdateTowerDefense
+}
+
+void Board::UpdatePvP()
+{
+	if (!IsPvPMode() || mApp->NetIsClient())
+		return;
+
+	// brains trickle: +50 every ~10 seconds, shared by the zombie team
+	if (mNetPvPBrainTimer > 0 || mApp->mGameScene == GameScenes::SCENE_PLAYING)
+	{
+		mNetPvPBrainTick++;
+		if (mNetPvPBrainTick >= 1000)
+		{
+			mNetPvPBrainTick = 0;
+			mNetPvPBrainTimer += 50;
+		}
+	}
+
+	// win checks
+	if (mApp->mGameScene != GameScenes::SCENE_PLAYING)
+		return;
+	if (mNetPvPBrainScore >= 5)
+	{
+		ZombiesWon(nullptr);
+	}
+	else if (mNetPvPKillScore >= 100)
+	{
+		FadeOutLevel();
+	}
+}
+
+// a zombie crossed into the house: brain for the zombie team
+void Board::NetPvPZombieScored(Zombie* theZombie)
+{
+	if (!IsPvPMode() || mApp->NetIsClient())
+		return;
+	mNetPvPBrainScore++;
+	theZombie->DieNoLoot();
+	mApp->PlaySample(Sexy::SOUND_CHOMP);
+}
+
+// PvP score display
+void Board::NetDrawPvPScore(Graphics* g)
+{
+	if (!IsPvPMode())
+		return;
+
+	SexyString aScoreStr = StrFormat(_S("BRAINS %d/5    KILLS %d/100"), mNetPvPBrainScore, mNetPvPKillScore);
+	TodDrawString(g, aScoreStr, BOARD_WIDTH / 2, 8, Sexy::FONT_BRIANNETOD12,
+		Color(255, 240, 200), DrawStringJustification::DS_ALIGN_CENTER);
+}
+
+// ==========================================================================
+// Zombie: tower defense path movement (host side)
+// ==========================================================================
+
+void Zombie::UpdateTowerDefense()
+{
+	Board* aBoard = mBoard;
+
+	if (mZombiePhase == ZombiePhase::PHASE_ZOMBIE_DYING || mDead)
+		return;
+
+	// advance along the path unless eating a plant
+	Plant* aTargetPlant = aBoard->mPlants.DataArrayTryToGet(mTargetPlantID);
+	bool aBlocked = aTargetPlant && !aTargetPlant->mDead;
+
+	if (!aBlocked)
+	{
+		mTdPathPos += mVelX / 80.0f;
+	}
+
+	// position along the path
+	int aCells = (int)(aBoard->mTDPath.size() / 2);
+	if (aCells == 0)
+		return;
+
+	float aF = mTdPathPos * (aCells - 1);
+	if (aF >= aCells - 1)
+	{
+		// reached the end of the road: brain lost
+		aBoard->mNetTDLives--;
+		mApp->PlaySample(Sexy::SOUND_LOSEMUSIC);
+		if (aBoard->mNetTDLives <= 0)
+			aBoard->ZombiesWon(nullptr);
+		DieNoLoot();
+		return;
+	}
+
+	int anIndex = (int)aF;
+	float aT = aF - anIndex;
+	int aRowA = aBoard->mTDPath[anIndex * 2] >> 1;
+	int aColA = aBoard->mTDPath[anIndex * 2 + 1];
+	int aRowB = aBoard->mTDPath[(anIndex + 1) * 2] >> 1;
+	int aColB = aBoard->mTDPath[(anIndex + 1) * 2 + 1];
+
+	float aXA = (float)aBoard->GridToPixelX(aColA, aRowA);
+	float aYA = (float)aBoard->GridToPixelY(aColA, aRowA);
+	float aXB = (float)aBoard->GridToPixelX(aColB, aRowB);
+	float aYB = (float)aBoard->GridToPixelY(aColB, aRowB);
+
+	mPosX = aXA + (aXB - aXA) * aT;
+	mPosY = aYA + (aYB - aYA) * aT;
+	mRow = (aT < 0.5f) ? aRowA : aRowB;
+	mX = (int)mPosX;
+	mY = (int)mPosY;
+
+	// eat a plant blocking the current cell
+	int aGridX = (int)(mPosX / 80.0f + 0.5f) - 0;
+	aGridX = aBoard->PixelToGridX((int)mPosX, (int)mPosY);
+	int aGridY = mRow;
+	Plant* aPlant = aBoard->GetTopPlantAt(aGridX, aGridY, PlantPriority::TOPPLANT_ONLY_NORMAL_POSITION);
+	if (aPlant && !aPlant->mDead && !mIsEating)
+	{
+		mTargetPlantID = (PlantID)aBoard->mPlants.DataArrayGetID(aPlant);
+		EatPlant(aPlant);
 	}
 }

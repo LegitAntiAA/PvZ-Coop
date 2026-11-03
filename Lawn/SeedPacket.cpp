@@ -901,6 +901,29 @@ void SeedPacket::MouseDown(int x, int y, int theClickCount)
 		}
 	}
 
+	// co-op PvP: zombie seed packets are bought with brains
+	if (mApp->mGameMode == GameMode::GAMEMODE_COOP_PVP && mBoard->mChallenge->IsZombieSeedType(mPacketType))
+	{
+		if (!mActive)
+		{
+			mApp->PlaySample(SOUND_BUZZER);
+			return;
+		}
+		int aBrainCost = mBoard->GetCurrentPlantCost(mPacketType, mImitaterType) / 2;
+		if (!mBoard->CanTakeBrains(aBrainCost))
+		{
+			mApp->PlaySample(SOUND_BUZZER);
+			mBoard->DisplayAdvice(_S("Not enough brains!"), MessageStyle::MESSAGE_STYLE_HINT_LONG, AdviceType::ADVICE_NONE);
+			return;
+		}
+		mBoard->mCursorObject->mType = mPacketType;
+		mBoard->mCursorObject->mImitaterType = mImitaterType;
+		mBoard->mCursorObject->mCursorType = CursorType::CURSOR_TYPE_PLANT_FROM_BANK;
+		mBoard->mCursorObject->mSeedBankIndex = mIndex;
+		mApp->PlaySample(SOUND_SEEDLIFT);
+		return;
+	}
+
 	mBoard->ClearAdvice(AdviceType::ADVICE_CANT_AFFORD_PLANT);
 	mBoard->ClearAdvice(AdviceType::ADVICE_PLANT_NEEDS_REPEATER);
 	mBoard->ClearAdvice(AdviceType::ADVICE_PLANT_NEEDS_MELONPULT);

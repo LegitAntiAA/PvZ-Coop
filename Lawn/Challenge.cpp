@@ -6440,3 +6440,40 @@ void Challenge::MouseDownButterAZombie(int theX, int theY)
 		aTopZombie->ApplyButter();
 	}
 }
+// ==========================================================================
+// Co-op PvP: zombie team player places zombies for brain currency
+// ==========================================================================
+
+void Challenge::PvPMouseDownWithZombie(int theX, int theY, int theClickCount)
+{
+	if (theClickCount >= 0)
+	{
+		SeedType aSeedType = mBoard->mCursorObject->mType;
+		int aGridY = mBoard->PlantingPixelToGridY(theX, theY, aSeedType);
+		if (aGridY != -1 && theClickCount)
+		{
+			// zombies walk in from beyond the right screen edge (like the original
+			// spawner) — the click only selects the lane
+			int aCost = mBoard->GetCurrentPlantCost(aSeedType, SEED_NONE) / 2;
+			if (mApp->mEasyPlantingCheat || mBoard->CanTakeBrains(aCost))
+			{
+				mBoard->TakeBrains(aCost);
+				ZombieType aZombieType = IZombieSeedTypeToZombieType(aSeedType);
+				mBoard->AddZombieInRow(aZombieType, aGridY, 0);
+
+				TOD_ASSERT(mBoard->mCursorObject->mSeedBankIndex >= 0 && mBoard->mCursorObject->mSeedBankIndex < mBoard->mSeedBank->mNumPackets);
+				mBoard->mSeedBank->mSeedPackets[mBoard->mCursorObject->mSeedBankIndex].WasPlanted();
+				mApp->PlayFoley(FOLEY_PLANT);
+				mBoard->ClearCursor();
+			}
+			else
+			{
+				mBoard->DisplayAdvice(_S("Not enough brains!"), MESSAGE_STYLE_HINT_LONG, ADVICE_NONE);
+				mApp->PlaySample(SOUND_BUZZER);
+			}
+			return;
+		}
+	}
+	mBoard->RefreshSeedPacketFromCursor();
+	mApp->PlayFoley(FOLEY_DROP);
+}

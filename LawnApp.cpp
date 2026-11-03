@@ -1477,6 +1477,8 @@ void LawnApp::ShowSeedChooserScreen()
 	if (mNetManager && mNetManager->IsActive())
 	{
 		int aBankCount = mBoard ? mBoard->GetNumSeedsInBank() : 10;
+	if (mGameMode == GameMode::GAMEMODE_COOP_PVP)
+		aBankCount = SEEDBANK_MAX - 4; // last 4 slots are the zombie team's cards
 		int aPlayers = max(1, mNetManager->GetPlayerCount());
 		int aPicksPerPlayer = max(1, aBankCount / aPlayers);
 		if (mNetManager->IsHosting())
@@ -3416,7 +3418,7 @@ bool LawnApp::IsAdventureMode()
 //0x4536D0
 bool LawnApp::IsSurvivalMode()
 {
-	return mGameMode >= GameMode::GAMEMODE_SURVIVAL_NORMAL_STAGE_1 && mGameMode <= GameMode::GAMEMODE_SURVIVAL_ENDLESS_STAGE_5 || mGameMode >= GameMode::GAMEMODE_SURVIVAL_NORMAL_STAGE_6 && mGameMode <= GameMode::GAMEMODE_SURVIVAL_ENDLESS_STAGE_HIGHGROUND;
+	return mGameMode >= GameMode::GAMEMODE_SURVIVAL_NORMAL_STAGE_1 && mGameMode <= GameMode::GAMEMODE_SURVIVAL_ENDLESS_STAGE_5 || mGameMode >= GameMode::GAMEMODE_SURVIVAL_NORMAL_STAGE_6 && mGameMode <= GameMode::GAMEMODE_SURVIVAL_ENDLESS_STAGE_HIGHGROUND || IsCoopEndlessMode(mGameMode);
 }
 
 //0x4536F0
@@ -3732,8 +3734,28 @@ SeedType LawnApp::GetAwardSeedForLevel(int theLevel)
 }
 
 //0x453AC0
+// ---- co-op custom mode helpers ----
+bool LawnApp::IsCoopCustomMode()
+{
+	return mGameMode >= GameMode::GAMEMODE_COOP_ENDLESS && mGameMode <= GameMode::GAMEMODE_COOP_PVP;
+}
+
+bool LawnApp::IsCoopEndlessMode(GameMode theGameMode)
+{
+	return theGameMode >= GameMode::GAMEMODE_COOP_ENDLESS && theGameMode <= GameMode::GAMEMODE_COOP_ENDLESS_ST;
+}
+
+bool LawnApp::IsCoopEndlessRepick(GameMode theGameMode)
+{
+	return theGameMode == GameMode::GAMEMODE_COOP_ENDLESS_S || theGameMode == GameMode::GAMEMODE_COOP_ENDLESS_ST;
+}
+
 int LawnApp::GetSeedsAvailable()
 {
+	// co-op custom modes: every seed is available
+	if (IsCoopCustomMode())
+		return NUM_SEEDS_IN_CHOOSER;
+
 	int aLevel = mBoard && mBoard->mIsReplay && mPlayerLevelRef > 4 ? mPlayerLevelRef : mPlayerInfo->GetLevel();
 	int maxPlants = 49;
 
@@ -3801,6 +3823,8 @@ bool LawnApp::HasSeedType(SeedType theSeedType)
 
 bool LawnApp::SeedTypeAvailable(SeedType theSeedType)
 {
+	if (IsCoopCustomMode())
+		return true;
 	return HasSeedType(theSeedType);
 }
 

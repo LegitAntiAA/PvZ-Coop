@@ -567,6 +567,25 @@ public:
 	int								mNetPvPBrainTimer;			// brain currency trickle
 	std::vector<uint8_t>			mTDPath;					// tower defense: pairs (row, col)
 
+	// endless T weather (host-simulated, synced via snapshots)
+	uint8_t							mNetDayPhase;				// 0 = day, 1 = night
+	uint16_t						mNetWeatherTimer;			// ticks until next phase switch
+	uint16_t						mNetFogTimer;				// fog remaining ticks
+	uint16_t						mNetStormTimer;				// storm remaining ticks
+	int								mNetTDLives;				// tower defense: brains left
+	int								mNetPvPBrainTick;			// pvp: brain trickle counter
+	void							UpdateEndlessWeather();
+	void							DrawEndlessWeather(Graphics* g);
+	bool							IsEndlessT();
+	bool							IsTowerDefense();
+	bool							IsPvPMode();
+	bool							CanTakeBrains(int theAmount);
+	void							TakeBrains(int theAmount);
+	void							UpdatePvP();
+	void							UpdateTowerDefenseGame();
+	void							NetPvPZombieScored(Zombie* theZombie);
+	void							NetDrawPvPScore(Graphics* g);
+
 	uint16_t						NetAllocId();
 	void							NetHostTick();				// host: send snapshot/cursor at rate
 	void							NetEncodeSnapshot(LawnNet::NetBuffer& theBuffer);

@@ -187,6 +187,8 @@ public:
     ReanimationID                   mZombatarHatID;
     ReanimationID                   mZombatarHatLineID;
     unsigned char                   mNetAnimKey;    // co-op: host-computed anim intent (0 walk, 1 eat, 2 dying)
+    float                           mTdPathPos;     // tower defense: position along the path (0..1)
+    bool                            mNetKillCounted; // co-op pvp: kill already scored
 
 public:
     Zombie();
@@ -213,6 +215,7 @@ public:
     void                            BungeeLanding();
     bool                            EffectedByDamage(unsigned int theDamageRangeFlags);
     void                            PickRandomSpeed();
+    void                            UpdateTowerDefense();
     void                            UpdateZombiePolevaulter();
     void                            UpdateZombieDolphinRider();
     void                            PickBungeeZombieTarget(int theColumn);

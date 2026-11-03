@@ -181,6 +181,7 @@ public:
     static ZombieType       IZombieSeedTypeToZombieType(SeedType theSeedType);
     static /*inline*/ bool  IsZombieSeedType(SeedType theSeedType);
     void                    IZombieMouseDownWithZombie(int theX, int theY, int theClickCount);
+    void                        PvPMouseDownWithZombie(int theX, int theY, int theClickCount);
     void                    IZombieStart();
     void                    IZombiePlacePlants(SeedType theSeedType, int theCount, int theGridY = -1);
     void                    IZombieUpdate();

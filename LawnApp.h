@@ -191,7 +191,10 @@ public:
 	void							NetOnSceneCmd(LawnNet::NetBuffer& thePayload);
 	void							NetOnProfileSync(LawnNet::NetBuffer& thePayload);
 	void							NetBroadcastProfile();									// host: push profile to clients
-	void							NetHandleRemoteInputs();								// host: apply queued remote inputs to the board
+	void							NetHandleRemoteInputs();
+	bool							IsCoopCustomMode();
+	static bool						IsCoopEndlessMode(GameMode theGameMode);
+	static bool						IsCoopEndlessRepick(GameMode theGameMode);								// host: apply queued remote inputs to the board
 
 public:
 	LawnApp();

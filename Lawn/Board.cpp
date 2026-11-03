@@ -82,6 +82,11 @@ Board::Board(LawnApp* theApp)
 	mNetPvPKillScore = 0;
 	mNetPvPBrainTimer = 0;
 	mTDPath.clear();
+	mNetDayPhase = 0;
+	mNetWeatherTimer = 6000;
+	mNetFogTimer = 0;
+	mNetStormTimer = 0;
+	mNetTDLives = 5;
 	mCoinBankFadeCount = 0;
 	mLevel = 0;
 	mCursorObject = new CursorObject();
@@ -824,6 +829,9 @@ void Board::PickZombieWaves()
 		else if (mApp->IsSurvivalMode() && mChallenge->mSurvivalStage > 0)
 		{
 			aZombiePoints = (mChallenge->mSurvivalStage * GetNumWavesPerSurvivalStage() + aWave) * 2 / 5 + 1;
+			// co-op endless: waves grow steadily stronger over time
+			if (mApp->IsCoopEndlessMode(mApp->mGameMode))
+				aZombiePoints = (int)(aZombiePoints * (1.0f + mChallenge->mSurvivalStage * 0.15f));
 		}
 		else if (mApp->IsAdventureMode() && (mApp->HasFinishedAdventure() /*|| mApp->mPlayerLevelRef > 4*/) && mLevel != 5)
 		{
@@ -1082,6 +1090,13 @@ void Board::LoadBackgroundImages()
 //0x40A550
 void Board::PickBackground()
 {
+	// co-op custom modes: classic day lawn
+	if (mApp->IsCoopCustomMode())
+	{
+		mBackground = BackgroundType::BACKGROUND_1_DAY;
+		return;
+	}
+
 	switch (mApp->mGameMode)
 	{
 	case GameMode::GAMEMODE_ADVENTURE:
@@ -1619,6 +1634,19 @@ void Board::FreezeEffectsForCutscene(bool theFreeze)
 //0x40AD60
 void Board::InitSurvivalStage()
 {
+	// co-op endless without repick: continue seamlessly, no chooser/intro
+	if (mApp->IsCoopEndlessMode(mApp->mGameMode) && !mApp->IsCoopEndlessRepick(mApp->mGameMode))
+	{
+		mLevelComplete = false;
+		InitZombieWaves();
+		for (int i = 0; i < SEEDBANK_MAX; i++)
+		{
+			mSeedBank->mSeedPackets[i].mX = GetSeedPacketPositionX(i);
+		}
+		DisplayAdvice(_S("[ADVICE_MORE_ZOMBIES]"), MESSAGE_STYLE_HINT_TALL_FAST, ADVICE_NONE);
+		return;
+	}
+
 	RefreshSeedPacketFromCursor();
 	mApp->mSoundSystem->GamePause(true);
 	FreezeEffectsForCutscene(true);
@@ -1730,6 +1758,8 @@ void Board::InitLevel()
 	// 设定关卡出怪
 	InitZombieWaves();
 	// 设定关卡初始阳光数量
+	if (mApp->IsCoopCustomMode())
+		return; // co-op custom modes have no lawnmowers
 	if (aGameMode == GameMode::GAMEMODE_CHALLENGE_BEGHOULED || aGameMode == GameMode::GAMEMODE_CHALLENGE_BEGHOULED_TWIST ||
 		mApp->IsScaryPotterLevel() || mApp->IsWhackAZombieLevel())
 	{
@@ -1990,6 +2020,19 @@ void Board::InitLevel()
 			mSeedBank->mSeedPackets[i].SetPacketType((SeedType)i);
 		}
 	}
+	// co-op PvP: rightmost 4 packets are the zombie team's spawn cards
+	if (aGameMode == GameMode::GAMEMODE_COOP_PVP)
+	{
+		mSeedBank->mNumPackets = SEEDBANK_MAX;
+		mSeedBank->mSeedPackets[6].SetPacketType(SeedType::SEED_ZOMBIE_NORMAL);
+		mSeedBank->mSeedPackets[7].SetPacketType(SeedType::SEED_ZOMBIE_TRAFFIC_CONE);
+		mSeedBank->mSeedPackets[8].SetPacketType(SeedType::SEED_ZOMBIE_PAIL);
+		mSeedBank->mSeedPackets[9].SetPacketType(SeedType::SEED_ZOMBIE_FOOTBALL);
+		for (int i = 6; i < SEEDBANK_MAX; i++)
+			mSeedBank->mSeedPackets[i].mNetOwnerSlot = 1; // refined by team sync below
+		mNetPvPBrainTimer = 100; // starting brains (host authority, snapshot-synced)
+	}
+
 	// 将所有子控件标记为已变动
 	MarkAllDirty();
 	
@@ -3346,6 +3389,18 @@ Zombie* Board::AddZombieInRow(ZombieType theZombieType, int theRow, int theFromW
 		}
 	}
 
+	// co-op endless: zombies get tougher over time
+	if (mApp->IsCoopEndlessMode(mApp->mGameMode))
+	{
+		float aHealthScale = 1.0f + mChallenge->mSurvivalStage * 0.12f;
+		aZombie->mBodyHealth = (int)(aZombie->mBodyHealth * aHealthScale);
+		aZombie->mBodyMaxHealth = (int)(aZombie->mBodyMaxHealth * aHealthScale);
+		aZombie->mHelmHealth = (int)(aZombie->mHelmHealth * aHealthScale);
+		aZombie->mHelmMaxHealth = (int)(aZombie->mHelmMaxHealth * aHealthScale);
+		aZombie->mFlyingHealth = (int)(aZombie->mFlyingHealth * aHealthScale);
+		aZombie->mFlyingMaxHealth = (int)(aZombie->mFlyingMaxHealth * aHealthScale);
+	}
+
 	// co-op: id + spawn event
 	if (mApp->NetActive())
 	{
@@ -4438,6 +4493,13 @@ void Board::MouseDownWithPlant(int x, int y, int theClickCount)
 	if (mApp->IsIZombieLevel())
 	{
 		mChallenge->IZombieMouseDownWithZombie(x, y, theClickCount);
+		return;
+	}
+
+	// co-op PvP: the zombie team places zombies for brains
+	if (IsPvPMode() && mChallenge->IsZombieSeedType(GetSeedTypeInCursor()))
+	{
+		mChallenge->PvPMouseDownWithZombie(x, y, theClickCount);
 		return;
 	}
 
@@ -5996,6 +6058,13 @@ void Board::UpdateGameObjects()
 	while (IterateZombies(aZombie))
 	{
 		aZombie->Update();
+
+		// co-op pvp: score kills (once per zombie)
+		if (IsPvPMode() && aZombie->mDead && !aZombie->mNetKillCounted)
+		{
+			aZombie->mNetKillCounted = true;
+			mNetPvPKillScore++;
+		}
 	}
 
 	Projectile* aProjectile = nullptr;
@@ -6206,6 +6275,10 @@ bool Board::IsLastStandFinalStage()
 //0x4139E0
 bool Board::IsSurvivalStageWithRepick()
 {
+	// coop endless modes use the stage-transition flow (repick only for S/ST,
+	// controlled inside InitSurvivalStage)
+	if (mApp->IsCoopEndlessMode(mApp->mGameMode))
+		return true;
 	return mApp->IsSurvivalMode() && !IsFinalSurvivalStage();
 }
 
@@ -6224,7 +6297,7 @@ bool Board::HasLevelAwardDropped()
 //0x413A70
 void Board::UpdateSunSpawning()
 {
-	if (StageIsNight() || 
+	if ((IsEndlessT() && mNetDayPhase == 1) || StageIsNight() || 
 		HasLevelAwardDropped() || 
 		mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_RAINING_SEEDS || 
 		mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ICE || 
@@ -6738,8 +6811,44 @@ void Board::SetTutorialState(TutorialState theTutorialState)
 }
 
 //0x415920
+bool Board::IsEndlessT()
+{
+	return mApp->mGameMode == GameMode::GAMEMODE_COOP_ENDLESS_T || mApp->mGameMode == GameMode::GAMEMODE_COOP_ENDLESS_ST;
+}
+
+void Board::UpdateEndlessWeather()
+{
+	if (!IsEndlessT() || mApp->NetIsClient())
+		return;
+
+	if (mNetWeatherTimer > 0)
+		mNetWeatherTimer--;
+	else
+	{
+		// switch phase every ~60 seconds
+		mNetDayPhase = mNetDayPhase ? 0 : 1;
+		mNetWeatherTimer = 6000;
+
+		// random weather after each switch
+		int aRoll = Rand(100);
+		if (aRoll < 25)
+			mNetFogTimer = 3000;       // ~30 s of fog
+		else if (aRoll < 45)
+			mNetStormTimer = 2000;     // ~20 s of storm
+		else
+			mNetFogTimer = 0;
+	}
+
+	if (mNetFogTimer > 0)
+		mNetFogTimer--;
+	if (mNetStormTimer > 0)
+		mNetStormTimer--;
+}
+
 void Board::UpdateGame()
 {
+	UpdateEndlessWeather();
+	UpdatePvP();
 	UpdateGameObjects();
 	if (StageHasFog() && mFogBlownCountDown > 0)
 	{
@@ -9759,7 +9868,8 @@ void Board::Draw(Graphics* g)
 	g->Translate(mApp->mDDInterface->mWideScreenOffsetX, mApp->mDDInterface->mWideScreenOffsetY);
 	DrawGameObjects(g);
 
-	// co-op extras: tower defense road, remote cursors, host-pause overlay
+	// co-op extras: weather, tower defense road, remote cursors, host-pause overlay
+	DrawEndlessWeather(g);
 	NetDrawTowerDefensePath(g);
 	NetDrawRemoteCursors(g);
 	if (mApp->NetIsClient() && mPaused)
@@ -10943,6 +11053,10 @@ bool Board::HasConveyorBeltSeedBank()
 //0x41BEE0
 int Board::GetNumSeedsInBank()
 {
+	if (mApp->IsCoopCustomMode())
+	{
+		return SEEDBANK_MAX;
+	}
 	if (mApp->IsScaryPotterLevel())
 	{
 		return 1;
@@ -12010,6 +12124,10 @@ int Board::KillAllZombiesInRadius(int theRow, int theX, int theY, int theRadius,
 //0x41DA10
 int Board::GetNumWavesPerSurvivalStage()
 {
+	if (mApp->IsCoopEndlessMode(mApp->mGameMode))
+	{
+		return 10;
+	}
 	if (mApp->IsLastStand() || mApp->IsSurvivalNormal(mApp->mGameMode))
 	{
 		return 10;

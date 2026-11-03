@@ -1,4 +1,5 @@
 #include "../../GameConstants.h"
+#include "../Net/NetManager.h"
 #include "GameButton.h"
 #include "../../LawnApp.h"
 #include "../System/Music.h"
@@ -116,6 +117,14 @@ ChallengeDefinition gChallengeDefs[NUM_CHALLENGE_MODES] = {
 #ifdef _CONSOLE_MINIGAMES
 	{ GameMode::GAMEMODE_CHALLENGE_HEAVY_WEAPON,			   10,  ChallengePage::CHALLENGE_PAGE_LIMBO_CHALLENGE,       4,  3,  _S("[HEAVY_WEAPON]") },
 #endif
+
+	// ---- PvZ Co-op custom modes ----
+	{ GameMode::GAMEMODE_COOP_ENDLESS,                         10,  ChallengePage::CHALLENGE_PAGE_COOP,  0,  0,  _S("ENDLESS") },
+	{ GameMode::GAMEMODE_COOP_ENDLESS_T,                       10,  ChallengePage::CHALLENGE_PAGE_COOP,  0,  1,  _S("ENDLESS T") },
+	{ GameMode::GAMEMODE_COOP_ENDLESS_S,                       10,  ChallengePage::CHALLENGE_PAGE_COOP,  0,  2,  _S("ENDLESS S") },
+	{ GameMode::GAMEMODE_COOP_ENDLESS_ST,                      10,  ChallengePage::CHALLENGE_PAGE_COOP,  0,  3,  _S("ENDLESS ST") },
+	{ GameMode::GAMEMODE_COOP_TOWER_DEFENSE,                   10,  ChallengePage::CHALLENGE_PAGE_COOP,  1,  0,  _S("TOWER DEFENSE") },
+	{ GameMode::GAMEMODE_COOP_PVP,                             10,  ChallengePage::CHALLENGE_PAGE_COOP,  1,  1,  _S("PvP") },
 };
 
 //0x42DAE0
@@ -155,6 +164,8 @@ ChallengeScreen::ChallengeScreen(LawnApp* theApp, ChallengePage thePage)
 			aPageButton->mLabel = TodStringTranslate(_S("[LIMBO_PAGE]"));
 		else if (aPageIdx == CHALLENGE_PAGE_LAST_STAND)
 			aPageButton->mLabel = TodStringTranslate(_S("[LAST_STAND_PAGE]"));
+		else if (aPageIdx == ChallengePage::CHALLENGE_PAGE_COOP)
+			aPageButton->mLabel = _S("CO-OP");
 		else
 			aPageButton->mLabel = TodReplaceNumberString(_S("[PAGE_X]"), _S("{PAGE}"), aPageIdx);
 		aPageButton->mButtonImage = Sexy::IMAGE_BLANK;
@@ -330,6 +341,13 @@ int ChallengeScreen::MoreTrophiesNeeded(int theChallengeIndex)
 			return 0;
 		}
 	}
+
+	// co-op custom modes are always unlocked (and coop.ini can unlock everything)
+	if (mApp->mNetManager && mApp->mNetManager->mConfig.mUnlockAllMinigames)
+		return 0;
+	ChallengeDefinition& aCoopDef = GetChallengeDefinition(theChallengeIndex);
+	if (aCoopDef.mPage == ChallengePage::CHALLENGE_PAGE_COOP)
+		return 0;
 
 	ChallengeDefinition& aDef = GetChallengeDefinition(theChallengeIndex);
 	if (mApp->mGameMode == GAMEMODE_UPSELL && mApp->mGameScene == SCENE_LEVEL_INTRO)
