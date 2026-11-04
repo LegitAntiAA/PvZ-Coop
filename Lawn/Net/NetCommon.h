@@ -24,7 +24,7 @@ namespace LawnNet
 // (the host broadcasts the same sounds via events).
 extern bool gNetSuppressSounds;
 
-static const uint32_t NET_PROTOCOL_VERSION = 14; // authoritative presentation and economy state
+static const uint32_t NET_PROTOCOL_VERSION = 15; // scoped, ordered and bounded remote input
 static const uint16_t NET_DEFAULT_PORT = 27713;			// PvZ co-op port
 static const int NET_MAX_PLAYERS = 4;					// 1 host + 3 clients
 static const int NET_MAX_NICK = 16;						// bytes (without terminator)
@@ -35,6 +35,9 @@ static const int NET_SNAPSHOT_HZ_MIN = 15;				// adaptive snapshot rate bounds
 static const int NET_SNAPSHOT_HZ_MAX = 30;
 static const int NET_SNAPSHOT_HZ_DEFAULT = 15;
 static const int NET_CURSOR_HZ = 30;					// cosmetic cursor updates
+static const int NET_INPUT_QUEUE_PER_PLAYER = 64;	// hard back-pressure limit per peer
+static const int NET_INPUT_QUEUE_TOTAL = 128;		// hard back-pressure limit for the host
+static const int NET_INPUT_APPLY_BUDGET = 16;		// maximum remote actions applied per frame
 
 // Relative player colors: viewer always sees self uncolored; others get
 // blue/red/green in slot order starting after the viewer (wrapping around).
@@ -80,11 +83,12 @@ enum NetMsgType : uint8_t
 	NETMSG_SNAPSHOT = 20,		// h->c: full logical board state
 	NETMSG_BOARD_EVENT = 21,	// h->c: u8 eventType + payload (sounds, instant visuals)
 
-	NETMSG_INPUT_MOUSE = 30,	// c->h: u8 down(1)/up(0), u8 clickCount(signed byte), i16 x, i16 y
+	NETMSG_INPUT_MOUSE = 30,	// c->h: u32 epoch/seq, u8 action/button, i16 canonical x/y, i16 seed index + type/imitater/owner
 	NETMSG_INPUT_KEY = 31,		// c->h: u16 keyCode, u8 down
 	NETMSG_CURSOR = 32,			// both: u8 slot, i16 x, i16 y, u8 cursorType, u8 heldSeed, u8 heldImitater, u8 flags
 	NETMSG_PAUSE = 33,			// h->c: u8 paused
 	NETMSG_PAUSE_REQ = 34,		// c->h: (client asks; host may ignore)
+	NETMSG_INPUT_EPOCH = 35,	// h->c: u32 epoch, u8 NetInputPhase
 
 	NETMSG_CHOOSER_OPEN = 40,	// h->all: u8 bankCount, u8 pickQuota[4]
 	NETMSG_SEED_PICK = 41,		// c->h: u8 seedType, u8 imitaterType
@@ -100,6 +104,23 @@ enum NetMsgType : uint8_t
 	NETMSG_RATE = 61,			// h->c: u16 snapshotHz
 
 	NETMSG_DEBUG_TEXT = 70		// both: string (debug log)
+};
+
+// An input epoch is a host-issued lifetime token for one UI/gameplay phase.
+// Mouse input is accepted only in NETINPUT_PLAYING and only for the current
+// epoch, so a delayed click can never cross a board or chooser transition.
+enum NetInputPhase : uint8_t
+{
+	NETINPUT_MENU = 0,
+	NETINPUT_INTRO = 1,
+	NETINPUT_CHOOSER = 2,
+	NETINPUT_PLAYING = 3
+};
+
+enum NetInputAction : uint8_t
+{
+	NETINPUT_MOUSE_UP = 0,
+	NETINPUT_MOUSE_DOWN = 1
 };
 
 // Scene commands (NETMSG_SCENE_CMD)

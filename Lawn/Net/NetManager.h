@@ -60,8 +60,10 @@ struct NetRemoteCursor
 struct NetRemoteInput
 {
 	uint8_t mSlot;
-	bool mDown;
-	int8_t mClickCount;
+	uint32_t mEpoch;
+	uint32_t mSequence;
+	uint8_t mAction;
+	int8_t mButton;
 	int16_t mX, mY;
 };
 
@@ -98,6 +100,7 @@ public:
 	void SetMyTeam(uint8_t theTeam);			// client: request; host: apply
 	uint8_t GetMyTeam() const;
 	int GetActingPlayerSlot() const { return mActingPlayerSlot >= 0 ? mActingPlayerSlot : mMySlot; }
+	int GetRawActingPlayerSlot() const { return mActingPlayerSlot; }
 	void SetActingPlayerSlot(int theSlot) { mActingPlayerSlot = theSlot; }
 	int GetTeamCount(uint8_t theTeam) const;	// count players on a team
 	void SendLobbyState();						// host: broadcast lobby
@@ -117,6 +120,11 @@ public:
 	void SendSnapshot(const NetBuffer& thePayload);
 	void BroadcastSceneCmd(uint8_t theCmd, int theParam);
 	void ClearPendingBoardMessages(const char* theReason);
+	void AdvanceInputPhase(NetInputPhase thePhase, const char* theReason); // host barrier
+	void PurgePendingInputs(const char* theReason, int theSlot = -1);
+	bool PopPendingInput(NetRemoteInput& theInput);
+	uint32_t GetInputEpoch() const { return mInputEpoch; }
+	NetInputPhase GetInputPhase() const { return mInputPhase; }
 
 	// ---- incoming queues (polled by LawnApp / Board) ----
 	struct PendingMsg
@@ -125,7 +133,6 @@ public:
 		NetBuffer mData;
 	};
 	std::deque<PendingMsg> mPendingBoardMsgs;	// client: events+snapshots in arrival order
-	std::deque<NetRemoteInput> mPendingInputs;	// host: remote input events
 	NetRemoteCursor mRemoteCursors[NET_MAX_PLAYERS];
 	bool mRemotePaused;							// client: is the game paused by host
 
@@ -165,12 +172,14 @@ private:
 	void OnChooserOpen(NetBuffer& thePayload);
 	void OnChooserState(NetBuffer& thePayload);
 	void OnChooserStart(NetBuffer& thePayload);
+	void OnInputEpoch(NetBuffer& thePayload);
 
 	void UpdatePings();
 	void AcceptThreadProc();
 	void ConnectThreadProc(const char* theIP);
 	void DropSession(int theSlot, bool theNotify);
 	void CheckAdaptiveRate();
+	void SendInputEpoch(NetSession* theSession);
 
 	// serialize/parse lobby
 	void EncodeLobbyState(NetBuffer& theBuffer);
@@ -199,6 +208,10 @@ private:
 	std::atomic<bool> mAcceptRunning;
 	NetSession mSessions[NET_MAX_PLAYERS];		// indexed by slot; slot 0 = host (unused)
 	std::mutex mSessionsMutex;
+	bool mDeferredDrop[NET_MAX_PLAYERS];		// never tear a session down inside its callback
+	std::deque<NetRemoteInput> mPendingInputs;
+	size_t mPendingInputCount[NET_MAX_PLAYERS];
+	uint32_t mLastInputSequence[NET_MAX_PLAYERS];
 
 	// client state
 	std::thread mConnectThread;
@@ -211,6 +224,9 @@ private:
 	NetPlayerInfo mPlayers[NET_MAX_PLAYERS];
 	uint8_t mMySlot;
 	int mActingPlayerSlot;					// host: slot whose queued input is being applied
+	uint32_t mInputEpoch;
+	uint32_t mNextInputSequence;			// client: non-zero sequence within mInputEpoch
+	NetInputPhase mInputPhase;
 
 	// rate
 	int mSnapshotHz;

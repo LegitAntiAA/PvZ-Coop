@@ -325,7 +325,9 @@ Board::~Board()
 	delete mAdvice;
 	for (int i = 1; i < LawnNet::NET_MAX_PLAYERS; i++)
 		delete mNetPlayerCursors[i];
-	delete mCursorObject;
+	// Slot zero is the cursor this Board owns.  mCursorObject may temporarily
+	// point at a remote player's cursor while host-authoritative input executes.
+	delete mNetPlayerCursors[0];
 	delete mCursorPreview;
 	delete mSeedBank;
 	if (mMenuButton)
@@ -5189,12 +5191,14 @@ bool Board::MouseHitTest(int x, int y, HitResult* theHitResult)
 		return false;
 	}
 
-	if (mMenuButton->IsMouseOver() && CanInteractWithBoardButtons())
+	const bool aRemoteInput = mApp->NetIsHost() && mApp->mNetManager &&
+		mApp->mNetManager->GetRawActingPlayerSlot() > 0;
+	if (!aRemoteInput && mMenuButton->IsMouseOver() && CanInteractWithBoardButtons())
 	{
 		theHitResult->mObjectType = GameObjectType::OBJECT_TYPE_MENU_BUTTON;
 		return true;
 	}
-	else if (mStoreButton && mStoreButton->IsMouseOver() && CanInteractWithBoardButtons())
+	else if (!aRemoteInput && mStoreButton && mStoreButton->IsMouseOver() && CanInteractWithBoardButtons())
 	{
 		theHitResult->mObjectType = GameObjectType::OBJECT_TYPE_STORE_BUTTON;
 		return true;
@@ -5448,6 +5452,8 @@ void Board::MouseDown(int x, int y, int theClickCount)
 
 	if (mApp->IsScreenSaver())
 		return;
+	const bool aRemoteInput = mApp->NetIsHost() && mApp->mNetManager &&
+		mApp->mNetManager->GetRawActingPlayerSlot() > 0;
 
 	mIgnoreMouseUp = !CanInteractWithBoardButtons();
 	if (mTimeStopCounter > 0)
@@ -5471,11 +5477,11 @@ void Board::MouseDown(int x, int y, int theClickCount)
 	if (mChallenge->MouseDown(x, y, theClickCount, &aHitResult))
 		return;
 
-	if (mMenuButton->IsMouseOver() && CanInteractWithBoardButtons() && theClickCount > 0)
+	if (!aRemoteInput && mMenuButton->IsMouseOver() && CanInteractWithBoardButtons() && theClickCount > 0)
 	{
 		mApp->PlaySample(Sexy::SOUND_GRAVEBUTTON);
 	}
-	else if (mStoreButton && mStoreButton->IsMouseOver() && CanInteractWithBoardButtons() && theClickCount > 0)
+	else if (!aRemoteInput && mStoreButton && mStoreButton->IsMouseOver() && CanInteractWithBoardButtons() && theClickCount > 0)
 	{
 		if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN || mApp->mGameMode == GameMode::GAMEMODE_TREE_OF_WISDOM)
 		{
@@ -5704,7 +5710,9 @@ void Board::MouseUp(int x, int y, int theClickCount)
 	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_BEGHOULED && mChallenge->MouseUp(x, y) && theClickCount > 0)
 		return;
 
-	if (CanInteractWithBoardButtons() && theClickCount > 0)
+	const bool aRemoteInput = mApp->NetIsHost() && mApp->mNetManager &&
+		mApp->mNetManager->GetRawActingPlayerSlot() > 0;
+	if (!aRemoteInput && CanInteractWithBoardButtons() && theClickCount > 0)
 	{
 		if (mMenuButton->IsMouseOver() && !mApp->GetDialog(Dialogs::DIALOG_GAME_OVER) && !mApp->GetDialog(Dialogs::DIALOG_LEVEL_COMPLETE))
 		{
@@ -12577,6 +12585,11 @@ void Board::RemovedFromManager(WidgetManager* theWidgetManager)
 
 void Board::ButtonDepress(int theId)
 {
+	// Speed, pause and menu-style board buttons are host controls.  A remote
+	// Board::MouseDown/Up is deliberately confined to gameplay interactions.
+	if (mApp->NetIsHost() && mApp->mNetManager &&
+		mApp->mNetManager->GetRawActingPlayerSlot() > 0)
+		return;
 #ifdef _REPLANTED_SPEED_CONTROL
 	if (theId == Board::SLOWDOWN)
 	{

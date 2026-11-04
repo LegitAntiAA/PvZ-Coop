@@ -94,6 +94,7 @@ const char* NetMessageName(uint8_t theMsgType)
 	case NETMSG_BOARD_EVENT: return "BOARD_EVENT"; case NETMSG_INPUT_MOUSE: return "INPUT_MOUSE";
 	case NETMSG_INPUT_KEY: return "INPUT_KEY"; case NETMSG_CURSOR: return "CURSOR";
 	case NETMSG_PAUSE: return "PAUSE"; case NETMSG_PAUSE_REQ: return "PAUSE_REQ";
+	case NETMSG_INPUT_EPOCH: return "INPUT_EPOCH";
 	case NETMSG_CHOOSER_OPEN: return "CHOOSER_OPEN"; case NETMSG_SEED_PICK: return "SEED_PICK";
 	case NETMSG_SEED_UNPICK: return "SEED_UNPICK"; case NETMSG_CHOOSER_STATE: return "CHOOSER_STATE";
 	case NETMSG_CHOOSER_START: return "CHOOSER_START"; case NETMSG_PROFILE_SYNC: return "PROFILE_SYNC";

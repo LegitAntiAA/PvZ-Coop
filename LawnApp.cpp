@@ -1118,11 +1118,26 @@ void LawnApp::Shutdown()
 //0x44F380
 void LawnApp::KillBoard()
 {
+	// A remote Board callback may synchronously tear the board down while its
+	// per-player cursor is temporarily installed as mCursorObject.  Restore the
+	// actual owned host cursor before disposal so Board::~Board cannot delete a
+	// remote cursor twice (and cannot leak the host cursor).
+	if (mNetManager && mBoard && mNetManager->GetRawActingPlayerSlot() > 0)
+	{
+		LawnNet::NetTrace("KillBoard restoring remote input guard slot=%d board=%p",
+			mNetManager->GetRawActingPlayerSlot(), (void*)mBoard);
+		mBoard->mCursorObject = mBoard->mNetPlayerCursors[0];
+		mNetManager->SetActingPlayerSlot(-1);
+	}
+
 	// Board messages contain ids whose meaning is scoped to one Board.  Clear
 	// them before disposing any old entities so no lifecycle path can leak a
 	// stale event or snapshot into the next board.
 	if (mNetManager)
+	{
 		mNetManager->ClearPendingBoardMessages("KILL_BOARD");
+		mNetManager->PurgePendingInputs("KILL_BOARD");
+	}
 
 	if (mPortAudioStream)
 	{
@@ -1344,6 +1359,7 @@ void LawnApp::StartPlaying()
 		// of those messages are discarded as intro traffic.
 		mGameScene = GameScenes::SCENE_PLAYING;
 		LawnNet::NetTrace("host entering gameplay; broadcasting barrier mode=%d level=%d", (int)mGameMode, mBoard ? mBoard->mLevel : -1);
+		mNetManager->AdvanceInputPhase(LawnNet::NETINPUT_PLAYING, "START_PLAYING");
 		LawnNet::NetBuffer anEmpty;
 		mNetManager->BroadcastMessage(LawnNet::NETMSG_START_PLAYING, anEmpty);
 		mBoard->StartLevel();
@@ -1606,6 +1622,7 @@ void LawnApp::ShowSeedChooserScreen()
 
 		if (mNetManager->IsHosting())
 		{
+			mNetManager->AdvanceInputPhase(LawnNet::NETINPUT_CHOOSER, "CHOOSER_OPEN");
 			LawnNet::NetBuffer aMsg;
 			aMsg.WriteU8((uint8_t)aBankCount);
 			for (int aSlot = 0; aSlot < LawnNet::NET_MAX_PLAYERS; aSlot++)
@@ -1641,6 +1658,8 @@ void LawnApp::ShowSeedChooserScreen()
 //0x44FE70
 void LawnApp::KillSeedChooserScreen()
 {
+	if (mNetManager)
+		mNetManager->PurgePendingInputs("KILL_SEED_CHOOSER");
 	if (mSeedChooserScreen)
 	{
 		mWidgetManager->RemoveWidget(mSeedChooserScreen);
@@ -1673,6 +1692,7 @@ void LawnApp::DoBackToMain()
 	// co-op host: bring everyone back to the menu
 	if (mNetManager && mNetManager->IsHosting())
 	{
+		mNetManager->AdvanceInputPhase(LawnNet::NETINPUT_MENU, "BACK_TO_MENU");
 		LawnNet::NetBuffer aMsg;
 		mNetManager->BroadcastMessage(LawnNet::NETMSG_BACK_TO_MENU, aMsg);
 	}
@@ -5487,27 +5507,88 @@ void LawnApp::NetOnProfileSync(LawnNet::NetBuffer& thePayload)
 
 void LawnApp::NetHandleRemoteInputs()
 {
-	if (!mNetManager || !mBoard)
+	if (!mNetManager || !mBoard || mNetManager->GetInputPhase() != LawnNet::NETINPUT_PLAYING)
 		return;
 
-	while (!mNetManager->mPendingInputs.empty())
+	Board* const aBatchBoard = mBoard;
+	const uint32_t aBatchEpoch = mNetManager->GetInputEpoch();
+	for (int aProcessed = 0; aProcessed < LawnNet::NET_INPUT_APPLY_BUDGET; aProcessed++)
 	{
-		LawnNet::NetRemoteInput anInput = mNetManager->mPendingInputs.front();
-		mNetManager->mPendingInputs.pop_front();
+		LawnNet::NetRemoteInput anInput;
+		if (!mNetManager->PopPendingInput(anInput))
+			break;
+
+		if (mBoard != aBatchBoard || mNetManager->GetInputEpoch() != aBatchEpoch ||
+			mNetManager->GetInputPhase() != LawnNet::NETINPUT_PLAYING ||
+			mGameScene != GameScenes::SCENE_PLAYING || mSeedChooserScreen ||
+			GetDialogCount() > 0 || aBatchBoard->mPaused)
+		{
+			LawnNet::NetTrace("mouse apply aborted reason=context boardNow=%p boardBatch=%p epochNow=%u epochBatch=%u phase=%u scene=%d chooser=%p dialogs=%d paused=%d",
+				(void*)mBoard, (void*)aBatchBoard, mNetManager->GetInputEpoch(), aBatchEpoch,
+				(unsigned)mNetManager->GetInputPhase(), (int)mGameScene,
+				(void*)mSeedChooserScreen, GetDialogCount(), aBatchBoard->mPaused ? 1 : 0);
+			mNetManager->PurgePendingInputs("APPLY_CONTEXT_CHANGED");
+			break;
+		}
+		if (anInput.mEpoch != aBatchEpoch)
+		{
+			LawnNet::NetTrace("mouse apply dropped slot=%u reason=stale_epoch packet=%u current=%u seq=%u",
+				anInput.mSlot, anInput.mEpoch, aBatchEpoch, anInput.mSequence);
+			continue;
+		}
 		if (anInput.mSlot == 0 || anInput.mSlot >= LawnNet::NET_MAX_PLAYERS ||
-			!mNetManager->IsPlayerActive(anInput.mSlot) || !mBoard->mNetPlayerCursors[anInput.mSlot])
+			!mNetManager->IsPlayerActive(anInput.mSlot) || !aBatchBoard->mNetPlayerCursors[anInput.mSlot])
 			continue;
 
-		CursorObject* aHostCursor = mBoard->mCursorObject;
-		mBoard->mCursorObject = mBoard->mNetPlayerCursors[anInput.mSlot];
-		mNetManager->SetActingPlayerSlot(anInput.mSlot);
-		if (anInput.mDown)
-			mBoard->MouseDown(anInput.mX, anInput.mY, anInput.mClickCount);
-		else
-			mBoard->MouseUp(anInput.mX, anInput.mY, anInput.mClickCount);
-		mNetManager->SetActingPlayerSlot(-1);
-		mBoard->mCursorObject = aHostCursor;
-		mBoard->UpdateCursor();
+		// Board input can synchronously open/close UI and, in challenge code,
+		// even replace the board.  The guard restores host authority on every
+		// return path, but never dereferences a board after LawnApp stopped owning
+		// it (SafeDeleteWidget may already have queued its destruction).
+		struct ScopedRemoteInput
+		{
+			LawnApp* mApp;
+			LawnNet::NetManager* mManager;
+			Board* mBoard;
+			CursorObject* mOldCursor;
+			int mOldActingSlot;
+			ScopedRemoteInput(LawnApp* theApp, LawnNet::NetManager* theManager,
+				Board* theBoard, int theSlot) :
+				mApp(theApp), mManager(theManager), mBoard(theBoard),
+				mOldCursor(theBoard->mCursorObject),
+				mOldActingSlot(theManager->GetRawActingPlayerSlot())
+			{
+				mBoard->mCursorObject = mBoard->mNetPlayerCursors[theSlot];
+				mManager->SetActingPlayerSlot(theSlot);
+			}
+			~ScopedRemoteInput()
+			{
+				if (mApp->mBoard == mBoard)
+					mBoard->mCursorObject = mOldCursor;
+				if (mApp->mNetManager == mManager)
+					mManager->SetActingPlayerSlot(mOldActingSlot);
+			}
+		};
+		{
+			ScopedRemoteInput aGuard(this, mNetManager, aBatchBoard, anInput.mSlot);
+			LawnNet::NetTrace("mouse apply slot=%u epoch=%u seq=%u action=%u button=%d local=(%d,%d) board=%p",
+				anInput.mSlot, anInput.mEpoch, anInput.mSequence, anInput.mAction,
+				anInput.mButton, anInput.mX, anInput.mY, (void*)aBatchBoard);
+			if (anInput.mAction == LawnNet::NETINPUT_MOUSE_DOWN)
+				aBatchBoard->MouseDown(anInput.mX, anInput.mY, anInput.mButton);
+			else
+				aBatchBoard->MouseUp(anInput.mX, anInput.mY, anInput.mButton);
+		}
+
+		if (!mNetManager)
+			break;
+		if (mBoard != aBatchBoard || mNetManager->GetInputEpoch() != aBatchEpoch ||
+			mNetManager->GetInputPhase() != LawnNet::NETINPUT_PLAYING ||
+			mGameScene != GameScenes::SCENE_PLAYING || mSeedChooserScreen || GetDialogCount() > 0)
+		{
+			mNetManager->PurgePendingInputs("APPLY_REENTRANT_TRANSITION");
+			break;
+		}
+		aBatchBoard->UpdateCursor();
 	}
 }
 
