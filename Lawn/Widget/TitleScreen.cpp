@@ -380,6 +380,15 @@ void TitleScreen::Update()
 		mLoadingThreadComplete = true;
 		mStartButton->SetDisabled(false);
 
+		// Automated co-op smoke processes have no human to press "Click to
+		// Start".  Advance only after the normal loading thread has completed,
+		// then return immediately because LoadingCompleted deletes this widget.
+		if (mApp->CoopSmokeActive())
+		{
+			mApp->LoadingCompleted();
+			return;
+		}
+
 		if (/*mApp->IsScreenSaver() ||*/ mApp->IsParticleEditor())
 		{
 			mApp->LoadingCompleted();

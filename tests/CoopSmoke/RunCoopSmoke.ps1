@@ -7,7 +7,9 @@ param(
     [ValidateRange(10, 3600)]
     [int]$TimeoutSeconds = 120,
     [ValidateRange(5, 300)]
-    [int]$HostReadyTimeoutSeconds = 30,
+    # A clean isolated appdata directory forces the original game to extract
+    # its sound cache before LoadingCompleted/NetInit can open the listener.
+    [int]$HostReadyTimeoutSeconds = 120,
     [ValidateRange(1, 60)]
     [int]$GracefulExitSeconds = 10,
     [ValidateRange(0, 65535)]
@@ -584,7 +586,10 @@ try {
     if (-not (Test-Path -LiteralPath $GameExe -PathType Leaf)) {
         throw ("Game executable not found: {0}" -f $GameExe)
     }
-    foreach ($requiredRelativePath in @("main.pak", "dependency.pak", "properties\resources.xml")) {
+    # The GOTY Release consumes its base resources from main.pak/dependency.pak.
+    # `properties\resources.xml` is an extension source asset and is not copied
+    # loose beside the executable, so requiring it rejected valid Release builds.
+    foreach ($requiredRelativePath in @("main.pak", "dependency.pak", "SDL3.dll")) {
         $requiredPath = Join-Path $gameDirectory $requiredRelativePath
         if (-not (Test-Path -LiteralPath $requiredPath -PathType Leaf)) {
             throw ("Required runtime resource not found: {0}" -f $requiredPath)
