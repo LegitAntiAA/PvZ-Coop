@@ -2752,8 +2752,8 @@ void LawnApp::UpdateFrames()
 		if (mNetManager->IsHosting())
 			NetHandleRemoteInputs();
 
-		// menu lobby panel (created lazily once the widget manager is up)
-		if (mWidgetManager && !mNetLobbyPanel)
+		// menu lobby panel (created once loading finished so fonts are ready)
+		if (mWidgetManager && mLoadingThreadCompleted && !mNetLobbyPanel)
 		{
 			mNetLobbyPanel = new LawnNet::NetLobbyPanel(this);
 			mWidgetManager->AddWidget(mNetLobbyPanel);

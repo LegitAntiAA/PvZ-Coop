@@ -66,6 +66,8 @@ Rect NetLobbyPanel::GetPanelRect() const
 
 void NetLobbyPanel::LayoutButtons()
 {
+	if (!mApp->mLoadingThreadCompleted)
+		return;
 	mButtons.clear();
 	Rect aPanel = GetPanelRect();
 	int aX = aPanel.mX + 10;
@@ -112,6 +114,10 @@ void NetLobbyPanel::RemovedFromManager(WidgetManager* theWidgetManager)
 
 void NetLobbyPanel::Update()
 {
+	// don't touch fonts/UI until the loading thread has finished
+	if (!mApp->mLoadingThreadCompleted)
+		return;
+
 	NetManager* aNet = mApp->mNetManager;
 	if (!aNet)
 		return;
@@ -154,7 +160,7 @@ void NetLobbyPanel::DrawButton(Graphics* g, const UiButton& theButton)
 void NetLobbyPanel::Draw(Graphics* g)
 {
 	NetManager* aNet = mApp->mNetManager;
-	if (!aNet || mApp->mBoard)
+	if (!aNet || mApp->mBoard || !mApp->mLoadingThreadCompleted)
 		return;
 
 	// ---- remote cursors (menus) ----
