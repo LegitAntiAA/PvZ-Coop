@@ -10,6 +10,7 @@
 #include "../../SexyAppFramework/Common.h"
 #include "../../SexyAppFramework/DDInterface.h"
 #include "../../SexyAppFramework/WidgetManager.h"
+#include "../../GameConstants.h"
 
 namespace
 {
@@ -594,6 +595,18 @@ void NetManager::OnHello(NetSession* theSession, NetBuffer& thePayload)
 	aRate.WriteU16((uint16_t)mSnapshotHz);
 	theSession->mConn.SendMessage(NETMSG_RATE, aRate);
 
+	// NetHostStart() may run several seconds before a peer connects.  The
+	// broadcast made at host startup is therefore not a reliable way to give a
+	// late peer the host profile.  Queue a fresh copy on the same TCP stream as
+	// WELCOME, before that peer can receive START_GAME/CHOOSER_OPEN.  This is
+	// gameplay-critical: ChooseSeedsOnCurrentLevel() and available seed packets
+	// both depend on profile progress.
+	if (mApp)
+	{
+		NetTrace("PROFILE_SYNC resend for authenticated slot=%u", theSession->mSlot);
+		mApp->NetBroadcastProfile();
+	}
+
 	SendLobbyState();
 }
 
@@ -665,11 +678,78 @@ void NetManager::OnClientCursor(NetSession* theSession, NetBuffer& thePayload)
 
 void NetManager::OnClientSeedPick(NetSession* theSession, NetBuffer& thePayload, bool theUnpick)
 {
-	// forward to the app (seed chooser screen picks it up on the host)
+	const size_t anExpectedBytes = theUnpick ? 1U : 2U;
+	if (thePayload.Remaining() != anExpectedBytes)
+	{
+		NetTrace("chooser %s rejected: expected=%zu bytes actual=%zu",
+			theUnpick ? "unpick" : "pick", anExpectedBytes, thePayload.Remaining());
+		return;
+	}
+
+	const uint8_t aSeedType = thePayload.ReadU8Or();
+	const uint8_t anImitater = theUnpick ? 0xFF : thePayload.ReadU8Or();
+	const int aSlot = theSession ? theSession->mSlot : -1;
+	const bool aPvP = mApp && mApp->mGameMode == GameMode::GAMEMODE_COOP_PVP;
+	const bool anAuthenticatedPlayer = theSession && aSlot > 0 && aSlot < NET_MAX_PLAYERS &&
+		theSession->mAssigned && mPlayers[aSlot].mActive && mPlayers[aSlot].mSlot == aSlot;
+	const bool anEligiblePlayer = anAuthenticatedPlayer &&
+		(!aPvP || mPlayers[aSlot].mTeam == NETTEAM_PLANTS);
+	const bool aChooserContext = mChooserOpen && mApp && mApp->mBoard &&
+		mApp->mBoard->mCutScene && mApp->mSeedChooserScreen &&
+		mApp->mGameScene == GameScenes::SCENE_LEVEL_INTRO;
+	if (!anEligiblePlayer || !aChooserContext)
+	{
+		NetTrace("chooser %s rejected: slot=%d authenticated=%d eligible=%d open=%d app=%p board=%p intro=%p screen=%p scene=%d",
+			theUnpick ? "unpick" : "pick", aSlot, anAuthenticatedPlayer ? 1 : 0,
+			anEligiblePlayer ? 1 : 0, mChooserOpen ? 1 : 0, (void*)mApp,
+			mApp ? (void*)mApp->mBoard : nullptr,
+			mApp && mApp->mBoard ? (void*)mApp->mBoard->mCutScene : nullptr,
+			mApp ? (void*)mApp->mSeedChooserScreen : nullptr,
+			mApp ? (int)mApp->mGameScene : -1);
+		return;
+	}
+
+	SeedChooserScreen* aChooser = mApp->mSeedChooserScreen;
+	const bool aValidSeed = aSeedType < (uint8_t)NUM_SEEDS_IN_CHOOSER &&
+		mApp->SeedTypeAvailable((SeedType)aSeedType) &&
+		!aChooser->SeedNotAllowedToPick((SeedType)aSeedType) &&
+		!aChooser->SeedNotAllowedDuringTrial((SeedType)aSeedType);
+	bool aValidImitater = true;
+	if (!theUnpick)
+	{
+		if (aSeedType == (uint8_t)SeedType::SEED_IMITATER)
+		{
+			// Match ImitaterDialog::SeedHitTest: only unlocked base plants may
+			// be copied, and level-specific chooser restrictions still apply.
+			aValidImitater = anImitater < (uint8_t)SeedType::SEED_GATLINGPEA &&
+				mApp->SeedTypeAvailable((SeedType)anImitater) &&
+				!aChooser->SeedNotAllowedToPick((SeedType)anImitater);
+		}
+		else
+		{
+			aValidImitater = anImitater == 0xFF;
+		}
+	}
+
+	// Crazy Dave's locked cards are global preselection, not a remote
+	// player's mutable pick.  Ordinary fixed challenge cards are likewise
+	// absent from that player's remote list, so an unpick cannot remove them.
+	const bool aLockedDaveSeed = aValidSeed &&
+		aChooser->mChosenSeeds[aSeedType].mCrazyDavePicked;
+	if (!aValidSeed || !aValidImitater || aLockedDaveSeed)
+	{
+		NetTrace("chooser %s rejected: slot=%d seed=%u imitater=%u validSeed=%d validImitater=%d locked=%d",
+			theUnpick ? "unpick" : "pick", aSlot, aSeedType, anImitater,
+			aValidSeed ? 1 : 0, aValidImitater ? 1 : 0, aLockedDaveSeed ? 1 : 0);
+		return;
+	}
+
+	// Forward only fully validated chooser actions.  The chooser applies the
+	// authoritative per-slot quota and duplicate rules in queue order.
 	ChooserPick aPick;
-	aPick.mSeedType = thePayload.ReadU8Or();
-	aPick.mImitater = theUnpick ? 0xFF : thePayload.ReadU8Or();
-	aPick.mSlot = theSession->mSlot;
+	aPick.mSeedType = aSeedType;
+	aPick.mImitater = anImitater;
+	aPick.mSlot = aSlot;
 	if (theUnpick)
 		mRemoteUnpicks.push_back(aPick);
 	else
@@ -1019,17 +1099,126 @@ void NetManager::OnCursor(NetBuffer& thePayload)
 
 void NetManager::OnChooserOpen(NetBuffer& thePayload)
 {
-	mChooserOpen = true;
-	mChooserBankCount = thePayload.ReadU8Or();
-	for (int i = 0; i < NET_MAX_PLAYERS; i++)
-		mChooserPickQuota[i] = thePayload.ReadU8Or();
-	mChooserPicksPerPlayer = mChooserPickQuota[mMySlot];
-	mRemotePicks.clear();
-	mRemoteUnpicks.clear();
+	static const size_t CHOOSER_OPEN_BYTES = 1 + NET_MAX_PLAYERS;
+	if (thePayload.Remaining() != CHOOSER_OPEN_BYTES)
+	{
+		NetTrace("CHOOSER_OPEN rejected: expected=%zu bytes actual=%zu",
+			CHOOSER_OPEN_BYTES, thePayload.Remaining());
+		return;
+	}
 
-	// survival repick / any mid-game chooser reopen: mirror it locally
+	const uint8_t aBankCount = thePayload.ReadU8Or();
+	uint8_t aQuotas[NET_MAX_PLAYERS] = {};
+	int aQuotaTotal = 0;
+	bool aQuotaInRange = aBankCount <= SEEDBANK_CAPACITY;
+	for (int i = 0; i < NET_MAX_PLAYERS; i++)
+	{
+		aQuotas[i] = thePayload.ReadU8Or();
+		aQuotaTotal += aQuotas[i];
+		if (aQuotas[i] > SEEDBANK_CAPACITY)
+			aQuotaInRange = false;
+	}
+
+	// Validate the complete generation before ShowSeedChooserScreen or any
+	// manager field is changed.  The client derives the same bank size and
+	// deterministic slot split as the host sender; accepting merely a matching
+	// sum would let a stale/malformed packet assign another player's quota.
+	const bool aContextValid = IsClient() && mApp && mApp->mBoard &&
+		mApp->mBoard->mCutScene && mApp->mWidgetManager &&
+		mApp->mGameScene == GameScenes::SCENE_LEVEL_INTRO &&
+		mMySlot < NET_MAX_PLAYERS && mPlayers[mMySlot].mActive &&
+		mPlayers[mMySlot].mSlot == mMySlot;
+	const bool aPvP = aContextValid && mApp->mGameMode == GameMode::GAMEMODE_COOP_PVP;
+	const int anExpectedBankCount = aContextValid ?
+		(aPvP ? PVP_PLANT_PACKET_COUNT : mApp->mBoard->GetNumSeedsInBank()) : -1;
+	int anExpectedQuotas[NET_MAX_PLAYERS] = {};
+	int anEligibleCount = 0;
+	if (aContextValid)
+	{
+		for (int aSlot = 0; aSlot < NET_MAX_PLAYERS; aSlot++)
+		{
+			const NetPlayerInfo& aPlayer = mPlayers[aSlot];
+			if (aPlayer.mActive && (!aPvP || aPlayer.mTeam == NETTEAM_PLANTS))
+				anEligibleCount++;
+		}
+		const int aDivisor = max(1, anEligibleCount);
+		const int aBaseQuota = anExpectedBankCount / aDivisor;
+		int aRemainder = anExpectedBankCount % aDivisor;
+		for (int aSlot = 0; aSlot < NET_MAX_PLAYERS; aSlot++)
+		{
+			const NetPlayerInfo& aPlayer = mPlayers[aSlot];
+			if (!aPlayer.mActive || (aPvP && aPlayer.mTeam != NETTEAM_PLANTS))
+				continue;
+			anExpectedQuotas[aSlot] = aBaseQuota;
+			if (aRemainder > 0)
+			{
+				anExpectedQuotas[aSlot]++;
+				aRemainder--;
+			}
+		}
+	}
+
+	bool aSplitMatches = aContextValid && aBankCount == anExpectedBankCount;
+	for (int i = 0; i < NET_MAX_PLAYERS; i++)
+	{
+		if ((int)aQuotas[i] != anExpectedQuotas[i])
+			aSplitMatches = false;
+	}
+	if (thePayload.Remaining() != 0 || !aQuotaInRange || !aContextValid ||
+		anExpectedBankCount < 0 || anExpectedBankCount > SEEDBANK_CAPACITY ||
+		!aSplitMatches)
+	{
+		NetTrace("CHOOSER_OPEN rejected: bank=%u expectedBank=%d quotas=[%u,%u,%u,%u] expected=[%d,%d,%d,%d] total=%d eligible=%d slot=%u context=%d range=%d trailing=%zu",
+			aBankCount, anExpectedBankCount,
+			aQuotas[0], aQuotas[1], aQuotas[2], aQuotas[3],
+			anExpectedQuotas[0], anExpectedQuotas[1], anExpectedQuotas[2], anExpectedQuotas[3],
+			aQuotaTotal, anEligibleCount, mMySlot, aContextValid ? 1 : 0,
+			aQuotaInRange ? 1 : 0, thePayload.Remaining());
+		return;
+	}
+
+	// Survival repick / any mid-game chooser reopen: create the widget first.
+	// ShowSeedChooserScreen computes a provisional local split, so commit the
+	// host-authoritative values only after that call returns.
 	if (mApp && mApp->mBoard && !mApp->mSeedChooserScreen)
 		mApp->ShowSeedChooserScreen();
+	if (!mApp->mSeedChooserScreen)
+	{
+		NetTrace("CHOOSER_OPEN rejected after widget creation: screen is unavailable");
+		return;
+	}
+
+	// A valid OPEN is the ordered generation barrier.  Discard only chooser
+	// traffic belonging to the preceding generation; later STATE/START packets
+	// on this TCP stream remain ordered behind this message.
+	mRemotePicks.clear();
+	mRemoteUnpicks.clear();
+	mRemoteChooserStates.clear();
+	mPendingChooserStarts.clear();
+	mChooserOpen = true;
+	mChooserBankCount = aBankCount;
+	for (int i = 0; i < NET_MAX_PLAYERS; i++)
+		mChooserPickQuota[i] = aQuotas[i];
+	mChooserPicksPerPlayer = aQuotas[mMySlot];
+	if (mApp->mSeedChooserScreen)
+	{
+		mApp->mSeedChooserScreen->mCoopPicksPerPlayer = mChooserPicksPerPlayer;
+		mApp->mSeedChooserScreen->mVisible = true;
+		if (mApp->mWidgetManager)
+			mApp->mWidgetManager->MarkAllDirty();
+	}
+
+	const bool aLocalChooserLevel = mApp && mApp->mBoard && mApp->mBoard->ChooseSeedsOnCurrentLevel();
+	const bool aSeedChoosing = mApp && mApp->mBoard && mApp->mBoard->mCutScene &&
+		mApp->mBoard->mCutScene->mSeedChoosing;
+	NetTrace("CHOOSER_OPEN applied bank=%u quotas=[%u,%u,%u,%u] slot=%u localQuota=%d localChooserLevel=%d screen=%p visible=%d mouse=%d seedChoosing=%d focus=%p",
+		aBankCount, aQuotas[0], aQuotas[1], aQuotas[2], aQuotas[3], mMySlot,
+		mChooserPicksPerPlayer, aLocalChooserLevel ? 1 : 0,
+		mApp ? (void*)mApp->mSeedChooserScreen : nullptr,
+		mApp && mApp->mSeedChooserScreen && mApp->mSeedChooserScreen->mVisible ? 1 : 0,
+		mApp && mApp->mSeedChooserScreen && mApp->mSeedChooserScreen->mMouseVisible ? 1 : 0,
+		aSeedChoosing ? 1 : 0,
+		mApp && mApp->mWidgetManager ? (void*)mApp->mWidgetManager->mFocusWidget : nullptr);
 }
 
 void NetManager::OnChooserState(NetBuffer& thePayload)

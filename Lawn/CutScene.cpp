@@ -16,6 +16,7 @@
 #include "System/PlayerInfo.h"
 #include "Widget/StoreScreen.h"
 #include "Widget/ChallengeScreen.h"
+#include "Net/NetCommon.h"
 #include "../Sexy.TodLib/TodFoley.h"
 #include "Widget/SeedChooserScreen.h"
 #include "../Sexy.TodLib/TodCommon.h"
@@ -1573,10 +1574,27 @@ bool CutScene::IsInShovelTutorial()
 
 void CutScene::StartSeedChooser()
 {
+	if (!mApp || !mApp->mSeedChooserScreen || !mApp->mWidgetManager)
+	{
+		LawnNet::NetTrace("StartSeedChooser rejected app=%p screen=%p widgets=%p board=%p",
+			(void*)mApp, mApp ? (void*)mApp->mSeedChooserScreen : nullptr,
+			mApp ? (void*)mApp->mWidgetManager : nullptr, (void*)mBoard);
+		return;
+	}
+
+	mApp->mSeedChooserScreen->mVisible = true;
 	mApp->mSeedChooserScreen->mMouseVisible = true;
 	mSeedChoosing = true;
 	mApp->mWidgetManager->SetFocus(mApp->mSeedChooserScreen);
-	mApp->mSeedChooserScreen->mRandomButton->SetDisabled(false);
+	if (mApp->mSeedChooserScreen->mRandomButton)
+		mApp->mSeedChooserScreen->mRandomButton->SetDisabled(false);
+	mApp->mWidgetManager->MarkAllDirty();
+	LawnNet::NetTrace("StartSeedChooser activated client=%d board=%p screen=%p pos=(%d,%d) visible=%d mouse=%d focus=%p",
+		mApp->NetIsClient() ? 1 : 0, (void*)mBoard, (void*)mApp->mSeedChooserScreen,
+		mApp->mSeedChooserScreen->mX, mApp->mSeedChooserScreen->mY,
+		mApp->mSeedChooserScreen->mVisible ? 1 : 0,
+		mApp->mSeedChooserScreen->mMouseVisible ? 1 : 0,
+		(void*)mApp->mWidgetManager->mFocusWidget);
 }
 
 void CutScene::EndSeedChooser()

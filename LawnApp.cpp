@@ -1549,6 +1549,12 @@ void LawnApp::KillStoreScreen()
 //0x44FDC0
 void LawnApp::ShowSeedChooserScreen()
 {
+	if (mSeedChooserScreen)
+	{
+		LawnNet::NetTrace("ShowSeedChooserScreen ignored duplicate board=%p scene=%d chooser=%p",
+			(void*)mBoard, (int)mGameScene, (void*)mSeedChooserScreen);
+		return;
+	}
 	TOD_ASSERT(mSeedChooserScreen == nullptr);
 
 	mSeedChooserScreen = new SeedChooserScreen();
@@ -1559,6 +1565,16 @@ void LawnApp::ShowSeedChooserScreen()
 	// co-op: tell everyone the chooser is open + the split
 	if (mNetManager && mNetManager->IsActive())
 	{
+		// This widget marks a new chooser generation on the host.  No request
+		// queued for the previous generation may be applied to this screen.
+		// Client-side authoritative queues are cleared only after a validated
+		// CHOOSER_OPEN arrives in NetManager::OnChooserOpen.
+		if (mNetManager->IsHosting())
+		{
+			mNetManager->mRemotePicks.clear();
+			mNetManager->mRemoteUnpicks.clear();
+		}
+
 		int aBankCount = mBoard ? mBoard->GetNumSeedsInBank() : 10;
 		const bool aPvP = mGameMode == GameMode::GAMEMODE_COOP_PVP;
 		if (aPvP)
@@ -1609,6 +1625,16 @@ void LawnApp::ShowSeedChooserScreen()
 		mNetManager->mChooserOpen = true;
 		mNetManager->mChooserPicksPerPlayer = aUiQuota;
 		mNetManager->mChooserBankCount = aBankCount;
+		LawnNet::NetTrace("ShowSeedChooserScreen role=%s mode=%d level=%d localChooserLevel=%d bank=%d quotas=[%d,%d,%d,%d] mySlot=%u uiQuota=%d screen=%p pos=(%d,%d) visible=%d mouse=%d focus=%p",
+			mNetManager->IsHosting() ? "host" : "client", (int)mGameMode,
+			mBoard ? mBoard->mLevel : -1,
+			mBoard && mBoard->ChooseSeedsOnCurrentLevel() ? 1 : 0,
+			aBankCount, aQuotas[0], aQuotas[1], aQuotas[2], aQuotas[3],
+			mNetManager->GetMySlot(), aUiQuota, (void*)mSeedChooserScreen,
+			mSeedChooserScreen->mX, mSeedChooserScreen->mY,
+			mSeedChooserScreen->mVisible ? 1 : 0,
+			mSeedChooserScreen->mMouseVisible ? 1 : 0,
+			mWidgetManager ? (void*)mWidgetManager->mFocusWidget : nullptr);
 	}
 }
 
@@ -5409,21 +5435,54 @@ void LawnApp::NetBroadcastProfile()
 void LawnApp::NetOnProfileSync(LawnNet::NetBuffer& thePayload)
 {
 	if (!mPlayerInfo)
+	{
+		LawnNet::NetTrace("PROFILE_SYNC rejected: player profile is unavailable");
 		return;
+	}
+
+	static const size_t PROFILE_SYNC_BYTES = (6 + 80 + 100) * sizeof(int32_t);
+	if (thePayload.Remaining() != PROFILE_SYNC_BYTES)
+	{
+		LawnNet::NetTrace("PROFILE_SYNC rejected: expected=%zu bytes actual=%zu",
+			PROFILE_SYNC_BYTES, thePayload.Remaining());
+		return;
+	}
+
+	int32_t aLevel = thePayload.ReadI32Or();
+	int32_t aCoins = thePayload.ReadI32Or();
+	int32_t aFinishedAdventure = thePayload.ReadI32Or();
+	int32_t aHasUnlockedMinigames = thePayload.ReadI32Or();
+	int32_t aHasUnlockedPuzzleMode = thePayload.ReadI32Or();
+	int32_t aHasUnlockedSurvivalMode = thePayload.ReadI32Or();
+	int32_t aPurchases[80];
+	int32_t aChallengeRecords[100];
+	for (int i = 0; i < 80; i++)
+		aPurchases[i] = thePayload.ReadI32Or();
+	for (int i = 0; i < 100; i++)
+		aChallengeRecords[i] = thePayload.ReadI32Or();
+
+	if (thePayload.Remaining() != 0 || aLevel < 0 || aLevel > FINAL_LEVEL)
+	{
+		LawnNet::NetTrace("PROFILE_SYNC rejected: level=%d trailing=%zu", aLevel, thePayload.Remaining());
+		return;
+	}
 
 	mNetBlockProfileSave = true;
 	PlayerInfo* aP = mPlayerInfo;
-	aP->mLevel = thePayload.ReadI32Or();
-	aP->mCoins = thePayload.ReadI32Or();
-	aP->mFinishedAdventure = thePayload.ReadI32Or();
-	aP->mHasUnlockedMinigames = thePayload.ReadI32Or();
-	aP->mHasUnlockedPuzzleMode = thePayload.ReadI32Or();
-	aP->mHasUnlockedSurvivalMode = thePayload.ReadI32Or();
+	aP->mLevel = aLevel;
+	aP->mCoins = aCoins;
+	aP->mFinishedAdventure = aFinishedAdventure;
+	aP->mHasUnlockedMinigames = aHasUnlockedMinigames;
+	aP->mHasUnlockedPuzzleMode = aHasUnlockedPuzzleMode;
+	aP->mHasUnlockedSurvivalMode = aHasUnlockedSurvivalMode;
 	for (int i = 0; i < 80; i++)
-		aP->mPurchases[i] = thePayload.ReadI32Or();
+		aP->mPurchases[i] = aPurchases[i];
 	for (int i = 0; i < 100; i++)
-		aP->mChallengeRecords[i] = thePayload.ReadI32Or();
+		aP->mChallengeRecords[i] = aChallengeRecords[i];
 	mPlayerLevelRef = aP->GetLevel();
+	LawnNet::NetTrace("PROFILE_SYNC applied level=%d coins=%d finishedAdventure=%d unlocks=(%d,%d,%d)",
+		aP->mLevel, aP->mCoins, aP->mFinishedAdventure,
+		aP->mHasUnlockedMinigames, aP->mHasUnlockedPuzzleMode, aP->mHasUnlockedSurvivalMode);
 }
 
 void LawnApp::NetHandleRemoteInputs()
