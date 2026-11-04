@@ -10,6 +10,47 @@
 
 using namespace Sexy;
 
+namespace
+{
+	bool IsImageFontControlOrSpace(unsigned char theChar)
+	{
+		return theChar <= 0x20 || theChar == 0x7F;
+	}
+
+	bool ImageFontHasGlyph(const ImageFont* theFont, unsigned char theChar)
+	{
+		unsigned char aMappedChar = theFont->mFontData->mCharMap[theChar];
+		for (ActiveFontLayerList::const_iterator anItr = theFont->mActiveLayerList.begin(); anItr != theFont->mActiveLayerList.end(); ++anItr)
+		{
+			const FontLayer* aLayer = anItr->mBaseFontLayer;
+			if (aLayer == nullptr)
+				continue;
+
+			const CharData& aCharData = aLayer->mCharData[aMappedChar];
+			const Rect& anImageRect = anItr->mScaledCharImageRects[aMappedChar];
+			if (aCharData.mWidth > 0 || anImageRect.mWidth > 0)
+				return true;
+		}
+
+		return false;
+	}
+
+	bool ImageFontNeedsUnicodeFallback(ImageFont* theFont, const SexyString& theString)
+	{
+		theFont->Prepare();
+		for (size_t i = 0; i < theString.size(); ++i)
+		{
+			unsigned char aChar = static_cast<unsigned char>(theString[i]);
+			if (aChar >= 0x80)
+				return true;
+			if (!IsImageFontControlOrSpace(aChar) && !ImageFontHasGlyph(theFont, aChar))
+				return true;
+		}
+
+		return false;
+	}
+}
+
 ////
 
 DataElement::DataElement() :
@@ -1374,7 +1415,7 @@ void ImageFont::GenerateActiveFontLayers()
 
 int ImageFont::StringWidth(const SexyString& theString)
 {
-	if (std::any_of(theString.begin(), theString.end(), [](unsigned char c) { return c >= 0x80; }))
+	if (ImageFontNeedsUnicodeFallback(this, theString))
 		return GetUnicodeFallback()->StringWidth(theString);
 
 	int aWidth = 0;
@@ -1392,9 +1433,16 @@ int ImageFont::StringWidth(const SexyString& theString)
 int ImageFont::CharWidthKern(char theChar, char thePrevChar)
 {
 	if ((unsigned char)theChar >= 0x80 || (unsigned char)thePrevChar >= 0x80)
-		return max(1, mPointSize / 2);
+		return GetUnicodeFallback()->CharWidthKern(theChar, thePrevChar);
 
 	Prepare();
+	unsigned char aCharValue = static_cast<unsigned char>(theChar);
+	unsigned char aPrevCharValue = static_cast<unsigned char>(thePrevChar);
+	if ((!IsImageFontControlOrSpace(aCharValue) && !ImageFontHasGlyph(this, aCharValue)) ||
+		(thePrevChar != 0 && !IsImageFontControlOrSpace(aPrevCharValue) && !ImageFontHasGlyph(this, aPrevCharValue)))
+	{
+		return GetUnicodeFallback()->CharWidthKern(theChar, thePrevChar);
+	}
 
 	int aMaxXPos = 0;
 	double aPointSize = mPointSize * mScale;
@@ -1704,7 +1752,7 @@ SexyChar ImageFont::GetMappedChar(char value)
 
 void ImageFont::DrawString(Graphics* g, int theX, int theY, const SexyString& theString, const Color& theColor, const Rect& theClipRect)
 {
-	if (std::any_of(theString.begin(), theString.end(), [](unsigned char c) { return c >= 0x80; }))
+	if (ImageFontNeedsUnicodeFallback(this, theString))
 	{
 		GetUnicodeFallback()->DrawString(g, theX, theY, theString, theColor, theClipRect);
 		return;

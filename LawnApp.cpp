@@ -3013,11 +3013,11 @@ void LawnApp::LoadingThreadProc()
 	if (!TodLoadResources("LoaderBar"))
 		return;
 
-	TodStringListLoad(_S("Properties\\LawnStrings.txt"));
-
 	WIN32_FILE_ATTRIBUTE_DATA fileInfo;
 	if (GetFileAttributesExA("dependency\\properties\\LawnStrings.txt", GetFileExInfoStandard, &fileInfo) != 0 || IsFileInPakFile("dependency\\properties\\LawnStrings.txt"))
 		TodStringListLoad(_S("dependency\\properties\\LawnStrings.txt"));
+
+	TodStringListLoad(_S("Properties\\LawnStrings.txt"));
 
 	if (GetFileAttributesExA("extension\\properties\\LawnStrings.txt", GetFileExInfoStandard, &fileInfo) != 0 || IsFileInPakFile("extension\\properties\\LawnStrings.txt"))
 		TodStringListLoad(_S("extension\\properties\\LawnStrings.txt"));

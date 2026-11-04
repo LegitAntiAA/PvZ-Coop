@@ -230,10 +230,14 @@ void NewOptionsDialog::Draw(Sexy::Graphics* g)
     }
     else*/
     {
-        TodDrawString(g, TodStringTranslate(_S("[MUSIC_LABEL]")), 186, 140 + aMusicOffset, FONT_DWARVENTODCRAFT18, aTextColor, DrawStringJustification::DS_ALIGN_RIGHT);
-        TodDrawString(g, TodStringTranslate(_S("[SOUND_LABEL]")), 186, 167 + aSfxOffset, FONT_DWARVENTODCRAFT18, aTextColor, DrawStringJustification::DS_ALIGN_RIGHT);
-        TodDrawString(g, TodStringTranslate(_S("Vertical-Sync")), 274, 197 + a3DAccelOffset, FONT_DWARVENTODCRAFT18, aTextColor, DrawStringJustification::DS_ALIGN_RIGHT);
-        TodDrawString(g, TodStringTranslate(_S("[FULLSCREEN_LABEL]")), 274, 229 + aFullScreenOffset, FONT_DWARVENTODCRAFT18, aTextColor, DrawStringJustification::DS_ALIGN_RIGHT);
+        const SexyString aVSyncLabel = TodStringListExists("[OPTIONS_VSYNC]")
+            ? TodStringTranslate(_S("[OPTIONS_VSYNC]"))
+            : TodStringTranslate(_S("[OPTIONS_3D_ACCELERATION]"));
+
+        TodDrawString(g, TodStringTranslate(_S("[OPTIONS_MUSIC_LABEL]")), 186, 140 + aMusicOffset, FONT_DWARVENTODCRAFT18, aTextColor, DrawStringJustification::DS_ALIGN_RIGHT);
+        TodDrawString(g, TodStringTranslate(_S("[OPTIONS_SOUNDFX]")), 186, 167 + aSfxOffset, FONT_DWARVENTODCRAFT18, aTextColor, DrawStringJustification::DS_ALIGN_RIGHT);
+        TodDrawString(g, aVSyncLabel, 274, 197 + a3DAccelOffset, FONT_DWARVENTODCRAFT18, aTextColor, DrawStringJustification::DS_ALIGN_RIGHT);
+        TodDrawString(g, TodStringTranslate(_S("[OPTIONS_FULL_SCREEN]")), 274, 229 + aFullScreenOffset, FONT_DWARVENTODCRAFT18, aTextColor, DrawStringJustification::DS_ALIGN_RIGHT);
     }
 }
 

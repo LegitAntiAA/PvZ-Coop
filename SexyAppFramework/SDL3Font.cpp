@@ -179,12 +179,18 @@ void SDL3Font::DrawString(Graphics* g, int theX, int theY, const SexyString& the
 {
 	if (!mFont) return;
 
-	int x = theX;
+	SDL_Renderer* aRenderer = LawnApp::mSDLRenderer;
+	SDL_Rect aPreviousClip = {};
+	bool aPreviousClipEnabled = SDL_RenderClipEnabled(aRenderer);
+	SDL_GetRenderClipRect(aRenderer, &aPreviousClip);
+
+	float x = theX + g->mTransX;
+	float aBaselineY = theY + g->mTransY;
 
 	if (theClipRect.mWidth > 0 && theClipRect.mHeight > 0)
 	{
 		SDL_Rect clip = { theClipRect.mX, theClipRect.mY, theClipRect.mWidth, theClipRect.mHeight };
-		SDL_SetRenderClipRect(LawnApp::mSDLRenderer, &clip);
+		SDL_SetRenderClipRect(aRenderer, &clip);
 	}
 
 	Uint32 prevChar = 0;
@@ -204,18 +210,18 @@ void SDL3Font::DrawString(Graphics* g, int theX, int theY, const SexyString& the
 		SDL_Texture* tex = mGlyphCache.count(c) ? mGlyphCache[c] : nullptr;
 		if (tex)
 		{
-			SDL_FRect dst = { float(x), float(theY - GetAscent()), float(mGlyphWidth[c]) / GetRelativeScale(), float(mGlyphHeight[c]) / GetRelativeScale()};
+			SDL_FRect dst = { x, aBaselineY - GetAscent(), float(mGlyphWidth[c]) / GetRelativeScale(), float(mGlyphHeight[c]) / GetRelativeScale()};
 			SDL_SetTextureColorMod(tex, theColor.mRed, theColor.mGreen, theColor.mBlue);
 			SDL_SetTextureAlphaMod(tex, theColor.mAlpha);
 			SDL_SetTextureScaleMode(tex, g->GetLinearBlend() ? SDL_ScaleMode::SDL_SCALEMODE_LINEAR : g->mIsPixelArt ? SDL_ScaleMode::SDL_SCALEMODE_PIXELART : SDL_ScaleMode::SDL_SCALEMODE_NEAREST);
-			SDL_RenderTexture(LawnApp::mSDLRenderer, tex, nullptr, &dst);
+			SDL_RenderTexture(aRenderer, tex, nullptr, &dst);
 			x += mGlyphWidth[c] / GetRelativeScale();
 		}
 
 		prevChar = c;
 	}
 
-	SDL_SetRenderClipRect(LawnApp::mSDLRenderer, nullptr);
+	SDL_SetRenderClipRect(aRenderer, aPreviousClipEnabled ? &aPreviousClip : nullptr);
 }
 
 SDL3Font* SDL3Font::Duplicate()
