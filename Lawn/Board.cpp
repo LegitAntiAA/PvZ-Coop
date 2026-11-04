@@ -1090,13 +1090,6 @@ void Board::LoadBackgroundImages()
 //0x40A550
 void Board::PickBackground()
 {
-	// co-op custom modes: classic day lawn
-	if (mApp->IsCoopCustomMode())
-	{
-		mBackground = BackgroundType::BACKGROUND_1_DAY;
-		return;
-	}
-
 	switch (mApp->mGameMode)
 	{
 	case GameMode::GAMEMODE_ADVENTURE:
@@ -1155,6 +1148,12 @@ void Board::PickBackground()
 #ifdef _DS_MINIGAMES
 	case GameMode::GAMEMODE_CHALLENGE_BOMB_ALL_TOGETHER:
 #endif
+	case GameMode::GAMEMODE_COOP_ENDLESS:
+	case GameMode::GAMEMODE_COOP_ENDLESS_T:
+	case GameMode::GAMEMODE_COOP_ENDLESS_S:
+	case GameMode::GAMEMODE_COOP_ENDLESS_ST:
+	case GameMode::GAMEMODE_COOP_TOWER_DEFENSE:
+	case GameMode::GAMEMODE_COOP_PVP:
 		mBackground = BackgroundType::BACKGROUND_1_DAY;
 		break;
 
