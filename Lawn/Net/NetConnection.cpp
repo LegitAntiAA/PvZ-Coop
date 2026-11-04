@@ -261,6 +261,18 @@ int NetConnection::PumpMessages()
 	return aCount;
 }
 
+uint32_t NetConnection::NextPingSeq()
+{
+	const uint32_t aSeq = mPingSeq++;
+	const uint32_t aNow = GetTickCount();
+	std::lock_guard<std::mutex> aLock(mPingMutex);
+	mPingTimes[aSeq] = aNow;
+	// A peer that never answers must not grow this map forever.
+	while (mPingTimes.size() > 32)
+		mPingTimes.erase(mPingTimes.begin());
+	return aSeq;
+}
+
 void NetConnection::OnPong(uint32_t theSeq)
 {
 	std::lock_guard<std::mutex> aLock(mPingMutex);

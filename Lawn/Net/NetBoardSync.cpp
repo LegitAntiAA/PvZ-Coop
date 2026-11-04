@@ -1112,6 +1112,8 @@ void Board::NetDrawRemoteCursors(Graphics* g)
 		const NetPlayerInfo& aPlayer = aNet->GetPlayer(i);
 		if (!aPlayer.mActive)
 			continue;
+		int aCursorX = (int)aCursor.mRenderX;
+		int aCursorY = (int)aCursor.mRenderY;
 
 		NetColor aColor = GetRelativePlayerColor(aNet->GetMySlot(), i);
 
@@ -1121,22 +1123,22 @@ void Board::NetDrawRemoteCursors(Graphics* g)
 		{
 			SeedType aSeedType = (SeedType)aCursor.mHeldSeed;
 			SeedType anImitater = aCursor.mHeldImitater != 255 ? (SeedType)aCursor.mHeldImitater : SeedType::SEED_NONE;
-			Plant::DrawSeedType(g, aSeedType, anImitater, VARIATION_NORMAL, (float)(aCursor.mX - 25), (float)(aCursor.mY - 35));
+			Plant::DrawSeedType(g, aSeedType, anImitater, VARIATION_NORMAL, (float)(aCursorX - 25), (float)(aCursorY - 35));
 			// color overlay to mark ownership
 			g->SetColor(Color(aColor.r, aColor.g, aColor.b, 90));
-			g->FillRect(aCursor.mX - 30, aCursor.mY - 40, 60, 70);
+			g->FillRect(aCursorX - 30, aCursorY - 40, 60, 70);
 		}
 
 		// cursor pointer marker in player color
 		g->SetColor(Color(aColor.r, aColor.g, aColor.b, 255));
-		g->FillRect(aCursor.mX, aCursor.mY, 9, 9);
+		g->FillRect(aCursorX, aCursorY, 9, 9);
 
 		// nick + ping label in small font
 		if (aPlayer.mNick[0])
 		{
 			SexyString aLabel = StringToSexyString(aPlayer.mNick) + _S(" ") + StrFormat(_S("%ums"), aPlayer.mPing);
-			int aLabelX = aCursor.mX + 14;
-			int aLabelY = aCursor.mY + 10;
+			int aLabelX = aCursorX + 14;
+			int aLabelY = aCursorY + 10;
 			g->SetColor(Color(0, 0, 0, 180));
 			g->DrawString(aLabel, aLabelX + 1, aLabelY + 1);
 			g->SetColor(Color(aColor.r, aColor.g, aColor.b, 255));

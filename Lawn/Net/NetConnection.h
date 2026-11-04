@@ -50,7 +50,7 @@ public:
 	void Disconnect();
 
 	// Ping bookkeeping (called by NetManager)
-	uint32_t NextPingSeq() { return mPingSeq++; }
+	uint32_t NextPingSeq();
 	void OnPong(uint32_t theSeq);
 	uint32_t GetSeqSentTime(uint32_t theSeq);
 	uint16_t GetPing() const { return mPingMs; }

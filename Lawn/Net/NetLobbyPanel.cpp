@@ -209,18 +209,20 @@ void NetLobbyPanel::Draw(Graphics* g)
 		const NetPlayerInfo& aPlayer = aNet->GetPlayer(i);
 		if (!aPlayer.mActive)
 			continue;
+		int aCursorX = (int)aCursor.mRenderX;
+		int aCursorY = (int)aCursor.mRenderY;
 
 		NetColor aColor = GetRelativePlayerColor(aNet->GetMySlot(), i);
 		g->SetColor(Color(aColor.r, aColor.g, aColor.b, 255));
-		g->FillRect(aCursor.mX, aCursor.mY, 9, 9);
+		g->FillRect(aCursorX, aCursorY, 9, 9);
 		g->SetColor(Color(0, 0, 0, 200));
-		g->FillRect(aCursor.mX + 12, aCursor.mY + 8, 2, 14);
+		g->FillRect(aCursorX + 12, aCursorY + 8, 2, 14);
 		if (aPlayer.mNick[0])
 		{
 			SexyString aLabel = StringToSexyString(aPlayer.mNick) + _S(" ") + StrFormat(_S("%ums"), aPlayer.mPing);
 			g->SetColor(Color(0, 0, 0, 180));
-			TodDrawString(g, aLabel, aCursor.mX + 15, aCursor.mY + 21, Sexy::FONT_BRIANNETOD12, Color(0, 0, 0, 180), DrawStringJustification::DS_ALIGN_LEFT);
-			TodDrawString(g, aLabel, aCursor.mX + 14, aCursor.mY + 20, Sexy::FONT_BRIANNETOD12, Color(aColor.r, aColor.g, aColor.b), DrawStringJustification::DS_ALIGN_LEFT);
+			TodDrawString(g, aLabel, aCursorX + 15, aCursorY + 21, Sexy::FONT_BRIANNETOD12, Color(0, 0, 0, 180), DrawStringJustification::DS_ALIGN_LEFT);
+			TodDrawString(g, aLabel, aCursorX + 14, aCursorY + 20, Sexy::FONT_BRIANNETOD12, Color(aColor.r, aColor.g, aColor.b), DrawStringJustification::DS_ALIGN_LEFT);
 		}
 	}
 

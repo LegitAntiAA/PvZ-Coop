@@ -33,13 +33,28 @@ struct NetSession
 struct NetRemoteCursor
 {
 	bool mValid;
-	int16_t mX, mY;
+	int16_t mX, mY;		// latest network target
+	float mRenderX, mRenderY;	// interpolated display position
 	uint8_t mCursorType;	// CursorType
 	uint8_t mHeldSeed;		// SeedType held in hand (for silhouette rendering)
 	uint8_t mHeldImitater;
 	uint8_t mFlags;
 	NetRemoteCursor() { Clear(); }
-	void Clear() { mValid = false; mX = 0; mY = 0; mCursorType = 0; mHeldSeed = 255; mHeldImitater = 255; mFlags = 0; }
+	void Clear() { mValid = false; mX = 0; mY = 0; mRenderX = 0; mRenderY = 0; mCursorType = 0; mHeldSeed = 255; mHeldImitater = 255; mFlags = 0; }
+	void SetTarget(int16_t theX, int16_t theY)
+	{
+		if (!mValid) { mRenderX = (float)theX; mRenderY = (float)theY; }
+		mX = theX; mY = theY; mValid = true;
+	}
+	void Interpolate()
+	{
+		mRenderX += ((float)mX - mRenderX) * 0.35f;
+		mRenderY += ((float)mY - mRenderY) * 0.35f;
+		float aDx = (float)mX - mRenderX;
+		float aDy = (float)mY - mRenderY;
+		if (aDx > -0.15f && aDx < 0.15f) mRenderX = (float)mX;
+		if (aDy > -0.15f && aDy < 0.15f) mRenderY = (float)mY;
+	}
 };
 
 struct NetRemoteInput
@@ -193,6 +208,7 @@ private:
 	// rate
 	int mSnapshotHz;
 	int mAdaptiveGoodStreak;
+	int mAdaptiveBadStreak;
 
 	// ping timer
 	uint32_t mLastPingTick;

@@ -21,6 +21,7 @@ NetManager::NetManager() :
 	mMySlot(0),
 	mSnapshotHz(NET_SNAPSHOT_HZ_DEFAULT),
 	mAdaptiveGoodStreak(0),
+	mAdaptiveBadStreak(0),
 	mLastPingTick(0),
 	mLastStatsTick(0),
 	mChooserOpen(false),
@@ -42,6 +43,7 @@ void NetManager::Init(LawnApp* theApp)
 {
 	mApp = theApp;
 	NetLoadConfig(mConfig);
+	mSnapshotHz = mConfig.mBaseSnapshotHz;
 	NetStartupWSA();
 }
 
@@ -175,6 +177,9 @@ void NetManager::CancelConnect()
 
 void NetManager::Disconnect()
 {
+	// Stop the retry loop before waiting for its worker.  An in-progress select
+	// may still take up to its current timeout, but no additional retry starts.
+	mConnecting = false;
 	if (mAcceptRunning)
 	{
 		mAcceptRunning = false;
@@ -210,6 +215,10 @@ void NetManager::Disconnect()
 	mMode = MODE_NONE;
 	mMySlot = 0;
 	mRemotePaused = false;
+	mAdaptiveGoodStreak = 0;
+	mAdaptiveBadStreak = 0;
+	mLastPingTick = 0;
+	mLastStatsTick = 0;
 	mRemotePicks.clear();
 	mRemoteUnpicks.clear();
 	mRemoteChooserStates.clear();
@@ -231,6 +240,7 @@ void NetManager::DropSession(int theSlot, bool theNotify)
 	aSession.mConn.Disconnect();
 	aSession.mAssigned = false;
 	mPlayers[theSlot].mActive = false;
+	mRemoteCursors[theSlot].Clear();
 	if (theNotify)
 		SendLobbyState();
 }
@@ -251,6 +261,9 @@ void NetManager::Update()
 {
 	if (mMode == MODE_NONE)
 		return;
+	for (int i = 0; i < NET_MAX_PLAYERS; i++)
+		if (mRemoteCursors[i].mValid)
+			mRemoteCursors[i].Interpolate();
 
 	// adopt pending connections
 	{
@@ -365,6 +378,8 @@ void NetManager::UpdatePings()
 			aTmp.WriteU32(aSeq);
 			mPlayers[i].mPing = mSessions[i].mConn.GetPing();
 		}
+		// Keep every lobby's nick/ping list live, not just the host's copy.
+		SendLobbyState();
 	}
 	else if (mMode == MODE_CLIENT && mHostConn && mClientConnected)
 	{
@@ -372,6 +387,18 @@ void NetManager::UpdatePings()
 		NetBuffer aPing;
 		aPing.WriteU32(aSeq);
 		mHostConn->SendMessage(NETMSG_PING, aPing);
+
+		if (mLastStatsTick == 0 || aNow - mLastStatsTick >= 2000)
+		{
+			mLastStatsTick = aNow;
+			NetBuffer aStats;
+			aStats.WriteU16(mHostConn->GetPing());
+			int anApplyMs = mApp && mApp->mBoard ? mApp->mBoard->mNetLastApplyMs : 0;
+			if (anApplyMs < 0) anApplyMs = 0;
+			if (anApplyMs > 65535) anApplyMs = 65535;
+			aStats.WriteU16((uint16_t)anApplyMs);
+			mHostConn->SendMessage(NETMSG_STATS, aStats);
+		}
 	}
 }
 
@@ -454,6 +481,9 @@ void NetManager::OnHello(NetSession* theSession, NetBuffer& thePayload)
 	aWelcome.WriteU8(theSession->mSlot);
 	aWelcome.WriteString(mPlayers[0].mNick);
 	theSession->mConn.SendMessage(NETMSG_WELCOME, aWelcome);
+	NetBuffer aRate;
+	aRate.WriteU16((uint16_t)mSnapshotHz);
+	theSession->mConn.SendMessage(NETMSG_RATE, aRate);
 
 	SendLobbyState();
 }
@@ -471,17 +501,35 @@ void NetManager::OnClientInput(NetSession* theSession, NetBuffer& thePayload)
 
 void NetManager::OnClientCursor(NetSession* theSession, NetBuffer& thePayload)
 {
-	uint8_t aSlot = thePayload.ReadU8Or();
-	if (aSlot >= NET_MAX_PLAYERS)
+	// The connection owns the slot.  Never trust the slot claimed in a packet.
+	thePayload.ReadU8Or();
+	const uint8_t aSlot = theSession->mSlot;
+	if (aSlot >= NET_MAX_PLAYERS || !mPlayers[aSlot].mActive)
 		return;
 	NetRemoteCursor& aCursor = mRemoteCursors[aSlot];
-	aCursor.mValid = true;
-	aCursor.mX = thePayload.ReadI16Or();
-	aCursor.mY = thePayload.ReadI16Or();
+	int16_t aX = thePayload.ReadI16Or();
+	int16_t aY = thePayload.ReadI16Or();
+	aCursor.SetTarget(aX, aY);
 	aCursor.mCursorType = thePayload.ReadU8Or();
 	aCursor.mHeldSeed = thePayload.ReadU8Or();
 	aCursor.mHeldImitater = thePayload.ReadU8Or();
 	aCursor.mFlags = thePayload.ReadU8Or();
+	if (aCursor.mHeldSeed != 255 && aCursor.mHeldSeed >= (uint8_t)SeedType::NUM_SEED_TYPES)
+		aCursor.mHeldSeed = 255;
+	if (aCursor.mHeldImitater != 255 && aCursor.mHeldImitater >= (uint8_t)SeedType::NUM_SEED_TYPES)
+		aCursor.mHeldImitater = 255;
+
+	// Relay the sanitized state to every client.  The sender ignores its own
+	// slot; the other peers now see client-to-client cursors as well.
+	NetBuffer aRelay;
+	aRelay.WriteU8(aSlot);
+	aRelay.WriteI16(aCursor.mX);
+	aRelay.WriteI16(aCursor.mY);
+	aRelay.WriteU8(aCursor.mCursorType);
+	aRelay.WriteU8(aCursor.mHeldSeed);
+	aRelay.WriteU8(aCursor.mHeldImitater);
+	aRelay.WriteU8(aCursor.mFlags);
+	BroadcastMessage(NETMSG_CURSOR, aRelay);
 }
 
 void NetManager::OnClientSeedPick(NetSession* theSession, NetBuffer& thePayload, bool theUnpick)
@@ -514,9 +562,20 @@ void NetManager::OnClientStats(NetSession* theSession, NetBuffer& thePayload)
 	mPlayers[theSession->mSlot].mPing = aPing;
 
 	if (aPing < 60 && anApplyMs < 8)
+	{
 		mAdaptiveGoodStreak++;
+		mAdaptiveBadStreak = 0;
+	}
 	else if (aPing > 150 || anApplyMs > 20)
+	{
 		mAdaptiveGoodStreak = 0;
+		mAdaptiveBadStreak++;
+	}
+	else
+	{
+		mAdaptiveGoodStreak = 0;
+		mAdaptiveBadStreak = 0;
+	}
 }
 
 void NetManager::CheckAdaptiveRate()
@@ -526,16 +585,10 @@ void NetManager::CheckAdaptiveRate()
 		SetSnapshotHz(mSnapshotHz + 1);
 		mAdaptiveGoodStreak = 0;
 	}
-	else if (mAdaptiveGoodStreak == 0 && mSnapshotHz > NET_SNAPSHOT_HZ_MIN)
+	else if (mAdaptiveBadStreak >= 2 && mSnapshotHz > NET_SNAPSHOT_HZ_MIN)
 	{
-		// decay rate only after repeated bad reports (streak stays 0)
-		static int aBadTicks = 0;
-		aBadTicks++;
-		if (aBadTicks >= 6)
-		{
-			SetSnapshotHz(mSnapshotHz - 1);
-			aBadTicks = 0;
-		}
+		SetSnapshotHz(mSnapshotHz - 1);
+		mAdaptiveBadStreak = 0;
 	}
 }
 
@@ -702,9 +755,9 @@ void NetManager::OnCursor(NetBuffer& thePayload)
 	if (aSlot >= NET_MAX_PLAYERS || aSlot == mMySlot)
 		return;
 	NetRemoteCursor& aCursor = mRemoteCursors[aSlot];
-	aCursor.mValid = true;
-	aCursor.mX = thePayload.ReadI16Or();
-	aCursor.mY = thePayload.ReadI16Or();
+	int16_t aX = thePayload.ReadI16Or();
+	int16_t aY = thePayload.ReadI16Or();
+	aCursor.SetTarget(aX, aY);
 	aCursor.mCursorType = thePayload.ReadU8Or();
 	aCursor.mHeldSeed = thePayload.ReadU8Or();
 	aCursor.mHeldImitater = thePayload.ReadU8Or();
