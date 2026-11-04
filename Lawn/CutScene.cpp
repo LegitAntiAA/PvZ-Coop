@@ -521,8 +521,6 @@ void CutScene::PreloadResources()
 		
 	}
 
-	PlaceStreetZombies();
-
 	mBoard->mPreloadTime = max(aTimer.GetDuration(), 0);
 	TodTrace("preloading: %d ms", mBoard->mPreloadTime);
 	TodHesitationTrace("CutScene::PreloadResources");
@@ -986,6 +984,28 @@ void CutScene::StartLevelIntro()
 	{
 		mBoard->Move(220, 0);
 	}
+
+	// A network client mirrors the host's presentation state.  It must not run
+	// CancelIntro/PlaceLawnItems here: those routines create authoritative
+	// plants, pots, mowers, vases and challenge state.  Music is local output,
+	// so initialize the same intro tune before returning to the visual-only path.
+	if (mApp->NetIsClient())
+	{
+		if (mApp->mGameMode == GameMode::GAMEMODE_TREE_OF_WISDOM)
+			mApp->mMusic->MakeSureMusicIsPlaying(MusicTune::MUSIC_TUNE_ZEN_GARDEN);
+		else if (mApp->mGameMode == GameMode::GAMEMODE_UPSELL)
+			mApp->mMusic->StopAllMusic();
+		else if (mApp->mGameMode == GameMode::GAMEMODE_INTRO)
+			mApp->mMusic->MakeSureMusicIsPlaying(MusicTune::MUSIC_TUNE_POOL_WATERYGRAVES);
+		else if (mCrazyDaveTime > 0)
+			mApp->mMusic->MakeSureMusicIsPlaying(MusicTune::MUSIC_TUNE_TITLE_CRAZY_DAVE_MAIN_THEME);
+		else if (mApp->IsFinalBossLevel())
+			mApp->mMusic->StopAllMusic();
+		else
+			mApp->mMusic->MakeSureMusicIsPlaying(MusicTune::MUSIC_TUNE_CHOOSE_YOUR_SEEDS);
+		return;
+	}
+
 	if (IsNonScrollingCutscene() && mCrazyDaveTime == 0)
 	{
 		CancelIntro();
@@ -1577,6 +1597,20 @@ void CutScene::Update()
 {
 	if (mPreUpdatingBoard)
 		return;
+
+	// The host is the only cutscene simulation.  Clients only load resources;
+	// Board::NetApplyIntroState supplies positions, chooser state and previews.
+	// Running the stock update here would place lawn items, advance Dave/profile
+	// logic and eventually call StartLevel a second time.
+	if (mApp->NetIsClient())
+	{
+		if (mApp->mGameScene == GameScenes::SCENE_LEVEL_INTRO &&
+			mBoard->mDrawCount > 0 && !mPreloaded)
+		{
+			PreloadResources();
+		}
+		return;
+	}
 
 	// 更新疯狂戴夫
 	if (IsShowingCrazyDave() && (!mBoard->mPaused || mApp->mGameMode != GameMode::GAMEMODE_UPSELL))

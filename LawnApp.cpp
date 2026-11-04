@@ -1324,15 +1324,18 @@ void LawnApp::MakeNewBoard()
 //0x44F6B0
 void LawnApp::StartPlaying()
 {
+	KillSeedChooserScreen();
+	if (NetIsClient())
+		mBoard->StartLevelClientPresentation();
+	else
+		mBoard->StartLevel();
+	mGameScene = GameScenes::SCENE_PLAYING;
 	if (mNetManager && mNetManager->IsHosting())
 	{
-		LawnNet::NetTrace("host entering gameplay; broadcasting START_PLAYING mode=%d level=%d", (int)mGameMode, mBoard ? mBoard->mLevel : -1);
+		LawnNet::NetTrace("host entered gameplay; broadcasting START_PLAYING mode=%d level=%d", (int)mGameMode, mBoard ? mBoard->mLevel : -1);
 		LawnNet::NetBuffer anEmpty;
 		mNetManager->BroadcastMessage(LawnNet::NETMSG_START_PLAYING, anEmpty);
 	}
-	KillSeedChooserScreen();
-	mBoard->StartLevel();
-	mGameScene = GameScenes::SCENE_PLAYING;
 	LawnNet::NetTrace("gameplay entered client=%d board=%p scene=%d seedChooser=%p", NetIsClient() ? 1 : 0, (void*)mBoard, (int)mGameScene, (void*)mSeedChooserScreen);
 }
 
@@ -2855,15 +2858,21 @@ void LawnApp::UpdateFrames()
 		}
 
 		// client: host pressed "Let's Rock" -> build the combined seed bank
-		if (mNetManager->IsClient() && !mNetManager->mPendingChooserStarts.empty())
+		if (mNetManager->IsClient() && !mNetManager->mPendingChooserStarts.empty() &&
+			mSeedChooserScreen && mBoard)
 		{
-			LawnNet::NetBuffer aStart = std::move(mNetManager->mPendingChooserStarts.front());
-			mNetManager->mPendingChooserStarts.pop_front();
-			if (mSeedChooserScreen && mBoard)
+			LawnNet::NetBuffer aStart = mNetManager->mPendingChooserStarts.front();
+			if (mSeedChooserScreen->CoopBuildBankFromPayload(aStart))
 			{
-				mSeedChooserScreen->CoopBuildBankFromPayload(aStart);
+				mNetManager->mPendingChooserStarts.pop_front();
 				mSeedChooserScreen->mStartButton->SetDisabled(true);
-				mBoard->mCutScene->EndSeedChooser();
+				if (mBoard->mCutScene && mBoard->mCutScene->mSeedChoosing)
+					mBoard->mCutScene->EndSeedChooser();
+			}
+			else
+			{
+				LawnNet::NetTrace("client rejected malformed queued CHOOSER_START payload");
+				mNetManager->mPendingChooserStarts.clear();
 			}
 		}
 	}

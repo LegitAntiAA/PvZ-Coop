@@ -10,6 +10,8 @@
 #include "../CursorObject.h"
 #include "../Challenge.h"
 #include "../Cutscene.h"
+#include "../Widget/SeedChooserScreen.h"
+#include "../Widget/GameButton.h"
 #include "../../Resources.h"
 #include "../../Sexy.TodLib/Reanimator.h"
 #include "../../Sexy.TodLib/Attachment.h"
@@ -17,6 +19,7 @@
 #include "../../GameConstants.h"
 #include "../../SexyAppFramework/Graphics.h"
 #include "../../SexyAppFramework/WidgetManager.h"
+#include "../../SexyAppFramework/DDInterface.h"
 #include "NetManager.h"
 #include <float.h>
 
@@ -288,13 +291,21 @@ void Board::NetHostTick()
 	if (mLastSnapshotTick == 0)
 		mLastSnapshotTick = aNow;
 	int aInterval = 1000 / max(1, aNet->GetSnapshotHz());
-	if (mApp->mGameScene == GameScenes::SCENE_PLAYING &&
-		aNow - mLastSnapshotTick >= (uint32_t)aInterval)
+	if (aNow - mLastSnapshotTick >= (uint32_t)aInterval)
 	{
 		mLastSnapshotTick = aNow;
-		NetBuffer aSnap;
-		NetEncodeSnapshot(aSnap);
-		aNet->SendSnapshot(aSnap);
+		if (mApp->mGameScene == GameScenes::SCENE_LEVEL_INTRO)
+		{
+			NetBuffer anIntro;
+			NetEncodeIntroState(anIntro);
+			aNet->BroadcastMessage(NETMSG_INTRO_STATE, anIntro);
+		}
+		else if (mApp->mGameScene == GameScenes::SCENE_PLAYING)
+		{
+			NetBuffer aSnap;
+			NetEncodeSnapshot(aSnap);
+			aNet->SendSnapshot(aSnap);
+		}
 	}
 
 	// our cursor
@@ -1537,6 +1548,208 @@ void Board::NetGhostUpdateOthers()
 			aGridReanim->PlayReanim("anim_pulse", ReanimLoopType::REANIM_LOOP, 0, 12.0f);
 		}
 	}
+}
+
+void Board::NetEncodeIntroState(NetBuffer& b)
+{
+	const int aWideX = mApp->mDDInterface ? mApp->mDDInterface->mWideScreenOffsetX : 0;
+	const int aWideY = mApp->mDDInterface ? mApp->mDDInterface->mWideScreenOffsetY : 0;
+	SeedChooserScreen* aChooser = mApp->mSeedChooserScreen;
+
+	b.WriteU32(mApp->mNetBoardSeed);
+	b.WriteI32(mCutScene->mCutsceneTime);
+	b.WriteI16((int16_t)mX);
+	b.WriteI16((int16_t)mY);
+	b.WriteI16((int16_t)mTreeX);
+	b.WriteI16((int16_t)mPoleX);
+	b.WriteI16((int16_t)(aChooser ? aChooser->mX - aWideX : 0));
+	b.WriteI16((int16_t)(aChooser ? aChooser->mY - aWideY : 0));
+	b.WriteI16((int16_t)(aChooser && aChooser->mMenuButton ? aChooser->mMenuButton->mY - aWideY : 0));
+	b.WriteI16((int16_t)mSeedBank->mX);
+	b.WriteI16((int16_t)mSeedBank->mY);
+	b.WriteU16((uint16_t)max(0, min(1000, mSodPosition)));
+	b.WriteI16((int16_t)(mFogOffset * 2.0f));
+	b.WriteU16((uint16_t)min(65535, max(0, mFogBlownCountDown)));
+	b.WriteU8((uint8_t)max(0, min(255, mSeedBank->mCutSceneDarken)));
+
+	uint8_t aFlags = 0;
+	if (mCutScene->mSeedChoosing) aFlags |= 1;
+	if (mMenuButton && mMenuButton->mBtnNoDraw) aFlags |= 2;
+	if (aChooser && aChooser->mMenuButton && aChooser->mMenuButton->mBtnNoDraw) aFlags |= 4;
+	if (aChooser && aChooser->mMenuButton && aChooser->mMenuButton->mDisabled) aFlags |= 8;
+	if (mEnableGraveStones) aFlags |= 16;
+	if (mShowShovel) aFlags |= 32;
+	if (aChooser && aChooser->mMouseVisible) aFlags |= 64;
+	b.WriteU8(aFlags);
+
+	uint16_t aCount = 0;
+	NetBuffer aPreview;
+	Zombie* aZombie = nullptr;
+	while (mZombies.IterateNext(aZombie))
+	{
+		if (aZombie->mDead || aZombie->mFromWave != Zombie::ZOMBIE_WAVE_CUTSCENE)
+			continue;
+		if (aZombie->mNetId == 0)
+			aZombie->mNetId = NetAllocId();
+		if (aZombie->mNetId == 0 || aCount == 0xFFFF)
+			continue;
+		aPreview.WriteU16(aZombie->mNetId);
+		aPreview.WriteU8((uint8_t)aZombie->mZombieType);
+		aPreview.WriteU8((uint8_t)max(0, min(MAX_GRID_SIZE_Y - 1, aZombie->mRow)));
+		aPreview.WriteI16((int16_t)(aZombie->mPosX * 4.0f));
+		aPreview.WriteI16((int16_t)(aZombie->mPosY * 4.0f));
+		aPreview.WriteI32(aZombie->mRenderOrder);
+		aPreview.WriteU8(aZombie->mVariant ? 1 : 0);
+		aCount++;
+	}
+	b.WriteU16(aCount);
+	b.WriteBytes(aPreview.Data(), aPreview.Size());
+}
+
+void Board::NetApplyIntroState(NetBuffer& b)
+{
+	static const size_t INTRO_FIXED_BYTES = 36;
+	static const size_t INTRO_ZOMBIE_BYTES = 13;
+	if (b.Remaining() < INTRO_FIXED_BYTES)
+	{
+		NetTrace("INTRO_STATE rejected: truncated fixed payload bytes=%zu", b.Remaining());
+		return;
+	}
+
+	uint32_t aBoardSeed = b.ReadU32Or();
+	int aCutsceneTime = b.ReadI32Or();
+	int aBoardX = b.ReadI16Or();
+	int aBoardY = b.ReadI16Or();
+	int aTreeX = b.ReadI16Or();
+	int aPoleX = b.ReadI16Or();
+	int aChooserX = b.ReadI16Or();
+	int aChooserY = b.ReadI16Or();
+	int aChooserMenuY = b.ReadI16Or();
+	int aSeedBankX = b.ReadI16Or();
+	int aSeedBankY = b.ReadI16Or();
+	int aSodPosition = b.ReadU16Or();
+	int aFogOffset2 = b.ReadI16Or();
+	int aFogCountdown = b.ReadU16Or();
+	int aSeedBankDarken = b.ReadU8Or();
+	uint8_t aFlags = b.ReadU8Or();
+	uint16_t aZombieCount = b.ReadU16Or();
+
+	if (aBoardSeed != mApp->mNetBoardSeed || aSodPosition > 1000 || (aFlags & ~127) != 0 ||
+		b.Remaining() != (size_t)aZombieCount * INTRO_ZOMBIE_BYTES)
+	{
+		NetTrace("INTRO_STATE rejected: seed=%u expected=%u sod=%d flags=%u zombies=%u remaining=%zu",
+			aBoardSeed, mApp->mNetBoardSeed, aSodPosition, aFlags, aZombieCount, b.Remaining());
+		return;
+	}
+
+	struct PreviewZombie
+	{
+		uint16_t mId;
+		uint8_t mType;
+		uint8_t mRow;
+		int16_t mX4;
+		int16_t mY4;
+		int32_t mRenderOrder;
+		bool mVariant;
+	};
+	std::vector<PreviewZombie> aPreview;
+	aPreview.reserve(aZombieCount);
+	std::map<unsigned short, bool> aSeen;
+	for (uint16_t i = 0; i < aZombieCount; i++)
+	{
+		PreviewZombie aWire = {};
+		aWire.mId = b.ReadU16Or();
+		aWire.mType = b.ReadU8Or();
+		aWire.mRow = b.ReadU8Or();
+		aWire.mX4 = b.ReadI16Or();
+		aWire.mY4 = b.ReadI16Or();
+		aWire.mRenderOrder = b.ReadI32Or();
+		aWire.mVariant = b.ReadU8Or() != 0;
+		if (aWire.mId == 0 || aWire.mType >= (uint8_t)ZombieType::NUM_ZOMBIE_TYPES ||
+			aWire.mRow >= MAX_GRID_SIZE_Y || aSeen.find(aWire.mId) != aSeen.end())
+		{
+			NetTrace("INTRO_STATE rejected zombie id=%u type=%u row=%u", aWire.mId, aWire.mType, aWire.mRow);
+			return;
+		}
+		aSeen[aWire.mId] = true;
+		aPreview.push_back(aWire);
+	}
+
+	mCutScene->mCutsceneTime = max(0, aCutsceneTime);
+	Move(aBoardX, aBoardY);
+	mTreeX = aTreeX;
+	mPoleX = aPoleX;
+	mSeedBank->Move(aSeedBankX, aSeedBankY);
+	mSeedBank->mCutSceneDarken = aSeedBankDarken;
+	mSodPosition = aSodPosition;
+	mFogOffset = aFogOffset2 / 2.0f;
+	mFogBlownCountDown = aFogCountdown;
+	mEnableGraveStones = (aFlags & 16) != 0;
+	mShowShovel = (aFlags & 32) != 0;
+	if (mMenuButton)
+		mMenuButton->mBtnNoDraw = (aFlags & 2) != 0;
+
+	SeedChooserScreen* aChooser = mApp->mSeedChooserScreen;
+	if (aChooser)
+	{
+		const int aWideX = mApp->mDDInterface ? mApp->mDDInterface->mWideScreenOffsetX : 0;
+		const int aWideY = mApp->mDDInterface ? mApp->mDDInterface->mWideScreenOffsetY : 0;
+		aChooser->Move(aChooserX + aWideX, aChooserY + aWideY);
+		aChooser->mMouseVisible = (aFlags & 64) != 0;
+		if (aChooser->mMenuButton)
+		{
+			aChooser->mMenuButton->mY = aChooserMenuY + aWideY;
+			aChooser->mMenuButton->mBtnNoDraw = (aFlags & 4) != 0;
+			aChooser->mMenuButton->mDisabled = (aFlags & 8) != 0;
+		}
+		bool aSeedChoosing = (aFlags & 1) != 0;
+		if (aSeedChoosing && !mCutScene->mSeedChoosing)
+			mCutScene->StartSeedChooser();
+		else if (!aSeedChoosing && mCutScene->mSeedChoosing)
+		{
+			mCutScene->mSeedChoosing = false;
+			aChooser->mMouseVisible = false;
+			mApp->mWidgetManager->SetFocus(this);
+		}
+	}
+
+	for (const PreviewZombie& aWire : aPreview)
+	{
+		Zombie* aZombie = NetGetGhostZombie(aWire.mId);
+		if (!aZombie)
+		{
+			gNetSuppressSounds = true;
+			aZombie = AddZombieInRow((ZombieType)aWire.mType, aWire.mRow, Zombie::ZOMBIE_WAVE_CUTSCENE);
+			gNetSuppressSounds = false;
+			if (!aZombie)
+				continue;
+			aZombie->mNetId = aWire.mId;
+			aZombie->mNetGhost = true;
+		}
+		aZombie->mFromWave = Zombie::ZOMBIE_WAVE_CUTSCENE;
+		aZombie->mRow = aWire.mRow;
+		aZombie->mVariant = aWire.mVariant;
+		aZombie->mPosX = aWire.mX4 / 4.0f;
+		aZombie->mPosY = aWire.mY4 / 4.0f;
+		aZombie->mNetTargetX = aZombie->mPosX;
+		aZombie->mNetTargetY = aZombie->mPosY;
+		aZombie->mX = (int)aZombie->mPosX;
+		aZombie->mY = (int)aZombie->mPosY;
+		aZombie->mRenderOrder = aWire.mRenderOrder;
+	}
+
+	Zombie* aZombie = nullptr;
+	while (mZombies.IterateNext(aZombie))
+	{
+		if (!aZombie->mDead && aZombie->mFromWave == Zombie::ZOMBIE_WAVE_CUTSCENE &&
+			(!aZombie->mNetGhost || aSeen.find(aZombie->mNetId) == aSeen.end()))
+		{
+			gNetSuppressSounds = true;
+			aZombie->DieNoLoot();
+			gNetSuppressSounds = false;
+		}
+	}
+	mCutScene->mPlacedZombies = true;
 }
 
 void Board::NetClientTick()

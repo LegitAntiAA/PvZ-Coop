@@ -2234,6 +2234,31 @@ void Board::StartLevel()
 	mApp->mMusic->StartGameMusic();
 }
 
+// Enter gameplay on a network client without running Challenge::StartLevel.
+// All gameplay objects and counters arrive from the host's snapshots; this
+// routine owns presentation-only cleanup and the local music transition.
+void Board::StartLevelClientPresentation()
+{
+	mCoinBankFadeCount = 0;
+	LawnNet::gNetSuppressSounds = true;
+	RemoveCutsceneZombies();
+	LawnNet::gNetSuppressSounds = false;
+
+	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ICE ||
+		mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN ||
+		mApp->mGameMode == GameMode::GAMEMODE_TREE_OF_WISDOM ||
+		mApp->mGameMode == GameMode::GAMEMODE_UPSELL ||
+		mApp->mGameMode == GameMode::GAMEMODE_INTRO)
+	{
+		return;
+	}
+
+	if (!mApp->mMusic->mMusicInterface) mApp->mMusic->mMusicInterface = gSexyAppBase->mMusicInterface;
+	if (!mApp->mMusic->mApp) mApp->mMusic->mApp = mApp;
+	if (!mApp->mMusic->mApp->mBoard) mApp->mMusic->mApp->mBoard = this;
+	mApp->mMusic->StartGameMusic();
+}
+
 //0x40BF10
 LawnMower* Board::GetBottomLawnMower()
 {

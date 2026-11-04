@@ -1771,39 +1771,45 @@ void SeedChooserScreen::CoopBuildBankFromLocalState()
 	CoopBuildBankInternal(mBoard->mSeedBank, aMySlot, aPicks, aCounts, anImitaters);
 }
 
-void SeedChooserScreen::CoopBuildBankFromPayload(LawnNet::NetBuffer& thePayload)
+bool SeedChooserScreen::CoopBuildBankFromPayload(LawnNet::NetBuffer& thePayload)
 {
-	if (!mBoard)
-		return;
+        if (!mBoard || thePayload.Remaining() < 2)
+                return false;
 
-	LawnNet::NetManager* aNet = mApp->mNetManager;
-	int aMySlot = aNet ? aNet->GetMySlot() : 0;
+        LawnNet::NetManager* aNet = mApp->mNetManager;
+        int aMySlot = aNet ? aNet->GetMySlot() : 0;
 
-	/*uint8_t aPicksPerPlayer =*/ thePayload.ReadU8Or();
-	int aPicks[4][12] = {};
-	int aCounts[4] = {};
-	SeedType anImitaters[4][12] = {};
-	for (int i = 0; i < 4; i++)
-	{
-		uint8_t aCount = thePayload.ReadU8Or();
-		aCounts[i] = min((int)aCount, 12);
-		for (int j = 0; j < aCounts[i]; j++)
-		{
-			uint8_t aSeed = thePayload.ReadU8Or();
-			uint8_t anImitater = thePayload.ReadU8Or();
-			if (aSeed < (uint8_t)SeedType::NUM_SEED_TYPES)
-			{
-				aPicks[i][j] = aSeed;
-				anImitaters[i][j] = anImitater < (uint8_t)SeedType::NUM_SEED_TYPES ? (SeedType)anImitater : SEED_NONE;
-			}
-			else
-			{
-				aPicks[i][j] = SEED_NONE;
-				anImitaters[i][j] = SEED_NONE;
-			}
-		}
-	}
-	CoopBuildBankInternal(mBoard->mSeedBank, aMySlot, aPicks, aCounts, anImitaters);
+        uint8_t aPicksPerPlayer = thePayload.ReadU8Or();
+        uint8_t aSlotCount = thePayload.ReadU8Or();
+        if (aPicksPerPlayer > 12 || aSlotCount != LawnNet::NET_MAX_PLAYERS)
+                return false;
+
+        int aPicks[4][12] = {};
+        int aCounts[4] = {};
+        SeedType anImitaters[4][12] = {};
+        for (int i = 0; i < 4; i++)
+        {
+                if (thePayload.Remaining() < 1)
+                        return false;
+                uint8_t aCount = thePayload.ReadU8Or();
+                if (aCount > 12 || thePayload.Remaining() < (size_t)aCount * 2)
+                        return false;
+                aCounts[i] = aCount;
+                for (int j = 0; j < aCounts[i]; j++)
+                {
+                        uint8_t aSeed = thePayload.ReadU8Or();
+                        uint8_t anImitater = thePayload.ReadU8Or();
+                        if (aSeed >= (uint8_t)SeedType::NUM_SEED_TYPES ||
+                                (anImitater != 255 && anImitater >= (uint8_t)SeedType::NUM_SEED_TYPES))
+                                return false;
+                        aPicks[i][j] = aSeed;
+                        anImitaters[i][j] = anImitater == 255 ? SEED_NONE : (SeedType)anImitater;
+                }
+        }
+        if (thePayload.Remaining() != 0)
+                return false;
+        CoopBuildBankInternal(mBoard->mSeedBank, aMySlot, aPicks, aCounts, anImitaters);
+        return true;
 }
 
 // --------------------------------------------------------------------------

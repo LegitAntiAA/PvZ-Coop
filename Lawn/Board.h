@@ -295,6 +295,7 @@ public:
 	void							InitLevel();
 	void							DisplayAdvice(const SexyString& theAdvice, MessageStyle theMessageStyle, AdviceType theHelpIndex);
 	void							StartLevel();
+	void							StartLevelClientPresentation();
 	Plant*							AddPlant(int theGridX, int theGridY, SeedType theSeedType, SeedType theImitaterType = SeedType::SEED_NONE);
 	Projectile*						AddProjectile(int theX, int theY, int theRenderOrder, int theRow, ProjectileType theProjectileType);
 	Coin*							AddCoin(int theX, int theY, CoinType theCoinType, CoinMotion theCoinMotion,
@@ -593,6 +594,8 @@ public:
 	uint16_t						NetAllocId();
 	void							NetHostTick();				// host: send snapshot/cursor at rate
 	void							NetEncodeSnapshot(LawnNet::NetBuffer& theBuffer);
+	void							NetEncodeIntroState(LawnNet::NetBuffer& theBuffer);
+	void							NetApplyIntroState(LawnNet::NetBuffer& theBuffer);
 	void							NetClientTick();			// client: drain + apply + ghosts
 	void							NetDrainMessages();
 	void							NetApplyEvent(LawnNet::NetBuffer& thePayload);

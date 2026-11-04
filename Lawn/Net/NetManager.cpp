@@ -1,9 +1,12 @@
 #include "NetManager.h"
 #include "../../LawnApp.h"
 #include "../Board.h"
+#include "../SeedPacket.h"
 #include "../CursorObject.h"
 #include "../Challenge.h"
+#include "../CutScene.h"
 #include "../Widget/StoreScreen.h"
+#include "../Widget/SeedChooserScreen.h"
 #include "../../SexyAppFramework/Common.h"
 #include "../../SexyAppFramework/DDInterface.h"
 
@@ -760,13 +763,38 @@ void NetManager::HandleMessageClient(uint8_t theMsgType, NetBuffer& thePayload)
 			mApp->NetOnBackToMenu();
 		break;
 	case NETMSG_START_PLAYING:
-		if (mApp && mApp->mBoard && mApp->mGameScene != GameScenes::SCENE_PLAYING)
+		if (mApp && mApp->mBoard && mApp->mGameScene == GameScenes::SCENE_LEVEL_INTRO)
 		{
 			NetTrace("client applying START_PLAYING scene=%d seedChooser=%p", (int)mApp->mGameScene, (void*)mApp->mSeedChooserScreen);
+			if (!mPendingChooserStarts.empty() && mApp->mSeedChooserScreen)
+			{
+				NetBuffer aFinalBank = std::move(mPendingChooserStarts.back());
+				if (!mApp->mSeedChooserScreen->CoopBuildBankFromPayload(aFinalBank))
+				{
+					NetTrace("START_PLAYING rejected: malformed final chooser payload");
+					mPendingChooserStarts.clear();
+					break;
+				}
+				NetTrace("final chooser bank applied packets=%d", mApp->mBoard->mSeedBank->mNumPackets);
+			}
+			else if (mApp->mBoard->ChooseSeedsOnCurrentLevel() &&
+				mApp->mBoard->mCutScene && mApp->mBoard->mCutScene->mSeedChoosing)
+			{
+				NetTrace("START_PLAYING deferred: chooser level has no final bank payload");
+				break;
+			}
 			mPendingChooserStarts.clear();
 			mRemoteChooserStates.clear();
 			mChooserOpen = false;
 			mApp->StartPlaying();
+		}
+		break;
+	case NETMSG_INTRO_STATE:
+		if (mApp && mApp->mBoard && mApp->mGameScene == GameScenes::SCENE_LEVEL_INTRO)
+		{
+			if (mApp->mBoard->mCutScene && !mApp->mBoard->mCutScene->mPreloaded)
+				mApp->mBoard->mCutScene->PreloadResources();
+			mApp->mBoard->NetApplyIntroState(thePayload);
 		}
 		break;
 	case NETMSG_SCENE_CMD:

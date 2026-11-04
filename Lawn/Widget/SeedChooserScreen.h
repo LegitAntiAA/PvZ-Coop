@@ -100,7 +100,7 @@ public:
     void                    CoopBroadcastChooserState();
     void                    CoopBroadcastChooserStart();
     void                    CoopBuildBankFromLocalState();
-    void                    CoopBuildBankFromPayload(LawnNet::NetBuffer& thePayload);
+    bool                    CoopBuildBankFromPayload(LawnNet::NetBuffer& thePayload);
     void                    CoopApplyChooserState(LawnNet::NetBuffer& thePayload);
     void                    CoopPollNetwork();
 
