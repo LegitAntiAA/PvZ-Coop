@@ -382,13 +382,40 @@ static RenderCommand* gRenderHead[256];
 //0x511E50
 void TodDrawStringMatrix(Graphics* g, const Font* theFont, const SexyMatrix3& theMatrix, const SexyString& theString, const Color& theColor)
 {
-	SexyString aFinalString = TodStringTranslate(theString);
+        if (!g || !theFont || theString.empty())
+                return;
 
-	memset(gRenderTail, 0, sizeof(gRenderTail));
-	memset(gRenderHead, 0, sizeof(gRenderHead));
-	ImageFont* aFont = (ImageFont*)theFont;
-	if (!aFont->mFontData->mInitialized)
-		return;
+        SexyString aFinalString = TodStringTranslate(theString);
+
+        // Bitmap-font matrix drawing is byte-oriented.  Route UTF-8 text
+        // through ImageFont::DrawString so its SDL/Unicode fallback decodes the
+        // complete string instead of treating continuation bytes as glyph ids.
+        // The fallback preserves position and safety; bitmap-only rotation and
+        // per-glyph scale are intentionally omitted for Unicode text.
+        bool aNeedsUnicodeFallback = false;
+        for (size_t i = 0; i < aFinalString.size(); ++i)
+        {
+                if (static_cast<unsigned char>(aFinalString[i]) >= 0x80)
+                {
+                        aNeedsUnicodeFallback = true;
+                        break;
+                }
+        }
+        if (aNeedsUnicodeFallback)
+        {
+                Font* aMutableFont = const_cast<Font*>(theFont);
+                aMutableFont->DrawString(g,
+                        FloatRoundToInt(theMatrix.m02 - g->mTransX),
+                        FloatRoundToInt(theMatrix.m12 - g->mTransY),
+                        aFinalString, theColor, g->mClipRect);
+                return;
+        }
+
+        memset(gRenderTail, 0, sizeof(gRenderTail));
+        memset(gRenderHead, 0, sizeof(gRenderHead));
+        ImageFont* aFont = dynamic_cast<ImageFont*>(const_cast<Font*>(theFont));
+        if (!aFont || !aFont->mFontData || !aFont->mFontData->mInitialized)
+                return;
 
 	aFont->Prepare();
 	int aCurXPos = 0;

@@ -177,7 +177,10 @@ FontLayer::FontLayer(const FontLayer& theFontLayer) :
 }
 CharData* FontLayer::GetCharData(SexyChar value)
 {
-	return &this->mCharData[value];
+        // SexyString is UTF-8 in the non-wide build.  Individual bytes above
+        // 0x7f arrive through a signed char on MSVC; indexing with that value
+        // used to walk before mCharData and crash TodDrawStringMatrix.
+        return &this->mCharData[static_cast<unsigned char>(value)];
 }
 
 FontData::FontData()
@@ -1747,7 +1750,7 @@ void ImageFont::DrawStringEx(Graphics* g, int theX, int theY, const SexyString& 
 
 SexyChar ImageFont::GetMappedChar(char value)
 {
-	return this->mFontData->mCharMap[value];
+        return this->mFontData->mCharMap[static_cast<unsigned char>(value)];
 }
 
 void ImageFont::DrawString(Graphics* g, int theX, int theY, const SexyString& theString, const Color& theColor, const Rect& theClipRect)

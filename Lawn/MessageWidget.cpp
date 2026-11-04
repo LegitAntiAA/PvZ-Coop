@@ -135,10 +135,27 @@ void MessageWidget::SetLabel(const SexyString& theNewLabel, MessageStyle theMess
 			break;
 		}
 		
-		if (mReanimType != ReanimationType::REANIM_NONE)
-		{
-			LayoutReanimText();
-		}
+                if (mReanimType != ReanimationType::REANIM_NONE)
+                {
+                        bool aHasUtf8 = false;
+                        for (const unsigned char* aByte = reinterpret_cast<const unsigned char*>(mLabel); *aByte; ++aByte)
+                        {
+                                if (*aByte >= 0x80)
+                                {
+                                        aHasUtf8 = true;
+                                        break;
+                                }
+                        }
+
+                        // The stock letter animation indexes one reanimation per
+                        // byte, not per UTF-8 code point.  Draw localized text as
+                        // one normal Unicode string; otherwise a Cyrillic glyph
+                        // is split into invalid continuation-byte "letters".
+                        if (aHasUtf8)
+                                mReanimType = ReanimationType::REANIM_NONE;
+                        else
+                                LayoutReanimText();
+                }
 		mDisplayTime = mDuration;
 	}
 }
