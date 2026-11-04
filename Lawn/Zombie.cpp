@@ -8891,18 +8891,18 @@ void Zombie::DieNoLoot()
 
         int s = shooters;
         while (s-- > 0) {
-            Coin* aCoin = mBoard->AddCoin(aCenterX - 10 - s * 10, aCenterY, CoinType::COIN_USABLE_SEED_PACKET, CoinMotion::COIN_MOTION_FROM_PLANT);
-            aCoin->mUsableSeedType = SeedType::SEED_PEASHOOTER;
+			mBoard->AddCoin(aCenterX - 10 - s * 10, aCenterY, CoinType::COIN_USABLE_SEED_PACKET,
+				CoinMotion::COIN_MOTION_FROM_PLANT, SeedType::SEED_PEASHOOTER);
         }
         int n = nuts;
         while (n-- > 0) {
-            Coin* aCoin = mBoard->AddCoin(aCenterX - 10 - n * 10 - shooters * 10, aCenterY, CoinType::COIN_USABLE_SEED_PACKET, CoinMotion::COIN_MOTION_FROM_PLANT);
-            aCoin->mUsableSeedType = SeedType::SEED_WALLNUT;
+			mBoard->AddCoin(aCenterX - 10 - n * 10 - shooters * 10, aCenterY, CoinType::COIN_USABLE_SEED_PACKET,
+				CoinMotion::COIN_MOTION_FROM_PLANT, SeedType::SEED_WALLNUT);
         }
         int p = pads;
         while (p-- > 0) {
-            Coin* aCoin = mBoard->AddCoin(aCenterX - 10 - p * 10 - shooters * 10 - nuts * 10, aCenterY, CoinType::COIN_USABLE_SEED_PACKET, CoinMotion::COIN_MOTION_FROM_PLANT);
-            aCoin->mUsableSeedType = SeedType::SEED_LILYPAD;
+			mBoard->AddCoin(aCenterX - 10 - p * 10 - shooters * 10 - nuts * 10, aCenterY, CoinType::COIN_USABLE_SEED_PACKET,
+				CoinMotion::COIN_MOTION_FROM_PLANT, SeedType::SEED_LILYPAD);
         }
     }
 #endif

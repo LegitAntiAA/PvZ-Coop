@@ -10,6 +10,7 @@
 #include "../../Sexy.TodLib/FilterEffect.h"
 #include "../../Sexy.TodLib/Attachment.h"
 #include "../../Sexy.TodLib/EffectSystem.h"
+#include "../Net/NetCommon.h"
 
 //0x46EF00
 void ReanimatorCache::UpdateReanimationForVariation(Reanimation* theReanim, DrawVariation theDrawVariation, DrawFilterVariation theFilterVariation)
@@ -787,6 +788,11 @@ void ReanimatorCache::ReanimatorCacheDispose()
 //0x46FFB0
 void ReanimatorCache::DrawCachedPlant(Graphics* g, float thePosX, float thePosY, SeedType theSeedType, DrawVariation theDrawVariation, DrawFilterVariation theFilterVariation, unsigned int theDrawBitVariation)
 {
+	if ((int)theSeedType < 0 || (int)theSeedType >= (int)SeedType::NUM_SEED_TYPES)
+	{
+		LawnNet::NetTrace("render guard: rejected DrawCachedPlant seed=%d", (int)theSeedType);
+		return;
+	}
 	TOD_ASSERT(theSeedType >= 0 && theSeedType < SeedType::NUM_SEED_TYPES);
 
 	MemoryImage* aImage = nullptr;

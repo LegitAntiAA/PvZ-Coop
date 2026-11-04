@@ -598,10 +598,9 @@ GridItem* Board::AddALadder(int theGridX, int theGridY)
 	aLadder->mRenderOrder = MakeRenderOrder(RenderLayer::RENDER_LAYER_PLANT, theGridY, 800);
 	aLadder->mGridX = theGridX;
 	aLadder->mGridY = theGridY;
-	if (mApp->NetActive())
+	if (mApp->NetIsHost())
 	{
 		aLadder->mNetId = NetAllocId();
-		aLadder->mNetGhost = mApp->NetIsClient();
 	}
 	return aLadder;
 }
@@ -614,10 +613,9 @@ GridItem* Board::AddACrater(int theGridX, int theGridY)
 	aCrater->mRenderOrder = MakeRenderOrder(RenderLayer::RENDER_LAYER_GROUND, theGridY, 1);
 	aCrater->mGridX = theGridX;
 	aCrater->mGridY = theGridY;
-	if (mApp->NetActive())
+	if (mApp->NetIsHost())
 	{
 		aCrater->mNetId = NetAllocId();
-		aCrater->mNetGhost = mApp->NetIsClient();
 	}
 	return aCrater;
 }
@@ -630,10 +628,9 @@ GridItem* Board::AddAGraveStone(int theGridX, int theGridY)
 	aGraveStone->mRenderOrder = MakeRenderOrder(RenderLayer::RENDER_LAYER_GRAVE_STONE, theGridY, 3);
 	aGraveStone->mGridX = theGridX;
 	aGraveStone->mGridY = theGridY;
-	if (mApp->NetActive())
+	if (mApp->NetIsHost())
 	{
 		aGraveStone->mNetId = NetAllocId();
-		aGraveStone->mNetGhost = mApp->NetIsClient();
 	}
 	return aGraveStone;
 }
@@ -2125,10 +2122,9 @@ void Board::PlaceRake()
 	aRake->mRenderOrder = MakeRenderOrder(RenderLayer::RENDER_LAYER_GRAVE_STONE, aGridY, 9);
 	aRake->mGridItemReanimID = mApp->ReanimationGetID(CreateRakeReanim(aGridX, aGridY, 0));
 	aRake->mGridItemState = GridItemState::GRIDITEM_STATE_RAKE_ATTRACTING;
-	if (mApp->NetActive())
+	if (mApp->NetIsHost())
 	{
 		aRake->mNetId = NetAllocId();
-		aRake->mNetGhost = mApp->NetIsClient();
 	}
 }
 
@@ -2173,10 +2169,9 @@ void Board::InitLawnMowers()
 			LawnMower* aLawnMower = mLawnMowers.DataArrayAlloc();
 			aLawnMower->LawnMowerInitialize(aRow);
 			aLawnMower->mVisible = false;
-			if (mApp->NetActive())
+			if (mApp->NetIsHost())
 			{
 				aLawnMower->mNetId = NetAllocId();
-				aLawnMower->mNetGhost = mApp->NetIsClient();
 			}
 		}
 	}
@@ -2559,22 +2554,27 @@ void Board::ClearAdvice(AdviceType theHelpIndex)
 }
 
 //0x40CB10
-Coin* Board::AddCoin(int theX, int theY, CoinType theCoinType, CoinMotion theCoinMotion)
+Coin* Board::AddCoin(int theX, int theY, CoinType theCoinType, CoinMotion theCoinMotion, SeedType theUsableSeedType)
 {
 	Coin* aCoin = mCoins.DataArrayAlloc();
 	aCoin->CoinInitialize(theX, theY, theCoinType, theCoinMotion);
+	// A usable packet must know what it contains before its spawn event is sent.
+	// Assigning this at the call site after AddCoin used to race the client draw
+	// and fed SEED_NONE/garbage into the plant image cache.
+	aCoin->mUsableSeedType = theUsableSeedType;
 	if (mApp->NetActive())
 	{
-		aCoin->mNetId = NetAllocId();
-		aCoin->mNetGhost = mApp->NetIsClient();
 		if (mApp->NetIsHost())
 		{
+			aCoin->mNetId = NetAllocId();
 			NetBuffer anEvent;
 			anEvent.WriteU16(aCoin->mNetId);
 			anEvent.WriteU8((uint8_t)theCoinType);
+			anEvent.WriteU8((uint8_t)theCoinMotion);
 			anEvent.WriteI16((int16_t)(aCoin->mPosX * 4));
 			anEvent.WriteI16((int16_t)(aCoin->mPosY * 4));
 			anEvent.WriteU16((uint16_t)aCoin->GetSunValue());
+			anEvent.WriteU8((uint8_t)theUsableSeedType);
 			mApp->mNetManager->SendBoardEvent(anEvent, BOARDEV_SUN_ADDED);
 		}
 	}
@@ -2647,10 +2647,9 @@ Plant* Board::NewPlant(int theGridX, int theGridY, SeedType theSeedType, SeedTyp
 	Plant* aPlant = mPlants.DataArrayAlloc();
 	aPlant->mIsOnBoard = true;
 	aPlant->PlantInitialize(theGridX, theGridY, theSeedType, theImitaterType);
-	if (mApp->NetActive())
+	if (mApp->NetIsHost())
 	{
 		aPlant->mNetId = NetAllocId();
-		aPlant->mNetGhost = mApp->NetIsClient();
 	}
 	return aPlant;
 }
@@ -3018,16 +3017,9 @@ Projectile* Board::AddProjectile(int theX, int theY, int theRenderOrder, int the
 {
 	Projectile* aProjectile = mProjectiles.DataArrayAlloc();
 	aProjectile->ProjectileInitialize(theX, theY, theRenderOrder, theRow, theProjectileType);
-	if (mApp->NetActive())
+	if (mApp->NetIsHost())
 	{
 		aProjectile->mNetId = NetAllocId();
-		aProjectile->mNetGhost = mApp->NetIsClient();
-		if (mApp->NetIsClient())
-		{
-			// ghosts never fire projectiles locally
-			aProjectile->mNetTargetX = (float)theX;
-			aProjectile->mNetTargetY = (float)theY;
-		}
 	}
 	return aProjectile;
 }
@@ -3402,16 +3394,15 @@ Zombie* Board::AddZombieInRow(ZombieType theZombieType, int theRow, int theFromW
 		aZombie->mPosX = BOARD_WIDTH + 120.0f + Rand(80);
 		aZombie->mX = (int)aZombie->mPosX;
 	}
-	if (theZombieType == ZombieType::ZOMBIE_BOBSLED && aZombie->IsOnBoard())
+	if (theZombieType == ZombieType::ZOMBIE_BOBSLED && aZombie->IsOnBoard() && !mApp->NetIsClient())
 	{
 		for (int _i = 0; _i < 3; _i++)
 		{
 			Zombie* aFollower = mZombies.DataArrayAlloc();
 			aFollower->ZombieInitialize(theRow, ZombieType::ZOMBIE_BOBSLED, false, aZombie, theFromWave);
-			if (mApp->NetActive())
+			if (mApp->NetIsHost())
 			{
 				aFollower->mNetId = NetAllocId();
-				aFollower->mNetGhost = mApp->NetIsClient();
 			}
 		}
 	}
@@ -3431,10 +3422,9 @@ Zombie* Board::AddZombieInRow(ZombieType theZombieType, int theRow, int theFromW
 	// co-op: id + spawn event
 	if (mApp->NetActive())
 	{
-		aZombie->mNetId = NetAllocId();
-		aZombie->mNetGhost = mApp->NetIsClient();
 		if (mApp->NetIsHost())
 		{
+			aZombie->mNetId = NetAllocId();
 			NetBuffer anEvent;
 			anEvent.WriteU16(aZombie->mNetId);
 			anEvent.WriteU8((uint8_t)theZombieType);

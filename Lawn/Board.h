@@ -297,7 +297,8 @@ public:
 	void							StartLevel();
 	Plant*							AddPlant(int theGridX, int theGridY, SeedType theSeedType, SeedType theImitaterType = SeedType::SEED_NONE);
 	Projectile*						AddProjectile(int theX, int theY, int theRenderOrder, int theRow, ProjectileType theProjectileType);
-	Coin*							AddCoin(int theX, int theY, CoinType theCoinType, CoinMotion theCoinMotion);
+	Coin*							AddCoin(int theX, int theY, CoinType theCoinType, CoinMotion theCoinMotion,
+								SeedType theUsableSeedType = SeedType::SEED_NONE);
 	void							RefreshSeedPacketFromCursor();
 	ZombieType						PickGraveRisingZombieType(int theZombiePoints);
 	ZombieType						PickZombieType(int theZombiePoints, int theWaveIndex, ZombiePicker* theZombiePicker);

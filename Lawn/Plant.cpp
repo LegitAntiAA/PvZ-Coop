@@ -24,6 +24,7 @@
 #include "Widget/AchievementsScreen.h"
 #include "ToolTipWidget.h"
 #include "../Sexy.TodLib/FilterEffect.h"
+#include "Net/NetCommon.h"
 
 PlantDefinition gPlantDefs[SeedType::NUM_SEED_TYPES] = {  //0x69F2B0
     { SeedType::SEED_PEASHOOTER,        nullptr, ReanimationType::REANIM_PEASHOOTER,    0,  100,    750,    PlantSubClass::SUBCLASS_SHOOTER,    150,    _S("PEASHOOTER") },
@@ -5203,7 +5204,19 @@ void Plant::Draw(Graphics* g)
 //0x4660B0
 void Plant::DrawSeedType(Graphics* g, SeedType theSeedType, SeedType theImitaterType, DrawVariation theDrawVariation, float thePosX, float thePosY, unsigned int theBitVariation)
 {
-    g->PushState();
+	const int aRawSeed = (int)theSeedType;
+	if ((aRawSeed < 0 || aRawSeed >= (int)SeedType::NUM_SEED_TYPES) && !Challenge::IsZombieSeedType(theSeedType))
+	{
+		LawnNet::NetTrace("render guard: rejected DrawSeedType seed=%d imitater=%d", aRawSeed, (int)theImitaterType);
+		return;
+	}
+	if (theSeedType == SeedType::SEED_IMITATER && theImitaterType != SeedType::SEED_NONE &&
+		((int)theImitaterType < 0 || (int)theImitaterType >= (int)SeedType::NUM_SEED_TYPES))
+	{
+		LawnNet::NetTrace("render guard: rejected DrawSeedType imitater=%d", (int)theImitaterType);
+		return;
+	}
+	g->PushState();
     int aCelRow = 0;
     int aCelCol = 2;
     float aOffsetX = 0.0f;
@@ -6544,10 +6557,14 @@ void Plant::Die()
 
 PlantDefinition& GetPlantDefinition(SeedType theSeedType)
 {
-    TOD_ASSERT(gPlantDefs[theSeedType].mSeedType == theSeedType);
-    TOD_ASSERT(theSeedType >= 0 && theSeedType < (int)SeedType::NUM_SEED_TYPES);
-    
-    return gPlantDefs[theSeedType];
+	if ((int)theSeedType < 0 || (int)theSeedType >= (int)SeedType::NUM_SEED_TYPES)
+	{
+		LawnNet::NetTrace("render guard: rejected GetPlantDefinition seed=%d", (int)theSeedType);
+		return gPlantDefs[(int)SeedType::SEED_PEASHOOTER];
+	}
+	TOD_ASSERT(gPlantDefs[theSeedType].mSeedType == theSeedType);
+
+	return gPlantDefs[theSeedType];
 }
 
 //0x467B00

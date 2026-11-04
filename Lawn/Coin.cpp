@@ -16,6 +16,7 @@
 #include "../Sexy.TodLib/Attachment.h"
 #include "Widget/AchievementsScreen.h"
 #include "../Sexy.TodLib/FilterEffect.h"
+#include "Net/NetCommon.h"
 
 Coin::Coin()
 {
@@ -1022,9 +1023,14 @@ void Coin::Draw(Graphics* g)
     {
         aImage = IMAGE_ZOMBIE_NOTE_SMALL;
     }
-    else if (mType == CoinType::COIN_USABLE_SEED_PACKET)
-    {
-        int aGrayness = 255;
+	else if (mType == CoinType::COIN_USABLE_SEED_PACKET)
+	{
+		if ((int)mUsableSeedType < 0 || (int)mUsableSeedType >= (int)SeedType::NUM_SEED_TYPES)
+		{
+			LawnNet::NetTrace("render guard: rejected usable packet id=%u seed=%d", mNetId, (int)mUsableSeedType);
+			return;
+		}
+		int aGrayness = 255;
         if (mIsBeingCollected)
         {
             aGrayness = 128;

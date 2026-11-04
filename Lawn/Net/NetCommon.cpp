@@ -107,7 +107,7 @@ const char* NetMessageName(uint8_t theMsgType)
 // -------------------------------------------------------------------------
 bool NetEncodeFrame(const NetBuffer& thePayload, uint8_t theMsgType, NetBuffer& theFrame)
 {
-	if (thePayload.Size() > NET_MAX_FRAME)
+	if (thePayload.Size() > NET_MAX_FRAME || thePayload.Size() > 0xFFFFU)
 		return false;
 	theFrame.Clear();
 	theFrame.Reserve(thePayload.Size() + 3);

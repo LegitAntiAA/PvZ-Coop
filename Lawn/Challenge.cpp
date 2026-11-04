@@ -2082,8 +2082,7 @@ void Challenge::UpdateRainingSeeds()
 		return;
 
 	mChallengeStateCounter = RandRangeInt(500, 999);
-
-	Coin* aCoin = mBoard->AddCoin(RandRangeInt(100, 649), 60, COIN_USABLE_SEED_PACKET, COIN_MOTION_FROM_SKY_SLOW);
+	int aCoinX = RandRangeInt(100, 649);
 
 	SeedType aSeedType;
 	do
@@ -2102,7 +2101,7 @@ void Challenge::UpdateRainingSeeds()
 	if (Rand(100) < TodAnimateCurve(0, 18, mBoard->CountPlantByType(SEED_LILYPAD), 30, 1, CURVE_LINEAR))
 		aSeedType = SEED_LILYPAD;
 
-	aCoin->mUsableSeedType = aSeedType;
+	mBoard->AddCoin(aCoinX, 60, COIN_USABLE_SEED_PACKET, COIN_MOTION_FROM_SKY_SLOW, aSeedType);
 }
 
 //0x423670
@@ -2219,7 +2218,7 @@ void Challenge::UpdateSlotMachine()
 				else
 				{
 					mBoard->DisplayAdvice(_S("[ADVICE_SLOT_MACHINE_2_OF_A_KIND]"), MESSAGE_STYLE_SLOT_MACHINE, ADVICE_NONE);
-					mBoard->AddCoin(360, 85, COIN_USABLE_SEED_PACKET, COIN_MOTION_COIN)->mUsableSeedType = aSeedType;
+					mBoard->AddCoin(360, 85, COIN_USABLE_SEED_PACKET, COIN_MOTION_COIN, aSeedType);
 				}
 			}
 		}
@@ -2247,7 +2246,7 @@ void Challenge::UpdateSlotMachine()
 				mBoard->DisplayAdvice(_S("[ADVICE_SLOT_MACHINE_3_OF_A_KIND]"), MESSAGE_STYLE_SLOT_MACHINE, ADVICE_NONE);
 				for (int i = 0; i < 3; i++)
 				{
-					mBoard->AddCoin(320 + i * 20, 85, COIN_USABLE_SEED_PACKET, COIN_MOTION_COIN)->mUsableSeedType = aPacket1;
+					mBoard->AddCoin(320 + i * 20, 85, COIN_USABLE_SEED_PACKET, COIN_MOTION_COIN, aPacket1);
 				}
 			}
 		}
@@ -4674,7 +4673,7 @@ void Challenge::ScaryPotterOpenPot(GridItem* theScaryPot)
 	switch (theScaryPot->mScaryPotType)
 	{
 	case SCARYPOT_SEED:
-		mBoard->AddCoin(aXPos + 20, aYPos, COIN_USABLE_SEED_PACKET, COIN_MOTION_FROM_PLANT)->mUsableSeedType = theScaryPot->mSeedType;
+		mBoard->AddCoin(aXPos + 20, aYPos, COIN_USABLE_SEED_PACKET, COIN_MOTION_FROM_PLANT, theScaryPot->mSeedType);
 		break;
 	case SCARYPOT_ZOMBIE:
 		mBoard->AddZombieInRow(theScaryPot->mZombieType, theScaryPot->mGridY, 0)->mPosX = aXPos;

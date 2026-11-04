@@ -12,6 +12,7 @@
 #include "../Sexy.TodLib/Reanimator.h"
 #include "../Sexy.TodLib/TodParticle.h"
 #include "../SexyAppFramework/WidgetManager.h"
+#include "Net/NetCommon.h"
 
 using namespace Sexy;
 
@@ -300,8 +301,13 @@ void GridItem::DrawCrater(Graphics* g)
 //0x44DB00
 void GridItem::DrawScaryPot(Graphics* g)
 {
-    int aImageCol = (int)mGridItemState - (int)GridItemState::GRIDITEM_STATE_SCARY_POT_QUESTION;
-    TOD_ASSERT(aImageCol >= 0 && aImageCol < 3);
+	int aImageCol = (int)mGridItemState - (int)GridItemState::GRIDITEM_STATE_SCARY_POT_QUESTION;
+	if (aImageCol < 0 || aImageCol >= 3)
+	{
+		LawnNet::NetTrace("render guard: rejected scary pot id=%u state=%d", mNetId, (int)mGridItemState);
+		return;
+	}
+	TOD_ASSERT(aImageCol >= 0 && aImageCol < 3);
 
     int aXPos = mBoard->GridToPixelX(mGridX, mGridY) - 5;
     int aYPos = mBoard->GridToPixelY(mGridX, mGridY) - 15;
@@ -313,15 +319,29 @@ void GridItem::DrawScaryPot(Graphics* g)
         g->DrawImageCel(IMAGE_SCARY_POT, aXPos, aYPos, aImageCol, 0);
 
         g->PushState();
-        if (mScaryPotType == ScaryPotType::SCARYPOT_SEED)
-        {
-            g->mScaleX = 0.7f;
+		if (mScaryPotType == ScaryPotType::SCARYPOT_SEED)
+		{
+			if ((int)mSeedType < 0 || (int)mSeedType >= (int)SeedType::NUM_SEED_TYPES)
+			{
+				LawnNet::NetTrace("render guard: rejected scary pot seed id=%u seed=%d", mNetId, (int)mSeedType);
+				g->PopState();
+				g->PopState();
+				return;
+			}
+			g->mScaleX = 0.7f;
             g->mScaleY = 0.7f;
             DrawSeedPacket(g, aXPos + 23.0f, aYPos + 33.0f, mSeedType, SeedType::SEED_NONE, 0.0f, 255, false, false);
         }
-        else if (mScaryPotType == ScaryPotType::SCARYPOT_ZOMBIE)
-        {
-            g->mScaleX = 0.4f;
+		else if (mScaryPotType == ScaryPotType::SCARYPOT_ZOMBIE)
+		{
+			if ((int)mZombieType < 0 || (int)mZombieType >= (int)ZombieType::NUM_ZOMBIE_TYPES)
+			{
+				LawnNet::NetTrace("render guard: rejected scary pot zombie id=%u zombie=%d", mNetId, (int)mZombieType);
+				g->PopState();
+				g->PopState();
+				return;
+			}
+			g->mScaleX = 0.4f;
             g->mScaleY = 0.4f;
             float aOffsetX = 6.0f;
             float aOffsetY = 19.0f;

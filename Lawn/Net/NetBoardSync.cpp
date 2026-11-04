@@ -18,10 +18,34 @@
 #include "../../SexyAppFramework/Graphics.h"
 #include "../../SexyAppFramework/WidgetManager.h"
 #include "NetManager.h"
+#include <float.h>
 
 using namespace LawnNet;
 
 bool LawnNet::gNetSuppressSounds = false;
+
+namespace
+{
+bool NetGridStateMatchesType(uint8_t theType, uint8_t theState)
+{
+	switch ((GridItemType)theType)
+	{
+	case GRIDITEM_GRAVESTONE:		return theState <= GRIDITEM_STATE_GRAVESTONE_SPECIAL;
+	case GRIDITEM_CRATER:
+	case GRIDITEM_LADDER:
+	case GRIDITEM_BRAIN:			return theState == GRIDITEM_STATE_NORMAL;
+	case GRIDITEM_PORTAL_CIRCLE:
+	case GRIDITEM_PORTAL_SQUARE:	return theState == GRIDITEM_STATE_NORMAL || theState == GRIDITEM_STATE_PORTAL_CLOSED;
+	case GRIDITEM_SCARY_POT:		return theState >= GRIDITEM_STATE_SCARY_POT_QUESTION && theState <= GRIDITEM_STATE_SCARY_POT_ZOMBIE;
+	case GRIDITEM_SQUIRREL:		return theState >= GRIDITEM_STATE_SQUIRREL_WAITING && theState <= GRIDITEM_STATE_SQUIRREL_ZOMBIE;
+	case GRIDITEM_ZEN_TOOL:		return theState >= GRIDITEM_STATE_ZEN_TOOL_WATERING_CAN && theState <= GRIDITEM_STATE_ZEN_TOOL_GOLD_WATERING_CAN;
+	case GRIDITEM_STINKY:			return theState >= GRIDITEM_STINKY_WALKING_LEFT && theState <= GRIDITEM_STINKY_WAKING_UP;
+	case GRIDITEM_RAKE:			return theState >= GRIDITEM_STATE_RAKE_ATTRACTING && theState <= GRIDITEM_STATE_RAKE_TRIGGERED;
+	case GRIDITEM_IZOMBIE_BRAIN:	return theState == GRIDITEM_STATE_NORMAL || theState == GRIDITEM_STATE_BRAIN_SQUISHED;
+	default:						return false;
+	}
+}
+}
 
 namespace LawnNet
 {
@@ -128,7 +152,36 @@ namespace LawnNet
 
 uint16_t Board::NetAllocId()
 {
-	return ++mNextNetId;
+	// Zero is the wire sentinel for "no authoritative identity".  Endless
+	// sessions can wrap the 16-bit counter, so also avoid every still-live id.
+	auto IsLiveId = [&](uint16_t theId)
+	{
+		Plant* aPlant = nullptr;
+		while (mPlants.IterateNext(aPlant)) if (!aPlant->mDead && aPlant->mNetId == theId) return true;
+		Zombie* aZombie = nullptr;
+		while (mZombies.IterateNext(aZombie)) if (!aZombie->mDead && aZombie->mNetId == theId) return true;
+		Projectile* aProjectile = nullptr;
+		while (mProjectiles.IterateNext(aProjectile)) if (!aProjectile->mDead && aProjectile->mNetId == theId) return true;
+		Coin* aCoin = nullptr;
+		while (mCoins.IterateNext(aCoin)) if (!aCoin->mDead && aCoin->mNetId == theId) return true;
+		LawnMower* aMower = nullptr;
+		while (mLawnMowers.IterateNext(aMower)) if (!aMower->mDead && aMower->mNetId == theId) return true;
+		GridItem* aGridItem = nullptr;
+		while (mGridItems.IterateNext(aGridItem)) if (!aGridItem->mDead && aGridItem->mNetId == theId) return true;
+		return false;
+	};
+
+	for (uint32_t anAttempt = 0; anAttempt < 0xFFFFU; ++anAttempt)
+	{
+		do
+		{
+			++mNextNetId;
+		} while (mNextNetId == 0);
+		if (!IsLiveId(mNextNetId))
+			return mNextNetId;
+	}
+	NetTrace("fatal: exhausted all authoritative entity ids");
+	return 0;
 }
 
 void Board::NetHostTick()
@@ -230,7 +283,7 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 	}
 
 	// ---- plants ----
-	uint8_t aCount = 0;
+	uint16_t aCount = 0;
 	NetBuffer aBody;
 	Plant* aPlant = nullptr;
 	while (mPlants.IterateNext(aPlant))
@@ -253,7 +306,7 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 		aBody.WriteU8(aPFlags);
 		aCount++;
 	}
-	b.WriteU8(aCount);
+	b.WriteU16(aCount);
 	b.WriteBytes(aBody.Data(), aBody.Size());
 
 	// ---- zombies ----
@@ -302,7 +355,7 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 		aBody.WriteU8(anAnimKey);
 		aCount++;
 	}
-	b.WriteU8(aCount);
+	b.WriteU16(aCount);
 	b.WriteBytes(aBody.Data(), aBody.Size());
 
 	// ---- projectiles ----
@@ -321,7 +374,7 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 		aBody.WriteU16((uint16_t)min(65535, max(0, aProjectile->mRenderOrder + 32768)));
 		aCount++;
 	}
-	b.WriteU8(aCount);
+	b.WriteU16(aCount);
 	b.WriteBytes(aBody.Data(), aBody.Size());
 
 	// ---- coins ----
@@ -332,6 +385,8 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 	{
 		if (aCoin->mDead)
 			continue;
+		if (aCoin->mNetId == 0)
+			aCoin->mNetId = NetAllocId();
 		aBody.WriteU16(aCoin->mNetId);
 		aBody.WriteU8((uint8_t)aCoin->mType);
 		aBody.WriteU8((uint8_t)aCoin->mCoinMotion);
@@ -341,9 +396,10 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 		if (aCoin->mIsBeingCollected) aCFlags |= 1;
 		if (aCoin->mHitGround) aCFlags |= 2;
 		aBody.WriteU8(aCFlags);
+		aBody.WriteU8((uint8_t)aCoin->mUsableSeedType);
 		aCount++;
 	}
-	b.WriteU8(aCount);
+	b.WriteU16(aCount);
 	b.WriteBytes(aBody.Data(), aBody.Size());
 
 	// ---- lawn mowers ----
@@ -354,13 +410,19 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 	{
 		if (aMower->mDead)
 			continue;
+		if (aMower->mNetId == 0)
+			aMower->mNetId = NetAllocId();
 		aBody.WriteU16(aMower->mNetId);
 		aBody.WriteU8((uint8_t)aMower->mRow);
 		aBody.WriteU8((uint8_t)aMower->mMowerState);
+		aBody.WriteU8((uint8_t)aMower->mMowerType);
+		aBody.WriteU8(aMower->mVisible ? 1 : 0);
 		aBody.WriteI16((int16_t)(aMower->mPosX * 4));
+		aBody.WriteF32(aMower->mAltitude);
+		aBody.WriteU8((uint8_t)aMower->mMowerHeight);
 		aCount++;
 	}
-	b.WriteU8(aCount);
+	b.WriteU16(aCount);
 	b.WriteBytes(aBody.Data(), aBody.Size());
 
 	// ---- grid items ----
@@ -371,15 +433,30 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 	{
 		if (aGridItem->mDead)
 			continue;
+		// Several stock modes (notably Vasebreaker) allocate grid items directly,
+		// bypassing the helpers that normally assign network identities.
+		if (aGridItem->mNetId == 0)
+			aGridItem->mNetId = NetAllocId();
 		aBody.WriteU16(aGridItem->mNetId);
 		aBody.WriteU8((uint8_t)aGridItem->mGridItemType);
 		aBody.WriteU8((uint8_t)aGridItem->mGridItemState);
 		aBody.WriteU8((uint8_t)aGridItem->mGridX);
 		aBody.WriteU8((uint8_t)aGridItem->mGridY);
-		aBody.WriteU16((uint16_t)min(65535, max(0, aGridItem->mGridItemCounter)));
+		aBody.WriteI32(aGridItem->mGridItemCounter);
+		aBody.WriteI32(aGridItem->mRenderOrder);
+		aBody.WriteF32(aGridItem->mPosX);
+		aBody.WriteF32(aGridItem->mPosY);
+		aBody.WriteF32(aGridItem->mGoalX);
+		aBody.WriteF32(aGridItem->mGoalY);
+		aBody.WriteU8(aGridItem->mZombieType == ZombieType::ZOMBIE_INVALID ? 255 : (uint8_t)aGridItem->mZombieType);
+		aBody.WriteU8(aGridItem->mSeedType == SeedType::SEED_NONE ? 255 : (uint8_t)aGridItem->mSeedType);
+		aBody.WriteU8((uint8_t)aGridItem->mScaryPotType);
+		aBody.WriteU16((uint16_t)min(65535, max(0, aGridItem->mTransparentCounter)));
+		aBody.WriteU8((uint8_t)min(255, max(0, aGridItem->mSunCount)));
+		aBody.WriteU8(aGridItem->mHighlighted ? 1 : 0);
 		aCount++;
 	}
-	b.WriteU8(aCount);
+	b.WriteU16(aCount);
 	b.WriteBytes(aBody.Data(), aBody.Size());
 }
 
@@ -389,54 +466,66 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 
 Plant* Board::NetGetGhostPlant(unsigned short theId)
 {
+	if (theId == 0)
+		return nullptr;
 	Plant* aPlant = nullptr;
 	while (mPlants.IterateNext(aPlant))
-		if (aPlant->mNetId == theId && !aPlant->mDead)
+		if (aPlant->mNetGhost && aPlant->mNetId == theId && !aPlant->mDead)
 			return aPlant;
 	return nullptr;
 }
 
 Zombie* Board::NetGetGhostZombie(unsigned short theId)
 {
+	if (theId == 0)
+		return nullptr;
 	Zombie* aZombie = nullptr;
 	while (mZombies.IterateNext(aZombie))
-		if (aZombie->mNetId == theId && !aZombie->mDead)
+		if (aZombie->mNetGhost && aZombie->mNetId == theId && !aZombie->mDead)
 			return aZombie;
 	return nullptr;
 }
 
 Projectile* Board::NetGetGhostProjectile(unsigned short theId)
 {
+	if (theId == 0)
+		return nullptr;
 	Projectile* aProjectile = nullptr;
 	while (mProjectiles.IterateNext(aProjectile))
-		if (aProjectile->mNetId == theId && !aProjectile->mDead)
+		if (aProjectile->mNetGhost && aProjectile->mNetId == theId && !aProjectile->mDead)
 			return aProjectile;
 	return nullptr;
 }
 
 Coin* Board::NetGetGhostCoin(unsigned short theId)
 {
+	if (theId == 0)
+		return nullptr;
 	Coin* aCoin = nullptr;
 	while (mCoins.IterateNext(aCoin))
-		if (aCoin->mNetId == theId && !aCoin->mDead)
+		if (aCoin->mNetGhost && aCoin->mNetId == theId && !aCoin->mDead)
 			return aCoin;
 	return nullptr;
 }
 
 GridItem* Board::NetGetGhostGridItem(unsigned short theId)
 {
+	if (theId == 0)
+		return nullptr;
 	GridItem* aGridItem = nullptr;
 	while (mGridItems.IterateNext(aGridItem))
-		if (aGridItem->mNetId == theId && !aGridItem->mDead)
+		if (aGridItem->mNetGhost && aGridItem->mNetId == theId && !aGridItem->mDead)
 			return aGridItem;
 	return nullptr;
 }
 
 LawnMower* Board::NetGetGhostMower(unsigned short theId)
 {
+	if (theId == 0)
+		return nullptr;
 	LawnMower* aMower = nullptr;
 	while (mLawnMowers.IterateNext(aMower))
-		if (aMower->mNetId == theId && !aMower->mDead)
+		if (aMower->mNetGhost && aMower->mNetId == theId && !aMower->mDead)
 			return aMower;
 	return nullptr;
 }
@@ -497,27 +586,53 @@ void Board::NetApplyEvent(NetBuffer& b)
 	}
 	case BOARDEV_SUN_ADDED:
 	{
+		if (b.Remaining() != 11)
+		{
+			NetTrace("SUN_ADDED rejected: invalid payload size=%zu expected=11", b.Remaining());
+			break;
+		}
 		uint16_t anId = b.ReadU16Or();
 		uint8_t aCoinType = b.ReadU8Or();
+		uint8_t aMotion = b.ReadU8Or();
 		int aX = b.ReadI16Or() / 4;
 		int aY = b.ReadI16Or() / 4;
 		uint16_t aValue = b.ReadU16Or();
-		if (!NetGetGhostCoin(anId))
+		uint8_t aUsableSeed = b.ReadU8Or();
+		bool aUsablePacket = aCoinType == (uint8_t)CoinType::COIN_USABLE_SEED_PACKET;
+		if (anId == 0 || aCoinType < (uint8_t)CoinType::COIN_SILVER ||
+			aCoinType > (uint8_t)CoinType::COIN_PRESENT_SURVIVAL_MODE ||
+			aMotion > (uint8_t)CoinMotion::COIN_MOTION_FROM_BOSS ||
+			(aUsablePacket && aUsableSeed >= (uint8_t)SeedType::NUM_SEED_TYPES) ||
+			(!aUsablePacket && aUsableSeed != 255))
+		{
+			NetTrace("SUN_ADDED rejected: id=%u coinType=%u seed=%u value=%u", anId, aCoinType, aUsableSeed, aValue);
+			break;
+		}
+		Coin* aCoin = NetGetGhostCoin(anId);
+		if (aCoin && aCoin->mType != (CoinType)aCoinType)
+		{
+			NetTrace("SUN_ADDED rejected: id=%u changed coin type old=%d new=%u", anId, (int)aCoin->mType, aCoinType);
+			break;
+		}
+		if (!aCoin)
 		{
 			gNetSuppressSounds = true;
-			Coin* aCoin = AddCoin(aX, aY, (CoinType)aCoinType, CoinMotion::COIN_MOTION_FROM_PLANT);
+			aCoin = AddCoin(aX, aY, (CoinType)aCoinType, (CoinMotion)aMotion,
+				aUsableSeed == 255 ? SeedType::SEED_NONE : (SeedType)aUsableSeed);
 			gNetSuppressSounds = false;
-			if (aCoin)
-			{
-				aCoin->mNetId = anId;
-				aCoin->mNetGhost = true;
-				aCoin->mHitGround = true;
-				aCoin->mPosX = (float)aX;
-				aCoin->mPosY = (float)aY;
-				aCoin->mGroundY = aY;
-				aCoin->mNetTargetX = (float)aX;
-				aCoin->mNetTargetY = (float)aY;
-			}
+		}
+		if (aCoin)
+		{
+			aCoin->mNetId = anId;
+			aCoin->mNetGhost = true;
+			aCoin->mHitGround = true;
+			aCoin->mPosX = (float)aX;
+			aCoin->mPosY = (float)aY;
+			aCoin->mGroundY = aY;
+			aCoin->mNetTargetX = (float)aX;
+			aCoin->mNetTargetY = (float)aY;
+			aCoin->mCoinMotion = (CoinMotion)aMotion;
+			aCoin->mUsableSeedType = aUsableSeed == 255 ? SeedType::SEED_NONE : (SeedType)aUsableSeed;
 		}
 		break;
 	}
@@ -706,7 +821,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	}
 
 	// ---- plants ----
-	uint8_t aCount = b.ReadU8Or();
+	uint16_t aCount = b.ReadU16Or();
 	std::map<unsigned short, bool> aSeenPlants;
 	for (int i = 0; i < aCount; i++)
 	{
@@ -752,7 +867,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	}
 
 	// ---- zombies ----
-	aCount = b.ReadU8Or();
+	aCount = b.ReadU16Or();
 	std::map<unsigned short, bool> aSeenZombies;
 	for (int i = 0; i < aCount; i++)
 	{
@@ -833,7 +948,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	}
 
 	// ---- projectiles ----
-	aCount = b.ReadU8Or();
+	aCount = b.ReadU16Or();
 	std::map<unsigned short, bool> aSeenProjectiles;
 	for (int i = 0; i < aCount; i++)
 	{
@@ -868,23 +983,50 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	}
 
 	// ---- coins ----
-	aCount = b.ReadU8Or();
+	aCount = b.ReadU16Or();
 	std::map<unsigned short, bool> aSeenCoins;
 	for (int i = 0; i < aCount; i++)
 	{
+		if (b.Remaining() < 10)
+		{
+			NetTrace("snapshot coin section truncated index=%d count=%u remaining=%zu", i, aCount, b.Remaining());
+			return;
+		}
 		uint16_t anId = b.ReadU16Or();
 		uint8_t aType = b.ReadU8Or();
 		uint8_t aMotion = b.ReadU8Or();
 		int16_t aX = b.ReadI16Or();
 		int16_t aY = b.ReadI16Or();
 		uint8_t aCFlags = b.ReadU8Or();
+		uint8_t aUsableSeed = b.ReadU8Or();
+		bool aUsablePacket = aType == (uint8_t)CoinType::COIN_USABLE_SEED_PACKET;
+		if (anId == 0 || aType < (uint8_t)CoinType::COIN_SILVER ||
+			aType > (uint8_t)CoinType::COIN_PRESENT_SURVIVAL_MODE ||
+			aMotion > (uint8_t)CoinMotion::COIN_MOTION_FROM_BOSS || (aCFlags & ~3) != 0 ||
+			(aUsablePacket && aUsableSeed >= (uint8_t)SeedType::NUM_SEED_TYPES) ||
+			(!aUsablePacket && aUsableSeed != 255))
+		{
+			NetTrace("snapshot coin rejected id=%u type=%u motion=%u flags=%u seed=%u", anId, aType, aMotion, aCFlags, aUsableSeed);
+			continue;
+		}
+		if (aSeenCoins.find(anId) != aSeenCoins.end())
+		{
+			NetTrace("snapshot coin rejected duplicate id=%u", anId);
+			continue;
+		}
 		aSeenCoins[anId] = true;
 
 		Coin* aCoin = NetGetGhostCoin(anId);
+		if (aCoin && aCoin->mType != (CoinType)aType)
+		{
+			NetTrace("snapshot coin rejected: id=%u changed type old=%d new=%u", anId, (int)aCoin->mType, aType);
+			continue;
+		}
 		if (!aCoin)
 		{
 			gNetSuppressSounds = true;
-			aCoin = AddCoin(aX / 4, aY / 4, (CoinType)aType, (CoinMotion)aMotion);
+			aCoin = AddCoin(aX / 4, aY / 4, (CoinType)aType, (CoinMotion)aMotion,
+				aUsableSeed == 255 ? SeedType::SEED_NONE : (SeedType)aUsableSeed);
 			gNetSuppressSounds = false;
 			if (!aCoin)
 				continue;
@@ -894,8 +1036,10 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		}
 		aCoin->mNetTargetX = aX / 4.0f;
 		aCoin->mNetTargetY = aY / 4.0f;
+		aCoin->mCoinMotion = (CoinMotion)aMotion;
 		aCoin->mIsBeingCollected = (aCFlags & 1) != 0;
 		aCoin->mHitGround = (aCFlags & 2) != 0;
+		aCoin->mUsableSeedType = aUsableSeed == 255 ? SeedType::SEED_NONE : (SeedType)aUsableSeed;
 	}
 	{
 		Coin* aCoin = nullptr;
@@ -910,17 +1054,49 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	}
 
 	// ---- lawn mowers ----
-	aCount = b.ReadU8Or();
+	aCount = b.ReadU16Or();
 	std::map<unsigned short, bool> aSeenMowers;
 	for (int i = 0; i < aCount; i++)
 	{
+		static const size_t MOWER_WIRE_BYTES = 13;
+		if (b.Remaining() < MOWER_WIRE_BYTES)
+		{
+			NetTrace("snapshot mower section truncated index=%d count=%u remaining=%zu", i, aCount, b.Remaining());
+			return;
+		}
 		uint16_t anId = b.ReadU16Or();
 		uint8_t aRow = b.ReadU8Or();
 		uint8_t aState = b.ReadU8Or();
+		uint8_t aType = b.ReadU8Or();
+		uint8_t aVisible = b.ReadU8Or();
 		int16_t aX = b.ReadI16Or();
+		float anAltitude = b.ReadF32Or();
+		uint8_t aHeight = b.ReadU8Or();
+		if (anId == 0 || aRow >= MAX_GRID_SIZE_Y || aState > (uint8_t)LawnMowerState::MOWER_SQUISHED ||
+			aType >= (uint8_t)LawnMowerType::NUM_MOWER_TYPES || aVisible > 1 ||
+			aHeight > (uint8_t)MowerHeight::MOWER_HEIGHT_UP_TO_LAND || !_finite(anAltitude) ||
+			aSeenMowers.find(anId) != aSeenMowers.end())
+		{
+			NetTrace("snapshot mower rejected id=%u row=%u state=%u type=%u visible=%u height=%u",
+				anId, aRow, aState, aType, aVisible, aHeight);
+			continue;
+		}
 		aSeenMowers[anId] = true;
 
 		LawnMower* aMower = NetGetGhostMower(anId);
+		if (!aMower)
+		{
+			LawnMower* aLocalMower = nullptr;
+			while (mLawnMowers.IterateNext(aLocalMower))
+			{
+				if (!aLocalMower->mDead && !aLocalMower->mNetGhost &&
+					aLocalMower->mRow == aRow && aLocalMower->mMowerType == (LawnMowerType)aType)
+				{
+					aMower = aLocalMower;
+					break;
+				}
+			}
+		}
 		if (!aMower)
 		{
 			gNetSuppressSounds = true;
@@ -928,60 +1104,160 @@ void Board::NetApplySnapshot(NetBuffer& b)
 			if (!aMower)
 				continue;
 			aMower->LawnMowerInitialize(aRow);
-			aMower->mNetId = anId;
-			aMower->mNetGhost = true;
 			gNetSuppressSounds = false;
 		}
+		if (aMower->mMowerType != (LawnMowerType)aType)
+		{
+			NetTrace("snapshot mower rejected type mismatch id=%u local=%d host=%u", anId, (int)aMower->mMowerType, aType);
+			continue;
+		}
+		aMower->mNetId = anId;
+		aMower->mNetGhost = true;
 		aMower->mMowerState = (LawnMowerState)aState;
+		aMower->mVisible = aVisible != 0;
 		aMower->mPosX = aX / 4.0f;
 		aMower->mNetTargetX = aX / 4.0f;
+		aMower->mAltitude = anAltitude;
+		aMower->mMowerHeight = (MowerHeight)aHeight;
 	}
 	{
 		LawnMower* aMower = nullptr;
 		while (mLawnMowers.IterateNext(aMower))
-			if (aMower->mNetGhost && !aMower->mDead && aSeenMowers.find(aMower->mNetId) == aSeenMowers.end())
+		{
+			if (!aMower->mDead &&
+				((aMower->mNetGhost && aSeenMowers.find(aMower->mNetId) == aSeenMowers.end()) || !aMower->mNetGhost))
+			{
+				Reanimation* aReanim = mApp->ReanimationTryToGet(aMower->mReanimID);
+				if (aReanim)
+					aReanim->ReanimationDie();
 				aMower->mDead = true;
+			}
+		}
 	}
 
 	// ---- grid items ----
-	aCount = b.ReadU8Or();
+	aCount = b.ReadU16Or();
 	std::map<unsigned short, bool> aSeenGridItems;
 	for (int i = 0; i < aCount; i++)
 	{
+		static const size_t GRID_ITEM_WIRE_BYTES = 37;
+		if (b.Remaining() < GRID_ITEM_WIRE_BYTES)
+		{
+			NetTrace("snapshot grid section truncated index=%d count=%u remaining=%zu", i, aCount, b.Remaining());
+			return;
+		}
 		uint16_t anId = b.ReadU16Or();
 		uint8_t aType = b.ReadU8Or();
 		uint8_t aState = b.ReadU8Or();
 		uint8_t aX = b.ReadU8Or();
 		uint8_t aY = b.ReadU8Or();
-		uint16_t aCounter = b.ReadU16Or();
+		int32_t aCounter = b.ReadI32Or();
+		int32_t aRenderOrder = b.ReadI32Or();
+		float aPosX = b.ReadF32Or();
+		float aPosY = b.ReadF32Or();
+		float aGoalX = b.ReadF32Or();
+		float aGoalY = b.ReadF32Or();
+		uint8_t aZombieType = b.ReadU8Or();
+		uint8_t aSeedType = b.ReadU8Or();
+		uint8_t aScaryPotType = b.ReadU8Or();
+		uint16_t aTransparentCounter = b.ReadU16Or();
+		uint8_t aSunCount = b.ReadU8Or();
+		uint8_t aFlags = b.ReadU8Or();
+		bool aPortal = aType == (uint8_t)GridItemType::GRIDITEM_PORTAL_CIRCLE ||
+			aType == (uint8_t)GridItemType::GRIDITEM_PORTAL_SQUARE;
+		bool aValidCell = (aX < MAX_GRID_SIZE_X || (aPortal && aX == MAX_GRID_SIZE_X)) && aY < MAX_GRID_SIZE_Y;
+		bool aValid = anId != 0 && aType >= (uint8_t)GridItemType::GRIDITEM_GRAVESTONE &&
+			aType <= (uint8_t)GridItemType::GRIDITEM_IZOMBIE_BRAIN &&
+			NetGridStateMatchesType(aType, aState) && aValidCell &&
+			(aZombieType == 255 || aZombieType < (uint8_t)ZombieType::NUM_ZOMBIE_TYPES) &&
+			(aSeedType == 255 || aSeedType < (uint8_t)SeedType::NUM_SEED_TYPES) &&
+			aScaryPotType <= (uint8_t)ScaryPotType::SCARYPOT_SUN &&
+			_finite(aPosX) && _finite(aPosY) && _finite(aGoalX) && _finite(aGoalY);
+		if (!aValid)
+		{
+			NetTrace("snapshot grid rejected id=%u type=%u state=%u cell=(%u,%u) zombie=%u seed=%u pot=%u",
+				anId, aType, aState, aX, aY, aZombieType, aSeedType, aScaryPotType);
+			continue;
+		}
+		bool aSeedPot = aScaryPotType == (uint8_t)ScaryPotType::SCARYPOT_SEED;
+		bool aZombiePot = aScaryPotType == (uint8_t)ScaryPotType::SCARYPOT_ZOMBIE;
+		bool aSunPot = aScaryPotType == (uint8_t)ScaryPotType::SCARYPOT_SUN;
+		if (aType == (uint8_t)GridItemType::GRIDITEM_SCARY_POT &&
+			(aY >= MAX_GRID_SIZE_Y - 1 || aScaryPotType == (uint8_t)ScaryPotType::SCARYPOT_NONE ||
+			 (aSeedPot && (aSeedType == 255 || aZombieType != 255 || aSunCount != 0)) ||
+			 (aZombiePot && (aZombieType == 255 || aSeedType != 255 || aSunCount != 0)) ||
+			 (aSunPot && (aZombieType != 255 || aSeedType != 255 || aSunCount < 1 || aSunCount > 3)) ||
+			 (aState == (uint8_t)GridItemState::GRIDITEM_STATE_SCARY_POT_LEAF && !aSeedPot) ||
+			 (aState == (uint8_t)GridItemState::GRIDITEM_STATE_SCARY_POT_ZOMBIE && !aZombiePot) ||
+			 aTransparentCounter > 50))
+		{
+			NetTrace("snapshot scary pot rejected id=%u state=%u content=%u zombie=%u seed=%u",
+				anId, aState, aScaryPotType, aZombieType, aSeedType);
+			continue;
+		}
+		if (aSeenGridItems.find(anId) != aSeenGridItems.end())
+		{
+			NetTrace("snapshot grid rejected duplicate id=%u", anId);
+			continue;
+		}
 		aSeenGridItems[anId] = true;
 
 		GridItem* aGridItem = NetGetGhostGridItem(anId);
+		if (aGridItem && aGridItem->mGridItemType != (GridItemType)aType)
+		{
+			NetTrace("snapshot grid rejected: id=%u changed type old=%d new=%u", anId, (int)aGridItem->mGridItemType, aType);
+			continue;
+		}
+		if (!aGridItem)
+		{
+			// Adopt the stock client-side item created during local resource/intro
+			// setup when possible.  Its random contents are overwritten below.
+			GridItem* aLocalItem = nullptr;
+			while (mGridItems.IterateNext(aLocalItem))
+			{
+				if (!aLocalItem->mDead && !aLocalItem->mNetGhost &&
+					aLocalItem->mGridItemType == (GridItemType)aType &&
+					aLocalItem->mGridX == aX && aLocalItem->mGridY == aY)
+				{
+					aGridItem = aLocalItem;
+					break;
+				}
+			}
+		}
 		if (!aGridItem)
 		{
 			gNetSuppressSounds = true;
 			aGridItem = mGridItems.DataArrayAlloc();
 			if (!aGridItem)
 				continue;
-			aGridItem->mGridItemType = (GridItemType)aType;
-			aGridItem->mGridItemState = (GridItemState)aState;
-			aGridItem->mGridX = aX;
-			aGridItem->mGridY = aY;
-			aGridItem->mGridItemCounter = aCounter;
-			aGridItem->mPosX = (float)GridToPixelX(aX, aY);
-			aGridItem->mPosY = (float)GridToPixelY(aX, aY);
-			aGridItem->mNetId = anId;
-			aGridItem->mNetGhost = true;
 			gNetSuppressSounds = false;
 		}
+		aGridItem->mGridItemType = (GridItemType)aType;
 		aGridItem->mGridItemState = (GridItemState)aState;
+		aGridItem->mGridX = aX;
+		aGridItem->mGridY = aY;
 		aGridItem->mGridItemCounter = aCounter;
+		aGridItem->mRenderOrder = aRenderOrder;
+		aGridItem->mPosX = aPosX;
+		aGridItem->mPosY = aPosY;
+		aGridItem->mGoalX = aGoalX;
+		aGridItem->mGoalY = aGoalY;
+		aGridItem->mZombieType = aZombieType == 255 ? ZombieType::ZOMBIE_INVALID : (ZombieType)aZombieType;
+		aGridItem->mSeedType = aSeedType == 255 ? SeedType::SEED_NONE : (SeedType)aSeedType;
+		aGridItem->mScaryPotType = (ScaryPotType)aScaryPotType;
+		aGridItem->mTransparentCounter = aTransparentCounter;
+		aGridItem->mSunCount = aSunCount;
+		aGridItem->mHighlighted = (aFlags & 1) != 0;
+		aGridItem->mNetId = anId;
+		aGridItem->mNetGhost = true;
 	}
 	{
 		GridItem* aGridItem = nullptr;
 		while (mGridItems.IterateNext(aGridItem))
-			if (aGridItem->mNetGhost && !aGridItem->mDead && aSeenGridItems.find(aGridItem->mNetId) == aSeenGridItems.end())
-				aGridItem->mDead = true;
+			if (!aGridItem->mDead &&
+				((aGridItem->mNetGhost && aSeenGridItems.find(aGridItem->mNetId) == aSeenGridItems.end()) ||
+				 (!aGridItem->mNetGhost && aGridItem->mGridItemType == GridItemType::GRIDITEM_SCARY_POT)))
+				aGridItem->GridItemDie();
 	}
 }
 
