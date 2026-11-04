@@ -1326,15 +1326,25 @@ void LawnApp::StartPlaying()
 {
 	KillSeedChooserScreen();
 	if (NetIsClient())
-		mBoard->StartLevelClientPresentation();
-	else
-		mBoard->StartLevel();
-	mGameScene = GameScenes::SCENE_PLAYING;
-	if (mNetManager && mNetManager->IsHosting())
 	{
-		LawnNet::NetTrace("host entered gameplay; broadcasting START_PLAYING mode=%d level=%d", (int)mGameMode, mBoard ? mBoard->mLevel : -1);
+		mBoard->StartLevelClientPresentation();
+		mGameScene = GameScenes::SCENE_PLAYING;
+	}
+	else if (mNetManager && mNetManager->IsHosting())
+	{
+		// START_PLAYING is the ordered TCP barrier.  Clients enter gameplay
+		// before Challenge::StartLevel emits authoritative spawn/events, so none
+		// of those messages are discarded as intro traffic.
+		mGameScene = GameScenes::SCENE_PLAYING;
+		LawnNet::NetTrace("host entering gameplay; broadcasting barrier mode=%d level=%d", (int)mGameMode, mBoard ? mBoard->mLevel : -1);
 		LawnNet::NetBuffer anEmpty;
 		mNetManager->BroadcastMessage(LawnNet::NETMSG_START_PLAYING, anEmpty);
+		mBoard->StartLevel();
+	}
+	else
+	{
+		mBoard->StartLevel();
+		mGameScene = GameScenes::SCENE_PLAYING;
 	}
 	LawnNet::NetTrace("gameplay entered client=%d board=%p scene=%d seedChooser=%p", NetIsClient() ? 1 : 0, (void*)mBoard, (int)mGameScene, (void*)mSeedChooserScreen);
 }
@@ -5275,6 +5285,11 @@ void LawnApp::NetOnStartGame(LawnNet::NetBuffer& thePayload)
 	// game.  The former hand-written subset skipped NewGame state and left
 	// some lazily loaded board resources unprepared on clients.
 	NewGame();
+	if (mBoard && mBoard->mCutScene && !mBoard->mCutScene->mPreloaded)
+	{
+		LawnNet::NetTrace("client preloading board resources immediately after NewGame");
+		mBoard->mCutScene->PreloadResources();
+	}
 	LawnNet::NetTrace("client START_GAME initialized board=%p scene=%d firstSelector=%d background=%d seedChooser=%p lobbyVisible=%d",
 		(void*)mBoard, (int)mGameScene, mFirstTimeGameSelector ? 1 : 0,
 		mBoard ? (int)mBoard->mBackground : -1, (void*)mSeedChooserScreen,
