@@ -23,6 +23,8 @@ static int gPanelEditColors[][4] =
 NetLobbyPanel::NetLobbyPanel(LawnApp* theApp) :
 	mApp(theApp),
 	mHoverButtonId(0),
+	mLastMouseX(-1),
+	mLastMouseY(-1),
 	mLastCursorSend(0)
 {
 	mNickEdit = new EditWidget(100, this);
@@ -61,7 +63,7 @@ NetLobbyPanel::~NetLobbyPanel()
 
 Rect NetLobbyPanel::GetPanelRect() const
 {
-	return Rect(8, 100, 290, 320);
+	return Rect(8, 265, 290, 320);
 }
 
 void NetLobbyPanel::LayoutButtons()
@@ -98,6 +100,13 @@ void NetLobbyPanel::LayoutButtons()
 		mButtons.push_back(aZombies);
 		mButtons.push_back(aLeave);
 	}
+
+	// restore hover state (LayoutButtons runs every frame and would otherwise
+	// wipe the highlight set by MouseMove before Update)
+	for (size_t i = 0; i < mButtons.size(); i++)
+		mButtons[i].mMouseOver =
+			(mHoverButtonId == mButtons[i].mId) &&
+			mButtons[i].mRect.Contains(mLastMouseX, mLastMouseY);
 }
 
 void NetLobbyPanel::AddedToManager(WidgetManager* theWidgetManager)

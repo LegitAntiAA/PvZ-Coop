@@ -180,11 +180,20 @@ ChallengeScreen::ChallengeScreen(LawnApp* theApp, ChallengePage thePage)
 			pageOffset += 2;
 		if (thePage == ChallengePage::CHALLENGE_PAGE_PUZZLE && (aPageIdx == ChallengePage::CHALLENGE_PAGE_LAST_STAND || thePage == ChallengePage::CHALLENGE_PAGE_PUZZLE))
 			pageOffset += 4;
-		aPageButton->Resize(200 + 100 * (aPageIdx - pageOffset), 540, 100, 75);
+		if (aPageIdx == ChallengePage::CHALLENGE_PAGE_COOP)
+		{
+			// the CO-OP tab is always visible and reachable from every page
+			aPageButton->Resize(700, 540, 100, 75);
+			aPageButton->mVisible = true;
+		}
+		else
+		{
+			aPageButton->Resize(200 + 100 * (aPageIdx - pageOffset), 540, 100, 75);
 
-		//if (!ShowPageButtons() || aPageIdx == CHALLENGE_PAGE_SURVIVAL || aPageIdx == CHALLENGE_PAGE_PUZZLE)
+			//if (!ShowPageButtons() || aPageIdx == CHALLENGE_PAGE_SURVIVAL || aPageIdx == CHALLENGE_PAGE_PUZZLE)
 
-		aPageButton->mVisible = false;
+			aPageButton->mVisible = false;
+		}
 
 		if (mApp->mPlayerInfo && mApp->mPlayerInfo->mHasUsedCheatKeys)
 		{

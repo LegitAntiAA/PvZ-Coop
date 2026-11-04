@@ -75,6 +75,8 @@ private:
 	EditWidget* mPortEdit;
 	std::vector<UiButton> mButtons;
 	int mHoverButtonId;
+	int mLastMouseX;
+	int mLastMouseY;
 	uint32_t mLastCursorSend;
 };
 
