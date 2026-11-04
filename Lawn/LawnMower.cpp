@@ -9,6 +9,26 @@
 //0x458000
 void LawnMower::LawnMowerInitialize(int theRow)
 {
+    LawnApp* anApp = (LawnApp*)gSexyAppBase;
+    Board* aBoard = anApp->mBoard;
+    LawnMowerType aMowerType;
+    if (aBoard->StageHasRoof())
+    {
+        aMowerType = LawnMowerType::LAWNMOWER_ROOF;
+    }
+    else if (aBoard->mPlantRow[theRow] == PlantRowType::PLANTROW_POOL && anApp->mPlayerInfo->mPurchases[(int)StoreItem::STORE_ITEM_POOL_CLEANER])
+    {
+        aMowerType = LawnMowerType::LAWNMOWER_POOL;
+    }
+    else
+    {
+        aMowerType = LawnMowerType::LAWNMOWER_LAWN;
+    }
+    LawnMowerInitialize(theRow, aMowerType);
+}
+
+void LawnMower::LawnMowerInitialize(int theRow, LawnMowerType theForcedType)
+{
     mApp = (LawnApp*)gSexyAppBase;
     mRow = theRow;
     mPosX = -160.0f;
@@ -25,16 +45,17 @@ void LawnMower::LawnMowerInitialize(int theRow)
     mNetId = 0;
     mNetGhost = false;
     mNetTargetX = 0.0f;
+    mAltitude = 0.0f;
+    mMowerHeight = MowerHeight::MOWER_HEIGHT_LAND;
 
     ReanimationType aReanimType;
-    if (mBoard->StageHasRoof())
+    mMowerType = theForcedType;
+    if (mMowerType == LawnMowerType::LAWNMOWER_ROOF)
     {
-        mMowerType = LawnMowerType::LAWNMOWER_ROOF;
         aReanimType = ReanimationType::REANIM_ROOF_CLEANER;
     }
-    else if (mBoard->mPlantRow[mRow] == PlantRowType::PLANTROW_POOL && mApp->mPlayerInfo->mPurchases[(int)StoreItem::STORE_ITEM_POOL_CLEANER])
+    else if (mMowerType == LawnMowerType::LAWNMOWER_POOL)
     {
-        mMowerType = LawnMowerType::LAWNMOWER_POOL;
         aReanimType = ReanimationType::REANIM_POOL_CLEANER;
     }
     else

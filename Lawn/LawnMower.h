@@ -40,6 +40,7 @@ public:
 
 public:
     void                LawnMowerInitialize(int theRow);
+    void                LawnMowerInitialize(int theRow, LawnMowerType theForcedType);
     void                StartMower();
     void                Update();
     void                Draw(Graphics* g);

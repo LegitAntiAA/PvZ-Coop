@@ -45,6 +45,99 @@ bool NetGridStateMatchesType(uint8_t theType, uint8_t theState)
 	default:						return false;
 	}
 }
+
+void NetEnsureGridItemVisual(GridItem* theGridItem, GridItemState thePreviousState)
+{
+	Reanimation* aReanim = theGridItem->mApp->ReanimationTryToGet(theGridItem->mGridItemReanimID);
+	bool aCreatedVisual = false;
+
+	if (theGridItem->mGridItemType == GridItemType::GRIDITEM_PORTAL_CIRCLE ||
+		theGridItem->mGridItemType == GridItemType::GRIDITEM_PORTAL_SQUARE)
+	{
+		if (!aReanim)
+		{
+			theGridItem->OpenPortal();
+			aReanim = theGridItem->mApp->ReanimationTryToGet(theGridItem->mGridItemReanimID);
+			aCreatedVisual = true;
+		}
+		if (theGridItem->mGridItemState == GridItemState::GRIDITEM_STATE_PORTAL_CLOSED &&
+			(aCreatedVisual || thePreviousState != theGridItem->mGridItemState))
+		{
+			theGridItem->ClosePortal();
+		}
+		else if (!aCreatedVisual && thePreviousState == GridItemState::GRIDITEM_STATE_PORTAL_CLOSED &&
+			theGridItem->mGridItemState == GridItemState::GRIDITEM_STATE_NORMAL)
+		{
+			theGridItem->OpenPortal();
+		}
+		return;
+	}
+
+	if (theGridItem->mGridItemType == GridItemType::GRIDITEM_RAKE)
+	{
+		if (!aReanim)
+		{
+			aReanim = theGridItem->mBoard->CreateRakeReanim(
+				(float)theGridItem->mGridX, (float)theGridItem->mGridY, 0);
+			theGridItem->mGridItemReanimID = theGridItem->mApp->ReanimationGetID(aReanim);
+		}
+		if (aReanim)
+			aReanim->mAnimRate = theGridItem->mGridItemState == GridItemState::GRIDITEM_STATE_RAKE_TRIGGERED ? 20.0f : 0.0f;
+		return;
+	}
+
+	if (theGridItem->mGridItemType != GridItemType::GRIDITEM_STINKY)
+		return;
+
+	if (!aReanim)
+	{
+		aReanim = theGridItem->mApp->AddReanimation(
+			theGridItem->mPosX, theGridItem->mPosY, 0, ReanimationType::REANIM_STINKY);
+		theGridItem->mGridItemReanimID = theGridItem->mApp->ReanimationGetID(aReanim);
+		aCreatedVisual = true;
+	}
+	if (!aReanim)
+		return;
+
+	if (aCreatedVisual || thePreviousState != theGridItem->mGridItemState)
+	{
+		theGridItem->mMotionTrailCount = 0;
+		switch (theGridItem->mGridItemState)
+		{
+		case GridItemState::GRIDITEM_STINKY_WALKING_LEFT:
+		case GridItemState::GRIDITEM_STINKY_WALKING_RIGHT:
+			aReanim->PlayReanim("anim_crawl", ReanimLoopType::REANIM_LOOP, 0, 6.0f);
+			break;
+		case GridItemState::GRIDITEM_STINKY_TURNING_LEFT:
+		case GridItemState::GRIDITEM_STINKY_TURNING_RIGHT:
+			aReanim->PlayReanim("turn", ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD, 0, 6.0f);
+			break;
+		case GridItemState::GRIDITEM_STINKY_FALLING_ASLEEP:
+			aReanim->PlayReanim("anim_in", ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD, 0, 6.0f);
+			break;
+		case GridItemState::GRIDITEM_STINKY_WAKING_UP:
+			aReanim->PlayReanim("anim_out", ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD, 0, 6.0f);
+			break;
+		case GridItemState::GRIDITEM_STINKY_SLEEPING:
+			aReanim->PlayReanim("anim_out", ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD, 0, 0.0f);
+			break;
+		default:
+			break;
+		}
+	}
+
+	if (theGridItem->mGridItemState == GridItemState::GRIDITEM_STINKY_WALKING_RIGHT ||
+		theGridItem->mGridItemState == GridItemState::GRIDITEM_STINKY_TURNING_LEFT)
+	{
+		aReanim->OverrideScale(-0.8f, 0.8f);
+		aReanim->SetPosition(theGridItem->mPosX + 69.0f, theGridItem->mPosY);
+	}
+	else
+	{
+		aReanim->OverrideScale(0.8f, 0.8f);
+		aReanim->SetPosition(theGridItem->mPosX, theGridItem->mPosY);
+	}
+}
 }
 
 namespace LawnNet
@@ -563,10 +656,18 @@ void Board::NetApplyEvent(NetBuffer& b)
 		uint8_t anImitater = b.ReadU8Or();
 		uint8_t aRow = b.ReadU8Or();
 		uint8_t aCol = b.ReadU8Or();
-		if (!NetGetGhostPlant(anId) && mSeedBank)
+		SeedType anImitaterType = anImitater == 255 ? SeedType::SEED_NONE : (SeedType)anImitater;
+		if (anId == 0 || aType >= (uint8_t)SeedType::NUM_SEED_TYPES ||
+			(anImitater != 255 && anImitater >= (uint8_t)SeedType::NUM_SEED_TYPES) ||
+			aRow >= MAX_GRID_SIZE_Y || aCol >= MAX_GRID_SIZE_X)
+		{
+			NetTrace("PLANT_ADDED rejected id=%u type=%u imitater=%u cell=(%u,%u)", anId, aType, anImitater, aCol, aRow);
+			break;
+		}
+		if (!NetGetGhostPlant(anId))
 		{
 			gNetSuppressSounds = true;
-			Plant* aPlant = NewPlant(aCol, aRow, (SeedType)aType, (SeedType)anImitater);
+			Plant* aPlant = NewPlant(aCol, aRow, (SeedType)aType, anImitaterType);
 			gNetSuppressSounds = false;
 			if (aPlant)
 			{
@@ -825,6 +926,11 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	std::map<unsigned short, bool> aSeenPlants;
 	for (int i = 0; i < aCount; i++)
 	{
+		if (b.Remaining() < 12)
+		{
+			NetTrace("snapshot plant section truncated index=%d count=%u remaining=%zu", i, aCount, b.Remaining());
+			return;
+		}
 		uint16_t anId = b.ReadU16Or();
 		uint8_t aType = b.ReadU8Or();
 		uint8_t anImitater = b.ReadU8Or();
@@ -834,19 +940,47 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		uint16_t aMaxHealth = b.ReadU16Or();
 		uint8_t aState = b.ReadU8Or();
 		uint8_t aPFlags = b.ReadU8Or();
+		SeedType anImitaterType = anImitater == 255 ? SeedType::SEED_NONE : (SeedType)anImitater;
+		if (anId == 0 || aType >= (uint8_t)SeedType::NUM_SEED_TYPES ||
+			(anImitater != 255 && anImitater >= (uint8_t)SeedType::NUM_SEED_TYPES) ||
+			aRow >= MAX_GRID_SIZE_Y || aCol >= MAX_GRID_SIZE_X || (aPFlags & ~15) != 0 ||
+			aSeenPlants.find(anId) != aSeenPlants.end())
+		{
+			NetTrace("snapshot plant rejected id=%u type=%u imitater=%u cell=(%u,%u) flags=%u",
+				anId, aType, anImitater, aCol, aRow, aPFlags);
+			continue;
+		}
 		aSeenPlants[anId] = true;
 
 		Plant* aPlant = NetGetGhostPlant(anId);
 		if (!aPlant)
 		{
+			// Intro/challenge setup can create the same stock plant locally before
+			// the first authoritative snapshot.  Adopt it instead of drawing two
+			// plants in the same cell.
+			Plant* aLocalPlant = nullptr;
+			while (mPlants.IterateNext(aLocalPlant))
+			{
+				if (!aLocalPlant->mDead && !aLocalPlant->mNetGhost &&
+					aLocalPlant->mRow == aRow && aLocalPlant->mPlantCol == aCol &&
+					aLocalPlant->mSeedType == (SeedType)aType &&
+					aLocalPlant->mImitaterType == anImitaterType)
+				{
+					aPlant = aLocalPlant;
+					break;
+				}
+			}
+		}
+		if (!aPlant)
+		{
 			gNetSuppressSounds = true;
-			aPlant = NewPlant(aCol, aRow, (SeedType)aType, (SeedType)anImitater);
+			aPlant = NewPlant(aCol, aRow, (SeedType)aType, anImitaterType);
 			gNetSuppressSounds = false;
 			if (!aPlant)
 				continue;
-			aPlant->mNetId = anId;
-			aPlant->mNetGhost = true;
 		}
+		aPlant->mNetId = anId;
+		aPlant->mNetGhost = true;
 		aPlant->mRow = aRow;
 		aPlant->mPlantCol = aCol;
 		aPlant->mX = GridToPixelX(aCol, aRow) - (aPlant->mWidth - 80) / 2;
@@ -862,7 +996,8 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	{
 		Plant* aPlant = nullptr;
 		while (mPlants.IterateNext(aPlant))
-			if (aPlant->mNetGhost && !aPlant->mDead && aSeenPlants.find(aPlant->mNetId) == aSeenPlants.end())
+			if (!aPlant->mDead &&
+				((aPlant->mNetGhost && aSeenPlants.find(aPlant->mNetId) == aSeenPlants.end()) || !aPlant->mNetGhost))
 				aPlant->Die();
 	}
 
@@ -1073,7 +1208,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		float anAltitude = b.ReadF32Or();
 		uint8_t aHeight = b.ReadU8Or();
 		if (anId == 0 || aRow >= MAX_GRID_SIZE_Y || aState > (uint8_t)LawnMowerState::MOWER_SQUISHED ||
-			aType >= (uint8_t)LawnMowerType::NUM_MOWER_TYPES || aVisible > 1 ||
+			aType > (uint8_t)LawnMowerType::LAWNMOWER_ROOF || aVisible > 1 ||
 			aHeight > (uint8_t)MowerHeight::MOWER_HEIGHT_UP_TO_LAND || !_finite(anAltitude) ||
 			aSeenMowers.find(anId) != aSeenMowers.end())
 		{
@@ -1089,8 +1224,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 			LawnMower* aLocalMower = nullptr;
 			while (mLawnMowers.IterateNext(aLocalMower))
 			{
-				if (!aLocalMower->mDead && !aLocalMower->mNetGhost &&
-					aLocalMower->mRow == aRow && aLocalMower->mMowerType == (LawnMowerType)aType)
+				if (!aLocalMower->mDead && !aLocalMower->mNetGhost && aLocalMower->mRow == aRow)
 				{
 					aMower = aLocalMower;
 					break;
@@ -1103,14 +1237,17 @@ void Board::NetApplySnapshot(NetBuffer& b)
 			aMower = mLawnMowers.DataArrayAlloc();
 			if (!aMower)
 				continue;
-			aMower->LawnMowerInitialize(aRow);
+			aMower->LawnMowerInitialize(aRow, (LawnMowerType)aType);
 			gNetSuppressSounds = false;
 		}
-		if (aMower->mMowerType != (LawnMowerType)aType)
+		else if (aMower->mMowerType != (LawnMowerType)aType)
 		{
-			NetTrace("snapshot mower rejected type mismatch id=%u local=%d host=%u", anId, (int)aMower->mMowerType, aType);
-			continue;
+			Reanimation* anOldReanim = mApp->ReanimationTryToGet(aMower->mReanimID);
+			if (anOldReanim)
+				anOldReanim->ReanimationDie();
+			aMower->LawnMowerInitialize(aRow, (LawnMowerType)aType);
 		}
+		MowerHeight aPreviousHeight = aMower->mMowerHeight;
 		aMower->mNetId = anId;
 		aMower->mNetGhost = true;
 		aMower->mMowerState = (LawnMowerState)aState;
@@ -1119,6 +1256,27 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		aMower->mNetTargetX = aX / 4.0f;
 		aMower->mAltitude = anAltitude;
 		aMower->mMowerHeight = (MowerHeight)aHeight;
+		Reanimation* aMowerReanim = mApp->ReanimationTryToGet(aMower->mReanimID);
+		if (aMowerReanim)
+		{
+			if (aMower->mMowerType == LawnMowerType::LAWNMOWER_POOL &&
+				aMower->mMowerHeight != aPreviousHeight)
+			{
+				if (aMower->mMowerHeight == MowerHeight::MOWER_HEIGHT_IN_POOL)
+					aMowerReanim->PlayReanim("anim_water", ReanimLoopType::REANIM_LOOP, 0, 35.0f);
+				else
+					aMowerReanim->PlayReanim("anim_land", ReanimLoopType::REANIM_LOOP, 0, 35.0f);
+			}
+			if (aMower->mMowerState == LawnMowerState::MOWER_TRIGGERED)
+				aMowerReanim->mAnimRate = aMower->mMowerType == LawnMowerType::LAWNMOWER_POOL ? 35.0f : 70.0f;
+			else if (aMower->mMowerState == LawnMowerState::MOWER_SQUISHED)
+			{
+				aMowerReanim->OverrideScale(0.85f, 0.22f);
+				aMowerReanim->SetPosition(-11.0f, 65.0f);
+			}
+			else
+				aMowerReanim->mAnimRate = 0.0f;
+		}
 	}
 	{
 		LawnMower* aMower = nullptr;
@@ -1224,6 +1382,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 				}
 			}
 		}
+		GridItemState aPreviousState = aGridItem ? aGridItem->mGridItemState : (GridItemState)aState;
 		if (!aGridItem)
 		{
 			gNetSuppressSounds = true;
@@ -1248,6 +1407,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		aGridItem->mTransparentCounter = aTransparentCounter;
 		aGridItem->mSunCount = aSunCount;
 		aGridItem->mHighlighted = (aFlags & 1) != 0;
+		NetEnsureGridItemVisual(aGridItem, aPreviousState);
 		aGridItem->mNetId = anId;
 		aGridItem->mNetGhost = true;
 	}
@@ -1353,6 +1513,29 @@ void Board::NetGhostUpdateOthers()
 		if (aMower->mDead || !aMower->mNetGhost)
 			continue;
 		aMower->mPosX += (aMower->mNetTargetX - aMower->mPosX) * 0.3f;
+		Reanimation* aMowerReanim = mApp->ReanimationTryToGet(aMower->mReanimID);
+		if (aMowerReanim && aMowerReanim->mIsAttachment)
+			aMowerReanim->Update();
+	}
+
+	// Grid-item visuals created from snapshots are attachments in the stock
+	// code, so EffectSystem deliberately does not tick them.
+	GridItem* aGridItem = nullptr;
+	while (mGridItems.IterateNext(aGridItem))
+	{
+		if (aGridItem->mDead || !aGridItem->mNetGhost)
+			continue;
+		Reanimation* aGridReanim = mApp->ReanimationTryToGet(aGridItem->mGridItemReanimID);
+		if (!aGridReanim || !aGridReanim->mIsAttachment)
+			continue;
+		aGridReanim->Update();
+		if ((aGridItem->mGridItemType == GridItemType::GRIDITEM_PORTAL_CIRCLE ||
+			aGridItem->mGridItemType == GridItemType::GRIDITEM_PORTAL_SQUARE) &&
+			aGridItem->mGridItemState != GridItemState::GRIDITEM_STATE_PORTAL_CLOSED &&
+			aGridReanim->mLoopType == ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD && aGridReanim->mLoopCount > 0)
+		{
+			aGridReanim->PlayReanim("anim_pulse", ReanimLoopType::REANIM_LOOP, 0, 12.0f);
+		}
 	}
 }
 

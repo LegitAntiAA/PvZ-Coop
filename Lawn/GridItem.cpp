@@ -189,7 +189,11 @@ void GridItem::DrawGraveStone(Graphics* g)
 //0x44D690
 void GridItem::DrawStinky(Graphics* g)
 {
-    Reanimation* aStinkyReanim = mApp->ReanimationGet(mGridItemReanimID);
+    Reanimation* aStinkyReanim = mApp->ReanimationTryToGet(mGridItemReanimID);
+    if (!aStinkyReanim)
+    {
+        return;
+    }
     float aOriginalTime = aStinkyReanim->mAnimTime;
     for (int i = mMotionTrailCount - 1; i >= 0; i--)
     {
@@ -525,7 +529,11 @@ bool GridItem::IsOpenPortal()
 //0x44E400
 void GridItem::UpdatePortal()
 {
-    Reanimation* aPortalReanim = mApp->ReanimationGet(mGridItemReanimID);
+    Reanimation* aPortalReanim = mApp->ReanimationTryToGet(mGridItemReanimID);
+    if (!aPortalReanim)
+    {
+        return;
+    }
     if (mGridItemState == GridItemState::GRIDITEM_STATE_PORTAL_CLOSED)
     {
         if (aPortalReanim->mLoopCount > 0)
@@ -666,7 +674,11 @@ void GridItem::UpdateRake()
     {
         if (RakeFindZombie())
         {
-            Reanimation* aRakeReanim = mApp->ReanimationGet(mGridItemReanimID);
+            Reanimation* aRakeReanim = mApp->ReanimationTryToGet(mGridItemReanimID);
+            if (!aRakeReanim)
+            {
+                return;
+            }
             aRakeReanim->mAnimRate = 20.0f;
             mGridItemCounter = 200;
             mGridItemState = GridItemState::GRIDITEM_STATE_RAKE_TRIGGERED;
