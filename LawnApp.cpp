@@ -1117,6 +1117,12 @@ void LawnApp::Shutdown()
 //0x44F380
 void LawnApp::KillBoard()
 {
+	// Board messages contain ids whose meaning is scoped to one Board.  Clear
+	// them before disposing any old entities so no lifecycle path can leak a
+	// stale event or snapshot into the next board.
+	if (mNetManager)
+		mNetManager->ClearPendingBoardMessages("KILL_BOARD");
+
 	if (mPortAudioStream)
 	{
 		Pa_StopStream(mPortAudioStream);

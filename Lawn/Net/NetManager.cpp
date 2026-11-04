@@ -759,6 +759,7 @@ void NetManager::HandleMessageClient(uint8_t theMsgType, NetBuffer& thePayload)
 		mSnapshotHz = thePayload.ReadU16Or();
 		break;
 	case NETMSG_BACK_TO_MENU:
+		ClearPendingBoardMessages("BACK_TO_MENU");
 		if (mApp)
 			mApp->NetOnBackToMenu();
 		break;
@@ -855,6 +856,10 @@ void NetManager::OnLobbyState(NetBuffer& thePayload)
 
 void NetManager::OnStartGame(NetBuffer& thePayload)
 {
+	// START_GAME is the lifetime barrier between two boards.  Nothing queued
+	// for the previous board may survive long enough to reach the new one.
+	ClearPendingBoardMessages("START_GAME");
+
 	// hand over to the app: it will create the board in client mode
 	if (mApp)
 		mApp->NetOnStartGame(thePayload);
@@ -864,15 +869,31 @@ void NetManager::OnSnapshot(NetBuffer& thePayload)
 {
 	static uint32_t aSnapshotCount = 0;
 	aSnapshotCount++;
+	std::lock_guard<std::mutex> aLock(mSessionsMutex);
 	if (aSnapshotCount == 1 || aSnapshotCount % 30 == 0)
 		NetTrace("snapshot received count=%u bytes=%zu pendingBefore=%zu", aSnapshotCount, thePayload.Size(), mPendingBoardMsgs.size());
-	std::lock_guard<std::mutex> aLock(mSessionsMutex);
+
+	// A snapshot is a complete authoritative state.  Keep only the newest
+	// pending snapshot, but preserve every reliable board event and its order.
+	// The former total-queue cap could silently discard a BOARDEV packet.
+	size_t aRemovedSnapshots = 0;
+	for (std::deque<PendingMsg>::iterator anIt = mPendingBoardMsgs.begin(); anIt != mPendingBoardMsgs.end(); )
+	{
+		if (anIt->mKind == 1)
+		{
+			anIt = mPendingBoardMsgs.erase(anIt);
+			aRemovedSnapshots++;
+		}
+		else
+			++anIt;
+	}
+	if (aRemovedSnapshots > 0)
+		NetTrace("snapshot coalesced older=%zu eventsPreserved=%zu", aRemovedSnapshots, mPendingBoardMsgs.size());
+
 	PendingMsg aMsg;
 	aMsg.mKind = 1;
 	aMsg.mData = std::move(thePayload);
 	mPendingBoardMsgs.push_back(std::move(aMsg));
-	if (mPendingBoardMsgs.size() > 8)
-		mPendingBoardMsgs.pop_front(); // never fall behind
 }
 
 void NetManager::OnBoardEvent(NetBuffer& thePayload)
@@ -892,8 +913,26 @@ void NetManager::OnBoardEvent(NetBuffer& thePayload)
 	aMsg.mKind = 0;
 	aMsg.mData = std::move(thePayload);
 	mPendingBoardMsgs.push_back(std::move(aMsg));
-	if (mPendingBoardMsgs.size() > 128)
-		mPendingBoardMsgs.pop_front();
+}
+
+void NetManager::ClearPendingBoardMessages(const char* theReason)
+{
+	std::lock_guard<std::mutex> aLock(mSessionsMutex);
+	if (mPendingBoardMsgs.empty())
+		return;
+
+	size_t anEventCount = 0;
+	size_t aSnapshotCount = 0;
+	for (std::deque<PendingMsg>::const_iterator anIt = mPendingBoardMsgs.begin(); anIt != mPendingBoardMsgs.end(); ++anIt)
+	{
+		if (anIt->mKind == 0)
+			anEventCount++;
+		else
+			aSnapshotCount++;
+	}
+	NetTrace("pending board queue cleared reason=%s events=%zu snapshots=%zu",
+		theReason ? theReason : "unspecified", anEventCount, aSnapshotCount);
+	mPendingBoardMsgs.clear();
 }
 
 void NetManager::OnCursor(NetBuffer& thePayload)

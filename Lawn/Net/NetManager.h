@@ -116,6 +116,7 @@ public:
 	void SendBoardEvent(const NetBuffer& thePayload, uint8_t theEventType);
 	void SendSnapshot(const NetBuffer& thePayload);
 	void BroadcastSceneCmd(uint8_t theCmd, int theParam);
+	void ClearPendingBoardMessages(const char* theReason);
 
 	// ---- incoming queues (polled by LawnApp / Board) ----
 	struct PendingMsg
