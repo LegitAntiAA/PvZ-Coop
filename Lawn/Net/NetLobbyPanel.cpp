@@ -25,8 +25,7 @@ NetLobbyPanel::NetLobbyPanel(LawnApp* theApp) :
 	mHoverButtonId(0),
 	mPressedButtonId(0),
 	mLastMouseX(-1),
-	mLastMouseY(-1),
-	mLastCursorSend(0)
+	mLastMouseY(-1)
 {
 	mNickEdit = new EditWidget(100, this);
 	mNickEdit->SetFont(Sexy::FONT_BRIANNETOD12);
@@ -150,19 +149,6 @@ void NetLobbyPanel::Update()
 	mNickEdit->mVisible = aShowEdits;
 	mIpEdit->mVisible = aShowEdits;
 	mPortEdit->mVisible = aShowEdits;
-
-	if (aInMenu && aNet->IsActive() && !aNet->IsConnecting())
-	{
-		// Share our menu cursor while in a connected lobby.  The host relays it
-		// to every peer, so clients see both the host and one another.
-		uint32_t aNow = GetTickCount();
-		if (aNow - mLastCursorSend > 50)
-		{
-			mLastCursorSend = aNow;
-			WidgetManager* aWM = mApp->mWidgetManager;
-			aNet->SendCursor(CURSOR_POINTER, SEED_NONE, SEED_NONE, 0, aWM->mLastMouseX, aWM->mLastMouseY);
-		}
-	}
 
 	LayoutButtons();
 	MarkDirty();

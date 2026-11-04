@@ -626,16 +626,6 @@ void Board::NetHostTick()
 		}
 	}
 
-	// our cursor
-	NetBuffer aCursor;
-	aCursor.WriteU8((uint8_t)aNet->GetMySlot());
-	aCursor.WriteI16((int16_t)mCursorObject->mX);
-	aCursor.WriteI16((int16_t)mCursorObject->mY);
-	aCursor.WriteU8((uint8_t)mCursorObject->mCursorType);
-	aCursor.WriteU8((uint8_t)mCursorObject->mType);
-	aCursor.WriteU8((uint8_t)mCursorObject->mImitaterType);
-	aCursor.WriteU8(0);
-	aNet->BroadcastMessage(NETMSG_CURSOR, aCursor);
 }
 
 void Board::NetEncodeSnapshot(NetBuffer& b)
@@ -2120,15 +2110,6 @@ void Board::NetClientTick()
 		}
 	}
 	NetGhostUpdateOthers();
-
-	// send our mouse position (cosmetic for the host + others)
-	NetManager* aNet = mApp->mNetManager;
-	if (aNet)
-	{
-		WidgetManager* aWM = mApp->mWidgetManager;
-		aNet->SendCursor((int)mCursorObject->mCursorType, (int)mCursorObject->mType,
-			(int)mCursorObject->mImitaterType, 0, aWM->mLastMouseX, aWM->mLastMouseY);
-	}
 
 	// fade counters run locally for visuals
 	if (mBoardFadeOutCounter > 0)

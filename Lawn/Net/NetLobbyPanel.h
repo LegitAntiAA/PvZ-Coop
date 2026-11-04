@@ -80,7 +80,6 @@ private:
 	int mPressedButtonId;
 	int mLastMouseX;
 	int mLastMouseY;
-	uint32_t mLastCursorSend;
 };
 
 } // namespace LawnNet

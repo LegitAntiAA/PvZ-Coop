@@ -1,6 +1,7 @@
 #include <time.h>
 #include "LawnApp.h"
 #include "Lawn/Board.h"
+#include "Lawn/CursorObject.h"
 #include "Lawn/Plant.h"
 #include "Lawn/Zombie.h"
 #include "Lawn/Cutscene.h"
@@ -2863,6 +2864,25 @@ void LawnApp::UpdateFrames()
 	if (mNetManager)
 	{
 		mNetManager->Update();
+
+		// Use one cursor path in every scene.  SendCursor converts this window's
+		// raw widget coordinates to the shared 800x600 canvas, so peers with a
+		// different widescreen offset still draw the cursor at the same point.
+		if (mNetManager->IsActive() && mWidgetManager)
+		{
+			int aCursorType = (int)CursorType::CURSOR_TYPE_NORMAL;
+			int aHeldSeed = (int)SeedType::SEED_NONE;
+			int aHeldImitater = (int)SeedType::SEED_NONE;
+			if (mBoard && mBoard->mCursorObject)
+			{
+				aCursorType = (int)mBoard->mCursorObject->mCursorType;
+				aHeldSeed = (int)mBoard->mCursorObject->mType;
+				aHeldImitater = (int)mBoard->mCursorObject->mImitaterType;
+			}
+			mNetManager->SendCursor(aCursorType, aHeldSeed, aHeldImitater, 0,
+				mWidgetManager->mLastMouseX, mWidgetManager->mLastMouseY);
+		}
+
 		if (mNetManager->IsHosting())
 			NetHandleRemoteInputs();
 

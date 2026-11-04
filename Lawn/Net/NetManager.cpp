@@ -9,6 +9,7 @@
 #include "../Widget/SeedChooserScreen.h"
 #include "../../SexyAppFramework/Common.h"
 #include "../../SexyAppFramework/DDInterface.h"
+#include "../../SexyAppFramework/WidgetManager.h"
 
 namespace
 {
@@ -588,6 +589,8 @@ void NetManager::OnClientCursor(NetSession* theSession, NetBuffer& thePayload)
 	int16_t aCanonicalX = thePayload.ReadI16Or();
 	int16_t aCanonicalY = thePayload.ReadI16Or();
 	aCursor.SetTarget((int16_t)NetLocalX(mApp, aCanonicalX), (int16_t)NetLocalY(mApp, aCanonicalY));
+	if (mApp && mApp->mWidgetManager)
+		mApp->mWidgetManager->MarkAllDirty();
 	uint8_t aClaimedCursorType = thePayload.ReadU8Or();
 	uint8_t aClaimedSeed = thePayload.ReadU8Or();
 	uint8_t aClaimedImitater = thePayload.ReadU8Or();
@@ -976,6 +979,8 @@ void NetManager::OnCursor(NetBuffer& thePayload)
 	aCursor.mHeldSeed = aHeldSeed;
 	aCursor.mHeldImitater = aHeldImitater;
 	aCursor.mFlags = aFlags;
+	if (mApp && mApp->mWidgetManager)
+		mApp->mWidgetManager->MarkAllDirty();
 }
 
 void NetManager::OnChooserOpen(NetBuffer& thePayload)
