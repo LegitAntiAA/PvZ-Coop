@@ -84,6 +84,11 @@ void NetLobbyPanel::LayoutButtons()
 		mButtons.push_back(aHost);
 		mButtons.push_back(aJoin);
 	}
+	else if (aNet->IsConnecting())
+	{
+		UiButton aCancel = { BTN_DISCONNECT, Rect(aX + 70, aY + 40, 128, 30), _S("CANCEL"), false, false };
+		mButtons.push_back(aCancel);
+	}
 	else
 	{
 		UiButton aPlants = { BTN_TEAM_PLANTS, Rect(aX, aY, 128, 28), _S("TEAM PLANTS"), false, false };
@@ -122,11 +127,17 @@ void NetLobbyPanel::Update()
 	if (!aNet)
 		return;
 
-	// only visible in the main menu (no board)
-	bool aInMenu = mApp->mBoard == nullptr;
+	// visible only in the main menu (after the title screen)
+	bool aInMenu = mApp->mBoard == nullptr && mApp->mGameSelector != nullptr;
 	Resize(aInMenu ? 0 : -5000, aInMenu ? 0 : -5000, mApp->mWidth, mApp->mHeight);
 
-	if (aInMenu)
+	// the connection form's edit widgets are hidden once connected/connecting
+	bool aShowEdits = aInMenu && !aNet->IsActive();
+	mNickEdit->mVisible = aShowEdits;
+	mIpEdit->mVisible = aShowEdits;
+	mPortEdit->mVisible = aShowEdits;
+
+	if (aInMenu && !aNet->IsActive())
 	{
 		// share our menu cursor position
 		uint32_t aNow = GetTickCount();
@@ -143,14 +154,26 @@ void NetLobbyPanel::Update()
 	Widget::Update();
 }
 
+// Only the panel area itself intercepts the mouse - clicks anywhere else fall
+// through to the widgets below (title screen, game selector, ...).
+bool NetLobbyPanel::IsPointVisible(int theX, int theY)
+{
+	if (mApp->mBoard != nullptr || mApp->mGameSelector == nullptr || !mApp->mLoadingThreadCompleted)
+		return false;
+	return GetPanelRect().Contains(theX, theY);
+}
+
 void NetLobbyPanel::DrawButton(Graphics* g, const UiButton& theButton)
 {
-	Color aFill = theButton.mDisabled ? Color(90, 90, 90) :
-		(theButton.mMouseOver ? Color(255, 230, 150) : Color(215, 180, 100));
+	Color aFill = theButton.mDisabled ? Color(120, 120, 120) :
+		(theButton.mMouseOver ? Color(255, 235, 160) : Color(215, 180, 100));
+	Color anOutline = theButton.mMouseOver ? Color(255, 250, 210) : Color(90, 60, 30);
 	g->SetColor(aFill);
 	g->FillRect(theButton.mRect.mX, theButton.mRect.mY, theButton.mRect.mWidth, theButton.mRect.mHeight);
-	g->SetColor(Color(90, 60, 30));
+	g->SetColor(anOutline);
 	g->DrawRect(theButton.mRect.mX, theButton.mRect.mY, theButton.mRect.mWidth - 1, theButton.mRect.mHeight - 1);
+	g->SetColor(theButton.mMouseOver ? Color(255, 255, 255, 90) : Color(255, 255, 255, 40));
+	g->FillRect(theButton.mRect.mX + 2, theButton.mRect.mY + 2, theButton.mRect.mWidth - 4, 3);
 	TodDrawString(g, theButton.mLabel,
 		theButton.mRect.mX + theButton.mRect.mWidth / 2,
 		theButton.mRect.mY + theButton.mRect.mHeight / 2 + 4,
@@ -160,7 +183,7 @@ void NetLobbyPanel::DrawButton(Graphics* g, const UiButton& theButton)
 void NetLobbyPanel::Draw(Graphics* g)
 {
 	NetManager* aNet = mApp->mNetManager;
-	if (!aNet || mApp->mBoard || !mApp->mLoadingThreadCompleted)
+	if (!aNet || mApp->mBoard || mApp->mGameSelector == nullptr || !mApp->mLoadingThreadCompleted)
 		return;
 
 	// ---- remote cursors (menus) ----
@@ -213,20 +236,31 @@ void NetLobbyPanel::Draw(Graphics* g)
 		mPortEdit->Resize(aPanel.mX + 80, aY, 100, 22);
 		aY += 40;
 
-		if (aNet->IsConnecting())
+		// last connection error (only when idle, not while retrying)
+		if (!aNet->IsConnecting() && !aNet->IsHosting() && aNet->GetMySlot() == 0)
 		{
-			TodDrawString(g, StringToSexyString(aNet->GetConnectStatus()), aPanel.mX + 10, aY + 30,
-				Sexy::FONT_BRIANNETOD12, Color(120, 80, 30), DrawStringJustification::DS_ALIGN_LEFT);
+			SexyString aStatus = StringToSexyString(aNet->GetConnectStatus());
+			if (aStatus.length() > 0)
+				TodDrawString(g, aStatus, aPanel.mX + 10, aY - 6,
+					Sexy::FONT_BRIANNETOD12, Color(180, 60, 40), DrawStringJustification::DS_ALIGN_LEFT);
 		}
+	}
+	else if (aNet->IsConnecting())
+	{
+		// ---- connecting overlay ----
+		TodDrawString(g, _S("Connecting..."), aPanel.mX + aPanel.mWidth / 2, aPanel.mY + 130,
+			Sexy::FONT_BRIANNETOD16, Color(90, 55, 20), DrawStringJustification::DS_ALIGN_CENTER);
+		TodDrawString(g, StringToSexyString(aNet->GetConnectStatus()), aPanel.mX + aPanel.mWidth / 2, aPanel.mY + 155,
+			Sexy::FONT_BRIANNETOD12, Color(120, 80, 30), DrawStringJustification::DS_ALIGN_CENTER);
 	}
 	else
 	{
 		// ---- connected: player list ----
 		SexyString aStatus;
 		if (aNet->IsHosting())
-			aStatus = StrFormat(_S("Hosting :%d  (%d/4)"), NET_DEFAULT_PORT, aNet->GetPlayerCount());
+			aStatus = StrFormat(_S("Hosting  (%d/4)"), aNet->GetPlayerCount());
 		else
-			aStatus = StringToSexyString(aNet->GetConnectStatus());
+			aStatus = _S("Connected to host");
 		TodDrawString(g, aStatus, aPanel.mX + 10, aY + 10, Sexy::FONT_BRIANNETOD12, Color(90, 55, 20), DrawStringJustification::DS_ALIGN_LEFT);
 		aY += 26;
 
@@ -305,6 +339,8 @@ void NetLobbyPanel::MouseDown(int x, int y, int theClickCount)
 	{
 		if (!mButtons[i].mRect.Contains(x, y))
 			continue;
+
+		mApp->PlaySample(Sexy::SOUND_TAP2);
 
 		switch (mButtons[i].mId)
 		{

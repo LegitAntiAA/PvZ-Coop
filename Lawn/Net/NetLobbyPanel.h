@@ -48,6 +48,7 @@ public:
 	virtual void MouseDown(int x, int y, int theClickCount) override;
 	virtual void MouseMove(int x, int y) override;
 	virtual void MouseLeave() override;
+	virtual bool IsPointVisible(int theX, int theY) override;
 	virtual void AddedToManager(WidgetManager* theWidgetManager) override;
 	virtual void RemovedFromManager(WidgetManager* theWidgetManager) override;
 

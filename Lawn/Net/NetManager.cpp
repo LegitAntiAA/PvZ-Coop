@@ -135,7 +135,20 @@ bool NetManager::StartClient(const char* theIP, uint16_t thePort)
 
 	mConnectThread = std::thread([this, anIP, thePort]()
 	{
-		SOCKET aSock = NetConnectTo(anIP, thePort, 5000);
+		// try several times before giving up
+		const int aMaxAttempts = 3;
+		SOCKET aSock = INVALID_SOCKET;
+		for (int anAttempt = 1; anAttempt <= aMaxAttempts; anAttempt++)
+		{
+			sprintf_s(mConnectStatus, "Attempt %d/%d...", anAttempt, aMaxAttempts);
+			aSock = NetConnectTo(anIP, thePort, 5000);
+			if (aSock != INVALID_SOCKET)
+				break;
+			if (!mConnecting) // cancelled by the user
+				return;
+			Sleep(500);
+		}
+
 		if (aSock == INVALID_SOCKET)
 		{
 			strcpy_s(mConnectStatus, "Failed to connect (check IP + Radmin VPN)");
@@ -148,6 +161,7 @@ bool NetManager::StartClient(const char* theIP, uint16_t thePort)
 			std::lock_guard<std::mutex> aLock(mPendingConnMutex);
 			mPendingConns.push_back(aSock);
 		}
+		strcpy_s(mConnectStatus, "Connected, waiting for host...");
 		mConnecting = false;
 	});
 

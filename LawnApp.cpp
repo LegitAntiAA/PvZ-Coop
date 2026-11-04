@@ -733,9 +733,10 @@ bool LawnApp::UpdateAppStep(bool* updated)
 					if (!imguiWantsKeyboard)
 					{
 						mLastUserInputTick = mLastTimerTime;
-						SexyChar aChar = event.text.text[0];
-
-						mWidgetManager->KeyChar((SexyChar)aChar);
+						// feed the entire UTF-8 text so multi-byte input
+						// (e.g. Cyrillic nicknames) survives byte by byte
+						for (const char* aTextPtr = event.text.text; *aTextPtr; ++aTextPtr)
+							mWidgetManager->KeyChar((SexyChar)*aTextPtr);
 					}
 					break;
 
