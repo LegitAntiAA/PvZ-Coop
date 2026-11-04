@@ -4924,7 +4924,8 @@ void Zombie::Update()
     TOD_ASSERT(!mDead);
 
     // co-op tower defense: zombies move only along the generated road
-    if (mBoard->IsTowerDefense() && mFromWave >= 0)
+    // (mBoard can be null for menu preview zombies, e.g. Zombatar)
+    if (mBoard && mBoard->IsTowerDefense() && mFromWave >= 0)
     {
         UpdateTowerDefense();
         Animate();
@@ -4932,7 +4933,7 @@ void Zombie::Update()
     }
 
     // co-op pvp: zombie reaching the house scores a brain for the zombie team
-    if (mBoard->IsPvPMode() && mFromWave >= 0 && mPosX < 30.0f)
+    if (mBoard && mBoard->IsPvPMode() && mFromWave >= 0 && mPosX < 30.0f)
     {
         mBoard->NetPvPZombieScored(this);
         return;
