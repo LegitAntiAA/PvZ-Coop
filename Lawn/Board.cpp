@@ -9904,9 +9904,8 @@ void Board::Draw(Graphics* g)
 	g->Translate(mApp->mDDInterface->mWideScreenOffsetX, mApp->mDDInterface->mWideScreenOffsetY);
 	DrawGameObjects(g);
 
-	// co-op extras: weather, tower defense road, remote cursors, host-pause overlay
+	// Co-op cursors are drawn by LawnApp after every widget and dialog.
 	DrawEndlessWeather(g);
-	NetDrawRemoteCursors(g);
 	if (mApp->NetIsClient() && mPaused)
 	{
 		g->SetColor(Color(0, 0, 0, 140));

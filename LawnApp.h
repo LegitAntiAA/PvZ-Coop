@@ -177,6 +177,7 @@ public:
 	uint32_t						mNetBoardSeed;			// shared board RNG seed for coop level creation
 	bool							mNetBlockProfileSave;	// client: never write host-synced profile to disk
 	bool							mNetCoopGameOverHandled;
+	Sexy::DDImage*				mNetCursorImage;
 
 public:
 	void							NetInit();
@@ -192,6 +193,7 @@ public:
 	void							NetOnProfileSync(LawnNet::NetBuffer& thePayload);
 	void							NetBroadcastProfile();									// host: push profile to clients
 	void							NetHandleRemoteInputs();
+	void							NetDrawCursorOverlay();
 	bool							IsCoopCustomMode();
 	static bool						IsCoopEndlessMode(GameMode theGameMode);
 	static bool						IsCoopEndlessRepick(GameMode theGameMode);								// host: apply queued remote inputs to the board

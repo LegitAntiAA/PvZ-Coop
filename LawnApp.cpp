@@ -449,6 +449,8 @@ void LawnApp::Redraw(Rect* theClipRect)
 	{
 		ImGui_ImplSDLRenderer3_RenderDrawData(drawData, mSDLRenderer);
 	}
+	// Network cursors are the final visual layer, above widgets and dialogs.
+	NetDrawCursorOverlay();
 	SDL_RenderPresent(mSDLRenderer);
 }
 
@@ -696,13 +698,27 @@ bool LawnApp::UpdateAppStep(bool* updated)
 							mDebugKeysEnabled = !mDebugKeysEnabled;
 						}
 
+						// SDL text input does not emit Ctrl+C/V as characters. Translate
+						// the standard edit shortcuts explicitly for focused EditWidgets.
+						SexyChar aShortcutChar = 0;
+						if ((event.key.mod & SDL_KMOD_CTRL) != 0)
+						{
+							if (event.key.key == SDLK_C) aShortcutChar = 3;
+							else if (event.key.key == SDLK_V) aShortcutChar = 22;
+							else if (event.key.key == SDLK_X) aShortcutChar = 24;
+							else if (event.key.key == SDLK_Z) aShortcutChar = 26;
+						}
+
 						// co-op client: no pause/options/cheat keys during play (host-only control)
 						bool aClientBlockKeys = NetIsClient() && mBoard && mGameScene == GameScenes::SCENE_PLAYING && GetDialogCount() == 0;
 						if (!aClientBlockKeys)
 						{
-							mWidgetManager->KeyDown(GetKeyCodeFromCodeSDL(event.key.key));
+							if (aShortcutChar != 0)
+								mWidgetManager->KeyChar(aShortcutChar);
+							else
+								mWidgetManager->KeyDown(GetKeyCodeFromCodeSDL(event.key.key));
 
-							if (theChar != -1 && !SDL_TextInputActive(mSDLWindow)) {
+							if (aShortcutChar == 0 && theChar != -1 && !SDL_TextInputActive(mSDLWindow)) {
 
 								bool shift = (event.key.mod & SDL_KMOD_SHIFT) != 0;
 								bool caps = (event.key.mod & SDL_KMOD_CAPS) != 0;
@@ -855,6 +871,7 @@ LawnApp::LawnApp()
 	mNetBoardSeed = 0;
 	mNetBlockProfileSave = false;
 	mNetCoopGameOverHandled = false;
+	mNetCursorImage = nullptr;
 	mLastLevelStats = new LevelStats();
 	mFirstTimeGameSelector = true;
 	mGameMode = GameMode::GAMEMODE_ADVENTURE;
@@ -1546,6 +1563,9 @@ void LawnApp::ShowSeedChooserScreen()
 		mNetManager->mChooserPicksPerPlayer = aUiQuota;
 		mNetManager->mChooserBankCount = aBankCount;
 	}
+
+	delete mNetCursorImage;
+	mNetCursorImage = nullptr;
 }
 
 //0x44FE70
@@ -5352,5 +5372,60 @@ void LawnApp::NetHandleRemoteInputs()
 		mNetManager->SetActingPlayerSlot(-1);
 		mBoard->mCursorObject = aHostCursor;
 		mBoard->UpdateCursor();
+	}
+}
+
+void LawnApp::NetDrawCursorOverlay()
+{
+	if (!mNetManager || !mNetManager->IsActive() || !mWidgetManager || !mWidgetManager->mImage)
+		return;
+	// PvP intentionally hides every player's cursor.
+	if (mBoard && mBoard->IsPvPMode())
+		return;
+
+	if (!mNetCursorImage)
+		mNetCursorImage = GetImage(_S("Cursor13.bmp"));
+	if (!mNetCursorImage)
+		return;
+
+	Graphics g(mWidgetManager->mImage);
+	g.ClearClipRect();
+	for (int i = 0; i < LawnNet::NET_MAX_PLAYERS; i++)
+	{
+		if (i == mNetManager->GetMySlot() || !mNetManager->mRemoteCursors[i].mValid)
+			continue;
+		const LawnNet::NetPlayerInfo& aPlayer = mNetManager->GetPlayer(i);
+		if (!aPlayer.mActive)
+			continue;
+
+		const LawnNet::NetRemoteCursor& aCursor = mNetManager->mRemoteCursors[i];
+		int aCursorX = (int)aCursor.mRenderX;
+		int aCursorY = (int)aCursor.mRenderY;
+		LawnNet::NetColor aColor = LawnNet::GetRelativePlayerColor(mNetManager->GetMySlot(), i);
+
+		if (mBoard && aCursor.mHeldSeed != 255 && aCursor.mHeldSeed != SEED_NONE &&
+			aCursor.mCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_BANK)
+		{
+			SeedType aSeed = (SeedType)aCursor.mHeldSeed;
+			SeedType anImitater = aCursor.mHeldImitater != 255 ? (SeedType)aCursor.mHeldImitater : SeedType::SEED_NONE;
+			Plant::DrawSeedType(&g, aSeed, anImitater, VARIATION_NORMAL,
+				(float)(aCursorX - 25), (float)(aCursorY - 35));
+			g.SetColor(Color(aColor.r, aColor.g, aColor.b, 90));
+			g.FillRect(aCursorX - 30, aCursorY - 40, 60, 70);
+		}
+
+		g.SetColorizeImages(true);
+		g.SetColor(Color(aColor.r, aColor.g, aColor.b));
+		g.DrawImage(mNetCursorImage, aCursorX, aCursorY);
+		g.SetColorizeImages(false);
+
+		if (aPlayer.mNick[0])
+		{
+			SexyString aLabel = StringToSexyString(aPlayer.mNick) + _S(" ") + StrFormat(_S("%ums"), aPlayer.mPing);
+			TodDrawString(&g, aLabel, aCursorX + 18, aCursorY + 23, Sexy::FONT_BRIANNETOD12,
+				Color(0, 0, 0, 190), DrawStringJustification::DS_ALIGN_LEFT);
+			TodDrawString(&g, aLabel, aCursorX + 17, aCursorY + 22, Sexy::FONT_BRIANNETOD12,
+				Color(aColor.r, aColor.g, aColor.b), DrawStringJustification::DS_ALIGN_LEFT);
+		}
 	}
 }
