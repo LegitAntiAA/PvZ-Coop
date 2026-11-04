@@ -3,6 +3,7 @@
 #include "TodStringFile.h"
 #include "../PakLib/PakInterface.h"
 #include "../SexyAppFramework/Font.h"
+#include "../SexyAppFramework/TextEncoding.h"
 
 int gTodStringFormatCount;               //[0x69DE4C]
 TodStringListFormat* gTodStringFormats;  //[0x69DA34]
@@ -110,6 +111,11 @@ bool TodStringListReadItems(const SexyChar* theFileText)
 	const SexyChar* aPtr = theFileText;
 	std::string aName;
 	SexyString aValue;
+#ifndef _USE_WIDE_STRING
+	// A string-list file has one encoding.  Detect it once from the complete
+	// byte stream so an individual CP1251 value cannot be mistaken for UTF-8.
+	const Sexy::TextEncoding anEncoding = Sexy::DetectTextEncoding(std::string(theFileText));
+#endif
 
 	for (;;)
 	{
@@ -126,7 +132,7 @@ bool TodStringListReadItems(const SexyChar* theFileText)
 #ifdef _USE_WIDE_STRING
 		gSexyAppBase->SetString(aNameUpper, aValue);
 #else
-		gSexyAppBase->SetString(aNameUpper, Sexy::StringToWString(aValue));
+		gSexyAppBase->SetString(aNameUpper, Sexy::DecodeTextBytes(aValue, anEncoding));
 #endif
 	}
 }
@@ -362,6 +368,10 @@ int TodDrawStringWrappedHelper(Graphics* g, const SexyString& theText, const Rec
 	int aMaxWidth = 0;
 	while (aCurPos < theText.size())
 	{
+		int aCharLength = 1;
+#ifndef _USE_WIDE_STRING
+		aCharLength = static_cast<int>(Sexy::Utf8CodePointByteLength(theText, static_cast<size_t>(aCurPos)));
+#endif
 		aCurChar = theText[aCurPos];
 		if (aCurChar == '{')  // 如果当前字符是特殊格式控制字符的起始标志（即“{”）
 		{
@@ -400,8 +410,21 @@ int TodDrawStringWrappedHelper(Graphics* g, const SexyString& theText, const Rec
 			aCurPos++;
 		}
 
-		aCurWidth += (*aCurrentFormat.mNewFont)->CharWidthKern(aCurChar, aPrevChar);  // 当前宽度加上当前字符的宽度
-		aPrevChar = aCurChar;
+#ifndef _USE_WIDE_STRING
+		if (aCharLength > 1 || static_cast<unsigned char>(aCurChar) >= 0x80U)
+		{
+			// Font::CharWidthKern consumes one byte, but localized text is UTF-8.
+			// Measure and advance a complete code point so wrapping never emits a
+			// truncated sequence that SDL_ttf would render as garbage or nothing.
+			aCurWidth += (*aCurrentFormat.mNewFont)->StringWidth(theText.substr(aCurPos, aCharLength));
+			aPrevChar = '\0';
+		}
+		else
+#endif
+		{
+			aCurWidth += (*aCurrentFormat.mNewFont)->CharWidthKern(aCurChar, aPrevChar);  // 当前宽度加上当前字符的宽度
+			aPrevChar = aCurChar;
+		}
 		if (aCurWidth > theRect.mWidth)  // 如果当前宽度超出了限制区域的宽度，则进行换行的处理
 		{
 			int aLineWidth;
@@ -437,7 +460,7 @@ int TodDrawStringWrappedHelper(Graphics* g, const SexyString& theText, const Rec
 			else
 			{
 				if (aCurPos < aLineFeedPos + 1)
-					aCurPos++;  // 确保每行至少有 1 个字符
+					aCurPos += aCharLength;  // 确保每行至少有 1 个完整字符
 
 				aLineWidth = TodWriteWordWrappedHelper(
 					g,
@@ -466,7 +489,7 @@ int TodDrawStringWrappedHelper(Graphics* g, const SexyString& theText, const Rec
 		}
 		else  // 当前宽度未超过限制区域宽度时
 		{
-			aCurPos++;  // 继续下一个字符
+			aCurPos += aCharLength;  // 继续下一个完整字符
 		}
 	}
 

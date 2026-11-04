@@ -1,4 +1,5 @@
 #include "../../Lawn/Net/NetCommon.h"
+#include "LocalizedTextTests.h"
 
 #include <chrono>
 #include <cstdio>
@@ -9,6 +10,7 @@
 #include <vector>
 
 #include <process.h>
+#include <windows.h>
 
 namespace
 {
@@ -342,6 +344,165 @@ private:
 	bool mIsolated;
 };
 
+bool WriteSmokeTestFile(const std::filesystem::path& thePath, const std::string& theText)
+{
+	FILE* aFile = nullptr;
+	if (fopen_s(&aFile, thePath.string().c_str(), "wb") != 0 || !aFile)
+		return false;
+	const bool aWritten = std::fwrite(theText.data(), 1U, theText.size(), aFile) == theText.size();
+	const bool aClosed = std::fclose(aFile) == 0;
+	return aWritten && aClosed;
+}
+
+class ScopedSmokeManifestTree
+{
+public:
+	ScopedSmokeManifestTree() : mReady(false), mEnvironmentTouched(false), mHadEnvironmentRole(false)
+	{
+		std::error_code anError;
+		const long long aNonce = std::chrono::steady_clock::now().time_since_epoch().count();
+		mRoot = std::filesystem::temp_directory_path(anError) /
+			("PvZSmokeManifestTests_" + std::to_string(_getpid()) + "_" + std::to_string(aNonce));
+		mRoleRoot = mRoot / "host";
+		mAppData = mRoleRoot / "appdata";
+		mLogs = mRoleRoot / "logs";
+		mConfig = mRoleRoot / "coop.ini";
+		mManifest = mRoleRoot / "SmokeManifest.ini";
+		mResult = mRoleRoot / "result.json";
+		mEscape = mRoot / "escape";
+		if (anError || !std::filesystem::create_directories(mAppData, anError) || anError ||
+			!std::filesystem::create_directories(mLogs, anError) || anError ||
+			!std::filesystem::create_directories(mEscape, anError) || anError ||
+			!WriteSmokeTestFile(mConfig, "nickname=SmokeHost\nenable_coop=1\n"))
+			return;
+
+		char anOldRole[64] = {};
+		DWORD anOldLength = GetEnvironmentVariableA("PVZ_COOP_SMOKE_ROLE", anOldRole, sizeof(anOldRole));
+		if (anOldLength >= sizeof(anOldRole))
+			return;
+		if (anOldLength > 0)
+		{
+			mHadEnvironmentRole = true;
+			mOldEnvironmentRole.assign(anOldRole, anOldLength);
+		}
+		SetEnvironmentVariableA("PVZ_COOP_SMOKE_ROLE", "host");
+		mEnvironmentTouched = true;
+		mReady = true;
+	}
+
+	~ScopedSmokeManifestTree()
+	{
+		if (mEnvironmentTouched)
+		{
+			if (mHadEnvironmentRole)
+				SetEnvironmentVariableA("PVZ_COOP_SMOKE_ROLE", mOldEnvironmentRole.c_str());
+			else
+				SetEnvironmentVariableA("PVZ_COOP_SMOKE_ROLE", nullptr);
+		}
+
+		std::error_code anIgnored;
+		std::filesystem::remove(mResult, anIgnored);
+		std::filesystem::remove(mManifest, anIgnored);
+		std::filesystem::remove(mConfig, anIgnored);
+		std::filesystem::remove(mAppData, anIgnored);
+		std::filesystem::remove(mLogs, anIgnored);
+		std::filesystem::remove(mEscape, anIgnored);
+		std::filesystem::remove(mRoleRoot, anIgnored);
+		std::filesystem::remove(mRoot, anIgnored);
+	}
+
+	bool IsReady() const { return mReady; }
+
+	std::string MakeManifest(const std::string& theAppData, const std::string& theResult) const
+	{
+		return
+			"schema=1\n"
+			"role=host\n"
+			"endpoint=127.0.0.1\n"
+			"port=27713\n"
+			"nickname=SmokeHost\n"
+			"mode=adventure\n"
+			"level=1\n"
+			"seed=424242\n"
+			"appdata_dir=" + theAppData + "\n"
+			"config_path=" + mConfig.string() + "\n"
+			"log_dir=" + mLogs.string() + "\n"
+			"result_path=" + theResult + "\n"
+			"timeout_ms=120000\n"
+			"minimum_snapshots=3\n"
+			"skip_intro=1\n"
+			"close_on_result=0\n";
+	}
+
+	bool Parse(const std::string& theText, LawnNet::NetSmokeManifest& theManifest,
+		std::string& theError) const
+	{
+		if (!WriteSmokeTestFile(mManifest, theText))
+			return false;
+		return LawnNet::NetLoadSmokeManifest(mManifest.string().c_str(), theManifest, theError);
+	}
+
+	std::filesystem::path mRoot, mRoleRoot, mAppData, mLogs, mConfig, mManifest, mResult, mEscape;
+
+private:
+	bool mReady;
+	bool mEnvironmentTouched;
+	bool mHadEnvironmentRole;
+	std::string mOldEnvironmentRole;
+};
+
+void TestSmokeManifestAndHashValidation()
+{
+	static const char aHello[] = "hello";
+	CHECK(LawnNet::NetFnv1a32(nullptr, 0) == 2166136261u);
+	CHECK(LawnNet::NetFnv1a32(aHello, sizeof(aHello) - 1) == 0x4F9F2CABu);
+
+	ScopedSmokeManifestTree aTree;
+	if (!aTree.IsReady())
+	{
+		Skip("could not construct isolated smoke manifest tree");
+		return;
+	}
+
+	LawnNet::NetSmokeManifest aManifest;
+	std::string anError;
+	const std::string aValid = aTree.MakeManifest(aTree.mAppData.string(), aTree.mResult.string());
+	CHECK(aTree.Parse(aValid, aManifest, anError));
+	CHECK(anError.empty());
+	CHECK(aManifest.IsHost());
+	CHECK(aManifest.mLevel == 1);
+	CHECK(aManifest.mSeed == 424242u);
+	CHECK(aManifest.mMinimumSnapshots == 3u);
+
+	std::string anUnknown = aValid;
+	const size_t aCloseField = anUnknown.find("close_on_result=0");
+	CHECK(aCloseField != std::string::npos);
+	if (aCloseField != std::string::npos)
+		anUnknown.replace(aCloseField, strlen("close_on_result=0"), "unknown_field=0");
+	anError.clear();
+	CHECK(!aTree.Parse(anUnknown, aManifest, anError));
+	CHECK(!anError.empty());
+
+	anError.clear();
+	CHECK(!aTree.Parse(aValid + "seed=9\n", aManifest, anError));
+	CHECK(!anError.empty());
+
+	anError.clear();
+	CHECK(!aTree.Parse(aTree.MakeManifest("relative-appdata", aTree.mResult.string()),
+		aManifest, anError));
+	CHECK(!anError.empty());
+
+	anError.clear();
+	CHECK(!aTree.Parse(aTree.MakeManifest(aTree.mEscape.string(), aTree.mResult.string()),
+		aManifest, anError));
+	CHECK(!anError.empty());
+
+	CHECK(WriteSmokeTestFile(aTree.mResult, "{}\n"));
+	anError.clear();
+	CHECK(!aTree.Parse(aValid, aManifest, anError));
+	CHECK(!anError.empty());
+}
+
 void TestConfigRoundTripInIsolatedDirectory()
 {
 	ScopedTemporaryWorkingDirectory aWorkingDirectory;
@@ -389,6 +550,11 @@ int main()
 	RunTest("Players.RelativeColors", TestRelativePlayerColors);
 	RunTest("Config.Defaults", TestConfigDefaults);
 	RunTest("Config.IsolatedRoundTrip", TestConfigRoundTripInIsolatedDirectory);
+	RunTest("Smoke.ManifestAndHashValidation", TestSmokeManifestAndHashValidation);
+	const LocalizedTextTestResult aTextResult = RunLocalizedTextTests();
+	gChecks += aTextResult.mChecks;
+	gFailures += aTextResult.mFailures;
+	gSkipped += aTextResult.mSkipped;
 
 	std::printf("\nchecks=%d failures=%d skipped=%d\n", gChecks, gFailures, gSkipped);
 	return gFailures == 0 ? 0 : 1;

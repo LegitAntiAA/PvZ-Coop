@@ -1,6 +1,7 @@
 #include "Common.h"
 #include "MTRand.h"
 #include "Debug.h"
+#include "TextEncoding.h"
 #include <direct.h>
 #include <io.h>
 #include <sys/types.h>
@@ -213,24 +214,7 @@ std::wstring Sexy::StringToLower(const std::wstring& theString)
 
 std::wstring Sexy::StringToWString(const std::string& theString)
 {
-	try
-	{
-		return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>>{}.from_bytes(theString);
-	}
-	catch (const std::range_error&)
-	{
-		// The Russian GOTY LawnStrings.txt is Windows-1251, while newer UI
-		// strings and nicknames are UTF-8.  Decode the legacy resource explicitly
-		// instead of treating each CP1251 byte as an unrelated Latin-1 codepoint.
-		if (theString.empty())
-			return std::wstring();
-		int aLength = MultiByteToWideChar(1251, 0, theString.data(), (int)theString.size(), nullptr, 0);
-		if (aLength <= 0)
-			return std::wstring();
-		std::wstring aString(aLength, L'\0');
-		MultiByteToWideChar(1251, 0, theString.data(), (int)theString.size(), &aString[0], aLength);
-		return aString;
-	}
+	return DecodeUtf8OrWindows1251(theString);
 }
 std::string Sexy::WStringToString(const std::wstring& theString)
 {

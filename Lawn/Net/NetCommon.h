@@ -292,6 +292,65 @@ void NetTraceClose();
 void NetTrace(const char* theFormat, ...);
 const char* NetMessageName(uint8_t theMsgType);
 
+enum NetSmokeRole : uint8_t
+{
+	NETSMOKE_NONE = 0,
+	NETSMOKE_HOST = 1,
+	NETSMOKE_CLIENT = 2
+};
+
+// Strict, test-only process contract loaded from -coop-smoke-manifest.  The
+// regular game never populates this structure and keeps all legacy paths and
+// lifecycle behavior unchanged.
+struct NetSmokeManifest
+{
+	bool mEnabled;
+	NetSmokeRole mRole;
+	std::string mManifestPath;
+	std::string mEndpoint;
+	uint16_t mPort;
+	std::string mNickname;
+	std::string mMode;
+	int mLevel;
+	uint32_t mSeed;
+	std::string mAppDataDir;
+	std::string mConfigPath;
+	std::string mLogDir;
+	std::string mResultPath;
+	uint32_t mTimeoutMs;
+	uint32_t mMinimumSnapshots;
+	bool mSkipIntro;
+	bool mCloseOnResult;
+
+	NetSmokeManifest() { Reset(); }
+	void Reset()
+	{
+		mEnabled = false;
+		mRole = NETSMOKE_NONE;
+		mManifestPath.clear();
+		mEndpoint.clear();
+		mPort = 0;
+		mNickname.clear();
+		mMode.clear();
+		mLevel = 0;
+		mSeed = 0;
+		mAppDataDir.clear();
+		mConfigPath.clear();
+		mLogDir.clear();
+		mResultPath.clear();
+		mTimeoutMs = 0;
+		mMinimumSnapshots = 0;
+		mSkipIntro = false;
+		mCloseOnResult = false;
+	}
+	bool IsHost() const { return mEnabled && mRole == NETSMOKE_HOST; }
+	bool IsClient() const { return mEnabled && mRole == NETSMOKE_CLIENT; }
+};
+
+bool NetLoadSmokeManifest(const char* theAbsolutePath, NetSmokeManifest& theManifest, std::string& theError);
+void NetSetRuntimePaths(const char* theConfigPath, const char* theLogDirectory);
+uint32_t NetFnv1a32(const void* theData, size_t theSize);
+
 // Config file (coop.ini): nickname + unlock flags
 struct NetConfig
 {

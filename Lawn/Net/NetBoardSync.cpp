@@ -1487,6 +1487,8 @@ void Board::NetApplyPlantPresentation(Plant* thePlant, PlantState thePreviousSta
 
 void Board::NetApplySnapshot(NetBuffer& b)
 {
+	const size_t aSmokeSnapshotBytes = b.Size();
+	const uint32_t aSmokeSnapshotHash = NetFnv1a32(b.Data(), b.Size());
 	// Fixed core through the seed-packet count.  Validate it before touching
 	// board/profile state so a truncated datagram cannot partially apply.
 	static const size_t NET_SNAPSHOT_CORE_BYTES = 72;
@@ -2569,7 +2571,12 @@ void Board::NetApplySnapshot(NetBuffer& b)
 				aGridItem->GridItemDie();
 	}
 	if (b.Remaining() != 0)
+	{
 		NetTrace("snapshot ignored trailing bytes=%zu", b.Remaining());
+		return;
+	}
+	if (mApp && mApp->CoopSmokeActive())
+		mApp->CoopSmokeOnSnapshotApplied(aSmokeSnapshotHash, aSmokeSnapshotBytes);
 }
 
 // ==========================================================================

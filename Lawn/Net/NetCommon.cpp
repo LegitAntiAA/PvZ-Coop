@@ -1,6 +1,7 @@
 #include "NetCommon.h"
 
 #include <cstdarg>
+#include <cctype>
 #include <cstdio>
 #include <ctime>
 #include <direct.h>
@@ -8,6 +9,7 @@
 #include <mutex>
 #include <process.h>
 #include <thread>
+#include <windows.h>
 
 namespace LawnNet
 {
@@ -16,6 +18,8 @@ namespace
 {
 std::mutex gNetTraceMutex;
 FILE* gNetTraceFile = nullptr;
+std::string gNetConfigPath("coop.ini");
+std::string gNetLogDirectory("coop_logs");
 
 void NetTraceTimestamp(char* theBuffer, size_t theSize)
 {
@@ -35,12 +39,12 @@ void NetTraceOpen(const char* theRole)
 		fclose(gNetTraceFile);
 		gNetTraceFile = nullptr;
 	}
-	_mkdir("coop_logs");
+	_mkdir(gNetLogDirectory.c_str());
 	time_t aNow = time(nullptr);
 	tm aLocal = {};
 	localtime_s(&aLocal, &aNow);
-	char aPath[260];
-	sprintf_s(aPath, "coop_logs\\coop_%04d%02d%02d_%02d%02d%02d_%s_%d.log",
+	char aPath[512];
+	sprintf_s(aPath, "%s\\coop_%04d%02d%02d_%02d%02d%02d_%s_%d.log", gNetLogDirectory.c_str(),
 		aLocal.tm_year + 1900, aLocal.tm_mon + 1, aLocal.tm_mday,
 		aLocal.tm_hour, aLocal.tm_min, aLocal.tm_sec,
 		theRole ? theRole : "unknown", _getpid());
@@ -145,10 +149,361 @@ static std::string TrimStr(const std::string& theStr)
 	return theStr.substr(aStart, anEnd - aStart + 1);
 }
 
+uint32_t NetFnv1a32(const void* theData, size_t theSize)
+{
+	const uint8_t* aBytes = static_cast<const uint8_t*>(theData);
+	uint32_t aHash = 2166136261u;
+	for (size_t i = 0; i < theSize; ++i)
+	{
+		aHash ^= aBytes[i];
+		aHash *= 16777619u;
+	}
+	return aHash;
+}
+
+void NetSetRuntimePaths(const char* theConfigPath, const char* theLogDirectory)
+{
+	if (theConfigPath && theConfigPath[0])
+		gNetConfigPath = theConfigPath;
+	if (theLogDirectory && theLogDirectory[0])
+		gNetLogDirectory = theLogDirectory;
+}
+
+namespace
+{
+bool SmokeError(std::string& theError, const std::string& theMessage)
+{
+	theError = theMessage;
+	return false;
+}
+
+bool ParseU32Strict(const std::string& theValue, uint32_t* theOut)
+{
+	if (!theOut || theValue.empty())
+		return false;
+	uint64_t aValue = 0;
+	for (size_t i = 0; i < theValue.size(); ++i)
+	{
+		unsigned char aChar = (unsigned char)theValue[i];
+		if (!isdigit(aChar))
+			return false;
+		aValue = aValue * 10u + (uint64_t)(aChar - '0');
+		if (aValue > 0xFFFFFFFFULL)
+			return false;
+	}
+	*theOut = (uint32_t)aValue;
+	return true;
+}
+
+bool IsDriveAbsolutePath(const std::string& thePath)
+{
+	return thePath.size() >= 3 && isalpha((unsigned char)thePath[0]) &&
+		thePath[1] == ':' && (thePath[2] == '\\' || thePath[2] == '/');
+}
+
+bool NormalizeSmokePath(const std::string& theValue, std::string& thePath, std::string& theError,
+	const char* theField)
+{
+	if (!IsDriveAbsolutePath(theValue))
+		return SmokeError(theError, std::string(theField) + " must be an absolute drive path");
+	for (size_t i = 0; i < theValue.size(); ++i)
+	{
+		unsigned char aChar = (unsigned char)theValue[i];
+		if (aChar < 32 || aChar == '"' || aChar == '*' || aChar == '?' ||
+			aChar == '<' || aChar == '>' || aChar == '|')
+			return SmokeError(theError, std::string(theField) + " contains an unsafe character");
+		if (aChar == ':' && i != 1)
+			return SmokeError(theError, std::string(theField) + " contains an invalid colon");
+	}
+
+	char aFullPath[MAX_PATH];
+	DWORD aLength = GetFullPathNameA(theValue.c_str(), MAX_PATH, aFullPath, nullptr);
+	if (aLength == 0 || aLength >= MAX_PATH)
+		return SmokeError(theError, std::string(theField) + " cannot be canonicalized within MAX_PATH");
+	thePath.assign(aFullPath, aLength);
+	for (size_t i = 0; i < thePath.size(); ++i)
+		if (thePath[i] == '/') thePath[i] = '\\';
+	while (thePath.size() > 3 && thePath[thePath.size() - 1] == '\\')
+		thePath.erase(thePath.size() - 1);
+	return true;
+}
+
+std::string SmokeParentPath(const std::string& thePath)
+{
+	size_t aSlash = thePath.find_last_of("\\/");
+	if (aSlash == std::string::npos)
+		return "";
+	if (aSlash == 2)
+		return thePath.substr(0, 3);
+	return thePath.substr(0, aSlash);
+}
+
+bool SmokePathIsDescendant(const std::string& theRoot, const std::string& thePath)
+{
+	if (thePath.size() <= theRoot.size() + 1 || _strnicmp(theRoot.c_str(), thePath.c_str(), theRoot.size()) != 0)
+		return false;
+	return thePath[theRoot.size()] == '\\';
+}
+
+bool SmokeExistingDirectory(const std::string& thePath)
+{
+	DWORD anAttributes = GetFileAttributesA(thePath.c_str());
+	return anAttributes != INVALID_FILE_ATTRIBUTES && (anAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0 &&
+		(anAttributes & FILE_ATTRIBUTE_REPARSE_POINT) == 0;
+}
+
+bool SmokeExistingFile(const std::string& thePath)
+{
+	DWORD anAttributes = GetFileAttributesA(thePath.c_str());
+	return anAttributes != INVALID_FILE_ATTRIBUTES && (anAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0 &&
+		(anAttributes & FILE_ATTRIBUTE_REPARSE_POINT) == 0;
+}
+
+bool SmokeHasReparseBelowRoot(const std::string& theRoot, const std::string& thePath,
+	bool theFinalMayBeMissing)
+{
+	std::string aCurrent = theFinalMayBeMissing ? SmokeParentPath(thePath) : thePath;
+	for (;;)
+	{
+		DWORD anAttributes = GetFileAttributesA(aCurrent.c_str());
+		if (anAttributes == INVALID_FILE_ATTRIBUTES ||
+			(anAttributes & FILE_ATTRIBUTE_REPARSE_POINT) != 0)
+			return true;
+		if (_stricmp(aCurrent.c_str(), theRoot.c_str()) == 0)
+			return false;
+		if (!SmokePathIsDescendant(theRoot, aCurrent))
+			return true;
+		aCurrent = SmokeParentPath(aCurrent);
+	}
+}
+
+bool SmokeSameOrDescendant(const std::string& theRoot, const std::string& thePath)
+{
+	return _stricmp(theRoot.c_str(), thePath.c_str()) == 0 ||
+		SmokePathIsDescendant(theRoot, thePath);
+}
+
+bool SmokeParserSelfTest()
+{
+	uint32_t aValue = 0;
+	static const char aHello[] = "hello";
+	return ParseU32Strict("0", &aValue) && aValue == 0 &&
+		ParseU32Strict("4294967295", &aValue) && aValue == 0xFFFFFFFFu &&
+		!ParseU32Strict("-1", &aValue) && !ParseU32Strict("1x", &aValue) &&
+		!ParseU32Strict("4294967296", &aValue) &&
+		NetFnv1a32(aHello, sizeof(aHello) - 1) == 0x4F9F2CABu;
+}
+}
+
+bool NetLoadSmokeManifest(const char* theAbsolutePath, NetSmokeManifest& theManifest, std::string& theError)
+{
+	theManifest.Reset();
+	theError.clear();
+	if (!SmokeParserSelfTest())
+		return SmokeError(theError, "internal smoke parser self-test failed");
+	if (!theAbsolutePath || !theAbsolutePath[0])
+		return SmokeError(theError, "smoke manifest path is empty");
+
+	std::string aManifestPath;
+	if (!NormalizeSmokePath(theAbsolutePath, aManifestPath, theError, "manifest path"))
+		return false;
+	if (!SmokeExistingFile(aManifestPath))
+		return SmokeError(theError, "smoke manifest is not an existing regular file");
+
+	FILE* aFile = nullptr;
+	if (fopen_s(&aFile, aManifestPath.c_str(), "rb") != 0 || !aFile)
+		return SmokeError(theError, "smoke manifest cannot be opened");
+
+	std::map<std::string, std::string> aValues;
+	char aLine[2048];
+	int aLineNumber = 0;
+	bool aParseOk = true;
+	while (fgets(aLine, sizeof(aLine), aFile))
+	{
+		++aLineNumber;
+		size_t aLineLength = strlen(aLine);
+		if (aLineLength == sizeof(aLine) - 1 && aLine[aLineLength - 1] != '\n' && !feof(aFile))
+		{
+			theError = "smoke manifest line is too long at line " + std::to_string(aLineNumber);
+			aParseOk = false;
+			break;
+		}
+		std::string aText(aLine, aLineLength);
+		if (aLineNumber == 1 && aText.size() >= 3 &&
+			(uint8_t)aText[0] == 0xEF && (uint8_t)aText[1] == 0xBB && (uint8_t)aText[2] == 0xBF)
+			aText.erase(0, 3);
+		aText = TrimStr(aText);
+		if (aText.empty() || aText[0] == '#' || aText[0] == ';')
+			continue;
+		if (aText[0] == '[')
+		{
+			theError = "smoke manifest sections are not allowed at line " + std::to_string(aLineNumber);
+			aParseOk = false;
+			break;
+		}
+		size_t anEquals = aText.find('=');
+		if (anEquals == std::string::npos)
+		{
+			theError = "smoke manifest entry lacks '=' at line " + std::to_string(aLineNumber);
+			aParseOk = false;
+			break;
+		}
+		std::string aKey = TrimStr(aText.substr(0, anEquals));
+		std::string aValue = TrimStr(aText.substr(anEquals + 1));
+		if (aKey.empty() || aValue.empty())
+		{
+			theError = "smoke manifest key/value is empty at line " + std::to_string(aLineNumber);
+			aParseOk = false;
+			break;
+		}
+		if (aValues.find(aKey) != aValues.end())
+		{
+			theError = "duplicate smoke manifest key '" + aKey + "'";
+			aParseOk = false;
+			break;
+		}
+		aValues[aKey] = aValue;
+		if (aValues.size() > 16)
+		{
+			theError = "smoke manifest contains too many fields";
+			aParseOk = false;
+			break;
+		}
+	}
+	if (ferror(aFile))
+	{
+		theError = "error while reading smoke manifest";
+		aParseOk = false;
+	}
+	fclose(aFile);
+	if (!aParseOk)
+		return false;
+
+	static const char* aRequiredKeys[] = {
+		"schema", "role", "endpoint", "port", "nickname", "mode", "level", "seed",
+		"appdata_dir", "config_path", "log_dir", "result_path", "timeout_ms",
+		"minimum_snapshots", "skip_intro", "close_on_result"
+	};
+	// The schema contains sixteen exact fields.  Unknown, missing and duplicate
+	// entries are all fatal so a typo can never fall back to a normal profile.
+	if (aValues.size() != sizeof(aRequiredKeys) / sizeof(aRequiredKeys[0]))
+		return SmokeError(theError, "smoke manifest must contain exactly 16 fields");
+	for (std::map<std::string, std::string>::const_iterator anIt = aValues.begin(); anIt != aValues.end(); ++anIt)
+	{
+		bool aKnown = false;
+		for (size_t i = 0; i < sizeof(aRequiredKeys) / sizeof(aRequiredKeys[0]); ++i)
+			if (anIt->first == aRequiredKeys[i]) { aKnown = true; break; }
+		if (!aKnown)
+			return SmokeError(theError, "unknown smoke manifest key '" + anIt->first + "'");
+	}
+	for (size_t i = 0; i < sizeof(aRequiredKeys) / sizeof(aRequiredKeys[0]); ++i)
+		if (aValues.find(aRequiredKeys[i]) == aValues.end())
+			return SmokeError(theError, std::string("smoke manifest is missing '") + aRequiredKeys[i] + "'");
+
+	uint32_t aSchema = 0, aPort = 0, aLevel = 0, aSeed = 0, aTimeout = 0,
+		aMinimumSnapshots = 0, aSkipIntro = 0, aCloseOnResult = 0;
+	if (!ParseU32Strict(aValues["schema"], &aSchema) || aSchema != 1)
+		return SmokeError(theError, "schema must equal 1");
+	if (aValues["role"] == "host") theManifest.mRole = NETSMOKE_HOST;
+	else if (aValues["role"] == "client") theManifest.mRole = NETSMOKE_CLIENT;
+	else return SmokeError(theError, "role must be exactly host or client");
+	if (aValues["endpoint"] != "127.0.0.1")
+		return SmokeError(theError, "endpoint must be exactly 127.0.0.1");
+	if (!ParseU32Strict(aValues["port"], &aPort) || aPort == 0 || aPort > 65535)
+		return SmokeError(theError, "port must be in 1..65535");
+	const std::string& aNickname = aValues["nickname"];
+	if (aNickname.empty() || aNickname.size() > NET_MAX_NICK)
+		return SmokeError(theError, "nickname length is invalid");
+	for (size_t i = 0; i < aNickname.size(); ++i)
+		if (!isalnum((unsigned char)aNickname[i]) && aNickname[i] != '_' && aNickname[i] != '-')
+			return SmokeError(theError, "nickname contains an invalid character");
+	if (aValues["mode"] != "adventure")
+		return SmokeError(theError, "mode must be exactly adventure");
+	if (!ParseU32Strict(aValues["level"], &aLevel) || aLevel != 1)
+		return SmokeError(theError, "the deterministic smoke scenario requires level=1");
+	if (!ParseU32Strict(aValues["seed"], &aSeed))
+		return SmokeError(theError, "seed must be an unsigned 32-bit integer");
+	if (!ParseU32Strict(aValues["timeout_ms"], &aTimeout) || aTimeout < 10000 || aTimeout > 3600000)
+		return SmokeError(theError, "timeout_ms must be in 10000..3600000");
+	if (!ParseU32Strict(aValues["minimum_snapshots"], &aMinimumSnapshots) ||
+		aMinimumSnapshots == 0 || aMinimumSnapshots > 1000)
+		return SmokeError(theError, "minimum_snapshots must be in 1..1000");
+	if (!ParseU32Strict(aValues["skip_intro"], &aSkipIntro) || aSkipIntro != 1)
+		return SmokeError(theError, "skip_intro must equal 1");
+	if (!ParseU32Strict(aValues["close_on_result"], &aCloseOnResult) || aCloseOnResult > 1)
+		return SmokeError(theError, "close_on_result must be 0 or 1");
+
+	std::string anAppDataDir, aConfigPath, aLogDir, aResultPath;
+	if (!NormalizeSmokePath(aValues["appdata_dir"], anAppDataDir, theError, "appdata_dir") ||
+		!NormalizeSmokePath(aValues["config_path"], aConfigPath, theError, "config_path") ||
+		!NormalizeSmokePath(aValues["log_dir"], aLogDir, theError, "log_dir") ||
+		!NormalizeSmokePath(aValues["result_path"], aResultPath, theError, "result_path"))
+		return false;
+
+	std::string aRunRoleRoot = SmokeParentPath(aManifestPath);
+	if (aRunRoleRoot.empty() || !SmokeExistingDirectory(aRunRoleRoot))
+		return SmokeError(theError, "manifest parent directory is unavailable");
+	if (!SmokePathIsDescendant(aRunRoleRoot, anAppDataDir) ||
+		!SmokePathIsDescendant(aRunRoleRoot, aConfigPath) ||
+		!SmokePathIsDescendant(aRunRoleRoot, aLogDir) ||
+		!SmokePathIsDescendant(aRunRoleRoot, aResultPath))
+		return SmokeError(theError, "all smoke paths must stay below the manifest directory");
+	if (!SmokeExistingDirectory(anAppDataDir) || !SmokeExistingDirectory(aLogDir))
+		return SmokeError(theError, "appdata_dir and log_dir must be existing regular directories");
+	if (!SmokeExistingFile(aConfigPath))
+		return SmokeError(theError, "config_path must be an existing regular file");
+	if (!SmokeExistingDirectory(SmokeParentPath(aResultPath)))
+		return SmokeError(theError, "result_path parent must be an existing regular directory");
+	if (SmokeHasReparseBelowRoot(aRunRoleRoot, anAppDataDir, false) ||
+		SmokeHasReparseBelowRoot(aRunRoleRoot, aLogDir, false) ||
+		SmokeHasReparseBelowRoot(aRunRoleRoot, aConfigPath, false) ||
+		SmokeHasReparseBelowRoot(aRunRoleRoot, aResultPath, true))
+		return SmokeError(theError, "smoke paths may not traverse reparse points");
+	if (aResultPath.size() > MAX_PATH - 32)
+		return SmokeError(theError, "result_path is too long for atomic temporary publication");
+	if (SmokeSameOrDescendant(anAppDataDir, aLogDir) ||
+		SmokeSameOrDescendant(aLogDir, anAppDataDir) ||
+		SmokeSameOrDescendant(anAppDataDir, aConfigPath) ||
+		SmokeSameOrDescendant(anAppDataDir, aResultPath) ||
+		SmokeSameOrDescendant(aLogDir, aConfigPath) ||
+		SmokeSameOrDescendant(aLogDir, aResultPath) ||
+		_stricmp(aConfigPath.c_str(), aResultPath.c_str()) == 0 ||
+		_stricmp(aManifestPath.c_str(), aResultPath.c_str()) == 0)
+		return SmokeError(theError, "smoke paths overlap");
+	DWORD aResultAttributes = GetFileAttributesA(aResultPath.c_str());
+	DWORD aResultError = aResultAttributes == INVALID_FILE_ATTRIBUTES ? GetLastError() : ERROR_SUCCESS;
+	if (aResultAttributes != INVALID_FILE_ATTRIBUTES || aResultError != ERROR_FILE_NOT_FOUND)
+		return SmokeError(theError, "result_path must not already exist");
+
+	char anEnvironmentRole[32] = {};
+	DWORD anEnvironmentRoleLength = GetEnvironmentVariableA("PVZ_COOP_SMOKE_ROLE", anEnvironmentRole, sizeof(anEnvironmentRole));
+	if (anEnvironmentRoleLength > 0 && (anEnvironmentRoleLength >= sizeof(anEnvironmentRole) ||
+		aValues["role"] != anEnvironmentRole))
+		return SmokeError(theError, "PVZ_COOP_SMOKE_ROLE does not match manifest role");
+
+	theManifest.mEnabled = true;
+	theManifest.mManifestPath = aManifestPath;
+	theManifest.mEndpoint = aValues["endpoint"];
+	theManifest.mPort = (uint16_t)aPort;
+	theManifest.mNickname = aNickname;
+	theManifest.mMode = aValues["mode"];
+	theManifest.mLevel = (int)aLevel;
+	theManifest.mSeed = aSeed;
+	theManifest.mAppDataDir = anAppDataDir;
+	theManifest.mConfigPath = aConfigPath;
+	theManifest.mLogDir = aLogDir;
+	theManifest.mResultPath = aResultPath;
+	theManifest.mTimeoutMs = aTimeout;
+	theManifest.mMinimumSnapshots = aMinimumSnapshots;
+	theManifest.mSkipIntro = true;
+	theManifest.mCloseOnResult = aCloseOnResult != 0;
+	return true;
+}
+
 bool NetLoadConfig(NetConfig& theConfig)
 {
 	theConfig.Reset();
-	FILE* aFile = fopen("coop.ini", "rb");
+	FILE* aFile = fopen(gNetConfigPath.c_str(), "rb");
 	if (!aFile)
 		return false;
 
@@ -191,7 +546,7 @@ bool NetLoadConfig(NetConfig& theConfig)
 
 bool NetSaveConfig(const NetConfig& theConfig)
 {
-	FILE* aFile = fopen("coop.ini", "wb");
+	FILE* aFile = fopen(gNetConfigPath.c_str(), "wb");
 	if (!aFile)
 		return false;
 	fprintf(aFile, "# PvZ Co-op configuration\n");

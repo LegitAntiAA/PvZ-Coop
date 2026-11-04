@@ -1318,6 +1318,9 @@ void NetManager::OnStartGame(NetBuffer& thePayload)
 
 void NetManager::OnSnapshot(NetBuffer& thePayload)
 {
+	if (mApp && mApp->CoopSmokeActive())
+		mApp->CoopSmokeOnSnapshotRx(NetFnv1a32(thePayload.Data(), thePayload.Size()),
+			thePayload.Size());
 	static uint32_t aSnapshotCount = 0;
 	aSnapshotCount++;
 	std::lock_guard<std::mutex> aLock(mSessionsMutex);
@@ -1990,6 +1993,9 @@ void NetManager::SendBoardEvent(const NetBuffer& thePayload, uint8_t theEventTyp
 void NetManager::SendSnapshot(const NetBuffer& thePayload)
 {
 	BroadcastMessage(NETMSG_SNAPSHOT, thePayload);
+	if (mApp && mApp->CoopSmokeActive())
+		mApp->CoopSmokeOnSnapshotTx(NetFnv1a32(thePayload.Data(), thePayload.Size()),
+			thePayload.Size());
 }
 
 uint64_t NetManager::GetBytesSent() const

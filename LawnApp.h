@@ -3,6 +3,7 @@
 
 #include "ConstEnums.h"
 #include "SexyAppFramework/SexyApp.h"
+#include "Lawn/Net/NetCommon.h"
 
 #include "portaudio.h"
 #include "SexyAppFramework/DDImage.h"
@@ -179,6 +180,22 @@ public:
 	bool							mNetCoopGameOverHandled;
 	Sexy::DDImage*				mNetCursorImage;
 
+	// Opt-in automation state.  It is populated only by a valid absolute
+	// -coop-smoke-manifest argument; ordinary launches never enter this path.
+	LawnNet::NetSmokeManifest	mCoopSmokeManifest;
+	bool							mCoopSmokeArgSeen;
+	bool							mCoopSmokeManifestValid;
+	bool							mCoopSmokeLifecycleStarted;
+	bool							mCoopSmokeGameStarted;
+	bool							mCoopSmokePeerReady;
+	bool							mCoopSmokeEverConnected;
+	bool							mCoopSmokeResultWritten;
+	uint32_t						mCoopSmokeStartedTick;
+	uint32_t						mCoopSmokeSnapshotsSent;
+	uint32_t						mCoopSmokeSnapshotsReceived;
+	uint32_t						mCoopSmokeSnapshotsApplied;
+	std::string						mCoopSmokeManifestError;
+
 public:
 	void							NetInit();
 	void							NetShutdown();
@@ -193,6 +210,14 @@ public:
 	void							NetOnProfileSync(LawnNet::NetBuffer& thePayload);
 	void							NetBroadcastProfile();									// host: push profile to clients
 	void							NetHandleRemoteInputs();
+	bool							CoopSmokeActive() const;
+	void							CoopSmokeStartLifecycle();
+	void							CoopSmokeUpdate();
+	void							CoopSmokeFail(const char* theReason);
+	bool							CoopSmokeWriteResult(bool thePassed, const char* theReason);
+	void							CoopSmokeOnSnapshotTx(uint32_t theHash, size_t theBytes);
+	void							CoopSmokeOnSnapshotRx(uint32_t theHash, size_t theBytes);
+	void							CoopSmokeOnSnapshotApplied(uint32_t theHash, size_t theBytes);
 	void							NetDrawCursorOverlay();
 	bool							IsCoopCustomMode();
 	static bool						IsCoopEndlessMode(GameMode theGameMode);

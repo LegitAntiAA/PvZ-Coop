@@ -1,6 +1,7 @@
 #include "SDL3Font.h"
 #include "../LawnApp.h"
 #include "Graphics.h"
+#include "TextEncoding.h"
 
 using namespace Sexy;
 
@@ -99,11 +100,21 @@ void SDL3Font::CacheGlyph(Uint32 c, const Color& color)
 {
 	if (!mFont || mGlyphCache.find(c) != mGlyphCache.end()) return;
 
+	const Uint32 aRenderCodePoint = ResolveGlyphCodePoint(c,
+		[this](Uint32 theCodePoint) { return TTF_FontHasGlyph(mFont, theCodePoint); });
+	if (aRenderCodePoint == 0U)
+		return;
+
 	SDL_Color sdlColor = { Uint8(color.mRed), Uint8(color.mGreen), Uint8(color.mBlue), Uint8(color.mAlpha) };
-	SDL_Surface* surface = TTF_RenderGlyph_Blended(mFont, c, sdlColor);
+	SDL_Surface* surface = TTF_RenderGlyph_Blended(mFont, aRenderCodePoint, sdlColor);
 	if (!surface) return;
 
 	SDL_Texture* texture = SDL_CreateTextureFromSurface(LawnApp::mSDLRenderer, surface);
+	if (!texture)
+	{
+		SDL_DestroySurface(surface);
+		return;
+	}
 	SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
 
 	mGlyphCache[c] = texture;

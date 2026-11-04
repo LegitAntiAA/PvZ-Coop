@@ -49,11 +49,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="LocalizedTextTests.cpp" />
     <ClCompile Include="TestMain.cpp" />
     <ClCompile Include="..\..\Lawn\Net\NetCommon.cpp" />
+    <ClCompile Include="..\..\PakLib\PakInterface.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="LocalizedTextTests.h" />
     <ClInclude Include="..\..\Lawn\Net\NetCommon.h" />
+    <ClInclude Include="..\..\PakLib\PakInterface.h" />
+    <ClInclude Include="..\..\SexyAppFramework\TextEncoding.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

@@ -23,7 +23,7 @@ Artifacts are retained by default under `%TEMP%\PvZ-Coop-Smoke\run_<GUID>`. Fail
 Expected result schema:
 
 ```json
-{"status":"pass","role":"host","protocol":16,"mode":"adventure","level":1,"seed":424242,"snapshotsSent":5}
+{"status":"pass","role":"host","protocol":17,"mode":"adventure","level":1,"seed":424242,"snapshotsSent":5}
 ```
 
 The client uses the same fields with `"role":"client"` and `"snapshotsApplied":5`. Logs must include `SMOKE_SNAPSHOT_TX ... hash=<hex>` on the host and `SMOKE_SNAPSHOT_APPLIED ... hash=<hex>` on the client. The runner also requires the normal listen/authentication/WELCOME/profile/start/gameplay signatures and rejects access violations, protocol violations, queue overflow, malformed starts, rejected snapshots, and host-loss markers.
