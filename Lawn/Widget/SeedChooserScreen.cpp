@@ -801,7 +801,8 @@ void SeedChooserScreen::OnStartButton()
 			if (!aPlayer.mActive || aPlayer.mTeam != NETTEAM_PLANTS)
 				continue;
 			int aCount = aSlot == mApp->mNetManager->GetMySlot() ? mSeedsInBank : mCoopRemotePickCount[aSlot];
-			if (aCount != mCoopPicksPerPlayer)
+			int anExpectedCount = mApp->mNetManager->mChooserPickQuota[aSlot];
+			if (aCount != anExpectedCount)
 			{
 				mApp->PlaySample(Sexy::SOUND_BUZZER);
 				return;
@@ -1687,7 +1688,7 @@ static void CoopBuildBankInternal(SeedBank* theBank, int theMySlot,
 	if (aPvP)
 	{
 		// Plant slots remain a fixed first row even if somebody selected fewer
-		// cards; the complete zombie-team palette always starts at index 6.
+		// cards; the complete zombie-team palette starts after all ten slots.
 		while (aPos < PVP_PLANT_PACKET_COUNT)
 			theBank->mSeedPackets[aPos++].SetPacketType(SEED_NONE, SEED_NONE);
 		for (int i = 0; i < PVP_ZOMBIE_PACKET_COUNT; i++)
@@ -1812,7 +1813,8 @@ void SeedChooserScreen::CoopPollNetwork()
 			const bool aValidSlot = aPick.mSlot >= 0 && aPick.mSlot < NET_MAX_PLAYERS;
 			const bool aCanPick = aValidSlot && (mApp->mGameMode != GAMEMODE_COOP_PVP ||
 				aNet->GetPlayer(aPick.mSlot).mTeam == NETTEAM_PLANTS);
-			if (aCanPick && mCoopRemotePickCount[aPick.mSlot] < mCoopPicksPerPlayer &&
+			int aSlotQuota = aValidSlot ? aNet->mChooserPickQuota[aPick.mSlot] : 0;
+			if (aCanPick && mCoopRemotePickCount[aPick.mSlot] < aSlotQuota &&
 				!CoopIsPickedByOthers(aPick.mSeedType))
 				CoopRecordRemotePick(aPick.mSlot, aPick.mSeedType, false);
 		}

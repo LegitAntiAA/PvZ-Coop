@@ -2037,7 +2037,7 @@ void Board::InitLevel()
 			mSeedBank->mSeedPackets[i].SetPacketType((SeedType)i);
 		}
 	}
-	// co-op PvP: six personal plant cards plus a shared two-row zombie palette
+	// co-op PvP: ten divided plant cards plus a shared two-row zombie palette
 	if (aGameMode == GameMode::GAMEMODE_COOP_PVP)
 	{
 		mSeedBank->mNumPackets = PVP_PACKET_COUNT;

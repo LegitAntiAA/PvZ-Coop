@@ -47,7 +47,7 @@ class SeedBank : public GameObject
 {
 public:
     int				    mNumPackets;                    //+0x24
-    SeedPacket		    mSeedPackets[SEEDBANK_CAPACITY]; // stock 10 + custom PvP rows
+    SeedPacket		    mSeedPackets[SEEDBANK_CAPACITY]; // stock bank + custom PvP rows
     int				    mCutSceneDarken;                //+0x348
     int				    mConveyorBeltCounter;           //+0x34C
 

@@ -39,7 +39,10 @@ NetManager::NetManager() :
 {
 	mConnectStatus[0] = 0;
 	for (int i = 0; i < NET_MAX_PLAYERS; i++)
+	{
 		mPlayers[i].Reset();
+		mChooserPickQuota[i] = 0;
+	}
 	mRemotePaused = false;
 }
 
@@ -237,7 +240,10 @@ void NetManager::Disconnect()
 	mPendingInputs.clear();
 	mChooserOpen = false;
 	for (int i = 0; i < NET_MAX_PLAYERS; i++)
+	{
 		mRemoteCursors[i].Clear();
+		mChooserPickQuota[i] = 0;
+	}
 	for (int i = 0; i < NET_MAX_PLAYERS; i++)
 		mPlayers[i].Reset();
 }
@@ -815,8 +821,10 @@ void NetManager::OnCursor(NetBuffer& thePayload)
 void NetManager::OnChooserOpen(NetBuffer& thePayload)
 {
 	mChooserOpen = true;
-	mChooserPicksPerPlayer = thePayload.ReadU8Or();
 	mChooserBankCount = thePayload.ReadU8Or();
+	for (int i = 0; i < NET_MAX_PLAYERS; i++)
+		mChooserPickQuota[i] = thePayload.ReadU8Or();
+	mChooserPicksPerPlayer = mChooserPickQuota[mMySlot];
 	mRemotePicks.clear();
 	mRemoteUnpicks.clear();
 

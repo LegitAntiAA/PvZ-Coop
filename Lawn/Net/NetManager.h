@@ -186,6 +186,7 @@ public:
 	bool mChooserOpen;							// client: chooser should be open
 	int mChooserPicksPerPlayer;					// from host
 	int mChooserBankCount;
+	int mChooserPickQuota[NET_MAX_PLAYERS];		// authoritative quota for every slot
 
 private:
 	Mode mMode;

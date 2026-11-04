@@ -18,10 +18,11 @@ const int           LAWN_YMIN = 80;
 const int           HIGH_GROUND_HEIGHT = 30;
 
 const int           SEEDBANK_MAX = 10;             // stock one-row bank size
-const int           SEEDBANK_CAPACITY = 24;        // storage capacity for custom multi-row HUDs
-const int           PVP_PLANT_PACKET_COUNT = 6;
+const int           SEEDBANK_CAPACITY = 32;        // storage capacity for custom multi-row HUDs
+const int           PVP_PLANT_PACKET_COUNT = 10;
 const int           PVP_ZOMBIE_PACKET_COUNT = 16;
 const int           PVP_PACKET_COUNT = PVP_PLANT_PACKET_COUNT + PVP_ZOMBIE_PACKET_COUNT;
+static_assert(PVP_PACKET_COUNT <= SEEDBANK_CAPACITY, "PvP seed bank exceeds storage capacity");
 const int           SEED_BANK_OFFSET_X = 0;
 const int           SEED_BANK_OFFSET_X_END = 10;
 const int           SEED_CHOOSER_OFFSET_Y = 516;

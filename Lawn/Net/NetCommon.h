@@ -24,7 +24,7 @@ namespace LawnNet
 // (the host broadcasts the same sounds via events).
 extern bool gNetSuppressSounds;
 
-static const uint32_t NET_PROTOCOL_VERSION = 2; // expanded PvP palette/shared card ownership
+static const uint32_t NET_PROTOCOL_VERSION = 3; // per-slot chooser quotas and 10-card PvP plant bank
 static const uint16_t NET_DEFAULT_PORT = 27713;			// PvZ co-op port
 static const int NET_MAX_PLAYERS = 4;					// 1 host + 3 clients
 static const int NET_MAX_NICK = 16;						// bytes (without terminator)
@@ -83,7 +83,7 @@ enum NetMsgType : uint8_t
 	NETMSG_PAUSE = 33,			// h->c: u8 paused
 	NETMSG_PAUSE_REQ = 34,		// c->h: (client asks; host may ignore)
 
-	NETMSG_CHOOSER_OPEN = 40,	// h->all: u8 numSeedsToChoosePerPlayer, u8 bankCount
+	NETMSG_CHOOSER_OPEN = 40,	// h->all: u8 bankCount, u8 pickQuota[4]
 	NETMSG_SEED_PICK = 41,		// c->h: u8 seedType, u8 imitaterType
 	NETMSG_SEED_UNPICK = 42,	// c->h: u8 seedType
 	NETMSG_CHOOSER_STATE = 43,	// h->all: per player: picked list

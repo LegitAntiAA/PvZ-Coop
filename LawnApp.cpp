@@ -1496,27 +1496,54 @@ void LawnApp::ShowSeedChooserScreen()
 	if (mNetManager && mNetManager->IsActive())
 	{
 		int aBankCount = mBoard ? mBoard->GetNumSeedsInBank() : 10;
-	if (mGameMode == GameMode::GAMEMODE_COOP_PVP)
-		aBankCount = PVP_PLANT_PACKET_COUNT; // only plant cards are divided
-		int aPlayers = max(1, mNetManager->GetPlayerCount());
-		if (mGameMode == GameMode::GAMEMODE_COOP_PVP)
-			aPlayers = max(1, mNetManager->GetTeamCount(LawnNet::NETTEAM_PLANTS));
-		int aPicksPerPlayer = max(1, aBankCount / aPlayers);
+		const bool aPvP = mGameMode == GameMode::GAMEMODE_COOP_PVP;
+		if (aPvP)
+			aBankCount = PVP_PLANT_PACKET_COUNT; // zombie cards are shared, not divided
+
+		int aQuotas[LawnNet::NET_MAX_PLAYERS] = {};
+		int anEligibleCount = 0;
+		for (int aSlot = 0; aSlot < LawnNet::NET_MAX_PLAYERS; aSlot++)
+		{
+			const LawnNet::NetPlayerInfo& aPlayer = mNetManager->GetPlayer(aSlot);
+			if (aPlayer.mActive && (!aPvP || aPlayer.mTeam == LawnNet::NETTEAM_PLANTS))
+				anEligibleCount++;
+		}
+		anEligibleCount = max(1, anEligibleCount);
+		int aBaseQuota = aBankCount / anEligibleCount;
+		int aRemainder = aBankCount % anEligibleCount;
+		for (int aSlot = 0; aSlot < LawnNet::NET_MAX_PLAYERS; aSlot++)
+		{
+			const LawnNet::NetPlayerInfo& aPlayer = mNetManager->GetPlayer(aSlot);
+			if (!aPlayer.mActive || (aPvP && aPlayer.mTeam != LawnNet::NETTEAM_PLANTS))
+				continue;
+			aQuotas[aSlot] = aBaseQuota;
+			if (aRemainder > 0)
+			{
+				aQuotas[aSlot]++;
+				aRemainder--;
+			}
+		}
+
 		if (mNetManager->IsHosting())
 		{
-			// host gets the remainder (odd banks)
-			aPicksPerPlayer = aBankCount - aPicksPerPlayer * (aPlayers - 1);
 			LawnNet::NetBuffer aMsg;
-			aMsg.WriteU8((uint8_t)aPicksPerPlayer);
 			aMsg.WriteU8((uint8_t)aBankCount);
+			for (int aSlot = 0; aSlot < LawnNet::NET_MAX_PLAYERS; aSlot++)
+				aMsg.WriteU8((uint8_t)aQuotas[aSlot]);
 			mNetManager->BroadcastMessage(LawnNet::NETMSG_CHOOSER_OPEN, aMsg);
 		}
-		mSeedChooserScreen->mCoopPicksPerPlayer = aPicksPerPlayer;
-		if (mGameMode == GameMode::GAMEMODE_COOP_PVP && mNetManager->IsHosting() &&
-			mNetManager->GetMyTeam() == LawnNet::NETTEAM_ZOMBIES)
+		for (int aSlot = 0; aSlot < LawnNet::NET_MAX_PLAYERS; aSlot++)
+			mNetManager->mChooserPickQuota[aSlot] = aQuotas[aSlot];
+		int aLocalQuota = aQuotas[mNetManager->GetMySlot()];
+		int aUiQuota = aLocalQuota;
+		// A zombie host chooses no plants but still owns the Start button.
+		if (aPvP && mNetManager->IsHosting() && aLocalQuota == 0)
+			aUiQuota = 1;
+		mSeedChooserScreen->mCoopPicksPerPlayer = aUiQuota;
+		if (aPvP && mNetManager->IsHosting() && mNetManager->GetMyTeam() == LawnNet::NETTEAM_ZOMBIES)
 			mSeedChooserScreen->EnableStartButton(true);
 		mNetManager->mChooserOpen = true;
-		mNetManager->mChooserPicksPerPlayer = aPicksPerPlayer;
+		mNetManager->mChooserPicksPerPlayer = aUiQuota;
 		mNetManager->mChooserBankCount = aBankCount;
 	}
 }
