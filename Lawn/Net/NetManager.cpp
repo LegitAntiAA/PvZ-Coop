@@ -568,7 +568,7 @@ void NetManager::OnClientSeedPick(NetSession* theSession, NetBuffer& thePayload,
 void NetManager::OnClientTeamSelect(NetSession* theSession, NetBuffer& thePayload)
 {
 	uint8_t aTeam = thePayload.ReadU8Or();
-	if (aTeam > NETTEAM_ZOMBIES)
+	if (aTeam > NETTEAM_ZOMBIES || (mApp && mApp->mBoard))
 		return;
 	mPlayers[theSession->mSlot].mTeam = aTeam;
 	SendLobbyState();
@@ -844,6 +844,8 @@ void NetManager::SendLobbyState()
 
 void NetManager::SetMyTeam(uint8_t theTeam)
 {
+	if (theTeam > NETTEAM_ZOMBIES || (mApp && mApp->mBoard))
+		return;
 	if (mMode == MODE_HOST)
 	{
 		mPlayers[0].mTeam = theTeam;

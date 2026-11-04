@@ -816,6 +816,18 @@ void SeedPacket::MouseDown(int x, int y, int theClickCount)
 		mApp->PlaySample(SOUND_BUZZER);
 		return;
 	}
+	if (mBoard->IsPvPMode() && mApp->NetActive())
+	{
+		int anActingSlot = mApp->mNetManager->GetActingPlayerSlot();
+		uint8_t aTeam = mApp->mNetManager->GetPlayer(anActingSlot).mTeam;
+		bool isZombiePacket = mBoard->mChallenge->IsZombieSeedType(mPacketType);
+		if ((isZombiePacket && aTeam != LawnNet::NETTEAM_ZOMBIES) ||
+			(!isZombiePacket && aTeam != LawnNet::NETTEAM_PLANTS))
+		{
+			mApp->PlaySample(SOUND_BUZZER);
+			return;
+		}
+	}
 
 	if (mApp->IsSlotMachineLevel())
 	{

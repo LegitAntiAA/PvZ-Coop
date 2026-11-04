@@ -1231,6 +1231,55 @@ bool Board::IsPvPMode()
 	return mApp->mGameMode == GameMode::GAMEMODE_COOP_PVP;
 }
 
+void Board::AssignPvPSeedOwners()
+{
+	if (!IsPvPMode() || !mSeedBank || !mApp->mNetManager)
+		return;
+
+	int aPlantSlots[LawnNet::NET_MAX_PLAYERS];
+	int aZombieSlots[LawnNet::NET_MAX_PLAYERS];
+	int aPlantCount = 0;
+	int aZombieCount = 0;
+	for (int aSlot = 0; aSlot < LawnNet::NET_MAX_PLAYERS; aSlot++)
+	{
+		const LawnNet::NetPlayerInfo& aPlayer = mApp->mNetManager->GetPlayer(aSlot);
+		if (!aPlayer.mActive)
+			continue;
+		if (aPlayer.mTeam == LawnNet::NETTEAM_PLANTS)
+			aPlantSlots[aPlantCount++] = aSlot;
+		else if (aPlayer.mTeam == LawnNet::NETTEAM_ZOMBIES)
+			aZombieSlots[aZombieCount++] = aSlot;
+	}
+
+	// PreNewGame rejects an incomplete PvP lobby.  Keep safe fallbacks for
+	// malformed/replayed state so every packet still has a valid owner.
+	if (aPlantCount == 0)
+		aPlantSlots[aPlantCount++] = 0;
+	if (aZombieCount == 0)
+		aZombieSlots[aZombieCount++] = 0;
+
+	int aPlantRoundRobin = 0;
+	int aZombieRoundRobin = 0;
+	for (int i = 0; i < mSeedBank->mNumPackets; i++)
+	{
+		SeedPacket& aPacket = mSeedBank->mSeedPackets[i];
+		if (aPacket.mPacketType == SeedType::SEED_NONE)
+			continue;
+		if (mChallenge->IsZombieSeedType(aPacket.mPacketType))
+		{
+			aPacket.mNetOwnerSlot = (unsigned char)aZombieSlots[aZombieRoundRobin++ % aZombieCount];
+			continue;
+		}
+
+		int anOwner = aPacket.mNetOwnerSlot;
+		bool anOwnerIsPlant = anOwner >= 0 && anOwner < LawnNet::NET_MAX_PLAYERS &&
+			mApp->mNetManager->GetPlayer(anOwner).mActive &&
+			mApp->mNetManager->GetPlayer(anOwner).mTeam == LawnNet::NETTEAM_PLANTS;
+		if (!anOwnerIsPlant)
+			aPacket.mNetOwnerSlot = (unsigned char)aPlantSlots[aPlantRoundRobin++ % aPlantCount];
+	}
+}
+
 bool Board::CanTakeBrains(int theAmount)
 {
 	return mNetPvPBrainTimer >= theAmount;

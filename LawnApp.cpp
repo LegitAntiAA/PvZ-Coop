@@ -1200,6 +1200,15 @@ void LawnApp::PreNewGame(GameMode theGameMode, bool theLookForSavedGame)
 	// stages...) and always fresh (clients don't have the host's save file)
 	if (mNetManager && mNetManager->IsHosting())
 	{
+		if (theGameMode == GameMode::GAMEMODE_COOP_PVP &&
+			(mNetManager->GetTeamCount(LawnNet::NETTEAM_PLANTS) == 0 ||
+			 mNetManager->GetTeamCount(LawnNet::NETTEAM_ZOMBIES) == 0))
+		{
+			DoDialog(Dialogs::DIALOG_INFO, true, "PvP teams",
+				"At least one connected player must choose Plants and one must choose Zombies.",
+				_S("[OK_LABEL]"), Dialog::BUTTONS_FOOTER);
+			return;
+		}
 		mNetBoardSeed = Rand();
 		mNetManager->mStartTDPath.clear();
 		if (theGameMode == GameMode::GAMEMODE_COOP_TOWER_DEFENSE)
@@ -1228,6 +1237,15 @@ void LawnApp::PreNewGame(GameMode theGameMode, bool theLookForSavedGame, int the
 	// co-op host: broadcast (see the overload above)
 	if (mNetManager && mNetManager->IsHosting())
 	{
+		if (theGameMode == GameMode::GAMEMODE_COOP_PVP &&
+			(mNetManager->GetTeamCount(LawnNet::NETTEAM_PLANTS) == 0 ||
+			 mNetManager->GetTeamCount(LawnNet::NETTEAM_ZOMBIES) == 0))
+		{
+			DoDialog(Dialogs::DIALOG_INFO, true, "PvP teams",
+				"At least one connected player must choose Plants and one must choose Zombies.",
+				_S("[OK_LABEL]"), Dialog::BUTTONS_FOOTER);
+			return;
+		}
 		mNetBoardSeed = Rand();
 		mNetManager->mStartTDPath.clear();
 		if (theGameMode == GameMode::GAMEMODE_COOP_TOWER_DEFENSE)

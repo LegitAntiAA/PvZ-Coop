@@ -1657,6 +1657,8 @@ static void CoopBuildBankInternal(SeedBank* theBank, int theMySlot,
 		theBank->mSeedPackets[aPos++].SetPacketType(SeedType::SEED_ZOMBIE_FOOTBALL);
 	}
 	theBank->mNumPackets = max(aPos, 1);
+	if (gLawnApp && gLawnApp->mBoard && gLawnApp->mGameMode == GameMode::GAMEMODE_COOP_PVP)
+		gLawnApp->mBoard->AssignPvPSeedOwners();
 	for (int i = aPos; i < SEEDBANK_MAX; i++)
 		theBank->mSeedPackets[i].SetPacketType(SEED_NONE, SEED_NONE);
 }

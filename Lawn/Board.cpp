@@ -2044,7 +2044,8 @@ void Board::InitLevel()
 		mSeedBank->mSeedPackets[8].SetPacketType(SeedType::SEED_ZOMBIE_PAIL);
 		mSeedBank->mSeedPackets[9].SetPacketType(SeedType::SEED_ZOMBIE_FOOTBALL);
 		for (int i = 6; i < SEEDBANK_MAX; i++)
-			mSeedBank->mSeedPackets[i].mNetOwnerSlot = 1; // refined by team sync below
+			mSeedBank->mSeedPackets[i].mNetOwnerSlot = 0;
+		AssignPvPSeedOwners();
 		mNetPvPBrainTimer = 100; // starting brains (host authority, snapshot-synced)
 	}
 

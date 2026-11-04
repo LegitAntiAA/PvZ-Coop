@@ -580,6 +580,7 @@ public:
 	bool							IsEndlessT();
 	bool							IsTowerDefense();
 	bool							IsPvPMode();
+	void							AssignPvPSeedOwners();
 	bool							CanTakeBrains(int theAmount);
 	void							TakeBrains(int theAmount);
 	void							UpdatePvP();
