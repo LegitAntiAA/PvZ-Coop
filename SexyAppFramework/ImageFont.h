@@ -7,6 +7,7 @@
 
 namespace Sexy
 {
+	class SDL3Font;
 
 class SexyAppBase;
 class Image;
@@ -133,11 +134,13 @@ public:
 	ActiveFontLayerList		mActiveLayerList;
 	double					mScale;
 	bool					mForceScaledImagesWhite;
+	SDL3Font*				mUnicodeFallback;
 
 public:
 	virtual void			GenerateActiveFontLayers();
 	virtual void			DrawStringEx(Graphics* g, int theX, int theY, const SexyString& theString, const Color& theColor, const Rect* theClipRect, RectList* theDrawnAreas, int* theWidth);
 	SexyChar GetMappedChar(char value);
+	SDL3Font* GetUnicodeFallback();
 
 public:
 	ImageFont(SexyAppBase* theSexyApp, const std::string& theFontDescFileName);

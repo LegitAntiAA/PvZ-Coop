@@ -95,7 +95,7 @@ void SDL3Font::Init(SexyAppBase* theApp, const std::string& theFace, int thePoin
 		CacheGlyph(c, defaultColor);
 }
 
-void SDL3Font::CacheGlyph(SexyChar c, const Color& color)
+void SDL3Font::CacheGlyph(Uint32 c, const Color& color)
 {
 	if (!mFont || mGlyphCache.find(c) != mGlyphCache.end()) return;
 
@@ -153,13 +153,24 @@ float SDL3Font::GetRelativeScale()
 
 int SDL3Font::StringWidth(const SexyString& theString)
 {
+	if (!mFont) return 0;
+
 	int w = 0;
-	for (auto c : theString)
+	Uint32 aPrevChar = 0;
+	std::wstring aWideString = StringToWString(theString);
+	for (Uint32 c : aWideString)
 	{
+		if (aPrevChar)
+		{
+			int aKern = 0;
+			TTF_GetGlyphKerning(mFont, aPrevChar, c, &aKern);
+			w += aKern;
+		}
+		if (mGlyphWidth.find(c) == mGlyphWidth.end())
+			CacheGlyph(c, Color::White);
 		if (mGlyphWidth.find(c) != mGlyphWidth.end())
 			w += mGlyphWidth[c];
-		else
-			w += TTF_GetGlyphImageForIndex(mFont, c, NULL) ? TTF_GetGlyphImageForIndex(mFont, c, NULL)->w : 0;
+		aPrevChar = c;
 	}
 	return w / GetRelativeScale();
 }
@@ -176,8 +187,9 @@ void SDL3Font::DrawString(Graphics* g, int theX, int theY, const SexyString& the
 		SDL_SetRenderClipRect(LawnApp::mSDLRenderer, &clip);
 	}
 
-	int prevChar = 0;
-	for (auto c : theString)
+	Uint32 prevChar = 0;
+	std::wstring aWideString = StringToWString(theString);
+	for (Uint32 c : aWideString)
 	{
 		if (prevChar)
 		{
@@ -187,9 +199,9 @@ void SDL3Font::DrawString(Graphics* g, int theX, int theY, const SexyString& the
 		}
 
 		if (mGlyphCache.find(c) == mGlyphCache.end())
-			CacheGlyph(c, theColor);
+			CacheGlyph(c, Color::White);
 
-		SDL_Texture* tex = mGlyphCache[c];
+		SDL_Texture* tex = mGlyphCache.count(c) ? mGlyphCache[c] : nullptr;
 		if (tex)
 		{
 			SDL_FRect dst = { float(x), float(theY - GetAscent()), float(mGlyphWidth[c]) / GetRelativeScale(), float(mGlyphHeight[c]) / GetRelativeScale()};
@@ -221,5 +233,23 @@ int	SDL3Font::GetDescent() { return TTF_GetFontDescent(mFont) / GetRelativeScale
 int	SDL3Font::GetHeight() { return TTF_GetFontHeight(mFont) / GetRelativeScale(); }
 int SDL3Font::GetLineSpacingOffset() { return GetHeight() + GetLineSpacing(); }
 int SDL3Font::GetLineSpacing() { return TTF_GetFontLineSkip(mFont) / GetRelativeScale(); }
-int SDL3Font::CharWidth(SexyChar theChar) { return mGlyphWidth[theChar] / GetRelativeScale(); }
-int SDL3Font::CharWidthKern(SexyChar theChar, SexyChar thePrevChar) { int kern; TTF_GetGlyphKerning(mFont, thePrevChar, theChar, &kern); return kern / GetRelativeScale(); }
+int SDL3Font::CharWidth(SexyChar theChar)
+{
+	Uint32 aChar = (unsigned char)theChar;
+	if (aChar >= 0x80)
+		return max(1, mPointSize / 2); // one half of a typical two-byte Cyrillic UTF-8 sequence
+	if (mGlyphWidth.find(aChar) == mGlyphWidth.end())
+		CacheGlyph(aChar, Color::White);
+	return mGlyphWidth[aChar] / GetRelativeScale();
+}
+
+int SDL3Font::CharWidthKern(SexyChar theChar, SexyChar thePrevChar)
+{
+	Uint32 aChar = (unsigned char)theChar;
+	Uint32 aPrevChar = (unsigned char)thePrevChar;
+	if (aChar >= 0x80 || aPrevChar >= 0x80)
+		return CharWidth(theChar);
+	int aKern = 0;
+	TTF_GetGlyphKerning(mFont, aPrevChar, aChar, &aKern);
+	return CharWidth(theChar) + aKern / GetRelativeScale();
+}

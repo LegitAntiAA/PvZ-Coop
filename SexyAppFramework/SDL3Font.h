@@ -37,12 +37,12 @@ namespace Sexy
 
 		void SetActive(bool active);
 
-		std::unordered_map<SexyChar, SDL_Texture*> mGlyphCache;
-		std::unordered_map<SexyChar, int> mGlyphWidth;
-		std::unordered_map<SexyChar, int> mGlyphHeight;
+		std::unordered_map<Uint32, SDL_Texture*> mGlyphCache;
+		std::unordered_map<Uint32, int> mGlyphWidth;
+		std::unordered_map<Uint32, int> mGlyphHeight;
 
 		void Init(SexyAppBase* theApp, const std::string& theFace, int thePointSize, bool bold, bool italics, bool underline);
-		void CacheGlyph(SexyChar c, const Color& color);
+		void CacheGlyph(Uint32 c, const Color& color);
 
 	public:
 		SDL3Font(const std::string& theFace, int thePointSize, bool bold = false, bool italics = false, bool underline = false);

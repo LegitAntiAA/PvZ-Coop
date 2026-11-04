@@ -5,6 +5,7 @@
 #include "MemoryImage.h"
 #include "..\SexyAppFramework\AutoCrit.h"
 #include "SDL3Image.h"
+#include "SDL3Font.h"
 #include "../LawnApp.h"
 
 using namespace Sexy;
@@ -1121,6 +1122,7 @@ ActiveFontLayer::~ActiveFontLayer()
 
 ImageFont::ImageFont(SexyAppBase* theSexyApp, const std::string& theFontDescFileName)
 {	
+	mUnicodeFallback = nullptr;
 	mScale = 1.0;
 	mFontData = new FontData();
 	mFontData->Ref();
@@ -1133,6 +1135,7 @@ ImageFont::ImageFont(SexyAppBase* theSexyApp, const std::string& theFontDescFile
 
 ImageFont::ImageFont(Image *theFontImage)
 {
+	mUnicodeFallback = nullptr;
 	mScale = 1.0;
 	mFontData = new FontData();
 	mFontData->Ref();
@@ -1159,6 +1162,7 @@ ImageFont::ImageFont(const ImageFont& theImageFont) :
 	mActiveListValid(theImageFont.mActiveListValid),
 	mForceScaledImagesWhite(theImageFont.mForceScaledImagesWhite)
 {
+	mUnicodeFallback = nullptr;
 	mFontData->Ref();	
 	
 	if (mActiveListValid)
@@ -1167,6 +1171,7 @@ ImageFont::ImageFont(const ImageFont& theImageFont) :
 
 ImageFont::ImageFont(Image* theFontImage, const std::string& theFontDescFileName)
 {
+	mUnicodeFallback = nullptr;
 	
 	mScale = 1.0;
 	mFontData = new FontData();
@@ -1179,6 +1184,7 @@ ImageFont::ImageFont(Image* theFontImage, const std::string& theFontDescFileName
 
 ImageFont::~ImageFont()
 {
+	delete mUnicodeFallback;
 	mFontData->DeRef();
 }
 
@@ -1368,6 +1374,9 @@ void ImageFont::GenerateActiveFontLayers()
 
 int ImageFont::StringWidth(const SexyString& theString)
 {
+	if (std::any_of(theString.begin(), theString.end(), [](unsigned char c) { return c >= 0x80; }))
+		return GetUnicodeFallback()->StringWidth(theString);
+
 	int aWidth = 0;
 	char aPrevChar = 0;
 	for(int i=0; i<(int)theString.length(); i++)
@@ -1382,6 +1391,9 @@ int ImageFont::StringWidth(const SexyString& theString)
 
 int ImageFont::CharWidthKern(char theChar, char thePrevChar)
 {
+	if ((unsigned char)theChar >= 0x80 || (unsigned char)thePrevChar >= 0x80)
+		return max(1, mPointSize / 2);
+
 	Prepare();
 
 	int aMaxXPos = 0;
@@ -1692,7 +1704,19 @@ SexyChar ImageFont::GetMappedChar(char value)
 
 void ImageFont::DrawString(Graphics* g, int theX, int theY, const SexyString& theString, const Color& theColor, const Rect& theClipRect)
 {
+	if (std::any_of(theString.begin(), theString.end(), [](unsigned char c) { return c >= 0x80; }))
+	{
+		GetUnicodeFallback()->DrawString(g, theX, theY, theString, theColor, theClipRect);
+		return;
+	}
 	DrawStringEx(g, theX, theY, theString, theColor, &theClipRect, NULL, NULL);	
+}
+
+SDL3Font* ImageFont::GetUnicodeFallback()
+{
+	if (!mUnicodeFallback)
+		mUnicodeFallback = new SDL3Font("C:\\Windows\\Fonts\\arial.ttf", max(10, (int)(mPointSize * mScale)));
+	return mUnicodeFallback;
 }
 
 Font* ImageFont::Duplicate()
@@ -1702,12 +1726,16 @@ Font* ImageFont::Duplicate()
 
 void ImageFont::SetPointSize(int thePointSize)
 {
+	delete mUnicodeFallback;
+	mUnicodeFallback = nullptr;
 	mPointSize = thePointSize;
 	mActiveListValid = false;
 }
 
 void ImageFont::SetScale(double theScale)
 {
+	delete mUnicodeFallback;
+	mUnicodeFallback = nullptr;
 	mScale = theScale;
 	mActiveListValid = false;
 }

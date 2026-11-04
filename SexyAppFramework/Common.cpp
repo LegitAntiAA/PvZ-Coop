@@ -7,6 +7,8 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <aclapi.h>
+#include <codecvt>
+#include <locale>
 
 #include "PerfTimer.h"
 
@@ -211,40 +213,30 @@ std::wstring Sexy::StringToLower(const std::wstring& theString)
 
 std::wstring Sexy::StringToWString(const std::string& theString)
 {
-	std::wstring aString;
-	aString.reserve(theString.length());
-	for (size_t i = 0; i < theString.length(); ++i)
-		aString += (unsigned char)theString[i];
-	return aString;
+	try
+	{
+		return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>>{}.from_bytes(theString);
+	}
+	catch (const std::range_error&)
+	{
+		// Preserve legacy single-byte strings instead of dropping their text.
+		std::wstring aString;
+		aString.reserve(theString.length());
+		for (unsigned char aChar : theString)
+			aString += aChar;
+		return aString;
+	}
 }
-#include <string>
-#include <locale>
-#include <codecvt>
 std::string Sexy::WStringToString(const std::wstring& theString)
 {
-#ifdef _USE_WIDE_STRING
-	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-	return converter.to_bytes(theString);
-#else
-	size_t aRequiredLength = wcstombs(NULL, theString.c_str(), 0);
-	if (aRequiredLength < 16384)
+	try
 	{
-		char aBuffer[16384];
-		wcstombs(aBuffer, theString.c_str(), 16384);
-		return std::string(aBuffer);
+		return std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>>{}.to_bytes(theString);
 	}
-	else
+	catch (const std::range_error&)
 	{
-		DBG_ASSERTE(aRequiredLength != (size_t)-1);
-		if (aRequiredLength == (size_t)-1) return "";
-
-		char* aBuffer = new char[aRequiredLength + 1];
-		wcstombs(aBuffer, theString.c_str(), aRequiredLength + 1);
-		std::string aStr = aBuffer;
-		delete[] aBuffer;
-		return aStr;
-}
-#endif
+		return "";
+	}
 }
 
 SexyString Sexy::StringToSexyString(const std::string& theString)
