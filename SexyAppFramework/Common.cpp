@@ -219,11 +219,16 @@ std::wstring Sexy::StringToWString(const std::string& theString)
 	}
 	catch (const std::range_error&)
 	{
-		// Preserve legacy single-byte strings instead of dropping their text.
-		std::wstring aString;
-		aString.reserve(theString.length());
-		for (unsigned char aChar : theString)
-			aString += aChar;
+		// The Russian GOTY LawnStrings.txt is Windows-1251, while newer UI
+		// strings and nicknames are UTF-8.  Decode the legacy resource explicitly
+		// instead of treating each CP1251 byte as an unrelated Latin-1 codepoint.
+		if (theString.empty())
+			return std::wstring();
+		int aLength = MultiByteToWideChar(1251, 0, theString.data(), (int)theString.size(), nullptr, 0);
+		if (aLength <= 0)
+			return std::wstring();
+		std::wstring aString(aLength, L'\0');
+		MultiByteToWideChar(1251, 0, theString.data(), (int)theString.size(), &aString[0], aLength);
 		return aString;
 	}
 }
