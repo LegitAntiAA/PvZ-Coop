@@ -364,6 +364,8 @@ void Challenge::LoadBeghouledBoardState(BeghouledBoardState* theBoardState)
 //0x41F380
 void Challenge::InitLevel()
 {
+	const bool aNetworkClient = mApp->NetIsClient();
+
 	if (mApp->mGameMode == GAMEMODE_CHALLENGE_RAINING_SEEDS)
 	{
 		mChallengeStateCounter = 100;
@@ -404,15 +406,15 @@ void Challenge::InitLevel()
 		mBoard->mSeedBank->AddSeed(SEED_ICESHROOM);
 		mConveyorBeltCounter = 1000;
 	}
-	if (mApp->IsIZombieLevel())
+	if (!aNetworkClient && mApp->IsIZombieLevel())
 	{
 		IZombieInitLevel();
 	}
-	if (mApp->IsScaryPotterLevel())
+	if (!aNetworkClient && mApp->IsScaryPotterLevel())
 	{
 		ScaryPotterPopulate();
 	}
-	if (mApp->IsFirstTimeAdventureMode() && mBoard->mLevel == 5)
+	if (!aNetworkClient && mApp->IsFirstTimeAdventureMode() && mBoard->mLevel == 5)
 	{
 		mBoard->NewPlant(5, 1, SEED_PEASHOOTER, SEED_NONE);
 		mBoard->NewPlant(7, 2, SEED_PEASHOOTER, SEED_NONE);

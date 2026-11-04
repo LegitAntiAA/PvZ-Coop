@@ -110,6 +110,7 @@ void Zombie::ZombieInitialize(int theRow, ZombieType theType, bool theVariant, Z
     mZombieType = theType;
     mTdPathPos = 0.0f;
     mNetKillCounted = false;
+    mNetAnimKey = 255;
     mVariant = theVariant;
     mIsEating = false;
     mJustGotShotCounter = 0;

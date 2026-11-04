@@ -1725,6 +1725,7 @@ void Board::NetApplyIntroState(NetBuffer& b)
 				continue;
 			aZombie->mNetId = aWire.mId;
 			aZombie->mNetGhost = true;
+			aZombie->mNetAnimKey = 255;
 		}
 		aZombie->mFromWave = Zombie::ZOMBIE_WAVE_CUTSCENE;
 		aZombie->mRow = aWire.mRow;
