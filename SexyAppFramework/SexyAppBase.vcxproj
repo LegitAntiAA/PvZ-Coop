@@ -1449,5 +1449,6 @@ EXIT /B 0</Command>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Target Name="CopyNetworkCursor" AfterTargets="Build">
     <Copy SourceFiles="$(SolutionDir)Cursor13.bmp" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(SolutionDir)Cursor13.png" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
   </Target>
 </Project>

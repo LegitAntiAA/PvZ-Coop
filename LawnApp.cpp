@@ -5460,10 +5460,22 @@ void LawnApp::NetDrawCursorOverlay()
 	if (mBoard && mBoard->IsPvPMode())
 		return;
 
-	if (!mNetCursorImage)
-		mNetCursorImage = GetImage(_S("Cursor13.bmp"));
-	if (!mNetCursorImage)
-		return;
+        static bool aCursorLoadAttempted = false;
+        if (!mNetCursorImage && !aCursorLoadAttempted)
+        {
+                aCursorLoadAttempted = true;
+                // ImageLib chooses the decoder by appending an extension.  Passing
+                // "Cursor13.bmp" made it probe Cursor13.bmp.png/.tga/... and the
+                // complete overlay returned early forever.  Cursor13.png is a
+                // pixel-identical conversion of the supplied BMP.
+                mNetCursorImage = GetImage(_S("Cursor13"));
+                LawnNet::NetTrace("cursor overlay asset load success=%d image=%p size=%dx%d",
+                        mNetCursorImage ? 1 : 0, (void*)mNetCursorImage,
+                        mNetCursorImage ? mNetCursorImage->GetWidth() : 0,
+                        mNetCursorImage ? mNetCursorImage->GetHeight() : 0);
+        }
+        if (!mNetCursorImage)
+                return;
 
 	Graphics g(mWidgetManager->mImage);
 	g.ClearClipRect();
@@ -5496,7 +5508,7 @@ void LawnApp::NetDrawCursorOverlay()
 		g.DrawImage(mNetCursorImage, aCursorX, aCursorY);
 		g.SetColorizeImages(false);
 
-		if (aPlayer.mNick[0])
+                if (aPlayer.mNick[0] && Sexy::FONT_BRIANNETOD12)
 		{
 			SexyString aLabel = StringToSexyString(aPlayer.mNick) + _S(" ") + StrFormat(_S("%ums"), aPlayer.mPing);
 			TodDrawString(&g, aLabel, aCursorX + 18, aCursorY + 23, Sexy::FONT_BRIANNETOD12,
