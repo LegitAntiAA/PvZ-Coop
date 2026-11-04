@@ -257,6 +257,13 @@ public:
 bool NetEncodeFrame(const NetBuffer& thePayload, uint8_t theMsgType, NetBuffer& theFrame);
 bool NetDecodeFrame(const uint8_t* theData, size_t theSize, uint8_t* theMsgType, NetBuffer& thePayload);
 
+// Per-session diagnostics. Logs are written beside the executable under
+// coop_logs and are safe to call from the connection worker threads.
+void NetTraceOpen(const char* theRole);
+void NetTraceClose();
+void NetTrace(const char* theFormat, ...);
+const char* NetMessageName(uint8_t theMsgType);
+
 // Config file (coop.ini): nickname + unlock flags
 struct NetConfig
 {

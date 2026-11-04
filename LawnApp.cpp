@@ -1292,6 +1292,8 @@ void LawnApp::PreNewGame(GameMode theGameMode, bool theLookForSavedGame, int the
 //0x44F5F0
 void LawnApp::MakeNewBoard()
 {
+	LawnNet::NetTrace("MakeNewBoard begin mode=%d scene=%d size=%dx%d oldBoard=%p lobby=%p",
+		(int)mGameMode, (int)mGameScene, mWidth, mHeight, (void*)mBoard, (void*)mNetLobbyPanel);
 	KillBoard();
 	// The co-op lobby is a full-screen widget.  It must be genuinely hidden
 	// during play; moving it off-screen leaves it in the widget draw/clip chain
@@ -1303,6 +1305,10 @@ void LawnApp::MakeNewBoard()
 	mWidgetManager->AddWidget(mBoard);
 	mWidgetManager->BringToBack(mBoard);
 	mWidgetManager->SetFocus(mBoard);
+	LawnNet::NetTrace("MakeNewBoard created board=%p lobbyVisible=%d widescreenOffset=(%d,%d)",
+		(void*)mBoard, mNetLobbyPanel && mNetLobbyPanel->mVisible ? 1 : 0,
+		mDDInterface ? mDDInterface->mWideScreenOffsetX : 0,
+		mDDInterface ? mDDInterface->mWideScreenOffsetY : 0);
 	if (!mPortAudioStream && ChallengeUsesMicrophone(mGameMode))
 	{
 		if (!TryToInitializePA())
@@ -1376,6 +1382,7 @@ void LawnApp::NewGame()
 //0x44F8E0
 void LawnApp::ShowGameSelector()
 {
+	LawnNet::NetTrace("ShowGameSelector begin board=%p selector=%p", (void*)mBoard, (void*)mGameSelector);
 	KillBoard();
 	if (mNetLobbyPanel)
 	{
@@ -5225,6 +5232,9 @@ void LawnApp::NetOnStartGame(LawnNet::NetBuffer& thePayload)
 	std::vector<uint8_t> aPath;
 	for (int i = 0; i < aPathLen; i++)
 		aPath.push_back(thePayload.ReadU8Or());
+	LawnNet::NetTrace("client START_GAME decoded mode=%d level=%d seed=%u tdPathCells=%u size=%dx%d selector=%p challenge=%p board=%p",
+		(int)aMode, aLevel, aBoardSeed, aPathLen, mWidth, mHeight,
+		(void*)mGameSelector, (void*)mChallengeScreen, (void*)mBoard);
 
 	if (mGameSelector)
 		KillGameSelector();
@@ -5249,6 +5259,10 @@ void LawnApp::NetOnStartGame(LawnNet::NetBuffer& thePayload)
 	// game.  The former hand-written subset skipped NewGame state and left
 	// some lazily loaded board resources unprepared on clients.
 	NewGame();
+	LawnNet::NetTrace("client START_GAME initialized board=%p scene=%d firstSelector=%d background=%d seedChooser=%p lobbyVisible=%d",
+		(void*)mBoard, (int)mGameScene, mFirstTimeGameSelector ? 1 : 0,
+		mBoard ? (int)mBoard->mBackground : -1, (void*)mSeedChooserScreen,
+		mNetLobbyPanel && mNetLobbyPanel->mVisible ? 1 : 0);
 }
 
 void LawnApp::NetOnHostLost()

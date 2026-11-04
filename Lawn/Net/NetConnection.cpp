@@ -17,8 +17,12 @@ bool NetStartupWSA()
 		return true;
 	}
 	WSADATA aData;
-	if (WSAStartup(MAKEWORD(2, 2), &aData) != 0)
+	int aResult = WSAStartup(MAKEWORD(2, 2), &aData);
+	if (aResult != 0)
+	{
+		NetTrace("WSAStartup failed error=%d", aResult);
 		return false;
+	}
 	gWSAOk = true;
 	gWSARefCount = 1;
 	return true;
@@ -41,7 +45,10 @@ SOCKET NetConnectTo(const char* theIP, uint16_t thePort, int theTimeoutMs)
 {
 	SOCKET aSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (aSocket == INVALID_SOCKET)
+	{
+		NetTrace("NetConnectTo socket failed error=%d", WSAGetLastError());
 		return INVALID_SOCKET;
+	}
 
 	// non-blocking connect with timeout
 	u_long aNonBlocking = 1;
@@ -51,7 +58,12 @@ SOCKET NetConnectTo(const char* theIP, uint16_t thePort, int theTimeoutMs)
 	memset(&anAddr, 0, sizeof(anAddr));
 	anAddr.sin_family = AF_INET;
 	anAddr.sin_port = htons(thePort);
-	inet_pton(AF_INET, theIP, &anAddr.sin_addr);
+	if (inet_pton(AF_INET, theIP, &anAddr.sin_addr) != 1)
+	{
+		NetTrace("NetConnectTo invalid IPv4 address=%s", theIP ? theIP : "(null)");
+		closesocket(aSocket);
+		return INVALID_SOCKET;
+	}
 
 	int aResult = connect(aSocket, (sockaddr*)&anAddr, sizeof(anAddr));
 	if (aResult == SOCKET_ERROR)
@@ -59,6 +71,7 @@ SOCKET NetConnectTo(const char* theIP, uint16_t thePort, int theTimeoutMs)
 		int anErr = WSAGetLastError();
 		if (anErr != WSAEWOULDBLOCK)
 		{
+			NetTrace("NetConnectTo immediate failure endpoint=%s:%u error=%d", theIP, thePort, anErr);
 			closesocket(aSocket);
 			return INVALID_SOCKET;
 		}
@@ -69,8 +82,10 @@ SOCKET NetConnectTo(const char* theIP, uint16_t thePort, int theTimeoutMs)
 		FD_SET(aSocket, &aWriteSet);
 		FD_SET(aSocket, &anErrSet);
 		timeval aTimeout = { theTimeoutMs / 1000, (theTimeoutMs % 1000) * 1000 };
-		if (select(0, nullptr, &aWriteSet, &anErrSet, &aTimeout) <= 0)
+		int aSelect = select(0, nullptr, &aWriteSet, &anErrSet, &aTimeout);
+		if (aSelect <= 0)
 		{
+			NetTrace("NetConnectTo timeout/select failure endpoint=%s:%u result=%d error=%d", theIP, thePort, aSelect, WSAGetLastError());
 			closesocket(aSocket);
 			return INVALID_SOCKET;
 		}
@@ -79,6 +94,7 @@ SOCKET NetConnectTo(const char* theIP, uint16_t thePort, int theTimeoutMs)
 		getsockopt(aSocket, SOL_SOCKET, SO_ERROR, (char*)&anOptVal, &anOptLen);
 		if (anOptVal != 0)
 		{
+			NetTrace("NetConnectTo completion failure endpoint=%s:%u error=%d", theIP, thePort, anOptVal);
 			closesocket(aSocket);
 			return INVALID_SOCKET;
 		}
@@ -133,6 +149,7 @@ bool NetConnection::Adopt(SOCKET theSocket)
 
 	mThreadRunning = true;
 	mRecvThread = std::thread(&NetConnection::RecvThreadProc, this);
+	NetTrace("connection adopted socket=%llu", (unsigned long long)theSocket);
 	return true;
 }
 
@@ -144,6 +161,7 @@ void NetConnection::RecvThreadProc()
 		int aRecv = recv(mSocket, (char*)aChunk, sizeof(aChunk), 0);
 		if (aRecv <= 0)
 		{
+			NetTrace("recv thread ended socket=%llu result=%d error=%d bytesRecv=%llu", (unsigned long long)mSocket, aRecv, WSAGetLastError(), (unsigned long long)mBytesRecv.load());
 			mConnected = false;
 			break;
 		}
@@ -173,6 +191,7 @@ void NetConnection::QueueFrame(const uint8_t* theData, size_t theSize)
 			memcpy(&aFrameSize, mPartial.data(), 2);
 			if (aFrameSize > NET_MAX_FRAME)
 			{
+				NetTrace("protocol violation oversized frame=%u max=%d", aFrameSize, NET_MAX_FRAME);
 				mConnected = false;
 				return;
 			}
@@ -196,9 +215,14 @@ void NetConnection::QueueFrame(const uint8_t* theData, size_t theSize)
 				mRecvQueue.push_back(std::move(aPayload));
 				if (mRecvQueue.size() > 4096) // runaway protection
 				{
+					NetTrace("receive queue overflow; dropping oldest frame queued=%zu", mRecvQueue.size());
 					mRecvQueue.pop_front();
 					mRecvTypes.pop_front();
 				}
+			}
+			else
+			{
+				NetTrace("frame decode failed bytes=%zu expectedPayload=%u", mPartial.size(), mExpectedSize);
 			}
 			mPartial.clear();
 			mExpectedSize = 0;
@@ -209,10 +233,16 @@ void NetConnection::QueueFrame(const uint8_t* theData, size_t theSize)
 bool NetConnection::SendMessage(uint8_t theMsgType, const NetBuffer& thePayload)
 {
 	if (!mConnected)
+	{
+		NetTrace("send rejected disconnected type=%s(%u) bytes=%zu", NetMessageName(theMsgType), theMsgType, thePayload.Size());
 		return false;
+	}
 	NetBuffer aFrame;
 	if (!NetEncodeFrame(thePayload, theMsgType, aFrame))
+	{
+		NetTrace("send encode failed type=%s(%u) bytes=%zu", NetMessageName(theMsgType), theMsgType, thePayload.Size());
 		return false;
+	}
 	std::lock_guard<std::mutex> aLock(mSendMutex);
 	return SendAll(aFrame.Data(), aFrame.Size());
 }
@@ -227,6 +257,7 @@ bool NetConnection::SendAll(const uint8_t* theData, size_t theSize)
 		int aResult = send(mSocket, (const char*)(theData + aSent), (int)(theSize - aSent), 0);
 		if (aResult == SOCKET_ERROR || aResult == 0)
 		{
+			NetTrace("send failed socket=%llu sent=%zu/%zu result=%d error=%d", (unsigned long long)mSocket, aSent, theSize, aResult, WSAGetLastError());
 			mConnected = false;
 			return false;
 		}
@@ -294,6 +325,8 @@ uint32_t NetConnection::GetSeqSentTime(uint32_t theSeq)
 
 void NetConnection::Disconnect()
 {
+	if (mSocket != INVALID_SOCKET || mConnected)
+		NetTrace("connection disconnect socket=%llu bytesSent=%llu bytesRecv=%llu", (unsigned long long)mSocket, (unsigned long long)mBytesSent.load(), (unsigned long long)mBytesRecv.load());
 	// recv() is blocking, so close its read side before joining the worker.
 	// Joining first can deadlock forever when the peer is still connected but
 	// silent (for example while returning to the menu or cancelling a retry).

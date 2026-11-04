@@ -1,7 +1,105 @@
 #include "NetCommon.h"
 
+#include <cstdarg>
+#include <cstdio>
+#include <ctime>
+#include <direct.h>
+#include <functional>
+#include <mutex>
+#include <process.h>
+#include <thread>
+
 namespace LawnNet
 {
+
+namespace
+{
+std::mutex gNetTraceMutex;
+FILE* gNetTraceFile = nullptr;
+
+void NetTraceTimestamp(char* theBuffer, size_t theSize)
+{
+	time_t aNow = time(nullptr);
+	tm aLocal = {};
+	localtime_s(&aLocal, &aNow);
+	strftime(theBuffer, theSize, "%Y-%m-%d %H:%M:%S", &aLocal);
+}
+}
+
+void NetTraceOpen(const char* theRole)
+{
+	std::lock_guard<std::mutex> aLock(gNetTraceMutex);
+	if (gNetTraceFile)
+	{
+		fprintf(gNetTraceFile, "--- trace replaced by new session ---\n");
+		fclose(gNetTraceFile);
+		gNetTraceFile = nullptr;
+	}
+	_mkdir("coop_logs");
+	time_t aNow = time(nullptr);
+	tm aLocal = {};
+	localtime_s(&aLocal, &aNow);
+	char aPath[260];
+	sprintf_s(aPath, "coop_logs\\coop_%04d%02d%02d_%02d%02d%02d_%s_%d.log",
+		aLocal.tm_year + 1900, aLocal.tm_mon + 1, aLocal.tm_mday,
+		aLocal.tm_hour, aLocal.tm_min, aLocal.tm_sec,
+		theRole ? theRole : "unknown", _getpid());
+	gNetTraceFile = fopen(aPath, "wb");
+	if (!gNetTraceFile)
+		return;
+	setvbuf(gNetTraceFile, nullptr, _IOLBF, 4096);
+	fprintf(gNetTraceFile, "PvZ Co-op diagnostic trace\nrole=%s protocol=%u pid=%d\n",
+		theRole ? theRole : "unknown", NET_PROTOCOL_VERSION, _getpid());
+}
+
+void NetTraceClose()
+{
+	std::lock_guard<std::mutex> aLock(gNetTraceMutex);
+	if (!gNetTraceFile)
+		return;
+	fprintf(gNetTraceFile, "--- trace closed ---\n");
+	fclose(gNetTraceFile);
+	gNetTraceFile = nullptr;
+}
+
+void NetTrace(const char* theFormat, ...)
+{
+	std::lock_guard<std::mutex> aLock(gNetTraceMutex);
+	if (!gNetTraceFile)
+		return;
+	char aTime[32];
+	NetTraceTimestamp(aTime, sizeof(aTime));
+	size_t aThread = std::hash<std::thread::id>{}(std::this_thread::get_id());
+	fprintf(gNetTraceFile, "[%s] [tid=%zu] ", aTime, aThread);
+	va_list anArgs;
+	va_start(anArgs, theFormat);
+	vfprintf(gNetTraceFile, theFormat, anArgs);
+	va_end(anArgs);
+	fputc('\n', gNetTraceFile);
+	fflush(gNetTraceFile);
+}
+
+const char* NetMessageName(uint8_t theMsgType)
+{
+	switch (theMsgType)
+	{
+	case NETMSG_PING: return "PING"; case NETMSG_PONG: return "PONG";
+	case NETMSG_HELLO: return "HELLO"; case NETMSG_WELCOME: return "WELCOME";
+	case NETMSG_LOBBY_FULL: return "LOBBY_FULL"; case NETMSG_VERSION_MISMATCH: return "VERSION_MISMATCH";
+	case NETMSG_LOBBY_STATE: return "LOBBY_STATE"; case NETMSG_TEAM_SELECT: return "TEAM_SELECT";
+	case NETMSG_START_GAME: return "START_GAME"; case NETMSG_SCENE_CMD: return "SCENE_CMD";
+	case NETMSG_BACK_TO_MENU: return "BACK_TO_MENU"; case NETMSG_SNAPSHOT: return "SNAPSHOT";
+	case NETMSG_BOARD_EVENT: return "BOARD_EVENT"; case NETMSG_INPUT_MOUSE: return "INPUT_MOUSE";
+	case NETMSG_INPUT_KEY: return "INPUT_KEY"; case NETMSG_CURSOR: return "CURSOR";
+	case NETMSG_PAUSE: return "PAUSE"; case NETMSG_PAUSE_REQ: return "PAUSE_REQ";
+	case NETMSG_CHOOSER_OPEN: return "CHOOSER_OPEN"; case NETMSG_SEED_PICK: return "SEED_PICK";
+	case NETMSG_SEED_UNPICK: return "SEED_UNPICK"; case NETMSG_CHOOSER_STATE: return "CHOOSER_STATE";
+	case NETMSG_CHOOSER_START: return "CHOOSER_START"; case NETMSG_PROFILE_SYNC: return "PROFILE_SYNC";
+	case NETMSG_STORE_ACTION: return "STORE_ACTION"; case NETMSG_STORE_SYNC: return "STORE_SYNC";
+	case NETMSG_STATS: return "STATS"; case NETMSG_RATE: return "RATE";
+	case NETMSG_DEBUG_TEXT: return "DEBUG_TEXT"; default: return "UNKNOWN";
+	}
+}
 
 // -------------------------------------------------------------------------
 // Frame encoding

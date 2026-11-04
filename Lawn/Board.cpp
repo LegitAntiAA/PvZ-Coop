@@ -1042,6 +1042,8 @@ int Board::GetLevelRandSeed()
 //0x40A160
 void Board::LoadBackgroundImages()
 {
+	LawnNet::NetTrace("LoadBackgroundImages begin board=%p background=%d level=%d mode=%d client=%d",
+		(void*)this, (int)mBackground, mLevel, (int)mApp->mGameMode, mApp->NetIsClient() ? 1 : 0);
 	switch (mBackground)
 	{
 	case BackgroundType::BACKGROUND_1_DAY:
@@ -1095,6 +1097,9 @@ void Board::LoadBackgroundImages()
 		TOD_ASSERT();
 		break;
 	}
+	LawnNet::NetTrace("LoadBackgroundImages complete board=%p background=%d day=%p night=%p pool=%p fog=%p roof=%p",
+		(void*)this, (int)mBackground, (void*)Sexy::IMAGE_BACKGROUND1, (void*)Sexy::IMAGE_BACKGROUND2,
+		(void*)Sexy::IMAGE_BACKGROUND3, (void*)Sexy::IMAGE_BACKGROUND4, (void*)Sexy::IMAGE_BACKGROUND5);
 }
 
 //0x40A550
@@ -7331,6 +7336,21 @@ void Board::DrawBackdrop(Graphics* g)
 	case BackgroundType::BACKGROUND_TREEOFWISDOM:		aBgImage = nullptr;										break;
 	case BackgroundType::BACKGROUND_6:					aBgImage = Sexy::IMAGE_BACKGROUND6;						break;
 	default:											TOD_ASSERT();											break;
+	}
+	static Board* aLastTracedBoard = nullptr;
+	static int aBackdropTraceCount = 0;
+	if (aLastTracedBoard != this)
+	{
+		aLastTracedBoard = this;
+		aBackdropTraceCount = 0;
+	}
+	if (mApp->NetIsClient() && aBackdropTraceCount < 5)
+	{
+		LawnNet::NetTrace("DrawBackdrop sample=%d board=%p background=%d image=%p imageSize=%dx%d level=%d firstAdventure=%d scene=%d",
+			aBackdropTraceCount, (void*)this, (int)mBackground, (void*)aBgImage,
+			aBgImage ? aBgImage->GetWidth() : 0, aBgImage ? aBgImage->GetHeight() : 0,
+			mLevel, mApp->IsFirstTimeAdventureMode() ? 1 : 0, (int)mApp->mGameScene);
+		aBackdropTraceCount++;
 	}
 
 	if (mLevel == 1 && mApp->IsFirstTimeAdventureMode() /*&& mApp->mPlayerLevelRef <= 4*/)

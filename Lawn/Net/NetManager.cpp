@@ -85,8 +85,10 @@ void NetManager::Init(LawnApp* theApp)
 
 void NetManager::Shutdown()
 {
+	NetTrace("manager shutdown requested mode=%d", (int)mMode);
 	Disconnect();
 	NetShutdownWSA();
+	NetTraceClose();
 }
 
 // -------------------------------------------------------------------------
@@ -95,13 +97,21 @@ void NetManager::Shutdown()
 bool NetManager::StartHost(uint16_t thePort)
 {
 	Disconnect();
+	NetTraceOpen("host");
+	NetTrace("host start requested port=%u nick=%s snapshotHz=%d", thePort, mConfig.mNick, mSnapshotHz);
 
 	if (!NetStartupWSA())
+	{
+		NetTrace("host start failed: WSA startup");
 		return false;
+	}
 
 	SOCKET aListener = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (aListener == INVALID_SOCKET)
+	{
+		NetTrace("host start failed: socket error=%d", WSAGetLastError());
 		return false;
+	}
 
 	BOOL aReuse = TRUE;
 	setsockopt(aListener, SOL_SOCKET, SO_REUSEADDR, (const char*)&aReuse, sizeof(BOOL));
@@ -115,6 +125,7 @@ bool NetManager::StartHost(uint16_t thePort)
 	if (::bind(aListener, (sockaddr*)&anAddr, sizeof(anAddr)) == SOCKET_ERROR ||
 		listen(aListener, 4) == SOCKET_ERROR)
 	{
+		NetTrace("host start failed: bind/listen error=%d", WSAGetLastError());
 		closesocket(aListener);
 		return false;
 	}
@@ -133,6 +144,7 @@ bool NetManager::StartHost(uint16_t thePort)
 
 	strcpy_s(mConnectStatus, "Hosting on port ");
 	_itoa_s(thePort, mConnectStatus + strlen(mConnectStatus), 32, 10);
+	NetTrace("host listening port=%u", thePort);
 	return true;
 }
 
@@ -150,6 +162,7 @@ void NetManager::AcceptThreadProc()
 			Sleep(50);
 			continue;
 		}
+		NetTrace("accepted TCP peer address=%s port=%u", inet_ntoa(aClientAddr.sin_addr), ntohs(aClientAddr.sin_port));
 		// queue for the game thread to adopt
 		std::lock_guard<std::mutex> aLock(mPendingConnMutex);
 		mPendingConns.push_back(aClient);
@@ -159,8 +172,13 @@ void NetManager::AcceptThreadProc()
 bool NetManager::StartClient(const char* theIP, uint16_t thePort)
 {
 	Disconnect();
+	NetTraceOpen("client");
+	NetTrace("client connect requested endpoint=%s:%u nick=%s snapshotHz=%d", theIP ? theIP : "(null)", thePort, mConfig.mNick, mSnapshotHz);
 	if (!NetStartupWSA())
+	{
+		NetTrace("client start failed: WSA startup");
 		return false;
+	}
 
 	mMode = MODE_CLIENT;
 	mConnecting = true;
@@ -178,6 +196,7 @@ bool NetManager::StartClient(const char* theIP, uint16_t thePort)
 		SOCKET aSock = INVALID_SOCKET;
 		for (int anAttempt = 1; anAttempt <= aMaxAttempts; anAttempt++)
 		{
+			NetTrace("client connection attempt=%d/%d endpoint=%s:%u", anAttempt, aMaxAttempts, anIP, thePort);
 			sprintf_s(mConnectStatus, "Attempt %d/%d...", anAttempt, aMaxAttempts);
 			aSock = NetConnectTo(anIP, thePort, 5000);
 			if (aSock != INVALID_SOCKET)
@@ -189,10 +208,12 @@ bool NetManager::StartClient(const char* theIP, uint16_t thePort)
 
 		if (aSock == INVALID_SOCKET)
 		{
+			NetTrace("client connection failed endpoint=%s:%u lastError=%d", anIP, thePort, WSAGetLastError());
 			strcpy_s(mConnectStatus, "Failed to connect (check IP + Radmin VPN)");
 			mConnecting = false;
 			return;
 		}
+		NetTrace("client TCP connected endpoint=%s:%u", anIP, thePort);
 
 		// hand to the manager under lock
 		{
@@ -213,6 +234,8 @@ void NetManager::CancelConnect()
 
 void NetManager::Disconnect()
 {
+	if (mMode != MODE_NONE || mConnecting || mClientConnected)
+		NetTrace("disconnect begin mode=%d connecting=%d connected=%d players=%d", (int)mMode, mConnecting ? 1 : 0, mClientConnected ? 1 : 0, GetPlayerCount());
 	// Stop the retry loop before waiting for its worker.  An in-progress select
 	// may still take up to its current timeout, but no additional retry starts.
 	mConnecting = false;
@@ -270,6 +293,7 @@ void NetManager::Disconnect()
 	}
 	for (int i = 0; i < NET_MAX_PLAYERS; i++)
 		mPlayers[i].Reset();
+	NetTrace("disconnect complete");
 }
 
 void NetManager::DropSession(int theSlot, bool theNotify)
@@ -277,6 +301,7 @@ void NetManager::DropSession(int theSlot, bool theNotify)
 	NetSession& aSession = mSessions[theSlot];
 	if (!aSession.mAssigned)
 		return;
+	NetTrace("dropping peer slot=%d nick=%s notify=%d", theSlot, mPlayers[theSlot].mNick, theNotify ? 1 : 0);
 	aSession.mConn.Disconnect();
 	aSession.mAssigned = false;
 	mPlayers[theSlot].mActive = false;
@@ -447,6 +472,8 @@ void NetManager::UpdatePings()
 // -------------------------------------------------------------------------
 void NetManager::HandleMessage(NetSession* theSession, uint8_t theMsgType, NetBuffer& thePayload)
 {
+	if (theMsgType != NETMSG_CURSOR && theMsgType != NETMSG_PING && theMsgType != NETMSG_PONG)
+		NetTrace("RX host slot=%u type=%s(%u) bytes=%zu", theSession ? theSession->mSlot : 255, NetMessageName(theMsgType), theMsgType, thePayload.Size());
 	switch (theMsgType)
 	{
 	case NETMSG_PING:
@@ -501,6 +528,7 @@ void NetManager::HandleMessage(NetSession* theSession, uint8_t theMsgType, NetBu
 void NetManager::OnHello(NetSession* theSession, NetBuffer& thePayload)
 {
 	uint32_t aVersion = thePayload.ReadU32Or();
+	NetTrace("HELLO slot=%u protocol=%u expected=%u", theSession->mSlot, aVersion, NET_PROTOCOL_VERSION);
 	if (aVersion != NET_PROTOCOL_VERSION)
 	{
 		theSession->mConn.SendMessage(NETMSG_VERSION_MISMATCH);
@@ -516,6 +544,7 @@ void NetManager::OnHello(NetSession* theSession, NetBuffer& thePayload)
 	thePayload.ReadString(aPlayer.mNick, NET_MAX_NICK + 1);
 	if (!aPlayer.mNick[0])
 		strcpy_s(aPlayer.mNick, "Player");
+	NetTrace("peer authenticated slot=%u nick=%s", theSession->mSlot, aPlayer.mNick);
 
 	NetBuffer aWelcome;
 	aWelcome.WriteU8(theSession->mSlot);
@@ -538,6 +567,7 @@ void NetManager::OnClientInput(NetSession* theSession, NetBuffer& thePayload)
 	// the host's local widescreen canvas before Board::MouseDown consumes them.
 	anInput.mX = (int16_t)NetLocalX(mApp, thePayload.ReadI16Or());
 	anInput.mY = (int16_t)NetLocalY(mApp, thePayload.ReadI16Or());
+	NetTrace("mouse input slot=%u down=%d clicks=%d local=(%d,%d)", anInput.mSlot, anInput.mDown ? 1 : 0, anInput.mClickCount, anInput.mX, anInput.mY);
 	std::lock_guard<std::mutex> aLock(mSessionsMutex);
 	mPendingInputs.push_back(anInput);
 }
@@ -618,6 +648,7 @@ void NetManager::OnClientStats(NetSession* theSession, NetBuffer& thePayload)
 	// ping ms (already measured), snapshot apply time
 	uint16_t aPing = thePayload.ReadU16Or();
 	uint16_t anApplyMs = thePayload.ReadU16Or();
+	NetTrace("client stats slot=%u pingMs=%u snapshotApplyMs=%u rateHz=%d", theSession->mSlot, aPing, anApplyMs, mSnapshotHz);
 	mPlayers[theSession->mSlot].mPing = aPing;
 
 	if (aPing < 60 && anApplyMs < 8)
@@ -668,6 +699,8 @@ void NetManager::SetSnapshotHz(int theHz)
 // -------------------------------------------------------------------------
 void NetManager::HandleMessageClient(uint8_t theMsgType, NetBuffer& thePayload)
 {
+	if (theMsgType != NETMSG_CURSOR && theMsgType != NETMSG_SNAPSHOT && theMsgType != NETMSG_PING && theMsgType != NETMSG_PONG)
+		NetTrace("RX client type=%s(%u) bytes=%zu", NetMessageName(theMsgType), theMsgType, thePayload.Size());
 	switch (theMsgType)
 	{
 	case NETMSG_PING:
@@ -746,6 +779,7 @@ void NetManager::OnWelcome(NetBuffer& thePayload)
 	mPlayers[0].mActive = true;
 	mPlayers[0].mSlot = 0;
 	strncpy_s(mPlayers[0].mNick, aHostNick, NET_MAX_NICK);
+	NetTrace("WELCOME assignedSlot=%u hostNick=%s", mMySlot, aHostNick);
 }
 
 void NetManager::EncodeLobbyState(NetBuffer& theBuffer)
@@ -788,6 +822,10 @@ void NetManager::OnStartGame(NetBuffer& thePayload)
 
 void NetManager::OnSnapshot(NetBuffer& thePayload)
 {
+	static uint32_t aSnapshotCount = 0;
+	aSnapshotCount++;
+	if (aSnapshotCount == 1 || aSnapshotCount % 30 == 0)
+		NetTrace("snapshot received count=%u bytes=%zu pendingBefore=%zu", aSnapshotCount, thePayload.Size(), mPendingBoardMsgs.size());
 	std::lock_guard<std::mutex> aLock(mSessionsMutex);
 	PendingMsg aMsg;
 	aMsg.mKind = 1;
@@ -799,6 +837,8 @@ void NetManager::OnSnapshot(NetBuffer& thePayload)
 
 void NetManager::OnBoardEvent(NetBuffer& thePayload)
 {
+	uint8_t anEvent = thePayload.Size() ? thePayload.mData[0] : 255;
+	NetTrace("board event received type=%u bytes=%zu", anEvent, thePayload.Size());
 	std::lock_guard<std::mutex> aLock(mSessionsMutex);
 	PendingMsg aMsg;
 	aMsg.mKind = 0;
@@ -918,6 +958,8 @@ void NetManager::BroadcastMessage(uint8_t theMsgType, const NetBuffer& thePayloa
 {
 	if (mMode != MODE_HOST)
 		return;
+	if (theMsgType != NETMSG_CURSOR && theMsgType != NETMSG_SNAPSHOT && theMsgType != NETMSG_PING && theMsgType != NETMSG_PONG)
+		NetTrace("TX broadcast type=%s(%u) bytes=%zu", NetMessageName(theMsgType), theMsgType, thePayload.Size());
 	for (int i = 1; i < NET_MAX_PLAYERS; i++)
 		if (mSessions[i].mAssigned)
 			mSessions[i].mConn.SendMessage(theMsgType, thePayload);
@@ -933,6 +975,7 @@ void NetManager::BroadcastSceneCmd(uint8_t theCmd, int theParam)
 
 void NetManager::BroadcastStartGame(int theGameMode, int theLevel, uint32_t theBoardSeed)
 {
+	NetTrace("start game broadcast mode=%d level=%d players=%d seed=%u tdPathCells=%zu", theGameMode, theLevel, GetPlayerCount(), theBoardSeed, mStartTDPath.size());
 	NetBuffer aMsg;
 	aMsg.WriteU8((uint8_t)theGameMode);
 	aMsg.WriteI32(theLevel);
@@ -966,6 +1009,7 @@ void NetManager::SendInput(bool theDown, int theClickCount, int theX, int theY)
 {
 	if (mMode != MODE_CLIENT || !mHostConn)
 		return;
+	NetTrace("mouse send down=%d clicks=%d local=(%d,%d) canonical=(%d,%d)", theDown ? 1 : 0, theClickCount, theX, theY, NetCanonicalX(mApp, theX), NetCanonicalY(mApp, theY));
 	NetBuffer aMsg;
 	aMsg.WriteU8(theDown ? 1 : 0);
 	aMsg.WriteU8((uint8_t)theClickCount);
