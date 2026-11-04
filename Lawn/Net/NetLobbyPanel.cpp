@@ -23,6 +23,7 @@ static int gPanelEditColors[][4] =
 NetLobbyPanel::NetLobbyPanel(LawnApp* theApp) :
 	mApp(theApp),
 	mHoverButtonId(0),
+	mPressedButtonId(0),
 	mLastMouseX(-1),
 	mLastMouseY(-1),
 	mLastCursorSend(0)
@@ -146,9 +147,10 @@ void NetLobbyPanel::Update()
 	mIpEdit->mVisible = aShowEdits;
 	mPortEdit->mVisible = aShowEdits;
 
-	if (aInMenu && !aNet->IsActive())
+	if (aInMenu && aNet->IsActive() && !aNet->IsConnecting())
 	{
-		// share our menu cursor position
+		// Share our menu cursor while in a connected lobby.  The host relays it
+		// to every peer, so clients see both the host and one another.
 		uint32_t aNow = GetTickCount();
 		if (aNow - mLastCursorSend > 50)
 		{
@@ -179,18 +181,23 @@ bool NetLobbyPanel::IsPointVisible(int theX, int theY)
 
 void NetLobbyPanel::DrawButton(Graphics* g, const UiButton& theButton)
 {
+	bool isPressed = mPressedButtonId == theButton.mId && theButton.mMouseOver;
+	int aPressOffset = isPressed ? 2 : 0;
 	Color aFill = theButton.mDisabled ? Color(120, 120, 120) :
-		(theButton.mMouseOver ? Color(255, 235, 160) : Color(215, 180, 100));
-	Color anOutline = theButton.mMouseOver ? Color(255, 250, 210) : Color(90, 60, 30);
+		(isPressed ? Color(175, 135, 70) :
+		(theButton.mMouseOver ? Color(255, 235, 160) : Color(215, 180, 100)));
+	Color anOutline = isPressed ? Color(70, 45, 20) :
+		(theButton.mMouseOver ? Color(255, 250, 210) : Color(90, 60, 30));
 	g->SetColor(aFill);
-	g->FillRect(theButton.mRect.mX, theButton.mRect.mY, theButton.mRect.mWidth, theButton.mRect.mHeight);
+	g->FillRect(theButton.mRect.mX, theButton.mRect.mY + aPressOffset, theButton.mRect.mWidth, theButton.mRect.mHeight - aPressOffset);
 	g->SetColor(anOutline);
-	g->DrawRect(theButton.mRect.mX, theButton.mRect.mY, theButton.mRect.mWidth - 1, theButton.mRect.mHeight - 1);
-	g->SetColor(theButton.mMouseOver ? Color(255, 255, 255, 90) : Color(255, 255, 255, 40));
-	g->FillRect(theButton.mRect.mX + 2, theButton.mRect.mY + 2, theButton.mRect.mWidth - 4, 3);
+	g->DrawRect(theButton.mRect.mX, theButton.mRect.mY + aPressOffset, theButton.mRect.mWidth - 1, theButton.mRect.mHeight - aPressOffset - 1);
+	g->SetColor(isPressed ? Color(40, 25, 10, 80) :
+		(theButton.mMouseOver ? Color(255, 255, 255, 90) : Color(255, 255, 255, 40)));
+	g->FillRect(theButton.mRect.mX + 2, theButton.mRect.mY + 2 + aPressOffset, theButton.mRect.mWidth - 4, 3);
 	TodDrawString(g, theButton.mLabel,
 		theButton.mRect.mX + theButton.mRect.mWidth / 2,
-		theButton.mRect.mY + theButton.mRect.mHeight / 2 + 4,
+		theButton.mRect.mY + theButton.mRect.mHeight / 2 + 4 + aPressOffset,
 		Sexy::FONT_BRIANNETOD12, Color(60, 35, 10), DrawStringJustification::DS_ALIGN_CENTER);
 }
 
@@ -327,6 +334,8 @@ void NetLobbyPanel::Draw(Graphics* g)
 
 void NetLobbyPanel::MouseMove(int x, int y)
 {
+	mLastMouseX = x;
+	mLastMouseY = y;
 	mHoverButtonId = 0;
 	for (size_t i = 0; i < mButtons.size(); i++)
 	{
@@ -340,6 +349,9 @@ void NetLobbyPanel::MouseMove(int x, int y)
 
 void NetLobbyPanel::MouseLeave()
 {
+	mLastMouseX = -1;
+	mLastMouseY = -1;
+	mHoverButtonId = 0;
 	for (size_t i = 0; i < mButtons.size(); i++)
 		mButtons[i].mMouseOver = false;
 	Widget::MouseLeave();
@@ -347,19 +359,41 @@ void NetLobbyPanel::MouseLeave()
 
 void NetLobbyPanel::MouseDown(int x, int y, int theClickCount)
 {
+	mPressedButtonId = 0;
+	for (size_t i = 0; i < mButtons.size(); i++)
+	{
+		if (mButtons[i].mDisabled || !mButtons[i].mRect.Contains(x, y))
+			continue;
+		mPressedButtonId = mButtons[i].mId;
+		mApp->PlaySample(Sexy::SOUND_TAP2);
+		MarkDirty();
+		return;
+	}
+}
+
+void NetLobbyPanel::MouseUp(int x, int y, int theClickCount)
+{
+	int aPressedButtonId = mPressedButtonId;
+	mPressedButtonId = 0;
+	for (size_t i = 0; i < mButtons.size(); i++)
+	{
+		if (mButtons[i].mId == aPressedButtonId && !mButtons[i].mDisabled && mButtons[i].mRect.Contains(x, y))
+		{
+			ActivateButton(aPressedButtonId);
+			break;
+		}
+	}
+	MarkDirty();
+}
+
+void NetLobbyPanel::ActivateButton(int theButtonId)
+{
 	NetManager* aNet = mApp->mNetManager;
 	if (!aNet)
 		return;
 
-	for (size_t i = 0; i < mButtons.size(); i++)
+	switch (theButtonId)
 	{
-		if (!mButtons[i].mRect.Contains(x, y))
-			continue;
-
-		mApp->PlaySample(Sexy::SOUND_TAP2);
-
-		switch (mButtons[i].mId)
-		{
 		case BTN_HOST:
 		{
 			ApplyNick();
@@ -392,9 +426,6 @@ void NetLobbyPanel::MouseDown(int x, int y, int theClickCount)
 		case BTN_TEAM_ZOMBIES:
 			aNet->SetMyTeam(NETTEAM_ZOMBIES);
 			break;
-		}
-		MarkDirty();
-		return;
 	}
 }
 

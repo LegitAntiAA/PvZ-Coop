@@ -46,6 +46,7 @@ public:
 	virtual void Update() override;
 	virtual void Draw(Graphics* g) override;
 	virtual void MouseDown(int x, int y, int theClickCount) override;
+	virtual void MouseUp(int x, int y, int theClickCount) override;
 	virtual void MouseMove(int x, int y) override;
 	virtual void MouseLeave() override;
 	virtual bool IsPointVisible(int theX, int theY) override;
@@ -67,6 +68,7 @@ private:
 
 	void LayoutButtons();
 	void DrawButton(Graphics* g, const UiButton& theButton);
+	void ActivateButton(int theButtonId);
 	Rect GetPanelRect() const;
 
 	LawnApp* mApp;
@@ -75,6 +77,7 @@ private:
 	EditWidget* mPortEdit;
 	std::vector<UiButton> mButtons;
 	int mHoverButtonId;
+	int mPressedButtonId;
 	int mLastMouseX;
 	int mLastMouseY;
 	uint32_t mLastCursorSend;
