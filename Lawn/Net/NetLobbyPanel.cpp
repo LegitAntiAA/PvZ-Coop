@@ -167,6 +167,11 @@ void NetLobbyPanel::Update()
 // through to the widgets below (title screen, game selector, ...).
 bool NetLobbyPanel::IsPointVisible(int theX, int theY)
 {
+	// theX/theY are relative to the widget origin: when the panel is parked
+	// off-screen (-5000) its relative rect would still match screen points and
+	// swallow clicks, so require the widget to actually sit at the origin
+	if (mX != 0 || mY != 0)
+		return false;
 	if (mApp->mBoard != nullptr || mApp->mGameSelector == nullptr || !mApp->mLoadingThreadCompleted)
 		return false;
 	return GetPanelRect().Contains(theX, theY);

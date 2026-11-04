@@ -2733,6 +2733,12 @@ void Challenge::InitZombieWavesSurvival()
 #endif
 			)	
 																																											continue;
+		// tower defense: only zombies that walk the road make sense
+		if (mBoard->IsTowerDefense() &&
+			(aRandZombie == ZombieType::ZOMBIE_ZAMBONI || aRandZombie == ZombieType::ZOMBIE_BOBSLED ||
+			 aRandZombie == ZombieType::ZOMBIE_BALLOON || aRandZombie == ZombieType::ZOMBIE_BUNGEE ||
+			 aRandZombie == ZombieType::ZOMBIE_DIGGER))
+			continue;
 		mBoard->mZombieAllowed[aRandZombie] = true;																															
 		aCapacity--;
 	}

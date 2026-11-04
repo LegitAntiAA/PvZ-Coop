@@ -6528,6 +6528,12 @@ void Board::UpdateIce()
 {
 	for (int aRow = 0; aRow < MAX_GRID_SIZE_Y; aRow++)
 	{
+		// tower defense: no ice trails on the road lawn
+		if (IsTowerDefense() && mIceTimer[aRow])
+		{
+			mIceTimer[aRow] = 0;
+			mIceMinX[aRow] = BOARD_ICE_START;
+		}
 		if (mIceTimer[aRow])
 		{
 			mIceTimer[aRow]--;
