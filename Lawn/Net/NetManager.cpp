@@ -851,6 +851,14 @@ void NetManager::OnBoardEvent(NetBuffer& thePayload)
 {
 	uint8_t anEvent = thePayload.Size() ? thePayload.mData[0] : 255;
 	NetTrace("board event received type=%u bytes=%zu", anEvent, thePayload.Size());
+	// Intro preview entities are created locally by CutScene on every peer.
+	// Applying the host's preview events as well would duplicate them and could
+	// access reanimation definitions before the client's preload has completed.
+	if (mApp && mApp->mBoard && mApp->mGameScene != GameScenes::SCENE_PLAYING)
+	{
+		NetTrace("board event dropped outside gameplay type=%u scene=%d", anEvent, (int)mApp->mGameScene);
+		return;
+	}
 	std::lock_guard<std::mutex> aLock(mSessionsMutex);
 	PendingMsg aMsg;
 	aMsg.mKind = 0;

@@ -12,6 +12,7 @@
 #include "../Cutscene.h"
 #include "../../Resources.h"
 #include "../../Sexy.TodLib/Reanimator.h"
+#include "../../Sexy.TodLib/Attachment.h"
 #include "../System/PlayerInfo.h"
 #include "../../GameConstants.h"
 #include "../../SexyAppFramework/Graphics.h"
@@ -141,7 +142,8 @@ void Board::NetHostTick()
 	if (mLastSnapshotTick == 0)
 		mLastSnapshotTick = aNow;
 	int aInterval = 1000 / max(1, aNet->GetSnapshotHz());
-	if (aNow - mLastSnapshotTick >= (uint32_t)aInterval)
+	if (mApp->mGameScene == GameScenes::SCENE_PLAYING &&
+		aNow - mLastSnapshotTick >= (uint32_t)aInterval)
 	{
 		mLastSnapshotTick = aNow;
 		NetBuffer aSnap;
@@ -176,7 +178,9 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 	b.WriteU8((uint8_t)min(255, mNumWaves));
 	b.WriteU16((uint16_t)max(0, mHugeWaveCountDown));
 	b.WriteU16((uint16_t)max(0, mZombieCountDown));
-	b.WriteU16((uint16_t)max(0, mBoardFadeOutCounter));
+	// -1 means that no fade is active.  Zero is an active, fully opaque fade,
+	// so clamping the sentinel to zero covered every client with a white quad.
+	b.WriteU16((uint16_t)min(65535, max(0, mBoardFadeOutCounter + 1)));
 	b.WriteU16((uint16_t)max(0, mNextSurvivalStageCounter));
 	b.WriteU16((uint16_t)(mFogOffset * 2));
 	b.WriteU16((uint16_t)max(0, mFogBlownCountDown));
@@ -287,12 +291,15 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 		aBody.WriteU8((uint8_t)min(255, aZombie->mChilledCounter));
 		aBody.WriteU8((uint8_t)min(255, aZombie->mButteredCounter));
 		aBody.WriteU8((uint8_t)min(255, aZombie->mIceTrapCounter));
-		aBody.WriteU8((uint8_t)min(255, max(0, aZombie->mZombieFade)));
+		// Zombie drawing uses -1 for fully visible and 0 for fully transparent.
+		aBody.WriteU8(aZombie->mZombieFade < 0 ? 255 : (uint8_t)min(254, aZombie->mZombieFade));
 		aBody.WriteU8((uint8_t)min(255, max(0, aZombie->mJustGotShotCounter)));
 		aBody.WriteF32(aZombie->mVelX);
 		aBody.WriteF32(aZombie->mAltitude);
 		aBody.WriteF32(aZombie->mOriginalAnimRate > 0 ? aZombie->mOriginalAnimRate : 12.0f);
-		aBody.WriteU8(aZombie->mNetAnimKey);
+		uint8_t anAnimKey = aZombie->mZombiePhase == ZombiePhase::PHASE_ZOMBIE_DYING ? 2 :
+			(aZombie->mIsEating ? 1 : 0);
+		aBody.WriteU8(anAnimKey);
 		aCount++;
 	}
 	b.WriteU8(aCount);
@@ -615,7 +622,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	int aNumWaves = b.ReadU8Or();
 	mHugeWaveCountDown = b.ReadU16Or();
 	mZombieCountDown = b.ReadU16Or();
-	mBoardFadeOutCounter = b.ReadU16Or();
+	mBoardFadeOutCounter = (int)b.ReadU16Or() - 1;
 	mNextSurvivalStageCounter = b.ReadU16Or();
 	mFogOffset = b.ReadU16Or() / 2.0f;
 	mFogBlownCountDown = b.ReadU16Or();
@@ -810,7 +817,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		aZombie->mChilledCounter = aChilled;
 		aZombie->mButteredCounter = aButtered;
 		aZombie->mIceTrapCounter = aIceTrap;
-		aZombie->mZombieFade = aFade;
+		aZombie->mZombieFade = aFade == 255 ? -1 : aFade;
 		aZombie->mJustGotShotCounter = aJustShot;
 		aZombie->mVelX = aVelX;
 		aZombie->mAltitude = anAltitude;
@@ -996,10 +1003,11 @@ void Board::NetGhostUpdateZombie(Zombie* theZombie, uint8_t theAnimKey)
 		Reanimation* aBody = mApp->ReanimationTryToGet(theZombie->mBodyReanimID);
 		if (aBody)
 		{
+			float aHostVelocity = theZombie->mVelX;
 			if (theAnimKey == 1)
 			{
-				aBody->SetFramesForLayer("anim_eat");
-				aBody->mLoopType = ReanimLoopType::REANIM_LOOP;
+				theZombie->mIsEating = false;
+				theZombie->StartEating();
 			}
 			else if (theAnimKey == 2)
 			{
@@ -1007,8 +1015,12 @@ void Board::NetGhostUpdateZombie(Zombie* theZombie, uint8_t theAnimKey)
 			}
 			else
 			{
-				theZombie->StartWalkAnim(10);
+				if (theZombie->mIsEating)
+					theZombie->StopEating();
+				else
+					theZombie->StartWalkAnim(10);
 			}
+			theZombie->mVelX = aHostVelocity;
 		}
 	}
 
@@ -1022,7 +1034,11 @@ void Board::NetGhostUpdateZombie(Zombie* theZombie, uint8_t theAnimKey)
 	if (theZombie->mIceTrapCounter > 0)
 		theZombie->mIceTrapCounter--;
 
-	theZombie->Animate();
+	// Do not call Zombie::Animate() on a client ghost: chew callbacks mutate
+	// health and can trigger hypno/death gameplay.  Only advance its attached
+	// visual tree and keep that tree positioned on the interpolated entity.
+	AttachmentUpdateAndMove(theZombie->mAttachmentID, theZombie->mPosX, theZombie->mPosY);
+	theZombie->UpdateReanim();
 }
 
 void Board::NetGhostUpdateOthers()
@@ -1072,8 +1088,31 @@ void Board::NetClientTick()
 	// ghost micro-updates (interpolation, cosmetic counters)
 	Zombie* aZombie = nullptr;
 	while (mZombies.IterateNext(aZombie))
-		if (!aZombie->mDead && aZombie->mNetGhost)
+	{
+		if (aZombie->mDead)
+			continue;
+		if (aZombie->mNetGhost)
+		{
 			NetGhostUpdateZombie(aZombie, aZombie->mNetAnimKey);
+		}
+		else if (mApp->mGameScene == GameScenes::SCENE_LEVEL_INTRO)
+		{
+			// Preview zombies are created locally by the stock cutscene.  They do
+			// not simulate on a client, but their attached reanimations must tick.
+			AttachmentUpdateAndMove(aZombie->mAttachmentID, aZombie->mPosX, aZombie->mPosY);
+			aZombie->UpdateReanim();
+		}
+	}
+
+	Plant* aPlant = nullptr;
+	while (mPlants.IterateNext(aPlant))
+	{
+		if (!aPlant->mDead && aPlant->mIsOnBoard)
+		{
+			aPlant->Animate();
+			aPlant->UpdateReanim();
+		}
+	}
 	NetGhostUpdateOthers();
 
 	// send our mouse position (cosmetic for the host + others)

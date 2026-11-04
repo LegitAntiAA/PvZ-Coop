@@ -24,7 +24,7 @@ namespace LawnNet
 // (the host broadcasts the same sounds via events).
 extern bool gNetSuppressSounds;
 
-static const uint32_t NET_PROTOCOL_VERSION = 5; // explicit host-authoritative transition into gameplay
+static const uint32_t NET_PROTOCOL_VERSION = 6; // preserve signed visual sentinels in board snapshots
 static const uint16_t NET_DEFAULT_PORT = 27713;			// PvZ co-op port
 static const int NET_MAX_PLAYERS = 4;					// 1 host + 3 clients
 static const int NET_MAX_NICK = 16;						// bytes (without terminator)

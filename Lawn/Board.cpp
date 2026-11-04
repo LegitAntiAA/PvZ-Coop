@@ -6957,14 +6957,27 @@ void Board::Update()
 {
 	TodHesitationBracket aHesitation("Board::Update");
 
-	// ---- co-op: client boards are driven entirely by the host ----
+	// ---- co-op: the host owns gameplay, while clients still run the normal
+	// visual/UI lifecycle (cutscene, preloading, layers and effects). ----
 	if (mApp->NetIsClient())
 	{
 		Widget::Update();
 		MarkDirty();
+		mCutScene->Update();
+		UpdateMousePosition();
 		NetClientTick();
+		UpdateLayers();
+		if (!mPaused)
+		{
+			mApp->mEffectSystem->Update();
+			mAdvice->Update();
+			mMainCounter++;
+			mEffectCounter++;
+		}
 		mCursorPreview->Update();
 		mCursorObject->Update();
+		mPrevMouseX = mApp->mWidgetManager->mLastMouseX;
+		mPrevMouseY = mApp->mWidgetManager->mLastMouseY;
 		return;
 	}
 
