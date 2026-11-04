@@ -92,6 +92,7 @@ public:
     int                     mCoopRemotePicks[4][12];            // seed types picked by each slot (255 = empty)
     int                     mCoopRemotePickCount[4];
     int                     mCoopMyImitater;                    // imitater copy for our pending pick
+    unsigned int            mCoopLastStateHash;                 // suppress identical per-frame network states
     void                    CoopSendPick(int theSeedType, int theImitater, bool theUnpick);
     bool                    CoopIsPickedByOthers(int theSeedType) const;
     void                    CoopRecordRemotePick(int theSlot, int theSeedType, bool theUnpick);

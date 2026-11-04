@@ -35,8 +35,10 @@ namespace LawnNet
 
 static bool NetIsValidHeldSeed(uint8_t theSeed)
 {
-	return theSeed == 255 || theSeed < (uint8_t)SeedType::NUM_SEED_TYPES ||
-		Challenge::IsZombieSeedType((SeedType)theSeed);
+	// Remote plant silhouettes are rendered by Plant::DrawSeedType, which only
+	// accepts real plant seed ids. Zombie-card ids and tool cursor payloads must
+	// never reach that renderer (PvP hides cursors entirely anyway).
+	return theSeed == 255 || theSeed < (uint8_t)SeedType::NUM_SEED_TYPES;
 }
 
 NetManager* gNetManager = nullptr;
@@ -756,6 +758,16 @@ void NetManager::HandleMessageClient(uint8_t theMsgType, NetBuffer& thePayload)
 	case NETMSG_BACK_TO_MENU:
 		if (mApp)
 			mApp->NetOnBackToMenu();
+		break;
+	case NETMSG_START_PLAYING:
+		if (mApp && mApp->mBoard && mApp->mGameScene != GameScenes::SCENE_PLAYING)
+		{
+			NetTrace("client applying START_PLAYING scene=%d seedChooser=%p", (int)mApp->mGameScene, (void*)mApp->mSeedChooserScreen);
+			mPendingChooserStarts.clear();
+			mRemoteChooserStates.clear();
+			mChooserOpen = false;
+			mApp->StartPlaying();
+		}
 		break;
 	case NETMSG_SCENE_CMD:
 		if (mApp)

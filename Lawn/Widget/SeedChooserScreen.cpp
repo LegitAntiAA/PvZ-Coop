@@ -29,6 +29,7 @@ SeedChooserScreen::SeedChooserScreen()
 {
 	mCoopPicksPerPlayer = 0;
 	mCoopMyImitater = SEED_NONE;
+	mCoopLastStateHash = 0xFFFFFFFFu;
 	for (int i = 0; i < 4; i++)
 	{
 		mCoopRemotePickCount[i] = 0;
@@ -1549,18 +1550,20 @@ void SeedChooserScreen::CoopBroadcastChooserState()
 	aMsg.WriteU8(4); // slots
 	for (int i = 0; i < 4; i++)
 	{
-		int aCount = (i == aNet->GetMySlot()) ? mSeedsInBank : mCoopRemotePickCount[i];
-		aMsg.WriteU8((uint8_t)min(12, aCount));
+		SeedType aSeeds[12];
+		SeedType anImitaters[12];
+		int aValidCount = 0;
 		if (i == aNet->GetMySlot())
 		{
 			// our own picks, in bank order
 			for (int anIndex = 0; anIndex < mBoard->mSeedBank->mNumPackets && anIndex < mSeedsInBank; anIndex++)
 			{
 				SeedType aSeedType = FindSeedInBank(anIndex);
-				if (aSeedType != SEED_NONE)
+				if ((int)aSeedType >= 0 && aSeedType < SeedType::NUM_SEED_TYPES && aValidCount < 12)
 				{
-					aMsg.WriteU8((uint8_t)aSeedType);
-					aMsg.WriteU8((uint8_t)(aSeedType == SEED_IMITATER ? mChosenSeeds[aSeedType].mImitaterType : SEED_NONE));
+					aSeeds[aValidCount] = aSeedType;
+					anImitaters[aValidCount] = aSeedType == SEED_IMITATER ? mChosenSeeds[aSeedType].mImitaterType : SEED_NONE;
+					aValidCount++;
 				}
 			}
 		}
@@ -1568,11 +1571,31 @@ void SeedChooserScreen::CoopBroadcastChooserState()
 		{
 			for (int j = 0; j < mCoopRemotePickCount[i] && j < 12; j++)
 			{
-				aMsg.WriteU8((uint8_t)mCoopRemotePicks[i][j]);
-				aMsg.WriteU8((uint8_t)SEED_NONE);
+				int aSeed = mCoopRemotePicks[i][j];
+				if (aSeed >= 0 && aSeed < (int)SeedType::NUM_SEED_TYPES)
+				{
+					aSeeds[aValidCount] = (SeedType)aSeed;
+					anImitaters[aValidCount] = SEED_NONE;
+					aValidCount++;
+				}
 			}
 		}
+		aMsg.WriteU8((uint8_t)aValidCount);
+		for (int j = 0; j < aValidCount; j++)
+		{
+			aMsg.WriteU8((uint8_t)aSeeds[j]);
+			aMsg.WriteU8((uint8_t)anImitaters[j]);
+		}
 	}
+	// CoopPollNetwork runs every chooser frame. Send only when the serialized
+	// state actually changes; the old unconditional broadcast produced hundreds
+	// of duplicate packets per second and eventually overflowed client queues.
+	unsigned int aHash = 2166136261u;
+	for (uint8_t aByte : aMsg.mData)
+		aHash = (aHash ^ aByte) * 16777619u;
+	if (aHash == mCoopLastStateHash)
+		return;
+	mCoopLastStateHash = aHash;
 	aNet->BroadcastMessage(LawnNet::NETMSG_CHOOSER_STATE, aMsg);
 }
 
@@ -1595,7 +1618,7 @@ void SeedChooserScreen::CoopDrawRemotePicks(Graphics* g)
 		for (int j = 0; j < mCoopRemotePickCount[i] && j < 12; j++)
 		{
 			SeedType aSeedType = (SeedType)mCoopRemotePicks[i][j];
-			if (aSeedType == SEED_NONE)
+			if ((int)aSeedType < 0 || aSeedType >= SeedType::NUM_SEED_TYPES)
 				continue;
 			NetColor aColor = GetRelativePlayerColor(aNet->GetMySlot(), i);
 			g->SetColor(Color(aColor.r, aColor.g, aColor.b, 200));
@@ -1620,17 +1643,19 @@ void SeedChooserScreen::CoopBroadcastChooserStart()
 	aMsg.WriteU8(4);
 	for (int i = 0; i < 4; i++)
 	{
-		int aCount = (i == aNet->GetMySlot()) ? mSeedsInBank : mCoopRemotePickCount[i];
-		aMsg.WriteU8((uint8_t)min(12, aCount));
+		SeedType aSeeds[12];
+		SeedType anImitaters[12];
+		int aValidCount = 0;
 		if (i == aNet->GetMySlot())
 		{
 			for (int anIndex = 0; anIndex < mBoard->mSeedBank->mNumPackets && anIndex < mSeedsInBank; anIndex++)
 			{
 				SeedType aSeedType = FindSeedInBank(anIndex);
-				if (aSeedType != SEED_NONE)
+				if ((int)aSeedType >= 0 && aSeedType < SeedType::NUM_SEED_TYPES && aValidCount < 12)
 				{
-					aMsg.WriteU8((uint8_t)aSeedType);
-					aMsg.WriteU8((uint8_t)(aSeedType == SEED_IMITATER ? mChosenSeeds[aSeedType].mImitaterType : SEED_NONE));
+					aSeeds[aValidCount] = aSeedType;
+					anImitaters[aValidCount] = aSeedType == SEED_IMITATER ? mChosenSeeds[aSeedType].mImitaterType : SEED_NONE;
+					aValidCount++;
 				}
 			}
 		}
@@ -1638,9 +1663,20 @@ void SeedChooserScreen::CoopBroadcastChooserStart()
 		{
 			for (int j = 0; j < mCoopRemotePickCount[i] && j < 12; j++)
 			{
-				aMsg.WriteU8((uint8_t)mCoopRemotePicks[i][j]);
-				aMsg.WriteU8((uint8_t)SEED_NONE);
+				int aSeed = mCoopRemotePicks[i][j];
+				if (aSeed >= 0 && aSeed < (int)SeedType::NUM_SEED_TYPES)
+				{
+					aSeeds[aValidCount] = (SeedType)aSeed;
+					anImitaters[aValidCount] = SEED_NONE;
+					aValidCount++;
+				}
 			}
+		}
+		aMsg.WriteU8((uint8_t)aValidCount);
+		for (int j = 0; j < aValidCount; j++)
+		{
+			aMsg.WriteU8((uint8_t)aSeeds[j]);
+			aMsg.WriteU8((uint8_t)anImitaters[j]);
 		}
 	}
 	aNet->BroadcastMessage(LawnNet::NETMSG_CHOOSER_START, aMsg);
@@ -1753,8 +1789,18 @@ void SeedChooserScreen::CoopBuildBankFromPayload(LawnNet::NetBuffer& thePayload)
 		aCounts[i] = min((int)aCount, 12);
 		for (int j = 0; j < aCounts[i]; j++)
 		{
-			aPicks[i][j] = thePayload.ReadU8Or();
-			anImitaters[i][j] = (SeedType)thePayload.ReadU8Or();
+			uint8_t aSeed = thePayload.ReadU8Or();
+			uint8_t anImitater = thePayload.ReadU8Or();
+			if (aSeed < (uint8_t)SeedType::NUM_SEED_TYPES)
+			{
+				aPicks[i][j] = aSeed;
+				anImitaters[i][j] = anImitater < (uint8_t)SeedType::NUM_SEED_TYPES ? (SeedType)anImitater : SEED_NONE;
+			}
+			else
+			{
+				aPicks[i][j] = SEED_NONE;
+				anImitaters[i][j] = SEED_NONE;
+			}
 		}
 	}
 	CoopBuildBankInternal(mBoard->mSeedBank, aMySlot, aPicks, aCounts, anImitaters);
@@ -1781,11 +1827,13 @@ void SeedChooserScreen::CoopApplyChooserState(LawnNet::NetBuffer& thePayload)
 			continue;
 		}
 		mCoopRemotePickCount[i] = 0;
-		for (int j = 0; j < aCount && j < 12; j++)
+		for (int j = 0; j < aCount; j++)
 		{
 			uint8_t aSeed = thePayload.ReadU8Or();
 			thePayload.ReadU8Or(); // imitater
-			mCoopRemotePicks[i][mCoopRemotePickCount[i]++] = aSeed;
+			// Never let malformed or stale chooser data reach DrawSeedType.
+			if (j < 12 && aSeed < (uint8_t)SeedType::NUM_SEED_TYPES)
+				mCoopRemotePicks[i][mCoopRemotePickCount[i]++] = aSeed;
 		}
 	}
 }

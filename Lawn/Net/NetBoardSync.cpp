@@ -1118,7 +1118,7 @@ void Board::NetDrawRemoteCursors(Graphics* g)
 		NetColor aColor = GetRelativePlayerColor(aNet->GetMySlot(), i);
 
 		// held plant silhouette in the owner's color
-		if (aCursor.mHeldSeed != 255 && aCursor.mHeldSeed != SEED_NONE &&
+		if (aCursor.mHeldSeed < (uint8_t)SeedType::NUM_SEED_TYPES &&
 			aCursor.mCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_BANK)
 		{
 			SeedType aSeedType = (SeedType)aCursor.mHeldSeed;

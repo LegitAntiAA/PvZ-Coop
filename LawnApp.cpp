@@ -1324,9 +1324,16 @@ void LawnApp::MakeNewBoard()
 //0x44F6B0
 void LawnApp::StartPlaying()
 {
+	if (mNetManager && mNetManager->IsHosting())
+	{
+		LawnNet::NetTrace("host entering gameplay; broadcasting START_PLAYING mode=%d level=%d", (int)mGameMode, mBoard ? mBoard->mLevel : -1);
+		LawnNet::NetBuffer anEmpty;
+		mNetManager->BroadcastMessage(LawnNet::NETMSG_START_PLAYING, anEmpty);
+	}
 	KillSeedChooserScreen();
 	mBoard->StartLevel();
 	mGameScene = GameScenes::SCENE_PLAYING;
+	LawnNet::NetTrace("gameplay entered client=%d board=%p scene=%d seedChooser=%p", NetIsClient() ? 1 : 0, (void*)mBoard, (int)mGameScene, (void*)mSeedChooserScreen);
 }
 
 //0x44F700
@@ -5423,7 +5430,7 @@ void LawnApp::NetDrawCursorOverlay()
 		int aCursorY = (int)aCursor.mRenderY;
 		LawnNet::NetColor aColor = LawnNet::GetRelativePlayerColor(mNetManager->GetMySlot(), i);
 
-		if (mBoard && aCursor.mHeldSeed != 255 && aCursor.mHeldSeed != SEED_NONE &&
+		if (mBoard && aCursor.mHeldSeed < (uint8_t)SeedType::NUM_SEED_TYPES &&
 			aCursor.mCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_BANK)
 		{
 			SeedType aSeed = (SeedType)aCursor.mHeldSeed;
