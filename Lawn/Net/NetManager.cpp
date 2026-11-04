@@ -114,6 +114,7 @@ NetManager::NetManager() :
 		mPendingInputCount[i] = 0;
 		mLastInputSequence[i] = 0;
 	}
+	mChooserStateEchoRequested.store(false, std::memory_order_relaxed);
 	mRemotePaused = false;
 }
 
@@ -340,6 +341,7 @@ void NetManager::Disconnect()
 	mRemoteChooserStates.clear();
 	mPendingChooserStarts.clear();
 	mPendingBoardMsgs.clear();
+	mChooserStateEchoRequested.store(false, std::memory_order_relaxed);
 	PurgePendingInputs("DISCONNECT");
 	mChooserOpen = false;
 	for (int i = 0; i < NET_MAX_PLAYERS; i++)
@@ -403,6 +405,7 @@ void NetManager::DropSession(int theSlot, bool theNotify)
 	PurgePendingInputs("PEER_DISCONNECT", theSlot);
 	mPlayers[theSlot].mActive = false;
 	mRemoteCursors[theSlot].Clear();
+	RequestChooserStateEcho("peer_disconnect", theSlot, -1);
 	if (theNotify)
 		SendLobbyState();
 }
@@ -915,6 +918,7 @@ void NetManager::OnClientSeedPick(NetSession* theSession, NetBuffer& thePayload,
 	{
 		NetTrace("chooser %s rejected: expected=%zu bytes actual=%zu",
 			theUnpick ? "unpick" : "pick", anExpectedBytes, thePayload.Remaining());
+		RequestChooserStateEcho("payload_size", theSession ? theSession->mSlot : -1, -1);
 		return;
 	}
 
@@ -938,6 +942,8 @@ void NetManager::OnClientSeedPick(NetSession* theSession, NetBuffer& thePayload,
 			mApp && mApp->mBoard ? (void*)mApp->mBoard->mCutScene : nullptr,
 			mApp ? (void*)mApp->mSeedChooserScreen : nullptr,
 			mApp ? (int)mApp->mGameScene : -1);
+		RequestChooserStateEcho(!anEligiblePlayer ? "slot_or_team" : "context",
+			aSlot, aSeedType);
 		return;
 	}
 
@@ -973,6 +979,8 @@ void NetManager::OnClientSeedPick(NetSession* theSession, NetBuffer& thePayload,
 		NetTrace("chooser %s rejected: slot=%d seed=%u imitater=%u validSeed=%d validImitater=%d locked=%d",
 			theUnpick ? "unpick" : "pick", aSlot, aSeedType, anImitater,
 			aValidSeed ? 1 : 0, aValidImitater ? 1 : 0, aLockedDaveSeed ? 1 : 0);
+		RequestChooserStateEcho(!aValidSeed ? "seed" :
+			(!aValidImitater ? "imitater" : "fixed_seed"), aSlot, aSeedType);
 		return;
 	}
 
@@ -1482,34 +1490,18 @@ void NetManager::OnChooserOpen(NetBuffer& thePayload)
 	const bool aPvP = aContextValid && mApp->mGameMode == GameMode::GAMEMODE_COOP_PVP;
 	const int anExpectedBankCount = aContextValid ?
 		(aPvP ? PVP_PLANT_PACKET_COUNT : mApp->mBoard->GetNumSeedsInBank()) : -1;
+	const int anExpectedFixedCount = aContextValid ?
+		SeedChooserScreen::CoopExpectedGlobalFixedPicks(mApp, mApp->mBoard) : -1;
 	int anExpectedQuotas[NET_MAX_PLAYERS] = {};
 	int anEligibleCount = 0;
-	if (aContextValid)
-	{
-		for (int aSlot = 0; aSlot < NET_MAX_PLAYERS; aSlot++)
-		{
-			const NetPlayerInfo& aPlayer = mPlayers[aSlot];
-			if (aPlayer.mActive && (!aPvP || aPlayer.mTeam == NETTEAM_PLANTS))
-				anEligibleCount++;
-		}
-		const int aDivisor = max(1, anEligibleCount);
-		const int aBaseQuota = anExpectedBankCount / aDivisor;
-		int aRemainder = anExpectedBankCount % aDivisor;
-		for (int aSlot = 0; aSlot < NET_MAX_PLAYERS; aSlot++)
-		{
-			const NetPlayerInfo& aPlayer = mPlayers[aSlot];
-			if (!aPlayer.mActive || (aPvP && aPlayer.mTeam != NETTEAM_PLANTS))
-				continue;
-			anExpectedQuotas[aSlot] = aBaseQuota;
-			if (aRemainder > 0)
-			{
-				anExpectedQuotas[aSlot]++;
-				aRemainder--;
-			}
-		}
-	}
+	const bool anExpectedSplitValid = aContextValid &&
+		anExpectedBankCount >= 0 && anExpectedBankCount <= SEEDBANK_CAPACITY &&
+		anExpectedFixedCount >= 0 && anExpectedFixedCount <= anExpectedBankCount &&
+		ComputeChooserQuotas(anExpectedBankCount, anExpectedFixedCount, aPvP,
+			anExpectedQuotas, &anEligibleCount);
 
-	bool aSplitMatches = aContextValid && aBankCount == anExpectedBankCount;
+	bool aSplitMatches = anExpectedSplitValid && aBankCount == anExpectedBankCount &&
+		aQuotaTotal == aBankCount;
 	for (int i = 0; i < NET_MAX_PLAYERS; i++)
 	{
 		if ((int)aQuotas[i] != anExpectedQuotas[i])
@@ -1517,25 +1509,32 @@ void NetManager::OnChooserOpen(NetBuffer& thePayload)
 	}
 	if (thePayload.Remaining() != 0 || !aQuotaInRange || !aContextValid ||
 		anExpectedBankCount < 0 || anExpectedBankCount > SEEDBANK_CAPACITY ||
-		!aSplitMatches)
+		!anExpectedSplitValid || !aSplitMatches)
 	{
-		NetTrace("CHOOSER_OPEN rejected: bank=%u expectedBank=%d quotas=[%u,%u,%u,%u] expected=[%d,%d,%d,%d] total=%d eligible=%d slot=%u context=%d range=%d trailing=%zu",
-			aBankCount, anExpectedBankCount,
+		NetTrace("CHOOSER_OPEN rejected: bank=%u expectedBank=%d fixed=%d quotas=[%u,%u,%u,%u] expected=[%d,%d,%d,%d] total=%d eligible=%d slot=%u context=%d range=%d splitValid=%d trailing=%zu",
+			aBankCount, anExpectedBankCount, anExpectedFixedCount,
 			aQuotas[0], aQuotas[1], aQuotas[2], aQuotas[3],
 			anExpectedQuotas[0], anExpectedQuotas[1], anExpectedQuotas[2], anExpectedQuotas[3],
 			aQuotaTotal, anEligibleCount, mMySlot, aContextValid ? 1 : 0,
-			aQuotaInRange ? 1 : 0, thePayload.Remaining());
+			aQuotaInRange ? 1 : 0, anExpectedSplitValid ? 1 : 0,
+			thePayload.Remaining());
 		return;
 	}
 
-	// Survival repick / any mid-game chooser reopen: create the widget first.
-	// ShowSeedChooserScreen computes a provisional local split, so commit the
-	// host-authoritative values only after that call returns.
+	// Survival repick / any mid-game chooser reopen: create the inert client
+	// widget first, then commit the host-authoritative generation below.
 	if (mApp && mApp->mBoard && !mApp->mSeedChooserScreen)
 		mApp->ShowSeedChooserScreen();
 	if (!mApp->mSeedChooserScreen)
 	{
 		NetTrace("CHOOSER_OPEN rejected after widget creation: screen is unavailable");
+		return;
+	}
+	const int anActualFixedCount = mApp->mSeedChooserScreen->CoopCountGlobalFixedPicks();
+	if (anActualFixedCount != anExpectedFixedCount)
+	{
+		NetTrace("CHOOSER_OPEN rejected after widget creation: fixed cards actual=%d expected=%d",
+			anActualFixedCount, anExpectedFixedCount);
 		return;
 	}
 
@@ -1553,8 +1552,10 @@ void NetManager::OnChooserOpen(NetBuffer& thePayload)
 	mChooserPicksPerPlayer = aQuotas[mMySlot];
 	if (mApp->mSeedChooserScreen)
 	{
+		mApp->mSeedChooserScreen->mCoopChooserActive = true;
 		mApp->mSeedChooserScreen->mCoopPicksPerPlayer = mChooserPicksPerPlayer;
 		mApp->mSeedChooserScreen->mVisible = true;
+		mApp->mSeedChooserScreen->CoopRefreshStartButton();
 		if (mApp->mWidgetManager)
 			mApp->mWidgetManager->MarkAllDirty();
 	}
@@ -1562,8 +1563,9 @@ void NetManager::OnChooserOpen(NetBuffer& thePayload)
 	const bool aLocalChooserLevel = mApp && mApp->mBoard && mApp->mBoard->ChooseSeedsOnCurrentLevel();
 	const bool aSeedChoosing = mApp && mApp->mBoard && mApp->mBoard->mCutScene &&
 		mApp->mBoard->mCutScene->mSeedChoosing;
-	NetTrace("CHOOSER_OPEN applied bank=%u quotas=[%u,%u,%u,%u] slot=%u localQuota=%d localChooserLevel=%d screen=%p visible=%d mouse=%d seedChoosing=%d focus=%p",
-		aBankCount, aQuotas[0], aQuotas[1], aQuotas[2], aQuotas[3], mMySlot,
+	NetTrace("CHOOSER_OPEN applied bank=%u fixed=%d mutable=%d quotas=[%u,%u,%u,%u] slot=%u localQuota=%d localChooserLevel=%d screen=%p visible=%d mouse=%d seedChoosing=%d focus=%p",
+		aBankCount, anExpectedFixedCount, aBankCount - anExpectedFixedCount,
+		aQuotas[0], aQuotas[1], aQuotas[2], aQuotas[3], mMySlot,
 		mChooserPicksPerPlayer, aLocalChooserLevel ? 1 : 0,
 		mApp ? (void*)mApp->mSeedChooserScreen : nullptr,
 		mApp && mApp->mSeedChooserScreen && mApp->mSeedChooserScreen->mVisible ? 1 : 0,
@@ -1625,6 +1627,82 @@ int NetManager::GetTeamCount(uint8_t theTeam) const
 		if (mPlayers[i].mActive && mPlayers[i].mTeam == theTeam)
 			aCount++;
 	return aCount;
+}
+
+void NetManager::RequestChooserStateEcho(const char* theReason, int theSlot, int theSeedType)
+{
+	if (mMode != MODE_HOST || !mChooserOpen)
+		return;
+	mChooserStateEchoRequested.store(true, std::memory_order_release);
+	NetTrace("chooser authoritative echo requested reason=%s slot=%d seed=%d",
+		theReason ? theReason : "unknown", theSlot, theSeedType);
+}
+
+bool NetManager::ConsumeChooserStateEchoRequest()
+{
+	return mChooserStateEchoRequested.exchange(false, std::memory_order_acq_rel);
+}
+
+bool NetManager::ComputeChooserQuotas(int theBankCount, int theFixedHostCount,
+	bool thePvP, int theQuotas[NET_MAX_PLAYERS], int* theEligibleCount) const
+{
+	if (!theQuotas)
+		return false;
+	for (int i = 0; i < NET_MAX_PLAYERS; i++)
+		theQuotas[i] = 0;
+	if (theEligibleCount)
+		*theEligibleCount = 0;
+	if (theBankCount < 0 || theBankCount > SEEDBANK_CAPACITY ||
+		theFixedHostCount < 0 || theFixedHostCount > theBankCount)
+		return false;
+
+	int anEligibleCount = 0;
+	for (int aSlot = 0; aSlot < NET_MAX_PLAYERS; aSlot++)
+	{
+		const NetPlayerInfo& aPlayer = mPlayers[aSlot];
+		if (aPlayer.mActive && (!thePvP || aPlayer.mTeam == NETTEAM_PLANTS))
+			anEligibleCount++;
+	}
+	if (theEligibleCount)
+		*theEligibleCount = anEligibleCount;
+	if (anEligibleCount <= 0)
+		return false;
+
+	// Fixed Dave/challenge cards are one global preselection.  Divide only the
+	// mutable capacity, then account for those fixed cards exactly once in the
+	// host's quota (the host serializes them in its slot).
+	const int aMutableCount = theBankCount - theFixedHostCount;
+	const int aBaseQuota = aMutableCount / anEligibleCount;
+	int aRemainder = aMutableCount % anEligibleCount;
+	for (int aSlot = 0; aSlot < NET_MAX_PLAYERS; aSlot++)
+	{
+		const NetPlayerInfo& aPlayer = mPlayers[aSlot];
+		if (!aPlayer.mActive || (thePvP && aPlayer.mTeam != NETTEAM_PLANTS))
+			continue;
+		theQuotas[aSlot] = aBaseQuota;
+		if (aRemainder > 0)
+		{
+			theQuotas[aSlot]++;
+			aRemainder--;
+		}
+	}
+
+	if (theFixedHostCount > 0)
+	{
+		const NetPlayerInfo& aHost = mPlayers[0];
+		if (!aHost.mActive || (thePvP && aHost.mTeam != NETTEAM_PLANTS))
+			return false;
+		theQuotas[0] += theFixedHostCount;
+	}
+
+	int aTotal = 0;
+	for (int i = 0; i < NET_MAX_PLAYERS; i++)
+	{
+		if (theQuotas[i] < 0 || theQuotas[i] > SEEDBANK_CAPACITY)
+			return false;
+		aTotal += theQuotas[i];
+	}
+	return aTotal == theBankCount;
 }
 
 void NetManager::BroadcastMessage(uint8_t theMsgType, const NetBuffer& thePayload)

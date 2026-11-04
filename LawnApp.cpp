@@ -1596,63 +1596,78 @@ void LawnApp::ShowSeedChooserScreen()
 		if (aPvP)
 			aBankCount = PVP_PLANT_PACKET_COUNT; // zombie cards are shared, not divided
 
-		int aQuotas[LawnNet::NET_MAX_PLAYERS] = {};
-		int anEligibleCount = 0;
-		for (int aSlot = 0; aSlot < LawnNet::NET_MAX_PLAYERS; aSlot++)
-		{
-			const LawnNet::NetPlayerInfo& aPlayer = mNetManager->GetPlayer(aSlot);
-			if (aPlayer.mActive && (!aPvP || aPlayer.mTeam == LawnNet::NETTEAM_PLANTS))
-				anEligibleCount++;
-		}
-		anEligibleCount = max(1, anEligibleCount);
-		int aBaseQuota = aBankCount / anEligibleCount;
-		int aRemainder = aBankCount % anEligibleCount;
-		for (int aSlot = 0; aSlot < LawnNet::NET_MAX_PLAYERS; aSlot++)
-		{
-			const LawnNet::NetPlayerInfo& aPlayer = mNetManager->GetPlayer(aSlot);
-			if (!aPlayer.mActive || (aPvP && aPlayer.mTeam != LawnNet::NETTEAM_PLANTS))
-				continue;
-			aQuotas[aSlot] = aBaseQuota;
-			if (aRemainder > 0)
-			{
-				aQuotas[aSlot]++;
-				aRemainder--;
-			}
-		}
+                if (mNetManager->IsHosting())
+                {
+                        const int aFixedCount = mSeedChooserScreen->CoopCountGlobalFixedPicks();
+                        const int anExpectedFixedCount =
+                                SeedChooserScreen::CoopExpectedGlobalFixedPicks(this, mBoard);
+                        int aQuotas[LawnNet::NET_MAX_PLAYERS] = {};
+                        int anEligibleCount = 0;
+                        const bool aValidSplit = aFixedCount == anExpectedFixedCount &&
+                                mNetManager->ComputeChooserQuotas(aBankCount, aFixedCount, aPvP,
+                                        aQuotas, &anEligibleCount);
+                        if (!aValidSplit)
+                        {
+                                // Do not publish a chooser generation that clients cannot
+                                // deterministically validate.  Keep the screen inert instead.
+                                mSeedChooserScreen->mCoopChooserActive = false;
+                                mSeedChooserScreen->EnableStartButton(false);
+                                mNetManager->mChooserOpen = false;
+                                LawnNet::NetTrace("ShowSeedChooserScreen rejected host split bank=%d fixed=%d expectedFixed=%d eligible=%d mode=%d",
+                                        aBankCount, aFixedCount, anExpectedFixedCount,
+                                        anEligibleCount, (int)mGameMode);
+                                return;
+                        }
 
-		if (mNetManager->IsHosting())
-		{
-			mNetManager->AdvanceInputPhase(LawnNet::NETINPUT_CHOOSER, "CHOOSER_OPEN");
-			LawnNet::NetBuffer aMsg;
-			aMsg.WriteU8((uint8_t)aBankCount);
-			for (int aSlot = 0; aSlot < LawnNet::NET_MAX_PLAYERS; aSlot++)
-				aMsg.WriteU8((uint8_t)aQuotas[aSlot]);
-			mNetManager->BroadcastMessage(LawnNet::NETMSG_CHOOSER_OPEN, aMsg);
-		}
-		for (int aSlot = 0; aSlot < LawnNet::NET_MAX_PLAYERS; aSlot++)
-			mNetManager->mChooserPickQuota[aSlot] = aQuotas[aSlot];
-		int aLocalQuota = aQuotas[mNetManager->GetMySlot()];
-		int aUiQuota = aLocalQuota;
-		// A zombie host chooses no plants but still owns the Start button.
-		if (aPvP && mNetManager->IsHosting() && aLocalQuota == 0)
-			aUiQuota = 1;
-		mSeedChooserScreen->mCoopPicksPerPlayer = aUiQuota;
-		if (aPvP && mNetManager->IsHosting() && mNetManager->GetMyTeam() == LawnNet::NETTEAM_ZOMBIES)
-			mSeedChooserScreen->EnableStartButton(true);
-		mNetManager->mChooserOpen = true;
-		mNetManager->mChooserPicksPerPlayer = aUiQuota;
-		mNetManager->mChooserBankCount = aBankCount;
-		LawnNet::NetTrace("ShowSeedChooserScreen role=%s mode=%d level=%d localChooserLevel=%d bank=%d quotas=[%d,%d,%d,%d] mySlot=%u uiQuota=%d screen=%p pos=(%d,%d) visible=%d mouse=%d focus=%p",
-			mNetManager->IsHosting() ? "host" : "client", (int)mGameMode,
-			mBoard ? mBoard->mLevel : -1,
-			mBoard && mBoard->ChooseSeedsOnCurrentLevel() ? 1 : 0,
-			aBankCount, aQuotas[0], aQuotas[1], aQuotas[2], aQuotas[3],
-			mNetManager->GetMySlot(), aUiQuota, (void*)mSeedChooserScreen,
-			mSeedChooserScreen->mX, mSeedChooserScreen->mY,
-			mSeedChooserScreen->mVisible ? 1 : 0,
-			mSeedChooserScreen->mMouseVisible ? 1 : 0,
-			mWidgetManager ? (void*)mWidgetManager->mFocusWidget : nullptr);
-	}
+                        mNetManager->AdvanceInputPhase(LawnNet::NETINPUT_CHOOSER, "CHOOSER_OPEN");
+                        for (int aSlot = 0; aSlot < LawnNet::NET_MAX_PLAYERS; aSlot++)
+                                mNetManager->mChooserPickQuota[aSlot] = aQuotas[aSlot];
+                        const int aLocalQuota = aQuotas[mNetManager->GetMySlot()];
+                        mNetManager->mChooserOpen = true;
+                        mNetManager->mChooserPicksPerPlayer = aLocalQuota;
+                        mNetManager->mChooserBankCount = aBankCount;
+                        mSeedChooserScreen->mCoopChooserActive = true;
+                        mSeedChooserScreen->mCoopPicksPerPlayer = aLocalQuota;
+                        mSeedChooserScreen->CoopRefreshStartButton();
+
+                        // Commit the host generation before publishing OPEN.  A fast
+                        // client may answer from the network thread immediately after
+                        // receiving it, and that reply must see the new quotas/open flag.
+                        LawnNet::NetBuffer aMsg;
+                        aMsg.WriteU8((uint8_t)aBankCount);
+                        for (int aSlot = 0; aSlot < LawnNet::NET_MAX_PLAYERS; aSlot++)
+                                aMsg.WriteU8((uint8_t)aQuotas[aSlot]);
+                        mNetManager->BroadcastMessage(LawnNet::NETMSG_CHOOSER_OPEN, aMsg);
+
+                        LawnNet::NetTrace("ShowSeedChooserScreen role=host mode=%d level=%d localChooserLevel=%d bank=%d fixed=%d mutable=%d quotas=[%d,%d,%d,%d] eligible=%d mySlot=%u localQuota=%d screen=%p pos=(%d,%d) visible=%d mouse=%d focus=%p",
+                                (int)mGameMode, mBoard ? mBoard->mLevel : -1,
+                                mBoard && mBoard->ChooseSeedsOnCurrentLevel() ? 1 : 0,
+                                aBankCount, aFixedCount, aBankCount - aFixedCount,
+                                aQuotas[0], aQuotas[1], aQuotas[2], aQuotas[3],
+                                anEligibleCount, mNetManager->GetMySlot(), aLocalQuota,
+                                (void*)mSeedChooserScreen, mSeedChooserScreen->mX,
+                                mSeedChooserScreen->mY, mSeedChooserScreen->mVisible ? 1 : 0,
+                                mSeedChooserScreen->mMouseVisible ? 1 : 0,
+                                mWidgetManager ? (void*)mWidgetManager->mFocusWidget : nullptr);
+                }
+                else
+                {
+                        // A locally-created client widget is only provisional.  Quota zero
+                        // is meaningful, so mCoopChooserActive (not the quota) is the
+                        // generation marker.  OnChooserOpen enables it after strict checks.
+                        mSeedChooserScreen->mCoopChooserActive = false;
+                        mSeedChooserScreen->mCoopPicksPerPlayer = 0;
+                        mSeedChooserScreen->EnableStartButton(false);
+                        mNetManager->mChooserOpen = false;
+                        mNetManager->mChooserPicksPerPlayer = 0;
+                        mNetManager->mChooserBankCount = 0;
+                        for (int aSlot = 0; aSlot < LawnNet::NET_MAX_PLAYERS; aSlot++)
+                                mNetManager->mChooserPickQuota[aSlot] = 0;
+                        LawnNet::NetTrace("ShowSeedChooserScreen role=client awaiting authoritative CHOOSER_OPEN mode=%d level=%d screen=%p",
+                                (int)mGameMode, mBoard ? mBoard->mLevel : -1,
+                                (void*)mSeedChooserScreen);
+                }
+        }
 }
 
 //0x44FE70

@@ -35,7 +35,7 @@ public:
     bool                    mRefreshing;                       //+0x2C
     int                     mRefreshCounter;                   //+0x30
     SeedType                mImitaterType;                     //+0x34
-    bool                    mCrazyDavePicked;                  //+0x38
+    bool                    mCrazyDavePicked;                  //+0x38 locked global preselection (Dave/challenge)
 };
 
 class SeedChooserScreen : public Widget
@@ -88,20 +88,26 @@ public:
     ScrollbarWidget*        mScrollbar;
 
     // ---- co-op shared seed picking ----
-    int                     mCoopPicksPerPlayer;                // how many seeds THIS player may pick
+    bool                    mCoopChooserActive;                 // quota 0 is valid while this is true
+    int                     mCoopPicksPerPlayer;                // authoritative quota for THIS slot
     int                     mCoopRemotePicks[4][12];            // seed types picked by each slot (255 = empty)
+    int                     mCoopRemoteImitaters[4][12];        // copied type for an imitater pick
     int                     mCoopRemotePickCount[4];
     int                     mCoopMyImitater;                    // imitater copy for our pending pick
     unsigned int            mCoopLastStateHash;                 // suppress identical per-frame network states
     void                    CoopSendPick(int theSeedType, int theImitater, bool theUnpick);
     bool                    CoopIsPickedByOthers(int theSeedType) const;
-    void                    CoopRecordRemotePick(int theSlot, int theSeedType, bool theUnpick);
+    bool                    CoopRecordRemotePick(int theSlot, int theSeedType, int theImitater, bool theUnpick);
+    int                     CoopCountGlobalFixedPicks() const;
+    static int              CoopExpectedGlobalFixedPicks(LawnApp* theApp, Board* theBoard);
+    int                     CoopGetLocalQuotaPickCount() const;
+    void                    CoopRefreshStartButton();
     void                    CoopDrawRemotePicks(Graphics* g);
-    void                    CoopBroadcastChooserState();
+    void                    CoopBroadcastChooserState(bool theForce = false);
     void                    CoopBroadcastChooserStart();
     void                    CoopBuildBankFromLocalState();
     bool                    CoopBuildBankFromPayload(LawnNet::NetBuffer& thePayload);
-    void                    CoopApplyChooserState(LawnNet::NetBuffer& thePayload);
+    bool                    CoopApplyChooserState(LawnNet::NetBuffer& thePayload);
     void                    CoopPollNetwork();
 
 public:

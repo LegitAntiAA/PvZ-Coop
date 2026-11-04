@@ -103,6 +103,10 @@ public:
 	int GetRawActingPlayerSlot() const { return mActingPlayerSlot; }
 	void SetActingPlayerSlot(int theSlot) { mActingPlayerSlot = theSlot; }
 	int GetTeamCount(uint8_t theTeam) const;	// count players on a team
+	bool ComputeChooserQuotas(int theBankCount, int theFixedHostCount, bool thePvP,
+		int theQuotas[NET_MAX_PLAYERS], int* theEligibleCount = nullptr) const;
+	void RequestChooserStateEcho(const char* theReason, int theSlot, int theSeedType);
+	bool ConsumeChooserStateEchoRequest();
 	void SendLobbyState();						// host: broadcast lobby
 
 	// ---- game start (host) ----
@@ -212,6 +216,7 @@ private:
 	std::deque<NetRemoteInput> mPendingInputs;
 	size_t mPendingInputCount[NET_MAX_PLAYERS];
 	uint32_t mLastInputSequence[NET_MAX_PLAYERS];
+	std::atomic<bool> mChooserStateEchoRequested;
 
 	// client state
 	std::thread mConnectThread;
