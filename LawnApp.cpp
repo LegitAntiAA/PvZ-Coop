@@ -904,6 +904,9 @@ LawnApp::LawnApp()
 //0x44EDD0、0x44EDF0
 LawnApp::~LawnApp()
 {
+	delete mNetCursorImage;
+	mNetCursorImage = nullptr;
+
 	if (mBoard)
 	{
 		WriteCurrentUserConfig();
@@ -1290,6 +1293,11 @@ void LawnApp::PreNewGame(GameMode theGameMode, bool theLookForSavedGame, int the
 void LawnApp::MakeNewBoard()
 {
 	KillBoard();
+	// The co-op lobby is a full-screen widget.  It must be genuinely hidden
+	// during play; moving it off-screen leaves it in the widget draw/clip chain
+	// and can cover a client's board with the renderer's white fallback surface.
+	if (mNetLobbyPanel)
+		mNetLobbyPanel->mVisible = false;
 	mBoard = new Board(this);
 	mBoard->Resize(0, 0, mWidth, mHeight);
 	mWidgetManager->AddWidget(mBoard);
@@ -1369,6 +1377,11 @@ void LawnApp::NewGame()
 void LawnApp::ShowGameSelector()
 {
 	KillBoard();
+	if (mNetLobbyPanel)
+	{
+		mNetLobbyPanel->Resize(0, 0, mWidth, mHeight);
+		mNetLobbyPanel->mVisible = true;
+	}
 	//UpdateRegisterInfo();
 	if (mGameSelector)
 	{
@@ -1563,9 +1576,6 @@ void LawnApp::ShowSeedChooserScreen()
 		mNetManager->mChooserPicksPerPlayer = aUiQuota;
 		mNetManager->mChooserBankCount = aBankCount;
 	}
-
-	delete mNetCursorImage;
-	mNetCursorImage = nullptr;
 }
 
 //0x44FE70
@@ -5235,14 +5245,10 @@ void LawnApp::NetOnStartGame(LawnNet::NetBuffer& thePayload)
 	if (mNetManager)
 		mNetManager->mStartTDPath = aPath;
 
-	MakeNewBoard();
-	if (!mBoard)
-		return;
-	mBoard->InitLevel();
-	mBoardResult = BoardResult::BOARDRESULT_NONE;
-	mGameScene = GameScenes::SCENE_LEVEL_INTRO;
-	ShowSeedChooserScreen();
-	mBoard->mCutScene->StartLevelIntro();
+	// Follow the exact same initialization/resource-loading path as a local
+	// game.  The former hand-written subset skipped NewGame state and left
+	// some lazily loaded board resources unprepared on clients.
+	NewGame();
 }
 
 void LawnApp::NetOnHostLost()

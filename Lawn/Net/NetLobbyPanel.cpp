@@ -137,9 +137,13 @@ void NetLobbyPanel::Update()
 	if (!aNet)
 		return;
 
-	// visible only in the main menu (after the title screen)
+	// Visible only in the main menu (after the title screen).  LawnApp hides
+	// this full-screen widget before creating a board and restores it on return
+	// to the selector; never move it to a huge negative coordinate as a proxy
+	// for visibility because it remains in the draw/clip chain.
 	bool aInMenu = mApp->mBoard == nullptr && mApp->mGameSelector != nullptr;
-	Resize(aInMenu ? 0 : -5000, aInMenu ? 0 : -5000, mApp->mWidth, mApp->mHeight);
+	if (aInMenu)
+		Resize(0, 0, mApp->mWidth, mApp->mHeight);
 
 	// the connection form's edit widgets are hidden once connected/connecting
 	bool aShowEdits = aInMenu && !aNet->IsActive();
