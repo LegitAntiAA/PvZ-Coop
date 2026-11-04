@@ -704,7 +704,8 @@ void NetManager::SetSnapshotHz(int theHz)
 // -------------------------------------------------------------------------
 void NetManager::HandleMessageClient(uint8_t theMsgType, NetBuffer& thePayload)
 {
-	if (theMsgType != NETMSG_CURSOR && theMsgType != NETMSG_SNAPSHOT && theMsgType != NETMSG_PING && theMsgType != NETMSG_PONG)
+	if (theMsgType != NETMSG_CURSOR && theMsgType != NETMSG_SNAPSHOT && theMsgType != NETMSG_DAVE_STATE &&
+		theMsgType != NETMSG_PING && theMsgType != NETMSG_PONG)
 		NetTrace("RX client type=%s(%u) bytes=%zu", NetMessageName(theMsgType), theMsgType, thePayload.Size());
 	switch (theMsgType)
 	{
@@ -797,6 +798,12 @@ void NetManager::HandleMessageClient(uint8_t theMsgType, NetBuffer& thePayload)
 				mApp->mBoard->mCutScene->PreloadResources();
 			mApp->mBoard->NetApplyIntroState(thePayload);
 		}
+		break;
+	case NETMSG_DAVE_STATE:
+		if (mApp && mApp->mBoard && mApp->mGameScene == GameScenes::SCENE_PLAYING)
+			mApp->mBoard->NetApplyDaveState(thePayload);
+		else
+			NetTrace("DAVE_STATE ignored without an active playing board");
 		break;
 	case NETMSG_SCENE_CMD:
 		if (mApp)
@@ -1045,7 +1052,8 @@ void NetManager::BroadcastMessage(uint8_t theMsgType, const NetBuffer& thePayloa
 {
 	if (mMode != MODE_HOST)
 		return;
-	if (theMsgType != NETMSG_CURSOR && theMsgType != NETMSG_SNAPSHOT && theMsgType != NETMSG_PING && theMsgType != NETMSG_PONG)
+	if (theMsgType != NETMSG_CURSOR && theMsgType != NETMSG_SNAPSHOT && theMsgType != NETMSG_DAVE_STATE &&
+		theMsgType != NETMSG_PING && theMsgType != NETMSG_PONG)
 		NetTrace("TX broadcast type=%s(%u) bytes=%zu", NetMessageName(theMsgType), theMsgType, thePayload.Size());
 	for (int i = 1; i < NET_MAX_PLAYERS; i++)
 		if (mSessions[i].mAssigned)

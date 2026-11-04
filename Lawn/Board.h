@@ -578,6 +578,8 @@ public:
 	uint16_t						mNetStormTimer;				// storm remaining ticks
 	int								mNetTDLives;				// tower defense: brains left
 	int								mNetPvPBrainTick;			// pvp: brain trickle counter
+	uint8_t							mNetDaveAppliedAnimKey;		// client: edge-triggered Dave animation
+	int								mNetDaveAppliedMessageIndex;	// client: edge-triggered Dave dialog
 	void							UpdateEndlessWeather();
 	void							DrawEndlessWeather(Graphics* g);
 	bool							IsEndlessT();
@@ -596,6 +598,9 @@ public:
 	void							NetEncodeSnapshot(LawnNet::NetBuffer& theBuffer);
 	void							NetEncodeIntroState(LawnNet::NetBuffer& theBuffer);
 	void							NetApplyIntroState(LawnNet::NetBuffer& theBuffer);
+	void							NetEncodeDaveState(LawnNet::NetBuffer& theBuffer);
+	void							NetApplyDaveState(LawnNet::NetBuffer& theBuffer);
+	void							NetCleanupCrazyDavePresentation();
 	void							NetClientTick();			// client: drain + apply + ghosts
 	void							NetDrainMessages();
 	void							NetApplyEvent(LawnNet::NetBuffer& thePayload);

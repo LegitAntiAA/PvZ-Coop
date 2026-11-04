@@ -1,4 +1,5 @@
 #include <time.h>
+#include <limits.h>
 #include "ZenGarden.h"
 #include "BoardInclude.h"
 #include "System/Music.h"
@@ -81,6 +82,8 @@ Board::Board(LawnApp* theApp)
 	mNetPvPBrainScore = 0;
 	mNetPvPKillScore = 0;
 	mNetPvPBrainTimer = 0;
+	mNetDaveAppliedAnimKey = 255;
+	mNetDaveAppliedMessageIndex = INT_MIN;
 	mTDPath.clear();
 	mNetDayPhase = 0;
 	mNetWeatherTimer = 6000;
@@ -2239,6 +2242,7 @@ void Board::StartLevel()
 // routine owns presentation-only cleanup and the local music transition.
 void Board::StartLevelClientPresentation()
 {
+	NetCleanupCrazyDavePresentation();
 	mCoinBankFadeCount = 0;
 	LawnNet::gNetSuppressSounds = true;
 	RemoveCutsceneZombies();

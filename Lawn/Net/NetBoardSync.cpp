@@ -22,6 +22,7 @@
 #include "../../SexyAppFramework/DDInterface.h"
 #include "NetManager.h"
 #include <float.h>
+#include <limits.h>
 
 using namespace LawnNet;
 
@@ -29,6 +30,264 @@ bool LawnNet::gNetSuppressSounds = false;
 
 namespace
 {
+enum NetDaveAnimKey : uint8_t
+{
+	NET_DAVE_ANIM_NONE = 0,
+	NET_DAVE_ANIM_ENTER,
+	NET_DAVE_ANIM_ENTER_UP,
+	NET_DAVE_ANIM_LEAVE,
+	NET_DAVE_ANIM_GRAB,
+	NET_DAVE_ANIM_IDLE,
+	NET_DAVE_ANIM_IDLE_HANDING,
+	NET_DAVE_ANIM_TALK_HANDING,
+	NET_DAVE_ANIM_TALK_CRAZY,
+	NET_DAVE_ANIM_TALK_SMALL,
+	NET_DAVE_ANIM_TALK_MEDIUM,
+	NET_DAVE_ANIM_TALK_BLAH,
+	NET_DAVE_ANIM_COUNT
+};
+
+struct NetDaveAnimSpec
+{
+	const char* mTrackName;
+	ReanimLoopType mLoopType;
+	float mAnimRate;
+};
+
+const NetDaveAnimSpec gNetDaveAnimSpecs[NET_DAVE_ANIM_COUNT] =
+{
+	{ nullptr,             ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD,  0.0f },
+	{ "anim_enter",        ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD, 24.0f },
+	{ "anim_enterup",      ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD, 12.0f },
+	{ "anim_leave",        ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD, 24.0f },
+	{ "anim_grab",         ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD, 18.0f },
+	{ "anim_idle",         ReanimLoopType::REANIM_LOOP,               12.0f },
+	{ "anim_idle_handing", ReanimLoopType::REANIM_LOOP,               12.0f },
+	{ "anim_talk_handing", ReanimLoopType::REANIM_LOOP,               12.0f },
+	{ "anim_crazy",        ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD, 12.0f },
+	{ "anim_smalltalk",    ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD, 12.0f },
+	{ "anim_mediumtalk",   ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD, 12.0f },
+	{ "anim_blahblah",     ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD, 12.0f }
+};
+
+static const size_t NET_DAVE_STATE_BYTES = 12;
+
+struct NetDaveWireState
+{
+	uint8_t mState;
+	uint8_t mAnimKey;
+	int mMessageIndex;
+	uint16_t mAnimTimeQ;
+	int mX;
+	int mY;
+};
+
+uint8_t NetGetDaveAnimKey(Reanimation* theReanim)
+{
+	if (!theReanim || theReanim->mDead)
+		return NET_DAVE_ANIM_NONE;
+
+	// Check the exceptional tracks before their more common siblings.  Some
+	// Dave animations share base-pose frames, while IsAnimPlaying compares the
+	// complete frame range selected by the named layer.
+	const uint8_t aPriority[] =
+	{
+		NET_DAVE_ANIM_ENTER_UP, NET_DAVE_ANIM_GRAB, NET_DAVE_ANIM_LEAVE,
+		NET_DAVE_ANIM_ENTER, NET_DAVE_ANIM_TALK_HANDING,
+		NET_DAVE_ANIM_IDLE_HANDING, NET_DAVE_ANIM_TALK_CRAZY,
+		NET_DAVE_ANIM_TALK_SMALL, NET_DAVE_ANIM_TALK_MEDIUM,
+		NET_DAVE_ANIM_TALK_BLAH, NET_DAVE_ANIM_IDLE
+	};
+	for (uint8_t aKey : aPriority)
+	{
+		if (theReanim->IsAnimPlaying(gNetDaveAnimSpecs[aKey].mTrackName))
+			return aKey;
+	}
+	return NET_DAVE_ANIM_NONE;
+}
+
+uint8_t NetGetFallbackDaveAnimKey(CrazyDaveState theState)
+{
+	switch (theState)
+	{
+	case CrazyDaveState::CRAZY_DAVE_ENTERING:        return NET_DAVE_ANIM_ENTER;
+	case CrazyDaveState::CRAZY_DAVE_LEAVING:         return NET_DAVE_ANIM_LEAVE;
+	case CrazyDaveState::CRAZY_DAVE_IDLING:          return NET_DAVE_ANIM_IDLE;
+	case CrazyDaveState::CRAZY_DAVE_TALKING:         return NET_DAVE_ANIM_TALK_MEDIUM;
+	case CrazyDaveState::CRAZY_DAVE_HANDING_TALKING: return NET_DAVE_ANIM_TALK_HANDING;
+	case CrazyDaveState::CRAZY_DAVE_HANDING_IDLING:  return NET_DAVE_ANIM_IDLE_HANDING;
+	default:                                          return NET_DAVE_ANIM_NONE;
+	}
+}
+
+NetDaveWireState NetCaptureDaveWireState(LawnApp* theApp)
+{
+	NetDaveWireState aState = {};
+	aState.mState = (uint8_t)CrazyDaveState::CRAZY_DAVE_OFF;
+	aState.mAnimKey = NET_DAVE_ANIM_NONE;
+	aState.mMessageIndex = -1;
+
+	Reanimation* aDaveReanim = theApp->ReanimationTryToGet(theApp->mCrazyDaveReanimID);
+	const int aRawDaveState = (int)theApp->mCrazyDaveState;
+	if (!aDaveReanim || aDaveReanim->mDead ||
+		aRawDaveState <= (int)CrazyDaveState::CRAZY_DAVE_OFF ||
+		aRawDaveState > (int)CrazyDaveState::CRAZY_DAVE_HANDING_IDLING)
+	{
+		return aState;
+	}
+
+	aState.mAnimKey = NetGetDaveAnimKey(aDaveReanim);
+	if (aState.mAnimKey == NET_DAVE_ANIM_NONE)
+		aState.mAnimKey = NetGetFallbackDaveAnimKey(theApp->mCrazyDaveState);
+	if (aState.mAnimKey == NET_DAVE_ANIM_NONE)
+		return aState;
+
+	aState.mState = (uint8_t)aRawDaveState;
+	if (theApp->mCrazyDaveMessageIndex >= 0 && theApp->mCrazyDaveMessageIndex <= 9999)
+		aState.mMessageIndex = theApp->mCrazyDaveMessageIndex;
+	int aTimeQ = (int)(aDaveReanim->mAnimTime * 65535.0f + 0.5f);
+	aState.mAnimTimeQ = (uint16_t)max(0, min(65535, aTimeQ));
+	aState.mX = max(-32768, min(32767, (int)aDaveReanim->mOverlayMatrix.m02));
+	aState.mY = max(-32768, min(32767, (int)aDaveReanim->mOverlayMatrix.m12));
+	return aState;
+}
+
+void NetWriteDaveWireState(NetBuffer& theBuffer, const NetDaveWireState& theState)
+{
+	theBuffer.WriteU8(theState.mState);
+	theBuffer.WriteU8(theState.mAnimKey);
+	theBuffer.WriteI32(theState.mMessageIndex);
+	theBuffer.WriteU16(theState.mAnimTimeQ);
+	theBuffer.WriteI16((int16_t)theState.mX);
+	theBuffer.WriteI16((int16_t)theState.mY);
+}
+
+bool NetValidateDaveWireState(const NetDaveWireState& theState)
+{
+	const bool aStateValid = theState.mState <= (uint8_t)CrazyDaveState::CRAZY_DAVE_HANDING_IDLING;
+	const bool anAnimValid = theState.mAnimKey < NET_DAVE_ANIM_COUNT;
+	const bool aMessageValid = theState.mMessageIndex == -1 ||
+		(theState.mMessageIndex >= 0 && theState.mMessageIndex <= 9999);
+	const bool anOffCanonical = theState.mState != (uint8_t)CrazyDaveState::CRAZY_DAVE_OFF ||
+		(theState.mAnimKey == NET_DAVE_ANIM_NONE && theState.mMessageIndex == -1 &&
+		 theState.mAnimTimeQ == 0 && theState.mX == 0 && theState.mY == 0);
+	const bool anOnCanonical = theState.mState == (uint8_t)CrazyDaveState::CRAZY_DAVE_OFF ||
+		theState.mAnimKey != NET_DAVE_ANIM_NONE;
+	return aStateValid && anAnimValid && aMessageValid && anOffCanonical && anOnCanonical;
+}
+
+bool NetReadDaveWireState(NetBuffer& theBuffer, NetDaveWireState& theState)
+{
+	if (theBuffer.Remaining() < NET_DAVE_STATE_BYTES)
+		return false;
+	theState.mState = theBuffer.ReadU8Or();
+	theState.mAnimKey = theBuffer.ReadU8Or();
+	theState.mMessageIndex = theBuffer.ReadI32Or();
+	theState.mAnimTimeQ = theBuffer.ReadU16Or();
+	theState.mX = theBuffer.ReadI16Or();
+	theState.mY = theBuffer.ReadI16Or();
+	return NetValidateDaveWireState(theState);
+}
+
+void NetApplyDavePresentation(Board* theBoard, LawnApp* anApp, const NetDaveWireState& theState)
+{
+	if (theState.mState == (uint8_t)CrazyDaveState::CRAZY_DAVE_OFF)
+	{
+		theBoard->NetCleanupCrazyDavePresentation();
+		return;
+	}
+
+	Reanimation* aDaveReanim = anApp->ReanimationTryToGet(anApp->mCrazyDaveReanimID);
+	if (!aDaveReanim || aDaveReanim->mDead)
+	{
+		theBoard->NetCleanupCrazyDavePresentation();
+		ReanimatorEnsureDefinitionLoaded(ReanimationType::REANIM_CRAZY_DAVE, true);
+		aDaveReanim = anApp->AddReanimation(0.0f, 0.0f, 0, ReanimationType::REANIM_CRAZY_DAVE);
+		if (aDaveReanim)
+		{
+			aDaveReanim->mIsAttachment = true;
+			aDaveReanim->SetBasePoseFromAnim("anim_idle_handing");
+			anApp->mCrazyDaveReanimID = anApp->ReanimationGetID(aDaveReanim);
+			anApp->mCrazyDaveState = CrazyDaveState::CRAZY_DAVE_IDLING;
+			anApp->mCrazyDaveMessageIndex = -1;
+			anApp->mCrazyDaveMessageText.clear();
+			anApp->mCrazyDaveBlinkCounter = INT_MAX;
+			if (anApp->IsStormyNightLevel())
+				aDaveReanim->mColorOverride = Color(64, 64, 64);
+			NetTrace("DAVE_STATE materialized client root=%u", (unsigned)anApp->mCrazyDaveReanimID);
+		}
+	}
+
+	if (!aDaveReanim)
+		return;
+
+	if (theBoard->mNetDaveAppliedMessageIndex != theState.mMessageIndex)
+	{
+		if (theState.mMessageIndex >= 0)
+		{
+			// CrazyDaveTalkIndex may create a hand prop and local foley, so it is
+			// strictly edge-triggered and never advances dialog authority here.
+			SexyString aDaveMessage = anApp->GetCrazyDaveText(theState.mMessageIndex);
+			const bool aReplacesHandProp =
+				aDaveMessage.find(_S("{SHOW_WALLNUT}")) != SexyString::npos ||
+				aDaveMessage.find(_S("{SHOW_HAMMER}")) != SexyString::npos ||
+				aDaveMessage.find(_S("{SHOW_FERTILIZER}")) != SexyString::npos ||
+				aDaveMessage.find(_S("{SHOW_TREE_FOOD}")) != SexyString::npos ||
+				aDaveMessage.find(_S("{SHOW_MONEYBAG}")) != SexyString::npos;
+			if (aReplacesHandProp && aDaveReanim->TrackExists("Dave_handinghand"))
+			{
+				ReanimatorTrackInstance* aHandTrack =
+					aDaveReanim->GetTrackInstanceByName("Dave_handinghand");
+				if (aHandTrack)
+					AttachmentDie(aHandTrack->mAttachmentID);
+			}
+			// PlayFoley/PlayFoleyPitch only use gNetSuppressSounds as a
+			// host rebroadcast guard.  Mute this synchronous client-side
+			// presentation call so the authoritative BOARDEV_FOLEY is
+			// heard once, then restore the pre-existing cutscene mute.
+			const bool aWasMutedForCutscene = anApp->mMuteSoundsForCutscene;
+			anApp->mMuteSoundsForCutscene = true;
+			anApp->CrazyDaveTalkIndex(theState.mMessageIndex);
+			anApp->mMuteSoundsForCutscene = aWasMutedForCutscene;
+		}
+		else
+		{
+			aDaveReanim->SetImageOverride("Dave_mouths", nullptr);
+			if (theState.mState != (uint8_t)CrazyDaveState::CRAZY_DAVE_HANDING_TALKING &&
+				theState.mState != (uint8_t)CrazyDaveState::CRAZY_DAVE_HANDING_IDLING)
+			{
+				if (aDaveReanim->TrackExists("Dave_handinghand"))
+				{
+					ReanimatorTrackInstance* aHandTrack =
+						aDaveReanim->GetTrackInstanceByName("Dave_handinghand");
+					if (aHandTrack)
+						AttachmentDie(aHandTrack->mAttachmentID);
+				}
+			}
+			anApp->mCrazyDaveMessageIndex = -1;
+			anApp->mCrazyDaveMessageText.clear();
+			anApp->CrazyDaveStopSound();
+		}
+		theBoard->mNetDaveAppliedMessageIndex = theState.mMessageIndex;
+		NetTrace("DAVE_STATE applied message edge index=%d", theState.mMessageIndex);
+	}
+
+	if (theBoard->mNetDaveAppliedAnimKey != theState.mAnimKey)
+	{
+		const NetDaveAnimSpec& aSpec = gNetDaveAnimSpecs[theState.mAnimKey];
+		aDaveReanim->PlayReanim(aSpec.mTrackName, aSpec.mLoopType, 0, aSpec.mAnimRate);
+		theBoard->mNetDaveAppliedAnimKey = theState.mAnimKey;
+		NetTrace("DAVE_STATE applied anim edge key=%u track=%s", theState.mAnimKey, aSpec.mTrackName);
+	}
+
+	const float aDaveAnimTime = theState.mAnimTimeQ / 65535.0f;
+	aDaveReanim->mAnimTime = aDaveAnimTime;
+	aDaveReanim->mLastFrameTime = aDaveAnimTime;
+	aDaveReanim->mLoopCount = 0;
+	aDaveReanim->SetPosition((float)theState.mX, (float)theState.mY);
+	anApp->mCrazyDaveState = (CrazyDaveState)theState.mState;
+}
+
 bool NetGridStateMatchesType(uint8_t theType, uint8_t theState)
 {
 	switch ((GridItemType)theType)
@@ -141,6 +400,58 @@ void NetEnsureGridItemVisual(GridItem* theGridItem, GridItemState thePreviousSta
 		aReanim->SetPosition(theGridItem->mPosX, theGridItem->mPosY);
 	}
 }
+}
+
+void Board::NetCleanupCrazyDavePresentation()
+{
+	Reanimation* aBlinkReanim = mApp->ReanimationTryToGet(mApp->mCrazyDaveBlinkReanimID);
+	if (aBlinkReanim)
+		aBlinkReanim->ReanimationDie();
+
+	Reanimation* aDaveReanim = mApp->ReanimationTryToGet(mApp->mCrazyDaveReanimID);
+	if (aDaveReanim)
+		aDaveReanim->ReanimationDie(); // also owns every hand/body attachment
+
+	const bool aHadDavePresentation = aBlinkReanim || aDaveReanim ||
+		mApp->mCrazyDaveState != CrazyDaveState::CRAZY_DAVE_OFF ||
+		mApp->mCrazyDaveMessageIndex != -1 || !mApp->mCrazyDaveMessageText.empty();
+	mApp->mCrazyDaveReanimID = ReanimationID::REANIMATIONID_NULL;
+	mApp->mCrazyDaveBlinkReanimID = ReanimationID::REANIMATIONID_NULL;
+	mApp->mCrazyDaveState = CrazyDaveState::CRAZY_DAVE_OFF;
+	mApp->mCrazyDaveBlinkCounter = 0;
+	mApp->mCrazyDaveMessageIndex = -1;
+	mApp->mCrazyDaveMessageText.clear();
+	if (aHadDavePresentation)
+		mApp->CrazyDaveStopSound();
+
+	mNetDaveAppliedAnimKey = 255;
+	mNetDaveAppliedMessageIndex = INT_MIN;
+}
+
+void Board::NetEncodeDaveState(NetBuffer& theBuffer)
+{
+	NetWriteDaveWireState(theBuffer, NetCaptureDaveWireState(mApp));
+}
+
+void Board::NetApplyDaveState(NetBuffer& theBuffer)
+{
+	if (theBuffer.Remaining() != NET_DAVE_STATE_BYTES)
+	{
+		NetTrace("DAVE_STATE rejected: bytes=%zu expected=%zu",
+			theBuffer.Remaining(), NET_DAVE_STATE_BYTES);
+		return;
+	}
+
+	NetDaveWireState aState = {};
+	if (!NetReadDaveWireState(theBuffer, aState) || theBuffer.Remaining() != 0)
+	{
+		NetTrace("DAVE_STATE rejected: state=(%u,%u,%d,%u,%d,%d) remaining=%zu",
+			aState.mState, aState.mAnimKey, aState.mMessageIndex, aState.mAnimTimeQ,
+			aState.mX, aState.mY, theBuffer.Remaining());
+		return;
+	}
+
+	NetApplyDavePresentation(this, mApp, aState);
 }
 
 namespace LawnNet
@@ -305,6 +616,13 @@ void Board::NetHostTick()
 			NetBuffer aSnap;
 			NetEncodeSnapshot(aSnap);
 			aNet->SendSnapshot(aSnap);
+
+			// Dave can enter after the intro (Scary Potter, Zen Garden and Tree of
+			// Wisdom).  Keep his presentation separate from the large snapshot and
+			// send canonical OFF as well so clients remove him at dialog end.
+			NetBuffer aDaveState;
+			NetEncodeDaveState(aDaveState);
+			aNet->BroadcastMessage(NETMSG_DAVE_STATE, aDaveState);
 		}
 	}
 
@@ -1582,6 +1900,10 @@ void Board::NetEncodeIntroState(NetBuffer& b)
 	if (aChooser && aChooser->mMouseVisible) aFlags |= 64;
 	b.WriteU8(aFlags);
 
+	// Use the same canonical 12-byte presentation payload as the playing-scene
+	// DAVE_STATE message; INTRO_STATE applies it only after validating all data.
+	NetEncodeDaveState(b);
+
 	uint16_t aCount = 0;
 	NetBuffer aPreview;
 	Zombie* aZombie = nullptr;
@@ -1608,7 +1930,7 @@ void Board::NetEncodeIntroState(NetBuffer& b)
 
 void Board::NetApplyIntroState(NetBuffer& b)
 {
-	static const size_t INTRO_FIXED_BYTES = 36;
+	static const size_t INTRO_FIXED_BYTES = 48;
 	static const size_t INTRO_ZOMBIE_BYTES = 13;
 	if (b.Remaining() < INTRO_FIXED_BYTES)
 	{
@@ -1632,13 +1954,19 @@ void Board::NetApplyIntroState(NetBuffer& b)
 	int aFogCountdown = b.ReadU16Or();
 	int aSeedBankDarken = b.ReadU8Or();
 	uint8_t aFlags = b.ReadU8Or();
+	NetDaveWireState aDaveState = {};
+	const bool aDaveValid = NetReadDaveWireState(b, aDaveState);
 	uint16_t aZombieCount = b.ReadU16Or();
 
 	if (aBoardSeed != mApp->mNetBoardSeed || aSodPosition > 1000 || (aFlags & ~127) != 0 ||
+		!aDaveValid ||
 		b.Remaining() != (size_t)aZombieCount * INTRO_ZOMBIE_BYTES)
 	{
-		NetTrace("INTRO_STATE rejected: seed=%u expected=%u sod=%d flags=%u zombies=%u remaining=%zu",
-			aBoardSeed, mApp->mNetBoardSeed, aSodPosition, aFlags, aZombieCount, b.Remaining());
+		NetTrace("INTRO_STATE rejected: seed=%u expected=%u sod=%d flags=%u dave=(%u,%u,%d,%u,%d,%d) zombies=%u remaining=%zu",
+			aBoardSeed, mApp->mNetBoardSeed, aSodPosition, aFlags,
+			aDaveState.mState, aDaveState.mAnimKey, aDaveState.mMessageIndex,
+			aDaveState.mAnimTimeQ, aDaveState.mX, aDaveState.mY,
+			aZombieCount, b.Remaining());
 		return;
 	}
 
@@ -1674,6 +2002,11 @@ void Board::NetApplyIntroState(NetBuffer& b)
 		aSeen[aWire.mId] = true;
 		aPreview.push_back(aWire);
 	}
+
+	// All bytes and preview entities have now been validated.  From this point
+	// on mutations are presentation-only; the client never advances Dave's
+	// dialog state machine or consumes gameplay RNG.
+	NetApplyDavePresentation(this, mApp, aDaveState);
 
 	mCutScene->mCutsceneTime = max(0, aCutsceneTime);
 	Move(aBoardX, aBoardY);

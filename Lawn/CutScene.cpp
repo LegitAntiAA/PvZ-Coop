@@ -1609,6 +1609,13 @@ void CutScene::Update()
 		{
 			PreloadResources();
 		}
+		Reanimation* aDaveReanim = mApp->ReanimationTryToGet(mApp->mCrazyDaveReanimID);
+		if (!mBoard->mPaused && aDaveReanim && !aDaveReanim->mDead)
+		{
+			// Dave is presentation-only here.  Advance the mirrored track, but do
+			// not run UpdateCrazyDave/UpdateIntro or any dialog authority logic.
+			aDaveReanim->Update();
+		}
 		return;
 	}
 
@@ -1812,6 +1819,9 @@ void CutScene::ZombieWonClick()
 //0x43C950
 void CutScene::AdvanceCrazyDaveDialog(bool theJustSkipping)
 {
+	if (mApp->NetIsClient())
+		return;
+
 	if (mApp->mGameMode == GameMode::GAMEMODE_UPSELL || mApp->mCrazyDaveMessageIndex == -1)
 		return;
 
@@ -1930,6 +1940,9 @@ void CutScene::AdvanceCrazyDaveDialog(bool theJustSkipping)
 //0x43CE00
 void CutScene::MouseDown(int theX, int theY)
 {
+	if (mApp->NetIsClient())
+		return;
+
 	if (mApp->mTodCheatKeys && mApp->mGameMode == GameMode::GAMEMODE_UPSELL)
 	{
 		if (mCrazyDaveCountDown > 1)
@@ -1953,6 +1966,9 @@ void CutScene::MouseDown(int theX, int theY)
 //0x43D280
 void CutScene::KeyDown(KeyCode theKey)
 {
+	if (mApp->NetIsClient())
+		return;
+
 	if (mApp->mGameMode == GameMode::GAMEMODE_UPSELL)
 	{
 		if (mApp->mTodCheatKeys && theKey == KeyCode::KEYCODE_ESCAPE)

@@ -89,7 +89,7 @@ const char* NetMessageName(uint8_t theMsgType)
 	case NETMSG_LOBBY_STATE: return "LOBBY_STATE"; case NETMSG_TEAM_SELECT: return "TEAM_SELECT";
 	case NETMSG_START_GAME: return "START_GAME"; case NETMSG_SCENE_CMD: return "SCENE_CMD";
 	case NETMSG_BACK_TO_MENU: return "BACK_TO_MENU"; case NETMSG_START_PLAYING: return "START_PLAYING";
-	case NETMSG_INTRO_STATE: return "INTRO_STATE";
+	case NETMSG_INTRO_STATE: return "INTRO_STATE"; case NETMSG_DAVE_STATE: return "DAVE_STATE";
 	case NETMSG_SNAPSHOT: return "SNAPSHOT";
 	case NETMSG_BOARD_EVENT: return "BOARD_EVENT"; case NETMSG_INPUT_MOUSE: return "INPUT_MOUSE";
 	case NETMSG_INPUT_KEY: return "INPUT_KEY"; case NETMSG_CURSOR: return "CURSOR";
