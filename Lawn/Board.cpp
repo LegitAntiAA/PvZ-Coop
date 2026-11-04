@@ -9995,10 +9995,18 @@ void Board::Draw(Graphics* g)
 	DrawEndlessWeather(g);
 	if (mApp->NetIsClient() && mPaused)
 	{
+		// DrawGameObjects uses the centered 800x600 board transform.  The pause
+		// veil belongs to the complete logical viewport, including modern-screen
+		// side/top margins, so draw it in absolute destination coordinates.
+		g->PushState();
+		g->mTransX = 0;
+		g->mTransY = 0;
+		g->ClearClipRect();
 		g->SetColor(Color(0, 0, 0, 140));
-		g->FillRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
+		g->FillRect(0, 0, mApp->mWidth, mApp->mHeight);
 		SexyString aPausedText = _S("PAUSED - waiting for host...");
-		TodDrawString(g, aPausedText, BOARD_WIDTH / 2, BOARD_HEIGHT / 2, Sexy::FONT_BRIANNETOD12, Color(255, 255, 255, 230), DrawStringJustification::DS_ALIGN_CENTER);
+		TodDrawString(g, aPausedText, mApp->mWidth / 2, mApp->mHeight / 2, Sexy::FONT_BRIANNETOD12, Color(255, 255, 255, 230), DrawStringJustification::DS_ALIGN_CENTER);
+		g->PopState();
 	}
 	g->PopState();
 }

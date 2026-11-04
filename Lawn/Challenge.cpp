@@ -434,18 +434,34 @@ void Challenge::InitLevel()
 //0x41F6E0
 void Challenge::StartLevel()
 {
-	if (mApp->IsWhackAZombieLevel())
+	const bool aWhackAZombieLevel = mApp->IsWhackAZombieLevel();
+	CursorType aLevelCursorType = aWhackAZombieLevel ? CURSOR_TYPE_HAMMER : CURSOR_TYPE_NORMAL;
+#ifdef _DS_MINIGAMES
+	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_HEAT_WAVE)
+		aLevelCursorType = CURSOR_TYPE_GLOVE;
+#endif
+#ifdef _MOBILE_MINIGAMES
+	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_BUTTERED_POPCORN)
+		aLevelCursorType = CURSOR_TYPE_BUTTER;
+#endif
+
+	// StartLevel is the cursor-mode lifecycle boundary.  The host executes a
+	// remote click by temporarily swapping mCursorObject for that player's
+	// mNetPlayerCursors entry, so every entry must carry a persistent challenge
+	// tool (hammer/glove/butter), not just slot zero.  Other levels reset to the
+	// normal cursor; seeds, shovels and other picked-up tools remain per-player.
+	for (int aPlayerSlot = 0; aPlayerSlot < LawnNet::NET_MAX_PLAYERS; aPlayerSlot++)
 	{
-		mBoard->mCursorObject->mCursorType = CURSOR_TYPE_HAMMER;
+		CursorObject* aPlayerCursor = mBoard->mNetPlayerCursors[aPlayerSlot];
+		if (aPlayerCursor)
+			aPlayerCursor->mCursorType = aLevelCursorType;
+	}
+
+	if (aWhackAZombieLevel)
+	{
 		mBoard->mZombieCountDown = 200;
 		mBoard->mZombieCountDownStart = mBoard->mZombieCountDown;
 	}
-#ifdef _DS_MINIGAMES
-	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_HEAT_WAVE)
-	{
-		mBoard->mCursorObject->mCursorType = CURSOR_TYPE_GLOVE;
-	}
-#endif
 	if (mApp->IsStormyNightLevel())
 	{
 		mChallengeState = STATECHALLENGE_STORM_FLASH_1;
@@ -567,13 +583,6 @@ void Challenge::StartLevel()
 	{
 		SquirrelStart();
 	}
-
-#ifdef _MOBILE_MINIGAMES
-	if (aGameMode == GameMode::GAMEMODE_CHALLENGE_BUTTERED_POPCORN)
-	{
-		mBoard->mCursorObject->mCursorType = CURSOR_TYPE_BUTTER;
-	}
-#endif
 
 #ifdef _DS_MINIGAMES
 	if (aGameMode == GameMode::GAMEMODE_CHALLENGE_HEAT_WAVE)
