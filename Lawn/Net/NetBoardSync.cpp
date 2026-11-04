@@ -74,6 +74,9 @@ static const size_t NET_DAVE_STATE_BYTES = 12;
 // Seed packet: type, imitater, cooldown, owner, active, signed horizontal offset,
 // plus the authoritative slot-machine countdown, next card and scroll phase.
 static const size_t NET_SEED_PACKET_WIRE_BYTES = 14;
+// Plant: id/type/imitater/row/column/health/max-health/state/flags (12),
+// plus authoritative live x/y (4) and render order (4).
+static const size_t NET_PLANT_WIRE_BYTES = 20;
 // Projectile: id(2), type/row(2), x/y/z/shadow(16), order(4),
 // rotation(4), motion/frame/high-ground(3).
 static const size_t NET_PROJECTILE_WIRE_BYTES = 31;
@@ -814,8 +817,12 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 		if (aPlant->mRecentlyEatenCountdown > 0) aPFlags |= 4;
 		if (aPlant->mEatenFlashCountdown > 0) aPFlags |= 8;
 		aBody.WriteU8(aPFlags);
+		aBody.WriteI16((int16_t)max(-2048, min(2048, aPlant->mX)));
+		aBody.WriteI16((int16_t)max(-2048, min(2048, aPlant->mY)));
+		aBody.WriteI32(max(0, min(1000000, aPlant->mRenderOrder)));
 		aCount++;
 	}
+	TOD_ASSERT(aBody.Size() == (size_t)aCount * NET_PLANT_WIRE_BYTES);
 	b.WriteU16(aCount);
 	b.WriteBytes(aBody.Data(), aBody.Size());
 
@@ -1475,37 +1482,99 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	mSeedBank->mNumPackets = aNumPackets;
 
 	// ---- plants ----
+	if (b.Remaining() < 2)
+	{
+		NetTrace("snapshot plant section missing count bytes=%zu", b.Remaining());
+		return;
+	}
 	uint16_t aCount = b.ReadU16Or();
+	if (aCount > 1024 || (size_t)aCount > b.Remaining() / NET_PLANT_WIRE_BYTES)
+	{
+		NetTrace("snapshot plant section truncated count=%u remaining=%zu record=%zu",
+			aCount, b.Remaining(), NET_PLANT_WIRE_BYTES);
+		return;
+	}
+	struct NetPlantWire
+	{
+		uint16_t mId;
+		uint8_t mType;
+		uint8_t mImitater;
+		uint8_t mRow;
+		uint8_t mCol;
+		uint16_t mHealth;
+		uint16_t mMaxHealth;
+		uint8_t mState;
+		uint8_t mFlags;
+		int16_t mPosX;
+		int16_t mPosY;
+		int32_t mRenderOrder;
+	};
+	std::vector<NetPlantWire> aPlantWires;
+	aPlantWires.reserve(aCount);
 	std::map<unsigned short, bool> aSeenPlants;
 	for (int i = 0; i < aCount; i++)
 	{
-		if (b.Remaining() < 12)
+		NetPlantWire aWire = {};
+		aWire.mId = b.ReadU16Or();
+		aWire.mType = b.ReadU8Or();
+		aWire.mImitater = b.ReadU8Or();
+		aWire.mRow = b.ReadU8Or();
+		aWire.mCol = b.ReadU8Or();
+		aWire.mHealth = b.ReadU16Or();
+		aWire.mMaxHealth = b.ReadU16Or();
+		aWire.mState = b.ReadU8Or();
+		aWire.mFlags = b.ReadU8Or();
+		aWire.mPosX = b.ReadI16Or();
+		aWire.mPosY = b.ReadI16Or();
+		aWire.mRenderOrder = b.ReadI32Or();
+
+		uint8_t aMaxPlantState = (uint8_t)PlantState::STATE_LILYPAD_INVULNERABLE;
+#ifdef _DS_MINIGAMES
+		aMaxPlantState = (uint8_t)PlantState::STATE_HEAT_WAVE_POWERED;
+#endif
+		const bool aValid = aWire.mId != 0 &&
+			aWire.mType < (uint8_t)SeedType::NUM_SEED_TYPES &&
+			(aWire.mImitater == 255 || aWire.mImitater < (uint8_t)SeedType::NUM_SEED_TYPES) &&
+			aWire.mRow < MAX_GRID_SIZE_Y && aWire.mCol < MAX_GRID_SIZE_X &&
+			aWire.mMaxHealth != 0 && aWire.mHealth <= aWire.mMaxHealth &&
+			aWire.mState <= aMaxPlantState && (aWire.mFlags & ~15) == 0 &&
+			aWire.mPosX >= -2048 && aWire.mPosX <= 2048 &&
+			aWire.mPosY >= -2048 && aWire.mPosY <= 2048 &&
+			aWire.mRenderOrder >= 0 && aWire.mRenderOrder <= 1000000 &&
+			aSeenPlants.find(aWire.mId) == aSeenPlants.end();
+		if (!aValid)
 		{
-			NetTrace("snapshot plant section truncated index=%d count=%u remaining=%zu", i, aCount, b.Remaining());
+			NetTrace("snapshot plant section rejected index=%d id=%u type=%u imitater=%u cell=(%u,%u) health=%u/%u state=%u flags=%u pos=(%d,%d) order=%d",
+				i, aWire.mId, aWire.mType, aWire.mImitater, aWire.mCol, aWire.mRow,
+				aWire.mHealth, aWire.mMaxHealth, aWire.mState, aWire.mFlags,
+				aWire.mPosX, aWire.mPosY, aWire.mRenderOrder);
 			return;
 		}
-		uint16_t anId = b.ReadU16Or();
-		uint8_t aType = b.ReadU8Or();
-		uint8_t anImitater = b.ReadU8Or();
-		uint8_t aRow = b.ReadU8Or();
-		uint8_t aCol = b.ReadU8Or();
-		uint16_t aHealth = b.ReadU16Or();
-		uint16_t aMaxHealth = b.ReadU16Or();
-		uint8_t aState = b.ReadU8Or();
-		uint8_t aPFlags = b.ReadU8Or();
-		SeedType anImitaterType = anImitater == 255 ? SeedType::SEED_NONE : (SeedType)anImitater;
-		if (anId == 0 || aType >= (uint8_t)SeedType::NUM_SEED_TYPES ||
-			(anImitater != 255 && anImitater >= (uint8_t)SeedType::NUM_SEED_TYPES) ||
-			aRow >= MAX_GRID_SIZE_Y || aCol >= MAX_GRID_SIZE_X || (aPFlags & ~15) != 0 ||
-			aSeenPlants.find(anId) != aSeenPlants.end())
-		{
-			NetTrace("snapshot plant rejected id=%u type=%u imitater=%u cell=(%u,%u) flags=%u",
-				anId, aType, anImitater, aCol, aRow, aPFlags);
-			continue;
-		}
-		aSeenPlants[anId] = true;
+		aSeenPlants[aWire.mId] = true;
+		aPlantWires.push_back(aWire);
+	}
 
-		Plant* aPlant = NetGetGhostPlant(anId);
+	// The complete variable-length section is valid before any plant is created,
+	// adopted, moved, updated, or deleted.
+	for (const NetPlantWire& aWire : aPlantWires)
+	{
+		SeedType anImitaterType = aWire.mImitater == 255 ? SeedType::SEED_NONE : (SeedType)aWire.mImitater;
+		Plant* aPlant = NetGetGhostPlant(aWire.mId);
+		if (aPlant && (aPlant->mSeedType != (SeedType)aWire.mType ||
+			aPlant->mImitaterType != anImitaterType))
+		{
+			// A wrapped wire id must never turn an older ghost into a different
+			// plant in place: its reanimations and type-specific state belong to
+			// the previous entity.  Retire it without gameplay side effects and
+			// let the normal creation path build a correctly initialized ghost.
+			NetTrace("snapshot plant id reuse id=%u old=(%d,%d) new=(%u,%d)",
+				aWire.mId, (int)aPlant->mSeedType, (int)aPlant->mImitaterType,
+				aWire.mType, (int)anImitaterType);
+			aPlant->mDead = true;
+			aPlant->RemoveEffects();
+			aPlant = nullptr;
+		}
+		bool aCreatedOrAdopted = false;
 		if (!aPlant)
 		{
 			// Intro/challenge setup can create the same stock plant locally before
@@ -1515,11 +1584,12 @@ void Board::NetApplySnapshot(NetBuffer& b)
 			while (mPlants.IterateNext(aLocalPlant))
 			{
 				if (!aLocalPlant->mDead && !aLocalPlant->mNetGhost &&
-					aLocalPlant->mRow == aRow && aLocalPlant->mPlantCol == aCol &&
-					aLocalPlant->mSeedType == (SeedType)aType &&
+					aLocalPlant->mRow == aWire.mRow && aLocalPlant->mPlantCol == aWire.mCol &&
+					aLocalPlant->mSeedType == (SeedType)aWire.mType &&
 					aLocalPlant->mImitaterType == anImitaterType)
 				{
 					aPlant = aLocalPlant;
+					aCreatedOrAdopted = true;
 					break;
 				}
 			}
@@ -1527,24 +1597,31 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		if (!aPlant)
 		{
 			gNetSuppressSounds = true;
-			aPlant = NewPlant(aCol, aRow, (SeedType)aType, anImitaterType);
+			aPlant = NewPlant(aWire.mCol, aWire.mRow, (SeedType)aWire.mType, anImitaterType);
 			gNetSuppressSounds = false;
 			if (!aPlant)
 				continue;
+			aCreatedOrAdopted = true;
 		}
-		aPlant->mNetId = anId;
+		aPlant->mNetId = aWire.mId;
 		aPlant->mNetGhost = true;
-		aPlant->mRow = aRow;
-		aPlant->mPlantCol = aCol;
-		aPlant->mX = GridToPixelX(aCol, aRow) - (aPlant->mWidth - 80) / 2;
-		aPlant->mY = GridToPixelY(aCol, aRow) - (aPlant->mHeight - 55) / 2;
-		aPlant->mPlantHealth = aHealth;
-		aPlant->mPlantMaxHealth = aMaxHealth;
-		aPlant->mState = (PlantState)aState;
-		aPlant->mIsAsleep = (aPFlags & 1) != 0;
-		aPlant->mSquished = (aPFlags & 2) != 0;
-		aPlant->mRecentlyEatenCountdown = (aPFlags & 4) ? 20 : 0;
-		aPlant->mEatenFlashCountdown = (aPFlags & 8) ? 8 : 0;
+		aPlant->mRow = aWire.mRow;
+		aPlant->mPlantCol = aWire.mCol;
+		aPlant->mNetTargetX = (float)aWire.mPosX;
+		aPlant->mNetTargetY = (float)aWire.mPosY;
+		if (aCreatedOrAdopted)
+		{
+			aPlant->mX = aWire.mPosX;
+			aPlant->mY = aWire.mPosY;
+		}
+		aPlant->mRenderOrder = aWire.mRenderOrder;
+		aPlant->mPlantHealth = aWire.mHealth;
+		aPlant->mPlantMaxHealth = aWire.mMaxHealth;
+		aPlant->mState = (PlantState)aWire.mState;
+		aPlant->mIsAsleep = (aWire.mFlags & 1) != 0;
+		aPlant->mSquished = (aWire.mFlags & 2) != 0;
+		aPlant->mRecentlyEatenCountdown = (aWire.mFlags & 4) ? 20 : 0;
+		aPlant->mEatenFlashCountdown = (aWire.mFlags & 8) ? 8 : 0;
 	}
 	{
 		Plant* aPlant = nullptr;
@@ -2586,6 +2663,25 @@ void Board::NetClientTick()
 	{
 		if (!aPlant->mDead && aPlant->mIsOnBoard)
 		{
+			if (aPlant->mNetGhost && !mPaused)
+			{
+				float aDeltaX = aPlant->mNetTargetX - (float)aPlant->mX;
+				float aDeltaY = aPlant->mNetTargetY - (float)aPlant->mY;
+				if (fabsf(aDeltaX) <= 1.0f)
+					aPlant->mX = (int)aPlant->mNetTargetX;
+				else
+				{
+					int aStepX = (int)(aDeltaX * 0.35f);
+					aPlant->mX += aStepX != 0 ? aStepX : (aDeltaX > 0.0f ? 1 : -1);
+				}
+				if (fabsf(aDeltaY) <= 1.0f)
+					aPlant->mY = (int)aPlant->mNetTargetY;
+				else
+				{
+					int aStepY = (int)(aDeltaY * 0.35f);
+					aPlant->mY += aStepY != 0 ? aStepY : (aDeltaY > 0.0f ? 1 : -1);
+				}
+			}
 			aPlant->Animate();
 			aPlant->UpdateReanim();
 		}
