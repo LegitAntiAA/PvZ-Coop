@@ -51,6 +51,16 @@ Projectile::~Projectile()
 //0x46C730
 void Projectile::ProjectileInitialize(int theX, int theY, int theRenderOrder, int theRow, ProjectileType theProjectileType)
 {
+	ProjectileInitializeInternal(theX, theY, theRenderOrder, theRow, theProjectileType, false);
+}
+
+void Projectile::ProjectileInitializeNetGhost(int theX, int theY, int theRenderOrder, int theRow, ProjectileType theProjectileType)
+{
+	ProjectileInitializeInternal(theX, theY, theRenderOrder, theRow, theProjectileType, true);
+}
+
+void Projectile::ProjectileInitializeInternal(int theX, int theY, int theRenderOrder, int theRow, ProjectileType theProjectileType, bool theNetPresentationOnly)
+{
 	int aGridX = mBoard->PixelToGridXKeepOnBoard(theX, theY);
 	mProjectileType = theProjectileType;
 	mPosX = theX;
@@ -99,17 +109,17 @@ void Projectile::ProjectileInitialize(int theX, int theY, int theRenderOrder, in
 	if (mProjectileType == ProjectileType::PROJECTILE_CABBAGE || mProjectileType == ProjectileType::PROJECTILE_BUTTER)
 	{
 		mRotation = -7 * PI / 25;  // DEG_TO_RAD(-50.4f);
-		mRotationSpeed = RandRangeFloat(-0.08f, -0.02f);
+		mRotationSpeed = theNetPresentationOnly ? 0.0f : RandRangeFloat(-0.08f, -0.02f);
 	}
 	else if (mProjectileType == ProjectileType::PROJECTILE_MELON)
 	{
 		mRotation = -2 * PI / 5;  // DEG_TO_RAD(-72.0f);
-		mRotationSpeed = RandRangeFloat(-0.08f, -0.02f);
+		mRotationSpeed = theNetPresentationOnly ? 0.0f : RandRangeFloat(-0.08f, -0.02f);
 	}
 	else if (mProjectileType == ProjectileType::PROJECTILE_WINTERMELON)
 	{
 		mRotation = -2 * PI / 5;  // DEG_TO_RAD(-72.0f);
-		mRotationSpeed = RandRangeFloat(-0.08f, -0.02f);
+		mRotationSpeed = theNetPresentationOnly ? 0.0f : RandRangeFloat(-0.08f, -0.02f);
 		/*Trail* aTrail = mApp->mEffectSystem->mTrailHolder->AllocTrail(305000, TrailType::TRAIL_ICE);
 		if (aTrail) 
 		{
@@ -124,7 +134,7 @@ void Projectile::ProjectileInitialize(int theX, int theY, int theRenderOrder, in
 	else if (mProjectileType == ProjectileType::PROJECTILE_KERNEL)
 	{
 		mRotation = 0.0f;
-		mRotationSpeed = RandRangeFloat(-0.2f, -0.08f);
+		mRotationSpeed = theNetPresentationOnly ? 0.0f : RandRangeFloat(-0.2f, -0.08f);
 	}
 	else if (mProjectileType == ProjectileType::PROJECTILE_SNOWPEA)
 	{
@@ -172,7 +182,7 @@ void Projectile::ProjectileInitialize(int theX, int theY, int theRenderOrder, in
 			}
 			aFirePeaReanim->SetPosition(mPosX + aOffsetX, mPosY + aOffsetY);
 			aFirePeaReanim->mLoopType = ReanimLoopType::REANIM_LOOP;
-			aFirePeaReanim->mAnimRate = RandRangeFloat(50.0f, 80.0f);
+			aFirePeaReanim->mAnimRate = theNetPresentationOnly ? 65.0f : RandRangeFloat(50.0f, 80.0f);
 			if (mFilterEffect != FilterEffect::FILTER_EFFECT_NONE) {
 				aFirePeaReanim->mFilterEffect = mFilterEffect;
 			}
@@ -194,14 +204,14 @@ void Projectile::ProjectileInitialize(int theX, int theY, int theRenderOrder, in
 	}
 	else if (mProjectileType == ProjectileType::PROJECTILE_BASKETBALL)
 	{
-		mRotation = RandRangeFloat(0.0f, 2 * PI);
-		mRotationSpeed = RandRangeFloat(0.05f, 0.1f);
+		mRotation = theNetPresentationOnly ? 0.0f : RandRangeFloat(0.0f, 2 * PI);
+		mRotationSpeed = theNetPresentationOnly ? 0.0f : RandRangeFloat(0.05f, 0.1f);
 	}
 	else if (mProjectileType == ProjectileType::PROJECTILE_STAR)
 	{
 		mShadowY += 15.0f;
-		mRotationSpeed = RandRangeFloat(0.05f, 0.1f);
-		if (Rand(2) == 0)
+		mRotationSpeed = theNetPresentationOnly ? 0.0f : RandRangeFloat(0.05f, 0.1f);
+		if (!theNetPresentationOnly && Rand(2) == 0)
 		{
 			mRotationSpeed = -mRotationSpeed;
 		}
@@ -233,6 +243,8 @@ void Projectile::ProjectileInitialize(int theX, int theY, int theRenderOrder, in
 	mAnimCounter = 0;
 	mX = (int)mPosX;
 	mY = (int)mPosY;
+	mNetTargetZ = mPosZ;
+	mNetTargetRotation = mRotation;
 }
 
 //0x46CAA0

@@ -71,6 +71,12 @@ const NetDaveAnimSpec gNetDaveAnimSpecs[NET_DAVE_ANIM_COUNT] =
 };
 
 static const size_t NET_DAVE_STATE_BYTES = 12;
+// Projectile: id(2), type/row(2), x/y/z/shadow(16), order(4),
+// rotation(4), motion/frame/high-ground(3).
+static const size_t NET_PROJECTILE_WIRE_BYTES = 31;
+// Coin: id/type/motion(4), x/y(8), order(4), scale/collect(4),
+// flags/seed/fade(3), disappear(2), potted visual seed/garden/facing/variation/age(5).
+static const size_t NET_COIN_WIRE_BYTES = 30;
 
 struct NetDaveWireState
 {
@@ -306,6 +312,61 @@ bool NetGridStateMatchesType(uint8_t theType, uint8_t theState)
 	case GRIDITEM_IZOMBIE_BRAIN:	return theState == GRIDITEM_STATE_NORMAL || theState == GRIDITEM_STATE_BRAIN_SQUISHED;
 	default:						return false;
 	}
+}
+
+bool NetProjectileFrameIsSafe(uint8_t theType, uint8_t theFrame)
+{
+	Image* anImage = nullptr;
+	switch ((ProjectileType)theType)
+	{
+	case ProjectileType::PROJECTILE_PEA:
+	case ProjectileType::PROJECTILE_ZOMBIE_PEA:
+		anImage = IMAGE_PROJECTILEPEA;
+		break;
+	case ProjectileType::PROJECTILE_SNOWPEA:
+		anImage = IMAGE_PROJECTILESNOWPEA;
+		break;
+	case ProjectileType::PROJECTILE_FIREBALL:
+		// FIREBALL is drawn entirely by its REANIM_FIRE_PEA attachment.
+		return theFrame == 0;
+	case ProjectileType::PROJECTILE_SPIKE:
+#ifdef _PIERCING_CACTUS
+	case ProjectileType::PROJECTILE_PIERCE_SPIKE:
+#endif
+		anImage = IMAGE_PROJECTILECACTUS;
+		break;
+	case ProjectileType::PROJECTILE_STAR:
+		anImage = IMAGE_PROJECTILE_STAR;
+		break;
+	case ProjectileType::PROJECTILE_PUFF:
+		anImage = IMAGE_PUFFSHROOM_PUFF1;
+		break;
+	case ProjectileType::PROJECTILE_BASKETBALL:
+		anImage = IMAGE_REANIM_ZOMBIE_CATAPULT_BASKETBALL;
+		break;
+	case ProjectileType::PROJECTILE_CABBAGE:
+		anImage = IMAGE_REANIM_CABBAGEPULT_CABBAGE;
+		break;
+	case ProjectileType::PROJECTILE_KERNEL:
+		anImage = IMAGE_REANIM_CORNPULT_KERNAL;
+		break;
+	case ProjectileType::PROJECTILE_BUTTER:
+		anImage = IMAGE_REANIM_CORNPULT_BUTTER;
+		break;
+	case ProjectileType::PROJECTILE_MELON:
+		anImage = IMAGE_REANIM_MELONPULT_MELON;
+		break;
+	case ProjectileType::PROJECTILE_WINTERMELON:
+		anImage = IMAGE_REANIM_WINTERMELON_PROJECTILE;
+		break;
+	case ProjectileType::PROJECTILE_COBBIG:
+		anImage = IMAGE_REANIM_COBCANNON_COB;
+		break;
+	default:
+		anImage = IMAGE_PROJECTILE;
+		break;
+	}
+	return anImage && theFrame < anImage->mNumCols;
 }
 
 void NetEnsureGridItemVisual(GridItem* theGridItem, GridItemState thePreviousState)
@@ -774,18 +835,25 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 	aCount = 0;
 	aBody.Clear();
 	Projectile* aProjectile = nullptr;
-	while (mProjectiles.IterateNext(aProjectile))
-	{
-		if (aProjectile->mDead)
-			continue;
-		aBody.WriteU16(aProjectile->mNetId);
-		aBody.WriteU8((uint8_t)aProjectile->mProjectileType);
-		aBody.WriteU8((uint8_t)aProjectile->mRow);
-		aBody.WriteI16((int16_t)(aProjectile->mX * 4));
-		aBody.WriteI16((int16_t)(aProjectile->mY * 4));
-		aBody.WriteU16((uint16_t)min(65535, max(0, aProjectile->mRenderOrder + 32768)));
-		aCount++;
-	}
+        while (mProjectiles.IterateNext(aProjectile))
+        {
+                if (aProjectile->mDead)
+                        continue;
+                aBody.WriteU16(aProjectile->mNetId);
+                aBody.WriteU8((uint8_t)aProjectile->mProjectileType);
+                aBody.WriteU8((uint8_t)aProjectile->mRow);
+                aBody.WriteF32(aProjectile->mPosX);
+                aBody.WriteF32(aProjectile->mPosY);
+                aBody.WriteF32(aProjectile->mPosZ);
+                aBody.WriteF32(aProjectile->mShadowY);
+                aBody.WriteI32(aProjectile->mRenderOrder);
+                aBody.WriteF32(aProjectile->mRotation);
+                aBody.WriteU8((uint8_t)aProjectile->mMotionType);
+                aBody.WriteU8((uint8_t)max(0, min(255, aProjectile->mFrame)));
+                aBody.WriteU8(aProjectile->mOnHighGround ? 1 : 0);
+                aCount++;
+        }
+	TOD_ASSERT(aBody.Size() == (size_t)aCount * NET_PROJECTILE_WIRE_BYTES);
 	b.WriteU16(aCount);
 	b.WriteBytes(aBody.Data(), aBody.Size());
 
@@ -799,18 +867,31 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 			continue;
 		if (aCoin->mNetId == 0)
 			aCoin->mNetId = NetAllocId();
-		aBody.WriteU16(aCoin->mNetId);
-		aBody.WriteU8((uint8_t)aCoin->mType);
-		aBody.WriteU8((uint8_t)aCoin->mCoinMotion);
-		aBody.WriteI16((int16_t)(aCoin->mPosX * 4));
-		aBody.WriteI16((int16_t)(aCoin->mPosY * 4));
-		uint8_t aCFlags = 0;
-		if (aCoin->mIsBeingCollected) aCFlags |= 1;
-		if (aCoin->mHitGround) aCFlags |= 2;
-		aBody.WriteU8(aCFlags);
-		aBody.WriteU8((uint8_t)aCoin->mUsableSeedType);
-		aCount++;
-	}
+                aBody.WriteU16(aCoin->mNetId);
+                aBody.WriteU8((uint8_t)aCoin->mType);
+                aBody.WriteU8((uint8_t)aCoin->mCoinMotion);
+                aBody.WriteF32(aCoin->mPosX);
+                aBody.WriteF32(aCoin->mPosY);
+                aBody.WriteI32(aCoin->mRenderOrder);
+                aBody.WriteU16((uint16_t)min(16384, max(0, (int)(aCoin->mScale * 4096.0f + 0.5f))));
+                aBody.WriteU16((uint16_t)min(8192, max(0, (int)(aCoin->mCollectionDistance * 4.0f + 0.5f))));
+                uint8_t aCFlags = 0;
+                if (aCoin->mIsBeingCollected) aCFlags |= 1;
+                if (aCoin->mHitGround) aCFlags |= 2;
+                aBody.WriteU8(aCFlags);
+                aBody.WriteU8((uint8_t)aCoin->mUsableSeedType);
+                aBody.WriteU8((uint8_t)min(255, max(0, aCoin->mFadeCount)));
+                aBody.WriteU16((uint16_t)min(65535, max(0, aCoin->mDisappearCounter)));
+                const bool aPottedPresent = aCoin->mType == CoinType::COIN_PRESENT_PLANT ||
+                        aCoin->mType == CoinType::COIN_AWARD_PRESENT;
+                aBody.WriteU8(aPottedPresent ? (uint8_t)aCoin->mPottedPlantSpec.mSeedType : 255);
+                aBody.WriteU8(aPottedPresent ? (uint8_t)aCoin->mPottedPlantSpec.mWhichZenGarden : 255);
+                aBody.WriteU8(aPottedPresent ? (uint8_t)aCoin->mPottedPlantSpec.mFacing : 255);
+                aBody.WriteU8(aPottedPresent ? (uint8_t)aCoin->mPottedPlantSpec.mDrawVariation : 255);
+                aBody.WriteU8(aPottedPresent ? (uint8_t)aCoin->mPottedPlantSpec.mPlantAge : 255);
+                aCount++;
+        }
+	TOD_ASSERT(aBody.Size() == (size_t)aCount * NET_COIN_WIRE_BYTES);
 	b.WriteU16(aCount);
 	b.WriteBytes(aBody.Data(), aBody.Size());
 
@@ -1006,9 +1087,9 @@ void Board::NetApplyEvent(NetBuffer& b)
 	}
 	case BOARDEV_SUN_ADDED:
 	{
-		if (b.Remaining() != 11)
+		if (b.Remaining() != 16)
 		{
-			NetTrace("SUN_ADDED rejected: invalid payload size=%zu expected=11", b.Remaining());
+			NetTrace("SUN_ADDED rejected: invalid payload size=%zu expected=16", b.Remaining());
 			break;
 		}
 		uint16_t anId = b.ReadU16Or();
@@ -1018,15 +1099,43 @@ void Board::NetApplyEvent(NetBuffer& b)
 		int aY = b.ReadI16Or() / 4;
 		uint16_t aValue = b.ReadU16Or();
 		uint8_t aUsableSeed = b.ReadU8Or();
+		uint8_t aPottedSeed = b.ReadU8Or();
+		uint8_t aPottedGarden = b.ReadU8Or();
+		uint8_t aPottedFacing = b.ReadU8Or();
+		uint8_t aPottedVariation = b.ReadU8Or();
+		uint8_t aPottedAge = b.ReadU8Or();
 		bool aUsablePacket = aCoinType == (uint8_t)CoinType::COIN_USABLE_SEED_PACKET;
+		bool aPottedPresent = aCoinType == (uint8_t)CoinType::COIN_PRESENT_PLANT ||
+			aCoinType == (uint8_t)CoinType::COIN_AWARD_PRESENT;
+		bool aValidPottedVisual = aPottedPresent ?
+			(aPottedSeed < (uint8_t)SeedType::NUM_SEED_TYPES &&
+			 aPottedGarden <= (uint8_t)GardenType::GARDEN_AQUARIUM &&
+			 aPottedFacing <= (uint8_t)PottedPlant::FacingDirection::FACING_LEFT &&
+			 aPottedVariation < (uint8_t)DrawVariation::NUM_VARIATIONS &&
+			 aPottedAge <= (uint8_t)PottedPlantAge::PLANTAGE_FULL) :
+			(aPottedSeed == 255 && aPottedGarden == 255 && aPottedFacing == 255 &&
+			 aPottedVariation == 255 && aPottedAge == 255);
 		if (anId == 0 || aCoinType < (uint8_t)CoinType::COIN_SILVER ||
 			aCoinType > (uint8_t)CoinType::COIN_PRESENT_SURVIVAL_MODE ||
 			aMotion > (uint8_t)CoinMotion::COIN_MOTION_FROM_BOSS ||
 			(aUsablePacket && aUsableSeed >= (uint8_t)SeedType::NUM_SEED_TYPES) ||
-			(!aUsablePacket && aUsableSeed != 255))
+			(!aUsablePacket && aUsableSeed != 255) || !aValidPottedVisual)
 		{
-			NetTrace("SUN_ADDED rejected: id=%u coinType=%u seed=%u value=%u", anId, aCoinType, aUsableSeed, aValue);
+			NetTrace("SUN_ADDED rejected: id=%u coinType=%u seed=%u potted=(%u,%u,%u,%u,%u) value=%u",
+				anId, aCoinType, aUsableSeed, aPottedSeed, aPottedGarden,
+				aPottedFacing, aPottedVariation, aPottedAge, aValue);
 			break;
+		}
+		PottedPlant aPottedVisual = {};
+		const PottedPlant* aPottedVisualPtr = nullptr;
+		if (aPottedPresent)
+		{
+			aPottedVisual.mSeedType = (SeedType)aPottedSeed;
+			aPottedVisual.mWhichZenGarden = (GardenType)aPottedGarden;
+			aPottedVisual.mFacing = (PottedPlant::FacingDirection)aPottedFacing;
+			aPottedVisual.mDrawVariation = (DrawVariation)aPottedVariation;
+			aPottedVisual.mPlantAge = (PottedPlantAge)aPottedAge;
+			aPottedVisualPtr = &aPottedVisual;
 		}
 		Coin* aCoin = NetGetGhostCoin(anId);
 		if (aCoin && aCoin->mType != (CoinType)aCoinType)
@@ -1036,10 +1145,13 @@ void Board::NetApplyEvent(NetBuffer& b)
 		}
 		if (!aCoin)
 		{
-			gNetSuppressSounds = true;
-			aCoin = AddCoin(aX, aY, (CoinType)aCoinType, (CoinMotion)aMotion,
-				aUsableSeed == 255 ? SeedType::SEED_NONE : (SeedType)aUsableSeed);
-			gNetSuppressSounds = false;
+			aCoin = mCoins.DataArrayAlloc();
+			if (aCoin)
+			{
+				aCoin->CoinInitializeNetGhost(aX, aY, (CoinType)aCoinType,
+					(CoinMotion)aMotion, aPottedVisualPtr);
+				aCoin->mUsableSeedType = aUsableSeed == 255 ? SeedType::SEED_NONE : (SeedType)aUsableSeed;
+			}
 		}
 		if (aCoin)
 		{
@@ -1053,6 +1165,14 @@ void Board::NetApplyEvent(NetBuffer& b)
 			aCoin->mNetTargetY = (float)aY;
 			aCoin->mCoinMotion = (CoinMotion)aMotion;
 			aCoin->mUsableSeedType = aUsableSeed == 255 ? SeedType::SEED_NONE : (SeedType)aUsableSeed;
+			if (aPottedPresent)
+			{
+				aCoin->mPottedPlantSpec.mSeedType = aPottedVisual.mSeedType;
+				aCoin->mPottedPlantSpec.mWhichZenGarden = aPottedVisual.mWhichZenGarden;
+				aCoin->mPottedPlantSpec.mFacing = aPottedVisual.mFacing;
+				aCoin->mPottedPlantSpec.mDrawVariation = aPottedVisual.mDrawVariation;
+				aCoin->mPottedPlantSpec.mPlantAge = aPottedVisual.mPlantAge;
+			}
 		}
 		break;
 	}
@@ -1402,32 +1522,135 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	}
 
 	// ---- projectiles ----
+	if (b.Remaining() < 2)
+	{
+		NetTrace("snapshot projectile section missing count bytes=%zu", b.Remaining());
+		return;
+	}
 	aCount = b.ReadU16Or();
+	if (aCount > 1024 || (size_t)aCount > b.Remaining() / NET_PROJECTILE_WIRE_BYTES)
+	{
+		NetTrace("snapshot projectile section truncated count=%u remaining=%zu record=%zu",
+			aCount, b.Remaining(), NET_PROJECTILE_WIRE_BYTES);
+		return;
+	}
+	struct NetProjectileWire
+	{
+		uint16_t mId;
+		uint8_t mType;
+		uint8_t mRow;
+		float mPosX;
+		float mPosY;
+		float mPosZ;
+		float mShadowY;
+		int32_t mRenderOrder;
+		float mRotation;
+		uint8_t mMotion;
+		uint8_t mFrame;
+		uint8_t mFlags;
+	};
+	std::vector<NetProjectileWire> aProjectileWires;
+	aProjectileWires.reserve(aCount);
 	std::map<unsigned short, bool> aSeenProjectiles;
 	for (int i = 0; i < aCount; i++)
 	{
-		uint16_t anId = b.ReadU16Or();
-		uint8_t aType = b.ReadU8Or();
-		uint8_t aRow = b.ReadU8Or();
-		int16_t aX = b.ReadI16Or();
-		int16_t aY = b.ReadI16Or();
-		uint16_t aRenderOrder = b.ReadU16Or();
-		aSeenProjectiles[anId] = true;
+		NetProjectileWire aWire = {};
+		aWire.mId = b.ReadU16Or();
+		aWire.mType = b.ReadU8Or();
+		aWire.mRow = b.ReadU8Or();
+		aWire.mPosX = b.ReadF32Or();
+		aWire.mPosY = b.ReadF32Or();
+		aWire.mPosZ = b.ReadF32Or();
+		aWire.mShadowY = b.ReadF32Or();
+		aWire.mRenderOrder = b.ReadI32Or();
+		aWire.mRotation = b.ReadF32Or();
+		aWire.mMotion = b.ReadU8Or();
+		aWire.mFrame = b.ReadU8Or();
+		aWire.mFlags = b.ReadU8Or();
 
-		Projectile* aProjectile = NetGetGhostProjectile(anId);
+		const bool aFrameValid = NetProjectileFrameIsSafe(aWire.mType, aWire.mFrame);
+		const bool aValid = aWire.mId != 0 &&
+			aWire.mType < (uint8_t)ProjectileType::NUM_PROJECTILES &&
+			aWire.mRow < MAX_GRID_SIZE_Y &&
+			aWire.mMotion <= (uint8_t)ProjectileMotion::MOTION_HOMING &&
+			(aWire.mFlags & ~1) == 0 && aFrameValid &&
+			_finite(aWire.mPosX) && _finite(aWire.mPosY) &&
+			_finite(aWire.mPosZ) && _finite(aWire.mShadowY) && _finite(aWire.mRotation) &&
+			aWire.mPosX >= -1024.0f && aWire.mPosX <= 2048.0f &&
+			aWire.mPosY >= -1024.0f && aWire.mPosY <= 2048.0f &&
+			aWire.mPosZ >= -4096.0f && aWire.mPosZ <= 4096.0f &&
+			aWire.mShadowY >= -1024.0f && aWire.mShadowY <= 2048.0f &&
+			aWire.mRotation >= -100000.0f && aWire.mRotation <= 100000.0f &&
+			aWire.mRenderOrder >= -1000000 && aWire.mRenderOrder <= 2000000 &&
+			aSeenProjectiles.find(aWire.mId) == aSeenProjectiles.end();
+		if (!aValid)
+		{
+			NetTrace("snapshot projectile section rejected index=%d id=%u type=%u row=%u motion=%u frame=%u flags=%u",
+				i, aWire.mId, aWire.mType, aWire.mRow, aWire.mMotion, aWire.mFrame, aWire.mFlags);
+			return;
+		}
+		aSeenProjectiles[aWire.mId] = true;
+		aProjectileWires.push_back(aWire);
+	}
+
+	// The entire variable-length section is valid before any projectile is
+	// created, replaced, moved, or deleted.
+	for (const NetProjectileWire& aWire : aProjectileWires)
+	{
+		Projectile* aProjectile = NetGetGhostProjectile(aWire.mId);
+		if (aProjectile && aProjectile->mProjectileType != (ProjectileType)aWire.mType)
+		{
+			// Torchwood conversion changes PEA into FIREBALL without changing the
+			// network identity.  Recreate the presentation object so FIREBALL gets
+			// its required REANIM_FIRE_PEA attachment and the old trail dies once.
+			aProjectile->Die();
+			aProjectile = nullptr;
+		}
+		bool aCreated = false;
 		if (!aProjectile)
 		{
-			gNetSuppressSounds = true;
-			aProjectile = AddProjectile(aX / 4, aY / 4, (int)aRenderOrder - 32768, aRow, (ProjectileType)aType);
-			gNetSuppressSounds = false;
+			aProjectile = mProjectiles.DataArrayAlloc();
+			if (aProjectile)
+				aProjectile->ProjectileInitializeNetGhost((int)aWire.mPosX, (int)aWire.mPosY,
+					aWire.mRenderOrder, aWire.mRow, (ProjectileType)aWire.mType);
 			if (!aProjectile)
 				continue;
-			aProjectile->mNetId = anId;
+			aCreated = true;
+			aProjectile->mNetId = aWire.mId;
 			aProjectile->mNetGhost = true;
 		}
-		aProjectile->mRow = aRow;
-		aProjectile->mNetTargetX = aX / 4.0f;
-		aProjectile->mNetTargetY = aY / 4.0f;
+		aProjectile->mRow = aWire.mRow;
+		aProjectile->mNetTargetX = aWire.mPosX;
+		aProjectile->mNetTargetY = aWire.mPosY;
+		aProjectile->mNetTargetZ = aWire.mPosZ;
+		aProjectile->mNetTargetRotation = aWire.mRotation;
+		if (aCreated)
+		{
+			aProjectile->mPosX = aWire.mPosX;
+			aProjectile->mPosY = aWire.mPosY;
+			aProjectile->mPosZ = aWire.mPosZ;
+			aProjectile->mRotation = aWire.mRotation;
+			aProjectile->mX = (int)aWire.mPosX;
+			aProjectile->mY = (int)(aWire.mPosY + aWire.mPosZ);
+		}
+		aProjectile->mShadowY = aWire.mShadowY;
+		aProjectile->mRenderOrder = aWire.mRenderOrder;
+		aProjectile->mMotionType = (ProjectileMotion)aWire.mMotion;
+		aProjectile->mFrame = aWire.mFrame;
+		aProjectile->mOnHighGround = (aWire.mFlags & 1) != 0;
+		if (aProjectile->mProjectileType == ProjectileType::PROJECTILE_FIREBALL)
+		{
+			const bool aBackwards = aProjectile->mMotionType == ProjectileMotion::MOTION_BACKWARDS;
+			Reanimation* aFirePeaReanim = FindReanimAttachment(aProjectile->mAttachmentID);
+			if (aFirePeaReanim)
+				aFirePeaReanim->OverrideScale(aBackwards ? -1.0f : 1.0f, 1.0f);
+			AttachEffect* aFirePeaEffect = FindFirstAttachment(aProjectile->mAttachmentID);
+			if (aFirePeaEffect && aFirePeaEffect->mEffectType == EffectType::EFFECT_REANIM)
+			{
+				aFirePeaEffect->mOffset.m02 = aBackwards ? 55.0f : -25.0f;
+				aFirePeaEffect->mOffset.m12 = -25.0f;
+			}
+		}
 	}
 	{
 		Projectile* aProjectile = nullptr;
@@ -1437,73 +1660,193 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	}
 
 	// ---- coins ----
+	if (b.Remaining() < 2)
+	{
+		NetTrace("snapshot coin section missing count bytes=%zu", b.Remaining());
+		return;
+	}
 	aCount = b.ReadU16Or();
+	if (aCount > 1024 || (size_t)aCount > b.Remaining() / NET_COIN_WIRE_BYTES)
+	{
+		NetTrace("snapshot coin section truncated count=%u remaining=%zu record=%zu",
+			aCount, b.Remaining(), NET_COIN_WIRE_BYTES);
+		return;
+	}
+	struct NetCoinWire
+	{
+		uint16_t mId;
+		uint8_t mType;
+		uint8_t mMotion;
+		float mPosX;
+		float mPosY;
+		int32_t mRenderOrder;
+		uint16_t mScaleQ;
+		uint16_t mCollectionDistanceQ;
+		uint8_t mFlags;
+		uint8_t mUsableSeed;
+		uint8_t mFadeCount;
+		uint16_t mDisappearCounter;
+		uint8_t mPottedSeed;
+		uint8_t mPottedGarden;
+		uint8_t mPottedFacing;
+		uint8_t mPottedVariation;
+		uint8_t mPottedAge;
+	};
+	std::vector<NetCoinWire> aCoinWires;
+	aCoinWires.reserve(aCount);
 	std::map<unsigned short, bool> aSeenCoins;
 	for (int i = 0; i < aCount; i++)
 	{
-		if (b.Remaining() < 10)
+		NetCoinWire aWire = {};
+		aWire.mId = b.ReadU16Or();
+		aWire.mType = b.ReadU8Or();
+		aWire.mMotion = b.ReadU8Or();
+		aWire.mPosX = b.ReadF32Or();
+		aWire.mPosY = b.ReadF32Or();
+		aWire.mRenderOrder = b.ReadI32Or();
+		aWire.mScaleQ = b.ReadU16Or();
+		aWire.mCollectionDistanceQ = b.ReadU16Or();
+		aWire.mFlags = b.ReadU8Or();
+		aWire.mUsableSeed = b.ReadU8Or();
+		aWire.mFadeCount = b.ReadU8Or();
+		aWire.mDisappearCounter = b.ReadU16Or();
+		const bool aUsablePacket = aWire.mType == (uint8_t)CoinType::COIN_USABLE_SEED_PACKET;
+		aWire.mPottedSeed = b.ReadU8Or();
+		aWire.mPottedGarden = b.ReadU8Or();
+		aWire.mPottedFacing = b.ReadU8Or();
+		aWire.mPottedVariation = b.ReadU8Or();
+		aWire.mPottedAge = b.ReadU8Or();
+		const bool aPottedPresent = aWire.mType == (uint8_t)CoinType::COIN_PRESENT_PLANT ||
+			aWire.mType == (uint8_t)CoinType::COIN_AWARD_PRESENT;
+		const bool aValidPottedVisual = aPottedPresent ?
+			(aWire.mPottedSeed < (uint8_t)SeedType::NUM_SEED_TYPES &&
+			 aWire.mPottedGarden <= (uint8_t)GardenType::GARDEN_AQUARIUM &&
+			 aWire.mPottedFacing <= (uint8_t)PottedPlant::FacingDirection::FACING_LEFT &&
+			 aWire.mPottedVariation < (uint8_t)DrawVariation::NUM_VARIATIONS &&
+			 aWire.mPottedAge <= (uint8_t)PottedPlantAge::PLANTAGE_FULL) :
+			(aWire.mPottedSeed == 255 && aWire.mPottedGarden == 255 &&
+			 aWire.mPottedFacing == 255 && aWire.mPottedVariation == 255 &&
+			 aWire.mPottedAge == 255);
+		const bool aValid = aWire.mId != 0 &&
+			aWire.mType >= (uint8_t)CoinType::COIN_SILVER &&
+			aWire.mType <= (uint8_t)CoinType::COIN_PRESENT_SURVIVAL_MODE &&
+			aWire.mMotion <= (uint8_t)CoinMotion::COIN_MOTION_FROM_BOSS &&
+			(aWire.mFlags & ~3) == 0 &&
+			(aUsablePacket ? aWire.mUsableSeed < (uint8_t)SeedType::NUM_SEED_TYPES : aWire.mUsableSeed == 255) &&
+			_finite(aWire.mPosX) && _finite(aWire.mPosY) &&
+			aWire.mPosX >= -1024.0f && aWire.mPosX <= 2048.0f &&
+			aWire.mPosY >= -1024.0f && aWire.mPosY <= 2048.0f &&
+			aWire.mRenderOrder >= -1000000 && aWire.mRenderOrder <= 2000000 &&
+			aWire.mScaleQ <= 16384 && aWire.mCollectionDistanceQ <= 8192 &&
+			aWire.mFadeCount <= 15 &&
+			aValidPottedVisual &&
+			aSeenCoins.find(aWire.mId) == aSeenCoins.end();
+		if (!aValid)
 		{
-			NetTrace("snapshot coin section truncated index=%d count=%u remaining=%zu", i, aCount, b.Remaining());
+			NetTrace("snapshot coin section rejected index=%d id=%u type=%u motion=%u flags=%u seed=%u potted=(%u,%u,%u,%u,%u) scale=%u fade=%u",
+				i, aWire.mId, aWire.mType, aWire.mMotion, aWire.mFlags,
+				aWire.mUsableSeed, aWire.mPottedSeed, aWire.mPottedGarden,
+				aWire.mPottedFacing, aWire.mPottedVariation, aWire.mPottedAge,
+				aWire.mScaleQ, aWire.mFadeCount);
 			return;
 		}
-		uint16_t anId = b.ReadU16Or();
-		uint8_t aType = b.ReadU8Or();
-		uint8_t aMotion = b.ReadU8Or();
-		int16_t aX = b.ReadI16Or();
-		int16_t aY = b.ReadI16Or();
-		uint8_t aCFlags = b.ReadU8Or();
-		uint8_t aUsableSeed = b.ReadU8Or();
-		bool aUsablePacket = aType == (uint8_t)CoinType::COIN_USABLE_SEED_PACKET;
-		if (anId == 0 || aType < (uint8_t)CoinType::COIN_SILVER ||
-			aType > (uint8_t)CoinType::COIN_PRESENT_SURVIVAL_MODE ||
-			aMotion > (uint8_t)CoinMotion::COIN_MOTION_FROM_BOSS || (aCFlags & ~3) != 0 ||
-			(aUsablePacket && aUsableSeed >= (uint8_t)SeedType::NUM_SEED_TYPES) ||
-			(!aUsablePacket && aUsableSeed != 255))
-		{
-			NetTrace("snapshot coin rejected id=%u type=%u motion=%u flags=%u seed=%u", anId, aType, aMotion, aCFlags, aUsableSeed);
-			continue;
-		}
-		if (aSeenCoins.find(anId) != aSeenCoins.end())
-		{
-			NetTrace("snapshot coin rejected duplicate id=%u", anId);
-			continue;
-		}
-		aSeenCoins[anId] = true;
+		aSeenCoins[aWire.mId] = true;
+		aCoinWires.push_back(aWire);
+	}
 
-		Coin* aCoin = NetGetGhostCoin(anId);
-		if (aCoin && aCoin->mType != (CoinType)aType)
+	for (const NetCoinWire& aWire : aCoinWires)
+	{
+		const bool aPottedPresent = aWire.mType == (uint8_t)CoinType::COIN_PRESENT_PLANT ||
+			aWire.mType == (uint8_t)CoinType::COIN_AWARD_PRESENT;
+		PottedPlant aPottedVisual = {};
+		const PottedPlant* aPottedVisualPtr = nullptr;
+		if (aPottedPresent)
 		{
-			NetTrace("snapshot coin rejected: id=%u changed type old=%d new=%u", anId, (int)aCoin->mType, aType);
-			continue;
+			aPottedVisual.mSeedType = (SeedType)aWire.mPottedSeed;
+			aPottedVisual.mWhichZenGarden = (GardenType)aWire.mPottedGarden;
+			aPottedVisual.mFacing = (PottedPlant::FacingDirection)aWire.mPottedFacing;
+			aPottedVisual.mDrawVariation = (DrawVariation)aWire.mPottedVariation;
+			aPottedVisual.mPlantAge = (PottedPlantAge)aWire.mPottedAge;
+			aPottedVisualPtr = &aPottedVisual;
 		}
+		Coin* aCoin = NetGetGhostCoin(aWire.mId);
+		if (aCoin && aCoin->mType != (CoinType)aWire.mType)
+		{
+			unsigned int aDataId = mCoins.DataArrayGetID(aCoin);
+			if (mCursorObject && mCursorObject->mCoinID == (CoinID)aDataId)
+			{
+				mCursorObject->mType = SeedType::SEED_NONE;
+				mCursorObject->mCursorType = CursorType::CURSOR_TYPE_NORMAL;
+				mCursorObject->mCoinID = CoinID::COINID_NULL;
+				mApp->SetCursor(CURSOR_POINTER);
+			}
+			aCoin->Die();
+			aCoin = nullptr;
+		}
+		bool aCreated = false;
 		if (!aCoin)
 		{
-			gNetSuppressSounds = true;
-			aCoin = AddCoin(aX / 4, aY / 4, (CoinType)aType, (CoinMotion)aMotion,
-				aUsableSeed == 255 ? SeedType::SEED_NONE : (SeedType)aUsableSeed);
-			gNetSuppressSounds = false;
+			aCoin = mCoins.DataArrayAlloc();
+			if (aCoin)
+			{
+				// This factory creates stock attachments but never Collects, scores,
+				// mutates a profile/board, plays sound, or consumes gameplay RNG.
+				aCoin->CoinInitializeNetGhost((int)aWire.mPosX, (int)aWire.mPosY,
+					(CoinType)aWire.mType, (CoinMotion)aWire.mMotion, aPottedVisualPtr);
+				aCoin->mUsableSeedType = aWire.mUsableSeed == 255 ?
+					SeedType::SEED_NONE : (SeedType)aWire.mUsableSeed;
+			}
 			if (!aCoin)
 				continue;
-			aCoin->mNetId = anId;
+			aCreated = true;
+			aCoin->mNetId = aWire.mId;
 			aCoin->mNetGhost = true;
-			aCoin->mHitGround = true;
 		}
-		aCoin->mNetTargetX = aX / 4.0f;
-		aCoin->mNetTargetY = aY / 4.0f;
-		aCoin->mCoinMotion = (CoinMotion)aMotion;
-		aCoin->mIsBeingCollected = (aCFlags & 1) != 0;
-		aCoin->mHitGround = (aCFlags & 2) != 0;
-		aCoin->mUsableSeedType = aUsableSeed == 255 ? SeedType::SEED_NONE : (SeedType)aUsableSeed;
+		aCoin->mNetTargetX = aWire.mPosX;
+		aCoin->mNetTargetY = aWire.mPosY;
+		if (aCreated)
+		{
+			aCoin->mPosX = aWire.mPosX;
+			aCoin->mPosY = aWire.mPosY;
+		}
+		// Coin::Draw uses absolute mPos coordinates; mX/mY must stay at the
+		// GameObject origin or the renderer translates the coin twice.
+		aCoin->mX = 0;
+		aCoin->mY = 0;
+		aCoin->mRenderOrder = aWire.mRenderOrder;
+		aCoin->mScale = aWire.mScaleQ / 4096.0f;
+		aCoin->mCollectionDistance = aWire.mCollectionDistanceQ / 4.0f;
+		aCoin->mCoinMotion = (CoinMotion)aWire.mMotion;
+		aCoin->mIsBeingCollected = (aWire.mFlags & 1) != 0;
+		aCoin->mHitGround = (aWire.mFlags & 2) != 0;
+		aCoin->mUsableSeedType = aWire.mUsableSeed == 255 ? SeedType::SEED_NONE : (SeedType)aWire.mUsableSeed;
+		if (aPottedPresent)
+		{
+			aCoin->mPottedPlantSpec.mSeedType = aPottedVisual.mSeedType;
+			aCoin->mPottedPlantSpec.mWhichZenGarden = aPottedVisual.mWhichZenGarden;
+			aCoin->mPottedPlantSpec.mFacing = aPottedVisual.mFacing;
+			aCoin->mPottedPlantSpec.mDrawVariation = aPottedVisual.mDrawVariation;
+			aCoin->mPottedPlantSpec.mPlantAge = aPottedVisual.mPlantAge;
+		}
+		aCoin->mFadeCount = aWire.mFadeCount;
+		aCoin->mDisappearCounter = aWire.mDisappearCounter;
 	}
 	{
 		Coin* aCoin = nullptr;
 		while (mCoins.IterateNext(aCoin))
 			if (aCoin->mNetGhost && !aCoin->mDead && aSeenCoins.find(aCoin->mNetId) == aSeenCoins.end())
 			{
-				if (aCoin->mIsBeingCollected)
-					aCoin->StartFade();
-				else
-					aCoin->Die();
+				// Once the host omits a coin it is authoritative-dead.  Do not restart
+				// StartFade on every snapshot and never let Coin::Update reach ScoreCoin.
+				unsigned int aDataId = mCoins.DataArrayGetID(aCoin);
+				if (mCursorObject && mCursorObject->mCoinID == (CoinID)aDataId)
+				{
+					mCursorObject->mType = SeedType::SEED_NONE;
+					mCursorObject->mCursorType = CursorType::CURSOR_TYPE_NORMAL;
+					mCursorObject->mCoinID = CoinID::COINID_NULL;
+					mApp->SetCursor(CURSOR_POINTER);
+				}
+				aCoin->Die();
 			}
 	}
 
@@ -1738,6 +2081,8 @@ void Board::NetApplySnapshot(NetBuffer& b)
 				 (!aGridItem->mNetGhost && aGridItem->mGridItemType == GridItemType::GRIDITEM_SCARY_POT)))
 				aGridItem->GridItemDie();
 	}
+	if (b.Remaining() != 0)
+		NetTrace("snapshot ignored trailing bytes=%zu", b.Remaining());
 }
 
 // ==========================================================================
@@ -1798,31 +2143,53 @@ void Board::NetGhostUpdateZombie(Zombie* theZombie, uint8_t theAnimKey)
 
 void Board::NetGhostUpdateOthers()
 {
-	// projectiles: interpolate
+	// Host pause freezes all client-side presentation clocks and interpolation.
+	if (mPaused)
+		return;
+
+	// Projectiles: interpolate every float used by Draw, keep the integer
+	// GameObject origin coherent, and advance only the attached visual tree.
 	Projectile* aProjectile = nullptr;
 	while (mProjectiles.IterateNext(aProjectile))
 	{
 		if (aProjectile->mDead || !aProjectile->mNetGhost)
 			continue;
-		aProjectile->mX += (int)((aProjectile->mNetTargetX - aProjectile->mX) * 0.35f);
-		aProjectile->mY += (int)((aProjectile->mNetTargetY - aProjectile->mY) * 0.35f);
+		aProjectile->mPosX += (aProjectile->mNetTargetX - aProjectile->mPosX) * 0.35f;
+		aProjectile->mPosY += (aProjectile->mNetTargetY - aProjectile->mPosY) * 0.35f;
+		aProjectile->mPosZ += (aProjectile->mNetTargetZ - aProjectile->mPosZ) * 0.35f;
+		aProjectile->mRotation += (aProjectile->mNetTargetRotation - aProjectile->mRotation) * 0.35f;
+		aProjectile->mX = (int)aProjectile->mPosX;
+		aProjectile->mY = (int)(aProjectile->mPosY + aProjectile->mPosZ);
+		AttachmentUpdateAndMove(aProjectile->mAttachmentID,
+			aProjectile->mPosX, aProjectile->mPosY + aProjectile->mPosZ);
 	}
 
-	// coins: interpolate unless being collected (then local flight anim)
+	// Coins: host position is authoritative both while falling and while flying
+	// into the bank.  Never call Coin::Update here: it can reach ScoreCoin and
+	// mutate sun/profile/gameplay state on a client.
 	Coin* aCoin = nullptr;
 	while (mCoins.IterateNext(aCoin))
 	{
 		if (aCoin->mDead || !aCoin->mNetGhost)
 			continue;
-		if (aCoin->mIsBeingCollected)
+		aCoin->mPosX += (aCoin->mNetTargetX - aCoin->mPosX) * 0.35f;
+		aCoin->mPosY += (aCoin->mNetTargetY - aCoin->mPosY) * 0.35f;
+		aCoin->mX = 0;
+		aCoin->mY = 0;
+		if (aCoin->mAttachmentID != AttachmentID::ATTACHMENTID_NULL)
 		{
-			aCoin->Update();
-			continue;
+			float anOffsetX = 0.0f;
+			float anOffsetY = 0.0f;
+			if (aCoin->mType == CoinType::COIN_DIAMOND)
+			{
+				anOffsetX = 18.0f - 18.0f * aCoin->mScale;
+				anOffsetY = 13.0f - 13.0f * aCoin->mScale;
+			}
+			AttachmentUpdateAndMove(aCoin->mAttachmentID,
+				aCoin->mPosX + anOffsetX, aCoin->mPosY + anOffsetY);
+			AttachmentOverrideColor(aCoin->mAttachmentID, aCoin->GetColor());
+			AttachmentOverrideScale(aCoin->mAttachmentID, aCoin->mScale);
 		}
-		aCoin->mPosX += (aCoin->mNetTargetX - aCoin->mPosX) * 0.2f;
-		aCoin->mPosY += (aCoin->mNetTargetY - aCoin->mPosY) * 0.2f;
-		aCoin->mX = (int)aCoin->mPosX;
-		aCoin->mY = (int)aCoin->mPosY;
 	}
 
 	// mowers: interpolate

@@ -24,7 +24,7 @@ namespace LawnNet
 // (the host broadcasts the same sounds via events).
 extern bool gNetSuppressSounds;
 
-static const uint32_t NET_PROTOCOL_VERSION = 9; // authoritative intro presentation, including Crazy Dave
+static const uint32_t NET_PROTOCOL_VERSION = 10; // authoritative projectile/coin presentation wire state
 static const uint16_t NET_DEFAULT_PORT = 27713;			// PvZ co-op port
 static const int NET_MAX_PLAYERS = 4;					// 1 host + 3 clients
 static const int NET_MAX_NICK = 16;						// bytes (without terminator)
@@ -119,7 +119,7 @@ enum NetBoardEvent : uint8_t
 {
 	BOARDEV_PLANT_ADDED = 0,		// u16 id, u8 type, u8 imitater, u8 row, u8 col, u8 flags
 	BOARDEV_PLANT_REMOVED = 1,		// u16 id
-	BOARDEV_SUN_ADDED = 2,			// u16 id, u8 coinType, u8 motion, i16 x4, i16 y4, u16 value, u8 usableSeed
+	BOARDEV_SUN_ADDED = 2,			// u16 id, u8 coinType, u8 motion, i16 x4/y4, u16 value, u8 usableSeed, u8 potted seed/garden/facing/variation/age
 	BOARDEV_SUN_COLLECTED = 3,		// u16 id
 	BOARDEV_ZOMBIE_ADDED = 4,		// u16 id, u8 type, u8 row, u8 variant, u8 fromWave, f32 speed, f32 posX
 	BOARDEV_ZOMBIE_REMOVED = 5,		// u16 id

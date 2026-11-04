@@ -2604,6 +2604,14 @@ Coin* Board::AddCoin(int theX, int theY, CoinType theCoinType, CoinMotion theCoi
 			anEvent.WriteI16((int16_t)(aCoin->mPosY * 4));
 			anEvent.WriteU16((uint16_t)aCoin->GetSunValue());
 			anEvent.WriteU8((uint8_t)theUsableSeedType);
+			const bool aPottedPresent = theCoinType == CoinType::COIN_PRESENT_PLANT ||
+				theCoinType == CoinType::COIN_AWARD_PRESENT;
+			anEvent.WriteU8(aPottedPresent ? (uint8_t)aCoin->mPottedPlantSpec.mSeedType : 255);
+			anEvent.WriteU8(aPottedPresent ? (uint8_t)aCoin->mPottedPlantSpec.mWhichZenGarden : 255);
+			anEvent.WriteU8(aPottedPresent ? (uint8_t)aCoin->mPottedPlantSpec.mFacing : 255);
+			anEvent.WriteU8(aPottedPresent ? (uint8_t)aCoin->mPottedPlantSpec.mDrawVariation : 255);
+			anEvent.WriteU8(aPottedPresent ? (uint8_t)aCoin->mPottedPlantSpec.mPlantAge : 255);
+			TOD_ASSERT(anEvent.Size() == 16);
 			mApp->mNetManager->SendBoardEvent(anEvent, BOARDEV_SUN_ADDED);
 		}
 	}
@@ -2649,7 +2657,9 @@ void Board::RefreshSeedPacketFromCursor()
 {
 	if (mCursorObject->mCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_USABLE_COIN)
 	{
-		mCoins.DataArrayTryToGet(mCursorObject->mCoinID)->DroppedUsableSeed();
+		Coin* aCoin = mCoins.DataArrayTryToGet(mCursorObject->mCoinID);
+		if (aCoin && !aCoin->mDead)
+			aCoin->DroppedUsableSeed();
 	}
 	else if (mCursorObject->mCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_BANK)
 	{

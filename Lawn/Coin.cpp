@@ -30,6 +30,20 @@ Coin::~Coin()
 //0x42FF60
 void Coin::CoinInitialize(int theX, int theY, CoinType theCoinType, CoinMotion theCoinMotion)
 {
+    CoinInitializeInternal(theX, theY, theCoinType, theCoinMotion, false, nullptr);
+}
+
+void Coin::CoinInitializeNetGhost(int theX, int theY, CoinType theCoinType, CoinMotion theCoinMotion, const PottedPlant* thePottedPlantVisual)
+{
+    CoinInitializeInternal(theX, theY, theCoinType, theCoinMotion, true, thePottedPlantVisual);
+    // Coin::Draw consumes absolute mPos coordinates.  Keeping the GameObject
+    // origin at zero avoids applying the translation a second time.
+    mX = 0;
+    mY = 0;
+}
+
+void Coin::CoinInitializeInternal(int theX, int theY, CoinType theCoinType, CoinMotion theCoinMotion, bool theNetPresentationOnly, const PottedPlant* thePottedPlantVisual)
+{
 	mPosX = theX;
 	mPosY = theY;
 	mType = theCoinType;
@@ -50,7 +64,22 @@ void Coin::CoinInitialize(int theX, int theY, CoinType theCoinType, CoinMotion t
 	mHasBouncyArrow = false;
 	mHitGround = false;
 	mTimesDropped = 0;
-	mPottedPlantSpec.InitializePottedPlant(SeedType::SEED_NONE);
+	if (theNetPresentationOnly)
+	{
+            // PottedPlant::InitializePottedPlant consumes gameplay RNG.  Network
+            // ghosts need only a deterministic, inert draw specification.
+            memset(&mPottedPlantSpec, 0, sizeof(mPottedPlantSpec));
+            mPottedPlantSpec.mSeedType = SeedType::SEED_NONE;
+            mPottedPlantSpec.mWhichZenGarden = GardenType::GARDEN_MAIN;
+            mPottedPlantSpec.mFacing = PottedPlant::FacingDirection::FACING_RIGHT;
+            mPottedPlantSpec.mDrawVariation = DrawVariation::VARIATION_NORMAL;
+            mPottedPlantSpec.mPlantAge = PottedPlantAge::PLANTAGE_SPROUT;
+            mPottedPlantSpec.mFeedingsPerGrow = 3;
+	}
+	else
+	{
+            mPottedPlantSpec.InitializePottedPlant(SeedType::SEED_NONE);
+	}
     mFilterEffect = FilterEffect::FILTER_EFFECT_NONE;
     mReanimationID = ReanimationID::REANIMATIONID_NULL;
 
@@ -75,8 +104,8 @@ void Coin::CoinInitialize(int theX, int theY, CoinType theCoinType, CoinMotion t
         Reanimation* aCoinReanim = mApp->AddReanimation(0.0f, 0.0f, 0, ReanimationType::REANIM_COIN_SILVER);
         aCoinReanim->SetPosition(mPosX + aPosX, mPosY + aPosY);
         aCoinReanim->mLoopType = ReanimLoopType::REANIM_LOOP;
-        aCoinReanim->mAnimTime = RandRangeFloat(0.0f, 0.99f);
-        aCoinReanim->mAnimRate *= RandRangeFloat(0.6f, 1.0f);
+        aCoinReanim->mAnimTime = theNetPresentationOnly ? 0.0f : RandRangeFloat(0.0f, 0.99f);
+        aCoinReanim->mAnimRate *= theNetPresentationOnly ? 0.8f : RandRangeFloat(0.6f, 1.0f);
         mReanimationID = mApp->ReanimationGetID(aCoinReanim);
         AttachReanim(mAttachmentID, aCoinReanim, aPosX, aPosY);
     }
@@ -90,8 +119,8 @@ void Coin::CoinInitialize(int theX, int theY, CoinType theCoinType, CoinMotion t
         Reanimation* aCoinReanim = mApp->AddReanimation(0.0f, 0.0f, 0, ReanimationType::REANIM_COIN_GOLD);
         aCoinReanim->SetPosition(mPosX + aPosX, mPosY + aPosY);
         aCoinReanim->mLoopType = ReanimLoopType::REANIM_LOOP;
-        aCoinReanim->mAnimTime = RandRangeFloat(0.0f, 0.99f);
-        aCoinReanim->mAnimRate *= RandRangeFloat(0.6f, 1.0f);
+        aCoinReanim->mAnimTime = theNetPresentationOnly ? 0.0f : RandRangeFloat(0.0f, 0.99f);
+        aCoinReanim->mAnimRate *= theNetPresentationOnly ? 0.8f : RandRangeFloat(0.6f, 1.0f);
         mReanimationID = mApp->ReanimationGetID(aCoinReanim);
         AttachReanim(mAttachmentID, aCoinReanim, aPosX, aPosY);
     }
@@ -105,8 +134,8 @@ void Coin::CoinInitialize(int theX, int theY, CoinType theCoinType, CoinMotion t
         Reanimation* aCoinReanim = mApp->AddReanimation(0.0f, 0.0f, 0, ReanimationType::REANIM_DIAMOND);
         aCoinReanim->SetPosition(mPosX + aPosX, mPosY + aPosY);
         aCoinReanim->mLoopType = ReanimLoopType::REANIM_LOOP;
-        aCoinReanim->mAnimTime = RandRangeFloat(0.0f, 0.99f);
-        aCoinReanim->mAnimRate = RandRangeFloat(50.0f, 80.0f);
+        aCoinReanim->mAnimTime = theNetPresentationOnly ? 0.0f : RandRangeFloat(0.0f, 0.99f);
+        aCoinReanim->mAnimRate = theNetPresentationOnly ? 65.0f : RandRangeFloat(50.0f, 80.0f);
         mReanimationID = mApp->ReanimationGetID(aCoinReanim);
         AttachReanim(mAttachmentID, aCoinReanim, aPosX, aPosY);
     }
@@ -188,7 +217,29 @@ void Coin::CoinInitialize(int theX, int theY, CoinType theCoinType, CoinMotion t
 
         mWidth = IMAGE_PRESENT->GetCelWidth();
         mHeight = IMAGE_PRESENT->GetCelHeight();
-        if (mApp->IsSurvivalEndless(mApp->mGameMode) || mApp->IsEndlessIZombie(mApp->mGameMode) || mApp->IsEndlessScaryPotter(mApp->mGameMode) || mApp->IsLastStandEndless(mApp->mGameMode))
+        if (theNetPresentationOnly)
+        {
+            const bool aValidVisual = thePottedPlantVisual &&
+                (int)thePottedPlantVisual->mSeedType >= 0 &&
+                (int)thePottedPlantVisual->mSeedType < (int)SeedType::NUM_SEED_TYPES &&
+                (int)thePottedPlantVisual->mWhichZenGarden >= 0 &&
+                (int)thePottedPlantVisual->mWhichZenGarden <= (int)GardenType::GARDEN_AQUARIUM &&
+                (int)thePottedPlantVisual->mFacing >= 0 &&
+                (int)thePottedPlantVisual->mFacing <= (int)PottedPlant::FacingDirection::FACING_LEFT &&
+                (int)thePottedPlantVisual->mDrawVariation >= 0 &&
+                (int)thePottedPlantVisual->mDrawVariation < (int)DrawVariation::NUM_VARIATIONS &&
+                (int)thePottedPlantVisual->mPlantAge >= 0 &&
+                (int)thePottedPlantVisual->mPlantAge <= (int)PottedPlantAge::PLANTAGE_FULL;
+
+            // A malformed or early event still receives a deterministic icon;
+            // the next validated snapshot replaces it with the host visual.
+            mPottedPlantSpec.mSeedType = aValidVisual ? thePottedPlantVisual->mSeedType : SeedType::SEED_PEASHOOTER;
+            mPottedPlantSpec.mWhichZenGarden = aValidVisual ? thePottedPlantVisual->mWhichZenGarden : GardenType::GARDEN_MAIN;
+            mPottedPlantSpec.mFacing = aValidVisual ? thePottedPlantVisual->mFacing : PottedPlant::FacingDirection::FACING_RIGHT;
+            mPottedPlantSpec.mDrawVariation = aValidVisual ? thePottedPlantVisual->mDrawVariation : DrawVariation::VARIATION_NORMAL;
+            mPottedPlantSpec.mPlantAge = aValidVisual ? thePottedPlantVisual->mPlantAge : PottedPlantAge::PLANTAGE_SPROUT;
+        }
+        else if (mApp->IsSurvivalEndless(mApp->mGameMode) || mApp->IsEndlessIZombie(mApp->mGameMode) || mApp->IsEndlessScaryPotter(mApp->mGameMode) || mApp->IsLastStandEndless(mApp->mGameMode))
         {
             SeedType aSeedType = mApp->mZenGarden->PickRandomSeedType();
             mPottedPlantSpec.InitializePottedPlant(aSeedType);
@@ -302,26 +353,26 @@ void Coin::CoinInitialize(int theX, int theY, CoinType theCoinType, CoinMotion t
     case CoinMotion::COIN_MOTION_FROM_SKY:
         mVelY = 0.67f;
         mVelX = 0.0f;
-        mGroundY = Rand(250) + 300;
+        mGroundY = theNetPresentationOnly ? theY : Rand(250) + 300;
         break;
 
     case CoinMotion::COIN_MOTION_FROM_SKY_SLOW:
         mVelY = 0.33f;
         mVelX = 0.0f;
-        mGroundY = Rand(250) + 300;
+        mGroundY = theNetPresentationOnly ? theY : Rand(250) + 300;
         break;
 
     case CoinMotion::COIN_MOTION_FROM_PLANT:
-        mVelY = -1.7f - RandRangeFloat(0.0f, 1.7f);
-        mVelX = -0.4f + RandRangeFloat(0.0f, 0.8f);
-        mGroundY = mPosY + 15 + Rand(20);
+        mVelY = theNetPresentationOnly ? 0.0f : -1.7f - RandRangeFloat(0.0f, 1.7f);
+        mVelX = theNetPresentationOnly ? 0.0f : -0.4f + RandRangeFloat(0.0f, 0.8f);
+        mGroundY = theNetPresentationOnly ? theY : (int)(mPosY + 15 + Rand(20));
         mScale = 0.4f;
         break;
 
     case CoinMotion::COIN_MOTION_COIN:
-        mVelY = -3.0f - RandRangeFloat(0.0f, 2.0f);
-        mVelX = -0.5f + RandRangeFloat(0.0f, 1.0f);
-        mGroundY = mPosY + 45 + Rand(20);
+        mVelY = theNetPresentationOnly ? 0.0f : -3.0f - RandRangeFloat(0.0f, 2.0f);
+        mVelX = theNetPresentationOnly ? 0.0f : -0.5f + RandRangeFloat(0.0f, 1.0f);
+        mGroundY = theNetPresentationOnly ? theY : (int)(mPosY + 45 + Rand(20));
         if (mGroundY > 521)
         {
             mGroundY = 521;
@@ -358,7 +409,10 @@ void Coin::CoinInitialize(int theX, int theY, CoinType theCoinType, CoinMotion t
         mVelY = 0.0f;
         mVelX = 0.0f;
         mGroundY = 600;
-        Collect();
+        if (!theNetPresentationOnly)
+        {
+            Collect();
+        }
         break;
 
     case CoinMotion::COIN_MOTION_FROM_PRESENT:
@@ -396,12 +450,12 @@ void Coin::CoinInitialize(int theX, int theY, CoinType theCoinType, CoinMotion t
     }
     mScale *= aScale;
 
-    if (CoinGetsBouncyArrow())
+    if (!theNetPresentationOnly && CoinGetsBouncyArrow())
     {
         mNeedsBouncyArrow = true;
     }
 
-    if (mCoinMotion != CoinMotion::COIN_MOTION_FROM_PRESENT)
+    if (!theNetPresentationOnly && mCoinMotion != CoinMotion::COIN_MOTION_FROM_PRESENT)
     {
         PlayLaunchSound();
     }

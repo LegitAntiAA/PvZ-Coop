@@ -46,6 +46,7 @@ public:
     ~Coin();
 
     void                    CoinInitialize(int theX, int theY, CoinType theCoinType, CoinMotion theCoinMotion);
+    void                    CoinInitializeNetGhost(int theX, int theY, CoinType theCoinType, CoinMotion theCoinMotion, const PottedPlant* thePottedPlantVisual);
     void                    MouseDown(int x, int y, int theClickCount);
     bool                    MouseHitTest(int theX, int theY, HitResult* theHitResult);
     void                    Die();
@@ -77,6 +78,9 @@ public:
     void                    PlayGroundSound();
 
     static /*inline*/ bool  IsMoney(CoinType theType);
+
+private:
+    void                    CoinInitializeInternal(int theX, int theY, CoinType theCoinType, CoinMotion theCoinMotion, bool theNetPresentationOnly, const PottedPlant* thePottedPlantVisual);
 };
 
 #endif

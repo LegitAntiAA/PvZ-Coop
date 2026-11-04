@@ -62,12 +62,15 @@ public:
     float                   mRad;
     unsigned int            mPiercedZombies[2];
     int                     mNumPierced;
+    float                   mNetTargetZ;           // co-op: authoritative presentation height
+    float                   mNetTargetRotation;    // co-op: authoritative presentation rotation
 
 public:
     Projectile();
     ~Projectile();
 
     void                    ProjectileInitialize(int theX, int theY, int theRenderOrder, int theRow, ProjectileType theProjectileType);
+    void                    ProjectileInitializeNetGhost(int theX, int theY, int theRenderOrder, int theRow, ProjectileType theProjectileType);
     void                    Update();
     void                    Draw(Graphics* g);
     void                    DrawShadow(Graphics* g);
@@ -92,6 +95,9 @@ public:
     bool                    IsZombieHitBySplash(Zombie* theZombie);
     bool                    PeaAboutToHitTorchwood();
     void                    OverrideAngle(float theAngle);
+
+private:
+    void                    ProjectileInitializeInternal(int theX, int theY, int theRenderOrder, int theRow, ProjectileType theProjectileType, bool theNetPresentationOnly);
 
 };
 
