@@ -15,6 +15,7 @@
 #include "../../Resources.h"
 #include "../../Sexy.TodLib/Reanimator.h"
 #include "../../Sexy.TodLib/Attachment.h"
+#include "../../Sexy.TodLib/TodParticle.h"
 #include "../System/PlayerInfo.h"
 #include "../../GameConstants.h"
 #include "../../SexyAppFramework/Graphics.h"
@@ -1126,7 +1127,11 @@ void Board::NetApplyEvent(NetBuffer& b)
 		uint16_t anId = b.ReadU16Or();
 		Plant* aPlant = NetGetGhostPlant(anId);
 		if (aPlant)
-			aPlant->Die();
+		{
+			// A client ghost must not execute Plant::Die gameplay callbacks.
+			aPlant->mDead = true;
+			aPlant->RemoveEffects();
+		}
 		break;
 	}
 	case BOARDEV_SUN_ADDED:
@@ -1303,8 +1308,115 @@ void Board::NetApplyEvent(NetBuffer& b)
 		ShakeBoard(anAmount, anAmount / 2);
 		break;
 	}
+	case BOARDEV_POTATO_EXPLODED:
+	{
+		static const size_t POTATO_EVENT_BYTES = 7;
+		if (b.Remaining() != POTATO_EVENT_BYTES)
+		{
+			NetTrace("POTATO_EXPLODED rejected: payload bytes=%zu expected=%zu", b.Remaining(), POTATO_EVENT_BYTES);
+			break;
+		}
+		uint16_t anId = b.ReadU16Or();
+		int anX = b.ReadI16Or();
+		int anY = b.ReadI16Or();
+		uint8_t aRow = b.ReadU8Or();
+		if (anId == 0 || aRow >= MAX_GRID_SIZE_Y || anX < -512 || anX > 1536 || anY < -512 || anY > 1536)
+		{
+			NetTrace("POTATO_EXPLODED rejected: id=%u pos=(%d,%d) row=%u", anId, anX, anY, aRow);
+			break;
+		}
+
+		Plant* aPlant = NetGetGhostPlant(anId);
+		TodParticleSystem* aParticle = mApp->AddTodParticle(
+			(float)anX, (float)anY,
+			MakeRenderOrder(RenderLayer::RENDER_LAYER_PARTICLE, aRow, 0),
+			ParticleEffect::PARTICLE_POTATO_MINE);
+		if (aPlant && aPlant->mSeedType == SeedType::SEED_POTATOMINE)
+		{
+			Reanimation* aBodyReanim = mApp->ReanimationTryToGet(aPlant->mBodyReanimID);
+			if (aParticle && aBodyReanim && aBodyReanim->mFilterEffect != FilterEffect::FILTER_EFFECT_NONE)
+				aParticle->OverrideFilterEffect(nullptr, aBodyReanim->mFilterEffect);
+			aPlant->mDead = true;
+			aPlant->RemoveEffects();
+		}
+		ShakeBoard(3, -4);
+		break;
+	}
 	default:
 		break;
+	}
+}
+
+void Board::NetBroadcastPotatoExplosion(Plant* thePlant)
+{
+	NetManager* aNet = mApp ? mApp->mNetManager : nullptr;
+	if (!thePlant || !aNet || !aNet->IsHosting())
+		return;
+	if (thePlant->mNetId == 0)
+		thePlant->mNetId = NetAllocId();
+	if (thePlant->mNetId == 0)
+		return;
+
+	NetBuffer anEvent;
+	anEvent.WriteU16(thePlant->mNetId);
+	anEvent.WriteI16((int16_t)max(-512, min(1536, thePlant->mX + thePlant->mWidth / 2)));
+	anEvent.WriteI16((int16_t)max(-512, min(1536, thePlant->mY + thePlant->mHeight / 2)));
+	anEvent.WriteU8((uint8_t)max(0, min(MAX_GRID_SIZE_Y - 1, thePlant->mRow)));
+	aNet->SendBoardEvent(anEvent, BOARDEV_POTATO_EXPLODED);
+}
+
+void Board::NetApplyPlantPresentation(Plant* thePlant, PlantState thePreviousState, bool theCreatedOrAdopted)
+{
+	if (!thePlant || thePlant->mSeedType != SeedType::SEED_POTATOMINE)
+		return;
+
+	Reanimation* aBodyReanim = mApp->ReanimationTryToGet(thePlant->mBodyReanimID);
+	if (!aBodyReanim)
+		return;
+
+	if (thePlant->mState == PlantState::STATE_POTATO_RISING &&
+		(theCreatedOrAdopted || thePreviousState != PlantState::STATE_POTATO_RISING))
+	{
+		mApp->AddTodParticle(thePlant->mX + thePlant->mWidth / 2,
+			thePlant->mY + thePlant->mHeight / 2, thePlant->mRenderOrder,
+			ParticleEffect::PARTICLE_POTATO_MINE_RISE);
+		aBodyReanim->StartBlend(20);
+		aBodyReanim->mAnimRate = 18.0f;
+		aBodyReanim->mLoopType = ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD;
+		aBodyReanim->mLoopCount = 0;
+		aBodyReanim->SetFramesForLayer("anim_rise");
+	}
+
+	if (thePlant->mState != PlantState::STATE_POTATO_ARMED)
+		return;
+
+	if (theCreatedOrAdopted || thePreviousState != PlantState::STATE_POTATO_ARMED)
+	{
+		aBodyReanim->mAnimRate = 13.0f;
+		aBodyReanim->mLoopType = ReanimLoopType::REANIM_LOOP;
+		aBodyReanim->mLoopCount = 0;
+		aBodyReanim->SetFramesForLayer("anim_armed");
+	}
+
+	// A late join can first observe an already armed mine.  Materialize its
+	// attached glow without consuming gameplay RNG and never create duplicates.
+	if (!mApp->ReanimationTryToGet(thePlant->mLightReanimID))
+	{
+		Reanimation* aLightReanim = mApp->AddReanimation(0.0f, 0.0f,
+			thePlant->mRenderOrder + 2, GetPlantDefinition(thePlant->mSeedType).mReanimationType);
+		if (aLightReanim)
+		{
+			aLightReanim->mLoopType = ReanimLoopType::REANIM_LOOP;
+			aLightReanim->mAnimRate = 11.0f;
+			aLightReanim->SetFramesForLayer("anim_glow");
+			aLightReanim->mFrameCount = 10;
+			aLightReanim->ShowOnlyTrack("anim_glow");
+			aLightReanim->SetTruncateDisappearingFrames("anim_glow", false);
+			thePlant->mLightReanimID = mApp->ReanimationGetID(aLightReanim);
+			aLightReanim->AttachToAnotherReanimation(aBodyReanim, "anim_light");
+			if (aBodyReanim->mFilterEffect != FilterEffect::FILTER_EFFECT_NONE)
+				aLightReanim->mFilterEffect = FilterEffect::FILTER_EFFECT_WASHED_OUT;
+		}
 	}
 }
 
@@ -1615,6 +1727,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 			aPlant->mY = aWire.mPosY;
 		}
 		aPlant->mRenderOrder = aWire.mRenderOrder;
+		PlantState aPreviousState = aPlant->mState;
 		aPlant->mPlantHealth = aWire.mHealth;
 		aPlant->mPlantMaxHealth = aWire.mMaxHealth;
 		aPlant->mState = (PlantState)aWire.mState;
@@ -1622,13 +1735,19 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		aPlant->mSquished = (aWire.mFlags & 2) != 0;
 		aPlant->mRecentlyEatenCountdown = (aWire.mFlags & 4) ? 20 : 0;
 		aPlant->mEatenFlashCountdown = (aWire.mFlags & 8) ? 8 : 0;
+		NetApplyPlantPresentation(aPlant, aPreviousState, aCreatedOrAdopted);
 	}
 	{
 		Plant* aPlant = nullptr;
 		while (mPlants.IterateNext(aPlant))
 			if (!aPlant->mDead &&
-				((aPlant->mNetGhost && aSeenPlants.find(aPlant->mNetId) == aSeenPlants.end()) || !aPlant->mNetGhost))
-				aPlant->Die();
+					((aPlant->mNetGhost && aSeenPlants.find(aPlant->mNetId) == aSeenPlants.end()) || !aPlant->mNetGhost))
+			{
+				// Snapshot omission is authoritative.  Retire presentation objects
+				// without client-side challenge callbacks, loot, damage or RNG.
+				aPlant->mDead = true;
+				aPlant->RemoveEffects();
+			}
 	}
 
 	// ---- zombies ----

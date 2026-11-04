@@ -605,6 +605,8 @@ public:
 	void							NetDrainMessages();
 	void							NetApplyEvent(LawnNet::NetBuffer& thePayload);
 	void							NetApplySnapshot(LawnNet::NetBuffer& thePayload);
+	void							NetBroadcastPotatoExplosion(Plant* thePlant);
+	void							NetApplyPlantPresentation(Plant* thePlant, PlantState thePreviousState, bool theCreatedOrAdopted);
 	Plant*							NetGetGhostPlant(unsigned short theId);
 	Zombie*							NetGetGhostZombie(unsigned short theId);
 	Projectile*						NetGetGhostProjectile(unsigned short theId);
