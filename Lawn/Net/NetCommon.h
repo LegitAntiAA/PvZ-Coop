@@ -117,7 +117,7 @@ enum NetBoardEvent : uint8_t
 	BOARDEV_PLANT_REMOVED = 1,		// u16 id
 	BOARDEV_SUN_ADDED = 2,			// u16 id, u8 coinType, u16 x, u16 y, u16 value
 	BOARDEV_SUN_COLLECTED = 3,		// u16 id
-	BOARDEV_ZOMBIE_ADDED = 4,		// u16 id, u8 type, u8 fromWave, u8 variant, u8 row, f32 speed...
+	BOARDEV_ZOMBIE_ADDED = 4,		// u16 id, u8 type, u8 row, u8 variant, u8 fromWave, f32 speed, f32 posX
 	BOARDEV_ZOMBIE_REMOVED = 5,		// u16 id
 	BOARDEV_WAVE_SPAWNED = 6,		// u8 wave (banner/horn handled by host sound events below)
 	BOARDEV_SOUND = 7,				// u16 soundId

@@ -3381,6 +3381,13 @@ Zombie* Board::AddZombieInRow(ZombieType theZombieType, int theRow, int theFromW
 	bool aVariant = !Rand(5);
 	Zombie* aZombie = mZombies.DataArrayAlloc();
 	aZombie->ZombieInitialize(theRow, theZombieType, aVariant, nullptr, theFromWave);
+	if (IsPvPMode())
+	{
+		// PvP placement chooses a lane, not an on-screen position.  Always enter
+		// from beyond the right edge just like a regular wave zombie.
+		aZombie->mPosX = BOARD_WIDTH + 120.0f + Rand(80);
+		aZombie->mX = (int)aZombie->mPosX;
+	}
 	if (theZombieType == ZombieType::ZOMBIE_BOBSLED && aZombie->IsOnBoard())
 	{
 		for (int _i = 0; _i < 3; _i++)
@@ -3421,6 +3428,7 @@ Zombie* Board::AddZombieInRow(ZombieType theZombieType, int theRow, int theFromW
 			anEvent.WriteU8(aVariant ? 1 : 0);
 			anEvent.WriteU8((uint8_t)max(0, theFromWave));
 			anEvent.WriteF32(aZombie->mVelX);
+			anEvent.WriteF32(aZombie->mPosX);
 			mApp->mNetManager->SendBoardEvent(anEvent, BOARDEV_ZOMBIE_ADDED);
 		}
 	}

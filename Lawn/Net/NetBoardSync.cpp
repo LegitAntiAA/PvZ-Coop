@@ -533,6 +533,7 @@ void Board::NetApplyEvent(NetBuffer& b)
 		uint8_t aVariant = b.ReadU8Or();
 		uint8_t aFromWave = b.ReadU8Or();
 		float aSpeed = b.ReadF32Or();
+		float aPosX = b.ReadF32Or();
 		if (!NetGetGhostZombie(anId))
 		{
 			gNetSuppressSounds = true;
@@ -544,6 +545,8 @@ void Board::NetApplyEvent(NetBuffer& b)
 				aZombie->mNetGhost = true;
 				aZombie->mVariant = aVariant != 0;
 				aZombie->mVelX = aSpeed;
+				aZombie->mPosX = aPosX;
+				aZombie->mX = (int)aPosX;
 				aZombie->mNetAnimKey = 255; // force anim apply
 			}
 		}

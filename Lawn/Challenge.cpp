@@ -6458,14 +6458,26 @@ void Challenge::PvPMouseDownWithZombie(int theX, int theY, int theClickCount)
 		int aGridY = mBoard->PlantingPixelToGridY(theX, theY, aSeedType);
 		if (aGridY != -1 && theClickCount)
 		{
-			// zombies walk in from beyond the right screen edge (like the original
-			// spawner) — the click only selects the lane
 			int aCost = mBoard->GetCurrentPlantCost(aSeedType, SEED_NONE) / 2;
 			if (mApp->mEasyPlantingCheat || mBoard->CanTakeBrains(aCost))
 			{
-				mBoard->TakeBrains(aCost);
+				if (mBoard->mZombies.mSize >= PVP_ZOMBIE_LIMIT)
+				{
+					mBoard->DisplayAdvice(_S("Zombie limit reached (100)."), MESSAGE_STYLE_HINT_LONG, ADVICE_NONE);
+					mApp->PlaySample(SOUND_BUZZER);
+					return;
+				}
+
 				ZombieType aZombieType = IZombieSeedTypeToZombieType(aSeedType);
-				mBoard->AddZombieInRow(aZombieType, aGridY, 0);
+				Zombie* aZombie = mBoard->AddZombieInRow(aZombieType, aGridY, 0);
+				if (!aZombie)
+				{
+					mApp->PlaySample(SOUND_BUZZER);
+					return;
+				}
+
+				if (!mApp->mEasyPlantingCheat)
+					mBoard->TakeBrains(aCost);
 
 				TOD_ASSERT(mBoard->mCursorObject->mSeedBankIndex >= 0 && mBoard->mCursorObject->mSeedBankIndex < mBoard->mSeedBank->mNumPackets);
 				mBoard->mSeedBank->mSeedPackets[mBoard->mCursorObject->mSeedBankIndex].WasPlanted();
