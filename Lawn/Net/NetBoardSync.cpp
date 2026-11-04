@@ -1138,6 +1138,10 @@ void Board::NetDrawTowerDefensePath(Graphics* g)
 	if (mTDPath.empty() || mApp->mGameMode != GameMode::GAMEMODE_COOP_TOWER_DEFENSE)
 		return;
 
+	// cut the matching cell out of the unsodded (dirt) lawn image, aligned the
+	// same way DrawBackdrop places the regular background
+	const int aBgX = -BOARD_OFFSET + WIDESCREEN_OFFSETX;
+	const int aBgY = WIDESCREEN_OFFSETY;
 	for (size_t i = 0; i + 1 < mTDPath.size(); i += 2)
 	{
 		int aRow = mTDPath[i] >> 1;
@@ -1145,11 +1149,16 @@ void Board::NetDrawTowerDefensePath(Graphics* g)
 		int aX = GridToPixelX(aCol, aRow);
 		int aY = GridToPixelY(aCol, aRow);
 
-		g->SetColor(Color(120, 85, 55, 120));
-		g->FillRect(aX, aY + 20, 80, 80);
-		g->SetColor(Color(80, 55, 35, 90));
-		g->FillRect(aX, aY + 20, 80, 4);
-		g->FillRect(aX, aY + 96, 80, 4);
+		if (Sexy::IMAGE_BACKGROUND1UNSODDED)
+		{
+			Rect aSrcRect(aX - aBgX, aY - aBgY, 80, 100);
+			g->DrawImage(Sexy::IMAGE_BACKGROUND1UNSODDED, aX, aY, aSrcRect);
+		}
+		else
+		{
+			g->SetColor(Color(120, 85, 55, 200));
+			g->FillRect(aX, aY, 80, 100);
+		}
 	}
 }
 

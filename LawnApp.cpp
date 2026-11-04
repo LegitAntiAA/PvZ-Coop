@@ -5161,7 +5161,9 @@ void LawnApp::NetOnStartGame(LawnNet::NetBuffer& thePayload)
 	if (mPlayerInfo && aMode == GameMode::GAMEMODE_ADVENTURE)
 		mPlayerInfo->mLevel = aLevel;
 
-	Board::SetTowerDefensePath(aPath);
+	// picked up by Board::InitLevel (the board is recreated below)
+	if (mNetManager)
+		mNetManager->mStartTDPath = aPath;
 
 	MakeNewBoard();
 	if (!mBoard)

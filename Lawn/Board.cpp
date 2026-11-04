@@ -1757,8 +1757,14 @@ void Board::InitLevel()
 	// 设定关卡出怪
 	InitZombieWaves();
 	// 设定关卡初始阳光数量
-	if (mApp->IsCoopCustomMode())
-		return; // co-op custom modes have no lawnmowers
+	// tower defense road: host/solo generate it, clients use the one from the start-game message
+	if (aGameMode == GameMode::GAMEMODE_COOP_TOWER_DEFENSE)
+	{
+		if (mApp->NetIsClient() || (mApp->mNetManager && mApp->mNetManager->IsHosting()))
+			mTDPath = mApp->mNetManager->mStartTDPath;
+		if (mTDPath.empty())
+			GenerateTowerDefensePath(mTDPath);
+	}
 	if (aGameMode == GameMode::GAMEMODE_CHALLENGE_BEGHOULED || aGameMode == GameMode::GAMEMODE_CHALLENGE_BEGHOULED_TWIST ||
 		mApp->IsScaryPotterLevel() || mApp->IsWhackAZombieLevel())
 	{
@@ -2126,6 +2132,7 @@ void Board::InitLawnMowers()
 #ifdef _DS_MINIGAMES
 		aGameMode == GameMode::GAMEMODE_CHALLENGE_BOMB_ALL_TOGETHER || aGameMode == GameMode::GAMEMODE_CHALLENGE_ZOMBIE_TRAP ||
 #endif
+		mApp->IsCoopCustomMode() || // co-op custom modes have no lawnmowers
 		mApp->IsSquirrelLevel() || mApp->IsIZombieLevel() || (StageHasRoof() && !mApp->mPlayerInfo->mPurchases[StoreItem::STORE_ITEM_ROOF_CLEANER]))
 		return;
 
@@ -7344,6 +7351,9 @@ void Board::DrawBackdrop(Graphics* g)
 		}
 	}
 
+	// tower defense road (dug-up lawn), drawn under all game objects
+	NetDrawTowerDefensePath(g);
+
 	if (mApp->mGameScene == GameScenes::SCENE_ZOMBIES_WON)
 	{
 		DrawHouseDoorBottom(g);
@@ -9875,7 +9885,6 @@ void Board::Draw(Graphics* g)
 
 	// co-op extras: weather, tower defense road, remote cursors, host-pause overlay
 	DrawEndlessWeather(g);
-	NetDrawTowerDefensePath(g);
 	NetDrawRemoteCursors(g);
 	if (mApp->NetIsClient() && mPaused)
 	{
