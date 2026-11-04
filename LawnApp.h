@@ -189,7 +189,7 @@ public:
 	void							NetOnStartGame(LawnNet::NetBuffer& thePayload);			// client: apply
 	void							NetOnHostLost();
 	void							NetOnBackToMenu();
-	void							NetOnSceneCmd(LawnNet::NetBuffer& thePayload);
+	bool							NetOnSceneCmd(uint8_t theCmd, uint32_t theParam);
 	void							NetOnProfileSync(LawnNet::NetBuffer& thePayload);
 	void							NetBroadcastProfile();									// host: push profile to clients
 	void							NetHandleRemoteInputs();

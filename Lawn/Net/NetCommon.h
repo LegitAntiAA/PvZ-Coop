@@ -24,7 +24,7 @@ namespace LawnNet
 // (the host broadcasts the same sounds via events).
 extern bool gNetSuppressSounds;
 
-static const uint32_t NET_PROTOCOL_VERSION = 16; // bush-rustle presentation event
+static const uint32_t NET_PROTOCOL_VERSION = 17; // synchronized Adventure start presentation
 static const uint16_t NET_DEFAULT_PORT = 27713;			// PvZ co-op port
 static const int NET_MAX_PLAYERS = 4;					// 1 host + 3 clients
 static const int NET_MAX_NICK = 16;						// bytes (without terminator)
@@ -132,7 +132,8 @@ enum NetSceneCmd : uint8_t
 	SCENECMD_SHOW_AWARD = 3,			// param = award type
 	SCENECMD_KILL_BOARD = 4,
 	SCENECMD_SHOW_SEED_CHOOSER = 5,
-	SCENECMD_SHOW_QUICKPLAY = 6
+	SCENECMD_SHOW_QUICKPLAY = 6,
+	SCENECMD_ADVENTURE_START_FX = 7	// param = non-zero presentation generation
 };
 
 // Board event types (NETMSG_BOARD_EVENT)

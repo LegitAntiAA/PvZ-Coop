@@ -96,6 +96,8 @@ NetManager::NetManager() :
 	mInputEpoch(1),
 	mNextInputSequence(1),
 	mInputPhase(NETINPUT_MENU),
+	mAdventureStartFxGeneration(0),
+	mLastAdventureStartFxGeneration(0),
 	mSnapshotHz(NET_SNAPSHOT_HZ_DEFAULT),
 	mAdaptiveGoodStreak(0),
 	mAdaptiveBadStreak(0),
@@ -184,6 +186,8 @@ bool NetManager::StartHost(uint16_t thePort)
 	mInputEpoch = 1;
 	mNextInputSequence = 1;
 	mInputPhase = NETINPUT_MENU;
+	mAdventureStartFxGeneration = 0;
+	mLastAdventureStartFxGeneration = 0;
 
 	mPlayers[0].Reset();
 	mPlayers[0].mActive = true;
@@ -235,6 +239,8 @@ bool NetManager::StartClient(const char* theIP, uint16_t thePort)
 	mInputEpoch = 1;
 	mNextInputSequence = 1;
 	mInputPhase = NETINPUT_MENU;
+	mAdventureStartFxGeneration = 0;
+	mLastAdventureStartFxGeneration = 0;
 	mConnecting = true;
 	mClientConnected = false;
 	strcpy_s(mConnectStatus, "Connecting...");
@@ -331,6 +337,8 @@ void NetManager::Disconnect()
 	mInputEpoch = 1;
 	mNextInputSequence = 1;
 	mInputPhase = NETINPUT_MENU;
+	mAdventureStartFxGeneration = 0;
+	mLastAdventureStartFxGeneration = 0;
 	mRemotePaused = false;
 	mAdaptiveGoodStreak = 0;
 	mAdaptiveBadStreak = 0;
@@ -1166,8 +1174,7 @@ void NetManager::HandleMessageClient(uint8_t theMsgType, NetBuffer& thePayload)
 			NetTrace("DAVE_STATE ignored without an active playing board");
 		break;
 	case NETMSG_SCENE_CMD:
-		if (mApp)
-			mApp->NetOnSceneCmd(thePayload);
+		OnSceneCmd(thePayload);
 		break;
 	case NETMSG_PROFILE_SYNC:
 		if (mApp)
@@ -1176,6 +1183,83 @@ void NetManager::HandleMessageClient(uint8_t theMsgType, NetBuffer& thePayload)
 	default:
 		break;
 	}
+}
+
+void NetManager::OnSceneCmd(NetBuffer& thePayload)
+{
+	static const size_t SCENE_CMD_BYTES = sizeof(uint8_t) + sizeof(uint32_t);
+	if (mMode != MODE_CLIENT || !mApp)
+	{
+		NetTrace("SCENE_CMD rejected: invalid receiver mode=%d app=%p", (int)mMode, (void*)mApp);
+		return;
+	}
+	if (thePayload.Remaining() != SCENE_CMD_BYTES)
+	{
+		NetTrace("SCENE_CMD rejected: expected=%zu bytes actual=%zu", SCENE_CMD_BYTES, thePayload.Remaining());
+		return;
+	}
+
+	uint8_t aCmd = 0;
+	uint32_t aParam = 0;
+	if (!thePayload.ReadU8(&aCmd) || !thePayload.ReadU32(&aParam) || thePayload.Remaining() != 0)
+	{
+		NetTrace("SCENE_CMD rejected: truncated or trailing payload");
+		return;
+	}
+	if (aCmd > SCENECMD_ADVENTURE_START_FX)
+	{
+		NetTrace("SCENE_CMD rejected: command out of range cmd=%u", (unsigned)aCmd);
+		return;
+	}
+
+	bool aParamValid = false;
+	switch (aCmd)
+	{
+	case SCENECMD_SHOW_CHALLENGE_PAGE:
+		aParamValid = aParam < (uint32_t)MAX_CHALLANGE_PAGES;
+		break;
+	case SCENECMD_SHOW_AWARD:
+		aParamValid = aParam <= (uint32_t)AWARD_PRECREDITS_ZOMBIENOTE;
+		break;
+	case SCENECMD_ADVENTURE_START_FX:
+		aParamValid = aParam != 0;
+		break;
+	default:
+		aParamValid = aParam == 0;
+		break;
+	}
+	if (!aParamValid)
+	{
+		NetTrace("SCENE_CMD rejected: invalid param cmd=%u param=%u", (unsigned)aCmd, aParam);
+		return;
+	}
+
+	if (aCmd == SCENECMD_ADVENTURE_START_FX)
+	{
+		if (mApp->mGameScene != GameScenes::SCENE_MENU || !mApp->mGameSelector || mApp->mBoard)
+		{
+			NetTrace("Adventure start FX rejected: context scene=%d selector=%p board=%p generation=%u",
+				(int)mApp->mGameScene, (void*)mApp->mGameSelector, (void*)mApp->mBoard, aParam);
+			return;
+		}
+		if (mLastAdventureStartFxGeneration != 0 &&
+			(int32_t)(aParam - mLastAdventureStartFxGeneration) <= 0)
+		{
+			NetTrace("Adventure start FX rejected: stale generation=%u last=%u",
+				aParam, mLastAdventureStartFxGeneration);
+			return;
+		}
+	}
+
+	if (!mApp->NetOnSceneCmd(aCmd, aParam))
+	{
+		NetTrace("SCENE_CMD rejected by app cmd=%u param=%u", (unsigned)aCmd, aParam);
+		return;
+	}
+
+	if (aCmd == SCENECMD_ADVENTURE_START_FX)
+		mLastAdventureStartFxGeneration = aParam;
+	NetTrace("SCENE_CMD applied cmd=%u param=%u", (unsigned)aCmd, aParam);
 }
 
 void NetManager::OnWelcome(NetBuffer& thePayload)
@@ -1723,6 +1807,30 @@ void NetManager::BroadcastSceneCmd(uint8_t theCmd, int theParam)
 	aMsg.WriteU8(theCmd);
 	aMsg.WriteI32(theParam);
 	BroadcastMessage(NETMSG_SCENE_CMD, aMsg);
+}
+
+uint32_t NetManager::BroadcastAdventureStartFx()
+{
+	if (mMode != MODE_HOST)
+	{
+		NetTrace("Adventure start FX broadcast rejected: manager is not hosting");
+		return 0;
+	}
+	uint32_t aGeneration = ++mAdventureStartFxGeneration;
+	if (aGeneration == 0)
+		aGeneration = ++mAdventureStartFxGeneration;
+	NetBuffer aMsg;
+	aMsg.WriteU8(SCENECMD_ADVENTURE_START_FX);
+	aMsg.WriteU32(aGeneration);
+	if (aMsg.Size() != sizeof(uint8_t) + sizeof(uint32_t))
+	{
+		NetTrace("Adventure start FX broadcast rejected: encoded size=%zu", aMsg.Size());
+		return 0;
+	}
+
+	BroadcastMessage(NETMSG_SCENE_CMD, aMsg);
+	NetTrace("Adventure start FX broadcast generation=%u bytes=%zu", aGeneration, aMsg.Size());
+	return aGeneration;
 }
 
 void NetManager::BroadcastStartGame(int theGameMode, int theLevel, uint32_t theBoardSeed)

@@ -123,6 +123,7 @@ public:
 	void SendBoardEvent(const NetBuffer& thePayload, uint8_t theEventType);
 	void SendSnapshot(const NetBuffer& thePayload);
 	void BroadcastSceneCmd(uint8_t theCmd, int theParam);
+	uint32_t BroadcastAdventureStartFx();
 	void ClearPendingBoardMessages(const char* theReason);
 	void AdvanceInputPhase(NetInputPhase thePhase, const char* theReason); // host barrier
 	void PurgePendingInputs(const char* theReason, int theSlot = -1);
@@ -177,6 +178,7 @@ private:
 	void OnChooserState(NetBuffer& thePayload);
 	void OnChooserStart(NetBuffer& thePayload);
 	void OnInputEpoch(NetBuffer& thePayload);
+	void OnSceneCmd(NetBuffer& thePayload);
 
 	void UpdatePings();
 	void AcceptThreadProc();
@@ -232,6 +234,8 @@ private:
 	uint32_t mInputEpoch;
 	uint32_t mNextInputSequence;			// client: non-zero sequence within mInputEpoch
 	NetInputPhase mInputPhase;
+	uint32_t mAdventureStartFxGeneration;	// host: next presentation serial
+	uint32_t mLastAdventureStartFxGeneration;	// client: last applied presentation serial
 
 	// rate
 	int mSnapshotHz;

@@ -329,7 +329,10 @@ GameSelector::GameSelector(LawnApp* theApp)
 	mApp->mMusic->MakeSureMusicIsPlaying(MusicTune::MUSIC_TUNE_TITLE_CRAZY_DAVE_MAIN_THEME);
 
 	mStartingGame = false;
+	mAdventureLaunchAuthority = false;
 	mStartingGameCounter = 0;
+	mHandReanimID = ReanimationID::REANIMATIONID_NULL;
+	mSpotLightID = ReanimationID::REANIMATIONID_NULL;
 	mMinigamesLocked = false;
 	mPuzzleLocked = false;
 	mSurvivalLocked = false;
@@ -1310,35 +1313,45 @@ void GameSelector::Update()
 		mStartingGameCounter++;
 		if (mStartingGameCounter > 450)
 		{
-			mApp->KillGameSelector();
+			// A replicated presentation owns no game-start authority.  Keep the
+			// selector alive until the host's ordered START_GAME arrives even if
+			// the connection drops and NetIsClient() subsequently becomes false.
+			if (!mAdventureLaunchAuthority)
+			{
+				mStartingGameCounter = 451;
+			}
+			else
+			{
+				mApp->KillGameSelector();
 
-			if (mApp->IsIceDemo())
-			{
-				mApp->PreNewGame(GameMode::GAMEMODE_CHALLENGE_ICE, false);
+				if (mApp->IsIceDemo())
+				{
+					mApp->PreNewGame(GameMode::GAMEMODE_CHALLENGE_ICE, false);
+					return;
+				}
+				if (mApp->IsFirstTimeAdventureMode() && mLevel == 1 && !mApp->SaveFileExists())
+				{
+					mApp->PreNewGame(GameMode::GAMEMODE_INTRO, false);
+					return;
+				}
+				if (mApp->mPlayerInfo->mNeedsMagicTacoReward && mLevel == 35)
+				{
+					StoreScreen* aStore = mApp->ShowStoreScreen();
+					aStore->SetupForIntro(601);
+					aStore->WaitForResult(true);
+					mApp->PreNewGame(GameMode::GAMEMODE_ADVENTURE, false);
+					return;
+				}
+				if (ShouldDoZenTuturialBeforeAdventure())
+				{
+					mApp->PreNewGame(GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN, false);
+					mApp->mZenGarden->SetupForZenTutorial();
+					return;
+				}
+				mApp->PreNewGame(GameMode::GAMEMODE_ADVENTURE, true);
+
 				return;
 			}
-			if (mApp->IsFirstTimeAdventureMode() && mLevel == 1 && !mApp->SaveFileExists())
-			{
-				mApp->PreNewGame(GameMode::GAMEMODE_INTRO, false);
-				return;
-			}
-			if (mApp->mPlayerInfo->mNeedsMagicTacoReward && mLevel == 35)
-			{
-				StoreScreen* aStore = mApp->ShowStoreScreen();
-				aStore->SetupForIntro(601);
-				aStore->WaitForResult(true);
-				mApp->PreNewGame(GameMode::GAMEMODE_ADVENTURE, false);
-				return;
-			}
-			if (ShouldDoZenTuturialBeforeAdventure())
-			{
-				mApp->PreNewGame(GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN, false);
-				mApp->mZenGarden->SetupForZenTutorial();
-				return;
-			}
-			mApp->PreNewGame(GameMode::GAMEMODE_ADVENTURE, true);
-			
-			return;
 		}
 		mAdventureButton->SetColor(ButtonWidget::COLOR_BKG, mStartingGameCounter % 20 < 10 ? Color(80, 80, 80) : Color::White);
 		if (mStartingGameCounter == 125)
@@ -1945,6 +1958,12 @@ void GameSelector::ButtonPress(int theId, int theClickCount)
 //0x44C590
 void GameSelector::ClickedAdventure()
 {
+	if (mApp->NetIsClient())
+	{
+		LawnNet::NetTrace("Adventure click rejected: client has no launch authority");
+		return;
+	}
+
 	if (mApp->IsTrialStageLocked() && (mLevel >= 25 || mApp->HasFinishedAdventure()))
 	{
 		if (mApp->LawnMessageBox(
@@ -1967,25 +1986,81 @@ void GameSelector::ClickedAdventure()
 		return;
 	}*/
 
+	StartAdventurePresentation(true);
+}
+
+bool GameSelector::StartAdventurePresentation(bool theAuthority)
+{
+	if (!mApp || mStartingGame)
+		return false;
+
+	if (theAuthority)
+	{
+		if (mApp->NetIsClient())
+		{
+			LawnNet::NetTrace("Adventure start FX rejected: client attempted authoritative start");
+			return false;
+		}
+
+		// The command must enter the TCP stream before any local presentation
+		// work.  START_GAME is sent only after this animation completes, so peers
+		// observe the same hand/laugh prelude before board creation.
+		if (mApp->mNetManager && mApp->mNetManager->IsHosting() &&
+			mApp->mNetManager->BroadcastAdventureStartFx() == 0)
+		{
+			LawnNet::NetTrace("Adventure start FX rejected: host could not allocate generation");
+			return false;
+		}
+	}
+	else if (!mApp->NetIsClient())
+	{
+		LawnNet::NetTrace("Adventure start FX rejected: non-client requested replica presentation");
+		return false;
+	}
+
 	mApp->mMusic->StopAllMusic();
 	mApp->PlaySample(Sexy::SOUND_LOSEMUSIC);
 	mStartingGame = true;
+	mAdventureLaunchAuthority = theAuthority;
+	mStartingGameCounter = 0;
 	
 	DisableButtons(true);
 
 	Reanimation* aHandReanim = mApp->AddReanimation(-70.0f, 10.0f, 0, ReanimationType::REANIM_ZOMBIE_HAND);
-	aHandReanim->mLoopType = ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD;
-	mHandReanimID = mApp->ReanimationGetID(aHandReanim);
+	if (aHandReanim)
+	{
+		aHandReanim->mLoopType = ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD;
+		mHandReanimID = mApp->ReanimationGetID(aHandReanim);
+		if (aHandReanim->mDefinition)
+		{
+			for (int i = 0; i < aHandReanim->mDefinition->mTracks.count; i++)
+				if (!strnicmp(aHandReanim->mDefinition->mTracks.tracks[i].mName, "rock", 4))
+					aHandReanim->mTrackInstances[i].mIgnoreClipRect = true;
+		}
+	}
+	else
+	{
+		mHandReanimID = ReanimationID::REANIMATIONID_NULL;
+		LawnNet::NetTrace("Adventure start FX: zombie hand reanimation allocation failed");
+	}
 	mApp->PlayFoley(FoleyType::FOLEY_DIRT_RISE);
-	for (int i = 0; i < aHandReanim->mDefinition->mTracks.count; i++)
-		if (!strnicmp(aHandReanim->mDefinition->mTracks.tracks[i].mName, "rock", 4))
-			aHandReanim->mTrackInstances[i].mIgnoreClipRect = true;
 
 #ifdef _HAS_GAMESELECTOR_SPOTLIGHT
 	Reanimation* aSplotLightReanim = mApp->AddReanimation(-70.0f, -10.0f, 0, ReanimationType::REANIM_SELECTORSCREEN_SPOTLIGHT);
-	aSplotLightReanim->mLoopType = ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD;
-	mSpotLightID = mApp->ReanimationGetID(aSplotLightReanim);
+	if (aSplotLightReanim)
+	{
+		aSplotLightReanim->mLoopType = ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD;
+		mSpotLightID = mApp->ReanimationGetID(aSplotLightReanim);
+	}
+	else
+	{
+		mSpotLightID = ReanimationID::REANIMATIONID_NULL;
+		LawnNet::NetTrace("Adventure start FX: spotlight reanimation allocation failed");
+	}
 #endif
+
+	LawnNet::NetTrace("Adventure start FX applied authority=%d", theAuthority ? 1 : 0);
+	return true;
 }
 
 //0x44C890

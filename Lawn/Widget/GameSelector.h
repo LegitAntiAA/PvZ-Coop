@@ -85,6 +85,7 @@ public:
 #endif
     Widget*                     mOverlayWidget;             //+0xBC
     bool                        mStartingGame;              //+0xC0
+    bool                        mAdventureLaunchAuthority;  //+0xC1, owns transition to PreNewGame
     int                         mStartingGameCounter;       //+0xC4
     bool                        mMinigamesLocked;           //+0xC8
     bool                        mPuzzleLocked;              //+0xC9
@@ -146,6 +147,7 @@ public:
     void                        SyncButtons();
     void                        AddTrophySparkle();
     void                        ClickedAdventure();
+    bool                        StartAdventurePresentation(bool theAuthority);
     void                        UpdateTooltip();
     /*inline*/ bool             ShouldDoZenTuturialBeforeAdventure();
     void                        AddPreviewProfiles();

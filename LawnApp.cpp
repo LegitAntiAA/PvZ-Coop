@@ -1232,6 +1232,12 @@ bool LawnApp::WriteCurrentUserConfig()
 //0x44F560
 void LawnApp::PreNewGame(GameMode theGameMode, bool theLookForSavedGame)
 {
+	if (NetIsClient())
+	{
+		LawnNet::NetTrace("client PreNewGame rejected mode=%d saved=%d", (int)theGameMode, theLookForSavedGame ? 1 : 0);
+		return;
+	}
+
 	//if (NeedRegister())
 	//{
 	//	ShowGameSelector();
@@ -1270,6 +1276,13 @@ void LawnApp::PreNewGame(GameMode theGameMode, bool theLookForSavedGame)
 
 void LawnApp::PreNewGame(GameMode theGameMode, bool theLookForSavedGame, int theLevel)
 {
+	if (NetIsClient())
+	{
+		LawnNet::NetTrace("client PreNewGame(level) rejected mode=%d level=%d saved=%d",
+			(int)theGameMode, theLevel, theLookForSavedGame ? 1 : 0);
+		return;
+	}
+
 	//if (NeedRegister())
 	//{
 	//	ShowGameSelector();
@@ -5413,37 +5426,50 @@ void LawnApp::NetOnBackToMenu()
 	}
 }
 
-void LawnApp::NetOnSceneCmd(LawnNet::NetBuffer& thePayload)
+bool LawnApp::NetOnSceneCmd(uint8_t aCmd, uint32_t aParam)
 {
-	uint8_t aCmd = thePayload.ReadU8Or();
-	int aParam = thePayload.ReadI32Or();
-
 	switch (aCmd)
 	{
 	case LawnNet::SCENECMD_SHOW_GAME_SELECTOR:
 		KillBoard();
 		ShowGameSelector();
-		break;
+		return true;
 	case LawnNet::SCENECMD_SHOW_CHALLENGE_PAGE:
 		if (mGameSelector)
 			KillGameSelector();
 		ShowChallengeScreen((ChallengePage)aParam);
-		break;
+		return true;
 	case LawnNet::SCENECMD_SHOW_STORE:
 		if (mBoard && !GetDialog(Dialogs::DIALOG_STORE))
+		{
 			ShowStoreScreen();
-		break;
+			return true;
+		}
+		return false;
 	case LawnNet::SCENECMD_SHOW_AWARD:
 		if (mBoard)
+		{
 			ShowAwardScreen((AwardType)aParam, false);
-		break;
+			return true;
+		}
+		return false;
 	case LawnNet::SCENECMD_SHOW_SEED_CHOOSER:
 		if (mBoard)
+		{
 			ShowSeedChooserScreen();
-		break;
+			return true;
+		}
+		return false;
 	case LawnNet::SCENECMD_KILL_BOARD:
 		KillBoard();
-		break;
+		return true;
+	case LawnNet::SCENECMD_ADVENTURE_START_FX:
+		if (!NetIsClient() || mGameScene != GameScenes::SCENE_MENU || !mGameSelector ||
+			mBoard)
+			return false;
+		return mGameSelector->StartAdventurePresentation(false);
+	default:
+		return false;
 	}
 }
 
