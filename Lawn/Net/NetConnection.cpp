@@ -225,7 +225,7 @@ bool NetConnection::SendAll(const uint8_t* theData, size_t theSize)
 	while (aSent < theSize)
 	{
 		int aResult = send(mSocket, (const char*)(theData + aSent), (int)(theSize - aSent), 0);
-		if (aResult == SOCKET_ERROR)
+		if (aResult == SOCKET_ERROR || aResult == 0)
 		{
 			mConnected = false;
 			return false;
@@ -282,20 +282,23 @@ uint32_t NetConnection::GetSeqSentTime(uint32_t theSeq)
 
 void NetConnection::Disconnect()
 {
-	if (mThreadRunning)
-	{
-		mThreadRunning = false;
-		mConnected = false;
-		if (mRecvThread.joinable())
-			mRecvThread.join();
-	}
-	if (mSocket != INVALID_SOCKET)
-	{
-		shutdown(mSocket, SD_BOTH);
-		closesocket(mSocket);
-		mSocket = INVALID_SOCKET;
-	}
+	// recv() is blocking, so close its read side before joining the worker.
+	// Joining first can deadlock forever when the peer is still connected but
+	// silent (for example while returning to the menu or cancelling a retry).
+	mThreadRunning = false;
 	mConnected = false;
+	SOCKET aSocket = mSocket;
+	mSocket = INVALID_SOCKET;
+	if (aSocket != INVALID_SOCKET)
+		shutdown(aSocket, SD_BOTH);
+
+	if (mRecvThread.joinable())
+		mRecvThread.join();
+
+	if (aSocket != INVALID_SOCKET)
+	{
+		closesocket(aSocket);
+	}
 }
 
 } // namespace LawnNet

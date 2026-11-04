@@ -68,7 +68,7 @@ private:
 	SOCKET mSocket;
 	std::atomic<bool> mConnected;
 	std::thread mRecvThread;
-	bool mThreadRunning;
+	std::atomic<bool> mThreadRunning;
 
 	std::mutex mSendMutex;
 
