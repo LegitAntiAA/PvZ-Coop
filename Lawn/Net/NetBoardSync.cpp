@@ -733,6 +733,7 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 
 	b.WriteU8(aFlags);
 	b.WriteI32(mSunMoney);
+	b.WriteI32(mApp->mPlayerInfo ? mApp->mPlayerInfo->mCoins : 0);
 	b.WriteU8((uint8_t)min(255, mCurrentWave));
 	b.WriteU8((uint8_t)min(255, mNumWaves));
 	b.WriteU16((uint16_t)max(0, mHugeWaveCountDown));
@@ -1233,6 +1234,8 @@ void Board::NetApplyEvent(NetBuffer& b)
 		{
 			aCoin->mIsBeingCollected = true;
 			aCoin->mDead = false;
+			if (aCoin->IsMoney())
+				ShowCoinBank();
 		}
 		break;
 	}
@@ -1422,13 +1425,32 @@ void Board::NetApplyPlantPresentation(Plant* thePlant, PlantState thePreviousSta
 
 void Board::NetApplySnapshot(NetBuffer& b)
 {
+	// Fixed core through the seed-packet count.  Validate it before touching
+	// board/profile state so a truncated datagram cannot partially apply.
+	static const size_t NET_SNAPSHOT_CORE_BYTES = 72;
+	if (b.Remaining() < NET_SNAPSHOT_CORE_BYTES)
+	{
+		NetTrace("snapshot core rejected: bytes=%zu expected-at-least=%zu", b.Remaining(), NET_SNAPSHOT_CORE_BYTES);
+		return;
+	}
+
 	// ---- board core ----
 	uint8_t aFlags = b.ReadU8Or();
 	bool aPaused = (aFlags & SNAPFLAG_PAUSED) != 0;
 	bool aLevelComplete = (aFlags & SNAPFLAG_LEVEL_COMPLETE) != 0;
 	bool aZombiesWon = (aFlags & SNAPFLAG_ZOMBIES_WON) != 0;
 
-	mSunMoney = b.ReadI32Or();
+	int aSunMoney = b.ReadI32Or();
+	int aCoinTotal = b.ReadI32Or();
+	if ((aFlags & ~(SNAPFLAG_PAUSED | SNAPFLAG_LEVEL_COMPLETE | SNAPFLAG_ZOMBIES_WON | SNAPFLAG_FOG_BLOWN)) != 0 ||
+		aCoinTotal < 0 || aCoinTotal > 99999)
+	{
+		NetTrace("snapshot core rejected: flags=%u coins=%d", aFlags, aCoinTotal);
+		return;
+	}
+	mSunMoney = aSunMoney;
+	if (mApp->mPlayerInfo)
+		mApp->mPlayerInfo->mCoins = aCoinTotal;
 	int aCurrentWave = b.ReadU8Or();
 	int aNumWaves = b.ReadU8Or();
 	mHugeWaveCountDown = b.ReadU16Or();
@@ -2080,6 +2102,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 			aPottedVisualPtr = &aPottedVisual;
 		}
 		Coin* aCoin = NetGetGhostCoin(aWire.mId);
+		bool aWasBeingCollected = aCoin && aCoin->mIsBeingCollected;
 		if (aCoin && aCoin->mType != (CoinType)aWire.mType)
 		{
 			unsigned int aDataId = mCoins.DataArrayGetID(aCoin);
@@ -2092,6 +2115,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 			}
 			aCoin->Die();
 			aCoin = nullptr;
+			aWasBeingCollected = false;
 		}
 		bool aCreated = false;
 		if (!aCoin)
@@ -2128,6 +2152,8 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		aCoin->mCollectionDistance = aWire.mCollectionDistanceQ / 4.0f;
 		aCoin->mCoinMotion = (CoinMotion)aWire.mMotion;
 		aCoin->mIsBeingCollected = (aWire.mFlags & 1) != 0;
+		if (!aWasBeingCollected && aCoin->mIsBeingCollected && aCoin->IsMoney())
+			ShowCoinBank();
 		aCoin->mHitGround = (aWire.mFlags & 2) != 0;
 		aCoin->mUsableSeedType = aWire.mUsableSeed == 255 ? SeedType::SEED_NONE : (SeedType)aWire.mUsableSeed;
 		if (aPottedPresent)
@@ -2814,6 +2840,8 @@ void Board::NetClientTick()
 		mShakeCounter--;
 	if (mIceTrapCounter > 0)
 		mIceTrapCounter--;
+	if (mCoinBankFadeCount > 0 && mApp->GetDialog(Dialogs::DIALOG_PURCHASE_PACKET_SLOT) == nullptr)
+		mCoinBankFadeCount--;
 }
 
 // ==========================================================================
