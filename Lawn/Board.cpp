@@ -90,6 +90,14 @@ Board::Board(LawnApp* theApp)
 	mCoinBankFadeCount = 0;
 	mLevel = 0;
 	mCursorObject = new CursorObject();
+	for (int i = 0; i < LawnNet::NET_MAX_PLAYERS; i++)
+		mNetPlayerCursors[i] = nullptr;
+	mNetPlayerCursors[0] = mCursorObject;
+	if (mApp->NetIsHost())
+	{
+		for (int i = 1; i < LawnNet::NET_MAX_PLAYERS; i++)
+			mNetPlayerCursors[i] = new CursorObject();
+	}
 	mCursorPreview = new CursorPreview();
 	mSeedBank = new SeedBank();
 	mCutScene = new CutScene();
@@ -312,6 +320,8 @@ Board::Board(LawnApp* theApp)
 Board::~Board()
 {
 	delete mAdvice;
+	for (int i = 1; i < LawnNet::NET_MAX_PLAYERS; i++)
+		delete mNetPlayerCursors[i];
 	delete mCursorObject;
 	delete mCursorPreview;
 	delete mSeedBank;

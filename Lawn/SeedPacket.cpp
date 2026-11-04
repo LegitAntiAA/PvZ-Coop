@@ -811,7 +811,7 @@ void SeedPacket::MouseDown(int x, int y, int theClickCount)
 	}
 
 	// co-op: can't pick up other players' seeds (their cooldowns are still visible)
-	if (mApp->NetActive() && mNetOwnerSlot != mApp->mNetManager->GetMySlot())
+	if (mApp->NetActive() && mNetOwnerSlot != mApp->mNetManager->GetActingPlayerSlot())
 	{
 		mApp->PlaySample(SOUND_BUZZER);
 		return;

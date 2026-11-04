@@ -59,6 +59,7 @@ struct NetRemoteCursor
 
 struct NetRemoteInput
 {
+	uint8_t mSlot;
 	bool mDown;
 	int8_t mClickCount;
 	int16_t mX, mY;
@@ -96,6 +97,8 @@ public:
 	bool IsPlayerActive(int theSlot) const { return mPlayers[theSlot].mActive; }
 	void SetMyTeam(uint8_t theTeam);			// client: request; host: apply
 	uint8_t GetMyTeam() const;
+	int GetActingPlayerSlot() const { return mActingPlayerSlot >= 0 ? mActingPlayerSlot : mMySlot; }
+	void SetActingPlayerSlot(int theSlot) { mActingPlayerSlot = theSlot; }
 	int GetTeamCount(uint8_t theTeam) const;	// count players on a team
 	void SendLobbyState();						// host: broadcast lobby
 
@@ -204,6 +207,7 @@ private:
 	// lobby
 	NetPlayerInfo mPlayers[NET_MAX_PLAYERS];
 	uint8_t mMySlot;
+	int mActingPlayerSlot;					// host: slot whose queued input is being applied
 
 	// rate
 	int mSnapshotHz;

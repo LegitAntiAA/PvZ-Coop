@@ -1,6 +1,7 @@
 #include "NetManager.h"
 #include "../../LawnApp.h"
 #include "../Board.h"
+#include "../CursorObject.h"
 #include "../Widget/StoreScreen.h"
 #include "../../SexyAppFramework/Common.h"
 
@@ -19,6 +20,7 @@ NetManager::NetManager() :
 	mClientConnected(false),
 	mHostConn(nullptr),
 	mMySlot(0),
+	mActingPlayerSlot(-1),
 	mSnapshotHz(NET_SNAPSHOT_HZ_DEFAULT),
 	mAdaptiveGoodStreak(0),
 	mAdaptiveBadStreak(0),
@@ -214,6 +216,7 @@ void NetManager::Disconnect()
 	mConnecting = false;
 	mMode = MODE_NONE;
 	mMySlot = 0;
+	mActingPlayerSlot = -1;
 	mRemotePaused = false;
 	mAdaptiveGoodStreak = 0;
 	mAdaptiveBadStreak = 0;
@@ -491,6 +494,7 @@ void NetManager::OnHello(NetSession* theSession, NetBuffer& thePayload)
 void NetManager::OnClientInput(NetSession* theSession, NetBuffer& thePayload)
 {
 	NetRemoteInput anInput;
+	anInput.mSlot = theSession->mSlot;
 	anInput.mDown = thePayload.ReadU8Or() != 0;
 	anInput.mClickCount = (int8_t)thePayload.ReadU8Or();
 	anInput.mX = thePayload.ReadI16Or();
@@ -510,17 +514,33 @@ void NetManager::OnClientCursor(NetSession* theSession, NetBuffer& thePayload)
 	int16_t aX = thePayload.ReadI16Or();
 	int16_t aY = thePayload.ReadI16Or();
 	aCursor.SetTarget(aX, aY);
-	aCursor.mCursorType = thePayload.ReadU8Or();
-	aCursor.mHeldSeed = thePayload.ReadU8Or();
-	aCursor.mHeldImitater = thePayload.ReadU8Or();
+	uint8_t aClaimedCursorType = thePayload.ReadU8Or();
+	uint8_t aClaimedSeed = thePayload.ReadU8Or();
+	uint8_t aClaimedImitater = thePayload.ReadU8Or();
 	aCursor.mFlags = thePayload.ReadU8Or();
+
+	// During a game the host's per-player cursor is authoritative.  Clients
+	// provide only pointer coordinates, never the plant/tool they claim to hold.
+	CursorObject* anAuthoritativeCursor = mApp && mApp->mBoard ? mApp->mBoard->mNetPlayerCursors[aSlot] : nullptr;
+	if (anAuthoritativeCursor)
+	{
+		aCursor.mCursorType = (uint8_t)anAuthoritativeCursor->mCursorType;
+		aCursor.mHeldSeed = (uint8_t)anAuthoritativeCursor->mType;
+		aCursor.mHeldImitater = (uint8_t)anAuthoritativeCursor->mImitaterType;
+	}
+	else
+	{
+		aCursor.mCursorType = aClaimedCursorType;
+		aCursor.mHeldSeed = aClaimedSeed;
+		aCursor.mHeldImitater = aClaimedImitater;
+	}
 	if (aCursor.mHeldSeed != 255 && aCursor.mHeldSeed >= (uint8_t)SeedType::NUM_SEED_TYPES)
 		aCursor.mHeldSeed = 255;
 	if (aCursor.mHeldImitater != 255 && aCursor.mHeldImitater >= (uint8_t)SeedType::NUM_SEED_TYPES)
 		aCursor.mHeldImitater = 255;
 
-	// Relay the sanitized state to every client.  The sender ignores its own
-	// slot; the other peers now see client-to-client cursors as well.
+	// Relay the sanitized state to every client.  The sender uses the echo to
+	// update its local held silhouette; other peers see the remote cursor.
 	NetBuffer aRelay;
 	aRelay.WriteU8(aSlot);
 	aRelay.WriteI16(aCursor.mX);
@@ -752,16 +772,37 @@ void NetManager::OnBoardEvent(NetBuffer& thePayload)
 void NetManager::OnCursor(NetBuffer& thePayload)
 {
 	uint8_t aSlot = thePayload.ReadU8Or();
-	if (aSlot >= NET_MAX_PLAYERS || aSlot == mMySlot)
+	if (aSlot >= NET_MAX_PLAYERS)
 		return;
-	NetRemoteCursor& aCursor = mRemoteCursors[aSlot];
 	int16_t aX = thePayload.ReadI16Or();
 	int16_t aY = thePayload.ReadI16Or();
+	uint8_t aCursorType = thePayload.ReadU8Or();
+	uint8_t aHeldSeed = thePayload.ReadU8Or();
+	uint8_t aHeldImitater = thePayload.ReadU8Or();
+	uint8_t aFlags = thePayload.ReadU8Or();
+
+	// Echoes for our own slot carry the host-confirmed held seed.  Apply only
+	// that semantic state locally; local mouse coordinates remain immediate.
+	if (aSlot == mMySlot)
+	{
+		if (mApp && mApp->mBoard)
+		{
+			CursorObject* aLocalCursor = mApp->mBoard->mCursorObject;
+			aLocalCursor->mCursorType = (CursorType)aCursorType;
+			aLocalCursor->mType = aHeldSeed < (uint8_t)SeedType::NUM_SEED_TYPES ? (SeedType)aHeldSeed : SeedType::SEED_NONE;
+			aLocalCursor->mImitaterType = aHeldImitater < (uint8_t)SeedType::NUM_SEED_TYPES ? (SeedType)aHeldImitater : SeedType::SEED_NONE;
+			if (aLocalCursor->mCursorType == CursorType::CURSOR_TYPE_NORMAL)
+				aLocalCursor->mSeedBankIndex = -1;
+		}
+		return;
+	}
+
+	NetRemoteCursor& aCursor = mRemoteCursors[aSlot];
 	aCursor.SetTarget(aX, aY);
-	aCursor.mCursorType = thePayload.ReadU8Or();
-	aCursor.mHeldSeed = thePayload.ReadU8Or();
-	aCursor.mHeldImitater = thePayload.ReadU8Or();
-	aCursor.mFlags = thePayload.ReadU8Or();
+	aCursor.mCursorType = aCursorType;
+	aCursor.mHeldSeed = aHeldSeed;
+	aCursor.mHeldImitater = aHeldImitater;
+	aCursor.mFlags = aFlags;
 }
 
 void NetManager::OnChooserOpen(NetBuffer& thePayload)

@@ -5288,10 +5288,19 @@ void LawnApp::NetHandleRemoteInputs()
 	{
 		LawnNet::NetRemoteInput anInput = mNetManager->mPendingInputs.front();
 		mNetManager->mPendingInputs.pop_front();
+		if (anInput.mSlot == 0 || anInput.mSlot >= LawnNet::NET_MAX_PLAYERS ||
+			!mNetManager->IsPlayerActive(anInput.mSlot) || !mBoard->mNetPlayerCursors[anInput.mSlot])
+			continue;
 
+		CursorObject* aHostCursor = mBoard->mCursorObject;
+		mBoard->mCursorObject = mBoard->mNetPlayerCursors[anInput.mSlot];
+		mNetManager->SetActingPlayerSlot(anInput.mSlot);
 		if (anInput.mDown)
 			mBoard->MouseDown(anInput.mX, anInput.mY, anInput.mClickCount);
 		else
 			mBoard->MouseUp(anInput.mX, anInput.mY, anInput.mClickCount);
+		mNetManager->SetActingPlayerSlot(-1);
+		mBoard->mCursorObject = aHostCursor;
+		mBoard->UpdateCursor();
 	}
 }

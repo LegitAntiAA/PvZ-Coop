@@ -562,6 +562,7 @@ public:
 	float							mNetGhostTimeAcc;
 	int								mNetLastApplyMs;
 	bool							mNetPausedOverlay;			// client: host has paused
+	CursorObject*					mNetPlayerCursors[LawnNet::NET_MAX_PLAYERS]; // host-authoritative cursor per slot
 	int								mNetPvPBrainScore;			// zombies team score
 	int								mNetPvPKillScore;			// plants team score
 	int								mNetPvPBrainTimer;			// brain currency trickle
