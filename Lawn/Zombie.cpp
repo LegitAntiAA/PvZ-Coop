@@ -4870,7 +4870,19 @@ void Zombie::UpdateZombiePosition()
         mZombiePhase == ZombiePhase::PHASE_RISING_FROM_GRAVE || mZombieHeight == ZombieHeight::HEIGHT_ZOMBIQUARIUM)
         return;
 
+    float aPreviousX = mPosX;
     UpdateZombieWalking();
+
+    // Keep all of the original zombie state, speed, chill/freeze and animation
+    // handling.  Tower defense only projects the distance that the stock
+    // walking code actually covered onto the generated road.
+    if (mBoard && mBoard->IsTowerDefense() && mFromWave >= 0)
+    {
+        float aDistanceWalked = aPreviousX - mPosX;
+        UpdateTowerDefense(aDistanceWalked);
+        return;
+    }
+
     CheckForZombieStep();
 
     if (mBlowingAway)
@@ -4922,15 +4934,6 @@ void Zombie::UpdateBurn()
 void Zombie::Update()
 {
     TOD_ASSERT(!mDead);
-
-    // co-op tower defense: zombies move only along the generated road
-    // (mBoard can be null for menu preview zombies, e.g. Zombatar)
-    if (mBoard && mBoard->IsTowerDefense() && mFromWave >= 0)
-    {
-        UpdateTowerDefense();
-        Animate();
-        return;
-    }
 
     // co-op pvp: zombie reaching the house scores a brain for the zombie team
     if (mBoard && mBoard->IsPvPMode() && mFromWave >= 0 && mPosX < 30.0f)
@@ -5392,6 +5395,8 @@ void Zombie::UpdatePlaying()
     {
         UpdateActions();
         UpdateZombiePosition();
+        if (mDead)
+            return;
         CheckIfPreyCaught();
         CheckForPool();
         CheckForHighGround();

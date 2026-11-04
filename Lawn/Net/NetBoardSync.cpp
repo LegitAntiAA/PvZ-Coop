@@ -1296,68 +1296,64 @@ void Board::NetDrawPvPScore(Graphics* g)
 }
 
 // ==========================================================================
-// Zombie: tower defense path movement (host side)
+// Zombie: tower defense path steering (the stock walking code supplies speed)
 // ==========================================================================
 
-void Zombie::UpdateTowerDefense()
+void Zombie::UpdateTowerDefense(float theDistanceWalked)
 {
 	Board* aBoard = mBoard;
-
-	if (mZombiePhase == ZombiePhase::PHASE_ZOMBIE_DYING || mDead)
-		return;
-
-	// advance along the path unless eating a plant
-	Plant* aTargetPlant = aBoard->mPlants.DataArrayTryToGet(mTargetPlantID);
-	bool aBlocked = aTargetPlant && !aTargetPlant->mDead;
-
-	if (!aBlocked)
-	{
-		mTdPathPos += mVelX / 80.0f;
-	}
-
-	// position along the path
 	int aCells = (int)(aBoard->mTDPath.size() / 2);
-	if (aCells == 0)
+	if (aCells < 2 || mDead)
 		return;
 
-	float aF = mTdPathPos * (aCells - 1);
-	if (aF >= aCells - 1)
+	int aStartRow = aBoard->mTDPath[0] >> 1;
+	int aStartCol = aBoard->mTDPath[1];
+	float aStartX = (float)aBoard->GridToPixelX(aStartCol, aStartRow);
+	float aStartY = (float)aBoard->GridToPixelY(aStartCol, aStartRow);
+
+	// Spawned zombies walk in from off-screen exactly as in the original game,
+	// then enter the first road cell without a teleport.
+	if (mTdPathPos <= 0.0f && mPosX > aStartX)
 	{
-		// reached the end of the road: brain lost
-		aBoard->mNetTDLives--;
-		mApp->PlaySample(Sexy::SOUND_LOSEMUSIC);
-		if (aBoard->mNetTDLives <= 0)
-			aBoard->ZombiesWon(nullptr);
-		DieNoLoot();
+		mRow = aStartRow;
+		mPosY = aStartY;
 		return;
 	}
 
-	int anIndex = (int)aF;
-	float aT = aF - anIndex;
-	int aRowA = aBoard->mTDPath[anIndex * 2] >> 1;
-	int aColA = aBoard->mTDPath[anIndex * 2 + 1];
-	int aRowB = aBoard->mTDPath[(anIndex + 1) * 2] >> 1;
-	int aColB = aBoard->mTDPath[(anIndex + 1) * 2 + 1];
+	mTdPathPos = max(0.0f, mTdPathPos + theDistanceWalked);
 
-	float aXA = (float)aBoard->GridToPixelX(aColA, aRowA);
-	float aYA = (float)aBoard->GridToPixelY(aColA, aRowA);
-	float aXB = (float)aBoard->GridToPixelX(aColB, aRowB);
-	float aYB = (float)aBoard->GridToPixelY(aColB, aRowB);
-
-	mPosX = aXA + (aXB - aXA) * aT;
-	mPosY = aYA + (aYB - aYA) * aT;
-	mRow = (aT < 0.5f) ? aRowA : aRowB;
-	mX = (int)mPosX;
-	mY = (int)mPosY;
-
-	// eat a plant blocking the current cell
-	int aGridX = (int)(mPosX / 80.0f + 0.5f) - 0;
-	aGridX = aBoard->PixelToGridX((int)mPosX, (int)mPosY);
-	int aGridY = mRow;
-	Plant* aPlant = aBoard->GetTopPlantAt(aGridX, aGridY, PlantPriority::TOPPLANT_ONLY_NORMAL_POSITION);
-	if (aPlant && !aPlant->mDead && !mIsEating)
+	float aDistanceLeft = mTdPathPos;
+	for (int anIndex = 0; anIndex < aCells - 1; anIndex++)
 	{
-		mTargetPlantID = (PlantID)aBoard->mPlants.DataArrayGetID(aPlant);
-		EatPlant(aPlant);
+		int aRowA = aBoard->mTDPath[anIndex * 2] >> 1;
+		int aColA = aBoard->mTDPath[anIndex * 2 + 1];
+		int aRowB = aBoard->mTDPath[(anIndex + 1) * 2] >> 1;
+		int aColB = aBoard->mTDPath[(anIndex + 1) * 2 + 1];
+
+		float aXA = (float)aBoard->GridToPixelX(aColA, aRowA);
+		float aYA = (float)aBoard->GridToPixelY(aColA, aRowA);
+		float aXB = (float)aBoard->GridToPixelX(aColB, aRowB);
+		float aYB = (float)aBoard->GridToPixelY(aColB, aRowB);
+		float aDeltaX = aXB - aXA;
+		float aDeltaY = aYB - aYA;
+		float aSegmentLength = sqrtf(aDeltaX * aDeltaX + aDeltaY * aDeltaY);
+
+		if (aDistanceLeft <= aSegmentLength)
+		{
+			float aT = aSegmentLength > 0.0f ? aDistanceLeft / aSegmentLength : 0.0f;
+			mPosX = aXA + aDeltaX * aT;
+			mPosY = aYA + aDeltaY * aT;
+			mRow = aT < 0.5f ? aRowA : aRowB;
+			return;
+		}
+
+		aDistanceLeft -= aSegmentLength;
 	}
+
+	// The original walking distance has reached the end of the complete road.
+	aBoard->mNetTDLives--;
+	mApp->PlaySample(Sexy::SOUND_LOSEMUSIC);
+	if (aBoard->mNetTDLives <= 0)
+		aBoard->ZombiesWon(nullptr);
+	DieNoLoot();
 }
