@@ -36,10 +36,24 @@ void Board::GenerateTowerDefensePath(std::vector<uint8_t>& thePath)
 	thePath.clear();
 	const int aMaxRow = 5; // rows 0..4 (standard lawn height)
 
-	int aRow = Rand(aMaxRow);
+	// Keep the three top-edge visits separated by lower-lawn sections.  This
+	// makes every generated road use the full height of the board while the
+	// rows between the mandatory visits remain random.
+	const int aTopVisitColumns[] = { 7, 4, 1 };
+	int aRow = 1 + Rand(aMaxRow - 1);
 	int aCol = MAX_GRID_SIZE_X - 1;
 	thePath.push_back((uint8_t)(aRow * 2 + 0));
 	thePath.push_back((uint8_t)aCol);
+
+	auto MoveToRow = [&](int theTargetRow)
+	{
+		while (aRow != theTargetRow)
+		{
+			aRow += theTargetRow > aRow ? 1 : -1;
+			thePath.push_back((uint8_t)(aRow * 2 + 0));
+			thePath.push_back((uint8_t)aCol);
+		}
+	};
 
 	while (aCol > 0)
 	{
@@ -47,21 +61,20 @@ void Board::GenerateTowerDefensePath(std::vector<uint8_t>& thePath)
 		thePath.push_back((uint8_t)(aRow * 2 + 0));
 		thePath.push_back((uint8_t)aCol);
 
-		// random vertical wiggle every few columns
-		if (aCol > 1 && Rand(3) == 0)
+		bool aTopVisit = false;
+		bool aLeaveTop = false;
+		for (int aVisitCol : aTopVisitColumns)
 		{
-			int aSteps = 1 + Rand(2);
-			int aDir = Rand(2) == 0 ? -1 : 1;
-			for (int i = 0; i < aSteps; i++)
-			{
-				int aNextRow = aRow + aDir;
-				if (aNextRow < 0 || aNextRow >= aMaxRow)
-					break;
-				aRow = aNextRow;
-				thePath.push_back((uint8_t)(aRow * 2 + 0));
-				thePath.push_back((uint8_t)aCol);
-			}
+			aTopVisit |= aCol == aVisitCol;
+			aLeaveTop |= aCol == aVisitCol - 1;
 		}
+
+		if (aTopVisit)
+			MoveToRow(0);
+		else if (aLeaveTop)
+			MoveToRow(1 + Rand(aMaxRow - 1));
+		else if (aRow > 0 && Rand(3) == 0)
+			MoveToRow(1 + Rand(aMaxRow - 1));
 	}
 }
 
