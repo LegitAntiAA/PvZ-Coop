@@ -23,7 +23,7 @@ public:
     bool                mActive;                                    //+0x48
     bool                mRefreshing;                                //+0x49
     int                 mTimesUsed;                                 //+0x4C
-    unsigned char       mNetOwnerSlot;                              // co-op: owning player slot (0=host)
+    unsigned char       mNetOwnerSlot;                              // co-op owner slot, or NET_SHARED_OWNER
 
 public:
     SeedPacket();
@@ -47,7 +47,7 @@ class SeedBank : public GameObject
 {
 public:
     int				    mNumPackets;                    //+0x24
-    SeedPacket		    mSeedPackets[SEEDBANK_MAX];     //+0x28
+    SeedPacket		    mSeedPackets[SEEDBANK_CAPACITY]; // stock 10 + custom PvP rows
     int				    mCutSceneDarken;                //+0x348
     int				    mConveyorBeltCounter;           //+0x34C
 

@@ -1648,9 +1648,10 @@ void Board::InitSurvivalStage()
 	{
 		mLevelComplete = false;
 		InitZombieWaves();
-		for (int i = 0; i < SEEDBANK_MAX; i++)
+		for (int i = 0; i < SEEDBANK_CAPACITY; i++)
 		{
 			mSeedBank->mSeedPackets[i].mX = GetSeedPacketPositionX(i);
+			mSeedBank->mSeedPackets[i].mY = GetSeedPacketPositionY(i);
 		}
 		DisplayAdvice(_S("[ADVICE_MORE_ZOMBIES]"), MESSAGE_STYLE_HINT_TALL_FAST, ADVICE_NONE);
 		return;
@@ -1666,10 +1667,11 @@ void Board::InitSurvivalStage()
 	mCutScene->StartLevelIntro();
 	mSeedBank->UpdateWidth();
 
-	for (int i = 0; i < SEEDBANK_MAX; i++)
+	for (int i = 0; i < SEEDBANK_CAPACITY; i++)
 	{
 		SeedPacket* aPacket = &mSeedBank->mSeedPackets[i];
 		aPacket->mX = GetSeedPacketPositionX(i);
+		aPacket->mY = GetSeedPacketPositionY(i);
 		aPacket->mPacketType = SeedType::SEED_NONE;
 	}
 
@@ -1835,12 +1837,12 @@ void Board::InitLevel()
 	mSeedBank->UpdateWidth();
 	//if (mApp->mPlayerLevelRef > 4)
 	//	mApp->mPlayerInfo->SetLevel(mLevel);
-	for (int i = 0; i < SEEDBANK_MAX; i++)
+	for (int i = 0; i < SEEDBANK_CAPACITY; i++)
 	{
 		SeedPacket* aPacket = &mSeedBank->mSeedPackets[i];
 		aPacket->mIndex = i;
 		aPacket->mX = GetSeedPacketPositionX(i);
-		aPacket->mY = 8;
+		aPacket->mY = GetSeedPacketPositionY(i);
 		aPacket->mPacketType = SeedType::SEED_NONE;
 	}
 	// 设定固定卡牌
@@ -2035,16 +2037,12 @@ void Board::InitLevel()
 			mSeedBank->mSeedPackets[i].SetPacketType((SeedType)i);
 		}
 	}
-	// co-op PvP: rightmost 4 packets are the zombie team's spawn cards
+	// co-op PvP: six personal plant cards plus a shared two-row zombie palette
 	if (aGameMode == GameMode::GAMEMODE_COOP_PVP)
 	{
-		mSeedBank->mNumPackets = SEEDBANK_MAX;
-		mSeedBank->mSeedPackets[6].SetPacketType(SeedType::SEED_ZOMBIE_NORMAL);
-		mSeedBank->mSeedPackets[7].SetPacketType(SeedType::SEED_ZOMBIE_TRAFFIC_CONE);
-		mSeedBank->mSeedPackets[8].SetPacketType(SeedType::SEED_ZOMBIE_PAIL);
-		mSeedBank->mSeedPackets[9].SetPacketType(SeedType::SEED_ZOMBIE_FOOTBALL);
-		for (int i = 6; i < SEEDBANK_MAX; i++)
-			mSeedBank->mSeedPackets[i].mNetOwnerSlot = 0;
+		mSeedBank->mNumPackets = PVP_PACKET_COUNT;
+		for (int i = 0; i < PVP_ZOMBIE_PACKET_COUNT; i++)
+			mSeedBank->mSeedPackets[PVP_PLANT_PACKET_COUNT + i].SetPacketType(Challenge::GetPvPZombieSeed(i));
 		AssignPvPSeedOwners();
 		mNetPvPBrainTimer = 100; // starting brains (host authority, snapshot-synced)
 	}
@@ -4366,6 +4364,10 @@ void Board::UpdateToolTip()
 	else if (aUseSeedType == SeedType::SEED_ZOMBIE_SCREEN_DOOR)
 	{
 		mToolTip->SetLabel(_S("[SCREEN_DOOR_ZOMBIE]"));
+	}
+	else if (aUseSeedType == SeedType::SEED_ZOMBIE_NEWSPAPER)
+	{
+		mToolTip->SetLabel(_S("[NEWSPAPER_ZOMBIE]"));
 	}
 	else if (aUseSeedType == SeedType::SEED_ZOMBONI)
 	{
@@ -11086,6 +11088,8 @@ bool Board::HasConveyorBeltSeedBank()
 //0x41BEE0
 int Board::GetNumSeedsInBank()
 {
+	if (mApp->mGameMode == GameMode::GAMEMODE_COOP_PVP)
+		return PVP_PACKET_COUNT;
 	if (mApp->IsCoopCustomMode())
 	{
 		return SEEDBANK_MAX;
@@ -11254,6 +11258,13 @@ int Board::GetSeedPacketPositionX(int theIndex)
 {
 	if (mApp->IsSlotMachineLevel())			return theIndex * 59 + 247;
 	if (HasConveyorBeltSeedBank())			return theIndex * 50 + 91;
+	if (IsPvPMode())
+	{
+		if (theIndex < PVP_PLANT_PACKET_COUNT)
+			return theIndex * 51 + 79;
+		int aZombieIndex = theIndex - PVP_PLANT_PACKET_COUNT;
+		return (aZombieIndex % 8) * 51 + 79;
+	}
 	
 	if (mSeedBank->mNumPackets <= 7)		return theIndex * 59 + 85;
 	else if (mSeedBank->mNumPackets == 8)	return theIndex * 54 + 81;
@@ -12526,4 +12537,14 @@ void Board::ButtonDepress(int theId)
 		}
 	}
 #endif
+}
+
+int Board::GetSeedPacketPositionY(int theIndex)
+{
+	if (IsPvPMode() && theIndex >= PVP_PLANT_PACKET_COUNT)
+	{
+		int aZombieIndex = theIndex - PVP_PLANT_PACKET_COUNT;
+		return 80 + (aZombieIndex / 8) * 72;
+	}
+	return 8;
 }

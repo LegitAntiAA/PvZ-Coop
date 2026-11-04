@@ -1497,8 +1497,10 @@ void LawnApp::ShowSeedChooserScreen()
 	{
 		int aBankCount = mBoard ? mBoard->GetNumSeedsInBank() : 10;
 	if (mGameMode == GameMode::GAMEMODE_COOP_PVP)
-		aBankCount = SEEDBANK_MAX - 4; // last 4 slots are the zombie team's cards
+		aBankCount = PVP_PLANT_PACKET_COUNT; // only plant cards are divided
 		int aPlayers = max(1, mNetManager->GetPlayerCount());
+		if (mGameMode == GameMode::GAMEMODE_COOP_PVP)
+			aPlayers = max(1, mNetManager->GetTeamCount(LawnNet::NETTEAM_PLANTS));
 		int aPicksPerPlayer = max(1, aBankCount / aPlayers);
 		if (mNetManager->IsHosting())
 		{
@@ -1510,6 +1512,9 @@ void LawnApp::ShowSeedChooserScreen()
 			mNetManager->BroadcastMessage(LawnNet::NETMSG_CHOOSER_OPEN, aMsg);
 		}
 		mSeedChooserScreen->mCoopPicksPerPlayer = aPicksPerPlayer;
+		if (mGameMode == GameMode::GAMEMODE_COOP_PVP && mNetManager->IsHosting() &&
+			mNetManager->GetMyTeam() == LawnNet::NETTEAM_ZOMBIES)
+			mSeedChooserScreen->EnableStartButton(true);
 		mNetManager->mChooserOpen = true;
 		mNetManager->mChooserPicksPerPlayer = aPicksPerPlayer;
 		mNetManager->mChooserBankCount = aBankCount;

@@ -676,7 +676,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 
 	// ---- seed packets ----
 	uint8_t aNumPackets = b.ReadU8Or();
-	if (mSeedBank && aNumPackets <= SEEDBANK_MAX)
+	if (mSeedBank && aNumPackets <= SEEDBANK_CAPACITY)
 	{
 		for (int i = 0; i < aNumPackets; i++)
 		{
@@ -1237,9 +1237,7 @@ void Board::AssignPvPSeedOwners()
 		return;
 
 	int aPlantSlots[LawnNet::NET_MAX_PLAYERS];
-	int aZombieSlots[LawnNet::NET_MAX_PLAYERS];
 	int aPlantCount = 0;
-	int aZombieCount = 0;
 	for (int aSlot = 0; aSlot < LawnNet::NET_MAX_PLAYERS; aSlot++)
 	{
 		const LawnNet::NetPlayerInfo& aPlayer = mApp->mNetManager->GetPlayer(aSlot);
@@ -1247,19 +1245,14 @@ void Board::AssignPvPSeedOwners()
 			continue;
 		if (aPlayer.mTeam == LawnNet::NETTEAM_PLANTS)
 			aPlantSlots[aPlantCount++] = aSlot;
-		else if (aPlayer.mTeam == LawnNet::NETTEAM_ZOMBIES)
-			aZombieSlots[aZombieCount++] = aSlot;
 	}
 
 	// PreNewGame rejects an incomplete PvP lobby.  Keep safe fallbacks for
 	// malformed/replayed state so every packet still has a valid owner.
 	if (aPlantCount == 0)
 		aPlantSlots[aPlantCount++] = 0;
-	if (aZombieCount == 0)
-		aZombieSlots[aZombieCount++] = 0;
 
 	int aPlantRoundRobin = 0;
-	int aZombieRoundRobin = 0;
 	for (int i = 0; i < mSeedBank->mNumPackets; i++)
 	{
 		SeedPacket& aPacket = mSeedBank->mSeedPackets[i];
@@ -1267,7 +1260,9 @@ void Board::AssignPvPSeedOwners()
 			continue;
 		if (mChallenge->IsZombieSeedType(aPacket.mPacketType))
 		{
-			aPacket.mNetOwnerSlot = (unsigned char)aZombieSlots[aZombieRoundRobin++ % aZombieCount];
+			// Every zombie player can use every zombie card.  Brains and cooldowns
+			// live on this one host-authoritative shared packet.
+			aPacket.mNetOwnerSlot = LawnNet::NET_SHARED_OWNER;
 			continue;
 		}
 

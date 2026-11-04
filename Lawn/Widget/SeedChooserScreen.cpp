@@ -21,6 +21,7 @@
 #include "../../Sexy.TodLib/TodStringFile.h"
 #include "../../SexyAppFramework/WidgetManager.h"
 #include "../Net/NetManager.h"
+#include "../Challenge.h"
 
 using namespace LawnNet;
 //0x483380
@@ -789,6 +790,25 @@ bool SeedChooserScreen::CheckSeedUpgrade(SeedType theSeedTypeTo, SeedType theSee
 //0x485600
 void SeedChooserScreen::OnStartButton()
 {
+	if (mApp->mGameMode == GAMEMODE_COOP_PVP && mCoopPicksPerPlayer > 0 &&
+		mApp->mNetManager && mApp->mNetManager->IsHosting())
+	{
+		// Zombie players use the complete shared zombie palette and do not take
+		// any of the plant team's divided chooser slots.
+		for (int aSlot = 0; aSlot < NET_MAX_PLAYERS; aSlot++)
+		{
+			const NetPlayerInfo& aPlayer = mApp->mNetManager->GetPlayer(aSlot);
+			if (!aPlayer.mActive || aPlayer.mTeam != NETTEAM_PLANTS)
+				continue;
+			int aCount = aSlot == mApp->mNetManager->GetMySlot() ? mSeedsInBank : mCoopRemotePickCount[aSlot];
+			if (aCount != mCoopPicksPerPlayer)
+			{
+				mApp->PlaySample(Sexy::SOUND_BUZZER);
+				return;
+			}
+		}
+	}
+
 	if (mApp->mGameMode == GAMEMODE_CHALLENGE_SEEING_STARS && !PickedPlantType(SEED_STARFRUIT))
 	{
 		if (!DisplayRepickWarningDialog(_S("[SEED_CHOOSER_SEEING_STARS_WARNING]")))
@@ -1019,6 +1039,10 @@ void SeedChooserScreen::EnableStartButton(bool theEnabled)
 //0x485E90
 void SeedChooserScreen::ClickedSeedInBank(ChosenSeed& theChosenSeed)
 {
+	if (mApp->mGameMode == GAMEMODE_COOP_PVP && mApp->mNetManager &&
+		mApp->mNetManager->GetMyTeam() == NETTEAM_ZOMBIES)
+		return;
+
 	for (int anIndex = theChosenSeed.mSeedIndexInBank + 1; anIndex < mBoard->mSeedBank->mNumPackets; anIndex++)
 	{
 		SeedType aSeedType = FindSeedInBank(anIndex);
@@ -1053,6 +1077,13 @@ void SeedChooserScreen::ClickedSeedInBank(ChosenSeed& theChosenSeed)
 //0x486030
 void SeedChooserScreen::ClickedSeedInChooser(ChosenSeed& theChosenSeed)
 {
+	if (mApp->mGameMode == GAMEMODE_COOP_PVP && mApp->mNetManager &&
+		mApp->mNetManager->GetMyTeam() == NETTEAM_ZOMBIES)
+	{
+		mApp->PlaySample(Sexy::SOUND_BUZZER);
+		return;
+	}
+
 	// co-op: per-player cap, no duplicates across players
 	if (mCoopPicksPerPlayer > 0)
 	{
@@ -1497,10 +1528,7 @@ void SeedChooserScreen::CoopSendPick(int theSeedType, int theImitater, bool theU
 
 	if (aNet->IsClient())
 	{
-		LawnNet::NetBuffer aMsg;
-		aMsg.WriteU8((uint8_t)theSeedType);
-		aMsg.WriteU8((uint8_t)theImitater);
-		aNet->BroadcastMessage(theUnpick ? LawnNet::NETMSG_SEED_UNPICK : LawnNet::NETMSG_SEED_PICK, aMsg);
+		aNet->SendSeedPick(theUnpick, theSeedType, theImitater);
 	}
 	else if (aNet->IsHosting())
 	{
@@ -1624,19 +1652,27 @@ void SeedChooserScreen::CoopBroadcastChooserStart()
 static void CoopBuildBankInternal(SeedBank* theBank, int theMySlot,
 	const int thePicks[4][12], const int theCounts[4], const SeedType theImitaters[4][12])
 {
+	LawnNet::NetManager* aNet = gLawnApp ? gLawnApp->mNetManager : nullptr;
+	const bool aPvP = gLawnApp && gLawnApp->mGameMode == GameMode::GAMEMODE_COOP_PVP;
 	int aMaxPlantPackets = SEEDBANK_MAX;
-	if (gLawnApp && gLawnApp->mGameMode == GameMode::GAMEMODE_COOP_PVP)
-		aMaxPlantPackets = SEEDBANK_MAX - 4; // the last 4 slots are the zombie team's cards
+	if (aPvP)
+		aMaxPlantPackets = PVP_PLANT_PACKET_COUNT;
 
 	int aTotal = 0;
 	for (int i = 0; i < 4; i++)
+	{
+		if (aPvP && aNet && aNet->GetPlayer(i).mTeam != NETTEAM_PLANTS)
+			continue;
 		aTotal += min(12, theCounts[i]);
+	}
 	aTotal = min(aTotal, aMaxPlantPackets);
 
 	int aPos = 0;
 	for (int anOffset = 0; anOffset < 4; anOffset++)
 	{
 		int aSlot = (theMySlot + anOffset) % 4;
+		if (aPvP && aNet && aNet->GetPlayer(aSlot).mTeam != NETTEAM_PLANTS)
+			continue;
 		for (int j = 0; j < theCounts[aSlot] && j < 12 && aPos < aTotal; j++)
 		{
 			SeedType aSeedType = (SeedType)thePicks[aSlot][j];
@@ -1648,18 +1684,19 @@ static void CoopBuildBankInternal(SeedBank* theBank, int theMySlot,
 			aPos++;
 		}
 	}
-	if (gLawnApp && gLawnApp->mGameMode == GameMode::GAMEMODE_COOP_PVP)
+	if (aPvP)
 	{
-		// append the zombie team's spawn cards
-		theBank->mSeedPackets[aPos++].SetPacketType(SeedType::SEED_ZOMBIE_NORMAL);
-		theBank->mSeedPackets[aPos++].SetPacketType(SeedType::SEED_ZOMBIE_TRAFFIC_CONE);
-		theBank->mSeedPackets[aPos++].SetPacketType(SeedType::SEED_ZOMBIE_PAIL);
-		theBank->mSeedPackets[aPos++].SetPacketType(SeedType::SEED_ZOMBIE_FOOTBALL);
+		// Plant slots remain a fixed first row even if somebody selected fewer
+		// cards; the complete zombie-team palette always starts at index 6.
+		while (aPos < PVP_PLANT_PACKET_COUNT)
+			theBank->mSeedPackets[aPos++].SetPacketType(SEED_NONE, SEED_NONE);
+		for (int i = 0; i < PVP_ZOMBIE_PACKET_COUNT; i++)
+			theBank->mSeedPackets[aPos++].SetPacketType(Challenge::GetPvPZombieSeed(i));
 	}
 	theBank->mNumPackets = max(aPos, 1);
 	if (gLawnApp && gLawnApp->mBoard && gLawnApp->mGameMode == GameMode::GAMEMODE_COOP_PVP)
 		gLawnApp->mBoard->AssignPvPSeedOwners();
-	for (int i = aPos; i < SEEDBANK_MAX; i++)
+	for (int i = aPos; i < SEEDBANK_CAPACITY; i++)
 		theBank->mSeedPackets[i].SetPacketType(SEED_NONE, SEED_NONE);
 }
 
@@ -1772,12 +1809,13 @@ void SeedChooserScreen::CoopPollNetwork()
 		{
 			LawnNet::NetManager::ChooserPick aPick = aNet->mRemotePicks.front();
 			aNet->mRemotePicks.pop_front();
-			if (!CoopIsPickedByOthers(aPick.mSeedType))
-				CoopRecordRemotePick(0, aPick.mSeedType, false); // slot resolved below
+			const bool aValidSlot = aPick.mSlot >= 0 && aPick.mSlot < NET_MAX_PLAYERS;
+			const bool aCanPick = aValidSlot && (mApp->mGameMode != GAMEMODE_COOP_PVP ||
+				aNet->GetPlayer(aPick.mSlot).mTeam == NETTEAM_PLANTS);
+			if (aCanPick && mCoopRemotePickCount[aPick.mSlot] < mCoopPicksPerPlayer &&
+				!CoopIsPickedByOthers(aPick.mSeedType))
+				CoopRecordRemotePick(aPick.mSlot, aPick.mSeedType, false);
 		}
-		// slot bookkeeping: picks arrive without slot info (single shared queue
-		// per client connection); attribute by order is unreliable with 3 clients,
-		// so NetManager tags each queued pick with the sender slot.
 		while (!aNet->mRemoteUnpicks.empty())
 		{
 			LawnNet::NetManager::ChooserPick aPick = aNet->mRemoteUnpicks.front();

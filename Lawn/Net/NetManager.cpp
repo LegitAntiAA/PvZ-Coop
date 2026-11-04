@@ -2,11 +2,18 @@
 #include "../../LawnApp.h"
 #include "../Board.h"
 #include "../CursorObject.h"
+#include "../Challenge.h"
 #include "../Widget/StoreScreen.h"
 #include "../../SexyAppFramework/Common.h"
 
 namespace LawnNet
 {
+
+static bool NetIsValidHeldSeed(uint8_t theSeed)
+{
+	return theSeed == 255 || theSeed < (uint8_t)SeedType::NUM_SEED_TYPES ||
+		Challenge::IsZombieSeedType((SeedType)theSeed);
+}
 
 NetManager* gNetManager = nullptr;
 
@@ -534,7 +541,7 @@ void NetManager::OnClientCursor(NetSession* theSession, NetBuffer& thePayload)
 		aCursor.mHeldSeed = aClaimedSeed;
 		aCursor.mHeldImitater = aClaimedImitater;
 	}
-	if (aCursor.mHeldSeed != 255 && aCursor.mHeldSeed >= (uint8_t)SeedType::NUM_SEED_TYPES)
+	if (!NetIsValidHeldSeed(aCursor.mHeldSeed))
 		aCursor.mHeldSeed = 255;
 	if (aCursor.mHeldImitater != 255 && aCursor.mHeldImitater >= (uint8_t)SeedType::NUM_SEED_TYPES)
 		aCursor.mHeldImitater = 255;
@@ -789,7 +796,7 @@ void NetManager::OnCursor(NetBuffer& thePayload)
 		{
 			CursorObject* aLocalCursor = mApp->mBoard->mCursorObject;
 			aLocalCursor->mCursorType = (CursorType)aCursorType;
-			aLocalCursor->mType = aHeldSeed < (uint8_t)SeedType::NUM_SEED_TYPES ? (SeedType)aHeldSeed : SeedType::SEED_NONE;
+			aLocalCursor->mType = NetIsValidHeldSeed(aHeldSeed) && aHeldSeed != 255 ? (SeedType)aHeldSeed : SeedType::SEED_NONE;
 			aLocalCursor->mImitaterType = aHeldImitater < (uint8_t)SeedType::NUM_SEED_TYPES ? (SeedType)aHeldImitater : SeedType::SEED_NONE;
 			if (aLocalCursor->mCursorType == CursorType::CURSOR_TYPE_NORMAL)
 				aLocalCursor->mSeedBankIndex = -1;
@@ -931,6 +938,17 @@ void NetManager::SendInput(bool theDown, int theClickCount, int theX, int theY)
 	aMsg.WriteI16((int16_t)theX);
 	aMsg.WriteI16((int16_t)theY);
 	mHostConn->SendMessage(NETMSG_INPUT_MOUSE, aMsg);
+}
+
+void NetManager::SendSeedPick(bool theUnpick, int theSeedType, int theImitater)
+{
+	if (mMode != MODE_CLIENT || !mHostConn)
+		return;
+	NetBuffer aMsg;
+	aMsg.WriteU8((uint8_t)theSeedType);
+	if (!theUnpick)
+		aMsg.WriteU8((uint8_t)theImitater);
+	mHostConn->SendMessage(theUnpick ? NETMSG_SEED_UNPICK : NETMSG_SEED_PICK, aMsg);
 }
 
 void NetManager::SendCursor(int theCursorType, int theHeldSeed, int theHeldImitater, uint8_t theFlags, int theX, int theY)

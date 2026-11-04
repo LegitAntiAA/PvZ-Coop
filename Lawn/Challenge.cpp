@@ -4812,8 +4812,38 @@ ZombieType Challenge::IZombieSeedTypeToZombieType(SeedType theSeedType)
 	case SEED_ZOMBIE_DANCER:		return ZOMBIE_DANCER;
 	case SEED_ZOMBIE_GARGANTUAR:	return ZOMBIE_GARGANTUAR;
 	case SEED_ZOMBIE_IMP:			return ZOMBIE_IMP;
+	case SEED_ZOMBIE_NEWSPAPER:	return ZOMBIE_NEWSPAPER;
 	default:						/*TOD_ASSERT();*/ return ZOMBIE_NORMAL;
 	}
+}
+
+SeedType Challenge::GetPvPZombieSeed(int theIndex)
+{
+	// This order is part of the network-visible PvP HUD layout. Keep it
+	// deterministic on every peer so packet indices and cooldowns agree.
+	static const SeedType aZombieSeeds[PVP_ZOMBIE_PACKET_COUNT] =
+	{
+		SEED_ZOMBIE_NORMAL,
+		SEED_ZOMBIE_TRAFFIC_CONE,
+		SEED_ZOMBIE_PAIL,
+		SEED_ZOMBIE_NEWSPAPER,
+		SEED_ZOMBIE_SCREEN_DOOR,
+		SEED_ZOMBIE_POLEVAULTER,
+		SEED_ZOMBIE_FOOTBALL,
+		SEED_ZOMBIE_DANCER,
+		SEED_ZOMBIE_DIGGER,
+		SEED_ZOMBIE_POGO,
+		SEED_ZOMBIE_LADDER,
+		SEED_ZOMBIE_BUNGEE,
+		SEED_ZOMBIE_BALLOON,
+		SEED_ZOMBONI,
+		SEED_ZOMBIE_GARGANTUAR,
+		SEED_ZOMBIE_IMP
+	};
+
+	if (theIndex < 0 || theIndex >= PVP_ZOMBIE_PACKET_COUNT)
+		return SEED_NONE;
+	return aZombieSeeds[theIndex];
 }
 
 //0x42A0F0
@@ -5293,7 +5323,8 @@ bool Challenge::IsZombieSeedType(SeedType theSeedType)
 		theSeedType == SEED_ZOMBIE_POGO ||
 		theSeedType == SEED_ZOMBIE_DANCER ||
 		theSeedType == SEED_ZOMBIE_GARGANTUAR ||
-		theSeedType == SEED_ZOMBIE_IMP;
+		theSeedType == SEED_ZOMBIE_IMP ||
+		theSeedType == SEED_ZOMBIE_NEWSPAPER;
 }
 
 //0x42B590

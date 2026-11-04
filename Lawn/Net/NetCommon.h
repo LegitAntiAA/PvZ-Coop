@@ -24,11 +24,12 @@ namespace LawnNet
 // (the host broadcasts the same sounds via events).
 extern bool gNetSuppressSounds;
 
-static const uint32_t NET_PROTOCOL_VERSION = 1;
+static const uint32_t NET_PROTOCOL_VERSION = 2; // expanded PvP palette/shared card ownership
 static const uint16_t NET_DEFAULT_PORT = 27713;			// PvZ co-op port
 static const int NET_MAX_PLAYERS = 4;					// 1 host + 3 clients
 static const int NET_MAX_NICK = 16;						// bytes (without terminator)
 static const int NET_MAX_FRAME = 96 * 1024;				// hard cap for one frame payload
+static const uint8_t NET_SHARED_OWNER = 0xFF;			// team-shared seed packet
 
 static const int NET_SNAPSHOT_HZ_MIN = 15;				// adaptive snapshot rate bounds
 static const int NET_SNAPSHOT_HZ_MAX = 30;

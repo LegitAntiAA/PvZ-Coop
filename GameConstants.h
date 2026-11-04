@@ -17,7 +17,11 @@ const int           LAWN_XMIN = 40;
 const int           LAWN_YMIN = 80;
 const int           HIGH_GROUND_HEIGHT = 30;
 
-const int           SEEDBANK_MAX = 10;
+const int           SEEDBANK_MAX = 10;             // stock one-row bank size
+const int           SEEDBANK_CAPACITY = 24;        // storage capacity for custom multi-row HUDs
+const int           PVP_PLANT_PACKET_COUNT = 6;
+const int           PVP_ZOMBIE_PACKET_COUNT = 16;
+const int           PVP_PACKET_COUNT = PVP_PLANT_PACKET_COUNT + PVP_ZOMBIE_PACKET_COUNT;
 const int           SEED_BANK_OFFSET_X = 0;
 const int           SEED_BANK_OFFSET_X_END = 10;
 const int           SEED_CHOOSER_OFFSET_Y = 516;

@@ -487,6 +487,7 @@ void DrawSeedPacket(Graphics* g, float x, float y, SeedType theSeedType, SeedTyp
 	case SeedType::SEED_ZOMBIE_LADDER:
 	case SeedType::SEED_ZOMBIE_DIGGER:
 	case SeedType::SEED_ZOMBIE_SCREEN_DOOR:
+	case SeedType::SEED_ZOMBIE_NEWSPAPER:
 	case SeedType::SEED_ZOMBIE_POGO:
 		aScale = 0.35f;
 		aOffsetX = -3.0f;
@@ -660,6 +661,9 @@ void SeedPacket::Draw(Graphics* g)
 			aDrawCost = false;
 		}
 		int aCost = mBoard->GetCurrentPlantCost(mPacketType, mImitaterType);
+		bool isPvPZombiePacket = mBoard->IsPvPMode() && mBoard->mChallenge->IsZombieSeedType(mPacketType);
+		if (isPvPZombiePacket)
+			aCost /= 2;
 
 		int aGrayness = 255;
 		if ((mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_BEGHOULED && !mActive) ||
@@ -692,7 +696,8 @@ void SeedPacket::Draw(Graphics* g)
 		{
 			aPercentDark = 0.0f;
 		}
-		else if ((!mBoard->CanTakeSunMoney(aCost) && aDrawCost) || aPercentDark > 1.0f || !mBoard->PlantingRequirementsMet(aUseSeedType))
+		else if (((isPvPZombiePacket ? !mBoard->CanTakeBrains(aCost) : !mBoard->CanTakeSunMoney(aCost)) && aDrawCost) ||
+			aPercentDark > 1.0f || (!isPvPZombiePacket && !mBoard->PlantingRequirementsMet(aUseSeedType)))
 		{
 			aGrayness = 128;
 		}
@@ -702,7 +707,8 @@ void SeedPacket::Draw(Graphics* g)
 		DrawSeedPacket(g, mOffsetX, 0.0f, mPacketType, mImitaterType, aPercentDark, aGrayness, false, true);
 
 		// co-op: tint other players' packets with their color
-		if (mApp->NetActive() && mNetOwnerSlot != mApp->mNetManager->GetMySlot() && mPacketType != SeedType::SEED_NONE)
+		if (mApp->NetActive() && mNetOwnerSlot < LawnNet::NET_MAX_PLAYERS &&
+			mNetOwnerSlot != mApp->mNetManager->GetMySlot() && mPacketType != SeedType::SEED_NONE)
 		{
 			LawnNet::NetColor aColor = LawnNet::GetRelativePlayerColor(mApp->mNetManager->GetMySlot(), mNetOwnerSlot);
 			g->SetColor(Color(aColor.r, aColor.g, aColor.b, 110));
@@ -728,7 +734,11 @@ void SeedPacket::Draw(Graphics* g)
 			}
 
 			SexyString aCostStr;
-			if (gLawnApp->mBoard && gLawnApp->mBoard->PlantUsesAcceleratedPricing(aSeedType) && !gLawnApp->GetDialog(Dialogs::DIALOG_ALMANAC))
+			if (isPvPZombiePacket)
+			{
+				aCostStr = StrFormat(_S("%d"), aCost);
+			}
+			else if (gLawnApp->mBoard && gLawnApp->mBoard->PlantUsesAcceleratedPricing(aSeedType) && !gLawnApp->GetDialog(Dialogs::DIALOG_ALMANAC))
 			{
 				aCostStr = StrFormat(_S("%d"), gLawnApp->mBoard->GetCurrentPlantCost(mPacketType, mImitaterType));
 			}
@@ -788,12 +798,16 @@ bool SeedPacket::CanPickUp()
 		}
 
 		int aCost = mBoard->GetCurrentPlantCost(mPacketType, mImitaterType);
-		if (!mBoard->CanTakeSunMoney(aCost) && !mBoard->HasConveyorBeltSeedBank())
+		bool isPvPZombiePacket = mBoard->IsPvPMode() && mBoard->mChallenge->IsZombieSeedType(mPacketType);
+		if (isPvPZombiePacket)
+			aCost /= 2;
+		if (((isPvPZombiePacket && !mBoard->CanTakeBrains(aCost)) ||
+			(!isPvPZombiePacket && !mBoard->CanTakeSunMoney(aCost))) && !mBoard->HasConveyorBeltSeedBank())
 		{
 			return false;
 		}
 
-		if (!mBoard->PlantingRequirementsMet(aUseSeedType))
+		if (!isPvPZombiePacket && !mBoard->PlantingRequirementsMet(aUseSeedType))
 		{
 			return false;
 		}
@@ -810,8 +824,11 @@ void SeedPacket::MouseDown(int x, int y, int theClickCount)
 		return;
 	}
 
-	// co-op: can't pick up other players' seeds (their cooldowns are still visible)
-	if (mApp->NetActive() && mNetOwnerSlot != mApp->mNetManager->GetActingPlayerSlot())
+	bool isSharedZombiePacket = mBoard->IsPvPMode() &&
+		mBoard->mChallenge->IsZombieSeedType(mPacketType);
+	// Plant cards stay personal.  PvP zombie cards are shared by the team.
+	if (mApp->NetActive() && !isSharedZombiePacket &&
+		mNetOwnerSlot != mApp->mNetManager->GetActingPlayerSlot())
 	{
 		mApp->PlaySample(SOUND_BUZZER);
 		return;
@@ -820,7 +837,7 @@ void SeedPacket::MouseDown(int x, int y, int theClickCount)
 	{
 		int anActingSlot = mApp->mNetManager->GetActingPlayerSlot();
 		uint8_t aTeam = mApp->mNetManager->GetPlayer(anActingSlot).mTeam;
-		bool isZombiePacket = mBoard->mChallenge->IsZombieSeedType(mPacketType);
+		bool isZombiePacket = isSharedZombiePacket;
 		if ((isZombiePacket && aTeam != LawnNet::NETTEAM_ZOMBIES) ||
 			(!isZombiePacket && aTeam != LawnNet::NETTEAM_PLANTS))
 		{
@@ -845,7 +862,7 @@ void SeedPacket::MouseDown(int x, int y, int theClickCount)
 		aUseSeedType = mImitaterType;
 	}
 
-	if (!mApp->mEasyPlantingCheat)
+	if (!mApp->mEasyPlantingCheat && !isSharedZombiePacket)
 	{
 		if (!mActive)
 		{
@@ -1087,6 +1104,15 @@ void SeedBank::Draw(Graphics* g)
 		Rect theSrcRect(IMAGE_SEEDBANK->mWidth - aExtraWidth - 12, 0, aExtraWidth + 12, IMAGE_SEEDBANK->mHeight);
 		g->DrawImage(IMAGE_SEEDBANK, 0, 0);
 		g->DrawImage(IMAGE_SEEDBANK, IMAGE_SEEDBANK->mWidth - 12, 0, theSrcRect);
+		if (mBoard->IsPvPMode())
+		{
+			// The shared zombie palette lives below the stock plant bank in two
+			// compact rows.  A separate backing keeps the cards readable over lawn.
+			g->SetColor(Color(62, 45, 30, 225));
+			g->FillRect(73, 74, 414, 150);
+			g->SetColor(Color(166, 121, 66, 255));
+			g->DrawRect(73, 74, 413, 149);
+		}
 	}
 
 	for (int i = 0; i < mNumPackets; i++)
@@ -1321,9 +1347,11 @@ void SeedBank::UpdateWidth()
 {
 	mNumPackets = mBoard->GetNumSeedsInBank();
 	mWidth = IMAGE_SEEDBANK->GetWidth() + mBoard->GetSeedBankExtraWidth();
+	mHeight = mBoard->IsPvPMode() ? 224 : IMAGE_SEEDBANK->GetHeight();
 	for (int i = 0; i < mNumPackets; i++)
 	{
 		mSeedPackets[i].mX = mBoard->GetSeedPacketPositionX(i);
+		mSeedPackets[i].mY = mBoard->GetSeedPacketPositionY(i);
 	}
 }
 

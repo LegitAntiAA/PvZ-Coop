@@ -180,6 +180,7 @@ public:
     void                    ScaryPotterMalletPot(GridItem* theScaryPot);
     static ZombieType       IZombieSeedTypeToZombieType(SeedType theSeedType);
     static /*inline*/ bool  IsZombieSeedType(SeedType theSeedType);
+    static SeedType         GetPvPZombieSeed(int theIndex);
     void                    IZombieMouseDownWithZombie(int theX, int theY, int theClickCount);
     void                        PvPMouseDownWithZombie(int theX, int theY, int theClickCount);
     void                    IZombieStart();
