@@ -78,12 +78,32 @@ static const size_t NET_SEED_PACKET_WIRE_BYTES = 14;
 // Plant: id/type/imitater/row/column/health/max-health/state/flags (12),
 // plus authoritative live x/y (4) and render order (4).
 static const size_t NET_PLANT_WIRE_BYTES = 20;
+// Zombie: id/type/row/position(8), health pools(10), phase/visual state(10),
+// velocity/altitude/animation rate(12) and the coarse animation key(1).
+static const size_t NET_ZOMBIE_WIRE_BYTES = 41;
 // Projectile: id(2), type/row(2), x/y/z/shadow(16), order(4),
 // rotation(4), motion/frame/high-ground(3).
 static const size_t NET_PROJECTILE_WIRE_BYTES = 31;
 // Coin: id/type/motion(4), x/y(8), order(4), scale/collect(4),
 // flags/seed/fade(3), disappear(2), potted visual seed/garden/facing/variation/age(5).
 static const size_t NET_COIN_WIRE_BYTES = 30;
+
+// A client ghost is only a presentation mirror. Calling Zombie::DieNoLoot on
+// it also awards challenge points, spawns level rewards, mutates linked
+// bobsled/bungee/boss gameplay and can consume RNG. Snapshot omission and
+// reliable removal events therefore use this resource-only retirement path.
+void NetRetireZombiePresentation(LawnApp* theApp, Zombie* theZombie)
+{
+	if (!theApp || !theZombie || theZombie->mDead)
+		return;
+
+	theZombie->StopZombieSound();
+	AttachmentDie(theZombie->mAttachmentID);
+	theApp->RemoveReanimation(theZombie->mBodyReanimID);
+	theApp->RemoveReanimation(theZombie->mMoweredReanimID);
+	theApp->RemoveReanimation(theZombie->mSpecialHeadReanimID);
+	theZombie->mDead = true;
+}
 
 bool NetIsValidSeedPacketType(uint8_t theType)
 {
@@ -874,6 +894,7 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 		aBody.WriteU8(anAnimKey);
 		aCount++;
 	}
+	TOD_ASSERT(aBody.Size() == (size_t)aCount * NET_ZOMBIE_WIRE_BYTES);
 	b.WriteU16(aCount);
 	b.WriteBytes(aBody.Data(), aBody.Size());
 
@@ -1268,10 +1289,15 @@ void Board::NetApplyEvent(NetBuffer& b)
 	}
 	case BOARDEV_ZOMBIE_REMOVED:
 	{
+		if (b.Remaining() != 2)
+		{
+			NetTrace("ZOMBIE_REMOVED rejected bytes=%zu", b.Remaining());
+			break;
+		}
 		uint16_t anId = b.ReadU16Or();
 		Zombie* aZombie = NetGetGhostZombie(anId);
 		if (aZombie)
-			aZombie->DieNoLoot();
+			NetRetireZombiePresentation(mApp, aZombie);
 		break;
 	}
 	case BOARDEV_MOWER_USED:
@@ -1773,84 +1799,170 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	}
 
 	// ---- zombies ----
+	if (b.Remaining() < 2)
+	{
+		NetTrace("snapshot zombie section missing count bytes=%zu", b.Remaining());
+		return;
+	}
 	aCount = b.ReadU16Or();
+	if (aCount > 1024 || (size_t)aCount > b.Remaining() / NET_ZOMBIE_WIRE_BYTES)
+	{
+		NetTrace("snapshot zombie section truncated count=%u remaining=%zu record=%zu",
+			aCount, b.Remaining(), NET_ZOMBIE_WIRE_BYTES);
+		return;
+	}
+	struct NetZombieWire
+	{
+		uint16_t mId;
+		uint8_t mType;
+		uint8_t mRow;
+		int16_t mPosX4;
+		int16_t mPosY4;
+		uint16_t mBodyHealth;
+		uint16_t mBodyMaxHealth;
+		uint16_t mHelmHealth;
+		uint16_t mShieldHealth;
+		uint16_t mFlyingHealth;
+		uint8_t mPhase;
+		uint8_t mHeight;
+		uint8_t mHelmType;
+		uint8_t mShieldType;
+		uint8_t mFlags;
+		uint8_t mChilled;
+		uint8_t mButtered;
+		uint8_t mIceTrap;
+		uint8_t mFade;
+		uint8_t mJustShot;
+		float mVelX;
+		float mAltitude;
+		float mAnimRate;
+		uint8_t mAnimKey;
+	};
+	std::vector<NetZombieWire> aZombieWires;
+	aZombieWires.reserve(aCount);
 	std::map<unsigned short, bool> aSeenZombies;
 	for (int i = 0; i < aCount; i++)
 	{
-		uint16_t anId = b.ReadU16Or();
-		uint8_t aType = b.ReadU8Or();
-		uint8_t aRow = b.ReadU8Or();
-		int16_t aPosX = b.ReadI16Or();
-		int16_t aPosY = b.ReadI16Or();
-		uint16_t aBodyHealth = b.ReadU16Or();
-		uint16_t aBodyMaxHealth = b.ReadU16Or();
-		uint16_t aHelmHealth = b.ReadU16Or();
-		uint16_t aShieldHealth = b.ReadU16Or();
-		uint16_t aFlyingHealth = b.ReadU16Or();
-		uint8_t aPhase = b.ReadU8Or();
-		uint8_t aHeight = b.ReadU8Or();
-		uint8_t aHelmType = b.ReadU8Or();
-		uint8_t aShieldType = b.ReadU8Or();
-		uint8_t aZFlags = b.ReadU8Or();
-		uint8_t aChilled = b.ReadU8Or();
-		uint8_t aButtered = b.ReadU8Or();
-		uint8_t aIceTrap = b.ReadU8Or();
-		uint8_t aFade = b.ReadU8Or();
-		uint8_t aJustShot = b.ReadU8Or();
-		float aVelX = b.ReadF32Or();
-		float anAltitude = b.ReadF32Or();
-		float anAnimRate = b.ReadF32Or();
-		uint8_t anAnimKey = b.ReadU8Or();
-		aSeenZombies[anId] = true;
+		NetZombieWire aWire = {};
+		aWire.mId = b.ReadU16Or();
+		aWire.mType = b.ReadU8Or();
+		aWire.mRow = b.ReadU8Or();
+		aWire.mPosX4 = b.ReadI16Or();
+		aWire.mPosY4 = b.ReadI16Or();
+		aWire.mBodyHealth = b.ReadU16Or();
+		aWire.mBodyMaxHealth = b.ReadU16Or();
+		aWire.mHelmHealth = b.ReadU16Or();
+		aWire.mShieldHealth = b.ReadU16Or();
+		aWire.mFlyingHealth = b.ReadU16Or();
+		aWire.mPhase = b.ReadU8Or();
+		aWire.mHeight = b.ReadU8Or();
+		aWire.mHelmType = b.ReadU8Or();
+		aWire.mShieldType = b.ReadU8Or();
+		aWire.mFlags = b.ReadU8Or();
+		aWire.mChilled = b.ReadU8Or();
+		aWire.mButtered = b.ReadU8Or();
+		aWire.mIceTrap = b.ReadU8Or();
+		aWire.mFade = b.ReadU8Or();
+		aWire.mJustShot = b.ReadU8Or();
+		aWire.mVelX = b.ReadF32Or();
+		aWire.mAltitude = b.ReadF32Or();
+		aWire.mAnimRate = b.ReadF32Or();
+		aWire.mAnimKey = b.ReadU8Or();
 
-		Zombie* aZombie = NetGetGhostZombie(anId);
+#ifdef _HAS_BLOOM_AND_DOOM_CONTENTS
+		const uint8_t aMaxPhase = (uint8_t)ZombiePhase::PHASE_DOG_FREE;
+#else
+		const uint8_t aMaxPhase = (uint8_t)ZombiePhase::PHASE_ZAMBONI_FLAT;
+#endif
+		const bool aValid = aWire.mId != 0 &&
+			aWire.mType < (uint8_t)ZombieType::NUM_ZOMBIE_TYPES &&
+			aWire.mRow < MAX_GRID_SIZE_Y && aWire.mPhase <= aMaxPhase &&
+			aWire.mHeight <= (uint8_t)ZombieHeight::HEIGHT_ZOMBIQUARIUM &&
+			aWire.mHelmType <= (uint8_t)HelmType::HELMTYPE_BLACK_FOOTBALL &&
+			aWire.mShieldType <= (uint8_t)ShieldType::SHIELDTYPE_TRASHCAN &&
+			aWire.mAnimKey <= 2 && _finite(aWire.mVelX) &&
+			_finite(aWire.mAltitude) && _finite(aWire.mAnimRate) &&
+			aWire.mVelX >= -2048.0f && aWire.mVelX <= 2048.0f &&
+			aWire.mAltitude >= -8192.0f && aWire.mAltitude <= 8192.0f &&
+			aWire.mAnimRate > 0.0f && aWire.mAnimRate <= 1000.0f &&
+			aSeenZombies.find(aWire.mId) == aSeenZombies.end();
+		if (!aValid)
+		{
+			NetTrace("snapshot zombie section rejected index=%d id=%u type=%u row=%u phase=%u height=%u helm=%u shield=%u anim=%u",
+				i, aWire.mId, aWire.mType, aWire.mRow, aWire.mPhase,
+				aWire.mHeight, aWire.mHelmType, aWire.mShieldType, aWire.mAnimKey);
+			return;
+		}
+		aSeenZombies[aWire.mId] = true;
+		aZombieWires.push_back(aWire);
+	}
+
+	// Validate the complete variable-length section before creating, replacing,
+	// moving or retiring any presentation entity.
+	for (const NetZombieWire& aWire : aZombieWires)
+	{
+		Zombie* aZombie = NetGetGhostZombie(aWire.mId);
+		if (aZombie && aZombie->mZombieType != (ZombieType)aWire.mType)
+		{
+			NetRetireZombiePresentation(mApp, aZombie);
+			aZombie = nullptr;
+		}
+		bool aCreated = false;
 		if (!aZombie)
 		{
 			gNetSuppressSounds = true;
-			aZombie = AddZombieInRow((ZombieType)aType, aRow, 0);
+			aZombie = AddZombieInRow((ZombieType)aWire.mType, aWire.mRow, 0);
 			gNetSuppressSounds = false;
 			if (!aZombie)
 				continue;
-			aZombie->mNetId = anId;
+			aCreated = true;
+			aZombie->mNetId = aWire.mId;
 			aZombie->mNetGhost = true;
 			aZombie->mNetAnimKey = 255;
 		}
-		aZombie->mRow = aRow;
-		aZombie->mNetTargetX = aPosX / 4.0f;
-		aZombie->mNetTargetY = aPosY / 4.0f;
-		aZombie->mBodyHealth = aBodyHealth;
-		aZombie->mBodyMaxHealth = aBodyMaxHealth;
-		aZombie->mHelmHealth = aHelmHealth;
-		aZombie->mShieldHealth = aShieldHealth;
-		aZombie->mFlyingHealth = aFlyingHealth;
-		aZombie->mZombiePhase = (ZombiePhase)aPhase;
-		aZombie->mZombieHeight = (ZombieHeight)aHeight;
-		aZombie->mHelmType = (HelmType)aHelmType;
-		aZombie->mShieldType = (ShieldType)aShieldType;
-		aZombie->mIsEating = (aZFlags & 1) != 0;
-		aZombie->mInPool = (aZFlags & 2) != 0;
-		aZombie->mOnHighGround = (aZFlags & 4) != 0;
-		aZombie->mHasHead = (aZFlags & 8) != 0;
-		aZombie->mHasArm = (aZFlags & 16) != 0;
-		aZombie->mHasObject = (aZFlags & 32) != 0;
-		aZombie->mVariant = (aZFlags & 64) != 0;
-		aZombie->mMindControlled = (aZFlags & 128) != 0;
-		aZombie->mChilledCounter = aChilled;
-		aZombie->mButteredCounter = aButtered;
-		aZombie->mIceTrapCounter = aIceTrap;
-		aZombie->mZombieFade = aFade == 255 ? -1 : aFade;
-		aZombie->mJustGotShotCounter = aJustShot;
-		aZombie->mVelX = aVelX;
-		aZombie->mAltitude = anAltitude;
-		aZombie->mOriginalAnimRate = anAnimRate;
+		aZombie->mRow = aWire.mRow;
+		aZombie->mNetTargetX = aWire.mPosX4 / 4.0f;
+		aZombie->mNetTargetY = aWire.mPosY4 / 4.0f;
+		if (aCreated)
+		{
+			aZombie->mPosX = aZombie->mNetTargetX;
+			aZombie->mPosY = aZombie->mNetTargetY;
+			aZombie->mX = (int)aZombie->mPosX;
+			aZombie->mY = (int)aZombie->mPosY;
+		}
+		aZombie->mBodyHealth = aWire.mBodyHealth;
+		aZombie->mBodyMaxHealth = aWire.mBodyMaxHealth;
+		aZombie->mHelmHealth = aWire.mHelmHealth;
+		aZombie->mShieldHealth = aWire.mShieldHealth;
+		aZombie->mFlyingHealth = aWire.mFlyingHealth;
+		aZombie->mZombiePhase = (ZombiePhase)aWire.mPhase;
+		aZombie->mZombieHeight = (ZombieHeight)aWire.mHeight;
+		aZombie->mHelmType = (HelmType)aWire.mHelmType;
+		aZombie->mShieldType = (ShieldType)aWire.mShieldType;
+		aZombie->mIsEating = (aWire.mFlags & 1) != 0;
+		aZombie->mInPool = (aWire.mFlags & 2) != 0;
+		aZombie->mOnHighGround = (aWire.mFlags & 4) != 0;
+		aZombie->mHasHead = (aWire.mFlags & 8) != 0;
+		aZombie->mHasArm = (aWire.mFlags & 16) != 0;
+		aZombie->mHasObject = (aWire.mFlags & 32) != 0;
+		aZombie->mVariant = (aWire.mFlags & 64) != 0;
+		aZombie->mMindControlled = (aWire.mFlags & 128) != 0;
+		aZombie->mChilledCounter = aWire.mChilled;
+		aZombie->mButteredCounter = aWire.mButtered;
+		aZombie->mIceTrapCounter = aWire.mIceTrap;
+		aZombie->mZombieFade = aWire.mFade == 255 ? -1 : aWire.mFade;
+		aZombie->mJustGotShotCounter = aWire.mJustShot;
+		aZombie->mVelX = aWire.mVelX;
+		aZombie->mAltitude = aWire.mAltitude;
+		aZombie->mOriginalAnimRate = aWire.mAnimRate;
 
-		NetGhostUpdateZombie(aZombie, anAnimKey);
+		NetGhostUpdateZombie(aZombie, aWire.mAnimKey);
 	}
 	{
 		Zombie* aZombie = nullptr;
 		while (mZombies.IterateNext(aZombie))
 			if (aZombie->mNetGhost && !aZombie->mDead && aSeenZombies.find(aZombie->mNetId) == aSeenZombies.end())
-				aZombie->DieNoLoot();
+				NetRetireZombiePresentation(mApp, aZombie);
 	}
 
 	// ---- projectiles ----
@@ -2447,7 +2559,26 @@ void Board::NetGhostUpdateZombie(Zombie* theZombie, uint8_t theAnimKey)
 			}
 			else if (theAnimKey == 2)
 			{
-				theZombie->PlayDeathAnim(0U);
+				// The snapshot has already set PHASE_ZOMBIE_DYING, so calling
+				// PlayDeathAnim would return immediately and leave the old chew track
+				// running. Apply only the visual track; gameplay death stays host-only.
+				theZombie->mIsEating = false;
+				const char* aDeathTrack = "anim_death";
+				if (theZombie->mZombieHeight == ZombieHeight::HEIGHT_ZOMBIQUARIUM &&
+					aBody->TrackExists("anim_aquarium_death"))
+					aDeathTrack = "anim_aquarium_death";
+				else if (theZombie->mZombieType == ZombieType::ZOMBIE_SNORKEL &&
+					!theZombie->mInPool && aBody->TrackExists("anim_deathground"))
+					aDeathTrack = "anim_deathground";
+				else if (theZombie->mInPool && aBody->TrackExists("anim_waterdeath"))
+					aDeathTrack = "anim_waterdeath";
+				if (aBody->TrackExists(aDeathTrack))
+				{
+					const float aRate = theZombie->mOriginalAnimRate > 0.0f ?
+						theZombie->mOriginalAnimRate : 24.0f;
+					aBody->PlayReanim(aDeathTrack,
+						ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD, 20, aRate);
+				}
 			}
 			else
 			{
@@ -2771,9 +2902,7 @@ void Board::NetApplyIntroState(NetBuffer& b)
 		if (!aZombie->mDead && aZombie->mFromWave == Zombie::ZOMBIE_WAVE_CUTSCENE &&
 			(!aZombie->mNetGhost || aSeen.find(aZombie->mNetId) == aSeen.end()))
 		{
-			gNetSuppressSounds = true;
-			aZombie->DieNoLoot();
-			gNetSuppressSounds = false;
+			NetRetireZombiePresentation(mApp, aZombie);
 		}
 	}
 	mCutScene->mPlacedZombies = true;
