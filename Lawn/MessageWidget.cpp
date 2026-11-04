@@ -12,26 +12,42 @@
 MessageWidget::MessageWidget(LawnApp* theApp)
 {
 	mApp = theApp;
+	mDisplayTime = 0;
 	mDuration = 0;
 	mLabel[0] = _S('\0');
 	mMessageStyle = MessageStyle::MESSAGE_STYLE_OFF;
+	mReanimType = ReanimationType::REANIM_NONE;
 	mLabelNext[0] = _S('\0');
 	mMessageStyleNext = MessageStyle::MESSAGE_STYLE_OFF;
 	mSlideOffTime = 100;
-	memset(mTextReanimID, (int)ReanimationID::REANIMATIONID_NULL, MAX_MESSAGE_LENGTH);
+	for (int i = 0; i < MAX_MESSAGE_LENGTH; i++)
+		mTextReanimID[i] = ReanimationID::REANIMATIONID_NULL;
+}
+
+MessageWidget::~MessageWidget()
+{
+	ClearReanim();
 }
 
 //0x458FC0
 void MessageWidget::ClearReanim()
 {
+	// A board can be queued for deferred widget deletion while the app is
+	// already transitioning to another scene.  Never dereference a missing app
+	// during that teardown; still reset every stored handle below.
+	if (!mApp)
+	{
+		for (int i = 0; i < MAX_MESSAGE_LENGTH; i++)
+			mTextReanimID[i] = ReanimationID::REANIMATIONID_NULL;
+		return;
+	}
+
 	for (int i = 0; i < MAX_MESSAGE_LENGTH; i++)
 	{
 		Reanimation* aReanim = mApp->ReanimationTryToGet(mTextReanimID[i]);
 		if (aReanim)
-		{
 			aReanim->ReanimationDie();
-			mTextReanimID[i] = ReanimationID::REANIMATIONID_NULL;
-		}
+		mTextReanimID[i] = ReanimationID::REANIMATIONID_NULL;
 	}
 }
 

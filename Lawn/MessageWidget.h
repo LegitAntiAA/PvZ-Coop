@@ -30,7 +30,7 @@ public:
 
 public:
 	MessageWidget(LawnApp* theApp);
-	~MessageWidget() { ClearReanim(); }
+	~MessageWidget();
 
 	/*inline*/ void		SetLabel(const SexyString& theNewLabel, MessageStyle theMessageStyle);
 	void				Update();
