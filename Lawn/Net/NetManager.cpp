@@ -5,6 +5,30 @@
 #include "../Challenge.h"
 #include "../Widget/StoreScreen.h"
 #include "../../SexyAppFramework/Common.h"
+#include "../../SexyAppFramework/DDInterface.h"
+
+namespace
+{
+int NetCanonicalX(LawnApp* theApp, int theLocalX)
+{
+	return theApp && theApp->mDDInterface ? theLocalX - theApp->mDDInterface->mWideScreenOffsetX : theLocalX;
+}
+
+int NetCanonicalY(LawnApp* theApp, int theLocalY)
+{
+	return theApp && theApp->mDDInterface ? theLocalY - theApp->mDDInterface->mWideScreenOffsetY : theLocalY;
+}
+
+int NetLocalX(LawnApp* theApp, int theCanonicalX)
+{
+	return theApp && theApp->mDDInterface ? theCanonicalX + theApp->mDDInterface->mWideScreenOffsetX : theCanonicalX;
+}
+
+int NetLocalY(LawnApp* theApp, int theCanonicalY)
+{
+	return theApp && theApp->mDDInterface ? theCanonicalY + theApp->mDDInterface->mWideScreenOffsetY : theCanonicalY;
+}
+}
 
 namespace LawnNet
 {
@@ -510,8 +534,10 @@ void NetManager::OnClientInput(NetSession* theSession, NetBuffer& thePayload)
 	anInput.mSlot = theSession->mSlot;
 	anInput.mDown = thePayload.ReadU8Or() != 0;
 	anInput.mClickCount = (int8_t)thePayload.ReadU8Or();
-	anInput.mX = thePayload.ReadI16Or();
-	anInput.mY = thePayload.ReadI16Or();
+	// Mouse packets use the shared 800x600 game coordinate system. Convert to
+	// the host's local widescreen canvas before Board::MouseDown consumes them.
+	anInput.mX = (int16_t)NetLocalX(mApp, thePayload.ReadI16Or());
+	anInput.mY = (int16_t)NetLocalY(mApp, thePayload.ReadI16Or());
 	std::lock_guard<std::mutex> aLock(mSessionsMutex);
 	mPendingInputs.push_back(anInput);
 }
@@ -524,9 +550,9 @@ void NetManager::OnClientCursor(NetSession* theSession, NetBuffer& thePayload)
 	if (aSlot >= NET_MAX_PLAYERS || !mPlayers[aSlot].mActive)
 		return;
 	NetRemoteCursor& aCursor = mRemoteCursors[aSlot];
-	int16_t aX = thePayload.ReadI16Or();
-	int16_t aY = thePayload.ReadI16Or();
-	aCursor.SetTarget(aX, aY);
+	int16_t aCanonicalX = thePayload.ReadI16Or();
+	int16_t aCanonicalY = thePayload.ReadI16Or();
+	aCursor.SetTarget((int16_t)NetLocalX(mApp, aCanonicalX), (int16_t)NetLocalY(mApp, aCanonicalY));
 	uint8_t aClaimedCursorType = thePayload.ReadU8Or();
 	uint8_t aClaimedSeed = thePayload.ReadU8Or();
 	uint8_t aClaimedImitater = thePayload.ReadU8Or();
@@ -556,8 +582,8 @@ void NetManager::OnClientCursor(NetSession* theSession, NetBuffer& thePayload)
 	// update its local held silhouette; other peers see the remote cursor.
 	NetBuffer aRelay;
 	aRelay.WriteU8(aSlot);
-	aRelay.WriteI16(aCursor.mX);
-	aRelay.WriteI16(aCursor.mY);
+	aRelay.WriteI16(aCanonicalX);
+	aRelay.WriteI16(aCanonicalY);
 	aRelay.WriteU8(aCursor.mCursorType);
 	aRelay.WriteU8(aCursor.mHeldSeed);
 	aRelay.WriteU8(aCursor.mHeldImitater);
@@ -811,7 +837,7 @@ void NetManager::OnCursor(NetBuffer& thePayload)
 	}
 
 	NetRemoteCursor& aCursor = mRemoteCursors[aSlot];
-	aCursor.SetTarget(aX, aY);
+	aCursor.SetTarget((int16_t)NetLocalX(mApp, aX), (int16_t)NetLocalY(mApp, aY));
 	aCursor.mCursorType = aCursorType;
 	aCursor.mHeldSeed = aHeldSeed;
 	aCursor.mHeldImitater = aHeldImitater;
@@ -943,8 +969,8 @@ void NetManager::SendInput(bool theDown, int theClickCount, int theX, int theY)
 	NetBuffer aMsg;
 	aMsg.WriteU8(theDown ? 1 : 0);
 	aMsg.WriteU8((uint8_t)theClickCount);
-	aMsg.WriteI16((int16_t)theX);
-	aMsg.WriteI16((int16_t)theY);
+	aMsg.WriteI16((int16_t)NetCanonicalX(mApp, theX));
+	aMsg.WriteI16((int16_t)NetCanonicalY(mApp, theY));
 	mHostConn->SendMessage(NETMSG_INPUT_MOUSE, aMsg);
 }
 
@@ -969,8 +995,8 @@ void NetManager::SendCursor(int theCursorType, int theHeldSeed, int theHeldImita
 
 	NetBuffer aMsg;
 	aMsg.WriteU8((uint8_t)mMySlot);
-	aMsg.WriteI16((int16_t)theX);
-	aMsg.WriteI16((int16_t)theY);
+	aMsg.WriteI16((int16_t)NetCanonicalX(mApp, theX));
+	aMsg.WriteI16((int16_t)NetCanonicalY(mApp, theY));
 	aMsg.WriteU8((uint8_t)theCursorType);
 	aMsg.WriteU8((uint8_t)theHeldSeed);
 	aMsg.WriteU8((uint8_t)theHeldImitater);
