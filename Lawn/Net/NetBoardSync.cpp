@@ -750,6 +750,7 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 	if (mLevelComplete) aFlags |= SNAPFLAG_LEVEL_COMPLETE;
 	if (mApp->mGameScene == GameScenes::SCENE_ZOMBIES_WON) aFlags |= SNAPFLAG_ZOMBIES_WON;
 	if (mFogBlownCountDown > 0) aFlags |= SNAPFLAG_FOG_BLOWN;
+	if (mApp->mShowHealthBar) aFlags |= SNAPFLAG_HEALTHBAR;
 
 	b.WriteU8(aFlags);
 	b.WriteI32(mSunMoney);
@@ -1371,6 +1372,41 @@ void Board::NetApplyEvent(NetBuffer& b)
 		ShakeBoard(3, -4);
 		break;
 	}
+	case BOARDEV_BUSH_RUSTLE:
+	{
+		static const size_t BUSH_RUSTLE_EVENT_BYTES = 1;
+		if (b.Remaining() != BUSH_RUSTLE_EVENT_BYTES)
+		{
+			NetTrace("BUSH_RUSTLE rejected: payload bytes=%zu expected=%zu",
+				b.Remaining(), BUSH_RUSTLE_EVENT_BYTES);
+			break;
+		}
+
+		uint8_t aRow = b.ReadU8Or();
+		const bool aValidContext = mApp && mApp->NetIsClient() &&
+			mApp->mBoard == this && mApp->mGameScene == GameScenes::SCENE_PLAYING &&
+			mApp->mNetManager && mApp->mNetManager->IsClient();
+		if (!aValidContext || aRow >= MAX_GRID_SIZE_Y || b.Remaining() != 0)
+		{
+			NetTrace("BUSH_RUSTLE rejected: row=%u context=%d trailing=%zu",
+				aRow, aValidContext ? 1 : 0, b.Remaining());
+			break;
+		}
+
+		Reanimation* aBushReanim = mApp->ReanimationTryToGet(mBushesID[aRow]);
+		if (!aBushReanim)
+		{
+			NetTrace("BUSH_RUSTLE ignored: row=%u reanimation unavailable", aRow);
+			break;
+		}
+
+		// Presentation only: the host already decided when this row rustles.
+		aBushReanim->StartBlend(20);
+		aBushReanim->mLastFrameTime = 0.0f;
+		aBushReanim->mAnimTime = 0.0f;
+		aBushReanim->mLoopCount = 0;
+		break;
+	}
 	default:
 		break;
 	}
@@ -1465,15 +1501,18 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	bool aPaused = (aFlags & SNAPFLAG_PAUSED) != 0;
 	bool aLevelComplete = (aFlags & SNAPFLAG_LEVEL_COMPLETE) != 0;
 	bool aZombiesWon = (aFlags & SNAPFLAG_ZOMBIES_WON) != 0;
+	bool aShowHealthBar = (aFlags & SNAPFLAG_HEALTHBAR) != 0;
 
 	int aSunMoney = b.ReadI32Or();
 	int aCoinTotal = b.ReadI32Or();
-	if ((aFlags & ~(SNAPFLAG_PAUSED | SNAPFLAG_LEVEL_COMPLETE | SNAPFLAG_ZOMBIES_WON | SNAPFLAG_FOG_BLOWN)) != 0 ||
+	if ((aFlags & ~(SNAPFLAG_PAUSED | SNAPFLAG_LEVEL_COMPLETE | SNAPFLAG_ZOMBIES_WON |
+		SNAPFLAG_FOG_BLOWN | SNAPFLAG_HEALTHBAR)) != 0 ||
 		aCoinTotal < 0 || aCoinTotal > 99999)
 	{
 		NetTrace("snapshot core rejected: flags=%u coins=%d", aFlags, aCoinTotal);
 		return;
 	}
+	mApp->mShowHealthBar = aShowHealthBar;
 	mSunMoney = aSunMoney;
 	if (mApp->mPlayerInfo)
 		mApp->mPlayerInfo->mCoins = aCoinTotal;

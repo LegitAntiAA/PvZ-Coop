@@ -24,7 +24,7 @@ namespace LawnNet
 // (the host broadcasts the same sounds via events).
 extern bool gNetSuppressSounds;
 
-static const uint32_t NET_PROTOCOL_VERSION = 15; // scoped, ordered and bounded remote input
+static const uint32_t NET_PROTOCOL_VERSION = 16; // bush-rustle presentation event
 static const uint16_t NET_DEFAULT_PORT = 27713;			// PvZ co-op port
 static const int NET_MAX_PLAYERS = 4;					// 1 host + 3 clients
 static const int NET_MAX_NICK = 16;						// bytes (without terminator)
@@ -159,7 +159,8 @@ enum NetBoardEvent : uint8_t
 	BOARDEV_SEED_PACKET_UPDATE = 18,// packet cooldown refresh
 	BOARDEV_PLANT_STATE = 19,		// u16 id, u8 state byte (anim transitions)
 	BOARDEV_ZOMBIE_STATE = 20,		// u16 id, phase byte (anim transitions)
-	BOARDEV_POTATO_EXPLODED = 21	// u16 plant id, i16 effect x/y, u8 row
+	BOARDEV_POTATO_EXPLODED = 21,	// u16 plant id, i16 effect x/y, u8 row
+	BOARDEV_BUSH_RUSTLE = 22		// u8 row
 };
 
 // Board snapshot flags
@@ -168,7 +169,8 @@ enum NetSnapshotFlag : uint8_t
 	SNAPFLAG_PAUSED = 1,
 	SNAPFLAG_LEVEL_COMPLETE = 2,
 	SNAPFLAG_ZOMBIES_WON = 4,
-	SNAPFLAG_FOG_BLOWN = 8
+	SNAPFLAG_FOG_BLOWN = 8,
+	SNAPFLAG_HEALTHBAR = 0x10
 };
 
 // PvP teams

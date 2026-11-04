@@ -6107,6 +6107,12 @@ void Board::SpawnZombieWave()
 						aBushReanim->mLastFrameTime = 0.0f;
 						aBushReanim->mAnimTime = 0.0f;
 						aBushReanim->mLoopCount = 0;
+						if (mApp->NetIsHost() && mApp->mNetManager)
+						{
+							NetBuffer anEvent;
+							anEvent.WriteU8((uint8_t)aZombie->mRow);
+							mApp->mNetManager->SendBoardEvent(anEvent, BOARDEV_BUSH_RUSTLE);
+						}
 					}
 				}
 			}
@@ -10168,7 +10174,7 @@ void Board::KeyDown(KeyCode theKey)
 	DoTypingCheck(theKey);
 
 #ifdef _HAS_HEALTHBAR_TOGGLE
-	if (theKey == KeyCode::KEYCODE_TAB) {
+	if (theKey == KeyCode::KEYCODE_TAB && !mApp->NetIsClient()) {
 		mApp->mShowHealthBar = !mApp->mShowHealthBar;
 	}
 #endif
