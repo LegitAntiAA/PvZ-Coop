@@ -308,6 +308,40 @@ void NetManager::DropSession(int theSlot, bool theNotify)
 	if (!aSession.mAssigned)
 		return;
 	NetTrace("dropping peer slot=%d nick=%s notify=%d", theSlot, mPlayers[theSlot].mNick, theNotify ? 1 : 0);
+
+	// A disconnected player can no longer finish or cancel a held bank packet.
+	// Release that exact reservation before marking the player inactive, then
+	// clear the host-authoritative cursor so later conveyor compaction cannot
+	// mistake the stale index for another player's held packet.
+	if (mApp && mApp->mBoard && theSlot >= 0 && theSlot < NET_MAX_PLAYERS)
+	{
+		Board* aBoard = mApp->mBoard;
+		CursorObject* aCursor = aBoard->mNetPlayerCursors[theSlot];
+		if (aCursor)
+		{
+			if (aCursor->mCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_BANK &&
+				aBoard->mSeedBank && aCursor->mSeedBankIndex >= 0 &&
+				aCursor->mSeedBankIndex < aBoard->mSeedBank->mNumPackets)
+			{
+				SeedPacket& aPacket = aBoard->mSeedBank->mSeedPackets[aCursor->mSeedBankIndex];
+				if (aPacket.mPacketType != SeedType::SEED_NONE)
+				{
+					aPacket.Activate();
+					NetTrace("released held seed packet slot=%d index=%d type=%d",
+						theSlot, aCursor->mSeedBankIndex, (int)aPacket.mPacketType);
+				}
+			}
+
+			aCursor->mType = SeedType::SEED_NONE;
+			aCursor->mImitaterType = SeedType::SEED_NONE;
+			aCursor->mCursorType = CursorType::CURSOR_TYPE_NORMAL;
+			aCursor->mSeedBankIndex = -1;
+			aCursor->mCoinID = CoinID::COINID_NULL;
+			aCursor->mDuplicatorPlantID = PlantID::PLANTID_NULL;
+			aCursor->mCobCannonPlantID = PlantID::PLANTID_NULL;
+			aCursor->mGlovePlantID = PlantID::PLANTID_NULL;
+		}
+	}
 	aSession.mConn.Disconnect();
 	aSession.mAssigned = false;
 	mPlayers[theSlot].mActive = false;

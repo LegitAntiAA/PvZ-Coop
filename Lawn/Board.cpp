@@ -2064,6 +2064,17 @@ void Board::InitLevel()
 	}
 	// 关卡玩法相关的初始化
 	mChallenge->InitLevel();
+
+	// Fixed and conveyor banks are one host-authoritative resource in co-op.
+	// Mark the full capacity so packets created later by a challenge (for example
+	// conveyor and Beghouled refills) inherit shared access as well.  Chooser
+	// levels keep their existing per-player ownership contract, and PvP assigns
+	// plant/zombie packet ownership separately above.
+	if (mApp->NetActive() && !IsPvPMode() && !ChooseSeedsOnCurrentLevel())
+	{
+		for (int i = 0; i < SEEDBANK_CAPACITY; i++)
+			mSeedBank->mSeedPackets[i].mNetOwnerSlot = LawnNet::NET_SHARED_OWNER;
+	}
 }
 
 Reanimation* Board::CreateRakeReanim(float theRakeX, float theRakeY, int theRenderOrder)

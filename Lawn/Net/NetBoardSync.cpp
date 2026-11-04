@@ -71,12 +71,41 @@ const NetDaveAnimSpec gNetDaveAnimSpecs[NET_DAVE_ANIM_COUNT] =
 };
 
 static const size_t NET_DAVE_STATE_BYTES = 12;
+// Seed packet: type, imitater, cooldown, owner, active, signed horizontal offset,
+// plus the authoritative slot-machine countdown, next card and scroll phase.
+static const size_t NET_SEED_PACKET_WIRE_BYTES = 14;
 // Projectile: id(2), type/row(2), x/y/z/shadow(16), order(4),
 // rotation(4), motion/frame/high-ground(3).
 static const size_t NET_PROJECTILE_WIRE_BYTES = 31;
 // Coin: id/type/motion(4), x/y(8), order(4), scale/collect(4),
 // flags/seed/fade(3), disappear(2), potted visual seed/garden/facing/variation/age(5).
 static const size_t NET_COIN_WIRE_BYTES = 30;
+
+bool NetIsValidSeedPacketType(uint8_t theType)
+{
+	if (theType == 255 || theType < (uint8_t)SeedType::NUM_SEED_TYPES)
+		return true;
+
+	return theType == (uint8_t)SeedType::SEED_BEGHOULED_BUTTON_SHUFFLE ||
+		theType == (uint8_t)SeedType::SEED_BEGHOULED_BUTTON_CRATER ||
+		theType == (uint8_t)SeedType::SEED_SLOT_MACHINE_SUN ||
+		theType == (uint8_t)SeedType::SEED_SLOT_MACHINE_DIAMOND ||
+		theType == (uint8_t)SeedType::SEED_ZOMBIQUARIUM_SNORKLE ||
+		theType == (uint8_t)SeedType::SEED_ZOMBIQUARIUM_TROPHY ||
+		(theType >= (uint8_t)SeedType::SEED_ZOMBIE_NORMAL &&
+		 theType <= (uint8_t)SeedType::SEED_ZOMBIE_NEWSPAPER);
+}
+
+bool NetIsValidSlotMachineSeed(uint8_t theType)
+{
+	return theType == 255 ||
+		theType == (uint8_t)SeedType::SEED_SUNFLOWER ||
+		theType == (uint8_t)SeedType::SEED_PEASHOOTER ||
+		theType == (uint8_t)SeedType::SEED_SNOWPEA ||
+		theType == (uint8_t)SeedType::SEED_WALLNUT ||
+		theType == (uint8_t)SeedType::SEED_SLOT_MACHINE_SUN ||
+		theType == (uint8_t)SeedType::SEED_SLOT_MACHINE_DIAMOND;
+}
 
 struct NetDaveWireState
 {
@@ -753,6 +782,14 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 		b.WriteU8(aCooldown);
 		b.WriteU8(aPacket.mNetOwnerSlot);
 		b.WriteU8(aPacket.mActive ? 1 : 0);
+		b.WriteI16((int16_t)max(0, min(1024, aPacket.mOffsetX)));
+		b.WriteU16((uint16_t)max(0, min(SLOT_MACHINE_TIME, aPacket.mSlotMachineCountDown)));
+		uint8_t aNextSlotSeed = (uint8_t)aPacket.mSlotMachiningNextSeed;
+		b.WriteU8(NetIsValidSlotMachineSeed(aNextSlotSeed) ? aNextSlotSeed : 255);
+		float aSlotPosition = aPacket.mSlotMachiningPosition;
+		if (!_finite(aSlotPosition) || aSlotPosition < 0.0f || aSlotPosition > 1.0f)
+			aSlotPosition = 0.0f;
+		b.WriteF32(aSlotPosition);
 	}
 
 	// ---- plants ----
@@ -1337,28 +1374,105 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	}
 
 	// ---- seed packets ----
-	uint8_t aNumPackets = b.ReadU8Or();
-	if (mSeedBank && aNumPackets <= SEEDBANK_CAPACITY)
+	if (b.Remaining() < 1)
 	{
-		for (int i = 0; i < aNumPackets; i++)
+		NetTrace("snapshot seed section truncated before count");
+		return;
+	}
+	uint8_t aNumPackets = b.ReadU8Or();
+	if (!mSeedBank || aNumPackets > SEEDBANK_CAPACITY ||
+		b.Remaining() < (size_t)aNumPackets * NET_SEED_PACKET_WIRE_BYTES)
+	{
+		NetTrace("snapshot seed section rejected count=%u remaining=%zu bank=%d",
+			aNumPackets, b.Remaining(), mSeedBank ? 1 : 0);
+		return;
+	}
+
+	struct NetSeedPacketWire
+	{
+		uint8_t mType;
+		uint8_t mImitater;
+		uint8_t mCooldown;
+		uint8_t mOwner;
+		uint8_t mActive;
+		int16_t mOffsetX;
+		uint16_t mSlotCountdown;
+		uint8_t mSlotNextSeed;
+		float mSlotPosition;
+	};
+	std::vector<NetSeedPacketWire> aSeedPackets;
+	aSeedPackets.reserve(aNumPackets);
+	for (int i = 0; i < aNumPackets; i++)
+	{
+		NetSeedPacketWire aWire = {};
+		aWire.mType = b.ReadU8Or();
+		aWire.mImitater = b.ReadU8Or();
+		aWire.mCooldown = b.ReadU8Or();
+		aWire.mOwner = b.ReadU8Or();
+		aWire.mActive = b.ReadU8Or();
+		aWire.mOffsetX = b.ReadI16Or();
+		aWire.mSlotCountdown = b.ReadU16Or();
+		aWire.mSlotNextSeed = b.ReadU8Or();
+		aWire.mSlotPosition = b.ReadF32Or();
+
+		bool aTypeValid = NetIsValidSeedPacketType(aWire.mType);
+		bool anImitaterValid = aWire.mImitater == 255 ||
+			aWire.mImitater < (uint8_t)SeedType::NUM_SEED_TYPES;
+		bool anOwnerValid = aWire.mOwner == LawnNet::NET_SHARED_OWNER ||
+			aWire.mOwner < LawnNet::NET_MAX_PLAYERS;
+		if (!aTypeValid || !anImitaterValid || !anOwnerValid ||
+			aWire.mActive > 1 || aWire.mOffsetX < 0 || aWire.mOffsetX > 1024 ||
+			aWire.mSlotCountdown > SLOT_MACHINE_TIME ||
+			!NetIsValidSlotMachineSeed(aWire.mSlotNextSeed) ||
+			!_finite(aWire.mSlotPosition) ||
+			aWire.mSlotPosition < 0.0f || aWire.mSlotPosition > 1.0f)
 		{
-			SeedPacket& aPacket = mSeedBank->mSeedPackets[i];
-			SeedType aType = (SeedType)b.ReadU8Or();
-			SeedType anImitater = (SeedType)b.ReadU8Or();
-			uint8_t aCooldown = b.ReadU8Or();
-			uint8_t anOwner = b.ReadU8Or();
-			uint8_t anActive = b.ReadU8Or();
-			if (aPacket.mPacketType != aType || aPacket.mImitaterType != anImitater)
+			NetTrace("snapshot seed rejected index=%d type=%u imitater=%u owner=%u active=%u offset=%d slot=(%u,%u,%.3f)",
+				i, aWire.mType, aWire.mImitater, aWire.mOwner, aWire.mActive,
+				aWire.mOffsetX, aWire.mSlotCountdown, aWire.mSlotNextSeed, aWire.mSlotPosition);
+			return;
+		}
+		aSeedPackets.push_back(aWire);
+	}
+
+	// Apply only after the complete seed section has passed structural and value
+	// validation; a malformed packet cannot leave a partially updated seed bank.
+	for (int i = 0; i < aNumPackets; i++)
+	{
+		const NetSeedPacketWire& aWire = aSeedPackets[i];
+		SeedPacket& aPacket = mSeedBank->mSeedPackets[i];
+		SeedType aType = aWire.mType == 255 ? SeedType::SEED_NONE : (SeedType)aWire.mType;
+		SeedType anImitater = aWire.mImitater == 255 ? SeedType::SEED_NONE : (SeedType)aWire.mImitater;
+		if (aPacket.mPacketType != aType || aPacket.mImitaterType != anImitater)
+		{
+			// SetPacketType queries plant definitions.  Empty and challenge-only
+			// packet ids deliberately live outside that table and use a raw reset.
+			if (aType == SeedType::SEED_NONE ||
+				(int)aType >= (int)SeedType::NUM_SEED_TYPES)
+			{
+				aPacket.mPacketType = aType;
+				aPacket.mImitaterType = anImitater;
+				aPacket.mRefreshCounter = 0;
+				aPacket.mRefreshTime = 0;
+				aPacket.mRefreshing = false;
+				aPacket.mActive = true;
+			}
+			else
 			{
 				aPacket.SetPacketType(aType, anImitater);
 			}
-			if (aPacket.mRefreshTime > 0)
-				aPacket.mRefreshCounter = aCooldown * aPacket.mRefreshTime / 255;
-			aPacket.mNetOwnerSlot = anOwner;
-			aPacket.mActive = anActive != 0;
 		}
-		mSeedBank->mNumPackets = aNumPackets;
+		if (aPacket.mRefreshTime > 0)
+			aPacket.mRefreshCounter = aWire.mCooldown * aPacket.mRefreshTime / 255;
+		aPacket.mNetOwnerSlot = aWire.mOwner;
+		aPacket.mActive = aWire.mActive != 0;
+		aPacket.mOffsetX = aWire.mOffsetX;
+		aPacket.mSlotMachineCountDown = aWire.mSlotCountdown;
+		aPacket.mSlotMachiningNextSeed = aWire.mSlotNextSeed == 255 ?
+			SeedType::SEED_NONE : (SeedType)aWire.mSlotNextSeed;
+		aPacket.mSlotMachiningPosition = aWire.mSlotPosition;
 	}
+	mSeedBank->mNumPackets = aNumPackets;
 
 	// ---- plants ----
 	uint16_t aCount = b.ReadU16Or();

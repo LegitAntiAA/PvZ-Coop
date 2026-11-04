@@ -824,25 +824,37 @@ void SeedPacket::MouseDown(int x, int y, int theClickCount)
 		return;
 	}
 
-	bool isSharedZombiePacket = mBoard->IsPvPMode() &&
+	bool isPvPZombiePacket = mBoard->IsPvPMode() &&
 		mBoard->mChallenge->IsZombieSeedType(mPacketType);
-	// Plant cards stay personal.  PvP zombie cards are shared by the team.
-	if (mApp->NetActive() && !isSharedZombiePacket &&
-		mNetOwnerSlot != mApp->mNetManager->GetActingPlayerSlot())
+	if (mApp->NetActive())
 	{
-		mApp->PlaySample(SOUND_BUZZER);
-		return;
-	}
-	if (mBoard->IsPvPMode() && mApp->NetActive())
-	{
-		int anActingSlot = mApp->mNetManager->GetActingPlayerSlot();
-		uint8_t aTeam = mApp->mNetManager->GetPlayer(anActingSlot).mTeam;
-		bool isZombiePacket = isSharedZombiePacket;
-		if ((isZombiePacket && aTeam != LawnNet::NETTEAM_ZOMBIES) ||
-			(!isZombiePacket && aTeam != LawnNet::NETTEAM_PLANTS))
+		LawnNet::NetManager* aNetManager = mApp->mNetManager;
+		int anActingSlot = aNetManager ? aNetManager->GetActingPlayerSlot() : -1;
+		if (!aNetManager || anActingSlot < 0 || anActingSlot >= LawnNet::NET_MAX_PLAYERS ||
+			!aNetManager->GetPlayer(anActingSlot).mActive)
 		{
 			mApp->PlaySample(SOUND_BUZZER);
 			return;
+		}
+
+		bool isSharedPacket = mNetOwnerSlot == LawnNet::NET_SHARED_OWNER;
+		if (!isSharedPacket && mNetOwnerSlot != anActingSlot)
+		{
+			mApp->PlaySample(SOUND_BUZZER);
+			return;
+		}
+
+		// Shared ownership never bypasses PvP team boundaries: every zombie card
+		// is shared only by the zombie team, while plant cards remain plant-only.
+		if (mBoard->IsPvPMode())
+		{
+			uint8_t aTeam = aNetManager->GetPlayer(anActingSlot).mTeam;
+			if ((isPvPZombiePacket && aTeam != LawnNet::NETTEAM_ZOMBIES) ||
+				(!isPvPZombiePacket && aTeam != LawnNet::NETTEAM_PLANTS))
+			{
+				mApp->PlaySample(SOUND_BUZZER);
+				return;
+			}
 		}
 	}
 
@@ -862,7 +874,7 @@ void SeedPacket::MouseDown(int x, int y, int theClickCount)
 		aUseSeedType = mImitaterType;
 	}
 
-	if (!mApp->mEasyPlantingCheat && !isSharedZombiePacket)
+	if (!mApp->mEasyPlantingCheat && !isPvPZombiePacket)
 	{
 		if (!mActive)
 		{
@@ -1214,6 +1226,23 @@ void SeedBank::RemoveSeed(int theIndex)
 	TOD_ASSERT(mBoard->HasConveyorBeltSeedBank());
 	TOD_ASSERT(theIndex >= 0 && theIndex < GetNumSeedsOnConveyorBelt());
 
+	int anActingSlot = -1;
+	if (mApp->NetActive() && mApp->mNetManager)
+	{
+		anActingSlot = mApp->mNetManager->GetActingPlayerSlot();
+		for (int aSlot = 0; aSlot < LawnNet::NET_MAX_PLAYERS; aSlot++)
+		{
+			if (aSlot == anActingSlot || !mApp->mNetManager->GetPlayer(aSlot).mActive)
+				continue;
+			CursorObject* aCursor = mBoard->mNetPlayerCursors[aSlot];
+			if (aCursor && aCursor->mCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_BANK &&
+				aCursor->mSeedBankIndex > theIndex && aCursor->mSeedBankIndex < mNumPackets)
+			{
+				aCursor->mSeedBankIndex--;
+			}
+		}
+	}
+
 	for (int i = theIndex; i < mNumPackets; i++)
 	{
 		SeedPacket* aSeedPacket = &mSeedPackets[i];
@@ -1238,6 +1267,27 @@ void SeedBank::RemoveSeed(int theIndex)
 		aSeedPacket->mRefreshTime = 0;
 		aSeedPacket->mRefreshing = false;
 		aSeedPacket->mActive = true;
+	}
+
+	// The compaction above resets every shifted packet to active.  Re-apply the
+	// reservation for packets currently held by other connected players so two
+	// players cannot consume the same conveyor entry after an earlier removal.
+	if (mApp->NetActive() && mApp->mNetManager)
+	{
+		for (int aSlot = 0; aSlot < LawnNet::NET_MAX_PLAYERS; aSlot++)
+		{
+			if (aSlot == anActingSlot || !mApp->mNetManager->GetPlayer(aSlot).mActive)
+				continue;
+			CursorObject* aCursor = mBoard->mNetPlayerCursors[aSlot];
+			if (!aCursor || aCursor->mCursorType != CursorType::CURSOR_TYPE_PLANT_FROM_BANK ||
+				aCursor->mSeedBankIndex < 0 || aCursor->mSeedBankIndex >= mNumPackets)
+			{
+				continue;
+			}
+			SeedPacket& aHeldPacket = mSeedPackets[aCursor->mSeedBankIndex];
+			if (aHeldPacket.mPacketType != SeedType::SEED_NONE)
+				aHeldPacket.Deactivate();
+		}
 	}
 }
 
