@@ -1661,42 +1661,139 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		aSeedPackets.push_back(aWire);
 	}
 
-	// Apply only after the complete seed section has passed structural and value
-	// validation; a malformed packet cannot leave a partially updated seed bank.
-	for (int i = 0; i < aNumPackets; i++)
+	// Chosen co-op banks are intentionally viewer-relative: each machine keeps
+	// its own packets first.  Match the host records as a multiset of semantic
+	// identities, consuming one wire occurrence per local occurrence so duplicate
+	// cards and shared PvP zombie cards remain deterministic without reordering
+	// the local bank.
+	int aWireForLocal[SEEDBANK_CAPACITY];
+	bool aWireUsed[SEEDBANK_CAPACITY] = {};
+	for (int i = 0; i < SEEDBANK_CAPACITY; i++)
+		aWireForLocal[i] = -1;
+
+	const int aLocalPacketCount = mSeedBank->mNumPackets;
+	bool anIdentityMultisetMatch = aLocalPacketCount >= 0 &&
+		aLocalPacketCount <= SEEDBANK_CAPACITY && aLocalPacketCount == aNumPackets;
+	int aMismatchLocalIndex = -1;
+	if (anIdentityMultisetMatch)
 	{
-		const NetSeedPacketWire& aWire = aSeedPackets[i];
-		SeedPacket& aPacket = mSeedBank->mSeedPackets[i];
-		SeedType aType = aWire.mType == 255 ? SeedType::SEED_NONE : (SeedType)aWire.mType;
-		SeedType anImitater = aWire.mImitater == 255 ? SeedType::SEED_NONE : (SeedType)aWire.mImitater;
-		if (aPacket.mPacketType != aType || aPacket.mImitaterType != anImitater)
+		for (int aLocalIndex = 0; aLocalIndex < aLocalPacketCount; aLocalIndex++)
 		{
-			// SetPacketType queries plant definitions.  Empty and challenge-only
-			// packet ids deliberately live outside that table and use a raw reset.
-			if (aType == SeedType::SEED_NONE ||
-				(int)aType >= (int)SeedType::NUM_SEED_TYPES)
+			const SeedPacket& aLocalPacket = mSeedBank->mSeedPackets[aLocalIndex];
+			const uint8_t aLocalType = (uint8_t)aLocalPacket.mPacketType;
+			const uint8_t aLocalImitater = (uint8_t)aLocalPacket.mImitaterType;
+			for (int aWireIndex = 0; aWireIndex < aNumPackets; aWireIndex++)
 			{
-				aPacket.mPacketType = aType;
-				aPacket.mImitaterType = anImitater;
-				aPacket.mRefreshCounter = 0;
-				aPacket.mRefreshTime = 0;
-				aPacket.mRefreshing = false;
-				aPacket.mActive = true;
+				const NetSeedPacketWire& aWire = aSeedPackets[aWireIndex];
+				if (!aWireUsed[aWireIndex] && aWire.mType == aLocalType &&
+					aWire.mImitater == aLocalImitater &&
+					aWire.mOwner == aLocalPacket.mNetOwnerSlot)
+				{
+					aWireUsed[aWireIndex] = true;
+					aWireForLocal[aLocalIndex] = aWireIndex;
+					break;
+				}
 			}
-			else
+			if (aWireForLocal[aLocalIndex] < 0)
 			{
-				aPacket.SetPacketType(aType, anImitater);
+				anIdentityMultisetMatch = false;
+				aMismatchLocalIndex = aLocalIndex;
+				break;
 			}
 		}
-		if (aPacket.mRefreshTime > 0)
-			aPacket.mRefreshCounter = aWire.mCooldown * aPacket.mRefreshTime / 255;
-		aPacket.mNetOwnerSlot = aWire.mOwner;
-		aPacket.mActive = aWire.mActive != 0;
-		aPacket.mOffsetX = aWire.mOffsetX;
-		aPacket.mSlotMachineCountDown = aWire.mSlotCountdown;
-		aPacket.mSlotMachiningNextSeed = aWire.mSlotNextSeed == 255 ?
-			SeedType::SEED_NONE : (SeedType)aWire.mSlotNextSeed;
-		aPacket.mSlotMachiningPosition = aWire.mSlotPosition;
+	}
+
+	bool aCanonicalOwnershipSafe = true;
+	for (int i = 0; i < aNumPackets; i++)
+	{
+		if (aSeedPackets[i].mOwner != LawnNet::NET_SHARED_OWNER)
+		{
+			aCanonicalOwnershipSafe = false;
+			break;
+		}
+	}
+	if (aLocalPacketCount < 0 || aLocalPacketCount > SEEDBANK_CAPACITY)
+		aCanonicalOwnershipSafe = false;
+	for (int i = 0; aCanonicalOwnershipSafe && i < aLocalPacketCount; i++)
+	{
+		if (mSeedBank->mSeedPackets[i].mNetOwnerSlot != LawnNet::NET_SHARED_OWNER)
+			aCanonicalOwnershipSafe = false;
+	}
+	const bool aCanonicalFallbackMode = HasConveyorBeltSeedBank() ||
+		(mApp && mApp->IsSlotMachineLevel());
+	const bool aCanonicalFallback = !anIdentityMultisetMatch &&
+		aCanonicalFallbackMode && aCanonicalOwnershipSafe;
+	if (!anIdentityMultisetMatch && !aCanonicalFallback)
+	{
+		uint8_t aMismatchType = 255;
+		uint8_t aMismatchImitater = 255;
+		uint8_t aMismatchOwner = 255;
+		if (aMismatchLocalIndex >= 0 && aMismatchLocalIndex < aLocalPacketCount)
+		{
+			const SeedPacket& aMismatch = mSeedBank->mSeedPackets[aMismatchLocalIndex];
+			aMismatchType = (uint8_t)aMismatch.mPacketType;
+			aMismatchImitater = (uint8_t)aMismatch.mImitaterType;
+			aMismatchOwner = aMismatch.mNetOwnerSlot;
+		}
+		NetTrace("snapshot seed identity mismatch rejected localCount=%d wireCount=%u localIndex=%d identity=(%u,%u,%u) mode=%d fallbackMode=%d shared=%d",
+			aLocalPacketCount, aNumPackets, aMismatchLocalIndex, aMismatchType,
+			aMismatchImitater, aMismatchOwner, mApp ? (int)mApp->mGameMode : -1,
+			aCanonicalFallbackMode ? 1 : 0, aCanonicalOwnershipSafe ? 1 : 0);
+		return;
+	}
+	if (aCanonicalFallback)
+	{
+		NetTrace("snapshot seed canonical fallback mode=%d conveyor=%d slot=%d localCount=%d wireCount=%u",
+			mApp ? (int)mApp->mGameMode : -1, HasConveyorBeltSeedBank() ? 1 : 0,
+			mApp && mApp->IsSlotMachineLevel() ? 1 : 0, aLocalPacketCount, aNumPackets);
+	}
+
+	auto ApplySeedRuntimeState = [&](SeedPacket& thePacket,
+		const NetSeedPacketWire& theWire, bool theApplyCanonicalIdentity)
+	{
+		if (theApplyCanonicalIdentity)
+		{
+			SeedType aType = theWire.mType == 255 ? SeedType::SEED_NONE : (SeedType)theWire.mType;
+			SeedType anImitater = theWire.mImitater == 255 ? SeedType::SEED_NONE : (SeedType)theWire.mImitater;
+			if (thePacket.mPacketType != aType || thePacket.mImitaterType != anImitater)
+			{
+				// SetPacketType queries plant definitions.  Empty and challenge-only
+				// packet ids deliberately live outside that table and use a raw reset.
+				if (aType == SeedType::SEED_NONE ||
+					(int)aType >= (int)SeedType::NUM_SEED_TYPES)
+				{
+					thePacket.mPacketType = aType;
+					thePacket.mImitaterType = anImitater;
+					thePacket.mRefreshCounter = 0;
+					thePacket.mRefreshTime = 0;
+					thePacket.mRefreshing = false;
+					thePacket.mActive = true;
+				}
+				else
+				{
+					thePacket.SetPacketType(aType, anImitater);
+				}
+			}
+		}
+		if (thePacket.mRefreshTime > 0)
+			thePacket.mRefreshCounter = theWire.mCooldown * thePacket.mRefreshTime / 255;
+		thePacket.mNetOwnerSlot = theWire.mOwner;
+		thePacket.mActive = theWire.mActive != 0;
+		thePacket.mOffsetX = theWire.mOffsetX;
+		thePacket.mSlotMachineCountDown = theWire.mSlotCountdown;
+		thePacket.mSlotMachiningNextSeed = theWire.mSlotNextSeed == 255 ?
+			SeedType::SEED_NONE : (SeedType)theWire.mSlotNextSeed;
+		thePacket.mSlotMachiningPosition = theWire.mSlotPosition;
+	};
+
+	// Apply only after structural validation and the complete identity mapping
+	// have succeeded; a malformed or unsafe mismatched section cannot partially
+	// update the local seed bank.
+	for (int aLocalIndex = 0; aLocalIndex < aNumPackets; aLocalIndex++)
+	{
+		const int aWireIndex = aCanonicalFallback ? aLocalIndex : aWireForLocal[aLocalIndex];
+		ApplySeedRuntimeState(mSeedBank->mSeedPackets[aLocalIndex],
+			aSeedPackets[aWireIndex], aCanonicalFallback);
 	}
 	mSeedBank->mNumPackets = aNumPackets;
 

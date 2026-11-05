@@ -794,6 +794,8 @@ void NetManager::OnClientInput(NetSession* theSession, NetBuffer& thePayload)
 		anImitater == 255 && anOwner == 255;
 	if ((!aHasSeedIdentity && !aCleanNoSeedIdentity) ||
 		(aHasSeedIdentity && (aSeedIndex >= SEEDBANK_CAPACITY ||
+			aSeedType == 255 ||
+			(anImitater != 255 && anImitater >= (uint8_t)SeedType::NUM_SEED_TYPES) ||
 			(anOwner >= NET_MAX_PLAYERS && anOwner != NET_SHARED_OWNER))))
 	{
 		NetTrace("mouse reject slot=%u reason=seed_identity index=%d type=%u imitater=%u owner=%u",
@@ -804,26 +806,48 @@ void NetManager::OnClientInput(NetSession* theSession, NetBuffer& thePayload)
 	int aHostSeedHit = NetSeedPacketAt(aBoard, aCanonicalX, aCanonicalY);
 	if (anAction == NETINPUT_MOUSE_DOWN && aHasSeedIdentity)
 	{
-		if (!aBoard->mSeedBank || aSeedIndex >= aBoard->mSeedBank->mNumPackets)
+		SeedBank* aHostBank = aBoard->mSeedBank;
+		if (!aHostBank || aHostBank->mNumPackets < 0 ||
+			aHostBank->mNumPackets > SEEDBANK_CAPACITY)
 		{
-			NetTrace("mouse reject slot=%u reason=seed_index_stale index=%d count=%d", aSlot,
-				aSeedIndex, aBoard->mSeedBank ? aBoard->mSeedBank->mNumPackets : -1);
+			NetTrace("mouse reject slot=%u reason=host_seed_bank localIndex=%d count=%d", aSlot,
+				aSeedIndex, aHostBank ? aHostBank->mNumPackets : -1);
 			return;
 		}
-		SeedPacket& aPacket = aBoard->mSeedBank->mSeedPackets[aSeedIndex];
-		if ((uint8_t)aPacket.mPacketType != aSeedType ||
-			(uint8_t)aPacket.mImitaterType != anImitater || aPacket.mNetOwnerSlot != anOwner)
+
+		// The sender's index is viewer-relative (its own cards are first), so it is
+		// diagnostic only.  Resolve the click exclusively through the semantic
+		// identity that both banks share.  Ambiguous duplicates are rejected rather
+		// than letting an untrusted local index select one of them on the host.
+		int aHostSeedIndex = -1;
+		int aMatchCount = 0;
+		for (int i = 0; i < aHostBank->mNumPackets; i++)
 		{
-			NetTrace("mouse reject slot=%u reason=seed_mismatch index=%d wire=(%u,%u,%u) host=(%u,%u,%u)",
-				aSlot, aSeedIndex, aSeedType, anImitater, anOwner,
-				(uint8_t)aPacket.mPacketType, (uint8_t)aPacket.mImitaterType, aPacket.mNetOwnerSlot);
+			const SeedPacket& aCandidate = aHostBank->mSeedPackets[i];
+			if ((uint8_t)aCandidate.mPacketType == aSeedType &&
+				(uint8_t)aCandidate.mImitaterType == anImitater &&
+				aCandidate.mNetOwnerSlot == anOwner)
+			{
+				aHostSeedIndex = i;
+				aMatchCount++;
+			}
+		}
+		if (aMatchCount != 1)
+		{
+			NetTrace("mouse reject slot=%u reason=seed_identity_%s localIndex=%d identity=(%u,%u,%u) matches=%d",
+				aSlot, aMatchCount == 0 ? "missing" : "ambiguous", aSeedIndex,
+				aSeedType, anImitater, anOwner, aMatchCount);
 			return;
 		}
+
+		SeedPacket& aPacket = aHostBank->mSeedPackets[aHostSeedIndex];
+		NetTrace("mouse seed remap slot=%u localIndex=%d hostIndex=%d identity=(%u,%u,%u)",
+			aSlot, aSeedIndex, aHostSeedIndex, aSeedType, anImitater, anOwner);
 		// Packet motion between the client's last snapshot and this ordered click
 		// must not select a neighbour.  Resolve the validated semantic identity to
 		// the host packet's current centre while preserving Board's normal path.
-		aCanonicalX = (int16_t)(aBoard->mSeedBank->mX + aPacket.mX + aPacket.mOffsetX + aPacket.mWidth / 2);
-		aCanonicalY = (int16_t)(aBoard->mSeedBank->mY + aPacket.mY + aPacket.mHeight / 2);
+		aCanonicalX = (int16_t)(aHostBank->mX + aPacket.mX + aPacket.mOffsetX + aPacket.mWidth / 2);
+		aCanonicalY = (int16_t)(aHostBank->mY + aPacket.mY + aPacket.mHeight / 2);
 	}
 	else if (anAction == NETINPUT_MOUSE_DOWN && aHostSeedHit >= 0)
 	{
