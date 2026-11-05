@@ -1398,12 +1398,22 @@ try {
     }
 
     if ($Scenario -eq "PortalCombatClient") {
-        $cameraBootstrapPattern = '(?im)\bcamera bootstrap (?:encoded|applied) board=\((-?\d+),(-?\d+)\) tree=(-?\d+) pole=(-?\d+)'
-        $hostCameraBootstrap = [regex]::Match($hostLog, $cameraBootstrapPattern)
-        $clientCameraBootstrap = [regex]::Match($clientLog, $cameraBootstrapPattern)
+        $hostCameraBootstrap = [regex]::Match($hostLog,
+            '(?im)\bcamera bootstrap encoded board=\((-?\d+),(-?\d+)\) tree=(-?\d+) pole=(-?\d+)')
+        $clientCameraBootstrap = [regex]::Match($clientLog,
+            '(?im)\bcamera bootstrap applied board=\((-?\d+),(-?\d+)\) tree=(-?\d+) pole=(-?\d+)')
         if (-not $hostCameraBootstrap.Success -or -not $clientCameraBootstrap.Success) {
             throw "Missing reliable Portal Combat START_PLAYING camera bootstrap evidence."
         }
+		$hostPlaying = [regex]::Match($hostLog,
+			'(?im)\bSMOKE_CHECKPOINT\b[^\r\n]*scenario=portal_combat_client[^\r\n]*step=PLAYING\b')
+		$clientPlaying = [regex]::Match($clientLog,
+			'(?im)\bSMOKE_CHECKPOINT\b[^\r\n]*scenario=portal_combat_client[^\r\n]*step=PLAYING\b')
+		if (-not $hostPlaying.Success -or -not $clientPlaying.Success -or
+			$hostCameraBootstrap.Index -ge $hostPlaying.Index -or
+			$clientCameraBootstrap.Index -ge $clientPlaying.Index) {
+			throw "Portal Combat camera bootstrap was not applied before the first PLAYING checkpoint."
+		}
         for ($group = 1; $group -le 4; ++$group) {
             if ($hostCameraBootstrap.Groups[$group].Value -ne $clientCameraBootstrap.Groups[$group].Value) {
                 throw ("Portal Combat START_PLAYING camera bootstrap mismatch in group {0}: host={1}, client={2}." -f
@@ -1429,6 +1439,13 @@ try {
                 $hostPortalCamera.Groups[1].Value, $hostPortalCamera.Groups[2].Value,
                 $clientPortalCamera.Groups[1].Value, $clientPortalCamera.Groups[2].Value)
         }
+
+		$portalSteadyCameraPattern = '(?im)\bSMOKE_CAMERA_SYNC\b[^\r\n]*\bphase=steady\b[^\r\n]*\bsamples=([2-9]\d|[1-9]\d{2,})\b[^\r\n]*\bmaxDelta=([0-4])\b[^\r\n]*\bintroTargetValid=0\b[^\r\n]*\btargetValid=1\b'
+		$hostSteadyCamera = [regex]::Match($hostLog, $portalSteadyCameraPattern)
+		$clientSteadyCamera = [regex]::Match($clientLog, $portalSteadyCameraPattern)
+		if (-not $hostSteadyCamera.Success -or -not $clientSteadyCamera.Success) {
+			throw "Missing 20-sample steady Portal Combat camera evidence."
+		}
 
         $portalLayoutPattern = '(?im)\bSMOKE_PORTAL_LAYOUT\b[^\r\n]*\bhash=([0-9a-f]{8})\b[^\r\n]*\bids=([^\s]+)\s+types=([^\s]+)\s+cells=([^\s]+)\s+states=([^\s]+)'
         $hostPortalLayout = [regex]::Match($hostLog, $portalLayoutPattern)

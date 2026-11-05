@@ -971,6 +971,8 @@ void NetSmokeScenarioRuntime::Reset(NetSmokeScenarioId theScenario)
 	mPortalRelocationVerified = false;
 	mPortalCameraVerified = false;
 	mPortalCameraMovementVerified = false;
+	mPortalCameraSteadySamples = 0;
+	mPortalCameraMaxDelta = 0;
         mPortalZombieId = 0;
         mPortalPlantId = 0;
 	mPortalHeldPacketId = 0;
@@ -2299,14 +2301,47 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
 				aBoard->mNetGameplayCameraTargets.mBoardX : aBoard->mX;
 			const int aTargetY = theManifest.IsClient() ?
 				aBoard->mNetGameplayCameraTargets.mBoardY : aBoard->mY;
-			if (!mPortalCameraMovementVerified &&
-				(aTargetX != mPortalInitialCameraX || aTargetY != mPortalInitialCameraY) &&
-				abs(aBoard->mX - aTargetX) <= 4 && abs(aBoard->mY - aTargetY) <= 4)
+			const int aTargetTree = theManifest.IsClient() ?
+				aBoard->mNetGameplayCameraTargets.mTreeX : aBoard->mTreeX;
+			const int aTargetPole = theManifest.IsClient() ?
+				aBoard->mNetGameplayCameraTargets.mPoleX : aBoard->mPoleX;
+			const bool aTargetValid = theManifest.IsHost() ||
+				aBoard->mNetGameplayCameraTargets.mValid;
+			if (aTargetX != mPortalInitialCameraX || aTargetY != mPortalInitialCameraY)
 			{
-				mPortalCameraMovementVerified = true;
-				NetTrace("SMOKE_CAMERA_SYNC role=%s phase=movement board=(%d,%d) target=(%d,%d) delta=(%d,%d) valid=1",
+				mPortalInitialCameraX = aTargetX;
+				mPortalInitialCameraY = aTargetY;
+				mPortalCameraSteadySamples = 0;
+				mPortalCameraMaxDelta = 0;
+				mPortalCameraMovementVerified = false;
+			}
+			const int aDeltaX = abs(aBoard->mX - aTargetX);
+			const int aDeltaY = abs(aBoard->mY - aTargetY);
+			const int aTreeDelta = abs(aBoard->mTreeX - aTargetTree);
+			const int aPoleDelta = abs(aBoard->mPoleX - aTargetPole);
+			const int aMaxDelta = max(max(aDeltaX, aDeltaY), max(aTreeDelta, aPoleDelta));
+			if (!aTargetValid || (theManifest.IsClient() && aBoard->mNetIntroTargets.mValid) ||
+				aMaxDelta > 4)
+			{
+				NetTrace("SMOKE_CAMERA_SYNC_INVALID role=%s phase=steady board=(%d,%d) target=(%d,%d) treeDelta=%d poleDelta=%d maxDelta=%d introTargetValid=%d targetValid=%d samples=%d",
 					theManifest.IsHost() ? "host" : "client", aBoard->mX, aBoard->mY,
-					aTargetX, aTargetY, abs(aBoard->mX - aTargetX), abs(aBoard->mY - aTargetY));
+					aTargetX, aTargetY, aTreeDelta, aPoleDelta, aMaxDelta,
+					aBoard->mNetIntroTargets.mValid ? 1 : 0, aTargetValid ? 1 : 0,
+					mPortalCameraSteadySamples);
+				theFailure = "Portal camera drifted from the authoritative gameplay target";
+				return false;
+			}
+			if (!mPortalCameraMovementVerified)
+			{
+				mPortalCameraSteadySamples++;
+				mPortalCameraMaxDelta = max(mPortalCameraMaxDelta, aMaxDelta);
+				if (mPortalCameraSteadySamples >= 20)
+				{
+					mPortalCameraMovementVerified = true;
+					NetTrace("SMOKE_CAMERA_SYNC role=%s phase=steady samples=%d maxDelta=%d introTargetValid=%d targetValid=1",
+						theManifest.IsHost() ? "host" : "client", mPortalCameraSteadySamples,
+						mPortalCameraMaxDelta, aBoard->mNetIntroTargets.mValid ? 1 : 0);
+				}
 			}
 		}
 		if (!mPortalLayoutVerified)
@@ -3005,7 +3040,8 @@ bool NetSmokeScenarioRuntime::IsComplete(uint32_t theRequiredPostActionSnapshots
 			(mSoakChooserVerified && mTdPathVerified && mTdZombieEntryObserved &&
 			 mTdZombieTurnObserved && mTdClientPlantObserved)) &&
                 (mScenario != NETSMOKE_SCENARIO_PORTAL_COMBAT_CLIENT ||
-                        (mPortalCameraVerified && mPortalLayoutVerified && mPortalConveyorVerified && mPortalZombieEntryObserved &&
+                        (mPortalCameraVerified && mPortalCameraMovementVerified &&
+			 mPortalLayoutVerified && mPortalConveyorVerified && mPortalZombieEntryObserved &&
                          mPortalZombieTeleportObserved && mPortalClientPlantObserved &&
                          mPortalAdviceShown && mPortalAdviceCleared &&
                          mPortalRelocationVerified)) &&

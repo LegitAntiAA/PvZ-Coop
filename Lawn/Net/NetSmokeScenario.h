@@ -214,7 +214,9 @@ private:
 	uint32_t mPortalAdviceClearTick;
 	bool mPortalRelocationVerified;
 	bool mPortalCameraVerified;
-        bool mPortalCameraMovementVerified;
+	bool mPortalCameraMovementVerified;
+	int mPortalCameraSteadySamples;
+	int mPortalCameraMaxDelta;
 	uint16_t mPortalZombieId;
 	uint16_t mPortalPlantId;
 	uint16_t mPortalHeldPacketId;
