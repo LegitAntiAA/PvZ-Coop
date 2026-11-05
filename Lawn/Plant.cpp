@@ -5595,10 +5595,6 @@ void Plant::DoSpecial()
         {
             aParticle->OverrideFilterEffect(nullptr, aBodyReanim->mFilterEffect);
         }
-        // Gameplay remains host-authoritative, but the stock particle is not
-        // reconstructible from a later snapshot once this plant has died.
-        // Send one reliable, presentation-only event before removing it.
-        mBoard->NetBroadcastPotatoExplosion(this);
         mBoard->ShakeBoard(3, -4);
 
         Die();
@@ -5725,6 +5721,10 @@ void Plant::DoSpecial()
         {
             aParticle->OverrideFilterEffect(nullptr, aBodyReanim->mFilterEffect);
         }
+        // Gameplay remains host-authoritative, but the stock particle is not
+        // reconstructible from a later snapshot once this plant has died.
+        // Send one reliable, presentation-only event before removing it.
+        mBoard->NetBroadcastPotatoExplosion(this);
         mBoard->ShakeBoard(3, -4);
 
         Die();
