@@ -1382,6 +1382,8 @@ void LawnApp::MakeNewBoard()
 //0x44F6B0
 void LawnApp::StartPlaying()
 {
+	if (NetIsClient() && mBoard)
+		mBoard->NetUpdateIntroPresentation(true);
 	KillSeedChooserScreen();
 	if (NetIsClient())
 	{

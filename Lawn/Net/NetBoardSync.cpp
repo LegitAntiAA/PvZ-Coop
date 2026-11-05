@@ -1159,9 +1159,10 @@ void Board::NetApplyEvent(NetBuffer& b)
 	}
 	case BOARDEV_SUN_ADDED:
 	{
-		if (b.Remaining() != 16)
+		if (!NetPayloadHasExactBytes(b, NET_SUN_ADDED_PAYLOAD_BYTES))
 		{
-			NetTrace("SUN_ADDED rejected: invalid payload size=%zu expected=16", b.Remaining());
+			NetTrace("SUN_ADDED rejected: invalid payload size=%zu expected=%zu",
+				b.Remaining(), NET_SUN_ADDED_PAYLOAD_BYTES);
 			break;
 		}
 		uint16_t anId = b.ReadU16Or();
@@ -1210,6 +1211,7 @@ void Board::NetApplyEvent(NetBuffer& b)
 			aPottedVisualPtr = &aPottedVisual;
 		}
 		Coin* aCoin = NetGetGhostCoin(anId);
+		bool aCreatedFromEvent = false;
 		if (aCoin && aCoin->mType != (CoinType)aCoinType)
 		{
 			NetTrace("SUN_ADDED rejected: id=%u changed coin type old=%d new=%u", anId, (int)aCoin->mType, aCoinType);
@@ -1223,18 +1225,26 @@ void Board::NetApplyEvent(NetBuffer& b)
 				aCoin->CoinInitializeNetGhost(aX, aY, (CoinType)aCoinType,
 					(CoinMotion)aMotion, aPottedVisualPtr);
 				aCoin->mUsableSeedType = aUsableSeed == 255 ? SeedType::SEED_NONE : (SeedType)aUsableSeed;
+				aCreatedFromEvent = true;
 			}
 		}
 		if (aCoin)
 		{
 			aCoin->mNetId = anId;
 			aCoin->mNetGhost = true;
-			aCoin->mHitGround = true;
-			aCoin->mPosX = (float)aX;
-			aCoin->mPosY = (float)aY;
-			aCoin->mGroundY = aY;
-			aCoin->mNetTargetX = (float)aX;
-			aCoin->mNetTargetY = (float)aY;
+			if (aCreatedFromEvent)
+			{
+				// AddCoin emits before some callers finish configuring velocity and
+				// ground state.  Keep the provisional ghost hidden until the first
+				// complete snapshot supplies an authoritative position instead of
+				// displaying a motionless coin at the spawn coordinates.
+				aCoin->mVisible = false;
+				aCoin->mHitGround = false;
+				aCoin->mPosX = (float)aX;
+				aCoin->mPosY = (float)aY;
+				aCoin->mNetTargetX = (float)aX;
+				aCoin->mNetTargetY = (float)aY;
+			}
 			aCoin->mCoinMotion = (CoinMotion)aMotion;
 			aCoin->mUsableSeedType = aUsableSeed == 255 ? SeedType::SEED_NONE : (SeedType)aUsableSeed;
 			if (aPottedPresent)
@@ -1250,10 +1260,18 @@ void Board::NetApplyEvent(NetBuffer& b)
 	}
 	case BOARDEV_SUN_COLLECTED:
 	{
+		if (!NetPayloadHasExactBytes(b, NET_SUN_COLLECTED_PAYLOAD_BYTES))
+		{
+			NetTrace("SUN_COLLECTED rejected: invalid payload size=%zu expected=%zu",
+				b.Remaining(), NET_SUN_COLLECTED_PAYLOAD_BYTES);
+			break;
+		}
 		uint16_t anId = b.ReadU16Or();
 		Coin* aCoin = NetGetGhostCoin(anId);
 		if (aCoin && !aCoin->mIsBeingCollected)
 		{
+			aCoin->mCollectX = aCoin->mPosX;
+			aCoin->mCollectY = aCoin->mPosY;
 			aCoin->mIsBeingCollected = true;
 			aCoin->mDead = false;
 			if (aCoin->IsMoney())
@@ -2289,13 +2307,15 @@ void Board::NetApplySnapshot(NetBuffer& b)
 			aCoin->mNetId = aWire.mId;
 			aCoin->mNetGhost = true;
 		}
+		const bool aFirstAuthoritativeSample = aCreated || !aCoin->mVisible;
 		aCoin->mNetTargetX = aWire.mPosX;
 		aCoin->mNetTargetY = aWire.mPosY;
-		if (aCreated)
+		if (aFirstAuthoritativeSample)
 		{
 			aCoin->mPosX = aWire.mPosX;
 			aCoin->mPosY = aWire.mPosY;
 		}
+		aCoin->mVisible = true;
 		// Coin::Draw uses absolute mPos coordinates; mX/mY must stay at the
 		// GameObject origin or the renderer translates the coin twice.
 		aCoin->mX = 0;
@@ -2738,6 +2758,64 @@ void Board::NetGhostUpdateOthers()
 	}
 }
 
+void Board::NetUpdateIntroPresentation(bool theSnap)
+{
+	if (!mNetIntroTargets.mValid)
+		return;
+	if (!theSnap && (mApp->mGameScene != GameScenes::SCENE_LEVEL_INTRO || mPaused))
+		return;
+
+	const int aBoardX = theSnap ? mNetIntroTargets.mBoardX :
+		NetApproachPresentationInt(mX, mNetIntroTargets.mBoardX);
+	const int aBoardY = theSnap ? mNetIntroTargets.mBoardY :
+		NetApproachPresentationInt(mY, mNetIntroTargets.mBoardY);
+	Move(aBoardX, aBoardY);
+
+	mTreeX = theSnap ? mNetIntroTargets.mTreeX :
+		NetApproachPresentationInt(mTreeX, mNetIntroTargets.mTreeX);
+	mPoleX = theSnap ? mNetIntroTargets.mPoleX :
+		NetApproachPresentationInt(mPoleX, mNetIntroTargets.mPoleX);
+	mSodPosition = theSnap ? mNetIntroTargets.mSodPosition :
+		NetApproachPresentationInt(mSodPosition, mNetIntroTargets.mSodPosition);
+
+	const int aFogOffset2 = theSnap ? mNetIntroTargets.mFogOffset2 :
+		NetApproachPresentationInt((int)(mFogOffset * 2.0f), mNetIntroTargets.mFogOffset2);
+	mFogOffset = aFogOffset2 / 2.0f;
+
+	if (mSeedBank)
+	{
+		const int aSeedBankX = theSnap ? mNetIntroTargets.mSeedBankX :
+			NetApproachPresentationInt(mSeedBank->mX, mNetIntroTargets.mSeedBankX);
+		const int aSeedBankY = theSnap ? mNetIntroTargets.mSeedBankY :
+			NetApproachPresentationInt(mSeedBank->mY, mNetIntroTargets.mSeedBankY);
+		mSeedBank->Move(aSeedBankX, aSeedBankY);
+		mSeedBank->mCutSceneDarken = theSnap ? mNetIntroTargets.mSeedBankDarken :
+			NetApproachPresentationInt(mSeedBank->mCutSceneDarken,
+				mNetIntroTargets.mSeedBankDarken);
+	}
+
+	SeedChooserScreen* aChooser = mApp->mSeedChooserScreen;
+	if (aChooser)
+	{
+		const int aWideX = mApp->mDDInterface ? mApp->mDDInterface->mWideScreenOffsetX : 0;
+		const int aWideY = mApp->mDDInterface ? mApp->mDDInterface->mWideScreenOffsetY : 0;
+		const int aChooserCanonicalX = aChooser->mX - aWideX;
+		const int aChooserCanonicalY = aChooser->mY - aWideY;
+		const int aChooserX = theSnap ? mNetIntroTargets.mChooserX :
+			NetApproachPresentationInt(aChooserCanonicalX, mNetIntroTargets.mChooserX);
+		const int aChooserY = theSnap ? mNetIntroTargets.mChooserY :
+			NetApproachPresentationInt(aChooserCanonicalY, mNetIntroTargets.mChooserY);
+		aChooser->Move(aChooserX + aWideX, aChooserY + aWideY);
+		if (aChooser->mMenuButton)
+		{
+			const int aMenuCanonicalY = aChooser->mMenuButton->mY - aWideY;
+			const int aMenuY = theSnap ? mNetIntroTargets.mChooserMenuY :
+				NetApproachPresentationInt(aMenuCanonicalY, mNetIntroTargets.mChooserMenuY);
+			aChooser->mMenuButton->mY = aMenuY + aWideY;
+		}
+	}
+}
+
 void Board::NetEncodeIntroState(NetBuffer& b)
 {
 	const int aWideX = mApp->mDDInterface ? mApp->mDDInterface->mWideScreenOffsetX : 0;
@@ -2878,15 +2956,24 @@ void Board::NetApplyIntroState(NetBuffer& b)
 	// dialog state machine or consumes gameplay RNG.
 	NetApplyDavePresentation(this, mApp, aDaveState);
 
+	const bool aFirstIntroSample = !mNetIntroTargets.mValid;
+	mNetIntroTargets.mBoardX = aBoardX;
+	mNetIntroTargets.mBoardY = aBoardY;
+	mNetIntroTargets.mTreeX = aTreeX;
+	mNetIntroTargets.mPoleX = aPoleX;
+	mNetIntroTargets.mChooserX = aChooserX;
+	mNetIntroTargets.mChooserY = aChooserY;
+	mNetIntroTargets.mChooserMenuY = aChooserMenuY;
+	mNetIntroTargets.mSeedBankX = aSeedBankX;
+	mNetIntroTargets.mSeedBankY = aSeedBankY;
+	mNetIntroTargets.mSodPosition = aSodPosition;
+	mNetIntroTargets.mFogOffset2 = aFogOffset2;
+	mNetIntroTargets.mSeedBankDarken = aSeedBankDarken;
+	mNetIntroTargets.mValid = true;
+
 	mCutScene->mCutsceneTime = max(0, aCutsceneTime);
-	Move(aBoardX, aBoardY);
-	mTreeX = aTreeX;
-	mPoleX = aPoleX;
-	mSeedBank->Move(aSeedBankX, aSeedBankY);
-	mSeedBank->mCutSceneDarken = aSeedBankDarken;
-	mSodPosition = aSodPosition;
-	mFogOffset = aFogOffset2 / 2.0f;
 	mFogBlownCountDown = aFogCountdown;
+	NetUpdateIntroPresentation(aFirstIntroSample);
 	mEnableGraveStones = (aFlags & 16) != 0;
 	mShowShovel = (aFlags & 32) != 0;
 	if (mMenuButton)
@@ -2895,13 +2982,9 @@ void Board::NetApplyIntroState(NetBuffer& b)
 	SeedChooserScreen* aChooser = mApp->mSeedChooserScreen;
 	if (aChooser)
 	{
-		const int aWideX = mApp->mDDInterface ? mApp->mDDInterface->mWideScreenOffsetX : 0;
-		const int aWideY = mApp->mDDInterface ? mApp->mDDInterface->mWideScreenOffsetY : 0;
-		aChooser->Move(aChooserX + aWideX, aChooserY + aWideY);
 		aChooser->mMouseVisible = (aFlags & 64) != 0;
 		if (aChooser->mMenuButton)
 		{
-			aChooser->mMenuButton->mY = aChooserMenuY + aWideY;
 			aChooser->mMenuButton->mBtnNoDraw = (aFlags & 4) != 0;
 			aChooser->mMenuButton->mDisabled = (aFlags & 8) != 0;
 		}
@@ -2958,6 +3041,7 @@ void Board::NetClientTick()
 {
 	// Drain and apply incoming messages first (events then snapshots in order)
 	NetDrainMessages();
+	NetUpdateIntroPresentation(false);
 
 	// ghost micro-updates (interpolation, cosmetic counters)
 	Zombie* aZombie = nullptr;

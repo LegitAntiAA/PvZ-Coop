@@ -17,6 +17,7 @@
 #include "Widget/AchievementsScreen.h"
 #include "../Sexy.TodLib/FilterEffect.h"
 #include "Net/NetCommon.h"
+#include "Net/NetManager.h"
 
 Coin::Coin()
 {
@@ -1162,9 +1163,17 @@ void Coin::Collect()
     if (mDead)
         return;
 
+	const bool aFirstCollection = !mIsBeingCollected;
     mCollectX = mPosX;
     mCollectY = mPosY;
     mIsBeingCollected = true;
+	if (aFirstCollection && mApp && mApp->NetIsHost() && mApp->mNetManager && mNetId != 0)
+	{
+		LawnNet::NetBuffer anEvent;
+		anEvent.WriteU16(mNetId);
+		TOD_ASSERT(anEvent.Size() == LawnNet::NET_SUN_COLLECTED_PAYLOAD_BYTES);
+		mApp->mNetManager->SendBoardEvent(anEvent, LawnNet::BOARDEV_SUN_COLLECTED);
+	}
 
     bool aIsEndlessAward = false;
     if ((mApp->IsEndlessIZombie(mApp->mGameMode) || mApp->IsEndlessScaryPotter(mApp->mGameMode)) && IsLevelAward())

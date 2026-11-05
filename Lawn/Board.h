@@ -565,6 +565,23 @@ public:
 	float							mNetGhostTimeAcc;
 	int								mNetLastApplyMs;
 	bool							mNetPausedOverlay;			// client: host has paused
+	struct NetIntroPresentationTargets
+	{
+		bool mValid;
+		int mBoardX;
+		int mBoardY;
+		int mTreeX;
+		int mPoleX;
+		int mChooserX;				// canonical: local widescreen offset is added when applied
+		int mChooserY;
+		int mChooserMenuY;
+		int mSeedBankX;
+		int mSeedBankY;
+		int mSodPosition;
+		int mFogOffset2;			// half-pixel wire units
+		int mSeedBankDarken;
+	};
+	NetIntroPresentationTargets	mNetIntroTargets;
 	CursorObject*					mNetPlayerCursors[LawnNet::NET_MAX_PLAYERS]; // host-authoritative cursor per slot
 	int								mNetPvPBrainScore;			// zombies team score
 	int								mNetPvPKillScore;			// plants team score
@@ -598,6 +615,7 @@ public:
 	void							NetEncodeSnapshot(LawnNet::NetBuffer& theBuffer);
 	void							NetEncodeIntroState(LawnNet::NetBuffer& theBuffer);
 	void							NetApplyIntroState(LawnNet::NetBuffer& theBuffer);
+	void							NetUpdateIntroPresentation(bool theSnap);
 	void							NetEncodeDaveState(LawnNet::NetBuffer& theBuffer);
 	void							NetApplyDaveState(LawnNet::NetBuffer& theBuffer);
 	void							NetCleanupCrazyDavePresentation();

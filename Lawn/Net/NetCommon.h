@@ -164,6 +164,12 @@ enum NetBoardEvent : uint8_t
 	BOARDEV_BUSH_RUSTLE = 22		// u8 row
 };
 
+// Exact payload sizes for coin/sun board events.  Keep these shared by the
+// runtime decoder and the protocol tests so trailing data is never silently
+// accepted as part of an older wire contract.
+static const size_t NET_SUN_ADDED_PAYLOAD_BYTES = 16;
+static const size_t NET_SUN_COLLECTED_PAYLOAD_BYTES = 2;
+
 // Board snapshot flags
 enum NetSnapshotFlag : uint8_t
 {
@@ -280,6 +286,16 @@ public:
 	inline int32_t ReadI32Or() { int32_t v = 0; ReadI32(&v); return v; }
 	inline float ReadF32Or() { float v = 0.f; ReadF32(&v); return v; }
 };
+
+inline bool NetPayloadHasExactBytes(const NetBuffer& thePayload, size_t theExpectedBytes)
+{
+	return thePayload.Remaining() == theExpectedBytes;
+}
+
+// Presentation-only integer smoothing used between authoritative samples.
+// It is monotonic, cannot overshoot, and always converges even when integer
+// truncation would otherwise produce a zero step.
+int NetApproachPresentationInt(int theCurrent, int theTarget);
 
 // Frame: [u16 payloadSize][u8 msgType][payload]
 bool NetEncodeFrame(const NetBuffer& thePayload, uint8_t theMsgType, NetBuffer& theFrame);

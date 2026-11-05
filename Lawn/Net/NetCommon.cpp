@@ -108,6 +108,22 @@ const char* NetMessageName(uint8_t theMsgType)
 	}
 }
 
+int NetApproachPresentationInt(int theCurrent, int theTarget)
+{
+	const int64_t aDelta = (int64_t)theTarget - (int64_t)theCurrent;
+	if (aDelta >= -1 && aDelta <= 1)
+		return theTarget;
+
+	int64_t aStep = aDelta * 35 / 100;
+	if (aStep == 0)
+		aStep = aDelta > 0 ? 1 : -1;
+
+	const int64_t aNext = (int64_t)theCurrent + aStep;
+	if ((aDelta > 0 && aNext > theTarget) || (aDelta < 0 && aNext < theTarget))
+		return theTarget;
+	return (int)aNext;
+}
+
 // -------------------------------------------------------------------------
 // Frame encoding
 // -------------------------------------------------------------------------

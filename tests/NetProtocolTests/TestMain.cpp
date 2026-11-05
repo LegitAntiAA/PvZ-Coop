@@ -503,6 +503,69 @@ void TestSmokeManifestAndHashValidation()
 	CHECK(!anError.empty());
 }
 
+void TestPresentationApproachIsMonotonicAndConvergent()
+{
+	CHECK(LawnNet::NetApproachPresentationInt(0, 100) == 35);
+	CHECK(LawnNet::NetApproachPresentationInt(100, 0) == 65);
+	CHECK(LawnNet::NetApproachPresentationInt(9, 10) == 10);
+	CHECK(LawnNet::NetApproachPresentationInt(11, 10) == 10);
+	CHECK(LawnNet::NetApproachPresentationInt(10, 10) == 10);
+
+	int aForward = -250;
+	for (int i = 0; i < 128 && aForward != 400; ++i)
+	{
+		const int aNext = LawnNet::NetApproachPresentationInt(aForward, 400);
+		CHECK(aNext > aForward);
+		CHECK(aNext <= 400);
+		aForward = aNext;
+	}
+	CHECK(aForward == 400);
+
+	int aBackward = 400;
+	for (int i = 0; i < 128 && aBackward != -250; ++i)
+	{
+		const int aNext = LawnNet::NetApproachPresentationInt(aBackward, -250);
+		CHECK(aNext < aBackward);
+		CHECK(aNext >= -250);
+		aBackward = aNext;
+	}
+	CHECK(aBackward == -250);
+
+	// With network targets arriving only every seventh render tick, presentation
+	// still advances on the six frames between authoritative samples.
+	int aRendered = 0;
+	int aChangesBetweenSamples = 0;
+	for (int aTick = 0; aTick < 35; ++aTick)
+	{
+		const int aTarget = (aTick / 7 + 1) * 100;
+		const int aNext = LawnNet::NetApproachPresentationInt(aRendered, aTarget);
+		if (aTick % 7 != 0 && aNext != aRendered)
+			++aChangesBetweenSamples;
+		aRendered = aNext;
+	}
+	CHECK(aChangesBetweenSamples > 0);
+}
+
+void TestCoinEventPayloadSizesAreExact()
+{
+	LawnNet::NetBuffer anAdded;
+	for (size_t i = 0; i < LawnNet::NET_SUN_ADDED_PAYLOAD_BYTES - 1U; ++i)
+		anAdded.WriteU8(0);
+	CHECK(!LawnNet::NetPayloadHasExactBytes(anAdded, LawnNet::NET_SUN_ADDED_PAYLOAD_BYTES));
+	anAdded.WriteU8(0);
+	CHECK(LawnNet::NetPayloadHasExactBytes(anAdded, LawnNet::NET_SUN_ADDED_PAYLOAD_BYTES));
+	anAdded.WriteU8(0);
+	CHECK(!LawnNet::NetPayloadHasExactBytes(anAdded, LawnNet::NET_SUN_ADDED_PAYLOAD_BYTES));
+
+	LawnNet::NetBuffer aCollected;
+	aCollected.WriteU8(0);
+	CHECK(!LawnNet::NetPayloadHasExactBytes(aCollected, LawnNet::NET_SUN_COLLECTED_PAYLOAD_BYTES));
+	aCollected.WriteU8(0);
+	CHECK(LawnNet::NetPayloadHasExactBytes(aCollected, LawnNet::NET_SUN_COLLECTED_PAYLOAD_BYTES));
+	aCollected.WriteU8(0);
+	CHECK(!LawnNet::NetPayloadHasExactBytes(aCollected, LawnNet::NET_SUN_COLLECTED_PAYLOAD_BYTES));
+}
+
 void TestConfigRoundTripInIsolatedDirectory()
 {
 	ScopedTemporaryWorkingDirectory aWorkingDirectory;
@@ -551,6 +614,8 @@ int main()
 	RunTest("Config.Defaults", TestConfigDefaults);
 	RunTest("Config.IsolatedRoundTrip", TestConfigRoundTripInIsolatedDirectory);
 	RunTest("Smoke.ManifestAndHashValidation", TestSmokeManifestAndHashValidation);
+	RunTest("Presentation.Approach", TestPresentationApproachIsMonotonicAndConvergent);
+	RunTest("Events.CoinPayloadSizes", TestCoinEventPayloadSizesAreExact);
 	const LocalizedTextTestResult aTextResult = RunLocalizedTextTests();
 	gChecks += aTextResult.mChecks;
 	gFailures += aTextResult.mFailures;

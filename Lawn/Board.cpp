@@ -79,6 +79,7 @@ Board::Board(LawnApp* theApp)
 	mNetGhostTimeAcc = 0.0f;
 	mNetLastApplyMs = 0;
 	mNetPausedOverlay = false;
+	memset(&mNetIntroTargets, 0, sizeof(mNetIntroTargets));
 	mNetPvPBrainScore = 0;
 	mNetPvPKillScore = 0;
 	mNetPvPBrainTimer = 0;
@@ -2624,7 +2625,7 @@ Coin* Board::AddCoin(int theX, int theY, CoinType theCoinType, CoinMotion theCoi
 			anEvent.WriteU8(aPottedPresent ? (uint8_t)aCoin->mPottedPlantSpec.mFacing : 255);
 			anEvent.WriteU8(aPottedPresent ? (uint8_t)aCoin->mPottedPlantSpec.mDrawVariation : 255);
 			anEvent.WriteU8(aPottedPresent ? (uint8_t)aCoin->mPottedPlantSpec.mPlantAge : 255);
-			TOD_ASSERT(anEvent.Size() == 16);
+			TOD_ASSERT(anEvent.Size() == LawnNet::NET_SUN_ADDED_PAYLOAD_BYTES);
 			mApp->mNetManager->SendBoardEvent(anEvent, BOARDEV_SUN_ADDED);
 		}
 	}
