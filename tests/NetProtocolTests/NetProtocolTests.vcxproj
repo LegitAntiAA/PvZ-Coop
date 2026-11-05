@@ -57,6 +57,7 @@
   <ItemGroup>
     <ClInclude Include="LocalizedTextTests.h" />
     <ClInclude Include="..\..\Lawn\Net\NetCommon.h" />
+    <ClInclude Include="..\..\Lawn\Net\NetSmokeScenario.h" />
     <ClInclude Include="..\..\PakLib\PakInterface.h" />
     <ClInclude Include="..\..\SexyAppFramework\TextEncoding.h" />
   </ItemGroup>

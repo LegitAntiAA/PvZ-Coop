@@ -888,6 +888,7 @@ LawnApp::LawnApp()
 	mCoopSmokeSnapshotsSent = 0;
 	mCoopSmokeSnapshotsReceived = 0;
 	mCoopSmokeSnapshotsApplied = 0;
+	mCoopSmokeScenarioRuntime.Reset();
 	mLastLevelStats = new LevelStats();
 	mFirstTimeGameSelector = true;
 	mGameMode = GameMode::GAMEMODE_ADVENTURE;
@@ -5442,13 +5443,20 @@ bool LawnApp::CoopSmokeWriteResult(bool thePassed, const char* theReason)
 	// later frame accidentally replacing the first outcome.
 	mCoopSmokeResultWritten = true;
 	const char* aRole = mCoopSmokeManifest.IsHost() ? "host" : "client";
+	const LawnNet::NetSmokeScenarioDefinition* aScenario =
+		LawnNet::NetGetSmokeScenario(mCoopSmokeManifest.mScenario);
 	std::string aJson = StrFormat(
 		"{\"status\":\"%s\",\"role\":\"%s\",\"protocol\":%u,"
-		"\"mode\":\"adventure\",\"level\":%d,\"seed\":%u,"
-		"\"snapshotsSent\":%u,\"snapshotsReceived\":%u,\"snapshotsApplied\":%u",
+		"\"scenario\":\"%s\",\"mode\":\"%s\",\"level\":%d,\"seed\":%u,"
+		"\"skipIntro\":%s,\"snapshotsSent\":%u,\"snapshotsReceived\":%u,"
+		"\"snapshotsApplied\":%u,\"actionApplied\":%s,\"postActionSnapshots\":%u",
 		thePassed ? "pass" : "fail", aRole, LawnNet::NET_PROTOCOL_VERSION,
+		aScenario ? aScenario->mName : "invalid", mCoopSmokeManifest.mMode.c_str(),
 		mCoopSmokeManifest.mLevel, mCoopSmokeManifest.mSeed,
-		mCoopSmokeSnapshotsSent, mCoopSmokeSnapshotsReceived, mCoopSmokeSnapshotsApplied);
+		mCoopSmokeManifest.mSkipIntro ? "true" : "false",
+		mCoopSmokeSnapshotsSent, mCoopSmokeSnapshotsReceived, mCoopSmokeSnapshotsApplied,
+		mCoopSmokeScenarioRuntime.HasAppliedAction() ? "true" : "false",
+		mCoopSmokeScenarioRuntime.GetPostActionSamples());
 	if (theReason && theReason[0])
 		aJson += ",\"error\":\"" + CoopSmokeJsonEscape(theReason) + "\"";
 	aJson += "}\n";
@@ -5500,6 +5508,7 @@ void LawnApp::CoopSmokeStartLifecycle()
 	if (!CoopSmokeActive() || mCoopSmokeLifecycleStarted || !mNetManager)
 		return;
 	mCoopSmokeLifecycleStarted = true;
+	mCoopSmokeScenarioRuntime.Reset(mCoopSmokeManifest.mScenario);
 
 	bool aStarted = false;
 	if (mCoopSmokeManifest.IsHost())
@@ -5524,10 +5533,13 @@ void LawnApp::CoopSmokeStartLifecycle()
 	LawnNet::NetTrace("SMOKE_LOCALIZATION_OK key=OPTIONS_MUSIC_LABEL utf8Bytes=%zu",
 		aMusicLabel.size());
 
-	LawnNet::NetTrace("SMOKE_LIFECYCLE role=%s manifest=%s timeoutMs=%u minimumSnapshots=%u",
+	const LawnNet::NetSmokeScenarioDefinition* aScenario =
+		LawnNet::NetGetSmokeScenario(mCoopSmokeManifest.mScenario);
+	LawnNet::NetTrace("SMOKE_LIFECYCLE role=%s scenario=%s manifest=%s timeoutMs=%u minimumSnapshots=%u skipIntro=%d",
 		mCoopSmokeManifest.IsHost() ? "host" : "client",
+		aScenario ? aScenario->mName : "invalid",
 		mCoopSmokeManifest.mManifestPath.c_str(), mCoopSmokeManifest.mTimeoutMs,
-		mCoopSmokeManifest.mMinimumSnapshots);
+		mCoopSmokeManifest.mMinimumSnapshots, mCoopSmokeManifest.mSkipIntro ? 1 : 0);
 }
 
 void LawnApp::CoopSmokeUpdate()
@@ -5545,6 +5557,13 @@ void LawnApp::CoopSmokeUpdate()
 	}
 	if (!mCoopSmokeLifecycleStarted || !mNetManager)
 		return;
+	const LawnNet::NetSmokeScenarioDefinition* aScenario =
+		LawnNet::NetGetSmokeScenario(mCoopSmokeManifest.mScenario);
+	if (!aScenario)
+	{
+		CoopSmokeFail("resolved smoke scenario disappeared at runtime");
+		return;
+	}
 
 	if (mCoopSmokeManifest.IsHost())
 	{
@@ -5578,10 +5597,16 @@ void LawnApp::CoopSmokeUpdate()
 			mCoopSmokeGameStarted = true;
 			if (mPlayerInfo)
 				mPlayerInfo->SetLevel(mCoopSmokeManifest.mLevel);
-			LawnNet::NetTrace("SMOKE_START role=host mode=adventure level=%d seed=%u",
-				mCoopSmokeManifest.mLevel, mCoopSmokeManifest.mSeed);
+			LawnNet::NetTrace("SMOKE_START role=host scenario=%s mode=%s gameMode=%u level=%d seed=%u skipIntro=%d",
+				aScenario->mName, mCoopSmokeManifest.mMode.c_str(),
+				(unsigned)mCoopSmokeManifest.mGameMode, mCoopSmokeManifest.mLevel,
+				mCoopSmokeManifest.mSeed, mCoopSmokeManifest.mSkipIntro ? 1 : 0);
 			KillGameSelector();
-			PreNewGame(GameMode::GAMEMODE_ADVENTURE, false, mCoopSmokeManifest.mLevel);
+			const GameMode aGameMode = (GameMode)mCoopSmokeManifest.mGameMode;
+			if (aGameMode == GameMode::GAMEMODE_ADVENTURE)
+				PreNewGame(aGameMode, false, mCoopSmokeManifest.mLevel);
+			else
+				PreNewGame(aGameMode, false);
 			if (!mBoard || !mBoard->mCutScene)
 			{
 				CoopSmokeFail("deterministic host board creation failed");
@@ -5591,9 +5616,17 @@ void LawnApp::CoopSmokeUpdate()
 				mBoard->mCutScene->CancelIntro();
 		}
 
+		std::string aScenarioFailure;
+		if (!mCoopSmokeScenarioRuntime.Update(this, mCoopSmokeManifest,
+			mCoopSmokeSnapshotsSent, aScenarioFailure))
+		{
+			CoopSmokeFail(aScenarioFailure.c_str());
+			return;
+		}
 		if (mCoopSmokeGameStarted && mBoard && mGameScene == GameScenes::SCENE_PLAYING &&
 			mNetManager->GetPlayerCount() == 2 &&
-			mCoopSmokeSnapshotsSent >= mCoopSmokeManifest.mMinimumSnapshots)
+			mCoopSmokeSnapshotsSent >= mCoopSmokeManifest.mMinimumSnapshots &&
+			mCoopSmokeScenarioRuntime.IsComplete(mCoopSmokeManifest.mMinimumSnapshots))
 		{
 			bool aPublished = CoopSmokeWriteResult(true, nullptr);
 			if (!aPublished || mCoopSmokeManifest.mCloseOnResult)
@@ -5616,8 +5649,16 @@ void LawnApp::CoopSmokeUpdate()
 			return;
 		}
 
+		std::string aScenarioFailure;
+		if (!mCoopSmokeScenarioRuntime.Update(this, mCoopSmokeManifest,
+			mCoopSmokeSnapshotsApplied, aScenarioFailure))
+		{
+			CoopSmokeFail(aScenarioFailure.c_str());
+			return;
+		}
 		if (mBoard && mGameScene == GameScenes::SCENE_PLAYING &&
-			mCoopSmokeSnapshotsApplied >= mCoopSmokeManifest.mMinimumSnapshots)
+			mCoopSmokeSnapshotsApplied >= mCoopSmokeManifest.mMinimumSnapshots &&
+			mCoopSmokeScenarioRuntime.IsComplete(mCoopSmokeManifest.mMinimumSnapshots))
 		{
 			bool aPublished = CoopSmokeWriteResult(true, nullptr);
 			if (!aPublished || mCoopSmokeManifest.mCloseOnResult)
@@ -5634,6 +5675,7 @@ void LawnApp::CoopSmokeOnSnapshotTx(uint32_t theHash, size_t theBytes)
 	++mCoopSmokeSnapshotsSent;
 	LawnNet::NetTrace("SMOKE_SNAPSHOT_TX index=%u bytes=%zu hash=%08x",
 		mCoopSmokeSnapshotsSent, theBytes, theHash);
+	mCoopSmokeScenarioRuntime.OnSnapshotTx(theHash, theBytes);
 }
 
 void LawnApp::CoopSmokeOnSnapshotRx(uint32_t theHash, size_t theBytes)
@@ -5654,6 +5696,7 @@ void LawnApp::CoopSmokeOnSnapshotApplied(uint32_t theHash, size_t theBytes)
 	++mCoopSmokeSnapshotsApplied;
 	LawnNet::NetTrace("SMOKE_SNAPSHOT_APPLIED index=%u bytes=%zu hash=%08x",
 		mCoopSmokeSnapshotsApplied, theBytes, theHash);
+	mCoopSmokeScenarioRuntime.OnSnapshotApplied(theHash, theBytes);
 }
 
 void LawnApp::NetInit()
@@ -5724,7 +5767,7 @@ void LawnApp::NetOnStartGame(LawnNet::NetBuffer& thePayload)
 			aValid = aCheck.ReadU8(&aCell);
 		}
 		aValid = aValid && aCheck.Remaining() == 0 &&
-			aMode == (uint8_t)GameMode::GAMEMODE_ADVENTURE &&
+			aMode == mCoopSmokeManifest.mGameMode &&
 			aLevel == mCoopSmokeManifest.mLevel && aSeed == mCoopSmokeManifest.mSeed &&
 			aPlayerCount == 2 && aPathLength == 0;
 		if (!aValid)

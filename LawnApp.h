@@ -194,6 +194,7 @@ public:
 	uint32_t						mCoopSmokeSnapshotsSent;
 	uint32_t						mCoopSmokeSnapshotsReceived;
 	uint32_t						mCoopSmokeSnapshotsApplied;
+	LawnNet::NetSmokeScenarioRuntime mCoopSmokeScenarioRuntime;
 	std::string						mCoopSmokeManifestError;
 
 public:

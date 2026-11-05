@@ -17,6 +17,8 @@
 #include <deque>
 #include <map>
 
+#include "NetSmokeScenario.h"
+
 namespace LawnNet
 {
 
@@ -328,6 +330,8 @@ struct NetSmokeManifest
 	std::string mNickname;
 	std::string mMode;
 	int mLevel;
+	NetSmokeScenarioId mScenario;
+	uint8_t mGameMode;
 	uint32_t mSeed;
 	std::string mAppDataDir;
 	std::string mConfigPath;
@@ -349,6 +353,8 @@ struct NetSmokeManifest
 		mNickname.clear();
 		mMode.clear();
 		mLevel = 0;
+		mScenario = NETSMOKE_SCENARIO_INVALID;
+		mGameMode = 0;
 		mSeed = 0;
 		mAppDataDir.clear();
 		mConfigPath.clear();

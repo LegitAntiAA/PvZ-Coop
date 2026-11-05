@@ -433,10 +433,11 @@ bool NetLoadSmokeManifest(const char* theAbsolutePath, NetSmokeManifest& theMani
 	for (size_t i = 0; i < aNickname.size(); ++i)
 		if (!isalnum((unsigned char)aNickname[i]) && aNickname[i] != '_' && aNickname[i] != '-')
 			return SmokeError(theError, "nickname contains an invalid character");
-	if (aValues["mode"] != "adventure")
-		return SmokeError(theError, "mode must be exactly adventure");
-	if (!ParseU32Strict(aValues["level"], &aLevel) || aLevel != 1)
-		return SmokeError(theError, "the deterministic smoke scenario requires level=1");
+	if (!ParseU32Strict(aValues["level"], &aLevel) || aLevel == 0 || aLevel > 999)
+		return SmokeError(theError, "level must be in 1..999");
+	NetSmokeScenarioDefinition aScenario;
+	if (!NetResolveSmokeScenario(aValues["mode"], (int)aLevel, aScenario, theError))
+		return false;
 	if (!ParseU32Strict(aValues["seed"], &aSeed))
 		return SmokeError(theError, "seed must be an unsigned 32-bit integer");
 	if (!ParseU32Strict(aValues["timeout_ms"], &aTimeout) || aTimeout < 10000 || aTimeout > 3600000)
@@ -444,8 +445,8 @@ bool NetLoadSmokeManifest(const char* theAbsolutePath, NetSmokeManifest& theMani
 	if (!ParseU32Strict(aValues["minimum_snapshots"], &aMinimumSnapshots) ||
 		aMinimumSnapshots == 0 || aMinimumSnapshots > 1000)
 		return SmokeError(theError, "minimum_snapshots must be in 1..1000");
-	if (!ParseU32Strict(aValues["skip_intro"], &aSkipIntro) || aSkipIntro != 1)
-		return SmokeError(theError, "skip_intro must equal 1");
+	if (!ParseU32Strict(aValues["skip_intro"], &aSkipIntro) || aSkipIntro > 1)
+		return SmokeError(theError, "skip_intro must be 0 or 1");
 	if (!ParseU32Strict(aValues["close_on_result"], &aCloseOnResult) || aCloseOnResult > 1)
 		return SmokeError(theError, "close_on_result must be 0 or 1");
 
@@ -504,6 +505,8 @@ bool NetLoadSmokeManifest(const char* theAbsolutePath, NetSmokeManifest& theMani
 	theManifest.mNickname = aNickname;
 	theManifest.mMode = aValues["mode"];
 	theManifest.mLevel = (int)aLevel;
+	theManifest.mScenario = aScenario.mId;
+	theManifest.mGameMode = aScenario.mGameMode;
 	theManifest.mSeed = aSeed;
 	theManifest.mAppDataDir = anAppDataDir;
 	theManifest.mConfigPath = aConfigPath;
@@ -511,7 +514,7 @@ bool NetLoadSmokeManifest(const char* theAbsolutePath, NetSmokeManifest& theMani
 	theManifest.mResultPath = aResultPath;
 	theManifest.mTimeoutMs = aTimeout;
 	theManifest.mMinimumSnapshots = aMinimumSnapshots;
-	theManifest.mSkipIntro = true;
+	theManifest.mSkipIntro = aSkipIntro != 0;
 	theManifest.mCloseOnResult = aCloseOnResult != 0;
 	return true;
 }

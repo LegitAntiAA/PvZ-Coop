@@ -413,7 +413,8 @@ public:
 
 	bool IsReady() const { return mReady; }
 
-	std::string MakeManifest(const std::string& theAppData, const std::string& theResult) const
+	std::string MakeManifest(const std::string& theAppData, const std::string& theResult,
+		const std::string& theMode = "adventure", int theLevel = 1, int theSkipIntro = 1) const
 	{
 		return
 			"schema=1\n"
@@ -421,8 +422,8 @@ public:
 			"endpoint=127.0.0.1\n"
 			"port=27713\n"
 			"nickname=SmokeHost\n"
-			"mode=adventure\n"
-			"level=1\n"
+			"mode=" + theMode + "\n"
+			"level=" + std::to_string(theLevel) + "\n"
 			"seed=424242\n"
 			"appdata_dir=" + theAppData + "\n"
 			"config_path=" + mConfig.string() + "\n"
@@ -430,7 +431,7 @@ public:
 			"result_path=" + theResult + "\n"
 			"timeout_ms=120000\n"
 			"minimum_snapshots=3\n"
-			"skip_intro=1\n"
+			"skip_intro=" + std::to_string(theSkipIntro) + "\n"
 			"close_on_result=0\n";
 	}
 
@@ -471,8 +472,36 @@ void TestSmokeManifestAndHashValidation()
 	CHECK(anError.empty());
 	CHECK(aManifest.IsHost());
 	CHECK(aManifest.mLevel == 1);
+	CHECK(aManifest.mScenario == LawnNet::NETSMOKE_SCENARIO_ADVENTURE_1);
+	CHECK(aManifest.mGameMode == (uint8_t)GameMode::GAMEMODE_ADVENTURE);
 	CHECK(aManifest.mSeed == 424242u);
 	CHECK(aManifest.mMinimumSnapshots == 3u);
+	CHECK(aManifest.mSkipIntro);
+
+	anError.clear();
+	CHECK(aTree.Parse(aTree.MakeManifest(aTree.mAppData.string(), aTree.mResult.string(),
+		"adventure", 5, 0), aManifest, anError));
+	CHECK(anError.empty());
+	CHECK(aManifest.mScenario == LawnNet::NETSMOKE_SCENARIO_ADVENTURE_5_BOWLING);
+	CHECK(aManifest.mGameMode == (uint8_t)GameMode::GAMEMODE_ADVENTURE);
+	CHECK(!aManifest.mSkipIntro);
+
+	anError.clear();
+	CHECK(aTree.Parse(aTree.MakeManifest(aTree.mAppData.string(), aTree.mResult.string(),
+		"vasebreaker", 1, 1), aManifest, anError));
+	CHECK(anError.empty());
+	CHECK(aManifest.mScenario == LawnNet::NETSMOKE_SCENARIO_VASEBREAKER);
+	CHECK(aManifest.mGameMode == (uint8_t)GameMode::GAMEMODE_CHALLENGE_VASEBREAKER);
+
+	anError.clear();
+	CHECK(!aTree.Parse(aTree.MakeManifest(aTree.mAppData.string(), aTree.mResult.string(),
+		"adventure", 2, 1), aManifest, anError));
+	CHECK(!anError.empty());
+
+	anError.clear();
+	CHECK(!aTree.Parse(aTree.MakeManifest(aTree.mAppData.string(), aTree.mResult.string(),
+		"vasebreaker", 1, 2), aManifest, anError));
+	CHECK(!anError.empty());
 
 	std::string anUnknown = aValid;
 	const size_t aCloseField = anUnknown.find("close_on_result=0");

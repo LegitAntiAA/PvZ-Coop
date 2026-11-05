@@ -14,10 +14,18 @@ param(
     [int]$GracefulExitSeconds = 10,
     [ValidateRange(0, 65535)]
     [int]$Port = 0,
-    [ValidatePattern('^[A-Za-z0-9_-]+$')]
-    [string]$Mode = "adventure",
-    [ValidateRange(1, 999)]
-    [int]$Level = 1,
+    [ValidateSet("Adventure1", "Adventure5Bowling", "Vasebreaker")]
+    [string]$Scenario = "Adventure1",
+    [ValidateSet(0, 1)]
+    [int]$SkipIntro = 1,
+    [ValidateRange(800, 3840)]
+    [int]$HostWindowWidth = 1366,
+    [ValidateRange(600, 2160)]
+    [int]$HostWindowHeight = 768,
+    [ValidateRange(800, 3840)]
+    [int]$ClientWindowWidth = 1920,
+    [ValidateRange(600, 2160)]
+    [int]$ClientWindowHeight = 1080,
     [uint32]$Seed = 424242,
     [ValidateRange(1, 1000)]
     [int]$MinimumSnapshots = 3,
@@ -77,7 +85,9 @@ function Get-FreeLoopbackPort {
 function Write-CoopConfig {
     param(
         [Parameter(Mandatory = $true)][string]$Path,
-        [Parameter(Mandatory = $true)][string]$Nickname
+        [Parameter(Mandatory = $true)][string]$Nickname,
+        [Parameter(Mandatory = $true)][int]$WindowWidth,
+        [Parameter(Mandatory = $true)][int]$WindowHeight
     )
 
     Assert-IniValue -Name "nickname" -Value $Nickname
@@ -87,8 +97,8 @@ nickname=$Nickname
 unlock_all_minigames=1
 enable_coop=1
 base_snapshot_rate=15
-window_width=800
-window_height=600
+window_width=$WindowWidth
+window_height=$WindowHeight
 borderless_fullscreen=0
 "@
     Write-Utf8NoBom -Path $Path -Text ($content + [Environment]::NewLine)
@@ -108,7 +118,8 @@ function Write-SmokeManifest {
         [Parameter(Mandatory = $true)][int]$SelectedLevel,
         [Parameter(Mandatory = $true)][uint32]$SelectedSeed,
         [Parameter(Mandatory = $true)][int]$SelectedTimeoutMs,
-        [Parameter(Mandatory = $true)][int]$RequiredSnapshots
+        [Parameter(Mandatory = $true)][int]$RequiredSnapshots,
+        [Parameter(Mandatory = $true)][ValidateSet(0, 1)][int]$SelectedSkipIntro
     )
 
     $values = [ordered]@{
@@ -140,7 +151,7 @@ log_dir=$LogDirectory
 result_path=$ResultPath
 timeout_ms=$SelectedTimeoutMs
 minimum_snapshots=$RequiredSnapshots
-skip_intro=1
+skip_intro=$SelectedSkipIntro
 close_on_result=0
 "@
     Write-Utf8NoBom -Path $Path -Text ($content + [Environment]::NewLine)
@@ -299,12 +310,34 @@ function Read-JsonIfComplete {
     }
 }
 
+function Assert-NoLiveFailure {
+    param(
+        [Parameter(Mandatory = $true)][string]$HostLogDirectory,
+        [Parameter(Mandatory = $true)][string]$ClientLogDirectory
+    )
+
+    $fatalPattern = '(?im)Access Violation|\bSMOKE_FAIL\b|\bfatal:|version mismatch|' +
+        'protocol violation|queue overflow|unhandled exception|assertion failed'
+    foreach ($entry in @(
+        @{ Role = "host"; Directory = $HostLogDirectory },
+        @{ Role = "client"; Directory = $ClientLogDirectory }
+    )) {
+        $text = Get-CombinedLogText -LogDirectory ([string]$entry.Directory)
+        $match = [regex]::Match($text, $fatalPattern)
+        if ($match.Success) {
+            throw ("Fail-fast: {0} log contains '{1}'." -f $entry.Role, $match.Value)
+        }
+    }
+}
+
 function Wait-ForResults {
     param(
         [Parameter(Mandatory = $true)][string]$HostResultPath,
         [Parameter(Mandatory = $true)][string]$ClientResultPath,
         [Parameter(Mandatory = $true)][System.Diagnostics.Process]$HostProcess,
         [Parameter(Mandatory = $true)][System.Diagnostics.Process]$ClientProcess,
+        [Parameter(Mandatory = $true)][string]$HostLogDirectory,
+        [Parameter(Mandatory = $true)][string]$ClientLogDirectory,
         [Parameter(Mandatory = $true)][int]$TimeoutSeconds
     )
 
@@ -312,6 +345,14 @@ function Wait-ForResults {
     while ([DateTime]::UtcNow -lt $deadline) {
         $hostResult = Read-JsonIfComplete -Path $HostResultPath
         $clientResult = Read-JsonIfComplete -Path $ClientResultPath
+        Assert-NoLiveFailure -HostLogDirectory $HostLogDirectory `
+            -ClientLogDirectory $ClientLogDirectory
+        if (($null -ne $hostResult) -and ([string]$hostResult.status -eq "fail")) {
+            throw ("Host smoke hook failed: {0}" -f [string]$hostResult.error)
+        }
+        if (($null -ne $clientResult) -and ([string]$clientResult.status -eq "fail")) {
+            throw ("Client smoke hook failed: {0}" -f [string]$clientResult.error)
+        }
         if (($null -ne $hostResult) -and ($null -ne $clientResult)) {
             return @($hostResult, $clientResult)
         }
@@ -348,14 +389,17 @@ function Assert-SmokeResult {
         [Parameter(Mandatory = $true)][object]$Result,
         [Parameter(Mandatory = $true)][ValidateSet("host", "client")][string]$Role,
         [Parameter(Mandatory = $true)][string]$ExpectedMode,
+        [Parameter(Mandatory = $true)][string]$ExpectedScenario,
         [Parameter(Mandatory = $true)][int]$ExpectedLevel,
         [Parameter(Mandatory = $true)][uint32]$ExpectedSeed,
-        [Parameter(Mandatory = $true)][int]$RequiredSnapshots
+        [Parameter(Mandatory = $true)][int]$RequiredSnapshots,
+        [Parameter(Mandatory = $true)][ValidateSet(0, 1)][int]$ExpectedSkipIntro
     )
 
     $status = [string](Get-RequiredProperty -Object $Result -Name "status" -Role $Role)
     $actualRole = [string](Get-RequiredProperty -Object $Result -Name "role" -Role $Role)
     $actualMode = [string](Get-RequiredProperty -Object $Result -Name "mode" -Role $Role)
+    $actualScenario = [string](Get-RequiredProperty -Object $Result -Name "scenario" -Role $Role)
     $actualLevel = [int](Get-RequiredProperty -Object $Result -Name "level" -Role $Role)
     $actualSeed = [uint32](Get-RequiredProperty -Object $Result -Name "seed" -Role $Role)
     $protocol = [int](Get-RequiredProperty -Object $Result -Name "protocol" -Role $Role)
@@ -369,12 +413,30 @@ function Assert-SmokeResult {
     if (-not $actualMode.Equals($ExpectedMode, [StringComparison]::OrdinalIgnoreCase)) {
         throw ("The {0} result mode is '{1}', expected '{2}'." -f $Role, $actualMode, $ExpectedMode)
     }
+    if ($actualScenario -ne $ExpectedScenario) {
+        throw ("The {0} result scenario is '{1}', expected '{2}'." -f
+            $Role, $actualScenario, $ExpectedScenario)
+    }
     if (($actualLevel -ne $ExpectedLevel) -or ($actualSeed -ne $ExpectedSeed)) {
         throw ("The {0} result has level/seed {1}/{2}, expected {3}/{4}." -f
             $Role, $actualLevel, $actualSeed, $ExpectedLevel, $ExpectedSeed)
     }
     if ($protocol -le 0) {
         throw ("The {0} result contains invalid protocol {1}." -f $Role, $protocol)
+    }
+    $actualSkipIntro = [bool](Get-RequiredProperty -Object $Result -Name "skipIntro" -Role $Role)
+    if ($actualSkipIntro -ne ([bool]$ExpectedSkipIntro)) {
+        throw ("The {0} result reports skipIntro={1}, expected {2}." -f
+            $Role, $actualSkipIntro, [bool]$ExpectedSkipIntro)
+    }
+    $actionApplied = [bool](Get-RequiredProperty -Object $Result -Name "actionApplied" -Role $Role)
+    if (-not $actionApplied) {
+        throw ("The {0} result did not observe the scripted action." -f $Role)
+    }
+    $postActionSnapshots = [int](Get-RequiredProperty -Object $Result -Name "postActionSnapshots" -Role $Role)
+    if ($postActionSnapshots -lt $RequiredSnapshots) {
+        throw ("The {0} result reports only {1} post-action snapshots; {2} are required." -f
+            $Role, $postActionSnapshots, $RequiredSnapshots)
     }
 
     $snapshotProperty = if ($Role -eq "host") { "snapshotsSent" } else { "snapshotsApplied" }
@@ -435,16 +497,16 @@ function Get-SnapshotHashes {
     return @($hashes | Select-Object -Unique)
 }
 
-function Assert-CommonSnapshotHash {
+function Assert-CommonPostActionHash {
     param(
         [Parameter(Mandatory = $true)][string]$HostLog,
         [Parameter(Mandatory = $true)][string]$ClientLog
     )
 
-    $transmitted = @(Get-SnapshotHashes -Text $HostLog -Marker "SMOKE_SNAPSHOT_TX")
-    $applied = @(Get-SnapshotHashes -Text $ClientLog -Marker "SMOKE_SNAPSHOT_APPLIED")
+    $transmitted = @(Get-SnapshotHashes -Text $HostLog -Marker "SMOKE_POST_ACTION_TX")
+    $applied = @(Get-SnapshotHashes -Text $ClientLog -Marker "SMOKE_POST_ACTION_APPLIED")
     if (($transmitted.Count -eq 0) -or ($applied.Count -eq 0)) {
-        throw ("Snapshot hashes are unavailable (host TX={0}, client applied={1})." -f
+        throw ("Post-action snapshot hashes are unavailable (host TX={0}, client applied={1})." -f
             $transmitted.Count, $applied.Count)
     }
 
@@ -459,7 +521,7 @@ function Assert-CommonSnapshotHash {
         }
     }
     if ($common.Count -eq 0) {
-        throw "No client-applied snapshot hash appears in the host TX log."
+        throw "No client-applied post-action snapshot hash appears in the host TX log."
     }
 
     return $common
@@ -553,6 +615,20 @@ if ([string]::IsNullOrWhiteSpace($ArtifactsRoot)) {
 }
 $ArtifactsRoot = Get-NormalizedPath -Path $ArtifactsRoot
 
+$scenarioSpec = switch ($Scenario) {
+    "Adventure1" { [ordered]@{ Mode = "adventure"; Level = 1; Marker = "adventure1" } }
+    "Adventure5Bowling" { [ordered]@{ Mode = "adventure"; Level = 5; Marker = "adventure5_bowling" } }
+    "Vasebreaker" { [ordered]@{ Mode = "vasebreaker"; Level = 1; Marker = "vasebreaker" } }
+    default { throw ("Unsupported smoke scenario: {0}" -f $Scenario) }
+}
+$Mode = [string]$scenarioSpec.Mode
+$Level = [int]$scenarioSpec.Level
+$scenarioMarker = [string]$scenarioSpec.Marker
+if (($HostWindowWidth -eq $ClientWindowWidth) -and
+    ($HostWindowHeight -eq $ClientWindowHeight)) {
+    throw "Host and client window dimensions must be asymmetric for this smoke suite."
+}
+
 $runId = [Guid]::NewGuid().ToString("N")
 $runRoot = Join-Path $ArtifactsRoot ("run_" + $runId)
 $hostRoot = Join-Path $runRoot "host"
@@ -601,20 +677,27 @@ try {
     }
     $timeoutMs = $TimeoutSeconds * 1000
 
-    Write-CoopConfig -Path $hostConfigPath -Nickname "SmokeHost"
-    Write-CoopConfig -Path $clientConfigPath -Nickname "SmokeClient"
+    Write-CoopConfig -Path $hostConfigPath -Nickname "SmokeHost" `
+        -WindowWidth $HostWindowWidth -WindowHeight $HostWindowHeight
+    Write-CoopConfig -Path $clientConfigPath -Nickname "SmokeClient" `
+        -WindowWidth $ClientWindowWidth -WindowHeight $ClientWindowHeight
     Write-SmokeManifest -Path $hostManifestPath -Role "host" -Nickname "SmokeHost" `
         -AppDataDirectory $hostAppDataDirectory -ConfigPath $hostConfigPath `
         -LogDirectory $hostLogDirectory -ResultPath $hostResultPath -SelectedPort $Port `
         -SelectedMode $Mode -SelectedLevel $Level -SelectedSeed $Seed `
-        -SelectedTimeoutMs $timeoutMs -RequiredSnapshots $MinimumSnapshots
+        -SelectedTimeoutMs $timeoutMs -RequiredSnapshots $MinimumSnapshots `
+        -SelectedSkipIntro $SkipIntro
     Write-SmokeManifest -Path $clientManifestPath -Role "client" -Nickname "SmokeClient" `
         -AppDataDirectory $clientAppDataDirectory -ConfigPath $clientConfigPath `
         -LogDirectory $clientLogDirectory -ResultPath $clientResultPath -SelectedPort $Port `
         -SelectedMode $Mode -SelectedLevel $Level -SelectedSeed $Seed `
-        -SelectedTimeoutMs $timeoutMs -RequiredSnapshots $MinimumSnapshots
+        -SelectedTimeoutMs $timeoutMs -RequiredSnapshots $MinimumSnapshots `
+        -SelectedSkipIntro $SkipIntro
 
     Write-SmokeStatus ("Artifacts: {0}" -f $runRoot)
+    Write-SmokeStatus ("Scenario {0}: mode={1}, level={2}, skip_intro={3}, host={4}x{5}, client={6}x{7}." -f
+        $Scenario, $Mode, $Level, $SkipIntro, $HostWindowWidth, $HostWindowHeight,
+        $ClientWindowWidth, $ClientWindowHeight)
     Write-SmokeStatus ("Starting host on 127.0.0.1:{0}." -f $Port)
     $hostProcess = Start-SmokeProcess -Executable $GameExe -WorkingDirectory $gameDirectory `
         -ManifestPath $hostManifestPath -Role "host" -RunId $runId
@@ -632,7 +715,9 @@ try {
         -HostProcess $hostProcess -ClientProcess $clientProcess
 
     $results = @(Wait-ForResults -HostResultPath $hostResultPath -ClientResultPath $clientResultPath `
-        -HostProcess $hostProcess -ClientProcess $clientProcess -TimeoutSeconds $TimeoutSeconds)
+        -HostProcess $hostProcess -ClientProcess $clientProcess `
+        -HostLogDirectory $hostLogDirectory -ClientLogDirectory $clientLogDirectory `
+        -TimeoutSeconds $TimeoutSeconds)
     $hostResult = $results[0]
     $clientResult = $results[1]
 
@@ -651,7 +736,10 @@ try {
         @{ Label = "listener"; Pattern = $hostReadyPattern },
         @{ Label = "authenticated client"; Pattern = '(?im)peer authenticated slot=1 nick=SmokeClient\b' },
         @{ Label = "deterministic game start"; Pattern = ('(?im)start game broadcast mode=\d+ level={0} players=2 seed={1}\b' -f $Level, $Seed) },
-        @{ Label = "snapshot TX hash"; Pattern = '(?im)\bSMOKE_SNAPSHOT_TX\b[^\r\n]*\bhash=(?:0x)?[0-9a-f]{8,16}\b' }
+        @{ Label = "scenario start"; Pattern = ('(?im)\bSMOKE_START\b[^\r\n]*scenario={0}\b' -f ([regex]::Escape($scenarioMarker))) },
+        @{ Label = "asymmetric host PLAYING checkpoint"; Pattern = ('(?im)\bSMOKE_CHECKPOINT\b[^\r\n]*scenario={0}[^\r\n]*step=PLAYING[^\r\n]*size={1}x{2}\b' -f ([regex]::Escape($scenarioMarker)), $HostWindowWidth, $HostWindowHeight) },
+        @{ Label = "host action applied"; Pattern = ('(?im)\bSMOKE_CHECKPOINT\b[^\r\n]*scenario={0}[^\r\n]*step=ACTION_APPLIED\b' -f ([regex]::Escape($scenarioMarker))) },
+        @{ Label = "post-action TX hash"; Pattern = '(?im)\bSMOKE_POST_ACTION_TX\b[^\r\n]*\bhash=(?:0x)?[0-9a-f]{8,16}\b' }
     )
     $clientPositivePatterns = @(
         @{ Label = "trace role/protocol"; Pattern = '(?im)role=client protocol=\d+ pid=\d+' },
@@ -660,7 +748,9 @@ try {
         @{ Label = "profile sync"; Pattern = '(?im)PROFILE_SYNC applied\b' },
         @{ Label = "matching game start"; Pattern = ('(?im)client START_GAME decoded mode=\d+ level={0} seed={1}\b' -f $Level, $Seed) },
         @{ Label = "gameplay scene"; Pattern = '(?im)gameplay entered client=1\b' },
-        @{ Label = "applied snapshot hash"; Pattern = '(?im)\bSMOKE_SNAPSHOT_APPLIED\b[^\r\n]*\bhash=(?:0x)?[0-9a-f]{8,16}\b' }
+        @{ Label = "asymmetric client PLAYING checkpoint"; Pattern = ('(?im)\bSMOKE_CHECKPOINT\b[^\r\n]*scenario={0}[^\r\n]*step=PLAYING[^\r\n]*size={1}x{2}\b' -f ([regex]::Escape($scenarioMarker)), $ClientWindowWidth, $ClientWindowHeight) },
+        @{ Label = "client action applied"; Pattern = ('(?im)\bSMOKE_CHECKPOINT\b[^\r\n]*scenario={0}[^\r\n]*step=ACTION_APPLIED\b' -f ([regex]::Escape($scenarioMarker))) },
+        @{ Label = "post-action applied hash"; Pattern = '(?im)\bSMOKE_POST_ACTION_APPLIED\b[^\r\n]*\bhash=(?:0x)?[0-9a-f]{8,16}\b' }
     )
     $negativePatterns = @(
         @{ Label = "access violation"; Pattern = '(?im)Access Violation' },
@@ -679,15 +769,26 @@ try {
     Assert-NoNegativePatterns -Role "host" -Text $hostLog -Patterns $negativePatterns
     Assert-NoNegativePatterns -Role "client" -Text $clientLog -Patterns $negativePatterns
 
+    $combinedActionLog = $hostLog + [Environment]::NewLine + $clientLog
+    $expectedActionOwner = if ($Scenario -eq "Vasebreaker") { "client" } else { "host" }
+    $actionIssuedPattern = ('(?im)\bSMOKE_CHECKPOINT\b[^\r\n]*scenario={0}[^\r\n]*step=ACTION_ISSUED[^\r\n]*owner={1}\b' -f
+        ([regex]::Escape($scenarioMarker)), $expectedActionOwner)
+    if (-not [regex]::IsMatch($combinedActionLog, $actionIssuedPattern)) {
+        throw ("No deterministic ACTION_ISSUED checkpoint was logged by expected owner {0}." -f
+            $expectedActionOwner)
+    }
+
     $hostProtocol = Assert-SmokeResult -Result $hostResult -Role "host" -ExpectedMode $Mode `
-        -ExpectedLevel $Level -ExpectedSeed $Seed -RequiredSnapshots $MinimumSnapshots
+        -ExpectedScenario $scenarioMarker -ExpectedLevel $Level -ExpectedSeed $Seed `
+        -RequiredSnapshots $MinimumSnapshots -ExpectedSkipIntro $SkipIntro
     $clientProtocol = Assert-SmokeResult -Result $clientResult -Role "client" -ExpectedMode $Mode `
-        -ExpectedLevel $Level -ExpectedSeed $Seed -RequiredSnapshots $MinimumSnapshots
+        -ExpectedScenario $scenarioMarker -ExpectedLevel $Level -ExpectedSeed $Seed `
+        -RequiredSnapshots $MinimumSnapshots -ExpectedSkipIntro $SkipIntro
     if ($hostProtocol -ne $clientProtocol) {
         throw ("Protocol mismatch in result files: host={0}, client={1}." -f $hostProtocol, $clientProtocol)
     }
 
-    $commonSnapshotHashes = @(Assert-CommonSnapshotHash -HostLog $hostLog -ClientLog $clientLog)
+    $commonSnapshotHashes = @(Assert-CommonPostActionHash -HostLog $hostLog -ClientLog $clientLog)
     $success = $true
     Write-SmokeStatus ("PASS: protocol {0}, common snapshot hash {1}." -f
         $hostProtocol, $commonSnapshotHashes[0])
@@ -716,8 +817,12 @@ finally {
         finished_utc = [DateTime]::UtcNow.ToString("o")
         executable = $GameExe
         port = $Port
+        scenario = $Scenario
         mode = $Mode
         level = $Level
+        skip_intro = $SkipIntro
+        host_window = ("{0}x{1}" -f $HostWindowWidth, $HostWindowHeight)
+        client_window = ("{0}x{1}" -f $ClientWindowWidth, $ClientWindowHeight)
         seed = $Seed
         minimum_snapshots = $MinimumSnapshots
         host_pid = $hostProcessId
