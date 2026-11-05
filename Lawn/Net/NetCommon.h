@@ -26,10 +26,14 @@ namespace LawnNet
 // (the host broadcasts the same sounds via events).
 extern bool gNetSuppressSounds;
 
-static const uint32_t NET_PROTOCOL_VERSION = 25; // Ready-set-plant presentation event
+static const uint32_t NET_PROTOCOL_VERSION = 26; // UTF-8 nicknames and authoritative chat
 static const uint16_t NET_DEFAULT_PORT = 27713;			// PvZ co-op port
 static const int NET_MAX_PLAYERS = 4;					// 1 host + 3 clients
-static const int NET_MAX_NICK = 16;						// bytes (without terminator)
+static const int NET_MAX_NICK_CHARS = 16;
+static const int NET_MAX_NICK_BYTES = 64;				// UTF-8 bytes (without terminator)
+static const int NET_MAX_NICK = NET_MAX_NICK_BYTES;	// compatibility alias for fixed buffers
+static const int NET_MAX_CHAT_CHARS = 96;
+static const int NET_MAX_CHAT_BYTES = 192;
 static const int NET_MAX_FRAME = 65535;					// u16 wire length hard cap
 static const uint8_t NET_SHARED_OWNER = 0xFF;			// team-shared seed packet
 
@@ -108,7 +112,9 @@ enum NetMsgType : uint8_t
 	NETMSG_STATS = 60,			// c->h: u16 pingMs, u16 snapshotApplyMs
 	NETMSG_RATE = 61,			// h->c: u16 snapshotHz
 
-	NETMSG_DEBUG_TEXT = 70		// both: string (debug log)
+	NETMSG_DEBUG_TEXT = 70,		// both: string (debug log)
+	NETMSG_CHAT_SEND = 71,		// c->h: UTF-8 string; sender slot comes from session
+	NETMSG_CHAT_BROADCAST = 72	// h->c: u8 sender slot, UTF-8 string
 };
 
 // An input epoch is a host-issued lifetime token for one UI/gameplay phase.
@@ -529,6 +535,8 @@ struct NetSmokeManifest
 bool NetLoadSmokeManifest(const char* theAbsolutePath, NetSmokeManifest& theManifest, std::string& theError);
 void NetSetRuntimePaths(const char* theConfigPath, const char* theLogDirectory);
 uint32_t NetFnv1a32(const void* theData, size_t theSize);
+bool NetNormalizeUtf8(const std::string& theInput, size_t theMaxBytes, size_t theMaxCodePoints,
+	bool theAllowSpaces, std::string& theOutput);
 
 // Config file (coop.ini): nickname + unlock flags
 struct NetConfig

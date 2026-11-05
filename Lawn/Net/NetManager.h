@@ -112,6 +112,14 @@ public:
 	void RequestChooserStateEcho(const char* theReason, int theSlot, int theSeedType);
 	bool ConsumeChooserStateEchoRequest();
 	void SendLobbyState();						// host: broadcast lobby
+	void SendChat(const std::string& theUtf8Text);
+	struct ChatLine
+	{
+		uint8_t mSlot;
+		std::string mText;
+		uint32_t mReceivedTick;
+	};
+	std::deque<ChatLine> mChatLines;
 
 	// ---- game start (host) ----
 	void BroadcastStartGame(int theGameMode, int theLevel, uint32_t theBoardSeed);
@@ -178,6 +186,7 @@ private:
 	void OnClientTeamSelect(NetSession* theSession, NetBuffer& thePayload);
 	void OnClientStats(NetSession* theSession, NetBuffer& thePayload);
 	void OnStoreAction(NetSession* theSession, NetBuffer& thePayload);
+	void OnClientChat(NetSession* theSession, NetBuffer& thePayload);
 
 	// client-side message handlers
 	void OnLobbyState(NetBuffer& thePayload);
@@ -191,6 +200,8 @@ private:
 	void OnChooserStart(NetBuffer& thePayload);
 	void OnInputEpoch(NetBuffer& thePayload);
 	void OnSceneCmd(NetBuffer& thePayload);
+	void OnChatBroadcast(NetBuffer& thePayload);
+	void AddChatLine(uint8_t theSlot, const std::string& theText);
 
 	void UpdatePings();
 	void AcceptThreadProc();
@@ -232,6 +243,7 @@ private:
 	uint32_t mLastInputSequence[NET_MAX_PLAYERS];
 	bool mRemoteHeatWaveQDown[NET_MAX_PLAYERS];
 	uint32_t mRemoteHeatWaveQDownTick[NET_MAX_PLAYERS];
+	uint32_t mLastChatTick[NET_MAX_PLAYERS];
 	std::atomic<bool> mChooserStateEchoRequested;
 
 	// client state

@@ -15,6 +15,7 @@
 #include "../Widget/AwardScreen.h"
 #include "../Widget/SeedChooserScreen.h"
 #include "../../LawnApp.h"
+#include "../../Resources.h"
 #include "../../SexyAppFramework/DDInterface.h"
 #include "../../Sexy.TodLib/Reanimator.h"
 
@@ -103,6 +104,130 @@ uint32_t SmokePlantGridHash(Board* theBoard)
 		}
 	}
 	return aHash;
+}
+
+bool ValidateTowerDefenseSmokePath(Board* theBoard,
+	const NetSmokeManifest& theManifest, std::string& theFailure)
+{
+	if (!theBoard || theBoard->mTDPath.empty() ||
+		(theBoard->mTDPath.size() & 1U) != 0U)
+	{
+		theFailure = "Tower Defense path is empty or has an odd byte count";
+		return false;
+	}
+	int aPreviousRow = -1;
+	int aPreviousCol = -1;
+	int anEdgeVisits[4] = {};
+	int anEdgeVisitCount = 0;
+	int aDirtCells = 0;
+	int aPathIndex[MAX_GRID_SIZE_X][5];
+	for (int aCol = 0; aCol < MAX_GRID_SIZE_X; ++aCol)
+		for (int aRow = 0; aRow < 5; ++aRow)
+			aPathIndex[aCol][aRow] = -1;
+	for (size_t i = 0; i < theBoard->mTDPath.size(); i += 2)
+	{
+		const uint8_t aRowByte = theBoard->mTDPath[i];
+		const int aRow = aRowByte >> 1;
+		const int aCol = theBoard->mTDPath[i + 1];
+		if ((aRowByte & 1U) != 0U || aRow < 0 || aRow >= 5 ||
+			aCol < 0 || aCol >= MAX_GRID_SIZE_X)
+		{
+			theFailure = "Tower Defense path contains an out-of-range cell";
+			return false;
+		}
+		if (aPathIndex[aCol][aRow] >= 0)
+		{
+			theFailure = "Tower Defense path repeats a cell";
+			return false;
+		}
+		aPathIndex[aCol][aRow] = (int)(i / 2);
+		if (i == 0)
+		{
+			if (aCol != MAX_GRID_SIZE_X - 1)
+			{
+				theFailure = "Tower Defense path does not start at the right edge";
+				return false;
+			}
+		}
+		else if (abs(aRow - aPreviousRow) + abs(aCol - aPreviousCol) != 1)
+		{
+			theFailure = "Tower Defense path contains a disconnected step";
+			return false;
+		}
+		const int anEdge = aRow == 0 ? 0 : (aRow == 4 ? 1 : -1);
+		if (anEdge >= 0 && aPreviousRow != aRow)
+		{
+			if (anEdgeVisitCount < 4)
+				anEdgeVisits[anEdgeVisitCount] = anEdge;
+			++anEdgeVisitCount;
+		}
+		if (theBoard->mGridSquareType[aCol][aRow] != GridSquareType::GRIDSQUARE_DIRT)
+		{
+			theFailure = "Tower Defense path cell was not converted to dug dirt";
+			return false;
+		}
+		++aDirtCells;
+		aPreviousRow = aRow;
+		aPreviousCol = aCol;
+	}
+	const bool anAlternatingEdges = anEdgeVisitCount == 3 &&
+		anEdgeVisits[0] == anEdgeVisits[2] &&
+		anEdgeVisits[0] != anEdgeVisits[1];
+	if (aPreviousCol != 0 || !anAlternatingEdges)
+	{
+		theFailure = "Tower Defense path missed its left edge or alternating edge pattern";
+		return false;
+	}
+	for (int aCol = 0; aCol < MAX_GRID_SIZE_X; ++aCol)
+	{
+		for (int aRow = 0; aRow < 5; ++aRow)
+		{
+			if (aCol + 1 < MAX_GRID_SIZE_X && aRow + 1 < 5 &&
+				aPathIndex[aCol][aRow] >= 0 && aPathIndex[aCol + 1][aRow] >= 0 &&
+				aPathIndex[aCol][aRow + 1] >= 0 && aPathIndex[aCol + 1][aRow + 1] >= 0)
+			{
+				theFailure = "Tower Defense path contains a filled 2x2 road block";
+				return false;
+			}
+			if (aPathIndex[aCol][aRow] < 0)
+				continue;
+			if (aCol + 1 < MAX_GRID_SIZE_X && aPathIndex[aCol + 1][aRow] >= 0 &&
+				abs(aPathIndex[aCol][aRow] - aPathIndex[aCol + 1][aRow]) != 1)
+			{
+				theFailure = "Tower Defense path has touching parallel horizontal runs";
+				return false;
+			}
+			if (aRow + 1 < 5 && aPathIndex[aCol][aRow + 1] >= 0 &&
+				abs(aPathIndex[aCol][aRow] - aPathIndex[aCol][aRow + 1]) != 1)
+			{
+				theFailure = "Tower Defense path has touching parallel vertical runs";
+				return false;
+			}
+		}
+	}
+	bool aGrassOutsideRoad = false;
+	for (int aRow = 0; aRow < 5 && !aGrassOutsideRoad; ++aRow)
+		for (int aCol = 0; aCol < MAX_GRID_SIZE_X; ++aCol)
+			if (!theBoard->NetTdIsPathCell(aCol, aRow) &&
+				theBoard->mGridSquareType[aCol][aRow] != GridSquareType::GRIDSQUARE_DIRT)
+			{
+				aGrassOutsideRoad = true;
+				break;
+			}
+	if (!aGrassOutsideRoad || !Sexy::IMAGE_BACKGROUND1UNSODDED ||
+		Sexy::IMAGE_BACKGROUND1UNSODDED->GetWidth() <= 0 ||
+		Sexy::IMAGE_BACKGROUND1UNSODDED->GetHeight() <= 0)
+	{
+		theFailure = "Tower Defense dug-road image or surrounding grass is unavailable";
+		return false;
+	}
+	const uint32_t aHash = NetFnv1a32(theBoard->mTDPath.data(), theBoard->mTDPath.size());
+	NetTrace("SMOKE_TD_PATH role=%s bytes=%zu hash=%08x edgeVisits=%d edgePattern=%s separated=1 no2x2=1 dirt=%d grass=1 image=%dx%d",
+		theManifest.IsHost() ? "host" : "client", theBoard->mTDPath.size(),
+		aHash, anEdgeVisitCount, anEdgeVisits[0] == 0 ? "TBT" : "BTB", aDirtCells,
+		Sexy::IMAGE_BACKGROUND1UNSODDED->GetWidth(),
+		Sexy::IMAGE_BACKGROUND1UNSODDED->GetHeight());
+	return true;
 }
 
 bool SmokeBeghouledMatchAt(SeedType theGrid[BEGHOULED_MAX_GRIDSIZEX][BEGHOULED_MAX_GRIDSIZEY],
@@ -596,8 +721,16 @@ void NetSmokeScenarioRuntime::Reset(NetSmokeScenarioId theScenario)
 	mVictoryIssued = false;
 	mVictoryFadeObserved = false;
 	mVictoryLevelCompleteSnapshotObserved = false;
-	mVictoryAwardObserved = false;
-	mVictoryBoardReleasedObserved = false;
+        mVictoryAwardObserved = false;
+        mVictoryBoardReleasedObserved = false;
+	mTdPathVerified = false;
+	mTdSpawnAccelerated = false;
+	mTdZombieEntryObserved = false;
+	mTdZombieTurnObserved = false;
+	mTdClientPlantObserved = false;
+	mTdZombieId = 0;
+	mTdPlantId = 0;
+	mTdZombieFirstX = 0.0f;
         mPostActionSamples = 0;
 }
 
@@ -668,7 +801,7 @@ bool NetSmokeScenarioRuntime::UpdateIntro(LawnApp* theApp,
         // Adventure 8 is the first ordinary first-time Adventure level with a
         // genuine chooser.  Exercise each peer's real chooser hit-testing and
         // network pick path; never synthesize the final seed bank in the test.
-        if (NetIsAdventure8InteractiveSmokeScenario(mScenario) &&
+        if (NetIsInteractiveChooserSmokeScenario(mScenario) &&
                 aCutScene->mSeedChoosing && theApp->mSeedChooserScreen)
         {
                 SeedChooserScreen* aChooser = theApp->mSeedChooserScreen;
@@ -695,8 +828,17 @@ bool NetSmokeScenarioRuntime::UpdateIntro(LawnApp* theApp,
                 if (aLocalCount < aQuota && aChooser->mSeedsInFlight == 0 &&
                         (uint32_t)(aNow - mIntroLastActionTick) >= SMOKE_INTRO_ACTION_INTERVAL_MS)
                 {
-                        const int aStart = theManifest.IsClient() ? NUM_SEEDS_IN_CHOOSER - 1 : 0;
-                        const int aStep = theManifest.IsClient() ? -1 : 1;
+				// The generic soak intentionally separates peers by choosing from
+				// opposite ends of the chooser.  The far end is made of expensive
+				// upgrade packets, though, so Tower Defense uses the next five stock
+				// plants after the host's first five.  This still exercises real
+				// 5+5 ownership while guaranteeing at least one packet can satisfy
+				// the normal cost/prerequisite rules during the bounded smoke run.
+				const bool aTowerDefense =
+					mScenario == NETSMOKE_SCENARIO_TOWER_DEFENSE_CLIENT;
+				const int aStart = theManifest.IsClient() ?
+					(aTowerDefense ? 5 : NUM_SEEDS_IN_CHOOSER - 1) : 0;
+				const int aStep = theManifest.IsClient() && !aTowerDefense ? -1 : 1;
                         for (int i = aStart; i >= 0 && i < NUM_SEEDS_IN_CHOOSER; i += aStep)
                         {
                                 ChosenSeed& aSeed = aChooser->mChosenSeeds[i];
@@ -881,10 +1023,12 @@ bool NetSmokeScenarioRuntime::IssueAction(LawnApp* theApp, const NetSmokeManifes
 		return IssueClientSeedAction(theApp);
 	if (mScenario == NETSMOKE_SCENARIO_ADVENTURE_15_WHACK_CLIENT)
 		return IssueClientWhackAction(theApp, mWhackTargetId);
-	if (mScenario == NETSMOKE_SCENARIO_SLOT_MACHINE_CLIENT)
-		return IssueClientSlotMachineAction(theApp);
+        if (mScenario == NETSMOKE_SCENARIO_SLOT_MACHINE_CLIENT)
+                return IssueClientSlotMachineAction(theApp);
+	if (mScenario == NETSMOKE_SCENARIO_TOWER_DEFENSE_CLIENT)
+		return IssueSoakSeedAction(theApp, true);
 
-	return IssueHostSeedAction(theApp);
+        return IssueHostSeedAction(theApp);
 }
 
 bool NetSmokeScenarioRuntime::ObserveActionApplied(Board* theBoard,
@@ -1208,7 +1352,14 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
 
         if (mPlayingTick == 0)
         {
-                if (NetIsAdventure8InteractiveSmokeScenario(mScenario) &&
+		if (mScenario == NETSMOKE_SCENARIO_TOWER_DEFENSE_CLIENT &&
+			!mTdPathVerified)
+		{
+			if (!ValidateTowerDefenseSmokePath(aBoard, theManifest, theFailure))
+				return false;
+			mTdPathVerified = true;
+		}
+                if (NetIsInteractiveChooserSmokeScenario(mScenario) &&
                         !mSoakChooserVerified && aBoard->mSeedBank && theApp->mNetManager)
                 {
                         int anOwnerCounts[NET_MAX_PLAYERS] = {};
@@ -1301,12 +1452,140 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
                 mBaselineCaptured = true;
                 mActionTick = GetTickCount();
                 mSoakLastActionTick = mActionTick;
-		NetTrace("SMOKE_CHECKPOINT role=%s scenario=%s step=BASELINE plants=%d pots=%d zombies=%d snapshots=%u",
+                NetTrace("SMOKE_CHECKPOINT role=%s scenario=%s step=BASELINE plants=%d pots=%d zombies=%d snapshots=%u",
 			theManifest.IsHost() ? "host" : "client", aDefinition->mName,
                         mBaselinePlants, mBaselinePots, aBoard->mZombies.mSize, theGameplaySnapshots);
         }
 
-        if (NetIsAdventure8InteractiveSmokeScenario(mScenario))
+	if (mScenario == NETSMOKE_SCENARIO_TOWER_DEFENSE_CLIENT)
+	{
+		const uint32_t aNow = GetTickCount();
+		if (theManifest.IsHost() && !mTdSpawnAccelerated)
+		{
+			// Keep the stock wave spawner and stock Zombie::Update walk path; only
+			// shorten its initial wait so a visible smoke run remains bounded.
+			aBoard->mZombieCountDown = 6;
+			aBoard->mZombieCountDownStart = 6;
+			mTdSpawnAccelerated = true;
+			NetTrace("SMOKE_TD_WAVE_ACCELERATED role=host countdown=6");
+		}
+
+		Zombie* aTdZombie = nullptr;
+		if (mTdZombieId != 0)
+			aTdZombie = FindSmokeZombieById(aBoard, mTdZombieId);
+		if (!mTdZombieEntryObserved)
+		{
+			Zombie* aCandidate = nullptr;
+			Zombie* aZombie = nullptr;
+			while (aBoard->mZombies.IterateNext(aZombie))
+			{
+				if (aZombie->mDead || aZombie->mFromWave < 0 ||
+					aZombie->mNetId == 0 ||
+					aZombie->mZombieType == ZombieType::ZOMBIE_BUNGEE ||
+					(theManifest.IsClient() && !aZombie->mNetGhost))
+					continue;
+				if (!aCandidate || aZombie->mNetId < aCandidate->mNetId)
+					aCandidate = aZombie;
+			}
+			if (aCandidate)
+			{
+				Reanimation* aBody = theApp->ReanimationTryToGet(aCandidate->mBodyReanimID);
+				if (aCandidate->mPosX < 730.0f || !aBody || aBody->mAnimRate <= 0.0f)
+				{
+					NetTrace("SMOKE_TD_ZOMBIE_ENTRY_INVALID role=%s id=%u ghost=%d x=%.2f row=%d body=%p animRate=%.2f",
+						theManifest.IsHost() ? "host" : "client", aCandidate->mNetId,
+						aCandidate->mNetGhost ? 1 : 0, aCandidate->mPosX, aCandidate->mRow,
+						(void*)aBody, aBody ? aBody->mAnimRate : 0.0f);
+					theFailure = "Tower Defense zombie did not first appear offscreen with a live stock animation";
+					return false;
+				}
+				mTdZombieId = aCandidate->mNetId;
+				mTdZombieFirstX = aCandidate->mPosX;
+				mTdZombieEntryObserved = true;
+				aTdZombie = aCandidate;
+				NetTrace("SMOKE_TD_ZOMBIE_ENTRY role=%s id=%u ghost=%d x=%.2f row=%d animRate=%.2f",
+					theManifest.IsHost() ? "host" : "client", aCandidate->mNetId,
+					aCandidate->mNetGhost ? 1 : 0, aCandidate->mPosX,
+					aCandidate->mRow, aBody->mAnimRate);
+			}
+		}
+		if (mTdZombieEntryObserved && !mTdZombieTurnObserved)
+		{
+			if (!aTdZombie || aTdZombie->mDead)
+			{
+				theFailure = "Tower Defense smoke zombie disappeared before its first top-road turn";
+				return false;
+			}
+			Reanimation* aBody = theApp->ReanimationTryToGet(aTdZombie->mBodyReanimID);
+			const float aMoved = fabsf(aTdZombie->mPosX - mTdZombieFirstX);
+			if (aTdZombie->mRow == 0 && aMoved >= 12.0f && aBody && aBody->mAnimRate > 0.0f)
+			{
+				mTdZombieTurnObserved = true;
+				NetTrace("SMOKE_TD_ZOMBIE_TURN role=%s id=%u row=0 moved=%.2f animRate=%.2f pathPos=%.2f",
+					theManifest.IsHost() ? "host" : "client", aTdZombie->mNetId,
+					aMoved, aBody->mAnimRate,
+					theManifest.IsHost() ? aTdZombie->mTdPathPos : 0.0f);
+			}
+		}
+
+		if (!mTdZombieTurnObserved)
+			return true;
+		if (theManifest.IsClient() && !mActionIssued &&
+			(uint32_t)(aNow - mSoakLastActionTick) >= 1200U)
+		{
+			if (IssueSoakSeedAction(theApp, true))
+			{
+				mSoakPlantsIssued++;
+				mActionIssued = true;
+				mActionTick = aNow;
+				mSoakLastActionTick = aNow;
+				NetTrace("SMOKE_CHECKPOINT role=client scenario=tower_defense_client step=ACTION_ISSUED owner=client");
+			}
+			else if (IssueSoakSunClick(theApp, true))
+			{
+				mSoakSunClicks++;
+				mSoakLastActionTick = aNow;
+			}
+		}
+		if (!mActionApplied && aBoard->mPlants.mSize > mBaselinePlants)
+		{
+			Plant* aPlant = nullptr;
+			Plant* aNewest = nullptr;
+			while (aBoard->mPlants.IterateNext(aPlant))
+			{
+				if (aPlant->mDead || !aPlant->mIsOnBoard)
+					continue;
+				if (aBoard->NetTdIsPathCell(aPlant->mPlantCol, aPlant->mRow))
+				{
+					theFailure = "Tower Defense accepted a plant on the dug road";
+					return false;
+				}
+				if (aPlant->mNetId != 0 && (!aNewest || aPlant->mNetId > aNewest->mNetId))
+					aNewest = aPlant;
+			}
+			if (aNewest)
+			{
+				mTdPlantId = aNewest->mNetId;
+				mTdClientPlantObserved = true;
+				mActionApplied = true;
+				NetTrace("SMOKE_TD_CLIENT_PLANT role=%s id=%u cell=(%d,%d) road=0",
+					theManifest.IsHost() ? "host" : "client", aNewest->mNetId,
+					aNewest->mPlantCol, aNewest->mRow);
+				NetTrace("SMOKE_CHECKPOINT role=%s scenario=tower_defense_client step=ACTION_APPLIED plants=%d baseline=%d",
+					theManifest.IsHost() ? "host" : "client",
+					aBoard->mPlants.mSize, mBaselinePlants);
+			}
+		}
+		if (mActionIssued && !mActionApplied && aNow - mActionTick >= 45000U)
+		{
+			theFailure = "Tower Defense client plant was not applied within 45 seconds";
+			return false;
+		}
+		return true;
+	}
+
+        if (NetIsInteractiveChooserSmokeScenario(mScenario) &&
+		mScenario != NETSMOKE_SCENARIO_TOWER_DEFENSE_CLIENT)
         {
                 const uint32_t aNow = GetTickCount();
                 const uint32_t aSoakElapsed = aNow - mPlayingTick;
@@ -1487,6 +1766,9 @@ bool NetSmokeScenarioRuntime::IsComplete(uint32_t theRequiredPostActionSnapshots
                         (mSoakChooserVerified && mVictoryFadeObserved &&
                          mVictoryAwardObserved &&
                          mVictoryBoardReleasedObserved && mSoakPlantsIssued > 0)) &&
+		(mScenario != NETSMOKE_SCENARIO_TOWER_DEFENSE_CLIENT ||
+			(mSoakChooserVerified && mTdPathVerified && mTdZombieEntryObserved &&
+			 mTdZombieTurnObserved && mTdClientPlantObserved)) &&
                 (!NetIsBowlingSmokeScenario(mScenario) || mBowlingZombieObserved) &&
 		theRequiredPostActionSnapshots > 0 &&
 		mPostActionSamples >= theRequiredPostActionSnapshots;

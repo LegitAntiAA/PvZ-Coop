@@ -767,47 +767,48 @@ namespace LawnNet
 void Board::GenerateTowerDefensePath(std::vector<uint8_t>& thePath)
 {
 	thePath.clear();
-	const int aMaxRow = 5; // rows 0..4 (standard lawn height)
+	const int aBottomRow = 4; // standard day lawn rows are 0..4
 
-	// Keep the three top-edge visits separated by lower-lawn sections.  This
-	// makes every generated road use the full height of the board while the
-	// rows between the mandatory visits remain random.
-	const int aTopVisitColumns[] = { 7, 4, 1 };
-	int aRow = 1 + Rand(aMaxRow - 1);
+	// Three well-separated vertical runs make the road touch alternating
+	// horizontal edges without folding back alongside itself.  Mirror the
+	// pattern from the authoritative board seed so both top->bottom->top and
+	// bottom->top->bottom occur randomly in play and reproducibly in smoke runs.
+	const int anEdgeVisitColumns[] = { 7, 4, 1 };
+	const uint32_t aPathSeed = gLawnApp && gLawnApp->mNetBoardSeed != 0 ?
+		gLawnApp->mNetBoardSeed : (uint32_t)Rand();
+	const int aFirstEdge = (aPathSeed & 1U) == 0U ? 0 : aBottomRow;
+	const int anEdgeRows[] = { aFirstEdge, aBottomRow - aFirstEdge, aFirstEdge };
+	int aRow = 1 + (int)((aPathSeed >> 1) % (uint32_t)(aBottomRow - 1));
 	int aCol = MAX_GRID_SIZE_X - 1;
-	thePath.push_back((uint8_t)(aRow * 2 + 0));
-	thePath.push_back((uint8_t)aCol);
+	auto AppendCell = [&]()
+	{
+		thePath.push_back((uint8_t)(aRow * 2));
+		thePath.push_back((uint8_t)aCol);
+	};
+	AppendCell();
 
 	auto MoveToRow = [&](int theTargetRow)
 	{
 		while (aRow != theTargetRow)
 		{
 			aRow += theTargetRow > aRow ? 1 : -1;
-			thePath.push_back((uint8_t)(aRow * 2 + 0));
-			thePath.push_back((uint8_t)aCol);
+			AppendCell();
 		}
 	};
 
+	for (int aVisit = 0; aVisit < 3; ++aVisit)
+	{
+		while (aCol > anEdgeVisitColumns[aVisit])
+		{
+			--aCol;
+			AppendCell();
+		}
+		MoveToRow(anEdgeRows[aVisit]);
+	}
 	while (aCol > 0)
 	{
-		aCol--;
-		thePath.push_back((uint8_t)(aRow * 2 + 0));
-		thePath.push_back((uint8_t)aCol);
-
-		bool aTopVisit = false;
-		bool aLeaveTop = false;
-		for (int aVisitCol : aTopVisitColumns)
-		{
-			aTopVisit |= aCol == aVisitCol;
-			aLeaveTop |= aCol == aVisitCol - 1;
-		}
-
-		if (aTopVisit)
-			MoveToRow(0);
-		else if (aLeaveTop)
-			MoveToRow(1 + Rand(aMaxRow - 1));
-		else if (aRow > 0 && Rand(3) == 0)
-			MoveToRow(1 + Rand(aMaxRow - 1));
+		--aCol;
+		AppendCell();
 	}
 }
 
@@ -3900,15 +3901,26 @@ void Board::NetDrawTowerDefensePath(Graphics* g)
 		NetTrace("TD road draw skipped: malformed odd path byteCount=%zu", mTDPath.size());
 		return;
 	}
+	const int anImageWidth = Sexy::IMAGE_BACKGROUND1UNSODDED->GetWidth();
+	const int anImageHeight = Sexy::IMAGE_BACKGROUND1UNSODDED->GetHeight();
+	if (anImageWidth <= 0 || anImageHeight <= 0)
+	{
+		NetTrace("TD road draw skipped: invalid image dimensions image=%dx%d cells=%zu",
+			anImageWidth, anImageHeight, mTDPath.size() / 2);
+		return;
+	}
 
 	// cut the matching cell out of the unsodded (dirt) lawn image, aligned the
 	// same way DrawBackdrop places the regular background
 	const int aBgX = -BOARD_OFFSET + WIDESCREEN_OFFSETX;
 	const int aBgY = WIDESCREEN_OFFSETY;
+
+	// Validate the complete draw first.  A malformed late cell must not leave a
+	// partially painted road in the current frame.
 	for (size_t i = 0; i + 1 < mTDPath.size(); i += 2)
 	{
-		int aRow = mTDPath[i] >> 1;
-		int aCol = mTDPath[i + 1];
+		const int aRow = mTDPath[i] >> 1;
+		const int aCol = mTDPath[i + 1];
 		if ((mTDPath[i] & 1U) != 0U || aRow < 0 || aRow >= 5 ||
 			aCol < 0 || aCol >= MAX_GRID_SIZE_X)
 		{
@@ -3916,21 +3928,49 @@ void Board::NetDrawTowerDefensePath(Graphics* g)
 				i / 2, (unsigned)mTDPath[i], aRow, aCol);
 			return;
 		}
-		int aX = GridToPixelX(aCol, aRow);
-		int aY = GridToPixelY(aCol, aRow);
+		const int aX = GridToPixelX(aCol, aRow);
+		const int aY = GridToPixelY(aCol, aRow);
 
-		Rect aSrcRect(aX - aBgX, aY - aBgY, 80, 100);
+		const Rect aSrcRect(aX - aBgX, aY - aBgY, 80, 100);
 		if (aSrcRect.mX < 0 || aSrcRect.mY < 0 ||
-			aSrcRect.mX + aSrcRect.mWidth > Sexy::IMAGE_BACKGROUND1UNSODDED->GetWidth() ||
-			aSrcRect.mY + aSrcRect.mHeight > Sexy::IMAGE_BACKGROUND1UNSODDED->GetHeight())
+			aSrcRect.mX + aSrcRect.mWidth > anImageWidth ||
+			aSrcRect.mY + aSrcRect.mHeight > anImageHeight)
 		{
 			NetTrace("TD road draw skipped: source out of bounds cell=%zu rect=(%d,%d,%d,%d) image=%dx%d",
 				i / 2, aSrcRect.mX, aSrcRect.mY, aSrcRect.mWidth, aSrcRect.mHeight,
-				Sexy::IMAGE_BACKGROUND1UNSODDED->GetWidth(),
-				Sexy::IMAGE_BACKGROUND1UNSODDED->GetHeight());
+				anImageWidth, anImageHeight);
 			return;
 		}
+	}
+
+	const size_t aCellCount = mTDPath.size() / 2;
+	for (size_t i = 0; i < mTDPath.size(); i += 2)
+	{
+		const int aRow = mTDPath[i] >> 1;
+		const int aCol = mTDPath[i + 1];
+		const int aX = GridToPixelX(aCol, aRow);
+		const int aY = GridToPixelY(aCol, aRow);
+		const Rect aSrcRect(aX - aBgX, aY - aBgY, 80, 100);
 		g->DrawImage(Sexy::IMAGE_BACKGROUND1UNSODDED, aX, aY, aSrcRect);
+	}
+
+	// A path packet or a non-null image alone does not prove that the road made
+	// it through the renderer.  Emit this only after every cell was drawn.
+	if (!mNetTDRoadDrawLogged)
+	{
+		mNetTDRoadDrawLogged = true;
+		const char* aRole = mApp->NetIsHost() ? "host" :
+			(mApp->NetIsClient() ? "client" : "solo");
+		if (mApp->CoopSmokeActive())
+		{
+			NetTrace("SMOKE_TD_ROAD_RENDER_COMPLETE role=%s board=%p cells=%zu image=%dx%d",
+				aRole, (void*)this, aCellCount, anImageWidth, anImageHeight);
+		}
+		else
+		{
+			NetTrace("TD_ROAD_DRAW_COMPLETE role=%s board=%p cells=%zu image=%dx%d",
+				aRole, (void*)this, aCellCount, anImageWidth, anImageHeight);
+		}
 	}
 }
 

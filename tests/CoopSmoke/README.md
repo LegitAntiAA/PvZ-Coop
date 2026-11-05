@@ -1,6 +1,6 @@
 # Two-process co-op smoke harness
 
-`RunCoopSmoke.ps1` launches one host and one client against loopback, starts one of seven deterministic scenarios, performs one scenario-specific gameplay action, validates both result files and diagnostic logs, and checks that a post-action snapshot transmitted by the host was applied by the client with the same FNV-1a hash.
+`RunCoopSmoke.ps1` launches one host and one client against loopback, starts one of ten deterministic scenarios, performs one scenario-specific gameplay action, validates both result files and diagnostic logs, and checks that a post-action snapshot transmitted by the host was applied by the client with the same FNV-1a hash.
 
 The runner has no external dependencies beyond Windows PowerShell 5.1. It uses the game-side `-coop-smoke-manifest=<absolute path>` hook described by `SmokeManifest.example.ini`. Each process has isolated appdata, config, logs, result, window dimensions, and profile state. The hook automatically hosts/connects/starts and writes `result_path` atomically only after the scripted action is visible on both sides and at least `minimum_snapshots` post-action snapshots were observed. The runner then closes the exact client process first and the exact host process second through their main windows.
 
@@ -11,8 +11,11 @@ Supported scenarios are deliberately fail-closed:
 | `Adventure1` | `mode=adventure`, `level=1` | Host selects the ready Peashooter packet and plants through `Board::MouseDown/Up`. |
 | `Adventure5Bowling` | `mode=adventure`, `level=5` | Host takes the first ready conveyor packet and rolls it through the normal board mouse path. |
 | `Adventure5BowlingClient` | `mode=adventure_bowling_client`, `level=5` | Client selects a host-identified conveyor packet through ordered network clicks; both peers must show the same moving nut. |
+| `Adventure8Soak` | `mode=adventure_soak`, `level=8` | Both peers exercise the stock chooser, planting, sun collection, synchronized loss camera, brains presentation, and loss dialog. |
+| `Adventure8Victory` | `mode=adventure_victory`, `level=8` | Both peers exercise the stock chooser and ready-set-plant sequence before synchronized victory fade and award UI. |
 | `Adventure15WhackClient` | `mode=adventure_whack_client`, `level=15` | Client hits a host-identified ordinary zombie with the hammer; both peers must observe the stock immediate removal under the same network ID. |
 | `SlotMachineClient` | `mode=slot_machine_client`, `level=1` | Client pulls the lever; both peers must observe the same roll, pull/return animations, three completed reels, 25 sun spent, and exactly one slot-machine sound. |
+| `TowerDefenseClient` | `mode=tower_defense_client`, `level=1` | Client plants on a non-road cell. Both peers must report the same generated path bytes/hash, road cell count, zombie ID through off-lawn entry and a path turn, and planted ID/cell. The path must touch the top at least three times and use the dirt road renderer. |
 | `Vasebreaker` | `mode=vasebreaker`, `level=1` | Client clicks the first live vase through the strict network input path. |
 | `Beghouled` | `mode=beghouled`, `level=1` | Client performs a valid drag through the strict network input path. |
 
@@ -35,16 +38,18 @@ Useful overrides:
   -Seed 424242 -TimeoutSeconds 180 -MinimumSnapshots 5
 ```
 
-Run the seven-scenario tranche explicitly:
+Run the ten-scenario tranche explicitly:
 
 ```powershell
 foreach ($scenario in "Adventure1", "Adventure5Bowling", "Adventure5BowlingClient", "Adventure15WhackClient", "Vasebreaker", "Beghouled") {
   .\tests\CoopSmoke\RunCoopSmoke.ps1 -Scenario $scenario -SkipIntro 1
 }
-.\tests\CoopSmoke\RunCoopSmoke.ps1 -Scenario SlotMachineClient -SkipIntro 0
+foreach ($scenario in "Adventure8Soak", "Adventure8Victory", "SlotMachineClient", "TowerDefenseClient") {
+  .\tests\CoopSmoke\RunCoopSmoke.ps1 -Scenario $scenario -SkipIntro 0
+}
 ```
 
-The Slot Machine scenario deliberately runs the stock intro so the seed bank and handle complete their normal slide-on lifecycle before the client pull.
+The Slot Machine and Tower Defense scenarios deliberately run the stock intro. Slot Machine waits for the seed bank and handle to finish their normal slide-on lifecycle; Tower Defense waits for path generation and the client-side plant action. `TowerDefenseClient`, `Adventure8Soak`, and `Adventure8Victory` reject `-SkipIntro 1` instead of silently weakening their coverage.
 
 `-SkipIntro` accepts `0` or `1`. With `0`, the smoke controller waits for the normal intro to enter `SCENE_PLAYING`; it never injects a gameplay action during cutscene, chooser, dialog, or pause state. Host and client dimensions may differ to exercise coordinate canonicalization; both windows are always visible and placed side by side.
 
@@ -58,6 +63,8 @@ Expected result schema:
 
 The client uses the same fields with `"role":"client"` and a non-zero `snapshotsApplied`. Logs must contain ordered `SMOKE_CHECKPOINT` markers for `PLAYING`, `BASELINE`, `ACTION_ISSUED` on the owning side, and `ACTION_APPLIED` on both sides. The runner intersects `SMOKE_POST_ACTION_TX ... hash=<hex>` with `SMOKE_POST_ACTION_APPLIED ... hash=<hex>`; a pre-action or intro snapshot cannot satisfy the test. It also requires normal listen/authentication/WELCOME/profile/start/gameplay signatures and rejects access violations, smoke failures, version/protocol violations, queue overflow, malformed starts, rejected snapshots, assertions, and host-loss markers. Fatal signatures are polled while the processes are still running for fail-fast behavior.
 
+The Adventure 5 and Whack cursor assertions require the stock shovel/hammer draw path, player tint, darker outline, and `fallback=0`; receiving only a cursor type cannot pass them. `CURSOR_TYPE_PLANT_FROM_GLOVE` and `CURSOR_TYPE_PLANT_FROM_WHEEL_BARROW` deliberately remain on the generic pointer fallback because their plant/potted-plant object identity is not yet part of the cursor protocol. Hammer shape/tint is covered, but its transient swing animation phase is not serialized by this harness.
+
 Each GUID artifact tree preserves generated configs/manifests, role logs, atomic result JSON, a PID ledger, and `summary.json`. Failed runs are never cleaned automatically.
 
-The game must run in an interactive Windows desktop session; this is process automation, not a headless renderer. This tranche proves launch/lifecycle, coordinate handling, representative host/client actions, and post-action state convergence for the seven scenarios. It is not a complete scripted playthrough or a substitute for the broader mini-game regression matrix.
+The game must run in an interactive Windows desktop session; this is process automation, not a headless renderer. This tranche proves launch/lifecycle, coordinate handling, representative host/client actions, and post-action state convergence for the ten scenarios. It is not a complete scripted playthrough or a substitute for the broader mini-game regression matrix.

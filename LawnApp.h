@@ -180,6 +180,8 @@ public:
 	PlayerInfo*					mNetLocalProfileBackup;	// complete local profile restored when the client session ends
 	bool							mNetCoopGameOverHandled;
 	Sexy::DDImage*				mNetCursorImage;
+	bool							mNetChatTyping;
+	SexyString					mNetChatDraft;
 
 	// Opt-in automation state.  It is populated only by a valid absolute
 	// -coop-smoke-manifest argument; ordinary launches never enter this path.
@@ -195,6 +197,10 @@ public:
 	uint32_t						mCoopSmokeSnapshotsSent;
 	uint32_t						mCoopSmokeSnapshotsReceived;
 	uint32_t						mCoopSmokeSnapshotsApplied;
+	bool							mCoopSmokeUnicodeChatSent;
+	bool							mCoopSmokeUnicodeChatReceived;
+	bool							mCoopSmokeUnicodeChatVisible;
+	bool							mCoopSmokeUnicodeChatFaded;
 	LawnNet::NetSmokeScenarioRuntime mCoopSmokeScenarioRuntime;
 	std::string						mCoopSmokeManifestError;
 
@@ -221,7 +227,11 @@ public:
 	void							CoopSmokeOnSnapshotTx(uint32_t theHash, size_t theBytes);
 	void							CoopSmokeOnSnapshotRx(uint32_t theHash, size_t theBytes);
 	void							CoopSmokeOnSnapshotApplied(uint32_t theHash, size_t theBytes);
+	bool							CoopSmokeUpdateUnicodeChat();
 	void							NetDrawCursorOverlay();
+	void							NetDrawChatOverlay();
+	bool							NetHandleChatKey(int theKey);
+	bool							NetHandleChatText(const char* theUtf8Text);
 	bool							IsCoopCustomMode();
 	static bool						IsCoopEndlessMode(GameMode theGameMode);
 	static bool						IsCoopEndlessRepick(GameMode theGameMode);								// host: apply queued remote inputs to the board

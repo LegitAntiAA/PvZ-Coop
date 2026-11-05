@@ -26,13 +26,15 @@ enum NetSmokeScenarioId : uint8_t
         NETSMOKE_SCENARIO_ADVENTURE_15_WHACK_CLIENT = 6,
         NETSMOKE_SCENARIO_SLOT_MACHINE_CLIENT = 7,
         NETSMOKE_SCENARIO_ADVENTURE_8_SOAK = 8,
-        NETSMOKE_SCENARIO_ADVENTURE_8_VICTORY = 9
+        NETSMOKE_SCENARIO_ADVENTURE_8_VICTORY = 9,
+	NETSMOKE_SCENARIO_TOWER_DEFENSE_CLIENT = 10
 };
 
-inline bool NetIsAdventure8InteractiveSmokeScenario(NetSmokeScenarioId theScenario)
+inline bool NetIsInteractiveChooserSmokeScenario(NetSmokeScenarioId theScenario)
 {
-	return theScenario == NETSMOKE_SCENARIO_ADVENTURE_8_SOAK ||
-		theScenario == NETSMOKE_SCENARIO_ADVENTURE_8_VICTORY;
+        return theScenario == NETSMOKE_SCENARIO_ADVENTURE_8_SOAK ||
+		theScenario == NETSMOKE_SCENARIO_ADVENTURE_8_VICTORY ||
+		theScenario == NETSMOKE_SCENARIO_TOWER_DEFENSE_CLIENT;
 }
 
 inline bool NetIsBowlingSmokeScenario(NetSmokeScenarioId theScenario)
@@ -77,9 +79,12 @@ inline const NetSmokeScenarioDefinition* NetSmokeScenarioTable(size_t& theCount)
                 { NETSMOKE_SCENARIO_ADVENTURE_8_SOAK,
                         "adventure8_soak", "adventure_soak", 8,
                         (uint8_t)GameMode::GAMEMODE_ADVENTURE, false },
-		{ NETSMOKE_SCENARIO_ADVENTURE_8_VICTORY,
-			"adventure8_victory", "adventure_victory", 8,
-			(uint8_t)GameMode::GAMEMODE_ADVENTURE, false }
+                { NETSMOKE_SCENARIO_ADVENTURE_8_VICTORY,
+                        "adventure8_victory", "adventure_victory", 8,
+			(uint8_t)GameMode::GAMEMODE_ADVENTURE, false },
+		{ NETSMOKE_SCENARIO_TOWER_DEFENSE_CLIENT,
+			"tower_defense_client", "tower_defense_client", 1,
+			(uint8_t)GameMode::GAMEMODE_COOP_TOWER_DEFENSE, true }
 	};
 	theCount = sizeof(aScenarios) / sizeof(aScenarios[0]);
 	return aScenarios;
@@ -110,8 +115,9 @@ inline bool NetResolveSmokeScenario(const std::string& theMode, int theLevel,
 		}
 	}
 	theError = "unsupported smoke scenario; allowed pairs are adventure/1, adventure/5, "
-		"adventure_bowling_client/5, adventure_whack_client/15, slot_machine_client/1, "
-		"adventure_soak/8, adventure_victory/8, vasebreaker/1, beghouled/1";
+                "adventure_bowling_client/5, adventure_whack_client/15, slot_machine_client/1, "
+		"adventure_soak/8, adventure_victory/8, tower_defense_client/1, "
+		"vasebreaker/1, beghouled/1";
 	return false;
 }
 
@@ -169,7 +175,15 @@ private:
 	bool mVictoryFadeObserved;
 	bool mVictoryLevelCompleteSnapshotObserved;
 	bool mVictoryAwardObserved;
-	bool mVictoryBoardReleasedObserved;
+        bool mVictoryBoardReleasedObserved;
+	bool mTdPathVerified;
+	bool mTdSpawnAccelerated;
+	bool mTdZombieEntryObserved;
+	bool mTdZombieTurnObserved;
+	bool mTdClientPlantObserved;
+	uint16_t mTdZombieId;
+	uint16_t mTdPlantId;
+	float mTdZombieFirstX;
         uint32_t mPostActionSamples;
 
 	bool UpdateIntro(LawnApp* theApp, const NetSmokeManifest& theManifest,

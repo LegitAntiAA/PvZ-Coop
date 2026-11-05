@@ -130,6 +130,7 @@ NetManager::NetManager() :
 		mLastInputSequence[i] = 0;
 		mRemoteHeatWaveQDown[i] = false;
 		mRemoteHeatWaveQDownTick[i] = 0;
+		mLastChatTick[i] = 0;
 	}
 	mChooserStateEchoRequested.store(false, std::memory_order_relaxed);
 	mRemotePaused = false;
@@ -209,7 +210,7 @@ bool NetManager::StartHost(uint16_t thePort)
 	mPlayers[0].Reset();
 	mPlayers[0].mActive = true;
 	mPlayers[0].mSlot = 0;
-	strncpy_s(mPlayers[0].mNick, mConfig.mNick, NET_MAX_NICK);
+	strcpy_s(mPlayers[0].mNick, mConfig.mNick);
 
 	mAcceptRunning = true;
 	mAcceptThread = std::thread(&NetManager::AcceptThreadProc, this);
@@ -370,6 +371,7 @@ void NetManager::Disconnect()
 	mRemoteChooserStates.clear();
 	mPendingChooserStarts.clear();
 	mPendingBoardMsgs.clear();
+	mChatLines.clear();
 	mChooserStateEchoRequested.store(false, std::memory_order_relaxed);
 	PurgePendingInputs("DISCONNECT");
 	mChooserOpen = false;
@@ -381,6 +383,7 @@ void NetManager::Disconnect()
 		mLastInputSequence[i] = 0;
 		mRemoteHeatWaveQDown[i] = false;
 		mRemoteHeatWaveQDownTick[i] = 0;
+		mLastChatTick[i] = 0;
 	}
 	for (int i = 0; i < NET_MAX_PLAYERS; i++)
 		mPlayers[i].Reset();
@@ -721,6 +724,9 @@ void NetManager::HandleMessage(NetSession* theSession, uint8_t theMsgType, NetBu
 	case NETMSG_STATS:
 		OnClientStats(theSession, thePayload);
 		break;
+	case NETMSG_CHAT_SEND:
+		OnClientChat(theSession, thePayload);
+		break;
 	case NETMSG_PAUSE_REQ:
 		// clients cannot pause (host-only control) — ignored
 		break;
@@ -745,9 +751,14 @@ void NetManager::OnHello(NetSession* theSession, NetBuffer& thePayload)
 	aPlayer.mSlot = theSession->mSlot;
 	aPlayer.mTeam = NETTEAM_NONE;
 	aPlayer.mPing = 0;
-	thePayload.ReadString(aPlayer.mNick, NET_MAX_NICK + 1);
-	if (!aPlayer.mNick[0])
+	char aRawNick[256] = {};
+	std::string aNick;
+	if (!thePayload.ReadString(aRawNick, sizeof(aRawNick)) ||
+		!NetNormalizeUtf8(aRawNick, NET_MAX_NICK_BYTES, NET_MAX_NICK_CHARS, true, aNick) ||
+		aNick != aRawNick)
 		strcpy_s(aPlayer.mNick, "Player");
+	else
+		strcpy_s(aPlayer.mNick, aNick.c_str());
 	NetTrace("peer authenticated slot=%u nick=%s", theSession->mSlot, aPlayer.mNick);
 
 	NetBuffer aWelcome;
@@ -1381,6 +1392,9 @@ void NetManager::HandleMessageClient(uint8_t theMsgType, NetBuffer& thePayload)
 	case NETMSG_SCENE_CMD:
 		OnSceneCmd(thePayload);
 		break;
+	case NETMSG_CHAT_BROADCAST:
+		OnChatBroadcast(thePayload);
+		break;
 	case NETMSG_PROFILE_SYNC:
 		if (mApp)
 			mApp->NetOnProfileSync(thePayload);
@@ -1475,7 +1489,7 @@ void NetManager::OnWelcome(NetBuffer& thePayload)
 	mPlayers[0].Reset();
 	mPlayers[0].mActive = true;
 	mPlayers[0].mSlot = 0;
-	strncpy_s(mPlayers[0].mNick, aHostNick, NET_MAX_NICK);
+	strcpy_s(mPlayers[0].mNick, aHostNick);
 	NetTrace("WELCOME assignedSlot=%u hostNick=%s", mMySlot, aHostNick);
 }
 
@@ -2052,6 +2066,87 @@ void NetManager::OnChooserStart(NetBuffer& thePayload)
 // -------------------------------------------------------------------------
 // Send helpers
 // -------------------------------------------------------------------------
+void NetManager::AddChatLine(uint8_t theSlot, const std::string& theText)
+{
+	if (theSlot >= NET_MAX_PLAYERS || !mPlayers[theSlot].mActive)
+		return;
+	ChatLine aLine = { theSlot, theText, GetTickCount() };
+	mChatLines.push_back(aLine);
+	while (mChatLines.size() > 32)
+		mChatLines.pop_front();
+}
+
+void NetManager::SendChat(const std::string& theUtf8Text)
+{
+	std::string aText;
+	if (!IsActive() || !NetNormalizeUtf8(theUtf8Text, NET_MAX_CHAT_BYTES,
+		NET_MAX_CHAT_CHARS, true, aText))
+		return;
+	if (mMode == MODE_HOST)
+	{
+		const uint32_t aNow = GetTickCount();
+		if (mLastChatTick[0] != 0 && aNow - mLastChatTick[0] < 750U)
+			return;
+		mLastChatTick[0] = aNow;
+		AddChatLine(0, aText);
+		NetBuffer aBroadcast;
+		aBroadcast.WriteU8(0);
+		aBroadcast.WriteString(aText.c_str());
+		BroadcastMessage(NETMSG_CHAT_BROADCAST, aBroadcast);
+		NetTrace("chat accepted slot=0 bytes=%zu", aText.size());
+	}
+	else if (mMode == MODE_CLIENT && mHostConn && mClientConnected)
+	{
+		NetBuffer aRequest;
+		aRequest.WriteString(aText.c_str());
+		mHostConn->SendMessage(NETMSG_CHAT_SEND, aRequest);
+	}
+}
+
+void NetManager::OnClientChat(NetSession* theSession, NetBuffer& thePayload)
+{
+	if (!theSession || theSession->mSlot == 0 || theSession->mSlot >= NET_MAX_PLAYERS)
+		return;
+	const uint32_t aNow = GetTickCount();
+	if (mLastChatTick[theSession->mSlot] != 0 && aNow - mLastChatTick[theSession->mSlot] < 750U)
+	{
+		NetTrace("chat rejected slot=%u reason=rate_limit", theSession->mSlot);
+		return;
+	}
+	char aRawText[256] = {};
+	std::string aText;
+	if (!thePayload.ReadString(aRawText, sizeof(aRawText)) || thePayload.Remaining() != 0 ||
+		!NetNormalizeUtf8(aRawText, NET_MAX_CHAT_BYTES, NET_MAX_CHAT_CHARS, true, aText) ||
+		aText != aRawText)
+	{
+		NetTrace("chat rejected slot=%u reason=invalid_utf8_or_length", theSession->mSlot);
+		return;
+	}
+	mLastChatTick[theSession->mSlot] = aNow;
+	AddChatLine(theSession->mSlot, aText);
+	NetBuffer aBroadcast;
+	aBroadcast.WriteU8(theSession->mSlot);
+	aBroadcast.WriteString(aText.c_str());
+	BroadcastMessage(NETMSG_CHAT_BROADCAST, aBroadcast);
+	NetTrace("chat accepted slot=%u bytes=%zu", theSession->mSlot, aText.size());
+}
+
+void NetManager::OnChatBroadcast(NetBuffer& thePayload)
+{
+	const uint8_t aSlot = thePayload.ReadU8Or();
+	char aRawText[256] = {};
+	std::string aText;
+	if (aSlot >= NET_MAX_PLAYERS || !thePayload.ReadString(aRawText, sizeof(aRawText)) ||
+		thePayload.Remaining() != 0 ||
+		!NetNormalizeUtf8(aRawText, NET_MAX_CHAT_BYTES, NET_MAX_CHAT_CHARS, true, aText) ||
+		aText != aRawText)
+	{
+		NetTrace("chat broadcast rejected slot=%u", aSlot);
+		return;
+	}
+	AddChatLine(aSlot, aText);
+}
+
 void NetManager::SendLobbyState()
 {
 	if (mMode != MODE_HOST)

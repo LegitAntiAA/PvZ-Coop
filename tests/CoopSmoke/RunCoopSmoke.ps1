@@ -14,7 +14,7 @@ param(
     [int]$GracefulExitSeconds = 10,
     [ValidateRange(0, 65535)]
     [int]$Port = 0,
-    [ValidateSet("Adventure1", "Adventure5Bowling", "Adventure5BowlingClient", "Adventure8Soak", "Adventure8Victory", "Adventure15WhackClient", "SlotMachineClient", "Vasebreaker", "Beghouled")]
+    [ValidateSet("Adventure1", "Adventure5Bowling", "Adventure5BowlingClient", "Adventure8Soak", "Adventure8Victory", "Adventure15WhackClient", "SlotMachineClient", "TowerDefenseClient", "Vasebreaker", "Beghouled")]
     [string]$Scenario = "Adventure1",
     [ValidateSet(0, 1)]
     [int]$SkipIntro = 1,
@@ -29,6 +29,7 @@ param(
     [uint32]$Seed = 424242,
     [ValidateRange(1, 1000)]
     [int]$MinimumSnapshots = 3,
+    [switch]$VerifyUnicodeChat,
     [switch]$CleanupOnSuccess
 )
 
@@ -242,7 +243,8 @@ function Start-SmokeProcess {
         [Parameter(Mandatory = $true)][string]$WorkingDirectory,
         [Parameter(Mandatory = $true)][string]$ManifestPath,
         [Parameter(Mandatory = $true)][string]$Role,
-        [Parameter(Mandatory = $true)][string]$RunId
+        [Parameter(Mandatory = $true)][string]$RunId,
+        [Parameter(Mandatory = $true)][bool]$EnableUnicodeChat
     )
 
     if ($ManifestPath.Contains('"')) {
@@ -267,6 +269,7 @@ function Start-SmokeProcess {
     }
     $childEnvironment["PVZ_COOP_SMOKE_RUN_ID"] = $RunId
     $childEnvironment["PVZ_COOP_SMOKE_ROLE"] = $Role
+    $childEnvironment["PVZ_COOP_SMOKE_UNICODE_CHAT"] = $(if ($EnableUnicodeChat) { "1" } else { "0" })
 
     $process = New-Object System.Diagnostics.Process
     $process.StartInfo = $startInfo
@@ -720,6 +723,7 @@ $scenarioSpec = switch ($Scenario) {
     "Adventure8Victory" { [ordered]@{ Mode = "adventure_victory"; Level = 8; Marker = "adventure8_victory" } }
     "Adventure15WhackClient" { [ordered]@{ Mode = "adventure_whack_client"; Level = 15; Marker = "adventure15_whack_client" } }
     "SlotMachineClient" { [ordered]@{ Mode = "slot_machine_client"; Level = 1; Marker = "slot_machine_client" } }
+    "TowerDefenseClient" { [ordered]@{ Mode = "tower_defense_client"; Level = 1; Marker = "tower_defense_client" } }
     "Vasebreaker" { [ordered]@{ Mode = "vasebreaker"; Level = 1; Marker = "vasebreaker" } }
     "Beghouled" { [ordered]@{ Mode = "beghouled"; Level = 1; Marker = "beghouled" } }
     default { throw ("Unsupported smoke scenario: {0}" -f $Scenario) }
@@ -730,6 +734,9 @@ $scenarioMarker = [string]$scenarioSpec.Marker
 $isBowlingScenario = $Scenario -in @("Adventure5Bowling", "Adventure5BowlingClient")
 if ($Scenario -in @("Adventure8Soak", "Adventure8Victory") -and $SkipIntro -ne 0) {
     throw ("{0} requires -SkipIntro 0 so the two-player seed chooser is exercised." -f $Scenario)
+}
+if ($Scenario -eq "TowerDefenseClient" -and $SkipIntro -ne 0) {
+    throw "TowerDefenseClient requires -SkipIntro 0 so the generated path and client plant action are exercised."
 }
 $runId = [Guid]::NewGuid().ToString("N")
 $runRoot = Join-Path $ArtifactsRoot ("run_" + $runId)
@@ -779,17 +786,24 @@ try {
     }
     $timeoutMs = $TimeoutSeconds * 1000
 
-    Write-CoopConfig -Path $hostConfigPath -Nickname "SmokeHost" `
+    # Build Cyrillic names from code points so Windows PowerShell 5.1 does not
+    # depend on whether this UTF-8 script itself carries a BOM.
+    $unicodeHostNickname = -join @([char]0x425, [char]0x43E, [char]0x441, [char]0x442)
+    $unicodeClientNickname = -join @([char]0x41A, [char]0x43B, [char]0x438,
+        [char]0x435, [char]0x43D, [char]0x442)
+    $hostNickname = $(if ($VerifyUnicodeChat) { $unicodeHostNickname } else { "SmokeHost" })
+    $clientNickname = $(if ($VerifyUnicodeChat) { $unicodeClientNickname } else { "SmokeClient" })
+    Write-CoopConfig -Path $hostConfigPath -Nickname $hostNickname `
         -WindowWidth $HostWindowWidth -WindowHeight $HostWindowHeight
-    Write-CoopConfig -Path $clientConfigPath -Nickname "SmokeClient" `
+    Write-CoopConfig -Path $clientConfigPath -Nickname $clientNickname `
         -WindowWidth $ClientWindowWidth -WindowHeight $ClientWindowHeight
-    Write-SmokeManifest -Path $hostManifestPath -Role "host" -Nickname "SmokeHost" `
+    Write-SmokeManifest -Path $hostManifestPath -Role "host" -Nickname $hostNickname `
         -AppDataDirectory $hostAppDataDirectory -ConfigPath $hostConfigPath `
         -LogDirectory $hostLogDirectory -ResultPath $hostResultPath -SelectedPort $Port `
         -SelectedMode $Mode -SelectedLevel $Level -SelectedSeed $Seed `
         -SelectedTimeoutMs $timeoutMs -RequiredSnapshots $MinimumSnapshots `
         -SelectedSkipIntro $SkipIntro
-    Write-SmokeManifest -Path $clientManifestPath -Role "client" -Nickname "SmokeClient" `
+    Write-SmokeManifest -Path $clientManifestPath -Role "client" -Nickname $clientNickname `
         -AppDataDirectory $clientAppDataDirectory -ConfigPath $clientConfigPath `
         -LogDirectory $clientLogDirectory -ResultPath $clientResultPath -SelectedPort $Port `
         -SelectedMode $Mode -SelectedLevel $Level -SelectedSeed $Seed `
@@ -802,7 +816,8 @@ try {
         $ClientWindowWidth, $ClientWindowHeight)
     Write-SmokeStatus ("Starting host on 127.0.0.1:{0}." -f $Port)
     $hostProcess = Start-SmokeProcess -Executable $GameExe -WorkingDirectory $gameDirectory `
-        -ManifestPath $hostManifestPath -Role "host" -RunId $runId
+        -ManifestPath $hostManifestPath -Role "host" -RunId $runId `
+        -EnableUnicodeChat ([bool]$VerifyUnicodeChat)
     Set-SmokeWindowLayout -Process $hostProcess -Role "host" -X 0 -Y 0 `
         -Width $HostWindowWidth -Height $HostWindowHeight
     Save-PidLedger -Path $pidLedgerPath -Executable $GameExe `
@@ -814,7 +829,8 @@ try {
 
     Write-SmokeStatus "Host is listening; starting client."
     $clientProcess = Start-SmokeProcess -Executable $GameExe -WorkingDirectory $gameDirectory `
-        -ManifestPath $clientManifestPath -Role "client" -RunId $runId
+        -ManifestPath $clientManifestPath -Role "client" -RunId $runId `
+        -EnableUnicodeChat ([bool]$VerifyUnicodeChat)
     Set-SmokeWindowLayout -Process $clientProcess -Role "client" -X $HostWindowWidth -Y 0 `
         -Width $ClientWindowWidth -Height $ClientWindowHeight
     Save-PidLedger -Path $pidLedgerPath -Executable $GameExe `
@@ -840,7 +856,7 @@ try {
     $hostPositivePatterns = @(
         @{ Label = "trace role/protocol"; Pattern = '(?im)role=host protocol=\d+ pid=\d+' },
         @{ Label = "listener"; Pattern = $hostReadyPattern },
-        @{ Label = "authenticated client"; Pattern = '(?im)peer authenticated slot=1 nick=SmokeClient\b' },
+        @{ Label = "authenticated client"; Pattern = ('(?im)peer authenticated slot=1 nick=' + [regex]::Escape($clientNickname) + '(?:\s|$)') },
         @{ Label = "deterministic game start"; Pattern = ('(?im)start game broadcast mode=\d+ level={0} players=2 seed={1}\b' -f $Level, $Seed) },
         @{ Label = "scenario start"; Pattern = ('(?im)\bSMOKE_START\b[^\r\n]*scenario={0}\b' -f ([regex]::Escape($scenarioMarker))) },
         @{ Label = "visible host PLAYING checkpoint"; Pattern = ('(?im)\bSMOKE_CHECKPOINT\b[^\r\n]*scenario={0}[^\r\n]*step=PLAYING[^\r\n]*size={1}x{2}\b' -f ([regex]::Escape($scenarioMarker)), $HostWindowWidth, $HostWindowHeight) },
@@ -850,7 +866,7 @@ try {
     $clientPositivePatterns = @(
         @{ Label = "trace role/protocol"; Pattern = '(?im)role=client protocol=\d+ pid=\d+' },
         @{ Label = "TCP connection"; Pattern = ('(?im)client TCP connected endpoint=127\.0\.0\.1:{0}\b' -f $Port) },
-        @{ Label = "WELCOME"; Pattern = '(?im)WELCOME assignedSlot=1 hostNick=SmokeHost\b' },
+        @{ Label = "WELCOME"; Pattern = ('(?im)WELCOME assignedSlot=1 hostNick=' + [regex]::Escape($hostNickname) + '(?:\s|$)') },
         @{ Label = "profile sync"; Pattern = '(?im)PROFILE_SYNC applied\b' },
         @{ Label = "matching game start"; Pattern = ('(?im)client START_GAME decoded mode=\d+ level={0} seed={1}\b' -f $Level, $Seed) },
         @{ Label = "gameplay scene"; Pattern = '(?im)gameplay entered client=1\b' },
@@ -858,6 +874,32 @@ try {
         @{ Label = "client action applied"; Pattern = ('(?im)\bSMOKE_CHECKPOINT\b[^\r\n]*scenario={0}[^\r\n]*step=ACTION_APPLIED\b' -f ([regex]::Escape($scenarioMarker))) },
         @{ Label = "post-action applied hash"; Pattern = '(?im)\bSMOKE_POST_ACTION_APPLIED\b[^\r\n]*\bhash=(?:0x)?[0-9a-f]{8,16}\b' }
     )
+    if ($VerifyUnicodeChat) {
+        $unicodeChatPatterns = @(
+            @{
+                Label = "replicated UTF-8 nicknames"
+                Pattern = '(?im)\bSMOKE_UTF8_NICKS\b[^\r\n]*\bvalid=1\b'
+            },
+            @{
+                Label = "Enter chat send"
+                Pattern = '(?im)\bSMOKE_CHAT_ENTER\b[^\r\n]*\butf8Bytes=\d+\b'
+            },
+            @{
+                Label = "host-authoritative chat broadcast"
+                Pattern = '(?im)\bSMOKE_CHAT_BROADCAST\b[^\r\n]*\bhost=1 client=1\b'
+            },
+            @{
+                Label = "chat overlay visible"
+                Pattern = '(?im)\bSMOKE_CHAT_OVERLAY\b[^\r\n]*\bphase=visible\b[^\r\n]*\balpha=230\b'
+            },
+            @{
+                Label = "chat overlay fade"
+                Pattern = '(?im)\bSMOKE_CHAT_OVERLAY\b[^\r\n]*\bphase=fade\b[^\r\n]*\balpha=(?:[1-9]|[1-9]\d|1\d\d|2[0-2]\d)\b'
+            }
+        )
+        $hostPositivePatterns += $unicodeChatPatterns
+        $clientPositivePatterns += $unicodeChatPatterns
+    }
     if ($isBowlingScenario) {
         $hostPositivePatterns += @{
             Label = "host moving Bowling nut"
@@ -891,8 +933,8 @@ try {
                 Pattern = '(?im)\bSMOKE_CHECKPOINT\b[^\r\n]*\bstep=INTRO_SHOVEL_PICKUP\b'
             }
             $clientPositivePatterns += @{
-                Label = "client rendered remote stock shovel"
-                Pattern = '(?im)\bSMOKE_REMOTE_CURSOR_RENDER\b[^\r\n]*\brole=client\b[^\r\n]*\bslot=0\b[^\r\n]*\btype=6\b[^\r\n]*\bstock=1\b'
+                Label = "client rendered tinted/outlined remote stock shovel"
+                Pattern = '(?im)\bSMOKE_REMOTE_CURSOR_RENDER\b[^\r\n]*\brole=client\b[^\r\n]*\bslot=0\b[^\r\n]*\btype=6\b[^\r\n]*\bstock=1\b[^\r\n]*\btint=(?:25[0-5]|2[0-4]\d|1?\d?\d),(?:25[0-5]|2[0-4]\d|1?\d?\d),(?:25[0-5]|2[0-4]\d|1?\d?\d)\b[^\r\n]*\boutline=1\b[^\r\n]*\bfallback=0\b'
             }
         }
     }
@@ -907,8 +949,8 @@ try {
                 Pattern = '(?im)\bSMOKE_WHACK_REMOVAL_OBSERVED\b[^\r\n]*\brole=host\b[^\r\n]*\btargetId=[1-9]\d*\b'
             },
             @{
-                Label = "host rendered remote stock hammer"
-                Pattern = '(?im)\bSMOKE_REMOTE_CURSOR_RENDER\b[^\r\n]*\brole=host\b[^\r\n]*\bslot=1\b[^\r\n]*\btype=7\b[^\r\n]*\bstock=1\b'
+                Label = "host rendered tinted/outlined remote stock hammer"
+                Pattern = '(?im)\bSMOKE_REMOTE_CURSOR_RENDER\b[^\r\n]*\brole=host\b[^\r\n]*\bslot=1\b[^\r\n]*\btype=7\b[^\r\n]*\bstock=1\b[^\r\n]*\btint=(?:25[0-5]|2[0-4]\d|1?\d?\d),(?:25[0-5]|2[0-4]\d|1?\d?\d),(?:25[0-5]|2[0-4]\d|1?\d?\d)\b[^\r\n]*\boutline=1\b[^\r\n]*\bfallback=0\b'
             }
         )
         $clientPositivePatterns += @(
@@ -921,8 +963,8 @@ try {
                 Pattern = '(?im)\bSMOKE_WHACK_REMOVAL_OBSERVED\b[^\r\n]*\brole=client\b[^\r\n]*\btargetId=[1-9]\d*\b'
             },
             @{
-                Label = "client rendered remote stock hammer"
-                Pattern = '(?im)\bSMOKE_REMOTE_CURSOR_RENDER\b[^\r\n]*\brole=client\b[^\r\n]*\bslot=0\b[^\r\n]*\btype=7\b[^\r\n]*\bstock=1\b'
+                Label = "client rendered tinted/outlined remote stock hammer"
+                Pattern = '(?im)\bSMOKE_REMOTE_CURSOR_RENDER\b[^\r\n]*\brole=client\b[^\r\n]*\bslot=0\b[^\r\n]*\btype=7\b[^\r\n]*\bstock=1\b[^\r\n]*\btint=(?:25[0-5]|2[0-4]\d|1?\d?\d),(?:25[0-5]|2[0-4]\d|1?\d?\d),(?:25[0-5]|2[0-4]\d|1?\d?\d)\b[^\r\n]*\boutline=1\b[^\r\n]*\bfallback=0\b'
             }
         )
     }
@@ -1002,6 +1044,23 @@ try {
             @{ Label = "client synchronized award UI"; Pattern = ('(?im)\bSMOKE_VICTORY_AWARD\b[^\r\n]*\brole=client\b[^\r\n]*\baward=0\b[^\r\n]*\bboard=0\b[^\r\n]*\bscreen=1\b[^\r\n]*\bsize={0}x{1}\b' -f $ClientWindowWidth, $ClientWindowHeight) }
         )
     }
+    if ($Scenario -eq "TowerDefenseClient") {
+        $positiveDecimal = '(?:[1-9]\d*\.[0-9][0-9]|0\.(?!00)[0-9][0-9])'
+        $hostPositivePatterns += @(
+            @{ Label = "host Tower Defense path"; Pattern = '(?im)\bSMOKE_TD_PATH\b[^\r\n]*\brole=host\b[^\r\n]*\bbytes=[1-9]\d*\b[^\r\n]*\bhash=[0-9a-f]{8}\b[^\r\n]*\bedgeVisits=3\b[^\r\n]*\bedgePattern=(?:TBT|BTB)\b[^\r\n]*\bseparated=1\b[^\r\n]*\bno2x2=1\b[^\r\n]*\bdirt=[1-9]\d*\b[^\r\n]*\bgrass=1\b[^\r\n]*\bimage=[1-9]\d*x[1-9]\d*\b' },
+            @{ Label = "host Tower Defense road draw"; Pattern = '(?im)\bSMOKE_TD_ROAD_RENDER_COMPLETE\b[^\r\n]*\brole=host\b[^\r\n]*\bboard=(?!0+\b)[0-9a-f]+\b[^\r\n]*\bcells=[1-9]\d*\b[^\r\n]*\bimage=[1-9]\d*x[1-9]\d*\b' },
+            @{ Label = "host Tower Defense off-lawn zombie entry"; Pattern = ('(?im)\bSMOKE_TD_ZOMBIE_ENTRY\b[^\r\n]*\brole=host\b[^\r\n]*\bid=[1-9]\d*\b[^\r\n]*\bghost=0\b[^\r\n]*\bx={0}\b[^\r\n]*\brow=[0-5]\b[^\r\n]*\banimRate={0}\b' -f $positiveDecimal) },
+            @{ Label = "host Tower Defense zombie turn"; Pattern = ('(?im)\bSMOKE_TD_ZOMBIE_TURN\b[^\r\n]*\brole=host\b[^\r\n]*\bid=[1-9]\d*\b[^\r\n]*\brow=[0-5]\b[^\r\n]*\bmoved={0}\b[^\r\n]*\banimRate={0}\b[^\r\n]*\bpathPos={0}\b' -f $positiveDecimal) },
+            @{ Label = "host observed Tower Defense client plant"; Pattern = '(?im)\bSMOKE_TD_CLIENT_PLANT\b[^\r\n]*\brole=host\b[^\r\n]*\bid=[1-9]\d*\b[^\r\n]*\bcell=\([0-8],[0-5]\)[^\r\n]*\broad=0\b' }
+        )
+        $clientPositivePatterns += @(
+            @{ Label = "client Tower Defense path"; Pattern = '(?im)\bSMOKE_TD_PATH\b[^\r\n]*\brole=client\b[^\r\n]*\bbytes=[1-9]\d*\b[^\r\n]*\bhash=[0-9a-f]{8}\b[^\r\n]*\bedgeVisits=3\b[^\r\n]*\bedgePattern=(?:TBT|BTB)\b[^\r\n]*\bseparated=1\b[^\r\n]*\bno2x2=1\b[^\r\n]*\bdirt=[1-9]\d*\b[^\r\n]*\bgrass=1\b[^\r\n]*\bimage=[1-9]\d*x[1-9]\d*\b' },
+            @{ Label = "client Tower Defense road draw"; Pattern = '(?im)\bSMOKE_TD_ROAD_RENDER_COMPLETE\b[^\r\n]*\brole=client\b[^\r\n]*\bboard=(?!0+\b)[0-9a-f]+\b[^\r\n]*\bcells=[1-9]\d*\b[^\r\n]*\bimage=[1-9]\d*x[1-9]\d*\b' },
+            @{ Label = "client Tower Defense off-lawn zombie entry"; Pattern = ('(?im)\bSMOKE_TD_ZOMBIE_ENTRY\b[^\r\n]*\brole=client\b[^\r\n]*\bid=[1-9]\d*\b[^\r\n]*\bghost=1\b[^\r\n]*\bx={0}\b[^\r\n]*\brow=[0-5]\b[^\r\n]*\banimRate={0}\b' -f $positiveDecimal) },
+            @{ Label = "client Tower Defense zombie turn"; Pattern = ('(?im)\bSMOKE_TD_ZOMBIE_TURN\b[^\r\n]*\brole=client\b[^\r\n]*\bid=[1-9]\d*\b[^\r\n]*\brow=[0-5]\b[^\r\n]*\bmoved={0}\b[^\r\n]*\banimRate={0}\b[^\r\n]*\bpathPos=(?:0\.00|{0})\b' -f $positiveDecimal) },
+            @{ Label = "client Tower Defense plant"; Pattern = '(?im)\bSMOKE_TD_CLIENT_PLANT\b[^\r\n]*\brole=client\b[^\r\n]*\bid=[1-9]\d*\b[^\r\n]*\bcell=\([0-8],[0-5]\)[^\r\n]*\broad=0\b' }
+        )
+    }
     $negativePatterns = @(
         @{ Label = "access violation"; Pattern = '(?im)Access Violation' },
         @{ Label = "fatal network error"; Pattern = '(?im)\bfatal:' },
@@ -1019,6 +1078,15 @@ try {
         @{ Label = "rejected ready-set-plant"; Pattern = '(?im)\bREADY_SET_PLANT rejected\b' },
         @{ Label = "dropped ready-set-plant"; Pattern = '(?im)\bboard event dropped outside gameplay type=24\b' }
     )
+    if ($Scenario -eq "TowerDefenseClient") {
+        $negativePatterns += @(
+            @{ Label = "invalid Tower Defense path topology"; Pattern = '(?im)\bSMOKE_TD_PATH\b[^\r\n]*(?:\bbytes=0\b|\bhash=00000000\b|\bedgeVisits=(?!3\b)\d+|\bedgePattern=(?!(?:TBT|BTB)\b)\S+|\bseparated=(?!1\b)\d+|\bno2x2=(?!1\b)\d+|\bdirt=0\b|\bgrass=(?!1\b)\d+)' },
+            @{ Label = "empty Tower Defense road draw"; Pattern = '(?im)\bSMOKE_TD_ROAD_RENDER_COMPLETE\b[^\r\n]*(?:\bboard=0+\b|\bcells=0\b)' },
+            @{ Label = "invalid Tower Defense zombie entry"; Pattern = '(?im)(?:\bSMOKE_TD_ZOMBIE_ENTRY_INVALID\b|\bSMOKE_TD_ZOMBIE_ENTRY\b[^\r\n]*\banimRate=(?:-\d+\.\d{2}|0\.00)\b)' },
+            @{ Label = "invalid Tower Defense zombie turn"; Pattern = '(?im)\bSMOKE_TD_ZOMBIE_TURN\b[^\r\n]*(?:\bmoved=(?:-\d+\.\d{2}|0\.00)\b|\banimRate=(?:-\d+\.\d{2}|0\.00)\b|\bpathPos=-\d+\.\d{2}\b)' },
+            @{ Label = "Tower Defense plant placed on road"; Pattern = '(?im)\bSMOKE_TD_CLIENT_PLANT\b[^\r\n]*\broad=(?!0\b)\d+' }
+        )
+    }
 
     Assert-PositivePatterns -Role "host" -Text $hostLog -Patterns $hostPositivePatterns
     Assert-PositivePatterns -Role "client" -Text $clientLog -Patterns $clientPositivePatterns
@@ -1029,6 +1097,7 @@ try {
     $expectedActionOwner = if ($Scenario -eq "Adventure5BowlingClient" -or
         $Scenario -eq "Adventure15WhackClient" -or
         $Scenario -eq "SlotMachineClient" -or
+        $Scenario -eq "TowerDefenseClient" -or
         $Scenario -eq "Vasebreaker" -or $Scenario -eq "Beghouled") { "client" } else { "host" }
     $actionIssuedPattern = ('(?im)\bSMOKE_CHECKPOINT\b[^\r\n]*scenario={0}[^\r\n]*step=ACTION_ISSUED[^\r\n]*owner={1}\b' -f
         ([regex]::Escape($scenarioMarker)), $expectedActionOwner)
@@ -1130,6 +1199,64 @@ try {
             throw ("Slot Machine roll mismatch: input={0}, expected={1}, hostPull={2}, clientPull={3}, hostReturn={4}, clientReturn={5}." -f
                 $clientSlotInput.Groups[1].Value, $expectedSlotRoll, $hostSlotRoll,
                 $clientSlotRoll, $hostSlotReturnRoll, $clientSlotReturnRoll)
+        }
+    }
+    if ($Scenario -eq "TowerDefenseClient") {
+        $hostTdPath = [regex]::Match($hostLog,
+            '(?im)\bSMOKE_TD_PATH\b[^\r\n]*\brole=host\b[^\r\n]*\bbytes=([1-9]\d*)\b[^\r\n]*\bhash=([0-9a-f]{8})\b[^\r\n]*\bedgeVisits=3\b[^\r\n]*\bedgePattern=(TBT|BTB)\b[^\r\n]*\bseparated=1\b[^\r\n]*\bno2x2=1\b')
+        $clientTdPath = [regex]::Match($clientLog,
+            '(?im)\bSMOKE_TD_PATH\b[^\r\n]*\brole=client\b[^\r\n]*\bbytes=([1-9]\d*)\b[^\r\n]*\bhash=([0-9a-f]{8})\b[^\r\n]*\bedgeVisits=3\b[^\r\n]*\bedgePattern=(TBT|BTB)\b[^\r\n]*\bseparated=1\b[^\r\n]*\bno2x2=1\b')
+        $hostTdRoad = [regex]::Match($hostLog,
+            '(?im)\bSMOKE_TD_ROAD_RENDER_COMPLETE\b[^\r\n]*\brole=host\b[^\r\n]*\bboard=(?!0+\b)[0-9a-f]+\b[^\r\n]*\bcells=([1-9]\d*)\b')
+        $clientTdRoad = [regex]::Match($clientLog,
+            '(?im)\bSMOKE_TD_ROAD_RENDER_COMPLETE\b[^\r\n]*\brole=client\b[^\r\n]*\bboard=(?!0+\b)[0-9a-f]+\b[^\r\n]*\bcells=([1-9]\d*)\b')
+        $tdPathEvidence = @($hostTdPath, $clientTdPath, $hostTdRoad, $clientTdRoad)
+        if (@($tdPathEvidence | Where-Object { -not $_.Success }).Count -ne 0) {
+            throw "Missing Tower Defense path/road correlation evidence."
+        }
+        if ($hostTdPath.Groups[1].Value -ne $clientTdPath.Groups[1].Value -or
+            $hostTdPath.Groups[2].Value.ToLowerInvariant() -ne
+                $clientTdPath.Groups[2].Value.ToLowerInvariant() -or
+            $hostTdPath.Groups[3].Value -ne $clientTdPath.Groups[3].Value) {
+            throw ("Tower Defense path mismatch: host bytes/hash/pattern={0}/{1}/{2}, client bytes/hash/pattern={3}/{4}/{5}." -f
+                $hostTdPath.Groups[1].Value, $hostTdPath.Groups[2].Value, $hostTdPath.Groups[3].Value,
+                $clientTdPath.Groups[1].Value, $clientTdPath.Groups[2].Value, $clientTdPath.Groups[3].Value)
+        }
+        if ($hostTdRoad.Groups[1].Value -ne $clientTdRoad.Groups[1].Value) {
+            throw ("Tower Defense road cell-count mismatch: host={0}, client={1}." -f
+                $hostTdRoad.Groups[1].Value, $clientTdRoad.Groups[1].Value)
+        }
+
+        $hostTdEntry = [regex]::Match($hostLog,
+            '(?im)\bSMOKE_TD_ZOMBIE_ENTRY\b[^\r\n]*\brole=host\b[^\r\n]*\bid=([1-9]\d*)\b')
+        $clientTdEntry = [regex]::Match($clientLog,
+            '(?im)\bSMOKE_TD_ZOMBIE_ENTRY\b[^\r\n]*\brole=client\b[^\r\n]*\bid=([1-9]\d*)\b')
+        $hostTdTurn = [regex]::Match($hostLog,
+            '(?im)\bSMOKE_TD_ZOMBIE_TURN\b[^\r\n]*\brole=host\b[^\r\n]*\bid=([1-9]\d*)\b')
+        $clientTdTurn = [regex]::Match($clientLog,
+            '(?im)\bSMOKE_TD_ZOMBIE_TURN\b[^\r\n]*\brole=client\b[^\r\n]*\bid=([1-9]\d*)\b')
+        $tdZombieEvidence = @($hostTdEntry, $clientTdEntry, $hostTdTurn, $clientTdTurn)
+        if (@($tdZombieEvidence | Where-Object { -not $_.Success }).Count -ne 0) {
+            throw "Missing Tower Defense zombie entry/turn identity evidence."
+        }
+        $tdZombieIds = @($tdZombieEvidence | ForEach-Object { [uint32]$_.Groups[1].Value } |
+            Select-Object -Unique)
+        if ($tdZombieIds.Count -ne 1) {
+            throw ("Tower Defense zombie identity mismatch: {0}." -f ($tdZombieIds -join ","))
+        }
+
+        $hostTdPlant = [regex]::Match($hostLog,
+            '(?im)\bSMOKE_TD_CLIENT_PLANT\b[^\r\n]*\brole=host\b[^\r\n]*\bid=([1-9]\d*)\b[^\r\n]*\bcell=\(([0-8],[0-5])\)')
+        $clientTdPlant = [regex]::Match($clientLog,
+            '(?im)\bSMOKE_TD_CLIENT_PLANT\b[^\r\n]*\brole=client\b[^\r\n]*\bid=([1-9]\d*)\b[^\r\n]*\bcell=\(([0-8],[0-5])\)')
+        if (-not $hostTdPlant.Success -or -not $clientTdPlant.Success) {
+            throw "Missing Tower Defense client-plant identity evidence."
+        }
+        if ($hostTdPlant.Groups[1].Value -ne $clientTdPlant.Groups[1].Value -or
+            $hostTdPlant.Groups[2].Value -ne $clientTdPlant.Groups[2].Value) {
+            throw ("Tower Defense client plant mismatch: host id/cell={0}/{1}, client id/cell={2}/{3}." -f
+                $hostTdPlant.Groups[1].Value, $hostTdPlant.Groups[2].Value,
+                $clientTdPlant.Groups[1].Value, $clientTdPlant.Groups[2].Value)
         }
     }
 

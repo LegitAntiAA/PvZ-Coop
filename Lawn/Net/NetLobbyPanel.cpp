@@ -31,7 +31,7 @@ NetLobbyPanel::NetLobbyPanel(LawnApp* theApp) :
 	mNickEdit->SetFont(Sexy::FONT_BRIANNETOD12);
 	mNickEdit->SetColors(gPanelEditColors, EditWidget::NUM_COLORS);
 	mNickEdit->mBlinkDelay = 14;
-	mNickEdit->mMaxChars = NET_MAX_NICK;
+	mNickEdit->mMaxChars = NET_MAX_NICK_CHARS;
 	mNickEdit->SetText(StringToSexyString(theApp->mNetManager->mConfig.mNick));
 	AddWidget(mNickEdit);
 
@@ -401,14 +401,14 @@ void NetLobbyPanel::ApplyNick()
 	NetManager* aNet = mApp->mNetManager;
 	if (!aNet)
 		return;
-	std::string aNick = SexyStringToStringFast(mNickEdit->mString);
-	if (aNick.empty())
+	std::string aNick;
+	if (!NetNormalizeUtf8(SexyStringToStringFast(mNickEdit->mString), NET_MAX_NICK_BYTES,
+		NET_MAX_NICK_CHARS, true, aNick))
 		return;
-	strncpy_s(aNet->mConfig.mNick, aNick.c_str(), NET_MAX_NICK);
-	aNet->mConfig.mNick[NET_MAX_NICK] = 0;
+	strcpy_s(aNet->mConfig.mNick, aNick.c_str());
 	if (aNet->IsHosting() && aNet->GetPlayerCount() == 1)
 	{
-		strncpy_s(aNet->GetPlayerMutable(0).mNick, aNet->mConfig.mNick, NET_MAX_NICK);
+		strcpy_s(aNet->GetPlayerMutable(0).mNick, aNet->mConfig.mNick);
 		aNet->SendLobbyState();
 	}
 }

@@ -98,6 +98,7 @@ extern "C" {
 #include <SDL3_ttf/SDL_ttf.h>
 
 #include <cstdio>
+#include <stdexcept>
 #include <thread>
 
 bool LawnApp::mIsPlayingVideo = false;
@@ -455,7 +456,8 @@ void LawnApp::Redraw(Rect* theClipRect)
 	{
 		ImGui_ImplSDLRenderer3_RenderDrawData(drawData, mSDLRenderer);
 	}
-	// Network cursors are the final visual layer, above widgets and dialogs.
+	// Co-op overlays are the final visual layer, above widgets and dialogs.
+	NetDrawChatOverlay();
 	NetDrawCursorOverlay();
 	SDL_RenderPresent(mSDLRenderer);
 }
@@ -669,6 +671,8 @@ bool LawnApp::UpdateAppStep(bool* updated)
 					if (!imguiWantsKeyboard)
 					{
 						mLastUserInputTick = mLastTimerTime;
+						if (NetHandleChatKey(GetKeyCodeFromCodeSDL(event.key.key)))
+							break;
 						if (NetIsClient() && mNetManager && event.key.key == SDLK_Q)
 							mNetManager->SendHeatWaveShoutKey(true);
 						if (mDebugKeysEnabled)
@@ -789,10 +793,20 @@ bool LawnApp::UpdateAppStep(bool* updated)
 					if (!imguiWantsKeyboard)
 					{
 						mLastUserInputTick = mLastTimerTime;
-						// feed the entire UTF-8 text so multi-byte input
-						// (e.g. Cyrillic nicknames) survives byte by byte
-						for (const char* aTextPtr = event.text.text; *aTextPtr; ++aTextPtr)
-							mWidgetManager->KeyChar((SexyChar)*aTextPtr);
+						if (NetHandleChatText(event.text.text))
+							break;
+						// SDL delivers UTF-8, while the GOTY build uses wide SexyString.
+						// Decode the complete sequence before feeding the focused edit widget.
+						try
+						{
+							SexyString aText = StringToSexyString(std::string(event.text.text));
+							for (SexyChar aChar : aText)
+								mWidgetManager->KeyChar(aChar);
+						}
+						catch (const std::range_error&)
+						{
+							LawnNet::NetTrace("SDL text input rejected malformed UTF-8");
+						}
 					}
 					break;
 
@@ -913,6 +927,8 @@ LawnApp::LawnApp()
 	mNetLocalProfileBackup = nullptr;
 	mNetCoopGameOverHandled = false;
 	mNetCursorImage = nullptr;
+	mNetChatTyping = false;
+	mNetChatDraft.clear();
 	mCoopSmokeArgSeen = false;
 	mCoopSmokeManifestValid = false;
 	mCoopSmokeLifecycleStarted = false;
@@ -924,6 +940,10 @@ LawnApp::LawnApp()
 	mCoopSmokeSnapshotsSent = 0;
 	mCoopSmokeSnapshotsReceived = 0;
 	mCoopSmokeSnapshotsApplied = 0;
+	mCoopSmokeUnicodeChatSent = false;
+	mCoopSmokeUnicodeChatReceived = false;
+	mCoopSmokeUnicodeChatVisible = false;
+	mCoopSmokeUnicodeChatFaded = false;
 	mCoopSmokeScenarioRuntime.Reset();
 	mLastLevelStats = new LevelStats();
 	mFirstTimeGameSelector = true;
@@ -3107,6 +3127,14 @@ void LawnApp::UpdateFrames()
 	if (mNetManager)
 	{
 		mNetManager->Update();
+		if (mNetChatTyping &&
+			!((mNetManager->IsHosting() && mNetManager->GetPlayerCount() > 1) ||
+				mNetManager->IsConnectedToHost()))
+		{
+			mNetChatTyping = false;
+			mNetChatDraft.clear();
+			SDL_StopTextInput(mSDLWindow);
+		}
 
 		// Use one cursor path in every scene.  SendCursor converts this window's
 		// raw widget coordinates to the shared 800x600 canvas, so peers with a
@@ -5640,6 +5668,60 @@ void LawnApp::CoopSmokeStartLifecycle()
 		mCoopSmokeManifest.mMinimumSnapshots, mCoopSmokeManifest.mSkipIntro ? 1 : 0);
 }
 
+bool LawnApp::CoopSmokeUpdateUnicodeChat()
+{
+	const char* aVerify = getenv("PVZ_COOP_SMOKE_UNICODE_CHAT");
+	if (!aVerify || strcmp(aVerify, "1") != 0)
+		return true;
+	if (!mNetManager || mNetManager->GetPlayerCount() != 2 ||
+		(!mNetManager->IsHosting() && !mNetManager->IsConnectedToHost()))
+		return false;
+
+	static const char* aHostNick = "\xD0\xA5\xD0\xBE\xD1\x81\xD1\x82"; // Host, Russian
+	static const char* aClientNick = "\xD0\x9A\xD0\xBB\xD0\xB8\xD0\xB5\xD0\xBD\xD1\x82"; // Client, Russian
+	if (strcmp(mNetManager->GetPlayer(0).mNick, aHostNick) != 0 ||
+		strcmp(mNetManager->GetPlayer(1).mNick, aClientNick) != 0)
+	{
+		CoopSmokeFail("Unicode nickname mismatch after lobby replication");
+		return false;
+	}
+
+	if (!mCoopSmokeUnicodeChatSent)
+	{
+		const char* aLocalText = mNetManager->GetMySlot() == 0 ? aHostNick : aClientNick;
+		if (!NetHandleChatKey(KeyCode::KEYCODE_RETURN) ||
+			!NetHandleChatText(aLocalText) ||
+			!NetHandleChatKey(KeyCode::KEYCODE_RETURN))
+		{
+			CoopSmokeFail("Enter chat input path rejected smoke message");
+			return false;
+		}
+		mCoopSmokeUnicodeChatSent = true;
+		LawnNet::NetTrace("SMOKE_CHAT_ENTER role=%s slot=%d utf8Bytes=%zu",
+			mCoopSmokeManifest.IsHost() ? "host" : "client",
+			mNetManager->GetMySlot(), strlen(aLocalText));
+	}
+
+	bool aSawHost = false;
+	bool aSawClient = false;
+	for (size_t i = 0; i < mNetManager->mChatLines.size(); ++i)
+	{
+		const LawnNet::NetManager::ChatLine& aLine = mNetManager->mChatLines[i];
+		aSawHost = aSawHost || (aLine.mSlot == 0 && aLine.mText == aHostNick);
+		aSawClient = aSawClient || (aLine.mSlot == 1 && aLine.mText == aClientNick);
+	}
+	if (aSawHost && aSawClient && !mCoopSmokeUnicodeChatReceived)
+	{
+		mCoopSmokeUnicodeChatReceived = true;
+		LawnNet::NetTrace("SMOKE_UTF8_NICKS role=%s hostBytes=%zu clientBytes=%zu valid=1",
+			mCoopSmokeManifest.IsHost() ? "host" : "client", strlen(aHostNick), strlen(aClientNick));
+		LawnNet::NetTrace("SMOKE_CHAT_BROADCAST role=%s host=1 client=1 lines=%zu",
+			mCoopSmokeManifest.IsHost() ? "host" : "client", mNetManager->mChatLines.size());
+	}
+	return mCoopSmokeUnicodeChatReceived && mCoopSmokeUnicodeChatVisible &&
+		mCoopSmokeUnicodeChatFaded;
+}
+
 void LawnApp::CoopSmokeUpdate()
 {
 	if (!CoopSmokeActive())
@@ -5669,6 +5751,9 @@ void LawnApp::CoopSmokeUpdate()
 		return;
 	}
 	if (!mCoopSmokeLifecycleStarted || !mNetManager)
+		return;
+	const bool aUnicodeChatReady = CoopSmokeUpdateUnicodeChat();
+	if (mCoopSmokeResultWritten)
 		return;
 	const LawnNet::NetSmokeScenarioDefinition* aScenario =
 		LawnNet::NetGetSmokeScenario(mCoopSmokeManifest.mScenario);
@@ -5747,7 +5832,8 @@ void LawnApp::CoopSmokeUpdate()
 			 (mGameScene == GameScenes::SCENE_PLAYING || aSmokeTerminalScene))) &&
 			mNetManager->GetPlayerCount() == 2 &&
 			mCoopSmokeSnapshotsSent >= mCoopSmokeManifest.mMinimumSnapshots &&
-			mCoopSmokeScenarioRuntime.IsComplete(mCoopSmokeManifest.mMinimumSnapshots))
+			mCoopSmokeScenarioRuntime.IsComplete(mCoopSmokeManifest.mMinimumSnapshots) &&
+			aUnicodeChatReady)
 		{
 			bool aPublished = CoopSmokeWriteResult(true, nullptr);
 			if (!aPublished || mCoopSmokeManifest.mCloseOnResult)
@@ -5786,7 +5872,8 @@ void LawnApp::CoopSmokeUpdate()
                 if ((aSmokeVictoryScene || (mBoard &&
 			(mGameScene == GameScenes::SCENE_PLAYING || aSmokeTerminalScene))) &&
 			mCoopSmokeSnapshotsApplied >= mCoopSmokeManifest.mMinimumSnapshots &&
-			mCoopSmokeScenarioRuntime.IsComplete(mCoopSmokeManifest.mMinimumSnapshots))
+			mCoopSmokeScenarioRuntime.IsComplete(mCoopSmokeManifest.mMinimumSnapshots) &&
+			aUnicodeChatReady)
 		{
 			bool aPublished = CoopSmokeWriteResult(true, nullptr);
 			if (!aPublished || mCoopSmokeManifest.mCloseOnResult)
@@ -5893,15 +5980,21 @@ void LawnApp::NetOnStartGame(LawnNet::NetBuffer& thePayload)
 		bool aValid = aCheck.ReadU8(&aMode) && aCheck.ReadI32(&aLevel) &&
 			aCheck.ReadU8(&aPlayerCount) && aCheck.ReadU32(&aSeed) &&
 			aCheck.ReadU8(&aPathLength);
-		for (uint8_t i = 0; aValid && i < aPathLength; ++i)
-		{
-			uint8_t aCell = 0;
-			aValid = aCheck.ReadU8(&aCell);
-		}
-		aValid = aValid && aCheck.Remaining() == 0 &&
-			aMode == mCoopSmokeManifest.mGameMode &&
-			aLevel == mCoopSmokeManifest.mLevel && aSeed == mCoopSmokeManifest.mSeed &&
-			aPlayerCount == 2 && aPathLength == 0;
+                for (uint8_t i = 0; aValid && i < aPathLength; ++i)
+                {
+                        uint8_t aCell = 0;
+                        aValid = aCheck.ReadU8(&aCell);
+                }
+		const bool aTowerDefenseStart =
+			mCoopSmokeManifest.mGameMode ==
+				(uint8_t)GameMode::GAMEMODE_COOP_TOWER_DEFENSE;
+		const bool aPathShapeValid = aTowerDefenseStart ?
+			(aPathLength >= 4 && (aPathLength & 1U) == 0U) :
+			(aPathLength == 0);
+                aValid = aValid && aCheck.Remaining() == 0 &&
+                        aMode == mCoopSmokeManifest.mGameMode &&
+                        aLevel == mCoopSmokeManifest.mLevel && aSeed == mCoopSmokeManifest.mSeed &&
+			aPlayerCount == 2 && aPathShapeValid;
 		if (!aValid)
 		{
 			LawnNet::NetTrace("SMOKE START_GAME malformed/mismatch bytes=%zu mode=%u level=%d players=%u seed=%u path=%u trailing=%zu",
@@ -6324,6 +6417,134 @@ void LawnApp::NetHandleRemoteInputs()
 	}
 }
 
+bool LawnApp::NetHandleChatKey(int theKey)
+{
+	const bool aCanChat = mNetManager &&
+		((mNetManager->IsHosting() && mNetManager->GetPlayerCount() > 1) ||
+			mNetManager->IsConnectedToHost());
+	if (!aCanChat)
+	{
+		if (mNetChatTyping)
+		{
+			mNetChatTyping = false;
+			mNetChatDraft.clear();
+			SDL_StopTextInput(mSDLWindow);
+		}
+		return false;
+	}
+	if (!mNetChatTyping)
+	{
+		if (theKey != KeyCode::KEYCODE_RETURN)
+			return false;
+		mNetChatTyping = true;
+		mNetChatDraft.clear();
+		SDL_StartTextInput(mSDLWindow);
+		return true;
+	}
+
+	if (theKey == KeyCode::KEYCODE_RETURN)
+	{
+		mNetManager->SendChat(SexyStringToStringFast(mNetChatDraft));
+		mNetChatDraft.clear();
+		mNetChatTyping = false;
+		SDL_StopTextInput(mSDLWindow);
+	}
+	else if (theKey == KeyCode::KEYCODE_ESCAPE)
+	{
+		mNetChatDraft.clear();
+		mNetChatTyping = false;
+		SDL_StopTextInput(mSDLWindow);
+	}
+	else if (theKey == KeyCode::KEYCODE_BACK && !mNetChatDraft.empty())
+	{
+		mNetChatDraft.pop_back();
+		if (!mNetChatDraft.empty() && sizeof(SexyChar) == 2 &&
+			mNetChatDraft.back() >= 0xD800 && mNetChatDraft.back() <= 0xDBFF)
+			mNetChatDraft.pop_back();
+	}
+	return true;
+}
+
+bool LawnApp::NetHandleChatText(const char* theUtf8Text)
+{
+	if (!mNetChatTyping)
+		return false;
+	try
+	{
+		SexyString aCandidate = mNetChatDraft + StringToSexyString(std::string(theUtf8Text ? theUtf8Text : ""));
+		std::string aUtf8 = SexyStringToStringFast(aCandidate);
+		std::string aChecked;
+		if (LawnNet::NetNormalizeUtf8(aUtf8, LawnNet::NET_MAX_CHAT_BYTES,
+			LawnNet::NET_MAX_CHAT_CHARS, true, aChecked) && aChecked == aUtf8)
+			mNetChatDraft = aCandidate;
+	}
+	catch (const std::range_error&)
+	{
+		LawnNet::NetTrace("chat input rejected malformed UTF-8");
+	}
+	return true;
+}
+
+void LawnApp::NetDrawChatOverlay()
+{
+	if (!mNetManager || !mNetManager->IsActive() || !mWidgetManager ||
+		!mWidgetManager->mImage || !Sexy::FONT_BRIANNETOD12)
+		return;
+	const uint32_t aNow = GetTickCount();
+	while (!mNetManager->mChatLines.empty() &&
+		aNow - mNetManager->mChatLines.front().mReceivedTick >= 8000U)
+		mNetManager->mChatLines.pop_front();
+
+	Graphics g(mWidgetManager->mImage);
+	g.ClearClipRect();
+	const size_t aCount = mNetManager->mChatLines.size();
+	const size_t aFirst = aCount > 6 ? aCount - 6 : 0;
+	int aY = 350;
+	for (size_t i = aFirst; i < aCount; ++i)
+	{
+		const LawnNet::NetManager::ChatLine& aLine = mNetManager->mChatLines[i];
+		const uint32_t anAge = aNow - aLine.mReceivedTick;
+		int anAlpha = anAge <= 6500U ? 230 : (int)((8000U - anAge) * 230U / 1500U);
+		anAlpha = max(0, min(230, anAlpha));
+		const LawnNet::NetPlayerInfo& aPlayer = mNetManager->GetPlayer(aLine.mSlot);
+		SexyString aText = _S("[") + StringToSexyString(aPlayer.mNick) + _S("] ") + StringToSexyString(aLine.mText);
+		LawnNet::NetColor aColor = LawnNet::GetRelativePlayerColor(mNetManager->GetMySlot(), aLine.mSlot);
+		g.SetColor(Color(0, 0, 0, anAlpha * 2 / 3));
+		g.FillRect(8, aY - 15, 520, 20);
+		TodDrawString(&g, aText, 14, aY, Sexy::FONT_BRIANNETOD12,
+			Color(aColor.r, aColor.g, aColor.b, anAlpha), DrawStringJustification::DS_ALIGN_LEFT);
+		aY += 22;
+	}
+	const char* aVerifyChat = getenv("PVZ_COOP_SMOKE_UNICODE_CHAT");
+	if (aVerifyChat && strcmp(aVerifyChat, "1") == 0 &&
+		mCoopSmokeUnicodeChatReceived && aCount >= 2)
+	{
+		uint32_t aYoungestAge = 0xFFFFFFFFU;
+		for (size_t i = aFirst; i < aCount; ++i)
+			aYoungestAge = min(aYoungestAge, aNow - mNetManager->mChatLines[i].mReceivedTick);
+		if (!mCoopSmokeUnicodeChatVisible)
+		{
+			mCoopSmokeUnicodeChatVisible = true;
+			LawnNet::NetTrace("SMOKE_CHAT_OVERLAY role=%s phase=visible lines=%zu alpha=230",
+				mCoopSmokeManifest.IsHost() ? "host" : "client", aCount);
+		}
+		if (!mCoopSmokeUnicodeChatFaded && aYoungestAge > 6500U && aYoungestAge < 8000U)
+		{
+			const int anAlpha = (int)((8000U - aYoungestAge) * 230U / 1500U);
+			mCoopSmokeUnicodeChatFaded = true;
+			LawnNet::NetTrace("SMOKE_CHAT_OVERLAY role=%s phase=fade lines=%zu alpha=%d age=%u",
+				mCoopSmokeManifest.IsHost() ? "host" : "client", aCount, anAlpha, aYoungestAge);
+		}
+	}
+	if (mNetChatTyping)
+	{
+		g.SetColor(Color(0, 0, 0, 210));
+		g.FillRect(8, 565, 520, 26);
+		TodDrawString(&g, _S("Chat: ") + mNetChatDraft + _S("_"), 14, 583,
+			Sexy::FONT_BRIANNETOD12, Color(255, 255, 255), DrawStringJustification::DS_ALIGN_LEFT);
+	}
+}
+
 void LawnApp::NetDrawCursorOverlay()
 {
 	if (!mNetManager || !mNetManager->IsActive() || !mWidgetManager || !mWidgetManager->mImage)
@@ -6334,22 +6555,10 @@ void LawnApp::NetDrawCursorOverlay()
 	if (mBoard && mBoard->IsPvPMode() && (!mNetLobbyPanel || !mNetLobbyPanel->mVisible))
 		return;
 
+        // Cursor13 is only the NORMAL/unsupported fallback.  Stock shovel,
+        // hammer and other tool cursors must remain visible even if that
+        // optional overlay asset is missing.
         static bool aCursorLoadAttempted = false;
-        if (!mNetCursorImage && !aCursorLoadAttempted)
-        {
-                aCursorLoadAttempted = true;
-                // ImageLib chooses the decoder by appending an extension.  Passing
-                // "Cursor13.bmp" made it probe Cursor13.bmp.png/.tga/... and the
-                // complete overlay returned early forever.  Cursor13.png is a
-                // pixel-identical conversion of the supplied BMP.
-                mNetCursorImage = GetImage(_S("Cursor13"));
-                LawnNet::NetTrace("cursor overlay asset load success=%d image=%p size=%dx%d",
-                        mNetCursorImage ? 1 : 0, (void*)mNetCursorImage,
-                        mNetCursorImage ? mNetCursorImage->GetWidth() : 0,
-                        mNetCursorImage ? mNetCursorImage->GetHeight() : 0);
-        }
-        if (!mNetCursorImage)
-                return;
 
 	Graphics g(mWidgetManager->mImage);
 	g.ClearClipRect();
@@ -6422,13 +6631,11 @@ void LawnApp::NetDrawCursorOverlay()
                                 const SeedType aRemoteImitater =
                                         aCursor.mHeldImitater < (uint8_t)SeedType::NUM_SEED_TYPES ?
                                                 (SeedType)aCursor.mHeldImitater : SeedType::SEED_NONE;
-                                Graphics aTintedTool(g);
-                                aTintedTool.SetColorizeImages(true);
-                                aTintedTool.SetColor(Color(aColor.r, aColor.g, aColor.b));
                                 aDrewSpecialCursor = aVisualCursor->DrawRemoteAtMouse(
-                                        &aTintedTool, aCursorX, aCursorY,
+                                        &g, aCursorX, aCursorY,
                                         (CursorType)aCursor.mCursorType,
-                                        aRemoteSeed, aRemoteImitater);
+                                        aRemoteSeed, aRemoteImitater,
+                                        Color(aColor.r, aColor.g, aColor.b));
 
 				// A cursor packet alone does not prove that the stock tool made it
 				// through the overlay draw path.  Record the first rendered instance
@@ -6441,9 +6648,10 @@ void LawnApp::NetDrawCursorOverlay()
 					if ((aLoggedRemoteTools[i] & aToolBit) == 0)
 					{
 						aLoggedRemoteTools[i] |= aToolBit;
-						LawnNet::NetTrace("SMOKE_REMOTE_CURSOR_RENDER role=%s slot=%d type=%u stock=1 pos=(%d,%d)",
+						LawnNet::NetTrace("SMOKE_REMOTE_CURSOR_RENDER role=%s slot=%d type=%u stock=1 tint=%u,%u,%u outline=1 fallback=0 pos=(%d,%d)",
 							mCoopSmokeManifest.IsHost() ? "host" : "client", i,
-							(unsigned)aCursor.mCursorType, aCursorX, aCursorY);
+							(unsigned)aCursor.mCursorType, (unsigned)aColor.r,
+							(unsigned)aColor.g, (unsigned)aColor.b, aCursorX, aCursorY);
 					}
 				}
                         }
@@ -6454,10 +6662,24 @@ void LawnApp::NetDrawCursorOverlay()
                 // for a special visual whose optional resource is unavailable.
                 if (!aHoldingPlant && !aDrewSpecialCursor)
                 {
-                        g.SetColorizeImages(true);
-                        g.SetColor(Color(aColor.r, aColor.g, aColor.b));
-                        g.DrawImage(mNetCursorImage, aCursorX, aCursorY);
-                        g.SetColorizeImages(false);
+                        if (!mNetCursorImage && !aCursorLoadAttempted)
+                        {
+                                aCursorLoadAttempted = true;
+                                // ImageLib chooses the decoder by appending an
+                                // extension, so request the extension-less asset.
+                                mNetCursorImage = GetImage(_S("Cursor13"));
+                                LawnNet::NetTrace("cursor overlay asset load success=%d image=%p size=%dx%d",
+                                        mNetCursorImage ? 1 : 0, (void*)mNetCursorImage,
+                                        mNetCursorImage ? mNetCursorImage->GetWidth() : 0,
+                                        mNetCursorImage ? mNetCursorImage->GetHeight() : 0);
+                        }
+                        if (mNetCursorImage)
+                        {
+                                g.SetColorizeImages(true);
+                                g.SetColor(Color(aColor.r, aColor.g, aColor.b));
+                                g.DrawImage(mNetCursorImage, aCursorX, aCursorY);
+                                g.SetColorizeImages(false);
+                        }
                 }
 
                 if (aPlayer.mNick[0] && Sexy::FONT_BRIANNETOD12)

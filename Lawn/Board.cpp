@@ -1795,7 +1795,12 @@ bool Board::ApplyTowerDefensePathToGrid()
 	const int aTowerDefenseRowCount = 5; // the day lawn has playable rows 0..4
 	int aPreviousRow = -1;
 	int aPreviousCol = -1;
-	int aTopEdgeVisits = 0;
+	int anEdgeVisits[4] = {};
+	int anEdgeVisitCount = 0;
+	int aPathIndex[MAX_GRID_SIZE_X][5];
+	for (int aCol = 0; aCol < MAX_GRID_SIZE_X; ++aCol)
+		for (int aRow = 0; aRow < aTowerDefenseRowCount; ++aRow)
+			aPathIndex[aCol][aRow] = -1;
 	for (size_t i = 0; i < mTDPath.size(); i += 2)
 	{
 		const int aRow = mTDPath[i] >> 1;
@@ -1806,6 +1811,13 @@ bool Board::ApplyTowerDefensePathToGrid()
 				i / 2, (unsigned int)mTDPath[i], aRow, aCol, mTDPath.size());
 			return false;
 		}
+		if (aPathIndex[aCol][aRow] >= 0)
+		{
+			LawnNet::NetTrace("TD path grid apply rejected: repeated cell=%zu row=%d col=%d first=%d",
+				i / 2, aRow, aCol, aPathIndex[aCol][aRow]);
+			return false;
+		}
+		aPathIndex[aCol][aRow] = (int)(i / 2);
 
 		if (i == 0)
 		{
@@ -1822,17 +1834,60 @@ bool Board::ApplyTowerDefensePathToGrid()
 			return false;
 		}
 
-		if (aRow == 0 && aPreviousRow != 0)
-			aTopEdgeVisits++;
+		const int anEdge = aRow == 0 ? 0 : (aRow == aTowerDefenseRowCount - 1 ? 1 : -1);
+		if (anEdge >= 0 && aPreviousRow != aRow)
+		{
+			if (anEdgeVisitCount < 4)
+				anEdgeVisits[anEdgeVisitCount] = anEdge;
+			anEdgeVisitCount++;
+		}
 		aPreviousRow = aRow;
 		aPreviousCol = aCol;
 	}
 
-	if (aPreviousCol != 0 || aTopEdgeVisits < 3)
+	const bool anAlternatingEdges = anEdgeVisitCount == 3 &&
+		anEdgeVisits[0] == anEdgeVisits[2] &&
+		anEdgeVisits[0] != anEdgeVisits[1];
+	if (aPreviousCol != 0 || !anAlternatingEdges)
 	{
-		LawnNet::NetTrace("TD path grid apply rejected: endColumn=%d topEdgeVisits=%d",
-			aPreviousCol, aTopEdgeVisits);
+		LawnNet::NetTrace("TD path grid apply rejected: endColumn=%d edgeVisits=%d pattern=%d%d%d",
+			aPreviousCol, anEdgeVisitCount, anEdgeVisits[0], anEdgeVisits[1],
+			anEdgeVisits[2]);
 		return false;
+	}
+
+	// A valid road is a one-cell-wide simple path.  Besides explicitly rejecting
+	// filled 2x2 blocks, reject any orthogonally adjacent cells that are not
+	// consecutive in the path; this prevents parallel runs from touching.
+	for (int aCol = 0; aCol < MAX_GRID_SIZE_X; ++aCol)
+	{
+		for (int aRow = 0; aRow < aTowerDefenseRowCount; ++aRow)
+		{
+			if (aCol + 1 < MAX_GRID_SIZE_X && aRow + 1 < aTowerDefenseRowCount &&
+				aPathIndex[aCol][aRow] >= 0 && aPathIndex[aCol + 1][aRow] >= 0 &&
+				aPathIndex[aCol][aRow + 1] >= 0 && aPathIndex[aCol + 1][aRow + 1] >= 0)
+			{
+				LawnNet::NetTrace("TD path grid apply rejected: filled 2x2 at col=%d row=%d",
+					aCol, aRow);
+				return false;
+			}
+			if (aPathIndex[aCol][aRow] < 0)
+				continue;
+			if (aCol + 1 < MAX_GRID_SIZE_X && aPathIndex[aCol + 1][aRow] >= 0 &&
+				abs(aPathIndex[aCol][aRow] - aPathIndex[aCol + 1][aRow]) != 1)
+			{
+				LawnNet::NetTrace("TD path grid apply rejected: self-adjacent horizontal cells col=%d row=%d",
+					aCol, aRow);
+				return false;
+			}
+			if (aRow + 1 < aTowerDefenseRowCount && aPathIndex[aCol][aRow + 1] >= 0 &&
+				abs(aPathIndex[aCol][aRow] - aPathIndex[aCol][aRow + 1]) != 1)
+			{
+				LawnNet::NetTrace("TD path grid apply rejected: self-adjacent vertical cells col=%d row=%d",
+					aCol, aRow);
+				return false;
+			}
+		}
 	}
 
 	int aChangedCells = 0;
@@ -1847,8 +1902,8 @@ bool Board::ApplyTowerDefensePathToGrid()
 		}
 	}
 
-	LawnNet::NetTrace("TD path grid applied: cells=%zu changed=%d topEdgeVisits=%d",
-		mTDPath.size() / 2, aChangedCells, aTopEdgeVisits);
+	LawnNet::NetTrace("TD path grid applied: cells=%zu changed=%d edgeVisits=3 pattern=%s separated=1 no2x2=1",
+		mTDPath.size() / 2, aChangedCells, anEdgeVisits[0] == 0 ? "TBT" : "BTB");
 	return true;
 }
 

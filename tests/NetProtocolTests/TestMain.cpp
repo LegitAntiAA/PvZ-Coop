@@ -554,6 +554,17 @@ void TestSmokeManifestAndHashValidation()
 
 	anError.clear();
 	CHECK(aTree.Parse(aTree.MakeManifest(aTree.mAppData.string(), aTree.mResult.string(),
+		"tower_defense_client", 1, 0), aManifest, anError));
+	CHECK(anError.empty());
+	CHECK(aManifest.mScenario == LawnNet::NETSMOKE_SCENARIO_TOWER_DEFENSE_CLIENT);
+	CHECK(aManifest.mGameMode == (uint8_t)GameMode::GAMEMODE_COOP_TOWER_DEFENSE);
+	const LawnNet::NetSmokeScenarioDefinition* aClientTowerDefense =
+		LawnNet::NetGetSmokeScenario(LawnNet::NETSMOKE_SCENARIO_TOWER_DEFENSE_CLIENT);
+	CHECK(aClientTowerDefense != nullptr);
+	CHECK(aClientTowerDefense && aClientTowerDefense->mActionIsClientOwned);
+
+	anError.clear();
+	CHECK(aTree.Parse(aTree.MakeManifest(aTree.mAppData.string(), aTree.mResult.string(),
 		"vasebreaker", 1, 1), aManifest, anError));
 	CHECK(anError.empty());
 	CHECK(aManifest.mScenario == LawnNet::NETSMOKE_SCENARIO_VASEBREAKER);

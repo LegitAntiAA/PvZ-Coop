@@ -80,7 +80,8 @@ void CursorObject::Draw(Graphics* g)
 }
 
 bool CursorObject::DrawRemoteAtMouse(Graphics* g, int theMouseX, int theMouseY,
-    CursorType theCursorType, SeedType theSeedType, SeedType theImitaterType)
+    CursorType theCursorType, SeedType theSeedType, SeedType theImitaterType,
+    const Color& theTintColor)
 {
     // These cursors carry object ids which are local to the authoritative
     // board.  Until that object identity is part of the cursor wire state, a
@@ -91,10 +92,33 @@ bool CursorObject::DrawRemoteAtMouse(Graphics* g, int theMouseX, int theMouseY,
         return false;
     }
 
+    // CursorObject is a widget rooted at mouse-25,-35.  Draw every supported
+    // stock cursor through one visual path: a darker player-colour outline,
+    // followed by the player-colour body.  This avoids per-tool tint branches
+    // and keeps future DrawContent cases automatically consistent.
+    static const int aOutlineOffsets[][2] = {
+        { -2, 0 }, { 2, 0 }, { 0, -2 }, { 0, 2 },
+        { -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 }
+    };
+    const Color anOutlineColor(
+        theTintColor.mRed * 55 / 100,
+        theTintColor.mGreen * 55 / 100,
+        theTintColor.mBlue * 55 / 100,
+        theTintColor.mAlpha);
+    for (const auto& anOffset : aOutlineOffsets)
+    {
+        Graphics anOutline(*g);
+        anOutline.SetColorizeImages(true);
+        anOutline.SetColor(anOutlineColor);
+        anOutline.TranslateF((float)theMouseX - 25.0f + anOffset[0],
+            (float)theMouseY - 35.0f + anOffset[1]);
+        DrawContent(&anOutline, theCursorType, theSeedType,
+            theImitaterType, theMouseX, theMouseY);
+    }
+
     Graphics aCursorGraphics(*g);
-    // CursorObject is a widget rooted at mouse-25,-35.  The network overlay is
-    // screen-space, so reproduce that widget transform before drawing the same
-    // stock cursor content used by the local player.
+    aCursorGraphics.SetColorizeImages(true);
+    aCursorGraphics.SetColor(theTintColor);
     aCursorGraphics.TranslateF((float)theMouseX - 25.0f, (float)theMouseY - 35.0f);
     return DrawContent(&aCursorGraphics, theCursorType, theSeedType,
         theImitaterType, theMouseX, theMouseY);

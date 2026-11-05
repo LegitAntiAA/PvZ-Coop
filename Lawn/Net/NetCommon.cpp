@@ -12,6 +12,57 @@
 #include <thread>
 #include <windows.h>
 
+bool LawnNet::NetNormalizeUtf8(const std::string& theInput, size_t theMaxBytes,
+	size_t theMaxCodePoints, bool theAllowSpaces, std::string& theOutput)
+{
+	theOutput.clear();
+	size_t aBegin = 0;
+	size_t anEnd = theInput.size();
+	while (aBegin < anEnd && (theInput[aBegin] == ' ' || theInput[aBegin] == '\t'))
+		++aBegin;
+	while (anEnd > aBegin && (theInput[anEnd - 1] == ' ' || theInput[anEnd - 1] == '\t'))
+		--anEnd;
+
+	size_t aCodePointCount = 0;
+	for (size_t anOffset = aBegin; anOffset < anEnd;)
+	{
+		const unsigned char aLead = (unsigned char)theInput[anOffset];
+		size_t aLength = 0;
+		uint32_t aCodePoint = 0;
+		if (aLead < 0x80) { aLength = 1; aCodePoint = aLead; }
+		else if (aLead >= 0xC2 && aLead <= 0xDF) { aLength = 2; aCodePoint = aLead & 0x1F; }
+		else if (aLead >= 0xE0 && aLead <= 0xEF) { aLength = 3; aCodePoint = aLead & 0x0F; }
+		else if (aLead >= 0xF0 && aLead <= 0xF4) { aLength = 4; aCodePoint = aLead & 0x07; }
+		else return false;
+		if (anOffset + aLength > anEnd)
+			return false;
+		for (size_t i = 1; i < aLength; ++i)
+		{
+			const unsigned char aContinuation = (unsigned char)theInput[anOffset + i];
+			if ((aContinuation & 0xC0) != 0x80)
+				return false;
+			aCodePoint = (aCodePoint << 6) | (aContinuation & 0x3F);
+		}
+		if ((aLength == 2 && aCodePoint < 0x80) ||
+			(aLength == 3 && aCodePoint < 0x800) ||
+			(aLength == 4 && aCodePoint < 0x10000) ||
+			(aCodePoint >= 0xD800 && aCodePoint <= 0xDFFF) || aCodePoint > 0x10FFFF)
+			return false;
+		if (aCodePoint < 0x20 || (aCodePoint >= 0x7F && aCodePoint <= 0x9F) ||
+			(aCodePoint >= 0x202A && aCodePoint <= 0x202E) ||
+			(aCodePoint >= 0x2066 && aCodePoint <= 0x2069) || aCodePoint == 0xFEFF)
+			return false;
+		if (!theAllowSpaces && aCodePoint == ' ')
+			return false;
+		if (aCodePointCount >= theMaxCodePoints || theOutput.size() + aLength > theMaxBytes)
+			break;
+		theOutput.append(theInput, anOffset, aLength);
+		++aCodePointCount;
+		anOffset += aLength;
+	}
+	return !theOutput.empty();
+}
+
 namespace LawnNet
 {
 
@@ -100,6 +151,7 @@ const char* NetMessageName(uint8_t theMsgType)
 	case NETMSG_INPUT_KEY: return "INPUT_KEY"; case NETMSG_CURSOR: return "CURSOR";
 	case NETMSG_PAUSE: return "PAUSE"; case NETMSG_PAUSE_REQ: return "PAUSE_REQ";
 	case NETMSG_INPUT_EPOCH: return "INPUT_EPOCH";
+	case NETMSG_CHAT_SEND: return "CHAT_SEND"; case NETMSG_CHAT_BROADCAST: return "CHAT_BROADCAST";
 	case NETMSG_CHOOSER_OPEN: return "CHOOSER_OPEN"; case NETMSG_SEED_PICK: return "SEED_PICK";
 	case NETMSG_SEED_UNPICK: return "SEED_UNPICK"; case NETMSG_CHOOSER_STATE: return "CHOOSER_STATE";
 	case NETMSG_CHOOSER_START: return "CHOOSER_START"; case NETMSG_PROFILE_SYNC: return "PROFILE_SYNC";
@@ -733,11 +785,11 @@ bool NetLoadSmokeManifest(const char* theAbsolutePath, NetSmokeManifest& theMani
 	if (!ParseU32Strict(aValues["port"], &aPort) || aPort == 0 || aPort > 65535)
 		return SmokeError(theError, "port must be in 1..65535");
 	const std::string& aNickname = aValues["nickname"];
-	if (aNickname.empty() || aNickname.size() > NET_MAX_NICK)
-		return SmokeError(theError, "nickname length is invalid");
-	for (size_t i = 0; i < aNickname.size(); ++i)
-		if (!isalnum((unsigned char)aNickname[i]) && aNickname[i] != '_' && aNickname[i] != '-')
-			return SmokeError(theError, "nickname contains an invalid character");
+	std::string aNormalizedNickname;
+	if (!NetNormalizeUtf8(aNickname, NET_MAX_NICK_BYTES, NET_MAX_NICK_CHARS,
+		true, aNormalizedNickname) || aNormalizedNickname.empty() ||
+		aNormalizedNickname != aNickname)
+		return SmokeError(theError, "nickname must be normalized, bounded UTF-8 without controls");
 	if (!ParseU32Strict(aValues["level"], &aLevel) || aLevel == 0 || aLevel > 999)
 		return SmokeError(theError, "level must be in 1..999");
 	NetSmokeScenarioDefinition aScenario;
@@ -845,8 +897,9 @@ bool NetLoadConfig(NetConfig& theConfig)
 
 		if (aKey == "nickname" && !aValue.empty())
 		{
-			strncpy_s(theConfig.mNick, aValue.c_str(), NET_MAX_NICK);
-			theConfig.mNick[NET_MAX_NICK] = 0;
+			std::string aNick;
+			if (NetNormalizeUtf8(aValue, NET_MAX_NICK_BYTES, NET_MAX_NICK_CHARS, true, aNick))
+				strcpy_s(theConfig.mNick, aNick.c_str());
 		}
 		else if (aKey == "unlock_all_minigames")
 			theConfig.mUnlockAllMinigames = (aValue == "1" || aValue == "true" || aValue == "yes");
@@ -883,7 +936,7 @@ bool NetSaveConfig(const NetConfig& theConfig)
 	if (!aFile)
 		return false;
 	fprintf(aFile, "# PvZ Co-op configuration\n");
-	fprintf(aFile, "# nickname - your in-game name (max %d chars)\n", NET_MAX_NICK);
+	fprintf(aFile, "# nickname - your in-game name (max %d Unicode characters)\n", NET_MAX_NICK_CHARS);
 	fprintf(aFile, "# unlock_all_minigames - 1 = all minigames/modes unlocked without adventure progress\n");
 	fprintf(aFile, "# base_snapshot_rate - initial sync rate (15..30), adapts automatically\n\n");
 	fprintf(aFile, "nickname=%s\n", theConfig.mNick);

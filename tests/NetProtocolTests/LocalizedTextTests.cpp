@@ -2,6 +2,7 @@
 
 #include "../../PakLib/PakInterface.h"
 #include "../../SexyAppFramework/TextEncoding.h"
+#include "../../Lawn/Net/NetCommon.h"
 
 #include <algorithm>
 #include <cstdio>
@@ -150,6 +151,26 @@ void TestMissingGlyphResolution()
 		[](uint32_t) { return false; }) == 0U);
 }
 
+void TestNetworkUtf8Normalization()
+{
+	const std::string aRussianNick = "\xD0\x91\xD1\x80\xD0\xB0\xD1\x82";
+	std::string anOutput;
+	LOCAL_CHECK(LawnNet::NetNormalizeUtf8(aRussianNick, LawnNet::NET_MAX_NICK_BYTES,
+		LawnNet::NET_MAX_NICK_CHARS, false, anOutput));
+	LOCAL_CHECK(anOutput == aRussianNick);
+	LOCAL_CHECK(LawnNet::NetNormalizeUtf8(aRussianNick, 5U,
+		LawnNet::NET_MAX_NICK_CHARS, false, anOutput));
+	LOCAL_CHECK(anOutput == "\xD0\x91\xD1\x80");
+	const std::string aMalformed("\xD0\x20", 2U);
+	LOCAL_CHECK(!LawnNet::NetNormalizeUtf8(aMalformed, 64U, 16U, false, anOutput));
+	LOCAL_CHECK(!LawnNet::NetNormalizeUtf8("Bad\nNick", 64U, 16U, false, anOutput));
+	const std::string aControl("Bad\x01Nick", 8U);
+	LOCAL_CHECK(!LawnNet::NetNormalizeUtf8(aControl, 64U, 16U, false, anOutput));
+	LOCAL_CHECK(LawnNet::NetNormalizeUtf8("  Sun Flower  ", 64U, 16U, true, anOutput));
+	LOCAL_CHECK(anOutput == "Sun Flower");
+	LOCAL_CHECK(!LawnNet::NetNormalizeUtf8("Sun Flower", 64U, 16U, false, anOutput));
+}
+
 std::filesystem::path FindMainPak()
 {
 	std::error_code anError;
@@ -283,6 +304,7 @@ LocalizedTextTestResult RunLocalizedTextTests()
 	RunTest("Text.LocalizedDecoding", TestLocalizedTextDecoding);
 	RunTest("Text.Utf8CodePointBoundaries", TestUtf8CodePointBoundaries);
 	RunTest("Text.MissingGlyphResolution", TestMissingGlyphResolution);
+	RunTest("Text.NetworkUtf8Normalization", TestNetworkUtf8Normalization);
 	RunTest("Text.RussianGotyLawnStringsFromPak", TestRussianGotyLawnStringsFromPak);
 	return { gChecks, gFailures, gSkipped };
 }

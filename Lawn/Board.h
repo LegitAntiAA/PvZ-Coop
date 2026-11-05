@@ -590,6 +590,7 @@ public:
 	int								mNetPvPBrainTimer;			// brain currency trickle
 	int								mNetPvPLastPlantsEaten;		// host-side reward watermark
 	std::vector<uint8_t>			mTDPath;					// tower defense: pairs (row, col)
+	bool							mNetTDRoadDrawLogged = false;	// first complete TD road render for this board/process
 
 	// endless T weather (host-simulated, synced via snapshots)
 	uint8_t							mNetDayPhase;				// 0 = day, 1 = night

@@ -24,7 +24,8 @@ public:
 	void					Update();
 	void					Draw(Graphics* g);
 	bool					DrawRemoteAtMouse(Graphics* g, int theMouseX, int theMouseY,
-		CursorType theCursorType, SeedType theSeedType, SeedType theImitaterType);
+		CursorType theCursorType, SeedType theSeedType, SeedType theImitaterType,
+		const Color& theTintColor);
 	void					Die();
 
 private:
