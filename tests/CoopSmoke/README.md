@@ -46,7 +46,7 @@ Artifacts are retained by default under `%TEMP%\PvZ-Coop-Smoke\run_<GUID>`. Fail
 Expected result schema:
 
 ```json
-{"status":"pass","role":"host","protocol":20,"scenario":"adventure1","mode":"adventure","level":1,"seed":424242,"skipIntro":true,"snapshotsSent":8,"snapshotsReceived":0,"snapshotsApplied":0,"actionApplied":true,"postActionSnapshots":5}
+{"status":"pass","role":"host","protocol":21,"scenario":"adventure1","mode":"adventure","level":1,"seed":424242,"skipIntro":true,"snapshotsSent":8,"snapshotsReceived":0,"snapshotsApplied":0,"actionApplied":true,"postActionSnapshots":5}
 ```
 
 The client uses the same fields with `"role":"client"` and a non-zero `snapshotsApplied`. Logs must contain ordered `SMOKE_CHECKPOINT` markers for `PLAYING`, `BASELINE`, `ACTION_ISSUED` on the owning side, and `ACTION_APPLIED` on both sides. The runner intersects `SMOKE_POST_ACTION_TX ... hash=<hex>` with `SMOKE_POST_ACTION_APPLIED ... hash=<hex>`; a pre-action or intro snapshot cannot satisfy the test. It also requires normal listen/authentication/WELCOME/profile/start/gameplay signatures and rejects access violations, smoke failures, version/protocol violations, queue overflow, malformed starts, rejected snapshots, assertions, and host-loss markers. Fatal signatures are polled while the processes are still running for fail-fast behavior.

@@ -51,6 +51,7 @@
   <ItemGroup>
     <ClCompile Include="LocalizedTextTests.cpp" />
 	<ClCompile Include="NetChallengeRuntimeTests.cpp" />
+	<ClCompile Include="NetMowerSnapshotTests.cpp" />
 	<ClCompile Include="NetZombieAnimTests.cpp" />
     <ClCompile Include="TestMain.cpp" />
     <ClCompile Include="..\..\Lawn\Net\NetCommon.cpp" />
@@ -59,6 +60,7 @@
   <ItemGroup>
     <ClInclude Include="LocalizedTextTests.h" />
 	<ClInclude Include="NetChallengeRuntimeTests.h" />
+	<ClInclude Include="NetMowerSnapshotTests.h" />
 	<ClInclude Include="NetZombieAnimTests.h" />
     <ClInclude Include="..\..\Lawn\Net\NetCommon.h" />
     <ClInclude Include="..\..\Lawn\Net\NetSmokeScenario.h" />

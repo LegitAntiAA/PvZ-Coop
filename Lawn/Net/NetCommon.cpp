@@ -241,6 +241,126 @@ bool NetDecodeZombieAnimState(NetBuffer& theBuffer, NetZombieAnimState& theState
 	return true;
 }
 
+namespace
+{
+bool NetMowerSnapshotStateIsBounded(const NetMowerSnapshotState& theState)
+{
+	return theState.mId != 0 &&
+		theState.mRow < NET_MOWER_ROW_COUNT &&
+		theState.mState <= NET_MOWER_STATE_MAX &&
+		theState.mType <= NET_MOWER_TYPE_MAX &&
+		std::isfinite(theState.mPosX) &&
+		std::isfinite(theState.mPosY) &&
+		theState.mPosX >= NET_MOWER_POSITION_MIN &&
+		theState.mPosX <= NET_MOWER_POSITION_MAX &&
+		theState.mPosY >= NET_MOWER_POSITION_MIN &&
+		theState.mPosY <= NET_MOWER_POSITION_MAX &&
+		theState.mRenderOrder >= 0 &&
+		theState.mRenderOrder <= NET_MOWER_RENDER_ORDER_MAX &&
+		std::isfinite(theState.mAltitude) &&
+		theState.mAltitude >= NET_MOWER_ALTITUDE_MIN &&
+		theState.mAltitude <= NET_MOWER_ALTITUDE_MAX &&
+		theState.mHeight <= NET_MOWER_HEIGHT_MAX;
+}
+
+int16_t NetQuantizeMowerPosition(float thePosition)
+{
+	const float aScaled = thePosition * 4.0f;
+	const int aRounded = (int)(aScaled + (aScaled >= 0.0f ? 0.5f : -0.5f));
+	return (int16_t)aRounded;
+}
+}
+
+bool NetEncodeMowerSnapshotState(const NetMowerSnapshotState& theState,
+	NetBuffer& theBuffer)
+{
+	if (!NetMowerSnapshotStateIsBounded(theState))
+		return false;
+
+	NetBuffer aWire;
+	aWire.WriteU16(theState.mId);
+	aWire.WriteU8(theState.mRow);
+	aWire.WriteU8(theState.mState);
+	aWire.WriteU8(theState.mType);
+	aWire.WriteU8(theState.mVisible ? 1 : 0);
+	aWire.WriteI16(NetQuantizeMowerPosition(theState.mPosX));
+	aWire.WriteI16(NetQuantizeMowerPosition(theState.mPosY));
+	aWire.WriteI32(theState.mRenderOrder);
+	aWire.WriteF32(theState.mAltitude);
+	aWire.WriteU8(theState.mHeight);
+	if (!NetEncodeZombieAnimState(theState.mReanim, aWire) ||
+		aWire.Size() != NET_MOWER_WIRE_BYTES)
+		return false;
+
+	theBuffer.WriteBytes(aWire.Data(), aWire.Size());
+	return true;
+}
+
+bool NetDecodeMowerSnapshotState(NetBuffer& theBuffer,
+	NetMowerSnapshotState& theState)
+{
+	const size_t aStartReadPos = theBuffer.mReadPos;
+	if (theBuffer.Remaining() < NET_MOWER_WIRE_BYTES)
+		return false;
+
+	NetMowerSnapshotState aDecoded;
+	aDecoded.mId = theBuffer.ReadU16Or();
+	aDecoded.mRow = theBuffer.ReadU8Or();
+	aDecoded.mState = theBuffer.ReadU8Or();
+	aDecoded.mType = theBuffer.ReadU8Or();
+	const uint8_t aVisible = theBuffer.ReadU8Or();
+	aDecoded.mVisible = aVisible != 0;
+	aDecoded.mPosX = theBuffer.ReadI16Or() / 4.0f;
+	aDecoded.mPosY = theBuffer.ReadI16Or() / 4.0f;
+	aDecoded.mRenderOrder = theBuffer.ReadI32Or();
+	aDecoded.mAltitude = theBuffer.ReadF32Or();
+	aDecoded.mHeight = theBuffer.ReadU8Or();
+	if (aVisible > 1 || !NetDecodeZombieAnimState(theBuffer, aDecoded.mReanim) ||
+		!NetMowerSnapshotStateIsBounded(aDecoded))
+	{
+		theBuffer.mReadPos = aStartReadPos;
+		return false;
+	}
+
+	theState = aDecoded;
+	return true;
+}
+
+bool NetDecodeMowerSnapshotSection(NetBuffer& theBuffer,
+	std::vector<NetMowerSnapshotState>& theStates)
+{
+	const size_t aStartReadPos = theBuffer.mReadPos;
+	if (theBuffer.Remaining() < sizeof(uint16_t))
+		return false;
+
+	const uint16_t aCount = theBuffer.ReadU16Or();
+	if (aCount > NET_MOWER_MAX_COUNT ||
+		(size_t)aCount > theBuffer.Remaining() / NET_MOWER_WIRE_BYTES)
+	{
+		theBuffer.mReadPos = aStartReadPos;
+		return false;
+	}
+
+	std::vector<NetMowerSnapshotState> aDecoded;
+	aDecoded.reserve(aCount);
+	std::map<uint16_t, bool> aSeenIds;
+	for (uint16_t anIndex = 0; anIndex < aCount; ++anIndex)
+	{
+		NetMowerSnapshotState aState;
+		if (!NetDecodeMowerSnapshotState(theBuffer, aState) ||
+			aSeenIds.find(aState.mId) != aSeenIds.end())
+		{
+			theBuffer.mReadPos = aStartReadPos;
+			return false;
+		}
+		aSeenIds[aState.mId] = true;
+		aDecoded.push_back(aState);
+	}
+
+	theStates.swap(aDecoded);
+	return true;
+}
+
 bool NetEncodeChallengeRuntimeState(const NetChallengeRuntimeState& theState,
 	NetBuffer& theBuffer)
 {

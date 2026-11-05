@@ -26,7 +26,7 @@ namespace LawnNet
 // (the host broadcasts the same sounds via events).
 extern bool gNetSuppressSounds;
 
-static const uint32_t NET_PROTOCOL_VERSION = 20; // exact animation/runtime + ordered mouse/Q gameplay input
+static const uint32_t NET_PROTOCOL_VERSION = 21; // exact mower presentation + ordered mouse/Q gameplay input
 static const uint16_t NET_DEFAULT_PORT = 27713;			// PvZ co-op port
 static const int NET_MAX_PLAYERS = 4;					// 1 host + 3 clients
 static const int NET_MAX_NICK = 16;						// bytes (without terminator)
@@ -336,6 +336,59 @@ struct NetZombieAnimState
 bool NetEncodeZombieAnimState(const NetZombieAnimState& theState, NetBuffer& theBuffer);
 bool NetDecodeZombieAnimState(NetBuffer& theBuffer, NetZombieAnimState& theState);
 bool NetZombieAnimStateFitsFrames(const NetZombieAnimState& theState, uint32_t theTotalFrames);
+
+// Lawn, pool and roof cleaners share one fixed, host-authoritative record.
+// Positions use signed quarter-pixels; the exact attached reanimation record
+// prevents triggered/squished/pool tracks from drifting independently.
+static const size_t NET_MOWER_WIRE_BYTES = 30;
+static const uint16_t NET_MOWER_MAX_COUNT = 32;
+static const uint8_t NET_MOWER_ROW_COUNT = 6;
+static const uint8_t NET_MOWER_STATE_MAX = 3;
+static const uint8_t NET_MOWER_TYPE_MAX = 2;
+static const uint8_t NET_MOWER_HEIGHT_MAX = 3;
+static const int32_t NET_MOWER_RENDER_ORDER_MAX = 1000000;
+static const float NET_MOWER_POSITION_MIN = -8192.0f;
+static const float NET_MOWER_POSITION_MAX = 8191.75f;
+static const float NET_MOWER_ALTITUDE_MIN = -256.0f;
+static const float NET_MOWER_ALTITUDE_MAX = 256.0f;
+
+struct NetMowerSnapshotState
+{
+	uint16_t mId;
+	uint8_t mRow;
+	uint8_t mState;
+	uint8_t mType;
+	bool mVisible;
+	float mPosX;
+	float mPosY;
+	int32_t mRenderOrder;
+	float mAltitude;
+	uint8_t mHeight;
+	NetZombieAnimState mReanim;
+
+	NetMowerSnapshotState() { Reset(); }
+	void Reset()
+	{
+		mId = 0;
+		mRow = 0;
+		mState = 0;
+		mType = 0;
+		mVisible = false;
+		mPosX = 0.0f;
+		mPosY = 0.0f;
+		mRenderOrder = 0;
+		mAltitude = 0.0f;
+		mHeight = 0;
+		mReanim.Reset();
+	}
+};
+
+bool NetEncodeMowerSnapshotState(const NetMowerSnapshotState& theState,
+	NetBuffer& theBuffer);
+bool NetDecodeMowerSnapshotState(NetBuffer& theBuffer,
+	NetMowerSnapshotState& theState);
+bool NetDecodeMowerSnapshotSection(NetBuffer& theBuffer,
+	std::vector<NetMowerSnapshotState>& theStates);
 
 // Fixed-size, host-authoritative challenge presentation state.  Beghouled's
 // 9x6 removal mask is column-major (bit = x * 6 + y), matching the native

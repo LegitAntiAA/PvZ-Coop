@@ -100,6 +100,9 @@ private:
 	int mBaselinePots;
 	int mBaselineChallengeScore;
 	uint32_t mBaselinePlantGridHash;
+	uint16_t mBowlingNutId;
+	int mBowlingFirstX;
+	int mBowlingFirstY;
 	bool mIntroObserved;
 	bool mIntroProgressObserved;
 	bool mIntroSawDave;
@@ -107,12 +110,16 @@ private:
 	bool mBaselineCaptured;
 	bool mActionIssued;
 	bool mActionApplied;
+	bool mBowlingNutObserved;
+	bool mBowlingNutMoved;
+	bool mBowlingZombieObserved;
 	uint32_t mPostActionSamples;
 
 	bool UpdateIntro(LawnApp* theApp, const NetSmokeManifest& theManifest,
 		const NetSmokeScenarioDefinition& theDefinition, std::string& theFailure);
 	bool IssueAction(LawnApp* theApp, const NetSmokeManifest& theManifest);
-	bool ObserveActionApplied(Board* theBoard) const;
+	bool ObserveActionApplied(Board* theBoard, const NetSmokeManifest& theManifest,
+		std::string& theFailure);
 
 public:
 	NetSmokeScenarioRuntime();

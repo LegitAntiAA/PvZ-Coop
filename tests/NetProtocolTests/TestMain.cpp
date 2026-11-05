@@ -1,6 +1,7 @@
 #include "../../Lawn/Net/NetCommon.h"
 #include "LocalizedTextTests.h"
 #include "NetChallengeRuntimeTests.h"
+#include "NetMowerSnapshotTests.h"
 #include "NetZombieAnimTests.h"
 
 #include <chrono>
@@ -665,6 +666,10 @@ int main()
 		RunNetChallengeRuntimeTests();
 	gChecks += aChallengeRuntimeResult.mChecks;
 	gFailures += aChallengeRuntimeResult.mFailures;
+	const NetMowerSnapshotTestResult aMowerSnapshotResult =
+		RunNetMowerSnapshotTests();
+	gChecks += aMowerSnapshotResult.mChecks;
+	gFailures += aMowerSnapshotResult.mFailures;
 
 	std::printf("\nchecks=%d failures=%d skipped=%d\n", gChecks, gFailures, gSkipped);
 	return gFailures == 0 ? 0 : 1;

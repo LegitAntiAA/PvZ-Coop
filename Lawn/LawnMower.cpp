@@ -45,6 +45,7 @@ void LawnMower::LawnMowerInitialize(int theRow, LawnMowerType theForcedType)
     mNetId = 0;
     mNetGhost = false;
     mNetTargetX = 0.0f;
+    mNetTargetY = 0.0f;
     mAltitude = 0.0f;
     mMowerHeight = MowerHeight::MOWER_HEIGHT_LAND;
 

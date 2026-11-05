@@ -849,6 +849,24 @@ try {
         @{ Label = "client action applied"; Pattern = ('(?im)\bSMOKE_CHECKPOINT\b[^\r\n]*scenario={0}[^\r\n]*step=ACTION_APPLIED\b' -f ([regex]::Escape($scenarioMarker))) },
         @{ Label = "post-action applied hash"; Pattern = '(?im)\bSMOKE_POST_ACTION_APPLIED\b[^\r\n]*\bhash=(?:0x)?[0-9a-f]{8,16}\b' }
     )
+    if ($Scenario -eq "Adventure5Bowling") {
+        $hostPositivePatterns += @{
+            Label = "host moving Bowling nut"
+            Pattern = '(?im)\bSMOKE_BOWLING_NUT_MOVING\b[^\r\n]*\brole=host\b[^\r\n]*\bid=\d+\b'
+        }
+        $clientPositivePatterns += @{
+            Label = "client moving Bowling nut"
+            Pattern = '(?im)\bSMOKE_BOWLING_NUT_MOVING\b[^\r\n]*\brole=client\b[^\r\n]*\bid=\d+\b'
+        }
+        $hostPositivePatterns += @{
+            Label = "host offscreen zombie spawn"
+            Pattern = '(?im)\bSMOKE_ZOMBIE_SPAWN_OBSERVED\b[^\r\n]*\brole=host\b[^\r\n]*\bid=\d+\b'
+        }
+        $clientPositivePatterns += @{
+            Label = "client offscreen zombie spawn"
+            Pattern = '(?im)\bSMOKE_ZOMBIE_SPAWN_OBSERVED\b[^\r\n]*\brole=client\b[^\r\n]*\bid=\d+\b'
+        }
+    }
     $negativePatterns = @(
         @{ Label = "access violation"; Pattern = '(?im)Access Violation' },
         @{ Label = "fatal network error"; Pattern = '(?im)\bfatal:' },
@@ -858,7 +876,11 @@ try {
         @{ Label = "queue overflow"; Pattern = '(?im)queue overflow' },
         @{ Label = "rejected snapshot"; Pattern = '(?im)snapshot[^\r\n]*\brejected\b' },
         @{ Label = "malformed start"; Pattern = '(?im)START_GAME[^\r\n]*\bmalformed\b' },
-        @{ Label = "unhandled exception"; Pattern = '(?im)unhandled exception|assertion failed' }
+        @{ Label = "unhandled exception"; Pattern = '(?im)unhandled exception|assertion failed' },
+        @{ Label = "invalid Bowling ghost target"; Pattern = '(?im)\bSMOKE_BOWLING_TARGET_INVALID\b' },
+        @{ Label = "invalid Bowling presentation"; Pattern = '(?im)\bSMOKE_BOWLING_PRESENTATION_INVALID\b' },
+        @{ Label = "uninitialized zombie ghost target"; Pattern = '(?im)\bSMOKE_ZOMBIE_TARGET_INVALID\b' },
+        @{ Label = "on-lawn zombie spawn"; Pattern = '(?im)\bSMOKE_ZOMBIE_SPAWN_INVALID\b' }
     )
 
     Assert-PositivePatterns -Role "host" -Text $hostLog -Patterns $hostPositivePatterns
@@ -873,6 +895,27 @@ try {
     if (-not [regex]::IsMatch($combinedActionLog, $actionIssuedPattern)) {
         throw ("No deterministic ACTION_ISSUED checkpoint was logged by expected owner {0}." -f
             $expectedActionOwner)
+    }
+
+    if ($Scenario -eq "Adventure5Bowling") {
+        $hostNut = [regex]::Match($hostLog,
+            '(?im)\bSMOKE_BOWLING_NUT_MOVING\b[^\r\n]*\brole=host\b[^\r\n]*\bid=(\d+)\b')
+        $clientNut = [regex]::Match($clientLog,
+            '(?im)\bSMOKE_BOWLING_NUT_MOVING\b[^\r\n]*\brole=client\b[^\r\n]*\bid=(\d+)\b')
+        if ((-not $hostNut.Success) -or (-not $clientNut.Success) -or
+            ($hostNut.Groups[1].Value -ne $clientNut.Groups[1].Value)) {
+            throw ("Bowling nut identity/movement mismatch: host={0}, client={1}." -f
+                $hostNut.Groups[1].Value, $clientNut.Groups[1].Value)
+        }
+        $hostZombie = [regex]::Match($hostLog,
+            '(?im)\bSMOKE_ZOMBIE_SPAWN_OBSERVED\b[^\r\n]*\brole=host\b[^\r\n]*\bid=(\d+)\b')
+        $clientZombie = [regex]::Match($clientLog,
+            '(?im)\bSMOKE_ZOMBIE_SPAWN_OBSERVED\b[^\r\n]*\brole=client\b[^\r\n]*\bid=(\d+)\b')
+        if ((-not $hostZombie.Success) -or (-not $clientZombie.Success) -or
+            ($hostZombie.Groups[1].Value -ne $clientZombie.Groups[1].Value)) {
+            throw ("Zombie spawn identity/presentation mismatch: host={0}, client={1}." -f
+                $hostZombie.Groups[1].Value, $clientZombie.Groups[1].Value)
+        }
     }
 
     $hostProtocol = Assert-SmokeResult -Result $hostResult -Role "host" -ExpectedMode $Mode `

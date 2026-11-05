@@ -37,6 +37,7 @@ public:
     unsigned short      mNetId;                 // co-op: stable id assigned by the host
     bool                mNetGhost;              // co-op: client-side mirror
     float               mNetTargetX;            // co-op: authoritative target position
+    float               mNetTargetY;            // co-op: authoritative target position
 
 public:
     void                LawnMowerInitialize(int theRow);

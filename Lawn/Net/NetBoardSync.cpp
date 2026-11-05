@@ -87,6 +87,8 @@ static const size_t NET_PROJECTILE_WIRE_BYTES = 31;
 // Coin: id/type/motion(4), x/y(8), order(4), scale/collect(4),
 // flags/seed/fade(3), disappear(2), potted visual seed/garden/facing/variation/age(5).
 static const size_t NET_COIN_WIRE_BYTES = 30;
+// Mower records live in NetCommon so the strict transactional codec is covered
+// by the protocol-only test target.
 
 // A client ghost is only a presentation mirror. Calling Zombie::DieNoLoot on
 // it also awards challenge points, spawns level rewards, mutates linked
@@ -142,6 +144,69 @@ bool NetCaptureZombieAnimState(LawnApp* theApp, Zombie* theZombie,
 	theState.mLoopType = (uint8_t)aLoopType;
 	theState.mLoopCount = (uint8_t)max(0, min(255, aBody->mLoopCount));
 	return NetZombieAnimStateFitsFrames(theState, aFrameCapacity);
+}
+
+bool NetCaptureMowerAnimState(LawnApp* theApp, LawnMower* theMower,
+	NetZombieAnimState& theState)
+{
+	theState.Reset();
+	if (!theApp || !theMower)
+		return true;
+
+	Reanimation* aReanim = theApp->ReanimationTryToGet(theMower->mReanimID);
+	if (!aReanim)
+		return true;
+	const uint32_t aFrameCapacity = NetGetReanimationFrameCapacity(aReanim);
+	const int aLoopType = (int)aReanim->mLoopType;
+	if (aReanim->mFrameStart < 0 || aReanim->mFrameStart > 65535 ||
+		aReanim->mFrameCount <= 0 || aReanim->mFrameCount > 65535 ||
+		aLoopType < 0 || aLoopType > 5 || !_finite(aReanim->mAnimTime) ||
+		!_finite(aReanim->mAnimRate))
+		return false;
+
+	theState.mPresent = true;
+	theState.mDead = aReanim->mDead;
+	theState.mFrameStart = (uint16_t)aReanim->mFrameStart;
+	theState.mFrameCount = (uint16_t)aReanim->mFrameCount;
+	theState.mAnimTime = aReanim->mAnimTime;
+	theState.mAnimRate = aReanim->mAnimRate;
+	theState.mLoopType = (uint8_t)aLoopType;
+	theState.mLoopCount = (uint8_t)max(0, min(255, aReanim->mLoopCount));
+	return NetZombieAnimStateFitsFrames(theState, aFrameCapacity);
+}
+
+bool NetGetMowerTypeFrameCapacity(uint8_t theMowerType,
+	uint32_t& theFrameCapacity)
+{
+	theFrameCapacity = 0;
+	ReanimationType aReanimType;
+	switch ((LawnMowerType)theMowerType)
+	{
+	case LawnMowerType::LAWNMOWER_LAWN:
+		aReanimType = ReanimationType::REANIM_LAWNMOWER;
+		break;
+	case LawnMowerType::LAWNMOWER_POOL:
+		aReanimType = ReanimationType::REANIM_POOL_CLEANER;
+		break;
+	case LawnMowerType::LAWNMOWER_ROOF:
+		aReanimType = ReanimationType::REANIM_ROOF_CLEANER;
+		break;
+	default:
+		return false;
+	}
+
+	const int aReanimIndex = (int)aReanimType;
+	if (aReanimIndex < 0 || (unsigned int)aReanimIndex >= gReanimatorDefCount ||
+		!gReanimatorDefArray)
+		return false;
+	ReanimatorEnsureDefinitionLoaded(aReanimType, true);
+	const ReanimatorDefinition& aDefinition = gReanimatorDefArray[aReanimIndex];
+	if (aDefinition.mTracks.count <= 0 || !aDefinition.mTracks.tracks ||
+		aDefinition.mTracks.tracks[0].mTransforms.count <= 0)
+		return false;
+	theFrameCapacity =
+		(uint32_t)aDefinition.mTracks.tracks[0].mTransforms.count;
+	return true;
 }
 
 bool NetGetZombieTypeFrameCapacity(uint8_t theZombieType, uint32_t& theFrameCapacity)
@@ -1080,16 +1145,35 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 			continue;
 		if (aMower->mNetId == 0)
 			aMower->mNetId = NetAllocId();
-		aBody.WriteU16(aMower->mNetId);
-		aBody.WriteU8((uint8_t)aMower->mRow);
-		aBody.WriteU8((uint8_t)aMower->mMowerState);
-		aBody.WriteU8((uint8_t)aMower->mMowerType);
-		aBody.WriteU8(aMower->mVisible ? 1 : 0);
-		aBody.WriteI16((int16_t)(aMower->mPosX * 4));
-		aBody.WriteF32(aMower->mAltitude);
-		aBody.WriteU8((uint8_t)aMower->mMowerHeight);
+		NetMowerSnapshotState aState;
+		aState.mId = aMower->mNetId;
+		aState.mRow = (uint8_t)aMower->mRow;
+		aState.mState = (uint8_t)aMower->mMowerState;
+		aState.mType = (uint8_t)aMower->mMowerType;
+		aState.mVisible = aMower->mVisible;
+		aState.mPosX = aMower->mPosX;
+		aState.mPosY = aMower->mPosY;
+		aState.mRenderOrder = aMower->mRenderOrder;
+		aState.mAltitude = aMower->mAltitude;
+		aState.mHeight = (uint8_t)aMower->mMowerHeight;
+		if (!NetCaptureMowerAnimState(mApp, aMower, aState.mReanim))
+		{
+			NetTrace("snapshot mower animation omitted: invalid host state id=%u type=%d",
+				aMower->mNetId, (int)aMower->mMowerType);
+			aState.mReanim.Reset();
+		}
+		if (!NetEncodeMowerSnapshotState(aState, aBody))
+		{
+			NetTrace("snapshot mower omitted: invalid host state id=%u row=%d state=%d type=%d pos=(%.2f,%.2f) order=%d altitude=%.2f height=%d",
+				aMower->mNetId, aMower->mRow, (int)aMower->mMowerState,
+				(int)aMower->mMowerType, aMower->mPosX, aMower->mPosY,
+				aMower->mRenderOrder, aMower->mAltitude,
+				(int)aMower->mMowerHeight);
+			continue;
+		}
 		aCount++;
 	}
+	TOD_ASSERT(aBody.Size() == (size_t)aCount * NET_MOWER_WIRE_BYTES);
 	b.WriteU16(aCount);
 	b.WriteBytes(aBody.Data(), aBody.Size());
 
@@ -1248,6 +1332,11 @@ void Board::NetApplyEvent(NetBuffer& b)
 			{
 				aPlant->mNetId = anId;
 				aPlant->mNetGhost = true;
+				// NewPlant gives network interpolation targets their default (0,0).
+				// Seed them from the authoritative spawn immediately so the first
+				// client update cannot drag a rolling Bowling nut into the HUD.
+				aPlant->mNetTargetX = (float)aPlant->mX;
+				aPlant->mNetTargetY = (float)aPlant->mY;
 			}
 		}
 		break;
@@ -1408,6 +1497,11 @@ void Board::NetApplyEvent(NetBuffer& b)
 				aZombie->mVelX = aSpeed;
 				aZombie->mPosX = aPosX;
 				aZombie->mX = (int)aPosX;
+				// AddZombieInRow initializes the ghost at a local spawn and leaves
+				// its network target at (0,0).  Keep the event-created presentation
+				// at the host position until the first full snapshot arrives.
+				aZombie->mNetTargetX = aZombie->mPosX;
+				aZombie->mNetTargetY = aZombie->mPosY;
 				aZombie->mNetAnimKey = 255; // force anim apply
 			}
 		}
@@ -2697,93 +2791,142 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	}
 
 	// ---- lawn mowers ----
-	aCount = b.ReadU16Or();
-	std::map<unsigned short, bool> aSeenMowers;
-	for (int i = 0; i < aCount; i++)
+	// Decode and validate the complete variable-length section before touching
+	// any local cleaner.  A bad final record therefore cannot partially move,
+	// replace or retire records decoded before it.
+	std::vector<NetMowerSnapshotState> aMowerWires;
+	if (!NetDecodeMowerSnapshotSection(b, aMowerWires))
 	{
-		static const size_t MOWER_WIRE_BYTES = 13;
-		if (b.Remaining() < MOWER_WIRE_BYTES)
+		NetTrace("snapshot mower section rejected remaining=%zu record=%zu max-count=%u",
+			b.Remaining(), NET_MOWER_WIRE_BYTES, NET_MOWER_MAX_COUNT);
+		return;
+	}
+	std::map<unsigned short, bool> aSeenMowers;
+	for (const NetMowerSnapshotState& aWire : aMowerWires)
+	{
+		aSeenMowers[aWire.mId] = true;
+		if (!aWire.mReanim.mPresent)
+			continue;
+
+		uint32_t aFrameCapacity = 0;
+		LawnMower* anExistingMower = NetGetGhostMower(aWire.mId);
+		if (anExistingMower &&
+			anExistingMower->mMowerType == (LawnMowerType)aWire.mType)
 		{
-			NetTrace("snapshot mower section truncated index=%d count=%u remaining=%zu", i, aCount, b.Remaining());
+			Reanimation* anExistingReanim =
+				mApp->ReanimationTryToGet(anExistingMower->mReanimID);
+			aFrameCapacity = NetGetReanimationFrameCapacity(anExistingReanim);
+		}
+		if (aFrameCapacity == 0 &&
+			!NetGetMowerTypeFrameCapacity(aWire.mType, aFrameCapacity))
+		{
+			NetTrace("snapshot mower animation rejected: definition unavailable id=%u type=%u",
+				aWire.mId, aWire.mType);
 			return;
 		}
-		uint16_t anId = b.ReadU16Or();
-		uint8_t aRow = b.ReadU8Or();
-		uint8_t aState = b.ReadU8Or();
-		uint8_t aType = b.ReadU8Or();
-		uint8_t aVisible = b.ReadU8Or();
-		int16_t aX = b.ReadI16Or();
-		float anAltitude = b.ReadF32Or();
-		uint8_t aHeight = b.ReadU8Or();
-		if (anId == 0 || aRow >= MAX_GRID_SIZE_Y || aState > (uint8_t)LawnMowerState::MOWER_SQUISHED ||
-			aType > (uint8_t)LawnMowerType::LAWNMOWER_ROOF || aVisible > 1 ||
-			aHeight > (uint8_t)MowerHeight::MOWER_HEIGHT_UP_TO_LAND || !_finite(anAltitude) ||
-			aSeenMowers.find(anId) != aSeenMowers.end())
+		if (!NetZombieAnimStateFitsFrames(aWire.mReanim, aFrameCapacity))
 		{
-			NetTrace("snapshot mower rejected id=%u row=%u state=%u type=%u visible=%u height=%u",
-				anId, aRow, aState, aType, aVisible, aHeight);
-			continue;
+			NetTrace("snapshot mower animation rejected: id=%u type=%u frames=%u+%u capacity=%u",
+				aWire.mId, aWire.mType, aWire.mReanim.mFrameStart,
+				aWire.mReanim.mFrameCount, aFrameCapacity);
+			return;
 		}
-		aSeenMowers[anId] = true;
+	}
 
-		LawnMower* aMower = NetGetGhostMower(anId);
+	for (const NetMowerSnapshotState& aWire : aMowerWires)
+	{
+		LawnMower* aMower = NetGetGhostMower(aWire.mId);
 		if (!aMower)
 		{
 			LawnMower* aLocalMower = nullptr;
 			while (mLawnMowers.IterateNext(aLocalMower))
 			{
-				if (!aLocalMower->mDead && !aLocalMower->mNetGhost && aLocalMower->mRow == aRow)
+				if (!aLocalMower->mDead && !aLocalMower->mNetGhost &&
+					aLocalMower->mRow == aWire.mRow)
 				{
 					aMower = aLocalMower;
 					break;
 				}
 			}
 		}
+
+		bool aCreated = false;
 		if (!aMower)
 		{
 			gNetSuppressSounds = true;
 			aMower = mLawnMowers.DataArrayAlloc();
+			if (aMower)
+				aMower->LawnMowerInitialize(aWire.mRow,
+					(LawnMowerType)aWire.mType);
+			gNetSuppressSounds = false;
 			if (!aMower)
 				continue;
-			aMower->LawnMowerInitialize(aRow, (LawnMowerType)aType);
-			gNetSuppressSounds = false;
+			aCreated = true;
 		}
-		else if (aMower->mMowerType != (LawnMowerType)aType)
+		else
 		{
-			Reanimation* anOldReanim = mApp->ReanimationTryToGet(aMower->mReanimID);
-			if (anOldReanim)
-				anOldReanim->ReanimationDie();
-			aMower->LawnMowerInitialize(aRow, (LawnMowerType)aType);
+			Reanimation* anExistingReanim =
+				mApp->ReanimationTryToGet(aMower->mReanimID);
+			const bool aNeedsLiveReanim = aWire.mReanim.mPresent &&
+				!aWire.mReanim.mDead &&
+				(!anExistingReanim || anExistingReanim->mDead);
+			const bool aNeedsCleanTransform =
+				aMower->mMowerState == LawnMowerState::MOWER_SQUISHED &&
+				aWire.mState != (uint8_t)LawnMowerState::MOWER_SQUISHED;
+			if (aMower->mMowerType != (LawnMowerType)aWire.mType ||
+				aNeedsLiveReanim || aNeedsCleanTransform)
+			{
+				if (anExistingReanim)
+					anExistingReanim->ReanimationDie();
+				aMower->LawnMowerInitialize(aWire.mRow,
+					(LawnMowerType)aWire.mType);
+				aCreated = true;
+			}
 		}
-		MowerHeight aPreviousHeight = aMower->mMowerHeight;
-		aMower->mNetId = anId;
+
+		aMower->mNetId = aWire.mId;
 		aMower->mNetGhost = true;
-		aMower->mMowerState = (LawnMowerState)aState;
-		aMower->mVisible = aVisible != 0;
-		aMower->mPosX = aX / 4.0f;
-		aMower->mNetTargetX = aX / 4.0f;
-		aMower->mAltitude = anAltitude;
-		aMower->mMowerHeight = (MowerHeight)aHeight;
-		Reanimation* aMowerReanim = mApp->ReanimationTryToGet(aMower->mReanimID);
+		aMower->mRow = aWire.mRow;
+		aMower->mMowerState = (LawnMowerState)aWire.mState;
+		aMower->mVisible = aWire.mVisible;
+		aMower->mNetTargetX = aWire.mPosX;
+		aMower->mNetTargetY = aWire.mPosY;
+		if (aCreated)
+		{
+			aMower->mPosX = aWire.mPosX;
+			aMower->mPosY = aWire.mPosY;
+		}
+		aMower->mRenderOrder = aWire.mRenderOrder;
+		aMower->mAltitude = aWire.mAltitude;
+		aMower->mMowerHeight = (MowerHeight)aWire.mHeight;
+
+		Reanimation* aMowerReanim =
+			mApp->ReanimationTryToGet(aMower->mReanimID);
 		if (aMowerReanim)
 		{
-			if (aMower->mMowerType == LawnMowerType::LAWNMOWER_POOL &&
-				aMower->mMowerHeight != aPreviousHeight)
+			aMowerReanim->mRenderOrder = aWire.mRenderOrder;
+			if (!aWire.mReanim.mPresent)
 			{
-				if (aMower->mMowerHeight == MowerHeight::MOWER_HEIGHT_IN_POOL)
-					aMowerReanim->PlayReanim("anim_water", ReanimLoopType::REANIM_LOOP, 0, 35.0f);
-				else
-					aMowerReanim->PlayReanim("anim_land", ReanimLoopType::REANIM_LOOP, 0, 35.0f);
+				aMowerReanim->mAnimRate = 0.0f;
+				aMowerReanim->mDead = true;
 			}
-			if (aMower->mMowerState == LawnMowerState::MOWER_TRIGGERED)
-				aMowerReanim->mAnimRate = aMower->mMowerType == LawnMowerType::LAWNMOWER_POOL ? 35.0f : 70.0f;
-			else if (aMower->mMowerState == LawnMowerState::MOWER_SQUISHED)
+			else
+			{
+				aMowerReanim->mFrameStart = aWire.mReanim.mFrameStart;
+				aMowerReanim->mFrameCount = aWire.mReanim.mFrameCount;
+				aMowerReanim->mAnimTime = aWire.mReanim.mAnimTime;
+				aMowerReanim->mLastFrameTime = aWire.mReanim.mAnimTime;
+				aMowerReanim->mAnimRate = aWire.mReanim.mAnimRate;
+				aMowerReanim->mLoopType =
+					(ReanimLoopType)aWire.mReanim.mLoopType;
+				aMowerReanim->mLoopCount = aWire.mReanim.mLoopCount;
+				aMowerReanim->mDead = aWire.mReanim.mDead;
+			}
+			if (aMower->mMowerState == LawnMowerState::MOWER_SQUISHED)
 			{
 				aMowerReanim->OverrideScale(0.85f, 0.22f);
 				aMowerReanim->SetPosition(-11.0f, 65.0f);
 			}
-			else
-				aMowerReanim->mAnimRate = 0.0f;
 		}
 	}
 	{
@@ -3023,6 +3166,7 @@ void Board::NetGhostUpdateOthers()
 		if (aMower->mDead || !aMower->mNetGhost)
 			continue;
 		aMower->mPosX += (aMower->mNetTargetX - aMower->mPosX) * 0.3f;
+		aMower->mPosY += (aMower->mNetTargetY - aMower->mPosY) * 0.3f;
 		Reanimation* aMowerReanim = mApp->ReanimationTryToGet(aMower->mReanimID);
 		if (aMowerReanim && aMowerReanim->mIsAttachment)
 			aMowerReanim->Update();

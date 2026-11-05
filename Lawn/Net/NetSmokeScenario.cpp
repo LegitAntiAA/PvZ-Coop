@@ -9,6 +9,7 @@
 #include "../GridItem.h"
 #include "../Plant.h"
 #include "../SeedPacket.h"
+#include "../Zombie.h"
 #include "../Widget/GameButton.h"
 #include "../Widget/SeedChooserScreen.h"
 #include "../../LawnApp.h"
@@ -262,6 +263,33 @@ Plant* FindFirstTutorialPeashooter(Board* theBoard)
 	}
 	return nullptr;
 }
+
+bool IsBowlingSmokeNut(const Plant* thePlant)
+{
+	if (!thePlant || thePlant->mDead || !thePlant->mIsOnBoard)
+		return false;
+	return thePlant->mSeedType == SeedType::SEED_WALLNUT ||
+		thePlant->mSeedType == SeedType::SEED_EXPLODE_O_NUT ||
+		thePlant->mSeedType == SeedType::SEED_GIANT_WALLNUT;
+}
+
+Plant* FindBowlingSmokeNut(Board* theBoard, uint16_t thePreferredId)
+{
+	if (!theBoard)
+		return nullptr;
+	Plant* aFallback = nullptr;
+	Plant* aPlant = nullptr;
+	while (theBoard->IteratePlants(aPlant))
+	{
+		if (!IsBowlingSmokeNut(aPlant))
+			continue;
+		if (thePreferredId != 0 && aPlant->mNetId == thePreferredId)
+			return aPlant;
+		if (!aFallback && aPlant->mNetId != 0)
+			aFallback = aPlant;
+	}
+	return aFallback;
+}
 }
 
 NetSmokeScenarioRuntime::NetSmokeScenarioRuntime()
@@ -284,6 +312,9 @@ void NetSmokeScenarioRuntime::Reset(NetSmokeScenarioId theScenario)
 	mBaselinePots = 0;
 	mBaselineChallengeScore = 0;
 	mBaselinePlantGridHash = 0;
+	mBowlingNutId = 0;
+	mBowlingFirstX = 0;
+	mBowlingFirstY = 0;
 	mIntroObserved = false;
 	mIntroProgressObserved = false;
 	mIntroSawDave = false;
@@ -291,6 +322,9 @@ void NetSmokeScenarioRuntime::Reset(NetSmokeScenarioId theScenario)
 	mBaselineCaptured = false;
 	mActionIssued = false;
 	mActionApplied = false;
+	mBowlingNutObserved = false;
+	mBowlingNutMoved = false;
+	mBowlingZombieObserved = false;
 	mPostActionSamples = 0;
 }
 
@@ -502,7 +536,8 @@ bool NetSmokeScenarioRuntime::IssueAction(LawnApp* theApp, const NetSmokeManifes
 	return IssueHostSeedAction(theApp);
 }
 
-bool NetSmokeScenarioRuntime::ObserveActionApplied(Board* theBoard) const
+bool NetSmokeScenarioRuntime::ObserveActionApplied(Board* theBoard,
+	const NetSmokeManifest& theManifest, std::string& theFailure)
 {
 	if (!theBoard || !mBaselineCaptured)
 		return false;
@@ -512,6 +547,61 @@ bool NetSmokeScenarioRuntime::ObserveActionApplied(Board* theBoard) const
 		return theBoard->mChallenge &&
 			(theBoard->mChallenge->mChallengeScore > mBaselineChallengeScore ||
 				SmokePlantGridHash(theBoard) != mBaselinePlantGridHash);
+	if (mScenario == NETSMOKE_SCENARIO_ADVENTURE_5_BOWLING)
+	{
+		Plant* aNut = FindBowlingSmokeNut(theBoard, mBowlingNutId);
+		if (!aNut)
+			return false;
+		if (aNut->mNetId == 0 || (theManifest.IsClient() && !aNut->mNetGhost))
+		{
+			theFailure = "Bowling action produced a plant without an authoritative ghost identity";
+			return false;
+		}
+
+		const bool aTargetIsUninitialized = aNut->mNetGhost &&
+			((fabsf(aNut->mNetTargetX) < 0.01f && aNut->mX != 0) ||
+			 (fabsf(aNut->mNetTargetY) < 0.01f && aNut->mY != 0));
+		if (aTargetIsUninitialized)
+		{
+			NetTrace("SMOKE_BOWLING_TARGET_INVALID role=%s id=%u pos=(%d,%d) target=(%.2f,%.2f)",
+				theManifest.IsHost() ? "host" : "client", aNut->mNetId,
+				aNut->mX, aNut->mY, aNut->mNetTargetX, aNut->mNetTargetY);
+			theFailure = "Bowling nut ghost retained the default (0,0) interpolation target";
+			return false;
+		}
+
+		if (!mBowlingNutObserved)
+		{
+			Reanimation* aBodyReanim = theBoard->mApp->ReanimationTryToGet(aNut->mBodyReanimID);
+			if (!aNut->mVisible || !aBodyReanim || aNut->mX < -160 || aNut->mX > 900 ||
+				aNut->mY < 40 || aNut->mY > 560)
+			{
+				NetTrace("SMOKE_BOWLING_PRESENTATION_INVALID role=%s id=%u visible=%d body=%p pos=(%d,%d)",
+					theManifest.IsHost() ? "host" : "client", aNut->mNetId,
+					aNut->mVisible ? 1 : 0, (void*)aBodyReanim, aNut->mX, aNut->mY);
+				theFailure = "Bowling nut was created without a visible on-lawn presentation";
+				return false;
+			}
+			mBowlingNutId = aNut->mNetId;
+			mBowlingFirstX = aNut->mX;
+			mBowlingFirstY = aNut->mY;
+			mBowlingNutObserved = true;
+			NetTrace("SMOKE_BOWLING_NUT_OBSERVED role=%s id=%u ghost=%d type=%d pos=(%d,%d) target=(%.2f,%.2f)",
+				theManifest.IsHost() ? "host" : "client", aNut->mNetId,
+				aNut->mNetGhost ? 1 : 0, (int)aNut->mSeedType, aNut->mX, aNut->mY,
+				aNut->mNetTargetX, aNut->mNetTargetY);
+		}
+
+		if (!mBowlingNutMoved && abs(aNut->mX - mBowlingFirstX) >= 8)
+		{
+			mBowlingNutMoved = true;
+			NetTrace("SMOKE_BOWLING_NUT_MOVING role=%s id=%u from=(%d,%d) to=(%d,%d) state=%d order=%d",
+				theManifest.IsHost() ? "host" : "client", aNut->mNetId,
+				mBowlingFirstX, mBowlingFirstY, aNut->mX, aNut->mY,
+				(int)aNut->mState, aNut->mRenderOrder);
+		}
+		return mBowlingNutObserved && mBowlingNutMoved;
+	}
 	return theBoard->mPlants.mSize > mBaselinePlants;
 }
 
@@ -540,6 +630,60 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
 		return UpdateIntro(theApp, theManifest, *aDefinition, theFailure);
 	if (theApp->mGameScene != GameScenes::SCENE_PLAYING)
 		return true;
+
+	if (theManifest.IsClient())
+	{
+		Zombie* aGhost = nullptr;
+		while (aBoard->mZombies.IterateNext(aGhost))
+		{
+			if (aGhost->mDead || !aGhost->mNetGhost)
+				continue;
+			if ((fabsf(aGhost->mNetTargetX) < 0.01f && fabsf(aGhost->mPosX) >= 0.01f) ||
+				(fabsf(aGhost->mNetTargetY) < 0.01f && fabsf(aGhost->mPosY) >= 0.01f))
+			{
+				NetTrace("SMOKE_ZOMBIE_TARGET_INVALID id=%u type=%d pos=(%.2f,%.2f) target=(%.2f,%.2f)",
+					aGhost->mNetId, (int)aGhost->mZombieType, aGhost->mPosX, aGhost->mPosY,
+					aGhost->mNetTargetX, aGhost->mNetTargetY);
+				theFailure = "network zombie retained the default (0,0) interpolation target";
+				return false;
+			}
+		}
+	}
+
+	if (mScenario == NETSMOKE_SCENARIO_ADVENTURE_5_BOWLING &&
+		!mBowlingZombieObserved && aBoard->mCurrentWave > 0)
+	{
+		Zombie* aZombie = nullptr;
+		Zombie* aCandidate = nullptr;
+		while (aBoard->mZombies.IterateNext(aZombie))
+		{
+			if (aZombie->mDead || aZombie->mFromWave != 0 ||
+				aZombie->mNetId == 0 || (theManifest.IsClient() && !aZombie->mNetGhost))
+				continue;
+			if (!aCandidate || aZombie->mNetId < aCandidate->mNetId)
+				aCandidate = aZombie;
+		}
+		if (aCandidate)
+		{
+			Reanimation* aBodyReanim = theApp->ReanimationTryToGet(aCandidate->mBodyReanimID);
+			if (aCandidate->mPosX < 730.0f || !aBodyReanim)
+			{
+				NetTrace("SMOKE_ZOMBIE_SPAWN_INVALID role=%s id=%u ghost=%d type=%d pos=(%.2f,%.2f) target=(%.2f,%.2f) body=%p",
+					theManifest.IsHost() ? "host" : "client", aCandidate->mNetId,
+					aCandidate->mNetGhost ? 1 : 0, (int)aCandidate->mZombieType,
+					aCandidate->mPosX, aCandidate->mPosY, aCandidate->mNetTargetX,
+					aCandidate->mNetTargetY, (void*)aBodyReanim);
+				theFailure = "first Bowling zombie presentation appeared on the lawn instead of offscreen right";
+				return false;
+			}
+			mBowlingZombieObserved = true;
+			NetTrace("SMOKE_ZOMBIE_SPAWN_OBSERVED role=%s id=%u ghost=%d type=%d pos=(%.2f,%.2f) target=(%.2f,%.2f)",
+				theManifest.IsHost() ? "host" : "client", aCandidate->mNetId,
+				aCandidate->mNetGhost ? 1 : 0, (int)aCandidate->mZombieType,
+				aCandidate->mPosX, aCandidate->mPosY,
+				aCandidate->mNetTargetX, aCandidate->mNetTargetY);
+		}
+	}
 
 	if (mPlayingTick == 0)
 	{
@@ -608,17 +752,25 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
 		}
 	}
 
-	if (!mActionApplied && ObserveActionApplied(aBoard))
+	if (!mActionApplied && ObserveActionApplied(aBoard, theManifest, theFailure))
 	{
 		mActionApplied = true;
 		NetTrace("SMOKE_CHECKPOINT role=%s scenario=%s step=ACTION_APPLIED plants=%d pots=%d",
 			theManifest.IsHost() ? "host" : "client", aDefinition->mName,
 			aBoard->mPlants.mSize, CountScaryPots(aBoard));
 	}
+	if (!theFailure.empty())
+		return false;
 	if (mActionIssued && !mActionApplied &&
 		(uint32_t)(GetTickCount() - mActionTick) >= 30000)
 	{
 		theFailure = "scripted smoke action was not applied within 30 seconds";
+		return false;
+	}
+	if (mScenario == NETSMOKE_SCENARIO_ADVENTURE_5_BOWLING && !mActionApplied &&
+		(uint32_t)(GetTickCount() - mActionTick) >= 30000)
+	{
+		theFailure = "Bowling nut was not visibly moving on this peer within 30 seconds";
 		return false;
 	}
 	return true;
@@ -644,7 +796,9 @@ void NetSmokeScenarioRuntime::OnSnapshotApplied(uint32_t theHash, size_t theByte
 
 bool NetSmokeScenarioRuntime::IsComplete(uint32_t theRequiredPostActionSnapshots) const
 {
-	return mActionApplied && theRequiredPostActionSnapshots > 0 &&
+	return mActionApplied &&
+		(mScenario != NETSMOKE_SCENARIO_ADVENTURE_5_BOWLING || mBowlingZombieObserved) &&
+		theRequiredPostActionSnapshots > 0 &&
 		mPostActionSamples >= theRequiredPostActionSnapshots;
 }
 
