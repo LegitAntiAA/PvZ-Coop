@@ -562,7 +562,10 @@ bool LawnApp::UpdateAppStep(bool* updated)
 						if (NetIsClient() && mBoard && mGameScene == GameScenes::SCENE_PLAYING && GetDialogCount() == 0)
 							mNetManager->SendInput(true, buttonTrans(event.button.button), x, y);
 						else
-							mWidgetManager->MouseDown(event.button.x, event.button.y, buttonTrans(event.button.button));
+							// Use the same remapped logical coordinates as MouseMove and
+							// network input.  Feeding the raw SDL window coordinates here
+							// displaced local clicks after a resize/letterbox transform.
+							mWidgetManager->MouseDown(x, y, buttonTrans(event.button.button));
 					}
 					break;
 				case SDL_EVENT_MOUSE_BUTTON_UP:
@@ -584,7 +587,7 @@ bool LawnApp::UpdateAppStep(bool* updated)
 						if (NetIsClient() && mBoard && mGameScene == GameScenes::SCENE_PLAYING && GetDialogCount() == 0)
 							mNetManager->SendInput(false, buttonTrans(event.button.button), x, y);
 						else
-							mWidgetManager->MouseUp(event.button.x, event.button.y, buttonTrans(event.button.button));
+							mWidgetManager->MouseUp(x, y, buttonTrans(event.button.button));
 					}
 					break;
 				case SDL_EVENT_MOUSE_MOTION:
