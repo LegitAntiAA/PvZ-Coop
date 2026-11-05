@@ -27,7 +27,11 @@ namespace
 const uint32_t SMOKE_INTRO_TIMEOUT_MS = 60000;
 const uint32_t SMOKE_INTRO_ACTION_INTERVAL_MS = 500;
 const uint32_t SMOKE_SOAK_DURATION_MS = 60000;
-const uint32_t SMOKE_VICTORY_INTERACTION_MS = 20000;
+// Give both peers enough time to earn and collect shared sun after their real
+// chooser picks.  Twenty seconds was too short when the client owned only
+// higher-cost packets and correctly caused a false-negative before its first
+// legitimate planting opportunity.
+const uint32_t SMOKE_VICTORY_INTERACTION_MS = 60000;
 const uint32_t SMOKE_VICTORY_TERMINAL_TIMEOUT_MS = 30000;
 
 int SmokeLocalX(LawnApp* theApp, int theCanonicalX)
