@@ -14,7 +14,7 @@ param(
     [int]$GracefulExitSeconds = 10,
     [ValidateRange(0, 65535)]
     [int]$Port = 0,
-    [ValidateSet("Adventure1", "Adventure5Bowling", "Adventure5BowlingClient", "Adventure15WhackClient", "Vasebreaker", "Beghouled")]
+    [ValidateSet("Adventure1", "Adventure5Bowling", "Adventure5BowlingClient", "Adventure15WhackClient", "SlotMachineClient", "Vasebreaker", "Beghouled")]
     [string]$Scenario = "Adventure1",
     [ValidateSet(0, 1)]
     [int]$SkipIntro = 1,
@@ -717,6 +717,7 @@ $scenarioSpec = switch ($Scenario) {
     "Adventure5Bowling" { [ordered]@{ Mode = "adventure"; Level = 5; Marker = "adventure5_bowling" } }
     "Adventure5BowlingClient" { [ordered]@{ Mode = "adventure_bowling_client"; Level = 5; Marker = "adventure5_bowling_client" } }
     "Adventure15WhackClient" { [ordered]@{ Mode = "adventure_whack_client"; Level = 15; Marker = "adventure15_whack_client" } }
+    "SlotMachineClient" { [ordered]@{ Mode = "slot_machine_client"; Level = 1; Marker = "slot_machine_client" } }
     "Vasebreaker" { [ordered]@{ Mode = "vasebreaker"; Level = 1; Marker = "vasebreaker" } }
     "Beghouled" { [ordered]@{ Mode = "beghouled"; Level = 1; Marker = "beghouled" } }
     default { throw ("Unsupported smoke scenario: {0}" -f $Scenario) }
@@ -902,6 +903,44 @@ try {
             }
         )
     }
+    if ($Scenario -eq "SlotMachineClient") {
+        $hostPositivePatterns += @(
+            @{
+                Label = "host Slot Machine pull presentation"
+                Pattern = '(?im)\bSMOKE_SLOT_MACHINE_PRESENTATION\b[^\r\n]*\brole=host\b[^\r\n]*\broll=[1-9]\d*\b'
+            },
+            @{
+                Label = "host Slot Machine return"
+                Pattern = '(?im)\bSMOKE_SLOT_MACHINE_RETURN\b[^\r\n]*\brole=host\b[^\r\n]*\broll=[1-9]\d*\b[^\r\n]*\bsounds=1\b'
+            },
+            @{
+                Label = "host Slot Machine sound"
+                Pattern = '(?im)\bSMOKE_SLOT_MACHINE_SOUND\b[^\r\n]*\brole=host\b[^\r\n]*\bcount=1\b'
+            }
+        )
+        $clientPositivePatterns += @(
+            @{
+                Label = "client Slot Machine input"
+                Pattern = '(?im)\bSMOKE_SLOT_MACHINE_CLIENT_INPUT\b[^\r\n]*\broll=\d+\b'
+            },
+            @{
+                Label = "client Slot Machine pull presentation"
+                Pattern = '(?im)\bSMOKE_SLOT_MACHINE_PRESENTATION\b[^\r\n]*\brole=client\b[^\r\n]*\broll=[1-9]\d*\b'
+            },
+            @{
+                Label = "client Slot Machine transition hook"
+                Pattern = '(?im)\bslot-machine presentation pull\b[^\r\n]*\broll=[1-9]\d*\b'
+            },
+            @{
+                Label = "client Slot Machine return"
+                Pattern = '(?im)\bSMOKE_SLOT_MACHINE_RETURN\b[^\r\n]*\brole=client\b[^\r\n]*\broll=[1-9]\d*\b[^\r\n]*\bsounds=1\b'
+            },
+            @{
+                Label = "client Slot Machine sound"
+                Pattern = '(?im)\bSMOKE_SLOT_MACHINE_SOUND\b[^\r\n]*\brole=client\b[^\r\n]*\bcount=1\b'
+            }
+        )
+    }
     $negativePatterns = @(
         @{ Label = "access violation"; Pattern = '(?im)Access Violation' },
         @{ Label = "fatal network error"; Pattern = '(?im)\bfatal:' },
@@ -926,6 +965,7 @@ try {
     $combinedActionLog = $hostLog + [Environment]::NewLine + $clientLog
     $expectedActionOwner = if ($Scenario -eq "Adventure5BowlingClient" -or
         $Scenario -eq "Adventure15WhackClient" -or
+        $Scenario -eq "SlotMachineClient" -or
         $Scenario -eq "Vasebreaker" -or $Scenario -eq "Beghouled") { "client" } else { "host" }
     $actionIssuedPattern = ('(?im)\bSMOKE_CHECKPOINT\b[^\r\n]*scenario={0}[^\r\n]*step=ACTION_ISSUED[^\r\n]*owner={1}\b' -f
         ([regex]::Escape($scenarioMarker)), $expectedActionOwner)
@@ -998,6 +1038,35 @@ try {
         if ($whackIds.Count -ne 1) {
             throw ("Whack-a-Zombie target identity mismatch: {0}." -f
                 ($whackIds -join ","))
+        }
+    }
+    if ($Scenario -eq "SlotMachineClient") {
+        $clientSlotInput = [regex]::Match($clientLog,
+            '(?im)\bSMOKE_SLOT_MACHINE_CLIENT_INPUT\b[^\r\n]*\broll=(\d+)\b')
+        $hostSlotPresentation = [regex]::Match($hostLog,
+            '(?im)\bSMOKE_SLOT_MACHINE_PRESENTATION\b[^\r\n]*\brole=host\b[^\r\n]*\broll=([1-9]\d*)\b')
+        $clientSlotPresentation = [regex]::Match($clientLog,
+            '(?im)\bSMOKE_SLOT_MACHINE_PRESENTATION\b[^\r\n]*\brole=client\b[^\r\n]*\broll=([1-9]\d*)\b')
+        $hostSlotReturn = [regex]::Match($hostLog,
+            '(?im)\bSMOKE_SLOT_MACHINE_RETURN\b[^\r\n]*\brole=host\b[^\r\n]*\broll=([1-9]\d*)\b[^\r\n]*\bsounds=1\b')
+        $clientSlotReturn = [regex]::Match($clientLog,
+            '(?im)\bSMOKE_SLOT_MACHINE_RETURN\b[^\r\n]*\brole=client\b[^\r\n]*\broll=([1-9]\d*)\b[^\r\n]*\bsounds=1\b')
+        if (-not $clientSlotInput.Success -or -not $hostSlotPresentation.Success -or
+            -not $clientSlotPresentation.Success -or -not $hostSlotReturn.Success -or
+            -not $clientSlotReturn.Success) {
+            throw "Missing Slot Machine input/presentation/return correlation evidence."
+        }
+        $expectedSlotRoll = [uint32]$clientSlotInput.Groups[1].Value + 1
+        $hostSlotRoll = [uint32]$hostSlotPresentation.Groups[1].Value
+        $clientSlotRoll = [uint32]$clientSlotPresentation.Groups[1].Value
+        $hostSlotReturnRoll = [uint32]$hostSlotReturn.Groups[1].Value
+        $clientSlotReturnRoll = [uint32]$clientSlotReturn.Groups[1].Value
+        if ($hostSlotRoll -ne $expectedSlotRoll -or $clientSlotRoll -ne $expectedSlotRoll -or
+            $hostSlotReturnRoll -ne $expectedSlotRoll -or
+            $clientSlotReturnRoll -ne $expectedSlotRoll) {
+            throw ("Slot Machine roll mismatch: input={0}, expected={1}, hostPull={2}, clientPull={3}, hostReturn={4}, clientReturn={5}." -f
+                $clientSlotInput.Groups[1].Value, $expectedSlotRoll, $hostSlotRoll,
+                $clientSlotRoll, $hostSlotReturnRoll, $clientSlotReturnRoll)
         }
     }
 

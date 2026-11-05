@@ -14,6 +14,7 @@
 #include "../Widget/SeedChooserScreen.h"
 #include "../../LawnApp.h"
 #include "../../SexyAppFramework/DDInterface.h"
+#include "../../Sexy.TodLib/Reanimator.h"
 
 #include <windows.h>
 
@@ -414,6 +415,34 @@ bool IssueClientWhackAction(LawnApp* theApp, uint16_t& theTargetId)
 		aRect.mX, aRect.mY, aRect.mWidth, aRect.mHeight, aClickX, aClickY);
 	return true;
 }
+
+bool IssueClientSlotMachineAction(LawnApp* theApp)
+{
+	Board* aBoard = theApp ? theApp->mBoard : nullptr;
+	if (!aBoard || !aBoard->mChallenge || !aBoard->mSeedBank ||
+		!theApp->IsSlotMachineLevel() || aBoard->mSunMoney < 25 ||
+		aBoard->mChallenge->mChallengeState != ChallengeState::STATECHALLENGE_NORMAL ||
+		aBoard->mSeedBank->mNumPackets < 3)
+	{
+		return false;
+	}
+	for (int i = 0; i < 3; ++i)
+		if (aBoard->mSeedBank->mSeedPackets[i].mSlotMachineCountDown > 0)
+			return false;
+	Reanimation* aHandle =
+		theApp->ReanimationTryToGet(aBoard->mChallenge->mReanimChallenge);
+	if (!aHandle)
+		return false;
+	const Rect aHandleRect = aBoard->mChallenge->SlotMachineGetHandleRect();
+	const int aClickX = aHandleRect.mX + aHandleRect.mWidth / 2;
+	const int aClickY = aHandleRect.mY + aHandleRect.mHeight / 2;
+	SmokeClientClick(theApp, aClickX, aClickY);
+	NetTrace("SMOKE_SLOT_MACHINE_CLIENT_INPUT roll=%d sun=%d rect=(%d,%d,%d,%d) click=(%d,%d)",
+		aBoard->mChallenge->mSlotMachineRollCount, aBoard->mSunMoney,
+		aHandleRect.mX, aHandleRect.mY, aHandleRect.mWidth, aHandleRect.mHeight,
+		aClickX, aClickY);
+	return true;
+}
 }
 
 NetSmokeScenarioRuntime::NetSmokeScenarioRuntime()
@@ -435,6 +464,8 @@ void NetSmokeScenarioRuntime::Reset(NetSmokeScenarioId theScenario)
 	mBaselinePlants = 0;
 	mBaselinePots = 0;
 	mBaselineChallengeScore = 0;
+	mBaselineSlotMachineRollCount = 0;
+	mBaselineSunMoney = 0;
 	mBaselinePlantGridHash = 0;
 	mBowlingNutId = 0;
 	mWhackTargetId = 0;
@@ -451,6 +482,9 @@ void NetSmokeScenarioRuntime::Reset(NetSmokeScenarioId theScenario)
 	mBowlingNutMoved = false;
 	mBowlingZombieObserved = false;
 	mWhackRemovalObserved = false;
+	mSlotMachinePresentationObserved = false;
+	mSlotMachineReturnObserved = false;
+	mSlotMachineSoundCount = 0;
 	mPostActionSamples = 0;
 }
 
@@ -662,6 +696,8 @@ bool NetSmokeScenarioRuntime::IssueAction(LawnApp* theApp, const NetSmokeManifes
 		return IssueClientSeedAction(theApp);
 	if (mScenario == NETSMOKE_SCENARIO_ADVENTURE_15_WHACK_CLIENT)
 		return IssueClientWhackAction(theApp, mWhackTargetId);
+	if (mScenario == NETSMOKE_SCENARIO_SLOT_MACHINE_CLIENT)
+		return IssueClientSlotMachineAction(theApp);
 
 	return IssueHostSeedAction(theApp);
 }
@@ -751,6 +787,55 @@ bool NetSmokeScenarioRuntime::ObserveActionApplied(Board* theBoard,
 			}
 		}
 		return mWhackRemovalObserved;
+	}
+	if (mScenario == NETSMOKE_SCENARIO_SLOT_MACHINE_CLIENT)
+	{
+		if (!theBoard->mChallenge || !theBoard->mSeedBank ||
+			theBoard->mSeedBank->mNumPackets < 3)
+		{
+			return false;
+		}
+		const int aRoll = theBoard->mChallenge->mSlotMachineRollCount;
+		if (mSlotMachineSoundCount > 1)
+		{
+			theFailure = "Slot Machine sound played more than once on one peer";
+			return false;
+		}
+		const bool aRolling =
+			theBoard->mChallenge->mChallengeState ==
+				ChallengeState::STATECHALLENGE_SLOT_MACHINE_ROLLING &&
+			aRoll > mBaselineSlotMachineRollCount &&
+			theBoard->mSeedBank->mSeedPackets[0].mSlotMachineCountDown > 0;
+		Reanimation* aHandle = theBoard->mApp->ReanimationTryToGet(
+			theBoard->mChallenge->mReanimChallenge);
+		const bool aPullVisible = aHandle && aHandle->IsAnimPlaying("anim_pull") &&
+			aHandle->mAnimRate > 0.0f && aHandle->mAnimTime > 0.0f;
+		if (aRolling && aPullVisible && !mSlotMachinePresentationObserved)
+		{
+			mSlotMachinePresentationObserved = true;
+			NetTrace("SMOKE_SLOT_MACHINE_PRESENTATION role=%s roll=%d countdown=%d animTime=%.4f animRate=%.2f",
+				theManifest.IsHost() ? "host" : "client", aRoll,
+				theBoard->mSeedBank->mSeedPackets[0].mSlotMachineCountDown,
+				aHandle->mAnimTime, aHandle->mAnimRate);
+		}
+		const bool aStopped =
+			theBoard->mChallenge->mChallengeState == ChallengeState::STATECHALLENGE_NORMAL &&
+			aRoll == mBaselineSlotMachineRollCount + 1 &&
+			theBoard->mSunMoney == mBaselineSunMoney - 25 &&
+			theBoard->mSeedBank->mSeedPackets[0].mSlotMachineCountDown == 0 &&
+			theBoard->mSeedBank->mSeedPackets[1].mSlotMachineCountDown == 0 &&
+			theBoard->mSeedBank->mSeedPackets[2].mSlotMachineCountDown == 0;
+		const bool aReturnVisible = aHandle && aHandle->IsAnimPlaying("anim_return") &&
+			aHandle->mAnimRate > 0.0f;
+		if (mSlotMachinePresentationObserved && aStopped && aReturnVisible &&
+			mSlotMachineSoundCount == 1 && !mSlotMachineReturnObserved)
+		{
+			mSlotMachineReturnObserved = true;
+			NetTrace("SMOKE_SLOT_MACHINE_RETURN role=%s roll=%d sun=%d sounds=%d animTime=%.4f animRate=%.2f",
+				theManifest.IsHost() ? "host" : "client", aRoll, theBoard->mSunMoney,
+				mSlotMachineSoundCount, aHandle->mAnimTime, aHandle->mAnimRate);
+		}
+		return mSlotMachineReturnObserved;
 	}
 	return theBoard->mPlants.mSize > mBaselinePlants;
 }
@@ -871,6 +956,9 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
 		mBaselinePlants = aBoard->mPlants.mSize;
 		mBaselinePots = CountScaryPots(aBoard);
 		mBaselineChallengeScore = aBoard->mChallenge ? aBoard->mChallenge->mChallengeScore : 0;
+		mBaselineSlotMachineRollCount = aBoard->mChallenge ?
+			aBoard->mChallenge->mSlotMachineRollCount : 0;
+		mBaselineSunMoney = aBoard->mSunMoney;
 		mBaselinePlantGridHash = SmokePlantGridHash(aBoard);
 		if (mScenario == NETSMOKE_SCENARIO_VASEBREAKER && mBaselinePots <= 0)
 			return true;
@@ -881,6 +969,14 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
 		if (mScenario == NETSMOKE_SCENARIO_ADVENTURE_15_WHACK_CLIENT &&
 			!FindWhackSmokeTarget(aBoard))
 			return true;
+		if (mScenario == NETSMOKE_SCENARIO_SLOT_MACHINE_CLIENT &&
+			(!aBoard->mChallenge || !aBoard->mSeedBank ||
+			 aBoard->mSunMoney < 25 || aBoard->mSeedBank->mNumPackets < 3 ||
+			 aBoard->mChallenge->mChallengeState != ChallengeState::STATECHALLENGE_NORMAL ||
+			 !theApp->ReanimationTryToGet(aBoard->mChallenge->mReanimChallenge)))
+		{
+			return true;
+		}
 		mBaselineCaptured = true;
 		mActionTick = GetTickCount();
 		NetTrace("SMOKE_CHECKPOINT role=%s scenario=%s step=BASELINE plants=%d pots=%d zombies=%d snapshots=%u",
@@ -953,6 +1049,15 @@ void NetSmokeScenarioRuntime::OnAuthoritativeWhackHit(uint16_t theZombieId)
 		return;
 	mWhackTargetId = theZombieId;
 	NetTrace("SMOKE_WHACK_HOST_HIT targetId=%u", mWhackTargetId);
+}
+
+void NetSmokeScenarioRuntime::OnSlotMachineSound(bool theHost)
+{
+	if (mScenario != NETSMOKE_SCENARIO_SLOT_MACHINE_CLIENT)
+		return;
+	++mSlotMachineSoundCount;
+	NetTrace("SMOKE_SLOT_MACHINE_SOUND role=%s count=%d",
+		theHost ? "host" : "client", mSlotMachineSoundCount);
 }
 
 bool NetSmokeScenarioRuntime::IsComplete(uint32_t theRequiredPostActionSnapshots) const

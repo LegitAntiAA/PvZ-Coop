@@ -5253,6 +5253,8 @@ void LawnApp::PlaySample(int theSoundNum)
 	if (!mMuteSoundsForCutscene)
 	{
 		SexyAppBase::PlaySample(theSoundNum);
+		if (CoopSmokeActive() && theSoundNum == Sexy::SOUND_SLOT_MACHINE)
+			mCoopSmokeScenarioRuntime.OnSlotMachineSound(NetIsHost());
 
 		// co-op: host shares gameplay sounds with clients
 		if (mNetManager && mNetManager->IsHosting() && !LawnNet::gNetSuppressSounds)

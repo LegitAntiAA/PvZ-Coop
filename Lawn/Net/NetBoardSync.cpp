@@ -1722,6 +1722,10 @@ void Board::NetApplySnapshot(NetBuffer& b)
 {
 	const size_t aSmokeSnapshotBytes = b.Size();
 	const uint32_t aSmokeSnapshotHash = NetFnv1a32(b.Data(), b.Size());
+	const ChallengeState aPreviousChallengeState = mChallenge ?
+		mChallenge->mChallengeState : ChallengeState::STATECHALLENGE_NORMAL;
+	const int aPreviousSlotMachineRollCount = mChallenge ?
+		mChallenge->mSlotMachineRollCount : 0;
 	// Fixed core through the seed-packet count.  Validate it before touching
 	// board/profile state so a truncated datagram cannot partially apply.
 	static const size_t NET_SNAPSHOT_CORE_BYTES =
@@ -3122,6 +3126,31 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		NetTrace("snapshot ignored trailing bytes=%zu", b.Remaining());
 		return;
 	}
+
+	// Challenge::Update is deliberately host-only.  Reconstruct the slot-machine
+	// handle's cosmetic transitions only after the complete snapshot was accepted.
+	// The pull sound arrives once through reliable BOARDEV_SOUND; replaying it here
+	// would double the audio on clients.
+	if (mApp->IsSlotMachineLevel())
+	{
+		Reanimation* aHandle = mApp->ReanimationTryToGet(mChallenge->mReanimChallenge);
+		if (aHandle && aChallengeState == ChallengeState::STATECHALLENGE_SLOT_MACHINE_ROLLING &&
+			(aPreviousChallengeState != ChallengeState::STATECHALLENGE_SLOT_MACHINE_ROLLING ||
+			 aChallengeRuntime.mSlotMachineRollCount > aPreviousSlotMachineRollCount))
+		{
+			aHandle->PlayReanim("anim_pull", ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD, 0, 36.0f);
+			NetTrace("slot-machine presentation pull roll=%u previousRoll=%d",
+				aChallengeRuntime.mSlotMachineRollCount, aPreviousSlotMachineRollCount);
+		}
+		else if (aHandle &&
+			aPreviousChallengeState == ChallengeState::STATECHALLENGE_SLOT_MACHINE_ROLLING &&
+			aChallengeState == ChallengeState::STATECHALLENGE_NORMAL)
+		{
+			aHandle->PlayReanim("anim_return", ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD, 0, 24.0f);
+			NetTrace("slot-machine presentation return roll=%u",
+				aChallengeRuntime.mSlotMachineRollCount);
+		}
+	}
 	if (mApp && mApp->CoopSmokeActive())
 		mApp->CoopSmokeOnSnapshotApplied(aSmokeSnapshotHash, aSmokeSnapshotBytes);
 }
@@ -3573,6 +3602,16 @@ void Board::NetClientTick()
 		}
 	}
 	NetGhostUpdateOthers();
+
+	// Host Challenge::Update advances the Slot Machine's attachment-based handle.
+	// Clients do not run that gameplay update, so tick this presentation only.
+	if (!mPaused && mChallenge && mApp->IsSlotMachineLevel())
+	{
+		Reanimation* aChallengeReanim =
+			mApp->ReanimationTryToGet(mChallenge->mReanimChallenge);
+		if (aChallengeReanim && aChallengeReanim->mIsAttachment)
+			aChallengeReanim->Update();
+	}
 
 	// fade counters run locally for visuals
 	if (mBoardFadeOutCounter > 0)

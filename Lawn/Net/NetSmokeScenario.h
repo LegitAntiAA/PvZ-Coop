@@ -23,7 +23,8 @@ enum NetSmokeScenarioId : uint8_t
 	NETSMOKE_SCENARIO_VASEBREAKER = 3,
 	NETSMOKE_SCENARIO_BEGHOULED = 4,
 	NETSMOKE_SCENARIO_ADVENTURE_5_BOWLING_CLIENT = 5,
-	NETSMOKE_SCENARIO_ADVENTURE_15_WHACK_CLIENT = 6
+	NETSMOKE_SCENARIO_ADVENTURE_15_WHACK_CLIENT = 6,
+	NETSMOKE_SCENARIO_SLOT_MACHINE_CLIENT = 7
 };
 
 inline bool NetIsBowlingSmokeScenario(NetSmokeScenarioId theScenario)
@@ -61,7 +62,10 @@ inline const NetSmokeScenarioDefinition* NetSmokeScenarioTable(size_t& theCount)
 			(uint8_t)GameMode::GAMEMODE_ADVENTURE, true },
 		{ NETSMOKE_SCENARIO_ADVENTURE_15_WHACK_CLIENT,
 			"adventure15_whack_client", "adventure_whack_client", 15,
-			(uint8_t)GameMode::GAMEMODE_ADVENTURE, true }
+			(uint8_t)GameMode::GAMEMODE_ADVENTURE, true },
+		{ NETSMOKE_SCENARIO_SLOT_MACHINE_CLIENT,
+			"slot_machine_client", "slot_machine_client", 1,
+			(uint8_t)GameMode::GAMEMODE_CHALLENGE_SLOT_MACHINE, true }
 	};
 	theCount = sizeof(aScenarios) / sizeof(aScenarios[0]);
 	return aScenarios;
@@ -92,7 +96,8 @@ inline bool NetResolveSmokeScenario(const std::string& theMode, int theLevel,
 		}
 	}
 	theError = "unsupported smoke scenario; allowed pairs are adventure/1, adventure/5, "
-		"adventure_bowling_client/5, adventure_whack_client/15, vasebreaker/1, beghouled/1";
+		"adventure_bowling_client/5, adventure_whack_client/15, slot_machine_client/1, "
+		"vasebreaker/1, beghouled/1";
 	return false;
 }
 
@@ -114,6 +119,8 @@ private:
 	int mBaselinePlants;
 	int mBaselinePots;
 	int mBaselineChallengeScore;
+	int mBaselineSlotMachineRollCount;
+	int mBaselineSunMoney;
 	uint32_t mBaselinePlantGridHash;
 	uint16_t mBowlingNutId;
 	uint16_t mWhackTargetId;
@@ -130,6 +137,9 @@ private:
 	bool mBowlingNutMoved;
 	bool mBowlingZombieObserved;
 	bool mWhackRemovalObserved;
+	bool mSlotMachinePresentationObserved;
+	bool mSlotMachineReturnObserved;
+	int mSlotMachineSoundCount;
 	uint32_t mPostActionSamples;
 
 	bool UpdateIntro(LawnApp* theApp, const NetSmokeManifest& theManifest,
@@ -146,6 +156,7 @@ public:
 	void OnSnapshotTx(uint32_t theHash, size_t theBytes);
 	void OnSnapshotApplied(uint32_t theHash, size_t theBytes);
 	void OnAuthoritativeWhackHit(uint16_t theZombieId);
+	void OnSlotMachineSound(bool theHost);
 	bool IsComplete(uint32_t theRequiredPostActionSnapshots) const;
 	bool HasIssuedAction() const { return mActionIssued; }
 	bool HasAppliedAction() const { return mActionApplied; }

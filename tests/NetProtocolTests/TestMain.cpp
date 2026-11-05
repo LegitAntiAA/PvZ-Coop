@@ -518,6 +518,17 @@ void TestSmokeManifestAndHashValidation()
 
 	anError.clear();
 	CHECK(aTree.Parse(aTree.MakeManifest(aTree.mAppData.string(), aTree.mResult.string(),
+		"slot_machine_client", 1, 0), aManifest, anError));
+	CHECK(anError.empty());
+	CHECK(aManifest.mScenario == LawnNet::NETSMOKE_SCENARIO_SLOT_MACHINE_CLIENT);
+	CHECK(aManifest.mGameMode == (uint8_t)GameMode::GAMEMODE_CHALLENGE_SLOT_MACHINE);
+	const LawnNet::NetSmokeScenarioDefinition* aClientSlotMachine =
+		LawnNet::NetGetSmokeScenario(LawnNet::NETSMOKE_SCENARIO_SLOT_MACHINE_CLIENT);
+	CHECK(aClientSlotMachine != nullptr);
+	CHECK(aClientSlotMachine && aClientSlotMachine->mActionIsClientOwned);
+
+	anError.clear();
+	CHECK(aTree.Parse(aTree.MakeManifest(aTree.mAppData.string(), aTree.mResult.string(),
 		"vasebreaker", 1, 1), aManifest, anError));
 	CHECK(anError.empty());
 	CHECK(aManifest.mScenario == LawnNet::NETSMOKE_SCENARIO_VASEBREAKER);
