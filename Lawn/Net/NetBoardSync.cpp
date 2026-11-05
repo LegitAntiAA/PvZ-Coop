@@ -857,7 +857,8 @@ void Board::NetHostTick()
 			NetEncodeIntroState(anIntro);
 			aNet->BroadcastMessage(NETMSG_INTRO_STATE, anIntro);
 		}
-		else if (mApp->mGameScene == GameScenes::SCENE_PLAYING)
+		else if (mApp->mGameScene == GameScenes::SCENE_PLAYING ||
+			mApp->mGameScene == GameScenes::SCENE_ZOMBIES_WON)
 		{
 			NetBuffer aSnap;
 			NetEncodeSnapshot(aSnap);
@@ -1865,13 +1866,6 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	mApp->mNetManager->mRemotePaused = aPaused;
 	if (aLevelComplete)
 		mLevelComplete = true;
-
-	// zombies won: trigger the same cutscene the host shows
-	if (aZombiesWon && mApp->mGameScene != GameScenes::SCENE_ZOMBIES_WON)
-	{
-		mApp->mGameScene = GameScenes::SCENE_ZOMBIES_WON;
-		mCutScene->StartZombiesWon();
-	}
 
 	// ---- seed packets ----
 	if (b.Remaining() < 1)
@@ -3158,6 +3152,19 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	}
 	if (mChallenge)
 		mChallenge->mShowBowlingLine = aShowBowlingLine;
+	// Terminal presentation is committed only after the complete snapshot passed
+	// every variable-section check.  The host continues sending terminal snapshots
+	// in ZOMBIES_WON so a dropped last gameplay packet cannot strand the client.
+	if (aZombiesWon && mApp->mGameScene != GameScenes::SCENE_ZOMBIES_WON)
+	{
+		mApp->mBoardResult = BoardResult::BOARDRESULT_LOST;
+		mApp->mGameScene = GameScenes::SCENE_ZOMBIES_WON;
+		mCutScene->StartZombiesWon();
+		FreezeEffectsForCutscene(true);
+		TutorialArrowRemove();
+		UpdateCursor();
+		NetTrace("terminal loss snapshot applied boardResult=%d", (int)mApp->mBoardResult);
+	}
 	if (mApp && mApp->CoopSmokeActive())
 		mApp->CoopSmokeOnSnapshotApplied(aSmokeSnapshotHash, aSmokeSnapshotBytes);
 }
