@@ -14,7 +14,7 @@ param(
     [int]$GracefulExitSeconds = 10,
     [ValidateRange(0, 65535)]
     [int]$Port = 0,
-    [ValidateSet("Adventure1", "Adventure5Bowling", "Adventure5BowlingClient", "Vasebreaker", "Beghouled")]
+    [ValidateSet("Adventure1", "Adventure5Bowling", "Adventure5BowlingClient", "Adventure15WhackClient", "Vasebreaker", "Beghouled")]
     [string]$Scenario = "Adventure1",
     [ValidateSet(0, 1)]
     [int]$SkipIntro = 1,
@@ -716,6 +716,7 @@ $scenarioSpec = switch ($Scenario) {
     "Adventure1" { [ordered]@{ Mode = "adventure"; Level = 1; Marker = "adventure1" } }
     "Adventure5Bowling" { [ordered]@{ Mode = "adventure"; Level = 5; Marker = "adventure5_bowling" } }
     "Adventure5BowlingClient" { [ordered]@{ Mode = "adventure_bowling_client"; Level = 5; Marker = "adventure5_bowling_client" } }
+    "Adventure15WhackClient" { [ordered]@{ Mode = "adventure_whack_client"; Level = 15; Marker = "adventure15_whack_client" } }
     "Vasebreaker" { [ordered]@{ Mode = "vasebreaker"; Level = 1; Marker = "vasebreaker" } }
     "Beghouled" { [ordered]@{ Mode = "beghouled"; Level = 1; Marker = "beghouled" } }
     default { throw ("Unsupported smoke scenario: {0}" -f $Scenario) }
@@ -879,6 +880,28 @@ try {
             }
         }
     }
+    if ($Scenario -eq "Adventure15WhackClient") {
+        $hostPositivePatterns += @(
+            @{
+                Label = "host authoritative Whack hit"
+                Pattern = '(?im)\bSMOKE_WHACK_HOST_HIT\b[^\r\n]*\btargetId=[1-9]\d*\b'
+            },
+            @{
+                Label = "host Whack removal"
+                Pattern = '(?im)\bSMOKE_WHACK_REMOVAL_OBSERVED\b[^\r\n]*\brole=host\b[^\r\n]*\btargetId=[1-9]\d*\b'
+            }
+        )
+        $clientPositivePatterns += @(
+            @{
+                Label = "client Whack input"
+                Pattern = '(?im)\bSMOKE_WHACK_CLIENT_INPUT\b[^\r\n]*\btargetId=[1-9]\d*\b'
+            },
+            @{
+                Label = "client Whack removal"
+                Pattern = '(?im)\bSMOKE_WHACK_REMOVAL_OBSERVED\b[^\r\n]*\brole=client\b[^\r\n]*\btargetId=[1-9]\d*\b'
+            }
+        )
+    }
     $negativePatterns = @(
         @{ Label = "access violation"; Pattern = '(?im)Access Violation' },
         @{ Label = "fatal network error"; Pattern = '(?im)\bfatal:' },
@@ -902,6 +925,7 @@ try {
 
     $combinedActionLog = $hostLog + [Environment]::NewLine + $clientLog
     $expectedActionOwner = if ($Scenario -eq "Adventure5BowlingClient" -or
+        $Scenario -eq "Adventure15WhackClient" -or
         $Scenario -eq "Vasebreaker" -or $Scenario -eq "Beghouled") { "client" } else { "host" }
     $actionIssuedPattern = ('(?im)\bSMOKE_CHECKPOINT\b[^\r\n]*scenario={0}[^\r\n]*step=ACTION_ISSUED[^\r\n]*owner={1}\b' -f
         ([regex]::Escape($scenarioMarker)), $expectedActionOwner)
@@ -954,6 +978,26 @@ try {
                 throw ("Remote Bowling packet identity mismatch: client={0}, remap={1}, apply={2}." -f
                     $clientPacketId, $hostRemapPacketId, $hostApplyPacketId)
             }
+        }
+    }
+    if ($Scenario -eq "Adventure15WhackClient") {
+        $clientWhack = [regex]::Match($clientLog,
+            '(?im)\bSMOKE_WHACK_CLIENT_INPUT\b[^\r\n]*\btargetId=([1-9]\d*)\b')
+        $hostWhack = [regex]::Match($hostLog,
+            '(?im)\bSMOKE_WHACK_HOST_HIT\b[^\r\n]*\btargetId=([1-9]\d*)\b')
+        $hostRemoval = [regex]::Match($hostLog,
+            '(?im)\bSMOKE_WHACK_REMOVAL_OBSERVED\b[^\r\n]*\brole=host\b[^\r\n]*\btargetId=([1-9]\d*)\b')
+        $clientRemoval = [regex]::Match($clientLog,
+            '(?im)\bSMOKE_WHACK_REMOVAL_OBSERVED\b[^\r\n]*\brole=client\b[^\r\n]*\btargetId=([1-9]\d*)\b')
+        $whackEvidence = @($clientWhack, $hostWhack, $hostRemoval, $clientRemoval)
+        if (@($whackEvidence | Where-Object { -not $_.Success }).Count -ne 0) {
+            throw "Missing Whack-a-Zombie target lifecycle evidence."
+        }
+        $whackIds = @($whackEvidence | ForEach-Object { [uint32]$_.Groups[1].Value } |
+            Select-Object -Unique)
+        if ($whackIds.Count -ne 1) {
+            throw ("Whack-a-Zombie target identity mismatch: {0}." -f
+                ($whackIds -join ","))
         }
     }
 

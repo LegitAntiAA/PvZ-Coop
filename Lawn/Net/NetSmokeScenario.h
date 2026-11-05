@@ -22,7 +22,8 @@ enum NetSmokeScenarioId : uint8_t
 	NETSMOKE_SCENARIO_ADVENTURE_5_BOWLING = 2,
 	NETSMOKE_SCENARIO_VASEBREAKER = 3,
 	NETSMOKE_SCENARIO_BEGHOULED = 4,
-	NETSMOKE_SCENARIO_ADVENTURE_5_BOWLING_CLIENT = 5
+	NETSMOKE_SCENARIO_ADVENTURE_5_BOWLING_CLIENT = 5,
+	NETSMOKE_SCENARIO_ADVENTURE_15_WHACK_CLIENT = 6
 };
 
 inline bool NetIsBowlingSmokeScenario(NetSmokeScenarioId theScenario)
@@ -57,6 +58,9 @@ inline const NetSmokeScenarioDefinition* NetSmokeScenarioTable(size_t& theCount)
 			(uint8_t)GameMode::GAMEMODE_CHALLENGE_BEGHOULED, true },
 		{ NETSMOKE_SCENARIO_ADVENTURE_5_BOWLING_CLIENT,
 			"adventure5_bowling_client", "adventure_bowling_client", 5,
+			(uint8_t)GameMode::GAMEMODE_ADVENTURE, true },
+		{ NETSMOKE_SCENARIO_ADVENTURE_15_WHACK_CLIENT,
+			"adventure15_whack_client", "adventure_whack_client", 15,
 			(uint8_t)GameMode::GAMEMODE_ADVENTURE, true }
 	};
 	theCount = sizeof(aScenarios) / sizeof(aScenarios[0]);
@@ -88,7 +92,7 @@ inline bool NetResolveSmokeScenario(const std::string& theMode, int theLevel,
 		}
 	}
 	theError = "unsupported smoke scenario; allowed pairs are adventure/1, adventure/5, "
-		"adventure_bowling_client/5, vasebreaker/1, beghouled/1";
+		"adventure_bowling_client/5, adventure_whack_client/15, vasebreaker/1, beghouled/1";
 	return false;
 }
 
@@ -112,6 +116,7 @@ private:
 	int mBaselineChallengeScore;
 	uint32_t mBaselinePlantGridHash;
 	uint16_t mBowlingNutId;
+	uint16_t mWhackTargetId;
 	int mBowlingFirstX;
 	int mBowlingFirstY;
 	bool mIntroObserved;
@@ -124,6 +129,7 @@ private:
 	bool mBowlingNutObserved;
 	bool mBowlingNutMoved;
 	bool mBowlingZombieObserved;
+	bool mWhackRemovalObserved;
 	uint32_t mPostActionSamples;
 
 	bool UpdateIntro(LawnApp* theApp, const NetSmokeManifest& theManifest,
@@ -139,6 +145,7 @@ public:
 		uint32_t theGameplaySnapshots, std::string& theFailure);
 	void OnSnapshotTx(uint32_t theHash, size_t theBytes);
 	void OnSnapshotApplied(uint32_t theHash, size_t theBytes);
+	void OnAuthoritativeWhackHit(uint16_t theZombieId);
 	bool IsComplete(uint32_t theRequiredPostActionSnapshots) const;
 	bool HasIssuedAction() const { return mActionIssued; }
 	bool HasAppliedAction() const { return mActionApplied; }

@@ -1296,6 +1296,8 @@ void Challenge::MouseDownWhackAZombie(int theX, int theY)
 
 	if (aTopZombie)
 	{
+		if (mApp->NetIsHost() && mApp->CoopSmokeActive())
+			mApp->mCoopSmokeScenarioRuntime.OnAuthoritativeWhackHit(aTopZombie->mNetId);
 		if (aTopZombie->mHelmType != HELMTYPE_NONE)
 		{
 			if (aTopZombie->mHelmType == HELMTYPE_BUCKET)

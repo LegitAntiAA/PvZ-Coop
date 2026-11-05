@@ -1,6 +1,6 @@
 # Two-process co-op smoke harness
 
-`RunCoopSmoke.ps1` launches one host and one client against loopback, starts one of five deterministic scenarios, performs one scenario-specific gameplay action, validates both result files and diagnostic logs, and checks that a post-action snapshot transmitted by the host was applied by the client with the same FNV-1a hash.
+`RunCoopSmoke.ps1` launches one host and one client against loopback, starts one of six deterministic scenarios, performs one scenario-specific gameplay action, validates both result files and diagnostic logs, and checks that a post-action snapshot transmitted by the host was applied by the client with the same FNV-1a hash.
 
 The runner has no external dependencies beyond Windows PowerShell 5.1. It uses the game-side `-coop-smoke-manifest=<absolute path>` hook described by `SmokeManifest.example.ini`. Each process has isolated appdata, config, logs, result, window dimensions, and profile state. The hook automatically hosts/connects/starts and writes `result_path` atomically only after the scripted action is visible on both sides and at least `minimum_snapshots` post-action snapshots were observed. The runner then closes the exact client process first and the exact host process second through their main windows.
 
@@ -11,6 +11,7 @@ Supported scenarios are deliberately fail-closed:
 | `Adventure1` | `mode=adventure`, `level=1` | Host selects the ready Peashooter packet and plants through `Board::MouseDown/Up`. |
 | `Adventure5Bowling` | `mode=adventure`, `level=5` | Host takes the first ready conveyor packet and rolls it through the normal board mouse path. |
 | `Adventure5BowlingClient` | `mode=adventure_bowling_client`, `level=5` | Client selects a host-identified conveyor packet through ordered network clicks; both peers must show the same moving nut. |
+| `Adventure15WhackClient` | `mode=adventure_whack_client`, `level=15` | Client hits a host-identified ordinary zombie with the hammer; both peers must observe the stock immediate removal under the same network ID. |
 | `Vasebreaker` | `mode=vasebreaker`, `level=1` | Client clicks the first live vase through the strict network input path. |
 | `Beghouled` | `mode=beghouled`, `level=1` | Client performs a valid drag through the strict network input path. |
 
@@ -33,10 +34,10 @@ Useful overrides:
   -Seed 424242 -TimeoutSeconds 180 -MinimumSnapshots 5
 ```
 
-Run the five-scenario tranche explicitly:
+Run the six-scenario tranche explicitly:
 
 ```powershell
-foreach ($scenario in "Adventure1", "Adventure5Bowling", "Adventure5BowlingClient", "Vasebreaker", "Beghouled") {
+foreach ($scenario in "Adventure1", "Adventure5Bowling", "Adventure5BowlingClient", "Adventure15WhackClient", "Vasebreaker", "Beghouled") {
   .\tests\CoopSmoke\RunCoopSmoke.ps1 -Scenario $scenario -SkipIntro 1
 }
 ```
@@ -55,4 +56,4 @@ The client uses the same fields with `"role":"client"` and a non-zero `snapshots
 
 Each GUID artifact tree preserves generated configs/manifests, role logs, atomic result JSON, a PID ledger, and `summary.json`. Failed runs are never cleaned automatically.
 
-The game must run in an interactive Windows desktop session; this is process automation, not a headless renderer. This tranche proves launch/lifecycle, coordinate handling, representative host/client actions, and post-action state convergence for the five scenarios. It is not a complete scripted playthrough or a substitute for the broader mini-game regression matrix.
+The game must run in an interactive Windows desktop session; this is process automation, not a headless renderer. This tranche proves launch/lifecycle, coordinate handling, representative host/client actions, and post-action state convergence for the six scenarios. It is not a complete scripted playthrough or a substitute for the broader mini-game regression matrix.

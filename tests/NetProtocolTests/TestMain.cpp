@@ -507,6 +507,17 @@ void TestSmokeManifestAndHashValidation()
 
 	anError.clear();
 	CHECK(aTree.Parse(aTree.MakeManifest(aTree.mAppData.string(), aTree.mResult.string(),
+		"adventure_whack_client", 15, 0), aManifest, anError));
+	CHECK(anError.empty());
+	CHECK(aManifest.mScenario == LawnNet::NETSMOKE_SCENARIO_ADVENTURE_15_WHACK_CLIENT);
+	CHECK(aManifest.mGameMode == (uint8_t)GameMode::GAMEMODE_ADVENTURE);
+	const LawnNet::NetSmokeScenarioDefinition* aClientWhack =
+		LawnNet::NetGetSmokeScenario(LawnNet::NETSMOKE_SCENARIO_ADVENTURE_15_WHACK_CLIENT);
+	CHECK(aClientWhack != nullptr);
+	CHECK(aClientWhack && aClientWhack->mActionIsClientOwned);
+
+	anError.clear();
+	CHECK(aTree.Parse(aTree.MakeManifest(aTree.mAppData.string(), aTree.mResult.string(),
 		"vasebreaker", 1, 1), aManifest, anError));
 	CHECK(anError.empty());
 	CHECK(aManifest.mScenario == LawnNet::NETSMOKE_SCENARIO_VASEBREAKER);

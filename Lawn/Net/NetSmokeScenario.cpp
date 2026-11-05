@@ -352,6 +352,68 @@ Plant* FindBowlingSmokeNut(Board* theBoard, uint16_t thePreferredId)
 	}
 	return aFallback;
 }
+
+Zombie* FindSmokeZombieById(Board* theBoard, uint16_t theId)
+{
+	if (!theBoard || theId == 0)
+		return nullptr;
+	Zombie* aZombie = nullptr;
+	while (theBoard->mZombies.IterateNext(aZombie))
+	{
+		if (aZombie->mNetId == theId)
+			return aZombie;
+	}
+	return nullptr;
+}
+
+Zombie* FindWhackSmokeTarget(Board* theBoard)
+{
+	if (!theBoard || !theBoard->mApp || !theBoard->mCursorObject ||
+		theBoard->mCursorObject->mCursorType != CursorType::CURSOR_TYPE_HAMMER)
+		return nullptr;
+	Zombie* aZombie = nullptr;
+	Zombie* aBest = nullptr;
+	while (theBoard->mZombies.IterateNext(aZombie))
+	{
+		if (aZombie->mDead || aZombie->IsDeadOrDying() || aZombie->mNetId == 0 ||
+			aZombie->mZombieType != ZombieType::ZOMBIE_NORMAL ||
+			aZombie->mZombiePhase == ZombiePhase::PHASE_RISING_FROM_GRAVE ||
+			!aZombie->mHasHead || aZombie->mHelmType != HelmType::HELMTYPE_NONE ||
+			aZombie->mShieldType != ShieldType::SHIELDTYPE_NONE ||
+			!theBoard->mApp->ReanimationTryToGet(aZombie->mBodyReanimID))
+		{
+			continue;
+		}
+		const Rect aRect = aZombie->GetZombieRect();
+		if (aRect.mWidth <= 0 || aRect.mHeight <= 0 || aRect.mX < 0 ||
+			aRect.mY < 40 || aRect.mX + aRect.mWidth > BOARD_WIDTH ||
+			aRect.mY + aRect.mHeight > BOARD_HEIGHT)
+		{
+			continue;
+		}
+		if (!aBest || aZombie->mNetId < aBest->mNetId)
+			aBest = aZombie;
+	}
+	return aBest;
+}
+
+bool IssueClientWhackAction(LawnApp* theApp, uint16_t& theTargetId)
+{
+	Board* aBoard = theApp ? theApp->mBoard : nullptr;
+	Zombie* aTarget = FindWhackSmokeTarget(aBoard);
+	if (!aBoard || !aTarget)
+		return false;
+	const Rect aRect = aTarget->GetZombieRect();
+	const int aClickX = aRect.mX + aRect.mWidth / 2;
+	// MouseDownWhackAZombie tests a 45px circle centred 20px above the click.
+	const int aClickY = aRect.mY + aRect.mHeight / 2 + 20;
+	theTargetId = aTarget->mNetId;
+	SmokeClientClick(theApp, aClickX, aClickY);
+	NetTrace("SMOKE_WHACK_CLIENT_INPUT targetId=%u type=%d phase=%d rect=(%d,%d,%d,%d) click=(%d,%d)",
+		theTargetId, (int)aTarget->mZombieType, (int)aTarget->mZombiePhase,
+		aRect.mX, aRect.mY, aRect.mWidth, aRect.mHeight, aClickX, aClickY);
+	return true;
+}
 }
 
 NetSmokeScenarioRuntime::NetSmokeScenarioRuntime()
@@ -375,6 +437,7 @@ void NetSmokeScenarioRuntime::Reset(NetSmokeScenarioId theScenario)
 	mBaselineChallengeScore = 0;
 	mBaselinePlantGridHash = 0;
 	mBowlingNutId = 0;
+	mWhackTargetId = 0;
 	mBowlingFirstX = 0;
 	mBowlingFirstY = 0;
 	mIntroObserved = false;
@@ -387,6 +450,7 @@ void NetSmokeScenarioRuntime::Reset(NetSmokeScenarioId theScenario)
 	mBowlingNutObserved = false;
 	mBowlingNutMoved = false;
 	mBowlingZombieObserved = false;
+	mWhackRemovalObserved = false;
 	mPostActionSamples = 0;
 }
 
@@ -596,6 +660,8 @@ bool NetSmokeScenarioRuntime::IssueAction(LawnApp* theApp, const NetSmokeManifes
 	}
 	if (mScenario == NETSMOKE_SCENARIO_ADVENTURE_5_BOWLING_CLIENT)
 		return IssueClientSeedAction(theApp);
+	if (mScenario == NETSMOKE_SCENARIO_ADVENTURE_15_WHACK_CLIENT)
+		return IssueClientWhackAction(theApp, mWhackTargetId);
 
 	return IssueHostSeedAction(theApp);
 }
@@ -665,6 +731,26 @@ bool NetSmokeScenarioRuntime::ObserveActionApplied(Board* theBoard,
 				(int)aNut->mState, aNut->mRenderOrder);
 		}
 		return mBowlingNutObserved && mBowlingNutMoved;
+	}
+	if (mScenario == NETSMOKE_SCENARIO_ADVENTURE_15_WHACK_CLIENT)
+	{
+		if (mWhackTargetId == 0)
+			return false;
+		Zombie* aTarget = FindSmokeZombieById(theBoard, mWhackTargetId);
+		// Whack-a-Zombie intentionally calls DieWithLoot directly rather than
+		// PlayDeathAnim, so the stock result is immediate removal after the POW.
+		// A retired client ghost can remain in DataArray for one cleanup tick with
+		// mDead set; treat that as the same authoritative removal.
+		if (!aTarget || aTarget->mDead)
+		{
+			if (!mWhackRemovalObserved)
+			{
+				mWhackRemovalObserved = true;
+				NetTrace("SMOKE_WHACK_REMOVAL_OBSERVED role=%s targetId=%u",
+					theManifest.IsHost() ? "host" : "client", mWhackTargetId);
+			}
+		}
+		return mWhackRemovalObserved;
 	}
 	return theBoard->mPlants.mSize > mBaselinePlants;
 }
@@ -792,11 +878,14 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
 			(!aBoard->mChallenge ||
 				aBoard->mChallenge->mChallengeState != ChallengeState::STATECHALLENGE_NORMAL))
 			return true;
+		if (mScenario == NETSMOKE_SCENARIO_ADVENTURE_15_WHACK_CLIENT &&
+			!FindWhackSmokeTarget(aBoard))
+			return true;
 		mBaselineCaptured = true;
 		mActionTick = GetTickCount();
-		NetTrace("SMOKE_CHECKPOINT role=%s scenario=%s step=BASELINE plants=%d pots=%d snapshots=%u",
+		NetTrace("SMOKE_CHECKPOINT role=%s scenario=%s step=BASELINE plants=%d pots=%d zombies=%d snapshots=%u",
 			theManifest.IsHost() ? "host" : "client", aDefinition->mName,
-			mBaselinePlants, mBaselinePots, theGameplaySnapshots);
+			mBaselinePlants, mBaselinePots, aBoard->mZombies.mSize, theGameplaySnapshots);
 	}
 
 	if (!mActionIssued && aDefinition->mActionIsClientOwned == theManifest.IsClient())
@@ -819,9 +908,9 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
 	if (!mActionApplied && ObserveActionApplied(aBoard, theManifest, theFailure))
 	{
 		mActionApplied = true;
-		NetTrace("SMOKE_CHECKPOINT role=%s scenario=%s step=ACTION_APPLIED plants=%d pots=%d",
+		NetTrace("SMOKE_CHECKPOINT role=%s scenario=%s step=ACTION_APPLIED plants=%d pots=%d targetId=%u",
 			theManifest.IsHost() ? "host" : "client", aDefinition->mName,
-			aBoard->mPlants.mSize, CountScaryPots(aBoard));
+			aBoard->mPlants.mSize, CountScaryPots(aBoard), mWhackTargetId);
 	}
 	if (!theFailure.empty())
 		return false;
@@ -856,6 +945,14 @@ void NetSmokeScenarioRuntime::OnSnapshotApplied(uint32_t theHash, size_t theByte
 	++mPostActionSamples;
 	NetTrace("SMOKE_POST_ACTION_APPLIED index=%u bytes=%zu hash=%08x",
 		mPostActionSamples, theBytes, theHash);
+}
+
+void NetSmokeScenarioRuntime::OnAuthoritativeWhackHit(uint16_t theZombieId)
+{
+	if (mScenario != NETSMOKE_SCENARIO_ADVENTURE_15_WHACK_CLIENT || theZombieId == 0)
+		return;
+	mWhackTargetId = theZombieId;
+	NetTrace("SMOKE_WHACK_HOST_HIT targetId=%u", mWhackTargetId);
 }
 
 bool NetSmokeScenarioRuntime::IsComplete(uint32_t theRequiredPostActionSnapshots) const
