@@ -6413,6 +6413,23 @@ void LawnApp::NetDrawCursorOverlay()
                                         &aTintedTool, aCursorX, aCursorY,
                                         (CursorType)aCursor.mCursorType,
                                         aRemoteSeed, aRemoteImitater);
+
+				// A cursor packet alone does not prove that the stock tool made it
+				// through the overlay draw path.  Record the first rendered instance
+				// of every remote tool per slot for the visible co-op smoke tests.
+				if (aDrewSpecialCursor && mCoopSmokeManifest.mEnabled &&
+					aCursor.mCursorType < 32)
+				{
+					static uint32_t aLoggedRemoteTools[LawnNet::NET_MAX_PLAYERS] = {};
+					const uint32_t aToolBit = 1u << aCursor.mCursorType;
+					if ((aLoggedRemoteTools[i] & aToolBit) == 0)
+					{
+						aLoggedRemoteTools[i] |= aToolBit;
+						LawnNet::NetTrace("SMOKE_REMOTE_CURSOR_RENDER role=%s slot=%d type=%u stock=1 pos=(%d,%d)",
+							mCoopSmokeManifest.IsHost() ? "host" : "client", i,
+							(unsigned)aCursor.mCursorType, aCursorX, aCursorY);
+					}
+				}
                         }
                 }
 

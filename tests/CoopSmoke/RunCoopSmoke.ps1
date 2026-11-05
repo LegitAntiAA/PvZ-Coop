@@ -895,6 +895,10 @@ try {
             @{
                 Label = "host Whack removal"
                 Pattern = '(?im)\bSMOKE_WHACK_REMOVAL_OBSERVED\b[^\r\n]*\brole=host\b[^\r\n]*\btargetId=[1-9]\d*\b'
+            },
+            @{
+                Label = "host rendered remote stock hammer"
+                Pattern = '(?im)\bSMOKE_REMOTE_CURSOR_RENDER\b[^\r\n]*\brole=host\b[^\r\n]*\bslot=1\b[^\r\n]*\btype=7\b[^\r\n]*\bstock=1\b'
             }
         )
         $clientPositivePatterns += @(
@@ -905,6 +909,10 @@ try {
             @{
                 Label = "client Whack removal"
                 Pattern = '(?im)\bSMOKE_WHACK_REMOVAL_OBSERVED\b[^\r\n]*\brole=client\b[^\r\n]*\btargetId=[1-9]\d*\b'
+            },
+            @{
+                Label = "client rendered remote stock hammer"
+                Pattern = '(?im)\bSMOKE_REMOTE_CURSOR_RENDER\b[^\r\n]*\brole=client\b[^\r\n]*\bslot=0\b[^\r\n]*\btype=7\b[^\r\n]*\bstock=1\b'
             }
         )
     }
@@ -997,7 +1005,9 @@ try {
         @{ Label = "invalid Bowling ghost target"; Pattern = '(?im)\bSMOKE_BOWLING_TARGET_INVALID\b' },
         @{ Label = "invalid Bowling presentation"; Pattern = '(?im)\bSMOKE_BOWLING_PRESENTATION_INVALID\b' },
         @{ Label = "uninitialized zombie ghost target"; Pattern = '(?im)\bSMOKE_ZOMBIE_TARGET_INVALID\b' },
-        @{ Label = "on-lawn zombie spawn"; Pattern = '(?im)\bSMOKE_ZOMBIE_SPAWN_INVALID\b' }
+        @{ Label = "on-lawn zombie spawn"; Pattern = '(?im)\bSMOKE_ZOMBIE_SPAWN_INVALID\b' },
+        @{ Label = "rejected ready-set-plant"; Pattern = '(?im)\bREADY_SET_PLANT rejected\b' },
+        @{ Label = "dropped ready-set-plant"; Pattern = '(?im)\bboard event dropped outside gameplay type=24\b' }
     )
 
     Assert-PositivePatterns -Role "host" -Text $hostLog -Patterns $hostPositivePatterns
