@@ -885,6 +885,16 @@ try {
                 Pattern = '(?im)\bSMOKE_BOWLING_CLIENT_INPUT\b[^\r\n]*\bindex=\d+\b[^\r\n]*\bpacketId=[1-9]\d*\b[^\r\n]*\bduplicates=\d+\b'
             }
         }
+        if ($Scenario -eq "Adventure5Bowling" -and $SkipIntro -eq 0) {
+            $hostPositivePatterns += @{
+                Label = "host stock shovel pickup"
+                Pattern = '(?im)\bSMOKE_CHECKPOINT\b[^\r\n]*\bstep=INTRO_SHOVEL_PICKUP\b'
+            }
+            $clientPositivePatterns += @{
+                Label = "client rendered remote stock shovel"
+                Pattern = '(?im)\bSMOKE_REMOTE_CURSOR_RENDER\b[^\r\n]*\brole=client\b[^\r\n]*\bslot=0\b[^\r\n]*\btype=6\b[^\r\n]*\bstock=1\b'
+            }
+        }
     }
     if ($Scenario -eq "Adventure15WhackClient") {
         $hostPositivePatterns += @(
