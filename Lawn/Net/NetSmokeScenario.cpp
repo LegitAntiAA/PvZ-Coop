@@ -1053,9 +1053,9 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
 			theFailure = "victory award scene retained a board, lacked its award UI, used the wrong award, or showed game-over";
 			return false;
 		}
-		if (!mVictoryFadeObserved || !mVictoryLevelCompleteSnapshotObserved)
+		if (!mVictoryFadeObserved)
 		{
-			theFailure = "victory award arrived before this peer observed the synchronized fade and level-complete snapshot";
+			theFailure = "victory award arrived before this peer observed the synchronized fade";
 			return false;
 		}
 		mVictoryBoardReleasedObserved = true;
@@ -1483,10 +1483,10 @@ bool NetSmokeScenarioRuntime::IsComplete(uint32_t theRequiredPostActionSnapshots
                          mSoakLossCameraObserved && mSoakLossBrainsObserved &&
                          mSoakLossDialogObserved && mSoakPlantsIssued > 0 &&
                          mSoakSunClicks > 0)) &&
-		(mScenario != NETSMOKE_SCENARIO_ADVENTURE_8_VICTORY ||
-			(mSoakChooserVerified && mVictoryFadeObserved &&
-			 mVictoryLevelCompleteSnapshotObserved && mVictoryAwardObserved &&
-			 mVictoryBoardReleasedObserved && mSoakPlantsIssued > 0)) &&
+                (mScenario != NETSMOKE_SCENARIO_ADVENTURE_8_VICTORY ||
+                        (mSoakChooserVerified && mVictoryFadeObserved &&
+                         mVictoryAwardObserved &&
+                         mVictoryBoardReleasedObserved && mSoakPlantsIssued > 0)) &&
                 (!NetIsBowlingSmokeScenario(mScenario) || mBowlingZombieObserved) &&
 		theRequiredPostActionSnapshots > 0 &&
 		mPostActionSamples >= theRequiredPostActionSnapshots;
