@@ -968,6 +968,12 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 	b.WriteU8((uint8_t)mTutorialState);
 	b.WriteU8((uint8_t)min(255, mIceTrapCounter));
 	b.WriteU8((uint8_t)min(255, mShakeCounter));
+	// Board widget coordinates are canonical 800x600 camera coordinates.  The
+	// local widescreen viewport offset is deliberately not folded into them.
+	b.WriteI16((int16_t)max(-2048, min(2048, mX)));
+	b.WriteI16((int16_t)max(-1024, min(1024, mY)));
+	b.WriteI16((int16_t)max(-4096, min(4096, mTreeX)));
+	b.WriteI16((int16_t)max(-4096, min(4096, mPoleX)));
 
 	// ice trails (visual)
 	for (int i = 0; i < MAX_GRID_SIZE_Y; i++)
@@ -1031,6 +1037,17 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 	b.WriteU8((uint8_t)max(0, mNetTDLives));
 
 	// ---- seed packets ----
+	// Packet identity alone is not enough for conveyor levels: a client that
+	// enters playing without receiving the last intro frame can otherwise keep
+	// the entire bank offscreen.  Carry the stock bank presentation in every
+	// gameplay snapshot so this also covers late join/recovery in every conveyor
+	// mode, rather than special-casing Portal Combat.
+	b.WriteI16((int16_t)max(-2048, min(2048, mSeedBank->mX)));
+	b.WriteI16((int16_t)max(-1024, min(1024, mSeedBank->mY)));
+	// Draw uses counter/4%6, so the complete visual phase is modulo 24.  A U16
+	// wrap would introduce a two-frame phase jump because 65536 is not /24.
+	b.WriteU8((uint8_t)(mSeedBank->mConveyorBeltCounter % 24));
+	b.WriteU8((uint8_t)max(0, min(255, mSeedBank->mCutSceneDarken)));
 	b.WriteU8((uint8_t)mSeedBank->mNumPackets);
 	for (int i = 0; i < mSeedBank->mNumPackets; i++)
 	{
@@ -1839,7 +1856,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	// Fixed core through the seed-packet count.  Validate it before touching
 	// board/profile state so a truncated datagram cannot partially apply.
 	static const size_t NET_SNAPSHOT_CORE_BYTES =
-		72 + NET_CHALLENGE_RUNTIME_WIRE_BYTES;
+		80 + NET_CHALLENGE_RUNTIME_WIRE_BYTES;
 	if (b.Remaining() < NET_SNAPSHOT_CORE_BYTES)
 	{
 		NetTrace("snapshot core rejected: bytes=%zu expected-at-least=%zu", b.Remaining(), NET_SNAPSHOT_CORE_BYTES);
@@ -1879,6 +1896,19 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	mTutorialState = (TutorialState)b.ReadU8Or();
 	mIceTrapCounter = b.ReadU8Or();
 	mShakeCounter = b.ReadU8Or();
+	const int aGameplayBoardX = b.ReadI16Or();
+	const int aGameplayBoardY = b.ReadI16Or();
+	const int aGameplayTreeX = b.ReadI16Or();
+	const int aGameplayPoleX = b.ReadI16Or();
+	if (aGameplayBoardX < -2048 || aGameplayBoardX > 2048 ||
+		aGameplayBoardY < -1024 || aGameplayBoardY > 1024 ||
+		aGameplayTreeX < -4096 || aGameplayTreeX > 4096 ||
+		aGameplayPoleX < -4096 || aGameplayPoleX > 4096)
+	{
+		NetTrace("snapshot camera rejected: board=(%d,%d) tree=%d pole=%d",
+			aGameplayBoardX, aGameplayBoardY, aGameplayTreeX, aGameplayPoleX);
+		return;
+	}
 
 	for (int i = 0; i < MAX_GRID_SIZE_Y; i++)
 	{
@@ -1975,16 +2005,23 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		mLevelComplete = true;
 
 	// ---- seed packets ----
-	if (b.Remaining() < 1)
+	if (b.Remaining() < 7)
 	{
-		NetTrace("snapshot seed section truncated before count");
+		NetTrace("snapshot seed section truncated before presentation/count bytes=%zu", b.Remaining());
 		return;
 	}
+	const int aSeedBankX = b.ReadI16Or();
+	const int aSeedBankY = b.ReadI16Or();
+	const int aConveyorCounter = b.ReadU8Or();
+	const int aSeedBankDarken = b.ReadU8Or();
 	uint8_t aNumPackets = b.ReadU8Or();
-	if (!mSeedBank || aNumPackets > SEEDBANK_CAPACITY ||
+	if (!mSeedBank || aSeedBankX < -2048 || aSeedBankX > 2048 ||
+		aSeedBankY < -1024 || aSeedBankY > 1024 ||
+		aNumPackets > SEEDBANK_CAPACITY ||
 		b.Remaining() < (size_t)aNumPackets * NET_SEED_PACKET_WIRE_BYTES)
 	{
-		NetTrace("snapshot seed section rejected count=%u remaining=%zu bank=%d",
+		NetTrace("snapshot seed section rejected bank=(%d,%d) counter=%d darken=%d count=%u remaining=%zu bank=%d",
+			aSeedBankX, aSeedBankY, aConveyorCounter, aSeedBankDarken,
 			aNumPackets, b.Remaining(), mSeedBank ? 1 : 0);
 		return;
 	}
@@ -2166,16 +2203,18 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	auto ApplySeedRuntimeState = [&](SeedPacket& thePacket,
 		const NetSeedPacketWire& theWire, bool theApplyCanonicalIdentity)
 	{
+		const bool anIdentityChanged = thePacket.mNetId != theWire.mId;
 		thePacket.mNetId = theWire.mId;
 		if (theApplyCanonicalIdentity)
 		{
 			SeedType aType = theWire.mType == 255 ? SeedType::SEED_NONE : (SeedType)theWire.mType;
 			SeedType anImitater = theWire.mImitater == 255 ? SeedType::SEED_NONE : (SeedType)theWire.mImitater;
-			if (thePacket.mPacketType != aType || thePacket.mImitaterType != anImitater)
+			if (thePacket.mPacketType != aType || thePacket.mImitaterType != anImitater ||
+				(HasConveyorBeltSeedBank() && anIdentityChanged))
 			{
 				// SetPacketType queries plant definitions.  Empty and challenge-only
 				// packet ids deliberately live outside that table and use a raw reset.
-				if (aType == SeedType::SEED_NONE ||
+				if (HasConveyorBeltSeedBank() || aType == SeedType::SEED_NONE ||
 					(int)aType >= (int)SeedType::NUM_SEED_TYPES)
 				{
 					thePacket.mPacketType = aType;
@@ -2212,6 +2251,24 @@ void Board::NetApplySnapshot(NetBuffer& b)
 			aSeedPackets[aWireIndex], true);
 	}
 	mSeedBank->mNumPackets = aNumPackets;
+	mSeedBank->Move(aSeedBankX, aSeedBankY);
+	mSeedBank->mConveyorBeltCounter = aConveyorCounter;
+	mSeedBank->mCutSceneDarken = aSeedBankDarken;
+	if (HasConveyorBeltSeedBank())
+	{
+		// A client starts with an empty/local bank in several challenge entry
+		// paths.  Canonical packet adoption changes the count but historically
+		// left every packet's base coordinates at zero, clipping or stacking the
+		// cards.  Recompute only geometry; identities/runtime fields above remain
+		// authoritative.
+		mSeedBank->mWidth = Sexy::IMAGE_SEEDBANK->GetWidth() + GetSeedBankExtraWidth();
+		mSeedBank->mHeight = Sexy::IMAGE_SEEDBANK->GetHeight();
+		for (int i = 0; i < mSeedBank->mNumPackets; ++i)
+		{
+			mSeedBank->mSeedPackets[i].mX = GetSeedPacketPositionX(i);
+			mSeedBank->mSeedPackets[i].mY = GetSeedPacketPositionY(i);
+		}
+	}
 
 	// ---- plants ----
 	if (b.Remaining() < 2)
@@ -2583,15 +2640,28 @@ void Board::NetApplySnapshot(NetBuffer& b)
 			aZombie->mNetGhost = true;
 			aZombie->mNetAnimKey = 255;
 		}
-		aZombie->mRow = aWire.mRow;
+		const int aPreviousRow = aZombie->mRow;
+		const float aTargetX = aWire.mPosX4 / 4.0f;
+		const float aTargetY = aWire.mPosY4 / 4.0f;
+		const bool aPortalJump = !aCreated &&
+			mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_PORTAL_COMBAT &&
+			aPreviousRow != aWire.mRow &&
+			(fabsf(aTargetX - aZombie->mPosX) >= 120.0f ||
+			 fabsf(aTargetY - aZombie->mPosY) >= 50.0f);
+		if (aPreviousRow != aWire.mRow)
+			aZombie->SetRow(aWire.mRow);
 		aZombie->mNetTargetX = aWire.mPosX4 / 4.0f;
 		aZombie->mNetTargetY = aWire.mPosY4 / 4.0f;
-		if (aCreated)
+		if (aCreated || aPortalJump)
 		{
 			aZombie->mPosX = aZombie->mNetTargetX;
 			aZombie->mPosY = aZombie->mNetTargetY;
 			aZombie->mX = (int)aZombie->mPosX;
 			aZombie->mY = (int)aZombie->mPosY;
+			if (aPortalJump)
+				NetTrace("portal zombie presentation snap id=%u row=%d->%u pos=(%.2f,%.2f)",
+					aWire.mId, aPreviousRow, aWire.mRow,
+					aZombie->mPosX, aZombie->mPosY);
 		}
 		aZombie->mBodyHealth = aWire.mBodyHealth;
 		aZombie->mBodyMaxHealth = aWire.mBodyMaxHealth;
@@ -2756,12 +2826,18 @@ void Board::NetApplySnapshot(NetBuffer& b)
 			aProjectile->mNetId = aWire.mId;
 			aProjectile->mNetGhost = true;
 		}
+		const int aPreviousRow = aProjectile->mRow;
+		const bool aPortalJump = !aCreated &&
+			mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_PORTAL_COMBAT &&
+			aPreviousRow != aWire.mRow &&
+			(fabsf(aWire.mPosX - aProjectile->mPosX) >= 120.0f ||
+			 fabsf(aWire.mPosY - aProjectile->mPosY) >= 50.0f);
 		aProjectile->mRow = aWire.mRow;
 		aProjectile->mNetTargetX = aWire.mPosX;
 		aProjectile->mNetTargetY = aWire.mPosY;
 		aProjectile->mNetTargetZ = aWire.mPosZ;
 		aProjectile->mNetTargetRotation = aWire.mRotation;
-		if (aCreated)
+		if (aCreated || aPortalJump)
 		{
 			aProjectile->mPosX = aWire.mPosX;
 			aProjectile->mPosY = aWire.mPosY;
@@ -2769,6 +2845,10 @@ void Board::NetApplySnapshot(NetBuffer& b)
 			aProjectile->mRotation = aWire.mRotation;
 			aProjectile->mX = (int)aWire.mPosX;
 			aProjectile->mY = (int)(aWire.mPosY + aWire.mPosZ);
+			if (aPortalJump)
+				NetTrace("portal projectile presentation snap id=%u row=%d->%u pos=(%.2f,%.2f,%.2f)",
+					aWire.mId, aPreviousRow, aWire.mRow,
+					aWire.mPosX, aWire.mPosY, aWire.mPosZ);
 		}
 		aProjectile->mShadowY = aWire.mShadowY;
 		aProjectile->mRenderOrder = aWire.mRenderOrder;
@@ -3087,6 +3167,12 @@ void Board::NetApplySnapshot(NetBuffer& b)
 			}
 		}
 
+		const int aPreviousRow = aMower->mRow;
+		const bool aPortalJump = !aCreated &&
+			mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_PORTAL_COMBAT &&
+			aPreviousRow != aWire.mRow &&
+			(fabsf(aWire.mPosX - aMower->mPosX) >= 120.0f ||
+			 fabsf(aWire.mPosY - aMower->mPosY) >= 50.0f);
 		aMower->mNetId = aWire.mId;
 		aMower->mNetGhost = true;
 		aMower->mRow = aWire.mRow;
@@ -3094,10 +3180,14 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		aMower->mVisible = aWire.mVisible;
 		aMower->mNetTargetX = aWire.mPosX;
 		aMower->mNetTargetY = aWire.mPosY;
-		if (aCreated)
+		if (aCreated || aPortalJump)
 		{
 			aMower->mPosX = aWire.mPosX;
 			aMower->mPosY = aWire.mPosY;
+			if (aPortalJump)
+				NetTrace("portal mower presentation snap id=%u row=%d->%u pos=(%.2f,%.2f)",
+					aWire.mId, aPreviousRow, aWire.mRow,
+					aWire.mPosX, aWire.mPosY);
 		}
 		aMower->mRenderOrder = aWire.mRenderOrder;
 		aMower->mAltitude = aWire.mAltitude;
@@ -3270,7 +3360,10 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		while (mGridItems.IterateNext(aGridItem))
 			if (!aGridItem->mDead &&
 				((aGridItem->mNetGhost && aSeenGridItems.find(aGridItem->mNetId) == aSeenGridItems.end()) ||
-				 (!aGridItem->mNetGhost && aGridItem->mGridItemType == GridItemType::GRIDITEM_SCARY_POT)))
+				 (!aGridItem->mNetGhost &&
+				  (aGridItem->mGridItemType == GridItemType::GRIDITEM_SCARY_POT ||
+				   aGridItem->mGridItemType == GridItemType::GRIDITEM_PORTAL_CIRCLE ||
+				   aGridItem->mGridItemType == GridItemType::GRIDITEM_PORTAL_SQUARE))))
 				aGridItem->GridItemDie();
 	}
 	if (b.Remaining() != 0)
@@ -3307,6 +3400,25 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	}
 	if (mChallenge)
 		mChallenge->mShowBowlingLine = aShowBowlingLine;
+	// Commit camera presentation only after every fixed and variable section has
+	// validated.  A malformed tail must not move the client viewport.
+	const bool aFirstGameplayCameraSample = !mNetGameplayCameraTargets.mValid;
+	const bool aCameraDiscontinuity = abs(aGameplayBoardX - mX) >= 160 ||
+		abs(aGameplayBoardY - mY) >= 120;
+	mNetGameplayCameraTargets.mBoardX = aGameplayBoardX;
+	mNetGameplayCameraTargets.mBoardY = aGameplayBoardY;
+	mNetGameplayCameraTargets.mTreeX = aGameplayTreeX;
+	mNetGameplayCameraTargets.mPoleX = aGameplayPoleX;
+	mNetGameplayCameraTargets.mValid = true;
+	if (aFirstGameplayCameraSample || aCameraDiscontinuity)
+	{
+		Move(aGameplayBoardX, aGameplayBoardY);
+		mTreeX = aGameplayTreeX;
+		mPoleX = aGameplayPoleX;
+	}
+	// Intro targets describe a different scene and must never pull a playing
+	// client back toward its final cutscene camera sample.
+	mNetIntroTargets.mValid = false;
 	// Terminal presentation is committed only after the complete snapshot passed
 	// every variable-section check.  The host continues sending terminal snapshots
 	// in ZOMBIES_WON so a dropped last gameplay packet cannot strand the client.
@@ -3434,6 +3546,21 @@ void Board::NetGhostUpdateOthers()
 			aGridReanim->mLoopType == ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD && aGridReanim->mLoopCount > 0)
 		{
 			aGridReanim->PlayReanim("anim_pulse", ReanimLoopType::REANIM_LOOP, 0, 12.0f);
+			if (!mApp->ParticleTryToGet(aGridItem->mGridItemParticleID))
+			{
+				ParticleEffect anEffect = ParticleEffect::PARTICLE_PORTAL_CIRCLE;
+				float aX = aGridItem->mGridX * 80.0f + 13.0f;
+				float aY = GridToPixelY(0, aGridItem->mGridY) - 39.0f;
+				if (aGridItem->mGridItemType == GridItemType::GRIDITEM_PORTAL_SQUARE)
+				{
+					anEffect = ParticleEffect::PARTICLE_PORTAL_SQUARE;
+					aX -= 8.0f;
+					aY += 15.0f;
+				}
+				TodParticleSystem* aParticle = mApp->AddTodParticle(aX, aY, 0, anEffect);
+				if (aParticle)
+					aGridItem->mGridItemParticleID = mApp->ParticleGetID(aParticle);
+			}
 		}
 	}
 }
@@ -3721,7 +3848,17 @@ void Board::NetClientTick()
 {
 	// Drain and apply incoming messages first (events then snapshots in order)
 	NetDrainMessages();
-	NetUpdateIntroPresentation(false);
+	if (mApp->mGameScene == GameScenes::SCENE_LEVEL_INTRO)
+		NetUpdateIntroPresentation(false);
+	else if (mNetGameplayCameraTargets.mValid &&
+		(mApp->mGameScene == GameScenes::SCENE_PLAYING ||
+		 mApp->mGameScene == GameScenes::SCENE_ZOMBIES_WON))
+	{
+		Move(NetApproachPresentationInt(mX, mNetGameplayCameraTargets.mBoardX),
+			NetApproachPresentationInt(mY, mNetGameplayCameraTargets.mBoardY));
+		mTreeX = NetApproachPresentationInt(mTreeX, mNetGameplayCameraTargets.mTreeX);
+		mPoleX = NetApproachPresentationInt(mPoleX, mNetGameplayCameraTargets.mPoleX);
+	}
 
 	// ghost micro-updates (interpolation, cosmetic counters)
 	Zombie* aZombie = nullptr;

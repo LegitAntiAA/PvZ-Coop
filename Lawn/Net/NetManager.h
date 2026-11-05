@@ -39,8 +39,9 @@ struct NetRemoteCursor
 	uint8_t mHeldSeed;		// SeedType held in hand (for silhouette rendering)
 	uint8_t mHeldImitater;
 	uint8_t mFlags;
+	uint16_t mHeldPacketId;
 	NetRemoteCursor() { Clear(); }
-	void Clear() { mValid = false; mX = 0; mY = 0; mRenderX = 0; mRenderY = 0; mCursorType = 0; mHeldSeed = 255; mHeldImitater = 255; mFlags = 0; }
+	void Clear() { mValid = false; mX = 0; mY = 0; mRenderX = 0; mRenderY = 0; mCursorType = 0; mHeldSeed = 255; mHeldImitater = 255; mFlags = 0; mHeldPacketId = 0; }
 	void SetTarget(int16_t theX, int16_t theY)
 	{
 		if (!mValid) { mRenderX = (float)theX; mRenderY = (float)theY; }

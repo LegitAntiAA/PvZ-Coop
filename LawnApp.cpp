@@ -6379,28 +6379,34 @@ void LawnApp::NetHandleRemoteInputs()
 		};
 		{
 			ScopedRemoteInput aGuard(this, mNetManager, aBatchBoard, anInput.mSlot);
-			LawnNet::NetTrace("mouse apply slot=%u epoch=%u seq=%u action=%u button=%d local=(%d,%d) board=%p",
+			// Network mouse coordinates are canonical screen coordinates.  Widget
+			// dispatch normally subtracts Board::mX/mY before entering Board::Mouse*,
+			// so the direct authoritative path must do the same while the camera pans.
+			const int aBoardLocalX = anInput.mX - aBatchBoard->mX;
+			const int aBoardLocalY = anInput.mY - aBatchBoard->mY;
+			LawnNet::NetTrace("mouse apply slot=%u epoch=%u seq=%u action=%u button=%d screen=(%d,%d) boardLocal=(%d,%d) boardPos=(%d,%d) board=%p",
 				anInput.mSlot, anInput.mEpoch, anInput.mSequence, anInput.mAction,
-				anInput.mButton, anInput.mX, anInput.mY, (void*)aBatchBoard);
+				anInput.mButton, anInput.mX, anInput.mY, aBoardLocalX, aBoardLocalY,
+				aBatchBoard->mX, aBatchBoard->mY, (void*)aBatchBoard);
 			if (anInput.mAction == LawnNet::NETINPUT_MOUSE_DOWN)
 			{
-				aBatchBoard->MouseMove(anInput.mX, anInput.mY);
-				aBatchBoard->MouseDown(anInput.mX, anInput.mY, anInput.mButton);
+				aBatchBoard->MouseMove(aBoardLocalX, aBoardLocalY);
+				aBatchBoard->MouseDown(aBoardLocalX, aBoardLocalY, anInput.mButton);
 			}
 			else if (anInput.mAction == LawnNet::NETINPUT_MOUSE_MOVE)
 			{
 				if (anInput.mButton != 0)
-					aBatchBoard->MouseDrag(anInput.mX, anInput.mY);
+					aBatchBoard->MouseDrag(aBoardLocalX, aBoardLocalY);
 				else
-					aBatchBoard->MouseMove(anInput.mX, anInput.mY);
+					aBatchBoard->MouseMove(aBoardLocalX, aBoardLocalY);
 			}
 			else
 			{
 				// Apply the release position while challenge capture is still alive.
 				// This makes short/faster drags deterministic even if all coalesced
 				// motion packets between DOWN and UP were intentionally throttled.
-				aBatchBoard->MouseDrag(anInput.mX, anInput.mY);
-				aBatchBoard->MouseUp(anInput.mX, anInput.mY, anInput.mButton);
+				aBatchBoard->MouseDrag(aBoardLocalX, aBoardLocalY);
+				aBatchBoard->MouseUp(aBoardLocalX, aBoardLocalY, anInput.mButton);
 			}
 		}
 

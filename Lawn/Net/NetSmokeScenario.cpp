@@ -20,6 +20,7 @@
 #include "../../Sexy.TodLib/Reanimator.h"
 
 #include <windows.h>
+#include <sstream>
 
 namespace LawnNet
 {
@@ -230,6 +231,151 @@ bool ValidateTowerDefenseSmokePath(Board* theBoard,
 	return true;
 }
 
+struct PortalSmokeRecord
+{
+	uint16_t mId;
+	uint8_t mType;
+	uint8_t mState;
+	uint8_t mGridX;
+	uint8_t mGridY;
+	int mTrackCount;
+};
+
+bool ValidatePortalCombatSmokeLayout(Board* theBoard,
+	const NetSmokeManifest& theManifest, std::string& theFailure,
+	uint32_t* theLayoutHash = nullptr)
+{
+	if (!theBoard || !theBoard->mApp)
+	{
+		theFailure = "Portal Combat board is unavailable";
+		return false;
+	}
+
+	PortalSmokeRecord aRecords[4] = {};
+	int aCount = 0;
+	int aCircleCount = 0;
+	int aSquareCount = 0;
+	int aTotalTracks = 0;
+	GridItem* aGridItem = nullptr;
+	while (theBoard->mGridItems.IterateNext(aGridItem))
+	{
+		if (aGridItem->mDead ||
+			(aGridItem->mGridItemType != GridItemType::GRIDITEM_PORTAL_CIRCLE &&
+			 aGridItem->mGridItemType != GridItemType::GRIDITEM_PORTAL_SQUARE))
+			continue;
+		if (aCount >= 4 || aGridItem->mNetId == 0 ||
+			aGridItem->mGridItemState != GridItemState::GRIDITEM_STATE_NORMAL ||
+			aGridItem->mGridX < 0 || aGridItem->mGridX > MAX_GRID_SIZE_X ||
+			aGridItem->mGridY < 0 || aGridItem->mGridY >= 5)
+		{
+			NetTrace("SMOKE_PORTAL_LAYOUT_INVALID role=%s count=%d id=%u type=%d state=%d cell=(%d,%d)",
+				theManifest.IsHost() ? "host" : "client", aCount + 1,
+				aGridItem->mNetId, (int)aGridItem->mGridItemType,
+				(int)aGridItem->mGridItemState, aGridItem->mGridX, aGridItem->mGridY);
+			theFailure = "Portal Combat contains an invalid or extra live portal";
+			return false;
+		}
+
+		Reanimation* aReanim =
+			theBoard->mApp->ReanimationTryToGet(aGridItem->mGridItemReanimID);
+		const ReanimationType anExpectedType =
+			aGridItem->mGridItemType == GridItemType::GRIDITEM_PORTAL_CIRCLE ?
+			ReanimationType::REANIM_PORTAL_CIRCLE : ReanimationType::REANIM_PORTAL_SQUARE;
+		bool aRealImage = false;
+		int aTrackCount = 0;
+		if (aReanim && !aReanim->mDead && aReanim->mReanimationType == anExpectedType &&
+			aReanim->mDefinition && aReanim->mDefinition->mTracks.tracks &&
+			aReanim->mDefinition->mTracks.count > 0)
+		{
+			aTrackCount = aReanim->mDefinition->mTracks.count;
+			for (int i = 0; i < aTrackCount; ++i)
+			{
+				const char* aTrackName = aReanim->mDefinition->mTracks.tracks[i].mName;
+				if (!aTrackName || !*aTrackName)
+					continue;
+				Image* anImage = aReanim->GetCurrentTrackImage(aTrackName);
+				if (anImage && anImage->GetWidth() > 1 && anImage->GetHeight() > 1)
+				{
+					aRealImage = true;
+					break;
+				}
+			}
+		}
+		if (!aRealImage)
+		{
+			NetTrace("SMOKE_PORTAL_RESOURCE_INVALID role=%s id=%u type=%d reanim=%p expected=%d actual=%d tracks=%d",
+				theManifest.IsHost() ? "host" : "client", aGridItem->mNetId,
+				(int)aGridItem->mGridItemType, (void*)aReanim, (int)anExpectedType,
+				aReanim ? (int)aReanim->mReanimationType : -1, aTrackCount);
+			theFailure = "Portal Combat portal reanimation has no real image resource";
+			return false;
+		}
+
+		PortalSmokeRecord aRecord = {};
+		aRecord.mId = aGridItem->mNetId;
+		aRecord.mType = (uint8_t)aGridItem->mGridItemType;
+		aRecord.mState = (uint8_t)aGridItem->mGridItemState;
+		aRecord.mGridX = (uint8_t)aGridItem->mGridX;
+		aRecord.mGridY = (uint8_t)aGridItem->mGridY;
+		aRecord.mTrackCount = aTrackCount;
+		int anInsert = aCount;
+		while (anInsert > 0 && aRecords[anInsert - 1].mId > aRecord.mId)
+		{
+			aRecords[anInsert] = aRecords[anInsert - 1];
+			--anInsert;
+		}
+		aRecords[anInsert] = aRecord;
+		++aCount;
+		aTotalTracks += aTrackCount;
+		if (aGridItem->mGridItemType == GridItemType::GRIDITEM_PORTAL_CIRCLE)
+			++aCircleCount;
+		else
+			++aSquareCount;
+	}
+
+	if (aCount != 4 || aCircleCount != 2 || aSquareCount != 2)
+	{
+		NetTrace("SMOKE_PORTAL_LAYOUT_INVALID role=%s count=%d circles=%d squares=%d",
+			theManifest.IsHost() ? "host" : "client", aCount, aCircleCount, aSquareCount);
+		theFailure = "Portal Combat did not expose exactly two live portals of each type";
+		return false;
+	}
+	for (int i = 1; i < aCount; ++i)
+	{
+		if (aRecords[i - 1].mId == aRecords[i].mId)
+		{
+			theFailure = "Portal Combat portals reused a network identity";
+			return false;
+		}
+	}
+
+	uint8_t aCanonical[24] = {};
+	for (int i = 0; i < 4; ++i)
+	{
+		const int aBase = i * 6;
+		aCanonical[aBase] = (uint8_t)(aRecords[i].mId & 0xFFU);
+		aCanonical[aBase + 1] = (uint8_t)(aRecords[i].mId >> 8);
+		aCanonical[aBase + 2] = aRecords[i].mType;
+		aCanonical[aBase + 3] = aRecords[i].mState;
+		aCanonical[aBase + 4] = aRecords[i].mGridX;
+		aCanonical[aBase + 5] = aRecords[i].mGridY;
+	}
+	const uint32_t aHash = NetFnv1a32(aCanonical, sizeof(aCanonical));
+	if (theLayoutHash)
+		*theLayoutHash = aHash;
+	NetTrace("SMOKE_PORTAL_LAYOUT role=%s count=4 circles=2 squares=2 hash=%08x ids=%u,%u,%u,%u types=%u,%u,%u,%u cells=%u:%u,%u:%u,%u:%u,%u:%u states=%u,%u,%u,%u resources=4 tracks=%d",
+		theManifest.IsHost() ? "host" : "client", aHash,
+		aRecords[0].mId, aRecords[1].mId, aRecords[2].mId, aRecords[3].mId,
+		aRecords[0].mType, aRecords[1].mType, aRecords[2].mType, aRecords[3].mType,
+		aRecords[0].mGridX, aRecords[0].mGridY,
+		aRecords[1].mGridX, aRecords[1].mGridY,
+		aRecords[2].mGridX, aRecords[2].mGridY,
+		aRecords[3].mGridX, aRecords[3].mGridY,
+		aRecords[0].mState, aRecords[1].mState,
+		aRecords[2].mState, aRecords[3].mState, aTotalTracks);
+	return true;
+}
+
 bool SmokeBeghouledMatchAt(SeedType theGrid[BEGHOULED_MAX_GRIDSIZEX][BEGHOULED_MAX_GRIDSIZEY],
 	int theGridX, int theGridY)
 {
@@ -403,7 +549,51 @@ bool IssueSoakSeedAction(LawnApp* theApp, bool theClient)
         NetTrace("SMOKE_SOAK_PLANT role=%s owner=%u type=%d cell=(%d,%d)",
                 theClient ? "client" : "host", anOwner, (int)aPacket->mPacketType,
                 aGridX, aGridY);
-        return true;
+	return true;
+}
+
+bool IssuePortalClientSeedPick(LawnApp* theApp, int thePreferredRow,
+	uint16_t& thePacketId, int& thePacketIndex, int& thePlantColumn, int& thePlantRow)
+{
+	Board* aBoard = theApp ? theApp->mBoard : nullptr;
+	if (!aBoard || !aBoard->mSeedBank || !theApp->mNetManager ||
+		theApp->mGameMode != GameMode::GAMEMODE_CHALLENGE_PORTAL_COMBAT)
+		return false;
+	const unsigned char anOwner = (unsigned char)theApp->mNetManager->GetMySlot();
+	for (int i = 0; i < aBoard->mSeedBank->mNumPackets; ++i)
+	{
+		SeedPacket* aPacket = &aBoard->mSeedBank->mSeedPackets[i];
+		if (aPacket->mPacketType == SeedType::SEED_NONE || aPacket->mNetId == 0 ||
+			!aPacket->CanPickUp() ||
+			(aPacket->mNetOwnerSlot != anOwner &&
+			 aPacket->mNetOwnerSlot != NET_SHARED_OWNER))
+			continue;
+		for (int aRowPass = 0; aRowPass < 5; ++aRowPass)
+		{
+			const int aRow = (thePreferredRow + aRowPass + 5) % 5;
+			for (int aColumn = 0; aColumn < 5; ++aColumn)
+			{
+				if (aBoard->GetTopPlantAt(aColumn, aRow, PlantPriority::TOPPLANT_ANY) ||
+					aBoard->CanPlantAt(aColumn, aRow, aPacket->mPacketType) !=
+						PlantingReason::PLANTING_OK)
+					continue;
+				const int aPacketX = aBoard->mSeedBank->mX + aPacket->mX +
+					aPacket->mOffsetX + aPacket->mWidth / 2;
+				const int aPacketY = aBoard->mSeedBank->mY + aPacket->mY +
+					aPacket->mHeight / 2;
+				SmokeClientClick(theApp, aPacketX, aPacketY);
+				thePacketId = aPacket->mNetId;
+				thePacketIndex = i;
+				thePlantColumn = aColumn;
+				thePlantRow = aRow;
+				NetTrace("SMOKE_PORTAL_CLIENT_INPUT packetId=%u index=%d owner=%u type=%d cell=(%d,%d)",
+					aPacket->mNetId, i, aPacket->mNetOwnerSlot,
+					(int)aPacket->mPacketType, aColumn, aRow);
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 bool IssueSoakSunClick(LawnApp* theApp, bool theClient)
@@ -731,6 +921,39 @@ void NetSmokeScenarioRuntime::Reset(NetSmokeScenarioId theScenario)
 	mTdZombieId = 0;
 	mTdPlantId = 0;
 	mTdZombieFirstX = 0.0f;
+	mPortalLayoutVerified = false;
+	mPortalConveyorVerified = false;
+	mPortalSpawnAccelerated = false;
+	mPortalZombieEntryObserved = false;
+	mPortalZombieTeleportObserved = false;
+	mPortalClientPlantObserved = false;
+	mPortalAdviceShown = false;
+	mPortalAdviceCleared = false;
+	mPortalAdviceClearTick = 0;
+	mPortalRelocationVerified = false;
+	mPortalCameraVerified = false;
+	mPortalCameraMovementVerified = false;
+        mPortalZombieId = 0;
+        mPortalPlantId = 0;
+	mPortalHeldPacketId = 0;
+	mPortalHeldPacketIndex = -1;
+	mPortalPlantColumn = -1;
+	mPortalPlantRow = -1;
+	mPortalHeldPacketEchoed = false;
+	mPortalHeldEchoMismatch = false;
+	mPortalPlantClickIssued = false;
+        mPortalConveyorInitialCounter = -1;
+	mPortalZombieEntryRow = -1;
+	mPortalZombieEntryTick = 0;
+	mPortalZombieEntryX = 0.0f;
+	mPortalInitialLayoutHash = 0;
+	mPortalInitialCameraX = 0;
+	mPortalInitialCameraY = 0;
+	memset(mPortalObservedZombieIds, 0, sizeof(mPortalObservedZombieIds));
+	memset(mPortalObservedZombieRows, 0, sizeof(mPortalObservedZombieRows));
+	memset(mPortalObservedZombieXs, 0, sizeof(mPortalObservedZombieXs));
+	memset(mPortalObservedZombieTicks, 0, sizeof(mPortalObservedZombieTicks));
+	memset(mPortalObservedZombieEligible, 0, sizeof(mPortalObservedZombieEligible));
         mPostActionSamples = 0;
 }
 
@@ -1027,6 +1250,8 @@ bool NetSmokeScenarioRuntime::IssueAction(LawnApp* theApp, const NetSmokeManifes
                 return IssueClientSlotMachineAction(theApp);
 	if (mScenario == NETSMOKE_SCENARIO_TOWER_DEFENSE_CLIENT)
 		return IssueSoakSeedAction(theApp, true);
+	if (mScenario == NETSMOKE_SCENARIO_PORTAL_COMBAT_CLIENT)
+		return false; // Portal smoke uses a deliberate pick -> host echo -> plant sequence.
 
         return IssueHostSeedAction(theApp);
 }
@@ -1303,8 +1528,9 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
 		{
 			if (aGhost->mDead || !aGhost->mNetGhost)
 				continue;
-			if ((fabsf(aGhost->mNetTargetX) < 0.01f && fabsf(aGhost->mPosX) >= 0.01f) ||
-				(fabsf(aGhost->mNetTargetY) < 0.01f && fabsf(aGhost->mPosY) >= 0.01f))
+			if (fabsf(aGhost->mNetTargetX) < 0.01f &&
+				fabsf(aGhost->mNetTargetY) < 0.01f &&
+				(fabsf(aGhost->mPosX) >= 0.01f || fabsf(aGhost->mPosY) >= 0.01f))
 			{
 				NetTrace("SMOKE_ZOMBIE_TARGET_INVALID id=%u type=%d pos=(%.2f,%.2f) target=(%.2f,%.2f)",
 					aGhost->mNetId, (int)aGhost->mZombieType, aGhost->mPosX, aGhost->mPosY,
@@ -1452,10 +1678,424 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
                 mBaselineCaptured = true;
                 mActionTick = GetTickCount();
                 mSoakLastActionTick = mActionTick;
-                NetTrace("SMOKE_CHECKPOINT role=%s scenario=%s step=BASELINE plants=%d pots=%d zombies=%d snapshots=%u",
+		NetTrace("SMOKE_CHECKPOINT role=%s scenario=%s step=BASELINE plants=%d pots=%d zombies=%d snapshots=%u",
 			theManifest.IsHost() ? "host" : "client", aDefinition->mName,
                         mBaselinePlants, mBaselinePots, aBoard->mZombies.mSize, theGameplaySnapshots);
         }
+
+	if (mScenario == NETSMOKE_SCENARIO_PORTAL_COMBAT_CLIENT)
+	{
+		const uint32_t aNow = GetTickCount();
+		if (!mPortalCameraVerified)
+		{
+			const int aTargetX = theManifest.IsClient() ?
+				aBoard->mNetGameplayCameraTargets.mBoardX : aBoard->mX;
+			const int aTargetY = theManifest.IsClient() ?
+				aBoard->mNetGameplayCameraTargets.mBoardY : aBoard->mY;
+			const bool aValid = theManifest.IsHost() ||
+				aBoard->mNetGameplayCameraTargets.mValid;
+			const int aDeltaX = abs(aBoard->mX - aTargetX);
+			const int aDeltaY = abs(aBoard->mY - aTargetY);
+			const int aTargetTree = theManifest.IsClient() ?
+				aBoard->mNetGameplayCameraTargets.mTreeX : aBoard->mTreeX;
+			const int aTargetPole = theManifest.IsClient() ?
+				aBoard->mNetGameplayCameraTargets.mPoleX : aBoard->mPoleX;
+			if (!aValid || aDeltaX > 4 || aDeltaY > 4 ||
+				abs(aBoard->mTreeX - aTargetTree) > 4 || abs(aBoard->mPoleX - aTargetPole) > 4)
+			{
+				NetTrace("SMOKE_CAMERA_SYNC_INVALID role=%s phase=start board=(%d,%d) target=(%d,%d) tree=%d targetTree=%d pole=%d targetPole=%d delta=(%d,%d) valid=%d",
+					theManifest.IsHost() ? "host" : "client", aBoard->mX, aBoard->mY,
+					aTargetX, aTargetY, aBoard->mTreeX, aTargetTree, aBoard->mPoleX,
+					aTargetPole, aDeltaX, aDeltaY, aValid ? 1 : 0);
+				return true;
+			}
+			mPortalCameraVerified = true;
+			mPortalInitialCameraX = aTargetX;
+			mPortalInitialCameraY = aTargetY;
+			NetTrace("SMOKE_CAMERA_SYNC role=%s phase=start board=(%d,%d) target=(%d,%d) tree=%d targetTree=%d pole=%d targetPole=%d delta=(%d,%d) valid=1",
+				theManifest.IsHost() ? "host" : "client", aBoard->mX, aBoard->mY,
+				aTargetX, aTargetY, aBoard->mTreeX, aTargetTree, aBoard->mPoleX,
+				aTargetPole, aDeltaX, aDeltaY);
+		}
+		else
+		{
+			const int aTargetX = theManifest.IsClient() ?
+				aBoard->mNetGameplayCameraTargets.mBoardX : aBoard->mX;
+			const int aTargetY = theManifest.IsClient() ?
+				aBoard->mNetGameplayCameraTargets.mBoardY : aBoard->mY;
+			if (!mPortalCameraMovementVerified &&
+				(aTargetX != mPortalInitialCameraX || aTargetY != mPortalInitialCameraY) &&
+				abs(aBoard->mX - aTargetX) <= 4 && abs(aBoard->mY - aTargetY) <= 4)
+			{
+				mPortalCameraMovementVerified = true;
+				NetTrace("SMOKE_CAMERA_SYNC role=%s phase=movement board=(%d,%d) target=(%d,%d) delta=(%d,%d) valid=1",
+					theManifest.IsHost() ? "host" : "client", aBoard->mX, aBoard->mY,
+					aTargetX, aTargetY, abs(aBoard->mX - aTargetX), abs(aBoard->mY - aTargetY));
+			}
+		}
+		if (!mPortalLayoutVerified)
+		{
+			if (!ValidatePortalCombatSmokeLayout(aBoard, theManifest, theFailure,
+				&mPortalInitialLayoutHash))
+				return false;
+			mPortalLayoutVerified = true;
+		}
+
+		if (!mPortalConveyorVerified)
+		{
+			SeedBank* aBank = aBoard->mSeedBank;
+			if (!aBank || !aBoard->HasConveyorBeltSeedBank())
+			{
+				theFailure = "Portal Combat is missing its stock conveyor seed bank";
+				return false;
+			}
+			if (mPortalConveyorInitialCounter < 0)
+			{
+				mPortalConveyorInitialCounter = aBank->mConveyorBeltCounter;
+				return true;
+			}
+			int aLivePackets = 0;
+			std::ostringstream anIds;
+			std::ostringstream aTypes;
+			std::ostringstream aPositions;
+			for (int i = 0; i < aBank->mNumPackets; ++i)
+			{
+				const SeedPacket& aPacket = aBank->mSeedPackets[i];
+				if (aPacket.mPacketType == SeedType::SEED_NONE)
+					continue;
+				if (aPacket.mNetId == 0)
+				{
+					// Stock AddSeed and snapshot encoding happen in adjacent host ticks.
+					// Wait for the authoritative encoder to allocate the id; only the
+					// correlated marker below is accepted by the runner.
+					return true;
+				}
+				if (aLivePackets != 0)
+				{
+					anIds << ',';
+					aTypes << ',';
+					aPositions << ',';
+				}
+				anIds << aPacket.mNetId;
+				aTypes << (int)aPacket.mPacketType;
+				aPositions << (aPacket.mX + aPacket.mOffsetX) << ':' << aPacket.mY;
+				++aLivePackets;
+			}
+			if (aLivePackets == 0 || aBank->mConveyorBeltCounter == mPortalConveyorInitialCounter)
+				return true;
+			const bool aVisible = aBank->mX < BOARD_WIDTH && aBank->mY < BOARD_HEIGHT &&
+				aBank->mX + aBank->mWidth > 0 && aBank->mY + aBank->mHeight > 0;
+			const bool aImages = Sexy::IMAGE_CONVEYORBELT_BACKDROP && Sexy::IMAGE_CONVEYORBELT &&
+				Sexy::IMAGE_CONVEYORBELT_BACKDROP->GetWidth() > 1 &&
+				Sexy::IMAGE_CONVEYORBELT_BACKDROP->GetHeight() > 1 &&
+				Sexy::IMAGE_CONVEYORBELT->GetWidth() > 1 && Sexy::IMAGE_CONVEYORBELT->GetHeight() > 1;
+			if (!aVisible || !aImages)
+			{
+				NetTrace("SMOKE_PORTAL_CONVEYOR_INVALID role=%s bank=(%d,%d,%d,%d) count=%d counter=%d initial=%d images=%d",
+					theManifest.IsHost() ? "host" : "client", aBank->mX, aBank->mY,
+					aBank->mWidth, aBank->mHeight, aLivePackets,
+					aBank->mConveyorBeltCounter, mPortalConveyorInitialCounter, aImages ? 1 : 0);
+				theFailure = "Portal Combat conveyor presentation is offscreen or missing stock resources";
+				return false;
+			}
+			mPortalConveyorVerified = true;
+			NetTrace("SMOKE_PORTAL_CONVEYOR role=%s bank=(%d,%d,%d,%d) count=%d counter=%d initial=%d ids=%s types=%s positions=%s images=%dx%d,%dx%d",
+				theManifest.IsHost() ? "host" : "client", aBank->mX, aBank->mY,
+				aBank->mWidth, aBank->mHeight, aLivePackets, aBank->mConveyorBeltCounter,
+				mPortalConveyorInitialCounter, anIds.str().c_str(), aTypes.str().c_str(),
+				aPositions.str().c_str(), Sexy::IMAGE_CONVEYORBELT_BACKDROP->GetWidth(),
+				Sexy::IMAGE_CONVEYORBELT_BACKDROP->GetHeight(), Sexy::IMAGE_CONVEYORBELT->GetWidth(),
+				Sexy::IMAGE_CONVEYORBELT->GetHeight());
+		}
+		if (theManifest.IsHost() && !mPortalSpawnAccelerated)
+		{
+			// Exercise the stock wave scheduler and stock zombie walk.  The smoke
+			// only shortens the initial wait; it never creates or moves an entity.
+			aBoard->mZombieCountDown = 6;
+			aBoard->mZombieCountDownStart = 6;
+			mPortalSpawnAccelerated = true;
+			NetTrace("SMOKE_PORTAL_WAVE_ACCELERATED role=host countdown=6");
+		}
+
+		if (!mPortalAdviceShown && aBoard->mHelpIndex == AdviceType::ADVICE_PORTAL_RELOCATING)
+		{
+			mPortalAdviceShown = true;
+			NetTrace("SMOKE_PORTAL_ADVICE role=%s phase=show help=%d",
+				theManifest.IsHost() ? "host" : "client", (int)aBoard->mHelpIndex);
+		}
+		if (mPortalAdviceShown && !mPortalAdviceCleared &&
+			aBoard->mHelpIndex == AdviceType::ADVICE_NONE)
+		{
+			mPortalAdviceCleared = true;
+			mPortalAdviceClearTick = aNow;
+			NetTrace("SMOKE_PORTAL_ADVICE role=%s phase=clear help=%d",
+				theManifest.IsHost() ? "host" : "client", (int)aBoard->mHelpIndex);
+		}
+
+		Zombie* aPortalZombie = mPortalZombieId != 0 ?
+			FindSmokeZombieById(aBoard, mPortalZombieId) : nullptr;
+		if (!mPortalZombieTeleportObserved)
+		{
+			// Observe every stock zombie.  Portal relocation can invalidate a
+			// previously promising path, so selecting one spawn up front is not
+			// fail-closed: it can legitimately leave the lawn without teleporting.
+			// We correlate the first real row jump whose same-row portal was ahead
+			// of the zombie while it walked left, without moving either object.
+			Zombie* aZombie = nullptr;
+			while (aBoard->mZombies.IterateNext(aZombie))
+			{
+				if (aZombie->mDead || aZombie->IsDeadOrDying() || aZombie->mFromWave < 0 ||
+					aZombie->mNetId == 0 || aZombie->mZombieType == ZombieType::ZOMBIE_BUNGEE ||
+					(theManifest.IsClient() && !aZombie->mNetGhost))
+					continue;
+
+				int anObservation = -1;
+				int anEmptyObservation = -1;
+				for (int i = 0; i < PORTAL_ZOMBIE_OBSERVATION_CAPACITY; ++i)
+				{
+					if (mPortalObservedZombieIds[i] == aZombie->mNetId)
+					{
+						anObservation = i;
+						break;
+					}
+					if (anEmptyObservation < 0 && mPortalObservedZombieIds[i] == 0)
+						anEmptyObservation = i;
+				}
+				if (anObservation < 0)
+				{
+					anObservation = anEmptyObservation;
+					if (anObservation < 0)
+						continue;
+					mPortalObservedZombieIds[anObservation] = aZombie->mNetId;
+					mPortalObservedZombieRows[anObservation] = aZombie->mRow;
+					mPortalObservedZombieXs[anObservation] = aZombie->mPosX;
+					mPortalObservedZombieTicks[anObservation] = aNow;
+				}
+
+				if (mPortalObservedZombieEligible[anObservation] &&
+					aZombie->mRow != mPortalObservedZombieRows[anObservation])
+				{
+					mPortalZombieId = aZombie->mNetId;
+					mPortalZombieEntryRow = mPortalObservedZombieRows[anObservation];
+					mPortalZombieEntryTick = mPortalObservedZombieTicks[anObservation];
+					mPortalZombieEntryX = mPortalObservedZombieXs[anObservation];
+					mPortalZombieEntryObserved = true;
+					aPortalZombie = aZombie;
+					break;
+				}
+
+				bool aPortalAhead = false;
+				const int aZombieCenterX = aZombie->GetZombieRect().mX +
+					aZombie->GetZombieRect().mWidth / 2;
+				GridItem* aPortal = nullptr;
+				while (aBoard->mGridItems.IterateNext(aPortal))
+				{
+					if (!aPortal->mDead && aPortal->mGridItemState == GridItemState::GRIDITEM_STATE_NORMAL &&
+						(aPortal->mGridItemType == GridItemType::GRIDITEM_PORTAL_CIRCLE ||
+						 aPortal->mGridItemType == GridItemType::GRIDITEM_PORTAL_SQUARE) &&
+						aPortal->mGridY == aZombie->mRow &&
+						aPortal->mGridX * 80 + 25 < aZombieCenterX - 45)
+					{
+						aPortalAhead = true;
+						break;
+					}
+				}
+				if (aPortalAhead && !mPortalObservedZombieEligible[anObservation])
+				{
+					mPortalObservedZombieEligible[anObservation] = true;
+					mPortalObservedZombieRows[anObservation] = aZombie->mRow;
+				}
+				// Keep the last authoritative same-row sample, rather than the spawn
+				// position at which this candidate first became eligible.  A portal at
+				// the left of the lawn may be reached many seconds later; the real jump
+				// distance is destination X minus this immediate pre-teleport X.
+				if (mPortalObservedZombieEligible[anObservation] &&
+					aZombie->mRow == mPortalObservedZombieRows[anObservation])
+				{
+					mPortalObservedZombieXs[anObservation] = aZombie->mPosX;
+					mPortalObservedZombieTicks[anObservation] = aNow;
+				}
+			}
+
+			if (mPortalZombieEntryObserved && aPortalZombie)
+			{
+				Reanimation* aBody = theApp->ReanimationTryToGet(aPortalZombie->mBodyReanimID);
+				const float aMoved = fabsf(mPortalZombieEntryX - aPortalZombie->mPosX);
+				const bool aSnapped = !theManifest.IsClient() ||
+					(fabsf(aPortalZombie->mPosX - aPortalZombie->mNetTargetX) <= 2.0f &&
+					 fabsf(aPortalZombie->mPosY - aPortalZombie->mNetTargetY) <= 2.0f);
+				const int anExpectedOrder = Board::MakeRenderOrder(
+					RenderLayer::RENDER_LAYER_ZOMBIE, aPortalZombie->mRow, 4);
+				const bool aRenderRow = aPortalZombie->mRenderOrder == anExpectedOrder;
+				bool aDestinationOpen = false;
+				GridItem* aPortal = nullptr;
+				while (aBoard->mGridItems.IterateNext(aPortal))
+				{
+					if (!aPortal->mDead && aPortal->mGridItemState == GridItemState::GRIDITEM_STATE_NORMAL &&
+						(aPortal->mGridItemType == GridItemType::GRIDITEM_PORTAL_CIRCLE ||
+						 aPortal->mGridItemType == GridItemType::GRIDITEM_PORTAL_SQUARE) &&
+						aPortal->mGridY == aPortalZombie->mRow)
+					{
+						aDestinationOpen = true;
+						break;
+					}
+				}
+				NetTrace("SMOKE_PORTAL_ZOMBIE_ENTRY role=%s id=%u ghost=%d row=%d x=%.2f animRate=%.2f",
+					theManifest.IsHost() ? "host" : "client", aPortalZombie->mNetId,
+					aPortalZombie->mNetGhost ? 1 : 0, mPortalZombieEntryRow,
+					mPortalZombieEntryX, aBody ? aBody->mAnimRate : 0.0f);
+				if (aMoved < 300.0f || !aBody || aBody->mDead || aBody->mAnimRate <= 0.0f ||
+					!aSnapped || !aRenderRow || !aDestinationOpen)
+				{
+					NetTrace("SMOKE_PORTAL_ZOMBIE_TELEPORT_INVALID role=%s id=%u fromRow=%d toRow=%d beforeX=%.2f afterX=%.2f target=(%.2f,%.2f) moved=%.2f snap=%d render=%d destination=%d body=%p animRate=%.2f",
+						theManifest.IsHost() ? "host" : "client", aPortalZombie->mNetId,
+						mPortalZombieEntryRow, aPortalZombie->mRow, mPortalZombieEntryX,
+						aPortalZombie->mPosX, aPortalZombie->mNetTargetX,
+						aPortalZombie->mNetTargetY, aMoved, aSnapped ? 1 : 0,
+						aRenderRow ? 1 : 0, aDestinationOpen ? 1 : 0,
+						(void*)aBody, aBody ? aBody->mAnimRate : 0.0f);
+					theFailure = "Portal Combat zombie teleport was interpolated, mis-layered, or lacked a live destination";
+					return false;
+				}
+				mPortalZombieTeleportObserved = true;
+				NetTrace("SMOKE_PORTAL_ZOMBIE_TELEPORT role=%s id=%u fromRow=%d toRow=%d beforeX=%.2f afterX=%.2f targetX=%.2f moved=%.2f snap=1 render=1 destination=1 animRate=%.2f",
+					theManifest.IsHost() ? "host" : "client", aPortalZombie->mNetId,
+					mPortalZombieEntryRow, aPortalZombie->mRow, mPortalZombieEntryX,
+					aPortalZombie->mPosX, aPortalZombie->mNetTargetX, aMoved, aBody->mAnimRate);
+			}
+			else if ((uint32_t)(aNow - mPlayingTick) >= 140000U)
+			{
+				theFailure = "Portal Combat observed no eligible stock zombie teleport within 140 seconds";
+				return false;
+			}
+		}
+
+		if (mPortalZombieTeleportObserved && theManifest.IsClient() && !mActionIssued &&
+			(uint32_t)(aNow - mSoakLastActionTick) >= 1000U)
+		{
+			if (IssuePortalClientSeedPick(theApp, aPortalZombie ? aPortalZombie->mRow : 0,
+				mPortalHeldPacketId, mPortalHeldPacketIndex,
+				mPortalPlantColumn, mPortalPlantRow))
+			{
+				mActionIssued = true;
+				mActionTick = aNow;
+				mSoakLastActionTick = aNow;
+				NetTrace("SMOKE_CHECKPOINT role=client scenario=portal_combat_client step=ACTION_ISSUED owner=client phase=pick packetId=%u index=%d",
+					mPortalHeldPacketId, mPortalHeldPacketIndex);
+			}
+		}
+		if (theManifest.IsClient() && mActionIssued && !mPortalPlantClickIssued)
+		{
+			if (mPortalHeldEchoMismatch)
+			{
+				theFailure = "Portal Combat host-confirmed held packet identity/index did not match the picked conveyor card";
+				return false;
+			}
+			if (!mPortalHeldPacketEchoed)
+			{
+				if ((uint32_t)(aNow - mActionTick) >= 10000U)
+				{
+					theFailure = "Portal Combat received no host-confirmed held packet echo within 10 seconds";
+					return false;
+				}
+			}
+			else
+			{
+				CursorObject* aCursor = aBoard->mCursorObject;
+				const bool aMapped = aCursor &&
+					aCursor->mCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_BANK &&
+					aCursor->mSeedBankIndex == mPortalHeldPacketIndex &&
+					mPortalHeldPacketIndex >= 0 &&
+					mPortalHeldPacketIndex < aBoard->mSeedBank->mNumPackets &&
+					aBoard->mSeedBank->mSeedPackets[mPortalHeldPacketIndex].mNetId ==
+						mPortalHeldPacketId;
+				if (!aMapped)
+				{
+					theFailure = "Portal Combat held packet echo did not map the local stock cursor to the same conveyor packet";
+					return false;
+				}
+				const int aPlantX = aBoard->GridToPixelX(mPortalPlantColumn, mPortalPlantRow) + 40;
+				const int aPlantY = aBoard->GridToPixelY(mPortalPlantColumn, mPortalPlantRow) + 45;
+				SmokeClientClick(theApp, aPlantX, aPlantY);
+				mPortalPlantClickIssued = true;
+				mSoakLastActionTick = aNow;
+				NetTrace("SMOKE_PORTAL_CLIENT_PLANT_INPUT packetId=%u index=%d cell=(%d,%d) echo=1",
+					mPortalHeldPacketId, mPortalHeldPacketIndex,
+					mPortalPlantColumn, mPortalPlantRow);
+			}
+		}
+		if (!mActionApplied && aBoard->mPlants.mSize > mBaselinePlants)
+		{
+			Plant* aNewest = nullptr;
+			Plant* aPlant = nullptr;
+			while (aBoard->mPlants.IterateNext(aPlant))
+				if (!aPlant->mDead && aPlant->mIsOnBoard && aPlant->mNetId != 0 &&
+					(!aNewest || aPlant->mNetId > aNewest->mNetId))
+					aNewest = aPlant;
+			if (aNewest)
+			{
+				Reanimation* aBody = theApp->ReanimationTryToGet(aNewest->mBodyReanimID);
+				if (!aBody || aBody->mDead)
+				{
+					theFailure = "Portal Combat client plant has no live stock presentation";
+					return false;
+				}
+				mPortalPlantId = aNewest->mNetId;
+				mPortalClientPlantObserved = true;
+				mActionApplied = true;
+				NetTrace("SMOKE_PORTAL_CLIENT_PLANT role=%s id=%u ghost=%d type=%d cell=(%d,%d) body=1",
+					theManifest.IsHost() ? "host" : "client", aNewest->mNetId,
+					aNewest->mNetGhost ? 1 : 0, (int)aNewest->mSeedType,
+					aNewest->mPlantCol, aNewest->mRow);
+				NetTrace("SMOKE_CHECKPOINT role=%s scenario=portal_combat_client step=ACTION_APPLIED plants=%d baseline=%d",
+					theManifest.IsHost() ? "host" : "client",
+					aBoard->mPlants.mSize, mBaselinePlants);
+			}
+		}
+		if (mActionIssued && !mActionApplied && aNow - mActionTick >= 45000U)
+		{
+			theFailure = "Portal Combat client conveyor plant was not applied within 45 seconds";
+			return false;
+		}
+
+		if (mPortalAdviceCleared && !mPortalRelocationVerified)
+		{
+			int aPortalCount = 0;
+			GridItem* aPortal = nullptr;
+			while (aBoard->mGridItems.IterateNext(aPortal))
+				if (!aPortal->mDead &&
+					(aPortal->mGridItemType == GridItemType::GRIDITEM_PORTAL_CIRCLE ||
+					 aPortal->mGridItemType == GridItemType::GRIDITEM_PORTAL_SQUARE))
+					++aPortalCount;
+			if (aPortalCount == 4)
+			{
+				uint32_t aRelocatedHash = 0;
+				if (!ValidatePortalCombatSmokeLayout(aBoard, theManifest, theFailure,
+					&aRelocatedHash))
+					return false;
+				if (aRelocatedHash == mPortalInitialLayoutHash)
+				{
+					// Advice is a board event, while the relocated grid-item set is carried
+					// by the following authoritative snapshot.  They can be drained in that
+					// order on a client (and the host clears advice immediately before
+					// MoveAPortal in the same update), so an unchanged first sample is a
+					// delivery race, not evidence of failure.  Remain fail-closed after a
+					// bounded window for a subsequent snapshot to expose the new layout.
+					if ((uint32_t)(aNow - mPortalAdviceClearTick) >= 5000U)
+					{
+						theFailure = "Portal Combat relocation advice cleared but no moved portal arrived within 5 seconds";
+						return false;
+					}
+					return true;
+				}
+				mPortalRelocationVerified = true;
+				NetTrace("SMOKE_PORTAL_RELOCATION role=%s before=%08x after=%08x live=4 open=4 pairs=2",
+					theManifest.IsHost() ? "host" : "client",
+					mPortalInitialLayoutHash, aRelocatedHash);
+			}
+		}
+		return true;
+	}
 
 	if (mScenario == NETSMOKE_SCENARIO_TOWER_DEFENSE_CLIENT)
 	{
@@ -1745,6 +2385,25 @@ void NetSmokeScenarioRuntime::OnAuthoritativeWhackHit(uint16_t theZombieId)
 	NetTrace("SMOKE_WHACK_HOST_HIT targetId=%u", mWhackTargetId);
 }
 
+void NetSmokeScenarioRuntime::OnPortalHeldPacketEcho(uint16_t thePacketId,
+	int thePacketIndex, int theCursorType)
+{
+	if (mScenario != NETSMOKE_SCENARIO_PORTAL_COMBAT_CLIENT || !mActionIssued ||
+		theCursorType != (int)CursorType::CURSOR_TYPE_PLANT_FROM_BANK ||
+		thePacketId == 0 || thePacketIndex < 0)
+		return;
+	if (thePacketId != mPortalHeldPacketId || thePacketIndex != mPortalHeldPacketIndex)
+	{
+		mPortalHeldEchoMismatch = true;
+		NetTrace("SMOKE_PORTAL_HELD_ECHO_MISMATCH expectedId=%u expectedIndex=%d actualId=%u actualIndex=%d",
+			mPortalHeldPacketId, mPortalHeldPacketIndex, thePacketId, thePacketIndex);
+		return;
+	}
+	mPortalHeldPacketEchoed = true;
+	NetTrace("SMOKE_PORTAL_HELD_ECHO packetId=%u index=%d cursor=plant_from_bank",
+		thePacketId, thePacketIndex);
+}
+
 void NetSmokeScenarioRuntime::OnSlotMachineSound(bool theHost)
 {
 	if (mScenario != NETSMOKE_SCENARIO_SLOT_MACHINE_CLIENT)
@@ -1769,6 +2428,11 @@ bool NetSmokeScenarioRuntime::IsComplete(uint32_t theRequiredPostActionSnapshots
 		(mScenario != NETSMOKE_SCENARIO_TOWER_DEFENSE_CLIENT ||
 			(mSoakChooserVerified && mTdPathVerified && mTdZombieEntryObserved &&
 			 mTdZombieTurnObserved && mTdClientPlantObserved)) &&
+		(mScenario != NETSMOKE_SCENARIO_PORTAL_COMBAT_CLIENT ||
+			(mPortalCameraVerified && mPortalLayoutVerified && mPortalConveyorVerified && mPortalZombieEntryObserved &&
+			 mPortalZombieTeleportObserved && mPortalClientPlantObserved &&
+			 mPortalAdviceShown && mPortalAdviceCleared &&
+			 mPortalRelocationVerified)) &&
                 (!NetIsBowlingSmokeScenario(mScenario) || mBowlingZombieObserved) &&
 		theRequiredPostActionSnapshots > 0 &&
 		mPostActionSamples >= theRequiredPostActionSnapshots;

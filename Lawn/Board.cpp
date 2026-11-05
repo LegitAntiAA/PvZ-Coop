@@ -82,6 +82,7 @@ Board::Board(LawnApp* theApp)
 	mNetPresentedSlotMachineState = ChallengeState::STATECHALLENGE_NORMAL;
 	mNetPresentedSlotMachineRollCount = 0;
 	memset(&mNetIntroTargets, 0, sizeof(mNetIntroTargets));
+	memset(&mNetGameplayCameraTargets, 0, sizeof(mNetGameplayCameraTargets));
 	mNetPvPBrainScore = 0;
 	mNetPvPKillScore = 0;
 	mNetPvPBrainTimer = 0;

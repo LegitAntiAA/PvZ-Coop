@@ -584,6 +584,15 @@ public:
 		int mSeedBankDarken;
 	};
 	NetIntroPresentationTargets	mNetIntroTargets;
+	struct NetGameplayCameraTargets
+	{
+		bool mValid;
+		int mBoardX;
+		int mBoardY;
+		int mTreeX;
+		int mPoleX;
+	};
+	NetGameplayCameraTargets	mNetGameplayCameraTargets;
 	CursorObject*					mNetPlayerCursors[LawnNet::NET_MAX_PLAYERS]; // host-authoritative cursor per slot
 	int								mNetPvPBrainScore;			// zombies team score
 	int								mNetPvPKillScore;			// plants team score

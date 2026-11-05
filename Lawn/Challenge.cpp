@@ -3643,7 +3643,9 @@ GridItem* Challenge::GetOtherPortal(GridItem* thePortal)
 	GridItem* aGridItem = nullptr;
 	while (mBoard->IterateGridItems(aGridItem))
 	{
-		if (aGridItem != thePortal && aGridItem->mGridItemType == thePortal->mGridItemType)
+		if (aGridItem != thePortal && !aGridItem->mDead &&
+			aGridItem->mGridItemType == thePortal->mGridItemType &&
+			aGridItem->mGridItemState != GRIDITEM_STATE_PORTAL_CLOSED)
 		{
 			return aGridItem;
 		}

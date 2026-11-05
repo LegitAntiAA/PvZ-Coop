@@ -14,7 +14,7 @@ param(
     [int]$GracefulExitSeconds = 10,
     [ValidateRange(0, 65535)]
     [int]$Port = 0,
-    [ValidateSet("Adventure1", "Adventure5Bowling", "Adventure5BowlingClient", "Adventure8Soak", "Adventure8Victory", "Adventure15WhackClient", "SlotMachineClient", "TowerDefenseClient", "Vasebreaker", "Beghouled")]
+    [ValidateSet("Adventure1", "Adventure5Bowling", "Adventure5BowlingClient", "Adventure8Soak", "Adventure8Victory", "Adventure15WhackClient", "SlotMachineClient", "TowerDefenseClient", "PortalCombatClient", "Vasebreaker", "Beghouled")]
     [string]$Scenario = "Adventure1",
     [ValidateSet(0, 1)]
     [int]$SkipIntro = 1,
@@ -724,6 +724,7 @@ $scenarioSpec = switch ($Scenario) {
     "Adventure15WhackClient" { [ordered]@{ Mode = "adventure_whack_client"; Level = 15; Marker = "adventure15_whack_client" } }
     "SlotMachineClient" { [ordered]@{ Mode = "slot_machine_client"; Level = 1; Marker = "slot_machine_client" } }
     "TowerDefenseClient" { [ordered]@{ Mode = "tower_defense_client"; Level = 1; Marker = "tower_defense_client" } }
+    "PortalCombatClient" { [ordered]@{ Mode = "portal_combat_client"; Level = 1; Marker = "portal_combat_client" } }
     "Vasebreaker" { [ordered]@{ Mode = "vasebreaker"; Level = 1; Marker = "vasebreaker" } }
     "Beghouled" { [ordered]@{ Mode = "beghouled"; Level = 1; Marker = "beghouled" } }
     default { throw ("Unsupported smoke scenario: {0}" -f $Scenario) }
@@ -1061,6 +1062,33 @@ try {
             @{ Label = "client Tower Defense plant"; Pattern = '(?im)\bSMOKE_TD_CLIENT_PLANT\b[^\r\n]*\brole=client\b[^\r\n]*\bid=[1-9]\d*\b[^\r\n]*\bcell=\([0-8],[0-5]\)[^\r\n]*\broad=0\b' }
         )
     }
+    if ($Scenario -eq "PortalCombatClient") {
+        $hostPositivePatterns += @(
+            @{ Label = "host Portal Combat layout"; Pattern = '(?im)\bSMOKE_PORTAL_LAYOUT\b[^\r\n]*\brole=host\b[^\r\n]*\bcount=4\b[^\r\n]*\bcircles=2\b[^\r\n]*\bsquares=2\b[^\r\n]*\bresources=4\b[^\r\n]*\btracks=[1-9]\d*\b' },
+            @{ Label = "host visible Portal conveyor"; Pattern = '(?im)\bSMOKE_PORTAL_CONVEYOR\b[^\r\n]*\brole=host\b[^\r\n]*\bcount=[1-9]\d*\b[^\r\n]*\bcounter=(\d+)\b[^\r\n]*\binitial=(?!\1\b)\d+\b[^\r\n]*\bimages=[1-9]\d*x[1-9]\d*,[1-9]\d*x[1-9]\d*\b' },
+            @{ Label = "host Portal Combat stock zombie entry"; Pattern = '(?im)\bSMOKE_PORTAL_ZOMBIE_ENTRY\b[^\r\n]*\brole=host\b[^\r\n]*\bid=[1-9]\d*\b[^\r\n]*\bghost=0\b[^\r\n]*\banimRate=(?!0\.00\b)-?\d+\.\d{2}\b' },
+            @{ Label = "host Portal Combat teleport"; Pattern = '(?im)\bSMOKE_PORTAL_ZOMBIE_TELEPORT\b[^\r\n]*\brole=host\b[^\r\n]*\bid=[1-9]\d*\b[^\r\n]*\bsnap=1\b[^\r\n]*\brender=1\b[^\r\n]*\bdestination=1\b[^\r\n]*\banimRate=(?!0\.00\b)-?\d+\.\d{2}\b' },
+            @{ Label = "host observed Portal client plant"; Pattern = '(?im)\bSMOKE_PORTAL_CLIENT_PLANT\b[^\r\n]*\brole=host\b[^\r\n]*\bid=[1-9]\d*\b' },
+            @{ Label = "host Portal relocation"; Pattern = '(?im)\bSMOKE_PORTAL_RELOCATION\b[^\r\n]*\brole=host\b[^\r\n]*\blive=4\b[^\r\n]*\bopen=4\b[^\r\n]*\bpairs=2\b' },
+            @{ Label = "host Portal advice show"; Pattern = '(?im)\bSMOKE_PORTAL_ADVICE\b[^\r\n]*\brole=host\b[^\r\n]*\bphase=show\b' },
+            @{ Label = "host Portal advice clear"; Pattern = '(?im)\bSMOKE_PORTAL_ADVICE\b[^\r\n]*\brole=host\b[^\r\n]*\bphase=clear\b' },
+            @{ Label = "host Portal advice TX show"; Pattern = '(?im)\badvice TX op=show\b' },
+            @{ Label = "host Portal advice TX clear"; Pattern = '(?im)\badvice TX op=clear\b' }
+        )
+        $clientPositivePatterns += @(
+            @{ Label = "client Portal Combat layout"; Pattern = '(?im)\bSMOKE_PORTAL_LAYOUT\b[^\r\n]*\brole=client\b[^\r\n]*\bcount=4\b[^\r\n]*\bcircles=2\b[^\r\n]*\bsquares=2\b[^\r\n]*\bresources=4\b[^\r\n]*\btracks=[1-9]\d*\b' },
+            @{ Label = "client visible Portal conveyor"; Pattern = '(?im)\bSMOKE_PORTAL_CONVEYOR\b[^\r\n]*\brole=client\b[^\r\n]*\bcount=[1-9]\d*\b[^\r\n]*\bcounter=(\d+)\b[^\r\n]*\binitial=(?!\1\b)\d+\b[^\r\n]*\bimages=[1-9]\d*x[1-9]\d*,[1-9]\d*x[1-9]\d*\b' },
+            @{ Label = "client Portal Combat stock zombie entry"; Pattern = '(?im)\bSMOKE_PORTAL_ZOMBIE_ENTRY\b[^\r\n]*\brole=client\b[^\r\n]*\bid=[1-9]\d*\b[^\r\n]*\bghost=1\b[^\r\n]*\banimRate=(?!0\.00\b)-?\d+\.\d{2}\b' },
+            @{ Label = "client Portal Combat teleport snap"; Pattern = '(?im)\bSMOKE_PORTAL_ZOMBIE_TELEPORT\b[^\r\n]*\brole=client\b[^\r\n]*\bid=[1-9]\d*\b[^\r\n]*\bsnap=1\b[^\r\n]*\brender=1\b[^\r\n]*\bdestination=1\b[^\r\n]*\banimRate=(?!0\.00\b)-?\d+\.\d{2}\b' },
+            @{ Label = "client Portal plant"; Pattern = '(?im)\bSMOKE_PORTAL_CLIENT_PLANT\b[^\r\n]*\brole=client\b[^\r\n]*\bid=[1-9]\d*\b' },
+            @{ Label = "client held conveyor packet echo"; Pattern = '(?im)\bcursor held packet echo\b[^\r\n]*\bslot=1\b[^\r\n]*\bid=[1-9]\d*\b[^\r\n]*\bindex=\d+\b' },
+            @{ Label = "client Portal relocation"; Pattern = '(?im)\bSMOKE_PORTAL_RELOCATION\b[^\r\n]*\brole=client\b[^\r\n]*\blive=4\b[^\r\n]*\bopen=4\b[^\r\n]*\bpairs=2\b' },
+            @{ Label = "client Portal advice show"; Pattern = '(?im)\bSMOKE_PORTAL_ADVICE\b[^\r\n]*\brole=client\b[^\r\n]*\bphase=show\b' },
+            @{ Label = "client Portal advice clear"; Pattern = '(?im)\bSMOKE_PORTAL_ADVICE\b[^\r\n]*\brole=client\b[^\r\n]*\bphase=clear\b' },
+            @{ Label = "client Portal advice applied show"; Pattern = '(?im)\badvice applied op=0\b' },
+            @{ Label = "client Portal advice applied clear"; Pattern = '(?im)\badvice applied op=1\b' }
+        )
+    }
     $negativePatterns = @(
         @{ Label = "access violation"; Pattern = '(?im)Access Violation' },
         @{ Label = "fatal network error"; Pattern = '(?im)\bfatal:' },
@@ -1087,6 +1115,19 @@ try {
             @{ Label = "Tower Defense plant placed on road"; Pattern = '(?im)\bSMOKE_TD_CLIENT_PLANT\b[^\r\n]*\broad=(?!0\b)\d+' }
         )
     }
+    if ($Scenario -eq "PortalCombatClient") {
+        $negativePatterns += @(
+            @{ Label = "invalid Portal layout"; Pattern = '(?im)\bSMOKE_PORTAL_LAYOUT_INVALID\b' },
+            @{ Label = "invalid Portal conveyor"; Pattern = '(?im)\bSMOKE_PORTAL_CONVEYOR_INVALID\b' },
+            @{ Label = "invalid Portal resource"; Pattern = '(?im)\bSMOKE_PORTAL_RESOURCE_INVALID\b' },
+            @{ Label = "invalid Portal zombie entry"; Pattern = '(?im)\bSMOKE_PORTAL_ZOMBIE_ENTRY_INVALID\b' },
+            @{ Label = "invalid Portal teleport"; Pattern = '(?im)\bSMOKE_PORTAL_ZOMBIE_TELEPORT_INVALID\b' },
+            @{ Label = "invalid Portal camera sync"; Pattern = '(?im)\bSMOKE_CAMERA_SYNC_INVALID\b' },
+            @{ Label = "interpolated Portal teleport"; Pattern = '(?im)\bSMOKE_PORTAL_ZOMBIE_TELEPORT\b[^\r\n]*\bsnap=(?!1\b)\d+' },
+            @{ Label = "invalid Portal relocation"; Pattern = '(?im)\bSMOKE_PORTAL_RELOCATION\b[^\r\n]*(?:\blive=(?!4\b)\d+|\bopen=(?!4\b)\d+|\bpairs=(?!2\b)\d+)' },
+            @{ Label = "rejected Portal advice"; Pattern = '(?im)\badvice (?:TX|applied)[^\r\n]*\brejected\b' }
+        )
+    }
 
     Assert-PositivePatterns -Role "host" -Text $hostLog -Patterns $hostPositivePatterns
     Assert-PositivePatterns -Role "client" -Text $clientLog -Patterns $clientPositivePatterns
@@ -1098,6 +1139,7 @@ try {
         $Scenario -eq "Adventure15WhackClient" -or
         $Scenario -eq "SlotMachineClient" -or
         $Scenario -eq "TowerDefenseClient" -or
+        $Scenario -eq "PortalCombatClient" -or
         $Scenario -eq "Vasebreaker" -or $Scenario -eq "Beghouled") { "client" } else { "host" }
     $actionIssuedPattern = ('(?im)\bSMOKE_CHECKPOINT\b[^\r\n]*scenario={0}[^\r\n]*step=ACTION_ISSUED[^\r\n]*owner={1}\b' -f
         ([regex]::Escape($scenarioMarker)), $expectedActionOwner)
@@ -1257,6 +1299,104 @@ try {
             throw ("Tower Defense client plant mismatch: host id/cell={0}/{1}, client id/cell={2}/{3}." -f
                 $hostTdPlant.Groups[1].Value, $hostTdPlant.Groups[2].Value,
                 $clientTdPlant.Groups[1].Value, $clientTdPlant.Groups[2].Value)
+        }
+    }
+
+    if ($Scenario -eq "PortalCombatClient") {
+        $portalCameraPattern = '(?im)\bSMOKE_CAMERA_SYNC\b[^\r\n]*\bphase=start\b[^\r\n]*\bboard=\((-?\d+),(-?\d+)\)[^\r\n]*\btarget=\((-?\d+),(-?\d+)\)[^\r\n]*\btree=(-?\d+)\s+targetTree=(-?\d+)\s+pole=(-?\d+)\s+targetPole=(-?\d+)[^\r\n]*\bdelta=\((\d+),(\d+)\)[^\r\n]*\bvalid=1\b'
+        $hostPortalCamera = [regex]::Match($hostLog, $portalCameraPattern)
+        $clientPortalCamera = [regex]::Match($clientLog, $portalCameraPattern)
+        if (-not $hostPortalCamera.Success -or -not $clientPortalCamera.Success) {
+            throw "Missing Portal Combat canonical camera evidence."
+        }
+        if ($hostPortalCamera.Groups[1].Value -ne $clientPortalCamera.Groups[1].Value -or
+            $hostPortalCamera.Groups[2].Value -ne $clientPortalCamera.Groups[2].Value -or
+			$hostPortalCamera.Groups[5].Value -ne $clientPortalCamera.Groups[5].Value -or
+			$hostPortalCamera.Groups[7].Value -ne $clientPortalCamera.Groups[7].Value -or
+			[int]$hostPortalCamera.Groups[9].Value -gt 4 -or
+			[int]$hostPortalCamera.Groups[10].Value -gt 4 -or
+			[int]$clientPortalCamera.Groups[9].Value -gt 4 -or
+			[int]$clientPortalCamera.Groups[10].Value -gt 4) {
+            throw ("Portal Combat camera mismatch: host=({0},{1}) client=({2},{3})." -f
+                $hostPortalCamera.Groups[1].Value, $hostPortalCamera.Groups[2].Value,
+                $clientPortalCamera.Groups[1].Value, $clientPortalCamera.Groups[2].Value)
+        }
+
+        $portalLayoutPattern = '(?im)\bSMOKE_PORTAL_LAYOUT\b[^\r\n]*\bhash=([0-9a-f]{8})\b[^\r\n]*\bids=([^\s]+)\s+types=([^\s]+)\s+cells=([^\s]+)\s+states=([^\s]+)'
+        $hostPortalLayout = [regex]::Match($hostLog, $portalLayoutPattern)
+        $clientPortalLayout = [regex]::Match($clientLog, $portalLayoutPattern)
+        if (-not $hostPortalLayout.Success -or -not $clientPortalLayout.Success) {
+            throw "Missing Portal Combat canonical layout evidence."
+        }
+        for ($group = 1; $group -le 5; ++$group) {
+            if ($hostPortalLayout.Groups[$group].Value -ne $clientPortalLayout.Groups[$group].Value) {
+                throw ("Portal Combat initial layout mismatch in group {0}: host={1}, client={2}." -f
+                    $group, $hostPortalLayout.Groups[$group].Value, $clientPortalLayout.Groups[$group].Value)
+            }
+        }
+
+        $portalConveyorPattern = '(?im)\bSMOKE_PORTAL_CONVEYOR\b[^\r\n]*\bcount=([1-9]\d*)\b[^\r\n]*\bids=([^\s]+)\s+types=([^\s]+)\s+positions=([^\s]+)'
+        $hostPortalConveyor = [regex]::Match($hostLog, $portalConveyorPattern)
+        $clientPortalConveyor = [regex]::Match($clientLog, $portalConveyorPattern)
+        if (-not $hostPortalConveyor.Success -or -not $clientPortalConveyor.Success) {
+            throw "Missing Portal Combat conveyor layout evidence."
+        }
+        for ($group = 1; $group -le 4; ++$group) {
+            if ($hostPortalConveyor.Groups[$group].Value -ne $clientPortalConveyor.Groups[$group].Value) {
+                throw ("Portal Combat conveyor mismatch in group {0}: host={1}, client={2}." -f
+                    $group, $hostPortalConveyor.Groups[$group].Value, $clientPortalConveyor.Groups[$group].Value)
+            }
+        }
+
+        $portalEntryPattern = '(?im)\bSMOKE_PORTAL_ZOMBIE_ENTRY\b[^\r\n]*\bid=([1-9]\d*)\b[^\r\n]*\brow=([0-5])\b[^\r\n]*\bx=(-?\d+\.\d{2})\b'
+        $portalTeleportPattern = '(?im)\bSMOKE_PORTAL_ZOMBIE_TELEPORT\b[^\r\n]*\bid=([1-9]\d*)\b[^\r\n]*\bfromRow=([0-5])\b[^\r\n]*\btoRow=([0-5])\b[^\r\n]*\bbeforeX=(-?\d+\.\d{2})\b[^\r\n]*\bafterX=(-?\d+\.\d{2})\b'
+        $portalZombieEvidence = @(
+            [regex]::Match($hostLog, $portalEntryPattern),
+            [regex]::Match($clientLog, $portalEntryPattern),
+            [regex]::Match($hostLog, $portalTeleportPattern),
+            [regex]::Match($clientLog, $portalTeleportPattern)
+        )
+        if (@($portalZombieEvidence | Where-Object { -not $_.Success }).Count -ne 0) {
+            throw "Missing Portal Combat zombie entry/teleport correlation evidence."
+        }
+        $portalZombieIds = @($portalZombieEvidence | ForEach-Object { [uint32]$_.Groups[1].Value } | Select-Object -Unique)
+        if ($portalZombieIds.Count -ne 1) {
+            throw ("Portal Combat zombie identity mismatch: {0}." -f ($portalZombieIds -join ","))
+        }
+        if ($portalZombieEvidence[2].Groups[2].Value -ne $portalZombieEvidence[3].Groups[2].Value -or
+            $portalZombieEvidence[2].Groups[3].Value -ne $portalZombieEvidence[3].Groups[3].Value) {
+            throw ("Portal Combat teleport row transition mismatch: host={0}->{1}, client={2}->{3}." -f
+                $portalZombieEvidence[2].Groups[2].Value, $portalZombieEvidence[2].Groups[3].Value,
+                $portalZombieEvidence[3].Groups[2].Value, $portalZombieEvidence[3].Groups[3].Value)
+        }
+
+        $portalPlantPattern = '(?im)\bSMOKE_PORTAL_CLIENT_PLANT\b[^\r\n]*\bid=([1-9]\d*)\b[^\r\n]*\btype=(\d+)\b[^\r\n]*\bcell=\(([0-8],[0-5])\)'
+        $hostPortalPlant = [regex]::Match($hostLog, $portalPlantPattern)
+        $clientPortalPlant = [regex]::Match($clientLog, $portalPlantPattern)
+        if (-not $hostPortalPlant.Success -or -not $clientPortalPlant.Success -or
+            $hostPortalPlant.Groups[1].Value -ne $clientPortalPlant.Groups[1].Value -or
+            $hostPortalPlant.Groups[2].Value -ne $clientPortalPlant.Groups[2].Value -or
+            $hostPortalPlant.Groups[3].Value -ne $clientPortalPlant.Groups[3].Value) {
+            throw "Portal Combat client plant identity/type/cell mismatch."
+        }
+		$portalInput = [regex]::Match($clientLog,
+			'(?im)\bSMOKE_PORTAL_CLIENT_INPUT\b[^\r\n]*\bpacketId=([1-9]\d*)\b[^\r\n]*\bindex=(\d+)\b')
+		$portalEcho = [regex]::Match($clientLog,
+			'(?im)\bcursor held packet echo\b[^\r\n]*\bslot=1\b[^\r\n]*\bid=([1-9]\d*)\b[^\r\n]*\bindex=(\d+)\b')
+		if (-not $portalInput.Success -or -not $portalEcho.Success -or
+			$portalInput.Groups[1].Value -ne $portalEcho.Groups[1].Value -or
+			$portalInput.Groups[2].Value -ne $portalEcho.Groups[2].Value) {
+			throw "Portal Combat held conveyor packet echo id/index mismatch."
+		}
+
+        $portalRelocationPattern = '(?im)\bSMOKE_PORTAL_RELOCATION\b[^\r\n]*\bbefore=([0-9a-f]{8})\b[^\r\n]*\bafter=([0-9a-f]{8})\b'
+        $hostPortalRelocation = [regex]::Match($hostLog, $portalRelocationPattern)
+        $clientPortalRelocation = [regex]::Match($clientLog, $portalRelocationPattern)
+        if (-not $hostPortalRelocation.Success -or -not $clientPortalRelocation.Success -or
+            $hostPortalRelocation.Groups[1].Value -ne $clientPortalRelocation.Groups[1].Value -or
+            $hostPortalRelocation.Groups[2].Value -ne $clientPortalRelocation.Groups[2].Value -or
+            $hostPortalRelocation.Groups[1].Value -eq $hostPortalRelocation.Groups[2].Value) {
+            throw "Portal Combat relocation hashes are missing, mismatched, or unchanged."
         }
     }
 

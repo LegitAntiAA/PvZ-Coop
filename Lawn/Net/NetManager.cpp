@@ -574,14 +574,22 @@ void NetManager::Update()
 				if (!NetIsValidHeldSeed(aSeed)) aSeed = 255;
 				if (anImitater != 255 && anImitater >= (uint8_t)SeedType::NUM_SEED_TYPES)
 					anImitater = 255;
+				uint16_t aHeldPacketId = 0;
+				if (anAuthoritative->mCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_BANK &&
+					mApp->mBoard->mSeedBank && anAuthoritative->mSeedBankIndex >= 0 &&
+					anAuthoritative->mSeedBankIndex < mApp->mBoard->mSeedBank->mNumPackets)
+					aHeldPacketId = mApp->mBoard->mSeedBank->mSeedPackets[
+						anAuthoritative->mSeedBankIndex].mNetId;
 				if (aPublished.mCursorType == aType && aPublished.mHeldSeed == aSeed &&
-					aPublished.mHeldImitater == anImitater && aPublished.mFlags == 0)
+					aPublished.mHeldImitater == anImitater && aPublished.mFlags == 0 &&
+					aPublished.mHeldPacketId == aHeldPacketId)
 					continue;
 
 				aPublished.mCursorType = aType;
 				aPublished.mHeldSeed = aSeed;
 				aPublished.mHeldImitater = anImitater;
 				aPublished.mFlags = 0;
+				aPublished.mHeldPacketId = aHeldPacketId;
 				NetBuffer aRelay;
 				aRelay.WriteU8((uint8_t)aSlot);
 				aRelay.WriteI16((int16_t)NetCanonicalX(mApp, aPublished.mX));
@@ -590,6 +598,7 @@ void NetManager::Update()
 				aRelay.WriteU8(aSeed);
 				aRelay.WriteU8(anImitater);
 				aRelay.WriteU8(0);
+				aRelay.WriteU16(aHeldPacketId);
 				BroadcastMessage(NETMSG_CURSOR, aRelay);
 				NetTrace("cursor authority publish slot=%d type=%u seed=%u imitater=%u",
 					aSlot, aType, aSeed, anImitater);
@@ -1084,6 +1093,13 @@ void NetManager::OnClientKeyInput(NetSession* theSession, NetBuffer& thePayload)
 
 void NetManager::OnClientCursor(NetSession* theSession, NetBuffer& thePayload)
 {
+	static const size_t NET_CURSOR_WIRE_BYTES = 11;
+	if (thePayload.Remaining() != NET_CURSOR_WIRE_BYTES)
+	{
+		NetTrace("cursor rejected slot=%u expected=%zu bytes actual=%zu",
+			theSession ? theSession->mSlot : 255, NET_CURSOR_WIRE_BYTES, thePayload.Remaining());
+		return;
+	}
 	// The connection owns the slot.  Never trust the slot claimed in a packet.
 	thePayload.ReadU8Or();
 	const uint8_t aSlot = theSession->mSlot;
@@ -1099,6 +1115,7 @@ void NetManager::OnClientCursor(NetSession* theSession, NetBuffer& thePayload)
 	uint8_t aClaimedSeed = thePayload.ReadU8Or();
 	uint8_t aClaimedImitater = thePayload.ReadU8Or();
         const uint8_t aClaimedFlags = thePayload.ReadU8Or();
+	thePayload.ReadU16Or(); // claimed packet id is never authoritative
 
 	// During a game the host's per-player cursor is authoritative.  Clients
 	// provide only pointer coordinates, never the plant/tool they claim to hold.
@@ -1132,6 +1149,15 @@ void NetManager::OnClientCursor(NetSession* theSession, NetBuffer& thePayload)
 	aRelay.WriteU8(aCursor.mHeldSeed);
 	aRelay.WriteU8(aCursor.mHeldImitater);
 	aRelay.WriteU8(aCursor.mFlags);
+	uint16_t aHeldPacketId = 0;
+	if (anAuthoritativeCursor &&
+		anAuthoritativeCursor->mCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_BANK &&
+		mApp->mBoard->mSeedBank && anAuthoritativeCursor->mSeedBankIndex >= 0 &&
+		anAuthoritativeCursor->mSeedBankIndex < mApp->mBoard->mSeedBank->mNumPackets)
+		aHeldPacketId = mApp->mBoard->mSeedBank->mSeedPackets[
+			anAuthoritativeCursor->mSeedBankIndex].mNetId;
+	aCursor.mHeldPacketId = aHeldPacketId;
+	aRelay.WriteU16(aHeldPacketId);
 	BroadcastMessage(NETMSG_CURSOR, aRelay);
 }
 
@@ -1896,6 +1922,13 @@ void NetManager::OnInputEpoch(NetBuffer& thePayload)
 
 void NetManager::OnCursor(NetBuffer& thePayload)
 {
+	static const size_t NET_CURSOR_WIRE_BYTES = 11;
+	if (thePayload.Remaining() != NET_CURSOR_WIRE_BYTES)
+	{
+		NetTrace("cursor echo rejected expected=%zu bytes actual=%zu",
+			NET_CURSOR_WIRE_BYTES, thePayload.Remaining());
+		return;
+	}
 	uint8_t aSlot = thePayload.ReadU8Or();
 	if (aSlot >= NET_MAX_PLAYERS)
 		return;
@@ -1905,6 +1938,7 @@ void NetManager::OnCursor(NetBuffer& thePayload)
 	uint8_t aHeldSeed = thePayload.ReadU8Or();
 	uint8_t aHeldImitater = thePayload.ReadU8Or();
 	uint8_t aFlags = thePayload.ReadU8Or();
+	uint16_t aHeldPacketId = thePayload.ReadU16Or();
 
 	// Echoes for our own slot carry the host-confirmed held seed.  Apply only
 	// that semantic state locally; local mouse coordinates remain immediate.
@@ -1916,8 +1950,30 @@ void NetManager::OnCursor(NetBuffer& thePayload)
 			aLocalCursor->mCursorType = (CursorType)aCursorType;
 			aLocalCursor->mType = NetIsValidHeldSeed(aHeldSeed) && aHeldSeed != 255 ? (SeedType)aHeldSeed : SeedType::SEED_NONE;
 			aLocalCursor->mImitaterType = aHeldImitater < (uint8_t)SeedType::NUM_SEED_TYPES ? (SeedType)aHeldImitater : SeedType::SEED_NONE;
-			if (aLocalCursor->mCursorType == CursorType::CURSOR_TYPE_NORMAL)
-				aLocalCursor->mSeedBankIndex = -1;
+			int aHeldIndex = -1;
+			if (aLocalCursor->mCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_BANK &&
+				aHeldPacketId != 0 && mApp->mBoard->mSeedBank)
+			{
+				for (int i = 0; i < mApp->mBoard->mSeedBank->mNumPackets; ++i)
+					if (mApp->mBoard->mSeedBank->mSeedPackets[i].mNetId == aHeldPacketId)
+					{
+						aHeldIndex = i;
+						break;
+					}
+			}
+			if (aLocalCursor->mCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_BANK &&
+				aHeldIndex < 0)
+			{
+				aLocalCursor->mCursorType = CursorType::CURSOR_TYPE_NORMAL;
+				aLocalCursor->mType = SeedType::SEED_NONE;
+				aLocalCursor->mImitaterType = SeedType::SEED_NONE;
+			}
+			aLocalCursor->mSeedBankIndex = aHeldIndex;
+			NetTrace("cursor held packet echo slot=%u id=%u index=%d type=%u",
+				aSlot, aHeldPacketId, aHeldIndex, aHeldSeed);
+			if (mApp->CoopSmokeActive())
+				mApp->mCoopSmokeScenarioRuntime.OnPortalHeldPacketEcho(
+					aHeldPacketId, aHeldIndex, (int)aLocalCursor->mCursorType);
 		}
 		return;
 	}
@@ -1928,6 +1984,7 @@ void NetManager::OnCursor(NetBuffer& thePayload)
 	aCursor.mHeldSeed = aHeldSeed;
 	aCursor.mHeldImitater = aHeldImitater;
 	aCursor.mFlags = aFlags;
+	aCursor.mHeldPacketId = aHeldPacketId;
 	if (mApp && mApp->mWidgetManager)
 		mApp->mWidgetManager->MarkAllDirty();
 }
@@ -2488,6 +2545,17 @@ void NetManager::SendCursor(int theCursorType, int theHeldSeed, int theHeldImita
 	aMsg.WriteU8((uint8_t)theHeldSeed);
 	aMsg.WriteU8((uint8_t)theHeldImitater);
 	aMsg.WriteU8(theFlags);
+	uint16_t aHeldPacketId = 0;
+	if (mApp && mApp->mBoard && mApp->mBoard->mSeedBank &&
+		theCursorType == (int)CursorType::CURSOR_TYPE_PLANT_FROM_BANK)
+	{
+		CursorObject* aCursor = mApp->mBoard->mCursorObject;
+		if (aCursor && aCursor->mSeedBankIndex >= 0 &&
+			aCursor->mSeedBankIndex < mApp->mBoard->mSeedBank->mNumPackets)
+			aHeldPacketId = mApp->mBoard->mSeedBank->mSeedPackets[
+				aCursor->mSeedBankIndex].mNetId;
+	}
+	aMsg.WriteU16(aHeldPacketId);
 
 	if (mMode == MODE_HOST)
 		BroadcastMessage(NETMSG_CURSOR, aMsg);
