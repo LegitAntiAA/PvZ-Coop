@@ -75,9 +75,12 @@ static const size_t NET_DAVE_STATE_BYTES = 12;
 // Seed packet: stable id, type, imitater, cooldown, owner, active, signed
 // horizontal offset, slot-machine countdown, next card and scroll phase.
 static const size_t NET_SEED_PACKET_WIRE_BYTES = 16;
-// Plant: id/type/imitater/row/column/health/max-health/state/flags (12),
-// plus authoritative live x/y (4) and render order (4).
-static const size_t NET_PLANT_WIRE_BYTES = 20;
+// Plant: base state (20), three exact presentation counters, and every bounded
+// reanimation channel owned directly by Plant (8 * 11).  Child attachments and
+// particles remain local presentation resources, never raw network pointers.
+static const int NET_PLANT_REANIM_ROLES = 8;
+static const size_t NET_PLANT_WIRE_BYTES = 23 +
+        NET_PLANT_REANIM_ROLES * NET_ZOMBIE_ANIM_WIRE_BYTES;
 // Zombie: id/type/row/position(8), health pools(10), phase/visual state(10),
 // velocity/altitude/original animation rate(12), and exact body animation(11).
 static const size_t NET_ZOMBIE_WIRE_BYTES = 40 + NET_ZOMBIE_ANIM_WIRE_BYTES;
@@ -115,6 +118,66 @@ uint32_t NetGetReanimationFrameCapacity(const Reanimation* theReanim)
 		theReanim->mDefinition->mTracks.tracks[0].mTransforms.count <= 0)
 		return 0;
 	return (uint32_t)theReanim->mDefinition->mTracks.tracks[0].mTransforms.count;
+}
+
+ReanimationID NetGetPlantReanimID(const Plant* thePlant, int theRole)
+{
+        switch (theRole)
+        {
+        case 0: return thePlant->mBodyReanimID;
+        case 1: return thePlant->mHeadReanimID;
+        case 2: return thePlant->mHeadReanimID2;
+        case 3: return thePlant->mHeadReanimID3;
+        case 4: return thePlant->mBlinkReanimID;
+        case 5: return thePlant->mLightReanimID;
+        case 6: return thePlant->mSleepingReanimID;
+        case 7: return thePlant->mSpecialReanimID;
+        default: return ReanimationID::REANIMATIONID_NULL;
+        }
+}
+
+bool NetCaptureReanimState(LawnApp* theApp, ReanimationID theId,
+        NetZombieAnimState& theState)
+{
+        theState.Reset();
+        if (!theApp)
+                return true;
+        Reanimation* aReanim = theApp->ReanimationTryToGet(theId);
+        if (!aReanim)
+                return true;
+        const uint32_t aFrameCapacity = NetGetReanimationFrameCapacity(aReanim);
+        const int aLoopType = (int)aReanim->mLoopType;
+        if (aReanim->mFrameStart < 0 || aReanim->mFrameStart > 65535 ||
+                aReanim->mFrameCount <= 0 || aReanim->mFrameCount > 65535 ||
+                aLoopType < 0 || aLoopType > 5 || !_finite(aReanim->mAnimTime) ||
+                !_finite(aReanim->mAnimRate))
+                return false;
+        theState.mPresent = true;
+        theState.mDead = aReanim->mDead;
+        theState.mFrameStart = (uint16_t)aReanim->mFrameStart;
+        theState.mFrameCount = (uint16_t)aReanim->mFrameCount;
+        theState.mAnimTime = aReanim->mAnimTime;
+        theState.mAnimRate = aReanim->mAnimRate;
+        theState.mLoopType = (uint8_t)aLoopType;
+        theState.mLoopCount = (uint8_t)max(0, min(255, aReanim->mLoopCount));
+        return NetZombieAnimStateFitsFrames(theState, aFrameCapacity);
+}
+
+void NetApplyReanimState(LawnApp* theApp, ReanimationID theId,
+        const NetZombieAnimState& theState)
+{
+        Reanimation* aReanim = theApp ? theApp->ReanimationTryToGet(theId) : nullptr;
+        if (!aReanim || !theState.mPresent ||
+                !NetZombieAnimStateFitsFrames(theState, NetGetReanimationFrameCapacity(aReanim)))
+                return;
+        aReanim->mFrameStart = theState.mFrameStart;
+        aReanim->mFrameCount = theState.mFrameCount;
+        aReanim->mAnimTime = theState.mAnimTime;
+        aReanim->mLastFrameTime = theState.mAnimTime;
+        aReanim->mAnimRate = theState.mAnimRate;
+        aReanim->mLoopType = (ReanimLoopType)theState.mLoopType;
+        aReanim->mLoopCount = theState.mLoopCount;
+        aReanim->mDead = theState.mDead;
 }
 
 bool NetCaptureZombieAnimState(LawnApp* theApp, Zombie* theZombie,
@@ -1010,15 +1073,33 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 		aBody.WriteU16((uint16_t)min(65535, max(0, aPlant->mPlantMaxHealth)));
 		aBody.WriteU8((uint8_t)aPlant->mState);
 		uint8_t aPFlags = 0;
-		if (aPlant->mIsAsleep) aPFlags |= 1;
-		if (aPlant->mSquished) aPFlags |= 2;
-		if (aPlant->mRecentlyEatenCountdown > 0) aPFlags |= 4;
-		if (aPlant->mEatenFlashCountdown > 0) aPFlags |= 8;
-		aBody.WriteU8(aPFlags);
-		aBody.WriteI16((int16_t)max(-2048, min(2048, aPlant->mX)));
-		aBody.WriteI16((int16_t)max(-2048, min(2048, aPlant->mY)));
-		aBody.WriteI32(max(0, min(1000000, aPlant->mRenderOrder)));
-		aCount++;
+                if (aPlant->mIsAsleep) aPFlags |= 1;
+                if (aPlant->mSquished) aPFlags |= 2;
+                aBody.WriteU8(aPFlags);
+                aBody.WriteI16((int16_t)max(-2048, min(2048, aPlant->mX)));
+                aBody.WriteI16((int16_t)max(-2048, min(2048, aPlant->mY)));
+                aBody.WriteI32(max(0, min(1000000, aPlant->mRenderOrder)));
+                aBody.WriteU8((uint8_t)max(0, min(255, aPlant->mRecentlyEatenCountdown)));
+                aBody.WriteU8((uint8_t)max(0, min(255, aPlant->mEatenFlashCountdown)));
+                aBody.WriteU8((uint8_t)max(0, min(255, aPlant->mBeghouledFlashCountdown)));
+                for (int aRole = 0; aRole < NET_PLANT_REANIM_ROLES; aRole++)
+                {
+                        NetZombieAnimState anAnimState;
+                        if (!NetCaptureReanimState(mApp, NetGetPlantReanimID(aPlant, aRole), anAnimState))
+                        {
+                                NetTrace("snapshot plant animation omitted: invalid host state id=%u type=%d role=%d",
+                                        aPlant->mNetId, (int)aPlant->mSeedType, aRole);
+                                anAnimState.Reset();
+                        }
+                        const bool anAnimWritten = NetEncodeZombieAnimState(anAnimState, aBody);
+                        TOD_ASSERT(anAnimWritten);
+                        if (!anAnimWritten)
+                        {
+                                anAnimState.Reset();
+                                NetEncodeZombieAnimState(anAnimState, aBody);
+                        }
+                }
+                aCount++;
 	}
 	TOD_ASSERT(aBody.Size() == (size_t)aCount * NET_PLANT_WIRE_BYTES);
 	b.WriteU16(aCount);
@@ -2130,9 +2211,13 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		uint16_t mMaxHealth;
 		uint8_t mState;
 		uint8_t mFlags;
-		int16_t mPosX;
-		int16_t mPosY;
-		int32_t mRenderOrder;
+                int16_t mPosX;
+                int16_t mPosY;
+                int32_t mRenderOrder;
+                uint8_t mRecentlyEaten;
+                uint8_t mEatenFlash;
+                uint8_t mBeghouledFlash;
+                NetZombieAnimState mReanim[NET_PLANT_REANIM_ROLES];
 	};
 	std::vector<NetPlantWire> aPlantWires;
 	aPlantWires.reserve(aCount);
@@ -2149,9 +2234,21 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		aWire.mMaxHealth = b.ReadU16Or();
 		aWire.mState = b.ReadU8Or();
 		aWire.mFlags = b.ReadU8Or();
-		aWire.mPosX = b.ReadI16Or();
-		aWire.mPosY = b.ReadI16Or();
-		aWire.mRenderOrder = b.ReadI32Or();
+                aWire.mPosX = b.ReadI16Or();
+                aWire.mPosY = b.ReadI16Or();
+                aWire.mRenderOrder = b.ReadI32Or();
+                aWire.mRecentlyEaten = b.ReadU8Or();
+                aWire.mEatenFlash = b.ReadU8Or();
+                aWire.mBeghouledFlash = b.ReadU8Or();
+                for (int aRole = 0; aRole < NET_PLANT_REANIM_ROLES; aRole++)
+                {
+                        if (!NetDecodeZombieAnimState(b, aWire.mReanim[aRole]))
+                        {
+                                NetTrace("snapshot plant section rejected malformed animation index=%d id=%u role=%d",
+                                        i, aWire.mId, aRole);
+                                return;
+                        }
+                }
 
 		uint8_t aMaxPlantState = (uint8_t)PlantState::STATE_LILYPAD_INVULNERABLE;
 #ifdef _DS_MINIGAMES
@@ -2162,7 +2259,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 			(aWire.mImitater == 255 || aWire.mImitater < (uint8_t)SeedType::NUM_SEED_TYPES) &&
 			aWire.mRow < MAX_GRID_SIZE_Y && aWire.mCol < MAX_GRID_SIZE_X &&
 			aWire.mMaxHealth != 0 && aWire.mHealth <= aWire.mMaxHealth &&
-			aWire.mState <= aMaxPlantState && (aWire.mFlags & ~15) == 0 &&
+                        aWire.mState <= aMaxPlantState && (aWire.mFlags & ~3) == 0 &&
 			aWire.mPosX >= -2048 && aWire.mPosX <= 2048 &&
 			aWire.mPosY >= -2048 && aWire.mPosY <= 2048 &&
 			aWire.mRenderOrder >= 0 && aWire.mRenderOrder <= 1000000 &&
@@ -2175,9 +2272,37 @@ void Board::NetApplySnapshot(NetBuffer& b)
 				aWire.mPosX, aWire.mPosY, aWire.mRenderOrder);
 			return;
 		}
-		aSeenPlants[aWire.mId] = true;
-		aPlantWires.push_back(aWire);
-	}
+                aSeenPlants[aWire.mId] = true;
+                aPlantWires.push_back(aWire);
+        }
+
+        // Existing ghosts provide exact local definitions for every live role.
+        // Reject an out-of-range frame window before mutating any plant.  A new
+        // ghost is still safe: the codec has bounded fields and application below
+        // rechecks against the freshly initialized local definition.
+        for (const NetPlantWire& aWire : aPlantWires)
+        {
+                Plant* anExisting = NetGetGhostPlant(aWire.mId);
+                if (!anExisting || anExisting->mSeedType != (SeedType)aWire.mType)
+                        continue;
+                for (int aRole = 0; aRole < NET_PLANT_REANIM_ROLES; aRole++)
+                {
+                        if (!aWire.mReanim[aRole].mPresent)
+                                continue;
+                        Reanimation* aLocal = mApp->ReanimationTryToGet(
+                                NetGetPlantReanimID(anExisting, aRole));
+                        if (aLocal && !NetZombieAnimStateFitsFrames(aWire.mReanim[aRole],
+                                NetGetReanimationFrameCapacity(aLocal)))
+                        {
+                                NetTrace("snapshot plant animation rejected id=%u type=%u role=%d frames=%u+%u capacity=%u",
+                                        aWire.mId, aWire.mType, aRole,
+                                        aWire.mReanim[aRole].mFrameStart,
+                                        aWire.mReanim[aRole].mFrameCount,
+                                        NetGetReanimationFrameCapacity(aLocal));
+                                return;
+                        }
+                }
+        }
 
 	// The complete variable-length section is valid before any plant is created,
 	// adopted, moved, updated, or deleted.
@@ -2243,12 +2368,16 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		PlantState aPreviousState = aPlant->mState;
 		aPlant->mPlantHealth = aWire.mHealth;
 		aPlant->mPlantMaxHealth = aWire.mMaxHealth;
-		aPlant->mState = (PlantState)aWire.mState;
-		aPlant->mIsAsleep = (aWire.mFlags & 1) != 0;
-		aPlant->mSquished = (aWire.mFlags & 2) != 0;
-		aPlant->mRecentlyEatenCountdown = (aWire.mFlags & 4) ? 20 : 0;
-		aPlant->mEatenFlashCountdown = (aWire.mFlags & 8) ? 8 : 0;
-		NetApplyPlantPresentation(aPlant, aPreviousState, aCreatedOrAdopted);
+                aPlant->mState = (PlantState)aWire.mState;
+                aPlant->mIsAsleep = (aWire.mFlags & 1) != 0;
+                aPlant->mSquished = (aWire.mFlags & 2) != 0;
+                aPlant->mRecentlyEatenCountdown = aWire.mRecentlyEaten;
+                aPlant->mEatenFlashCountdown = aWire.mEatenFlash;
+                aPlant->mBeghouledFlashCountdown = aWire.mBeghouledFlash;
+                NetApplyPlantPresentation(aPlant, aPreviousState, aCreatedOrAdopted);
+                for (int aRole = 0; aRole < NET_PLANT_REANIM_ROLES; aRole++)
+                        NetApplyReanimState(mApp, NetGetPlantReanimID(aPlant, aRole),
+                                aWire.mReanim[aRole]);
 	}
 	{
 		Plant* aPlant = nullptr;
@@ -3661,21 +3790,52 @@ void Board::NetDrawRemoteCursors(Graphics* g)
 
 		NetColor aColor = GetRelativePlayerColor(aNet->GetMySlot(), i);
 
-		// held plant silhouette in the owner's color
-		if (aCursor.mHeldSeed < (uint8_t)SeedType::NUM_SEED_TYPES &&
-			aCursor.mCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_BANK)
+		const bool aHoldingPlant =
+			aCursor.mHeldSeed < (uint8_t)SeedType::NUM_SEED_TYPES &&
+			aCursor.mCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_BANK;
+		// Match CursorObject::Draw exactly: the cursor coordinates are the widget
+		// origin, while every plant has its own height offset.  Tint the actual
+		// silhouette instead of placing an unrelated rectangle over it.
+		if (aHoldingPlant)
 		{
 			SeedType aSeedType = (SeedType)aCursor.mHeldSeed;
 			SeedType anImitater = aCursor.mHeldImitater != 255 ? (SeedType)aCursor.mHeldImitater : SeedType::SEED_NONE;
-			Plant::DrawSeedType(g, aSeedType, anImitater, VARIATION_NORMAL, (float)(aCursorX - 25), (float)(aCursorY - 35));
-			// color overlay to mark ownership
-			g->SetColor(Color(aColor.r, aColor.g, aColor.b, 90));
-			g->FillRect(aCursorX - 30, aCursorY - 40, 60, 70);
+                        float anOffsetX = -35.0f;
+                        float anOffsetY = PlantDrawHeightOffset(this, nullptr, aSeedType, -1, -1) - 60.0f;
+#ifdef _HAS_BLOOM_AND_DOOM_CONTENTS
+                        if (aSeedType == SeedType::SEED_STINGER)
+                                anOffsetY -= 60.0f;
+                        else
+#endif
+                        if (Plant::IsFlying(aSeedType) || aSeedType == SeedType::SEED_GRAVEBUSTER)
+                                anOffsetY += 30.0f;
+                        if (mApp->IsIZombieLevel())
+                        {
+                                anOffsetX -= 55.0f;
+                                anOffsetY -= 70.0f;
+                                if (aSeedType == SeedType::SEED_ZOMBIE_BUNGEE)
+                                        anOffsetY -= 600.0f;
+                                else if (aSeedType == SeedType::SEED_ZOMBONI)
+                                {
+                                        anOffsetX += 10.0f;
+                                        anOffsetY -= 25.0f;
+                                }
+                                else if (aSeedType == SeedType::SEED_ZOMBIE_POLEVAULTER)
+                                        anOffsetX -= 50.0f;
+                        }
+			Graphics aTinted(*g);
+			aTinted.SetColorizeImages(true);
+			aTinted.SetColor(Color(aColor.r, aColor.g, aColor.b, 150));
+			Plant::DrawSeedType(&aTinted, aSeedType, anImitater, VARIATION_NORMAL,
+				(float)aCursorX + anOffsetX, (float)aCursorY + anOffsetY);
 		}
 
 		// cursor pointer marker in player color
-		g->SetColor(Color(aColor.r, aColor.g, aColor.b, 255));
-		g->FillRect(aCursorX, aCursorY, 9, 9);
+		if (!aHoldingPlant)
+		{
+			g->SetColor(Color(aColor.r, aColor.g, aColor.b, 255));
+			g->FillRect(aCursorX, aCursorY, 9, 9);
+		}
 
 		// nick + ping label in small font
 		if (aPlayer.mNick[0])

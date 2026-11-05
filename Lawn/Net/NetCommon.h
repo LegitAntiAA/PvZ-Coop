@@ -26,7 +26,7 @@ namespace LawnNet
 // (the host broadcasts the same sounds via events).
 extern bool gNetSuppressSounds;
 
-static const uint32_t NET_PROTOCOL_VERSION = 23; // Bowling presentation flag + stable shared-conveyor input
+static const uint32_t NET_PROTOCOL_VERSION = 24; // Exact plant flash + bounded plant reanimation channels
 static const uint16_t NET_DEFAULT_PORT = 27713;			// PvZ co-op port
 static const int NET_MAX_PLAYERS = 4;					// 1 host + 3 clients
 static const int NET_MAX_NICK = 16;						// bytes (without terminator)
@@ -43,18 +43,20 @@ static const int NET_INPUT_QUEUE_TOTAL = 128;		// hard back-pressure limit for t
 static const int NET_INPUT_APPLY_BUDGET = 16;		// maximum remote actions applied per frame
 
 // Relative player colors: viewer always sees self uncolored; others get
-// blue/red/green in slot order starting after the viewer (wrapping around).
-// With 2 players both sides mutually see each other as blue.
+// blue/red/green in stable slot order after removing the viewer's own slot.
+// Thus a two-player host/client pair mutually sees the other player as blue,
+// while four players still get three distinct remote colors on every screen.
 static const int NET_PLAYER_COLOR_COUNT = 3;
 struct NetColor { uint8_t r, g, b; };
 inline NetColor GetRelativePlayerColor(int theViewerSlot, int theOwnerSlot)
 {
 	if (theOwnerSlot == theViewerSlot)
 		return { 255, 255, 255 };
-	int anOffset = ((theOwnerSlot - theViewerSlot) % NET_MAX_PLAYERS + NET_MAX_PLAYERS) % NET_MAX_PLAYERS;
-	// anOffset in 1..3 for the other players -> blue, red, green
-	static const NetColor aColors[NET_PLAYER_COLOR_COUNT] = { { 70, 130, 255 }, { 255, 70, 70 }, { 80, 200, 80 } };
-	return aColors[(anOffset - 1) % NET_PLAYER_COLOR_COUNT];
+        static const NetColor aColors[NET_PLAYER_COLOR_COUNT] = { { 70, 130, 255 }, { 255, 70, 70 }, { 80, 200, 80 } };
+        int aRemoteIndex = theOwnerSlot;
+        if (theOwnerSlot > theViewerSlot)
+                aRemoteIndex--;
+        return aColors[max(0, min(NET_PLAYER_COLOR_COUNT - 1, aRemoteIndex))];
 }
 inline NetColor GetPlayerColorBySlot(int theSlot)
 {

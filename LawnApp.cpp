@@ -6334,21 +6334,55 @@ void LawnApp::NetDrawCursorOverlay()
 		int aCursorY = (int)aCursor.mRenderY;
 		LawnNet::NetColor aColor = LawnNet::GetRelativePlayerColor(mNetManager->GetMySlot(), i);
 
-		if (mBoard && aCursor.mHeldSeed < (uint8_t)SeedType::NUM_SEED_TYPES &&
-			aCursor.mCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_BANK)
-		{
-			SeedType aSeed = (SeedType)aCursor.mHeldSeed;
-			SeedType anImitater = aCursor.mHeldImitater != 255 ? (SeedType)aCursor.mHeldImitater : SeedType::SEED_NONE;
-			Plant::DrawSeedType(&g, aSeed, anImitater, VARIATION_NORMAL,
-				(float)(aCursorX - 25), (float)(aCursorY - 35));
-			g.SetColor(Color(aColor.r, aColor.g, aColor.b, 90));
-			g.FillRect(aCursorX - 30, aCursorY - 40, 60, 70);
-		}
+                const bool aHoldingPlant = mBoard &&
+                        aCursor.mHeldSeed < (uint8_t)SeedType::NUM_SEED_TYPES &&
+                        aCursor.mCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_BANK;
+                if (aHoldingPlant)
+                {
+                        SeedType aSeed = (SeedType)aCursor.mHeldSeed;
+                        SeedType anImitater = aCursor.mHeldImitater != 255 ? (SeedType)aCursor.mHeldImitater : SeedType::SEED_NONE;
+                        // CursorObject lives at mouse-25,-35, then applies these
+                        // per-seed offsets while drawing.  This overlay draws in
+                        // screen coordinates, so include both parts here.
+                        float anOffsetX = -35.0f;
+                        float anOffsetY = PlantDrawHeightOffset(mBoard, nullptr, aSeed, -1, -1) - 60.0f;
+#ifdef _HAS_BLOOM_AND_DOOM_CONTENTS
+                        if (aSeed == SeedType::SEED_STINGER)
+                                anOffsetY -= 60.0f;
+                        else
+#endif
+                        if (Plant::IsFlying(aSeed) || aSeed == SeedType::SEED_GRAVEBUSTER)
+                                anOffsetY += 30.0f;
+                        if (IsIZombieLevel())
+                        {
+                                anOffsetX -= 55.0f;
+                                anOffsetY -= 70.0f;
+                                if (aSeed == SeedType::SEED_ZOMBIE_BUNGEE)
+                                        anOffsetY -= 600.0f;
+                                else if (aSeed == SeedType::SEED_ZOMBONI)
+                                {
+                                        anOffsetX += 10.0f;
+                                        anOffsetY -= 25.0f;
+                                }
+                                else if (aSeed == SeedType::SEED_ZOMBIE_POLEVAULTER)
+                                        anOffsetX -= 50.0f;
+                        }
+                        Graphics aTinted(g);
+                        aTinted.SetColorizeImages(true);
+                        aTinted.SetColor(Color(aColor.r, aColor.g, aColor.b, 150));
+                        Plant::DrawSeedType(&aTinted, aSeed, anImitater, VARIATION_NORMAL,
+                                (float)aCursorX + anOffsetX, (float)aCursorY + anOffsetY);
+                }
 
-		g.SetColorizeImages(true);
-		g.SetColor(Color(aColor.r, aColor.g, aColor.b));
-		g.DrawImage(mNetCursorImage, aCursorX, aCursorY);
-		g.SetColorizeImages(false);
+                // The stock cursor becomes the held plant silhouette.  Drawing
+                // both at once creates a misleading second hotspot.
+                if (!aHoldingPlant)
+                {
+                        g.SetColorizeImages(true);
+                        g.SetColor(Color(aColor.r, aColor.g, aColor.b));
+                        g.DrawImage(mNetCursorImage, aCursorX, aCursorY);
+                        g.SetColorizeImages(false);
+                }
 
                 if (aPlayer.mNick[0] && Sexy::FONT_BRIANNETOD12)
 		{

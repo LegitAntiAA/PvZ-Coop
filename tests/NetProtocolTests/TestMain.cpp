@@ -255,13 +255,29 @@ bool ColorEquals(const LawnNet::NetColor& theColor, uint8_t theRed, uint8_t theG
 
 void TestRelativePlayerColors()
 {
-	for (int aViewer = 0; aViewer < LawnNet::NET_MAX_PLAYERS; ++aViewer)
-	{
-		CHECK(ColorEquals(LawnNet::GetRelativePlayerColor(aViewer, aViewer), 255U, 255U, 255U));
-		CHECK(ColorEquals(LawnNet::GetRelativePlayerColor(aViewer, (aViewer + 1) % LawnNet::NET_MAX_PLAYERS), 70U, 130U, 255U));
-		CHECK(ColorEquals(LawnNet::GetRelativePlayerColor(aViewer, (aViewer + 2) % LawnNet::NET_MAX_PLAYERS), 255U, 70U, 70U));
-		CHECK(ColorEquals(LawnNet::GetRelativePlayerColor(aViewer, (aViewer + 3) % LawnNet::NET_MAX_PLAYERS), 80U, 200U, 80U));
-	}
+        for (int aViewer = 0; aViewer < LawnNet::NET_MAX_PLAYERS; ++aViewer)
+        {
+                CHECK(ColorEquals(LawnNet::GetRelativePlayerColor(aViewer, aViewer), 255U, 255U, 255U));
+                int aRemoteIndex = 0;
+                for (int anOwner = 0; anOwner < LawnNet::NET_MAX_PLAYERS; ++anOwner)
+                {
+                        if (anOwner == aViewer)
+                                continue;
+                        static const uint8_t aExpected[3][3] =
+                        {
+                                { 70U, 130U, 255U },
+                                { 255U, 70U, 70U },
+                                { 80U, 200U, 80U }
+                        };
+                        CHECK(ColorEquals(LawnNet::GetRelativePlayerColor(aViewer, anOwner),
+                                aExpected[aRemoteIndex][0], aExpected[aRemoteIndex][1],
+                                aExpected[aRemoteIndex][2]));
+                        ++aRemoteIndex;
+                }
+        }
+
+        CHECK(ColorEquals(LawnNet::GetRelativePlayerColor(0, 1), 70U, 130U, 255U));
+        CHECK(ColorEquals(LawnNet::GetRelativePlayerColor(1, 0), 70U, 130U, 255U));
 
 	CHECK(ColorEquals(LawnNet::GetPlayerColorBySlot(0), 255U, 255U, 255U));
 	CHECK(ColorEquals(LawnNet::GetPlayerColorBySlot(1), 70U, 130U, 255U));
