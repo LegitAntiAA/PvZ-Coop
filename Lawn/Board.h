@@ -635,6 +635,7 @@ public:
 	void							NetDrawTowerDefensePath(Graphics* g);
 	bool							NetTdIsPathCell(int theGridX, int theGridY);
 	int								NetTdPathPosToCell(float thePos, int& theRow, int& theCol);
+	bool							ApplyTowerDefensePathToGrid();
 	static void						GenerateTowerDefensePath(std::vector<uint8_t>& thePath);
 	static void						SetTowerDefensePath(const std::vector<uint8_t>& thePath);
 	void							NetGhostUpdateZombie(Zombie* theZombie, uint8_t theAnimKey);

@@ -766,7 +766,9 @@ void Board::PickZombieWaves()
 	else
 	{
 		GameMode aGameMode = mApp->mGameMode;
-		if (mApp->IsSurvivalMode() || mApp->IsLastStand())
+		if (aGameMode == GameMode::GAMEMODE_COOP_PVP)
+			mNumWaves = 0;
+		else if (mApp->IsSurvivalMode() || mApp->IsLastStand())
 			mNumWaves = GetNumWavesPerSurvivalStage();
 		else if (aGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN || aGameMode == GameMode::GAMEMODE_TREE_OF_WISDOM || mApp->IsSquirrelLevel())
 			mNumWaves = 0;
@@ -1051,7 +1053,9 @@ void Board::LoadBackgroundImages()
 	{
 	case BackgroundType::BACKGROUND_1_DAY:
 		TodLoadResources("DelayLoad_Background1");
-		if ((mApp->IsAdventureMode() && mLevel <= 4) || mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_RESODDED)
+		if ((mApp->IsAdventureMode() && mLevel <= 4) ||
+			mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_RESODDED ||
+			mApp->mGameMode == GameMode::GAMEMODE_COOP_TOWER_DEFENSE)
 		{
 			TodLoadResources("DelayLoad_BackgroundUnsodded");
 		}
@@ -1100,9 +1104,10 @@ void Board::LoadBackgroundImages()
 		TOD_ASSERT();
 		break;
 	}
-	LawnNet::NetTrace("LoadBackgroundImages complete board=%p background=%d day=%p night=%p pool=%p fog=%p roof=%p",
-		(void*)this, (int)mBackground, (void*)Sexy::IMAGE_BACKGROUND1, (void*)Sexy::IMAGE_BACKGROUND2,
-		(void*)Sexy::IMAGE_BACKGROUND3, (void*)Sexy::IMAGE_BACKGROUND4, (void*)Sexy::IMAGE_BACKGROUND5);
+	LawnNet::NetTrace("LoadBackgroundImages complete board=%p background=%d day=%p unsodded=%p night=%p pool=%p fog=%p roof=%p",
+		(void*)this, (int)mBackground, (void*)Sexy::IMAGE_BACKGROUND1,
+		(void*)Sexy::IMAGE_BACKGROUND1UNSODDED, (void*)Sexy::IMAGE_BACKGROUND2, (void*)Sexy::IMAGE_BACKGROUND3,
+		(void*)Sexy::IMAGE_BACKGROUND4, (void*)Sexy::IMAGE_BACKGROUND5);
 }
 
 //0x40A550
@@ -1757,6 +1762,78 @@ void Board::GetZenButtonRect(GameObjectType theObjectType, Rect& theRect)
 	//return theRect;
 }
 
+bool Board::ApplyTowerDefensePathToGrid()
+{
+	// Validate the path representation and the invariants used by movement
+	// before touching the lawn.  This keeps a malformed network path from
+	// leaving the host/client with a partially dug road, and makes repeated
+	// application harmless.
+	if (mTDPath.empty() || (mTDPath.size() & 1U) != 0U)
+	{
+		LawnNet::NetTrace("TD path grid apply rejected: byteCount=%zu", mTDPath.size());
+		return false;
+	}
+
+	const int aTowerDefenseRowCount = 5; // the day lawn has playable rows 0..4
+	int aPreviousRow = -1;
+	int aPreviousCol = -1;
+	int aTopEdgeVisits = 0;
+	for (size_t i = 0; i < mTDPath.size(); i += 2)
+	{
+		const int aRow = mTDPath[i] >> 1;
+		const int aCol = mTDPath[i + 1];
+		if ((mTDPath[i] & 1U) != 0U || aRow >= aTowerDefenseRowCount || aCol >= MAX_GRID_SIZE_X)
+		{
+			LawnNet::NetTrace("TD path grid apply rejected: cell=%zu rowByte=%u row=%d col=%d byteCount=%zu",
+				i / 2, (unsigned int)mTDPath[i], aRow, aCol, mTDPath.size());
+			return false;
+		}
+
+		if (i == 0)
+		{
+			if (aCol != MAX_GRID_SIZE_X - 1)
+			{
+				LawnNet::NetTrace("TD path grid apply rejected: start column=%d", aCol);
+				return false;
+			}
+		}
+		else if (abs(aRow - aPreviousRow) + abs(aCol - aPreviousCol) != 1)
+		{
+			LawnNet::NetTrace("TD path grid apply rejected: disconnected cell=%zu row=%d col=%d previousRow=%d previousCol=%d",
+				i / 2, aRow, aCol, aPreviousRow, aPreviousCol);
+			return false;
+		}
+
+		if (aRow == 0 && aPreviousRow != 0)
+			aTopEdgeVisits++;
+		aPreviousRow = aRow;
+		aPreviousCol = aCol;
+	}
+
+	if (aPreviousCol != 0 || aTopEdgeVisits < 3)
+	{
+		LawnNet::NetTrace("TD path grid apply rejected: endColumn=%d topEdgeVisits=%d",
+			aPreviousCol, aTopEdgeVisits);
+		return false;
+	}
+
+	int aChangedCells = 0;
+	for (size_t i = 0; i < mTDPath.size(); i += 2)
+	{
+		const int aRow = mTDPath[i] >> 1;
+		const int aCol = mTDPath[i + 1];
+		if (mGridSquareType[aCol][aRow] != GridSquareType::GRIDSQUARE_DIRT)
+		{
+			mGridSquareType[aCol][aRow] = GridSquareType::GRIDSQUARE_DIRT;
+			aChangedCells++;
+		}
+	}
+
+	LawnNet::NetTrace("TD path grid applied: cells=%zu changed=%d topEdgeVisits=%d",
+		mTDPath.size() / 2, aChangedCells, aTopEdgeVisits);
+	return true;
+}
+
 //0x40AF90
 void Board::InitLevel()
 {
@@ -1784,6 +1861,12 @@ void Board::InitLevel()
 			mTDPath = mApp->mNetManager->mStartTDPath;
 		if (mTDPath.empty())
 			GenerateTowerDefensePath(mTDPath);
+		if (!ApplyTowerDefensePathToGrid())
+		{
+			// Do not let an invalid received path reach the renderer or movement
+			// code.  A valid host-generated path never takes this branch.
+			mTDPath.clear();
+		}
 	}
 	if (aGameMode == GameMode::GAMEMODE_CHALLENGE_BEGHOULED || aGameMode == GameMode::GAMEMODE_CHALLENGE_BEGHOULED_TWIST ||
 		mApp->IsScaryPotterLevel() || mApp->IsWhackAZombieLevel())
@@ -6452,6 +6535,8 @@ void Board::UpdateZombieSpawning()
 {
 	if (mApp->mGameMode == GameMode::GAMEMODE_UPSELL || mApp->mGameMode == GameMode::GAMEMODE_INTRO)
 		return;
+	if (mApp->mGameMode == GameMode::GAMEMODE_COOP_PVP)
+		return;
 
 	if (mFinalWaveSoundCounter > 0)
 	{
@@ -8068,6 +8153,11 @@ void Board::DrawGameObjects(Graphics* g)
 //0x4173C0
 bool Board::HasProgressMeter()
 {
+	// PvP has no AI-authored waves; its dedicated score HUD is the only
+	// progress display.
+	if (mApp->mGameMode == GameMode::GAMEMODE_COOP_PVP)
+		return false;
+
 	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_BEGHOULED || 
 		mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_BEGHOULED_TWIST || 
 		mApp->IsFinalBossLevel() || 

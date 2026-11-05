@@ -6026,8 +6026,10 @@ void LawnApp::NetDrawCursorOverlay()
 {
 	if (!mNetManager || !mNetManager->IsActive() || !mWidgetManager || !mWidgetManager->mImage)
 		return;
-	// PvP intentionally hides every player's cursor.
-	if (mBoard && mBoard->IsPvPMode())
+	// PvP intentionally hides remote cursors over the game board.  Keep the
+	// lobby overlay interactive/visible even if an old board is still alive
+	// while returning from a match.
+	if (mBoard && mBoard->IsPvPMode() && (!mNetLobbyPanel || !mNetLobbyPanel->mVisible))
 		return;
 
         static bool aCursorLoadAttempted = false;

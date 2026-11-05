@@ -3164,6 +3164,17 @@ void Board::NetDrawTowerDefensePath(Graphics* g)
 {
 	if (mTDPath.empty() || mApp->mGameMode != GameMode::GAMEMODE_COOP_TOWER_DEFENSE)
 		return;
+	if (!Sexy::IMAGE_BACKGROUND1UNSODDED)
+	{
+		static bool aMissingRoadImageTraced = false;
+		if (!aMissingRoadImageTraced)
+		{
+			aMissingRoadImageTraced = true;
+			NetTrace("TD road draw skipped: DelayLoad_BackgroundUnsodded did not provide IMAGE_BACKGROUND1UNSODDED");
+		}
+		TOD_ASSERT(Sexy::IMAGE_BACKGROUND1UNSODDED != nullptr);
+		return;
+	}
 
 	// cut the matching cell out of the unsodded (dirt) lawn image, aligned the
 	// same way DrawBackdrop places the regular background
@@ -3176,16 +3187,8 @@ void Board::NetDrawTowerDefensePath(Graphics* g)
 		int aX = GridToPixelX(aCol, aRow);
 		int aY = GridToPixelY(aCol, aRow);
 
-		if (Sexy::IMAGE_BACKGROUND1UNSODDED)
-		{
-			Rect aSrcRect(aX - aBgX, aY - aBgY, 80, 100);
-			g->DrawImage(Sexy::IMAGE_BACKGROUND1UNSODDED, aX, aY, aSrcRect);
-		}
-		else
-		{
-			g->SetColor(Color(120, 85, 55, 200));
-			g->FillRect(aX, aY, 80, 100);
-		}
+		Rect aSrcRect(aX - aBgX, aY - aBgY, 80, 100);
+		g->DrawImage(Sexy::IMAGE_BACKGROUND1UNSODDED, aX, aY, aSrcRect);
 	}
 }
 

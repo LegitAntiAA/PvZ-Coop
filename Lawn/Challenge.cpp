@@ -3271,6 +3271,12 @@ void Challenge::WhackAZombieSpawning()
 //0x426580
 bool Challenge::UpdateZombieSpawning()
 {
+	// PvP zombies are placed explicitly by the zombie team.  Returning true
+	// suppresses the stock countdown/wave spawner without affecting those
+	// player-authored spawns.
+	if (mApp->mGameMode == GameMode::GAMEMODE_COOP_PVP)
+		return true;
+
 	if (mApp->IsWhackAZombieLevel())
 	{
 		WhackAZombieSpawning();
