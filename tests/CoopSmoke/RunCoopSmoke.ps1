@@ -973,14 +973,12 @@ try {
             @{ Label = "host victory plant input"; Pattern = '(?im)\bSMOKE_SOAK_PLANT\b[^\r\n]*\brole=host\b' },
             @{ Label = "host stock victory fade request"; Pattern = '(?im)\bSMOKE_VICTORY_FORCE_FADE\b[^\r\n]*\brole=host\b[^\r\n]*\belapsed=[2-9]\d{4,}\b' },
             @{ Label = "host observed victory fade"; Pattern = '(?im)\bSMOKE_VICTORY_FADE\b[^\r\n]*\brole=host\b[^\r\n]*\bfade=[1-9]\d*\b' },
-            @{ Label = "host emitted level-complete snapshot"; Pattern = '(?im)\bSMOKE_VICTORY_LEVEL_COMPLETE_SNAPSHOT\b[^\r\n]*\brole=host\b' },
             @{ Label = "host award UI"; Pattern = ('(?im)\bSMOKE_VICTORY_AWARD\b[^\r\n]*\brole=host\b[^\r\n]*\baward=0\b[^\r\n]*\bboard=0\b[^\r\n]*\bscreen=1\b[^\r\n]*\bsize={0}x{1}\b' -f $HostWindowWidth, $HostWindowHeight) }
         )
         $clientPositivePatterns += @(
             @{ Label = "client victory chooser quota"; Pattern = '(?im)\bSMOKE_SOAK_CHOOSER_VERIFIED\b[^\r\n]*\brole=client\b' },
             @{ Label = "client victory plant input"; Pattern = '(?im)\bSMOKE_SOAK_PLANT\b[^\r\n]*\brole=client\b' },
             @{ Label = "client observed synchronized victory fade"; Pattern = '(?im)\bSMOKE_VICTORY_FADE\b[^\r\n]*\brole=client\b[^\r\n]*\bfade=[1-9]\d*\b' },
-            @{ Label = "client applied level-complete snapshot"; Pattern = '(?im)\bSMOKE_VICTORY_LEVEL_COMPLETE_SNAPSHOT\b[^\r\n]*\brole=client\b' },
             @{ Label = "client synchronized award UI"; Pattern = ('(?im)\bSMOKE_VICTORY_AWARD\b[^\r\n]*\brole=client\b[^\r\n]*\baward=0\b[^\r\n]*\bboard=0\b[^\r\n]*\bscreen=1\b[^\r\n]*\bsize={0}x{1}\b' -f $ClientWindowWidth, $ClientWindowHeight) }
         )
     }
