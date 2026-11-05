@@ -82,9 +82,9 @@ static const size_t NET_SEED_PACKET_WIRE_BYTES = 16;
 static const int NET_PLANT_REANIM_ROLES = 8;
 static const size_t NET_PLANT_WIRE_BYTES = 23 +
         NET_PLANT_REANIM_ROLES * NET_ZOMBIE_ANIM_WIRE_BYTES;
-// Zombie: id/type/row/position(8), health pools(10), phase/visual state(10),
+// Zombie: id/type/row/position(8), eight U32 health pools(32), phase/visual state(10),
 // velocity/altitude/original animation rate(12), and exact body animation(11).
-static const size_t NET_ZOMBIE_WIRE_BYTES = 40 + NET_ZOMBIE_ANIM_WIRE_BYTES;
+static const size_t NET_ZOMBIE_WIRE_BYTES = 62 + NET_ZOMBIE_ANIM_WIRE_BYTES;
 // Projectile: id(2), type/row(2), x/y/z/shadow(16), order(4),
 // rotation(4), motion/frame/high-ground(3).
 static const size_t NET_PROJECTILE_WIRE_BYTES = 31;
@@ -983,7 +983,7 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 	}
 
 	// challenge essentials
-	b.WriteU8((uint8_t)mChallenge->mSurvivalStage);
+	b.WriteU32((uint32_t)max(0, mChallenge->mSurvivalStage));
 	b.WriteU8((uint8_t)mChallenge->mChallengeState);
 	b.WriteU16((uint16_t)min(65535, max(0, mChallenge->mChallengeStateCounter)));
 	b.WriteI16((int16_t)max(-32768, min(32767, mChallenge->mChallengeScore)));
@@ -1137,11 +1137,17 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 		aBody.WriteU8((uint8_t)aZombie->mRow);
 		aBody.WriteI16((int16_t)(aZombie->mPosX * 4));
 		aBody.WriteI16((int16_t)(aZombie->mPosY * 4));
-		aBody.WriteU16((uint16_t)min(65535, max(0, aZombie->mBodyHealth)));
-		aBody.WriteU16((uint16_t)min(65535, max(0, aZombie->mBodyMaxHealth)));
-		aBody.WriteU16((uint16_t)min(65535, max(0, aZombie->mHelmHealth)));
-		aBody.WriteU16((uint16_t)min(65535, max(0, aZombie->mShieldHealth)));
-		aBody.WriteU16((uint16_t)min(65535, max(0, aZombie->mFlyingHealth)));
+		NetZombieHealthState aHealth;
+		aHealth.mBody = (uint32_t)max(0, aZombie->mBodyHealth);
+		aHealth.mBodyMax = (uint32_t)max(0, aZombie->mBodyMaxHealth);
+		aHealth.mHelm = (uint32_t)max(0, aZombie->mHelmHealth);
+		aHealth.mHelmMax = (uint32_t)max(0, aZombie->mHelmMaxHealth);
+		aHealth.mShield = (uint32_t)max(0, aZombie->mShieldHealth);
+		aHealth.mShieldMax = (uint32_t)max(0, aZombie->mShieldMaxHealth);
+		aHealth.mFlying = (uint32_t)max(0, aZombie->mFlyingHealth);
+		aHealth.mFlyingMax = (uint32_t)max(0, aZombie->mFlyingMaxHealth);
+		const bool aHealthWritten = NetEncodeZombieHealthState(aHealth, aBody);
+		TOD_ASSERT(aHealthWritten);
 		aBody.WriteU8((uint8_t)aZombie->mZombiePhase);
 		aBody.WriteU8((uint8_t)aZombie->mZombieHeight);
 		aBody.WriteU8((uint8_t)aZombie->mHelmType);
@@ -1916,7 +1922,13 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		mIceTimer[i] = b.ReadU16Or();
 	}
 
-	const int aSurvivalStage = b.ReadU8Or();
+	const uint32_t aSurvivalStageWire = b.ReadU32Or();
+	if (aSurvivalStageWire > NET_ENDLESS_STAGE_MAX)
+	{
+		NetTrace("snapshot survival stage rejected: stage=%u", aSurvivalStageWire);
+		return;
+	}
+	const int aSurvivalStage = (int)aSurvivalStageWire;
 	const ChallengeState aChallengeState = (ChallengeState)b.ReadU8Or();
 	const int aChallengeStateCounter = b.ReadU16Or();
 	const int aChallengeScore = b.ReadI16Or();
@@ -2507,11 +2519,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		uint8_t mRow;
 		int16_t mPosX4;
 		int16_t mPosY4;
-		uint16_t mBodyHealth;
-		uint16_t mBodyMaxHealth;
-		uint16_t mHelmHealth;
-		uint16_t mShieldHealth;
-		uint16_t mFlyingHealth;
+		NetZombieHealthState mHealth;
 		uint8_t mPhase;
 		uint8_t mHeight;
 		uint8_t mHelmType;
@@ -2538,11 +2546,12 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		aWire.mRow = b.ReadU8Or();
 		aWire.mPosX4 = b.ReadI16Or();
 		aWire.mPosY4 = b.ReadI16Or();
-		aWire.mBodyHealth = b.ReadU16Or();
-		aWire.mBodyMaxHealth = b.ReadU16Or();
-		aWire.mHelmHealth = b.ReadU16Or();
-		aWire.mShieldHealth = b.ReadU16Or();
-		aWire.mFlyingHealth = b.ReadU16Or();
+		if (!NetDecodeZombieHealthState(b, aWire.mHealth))
+		{
+			NetTrace("snapshot zombie section rejected malformed health index=%d id=%u",
+				i, aWire.mId);
+			return;
+		}
 		aWire.mPhase = b.ReadU8Or();
 		aWire.mHeight = b.ReadU8Or();
 		aWire.mHelmType = b.ReadU8Or();
@@ -2675,11 +2684,14 @@ void Board::NetApplySnapshot(NetBuffer& b)
 					aWire.mId, aPreviousRow, aWire.mRow,
 					aZombie->mPosX, aZombie->mPosY);
 		}
-		aZombie->mBodyHealth = aWire.mBodyHealth;
-		aZombie->mBodyMaxHealth = aWire.mBodyMaxHealth;
-		aZombie->mHelmHealth = aWire.mHelmHealth;
-		aZombie->mShieldHealth = aWire.mShieldHealth;
-		aZombie->mFlyingHealth = aWire.mFlyingHealth;
+		aZombie->mBodyHealth = (int)aWire.mHealth.mBody;
+		aZombie->mBodyMaxHealth = (int)aWire.mHealth.mBodyMax;
+		aZombie->mHelmHealth = (int)aWire.mHealth.mHelm;
+		aZombie->mHelmMaxHealth = (int)aWire.mHealth.mHelmMax;
+		aZombie->mShieldHealth = (int)aWire.mHealth.mShield;
+		aZombie->mShieldMaxHealth = (int)aWire.mHealth.mShieldMax;
+		aZombie->mFlyingHealth = (int)aWire.mHealth.mFlying;
+		aZombie->mFlyingMaxHealth = (int)aWire.mHealth.mFlyingMax;
 		aZombie->mZombiePhase = (ZombiePhase)aWire.mPhase;
 		aZombie->mZombieHeight = (ZombieHeight)aWire.mHeight;
 		aZombie->mHelmType = (HelmType)aWire.mHelmType;

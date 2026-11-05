@@ -3032,8 +3032,10 @@ void LawnApp::CheckForGameEnd()
 			if (NetIsHost() && IsCoopEndlessRepick(mGameMode) && mNetManager)
 			{
 				LawnNet::NetBuffer aRepick;
-				aRepick.WriteU8((uint8_t)mBoard->mChallenge->mSurvivalStage);
-				mNetManager->SendBoardEvent(aRepick, LawnNet::BOARDEV_ENDLESS_REPICK);
+				const bool aRepickWritten = LawnNet::NetEncodeEndlessRepickEvent(
+					(uint32_t)mBoard->mChallenge->mSurvivalStage, aRepick);
+				TOD_ASSERT(aRepickWritten);
+				mNetManager->BroadcastMessage(LawnNet::NETMSG_BOARD_EVENT, aRepick);
 				LawnNet::NetTrace("ENDLESS_REPICK TX stage=%d mode=%d",
 					mBoard->mChallenge->mSurvivalStage, (int)mGameMode);
 			}

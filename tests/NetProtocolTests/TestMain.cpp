@@ -1,6 +1,7 @@
 #include "../../Lawn/Net/NetCommon.h"
 #include "LocalizedTextTests.h"
 #include "NetChallengeRuntimeTests.h"
+#include "NetEndlessWireTests.h"
 #include "NetMowerSnapshotTests.h"
 #include "NetZombieAnimTests.h"
 
@@ -780,6 +781,10 @@ int main()
 		RunNetChallengeRuntimeTests();
 	gChecks += aChallengeRuntimeResult.mChecks;
 	gFailures += aChallengeRuntimeResult.mFailures;
+	const NetEndlessWireTestResult anEndlessWireResult =
+		RunNetEndlessWireTests();
+	gChecks += anEndlessWireResult.mChecks;
+	gFailures += anEndlessWireResult.mFailures;
 	const NetMowerSnapshotTestResult aMowerSnapshotResult =
 		RunNetMowerSnapshotTests();
 	gChecks += aMowerSnapshotResult.mChecks;

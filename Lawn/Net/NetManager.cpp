@@ -1609,14 +1609,11 @@ void NetManager::OnBoardEvent(NetBuffer& thePayload)
 	// INPUT_EPOCH/CHOOSER_OPEN frames on this same TCP stream are dispatched.
 	if (anEvent == BOARDEV_ENDLESS_REPICK)
 	{
-		uint8_t anEventWire = 0;
-		uint8_t aNextStage = 0;
-		if (thePayload.Remaining() != 2 || !thePayload.ReadU8(&anEventWire) ||
-			!thePayload.ReadU8(&aNextStage) || thePayload.Remaining() != 0 ||
-			anEventWire != BOARDEV_ENDLESS_REPICK)
+		uint32_t aNextStage = 0;
+		if (!NetDecodeEndlessRepickEvent(thePayload, aNextStage))
 		{
-			NetTrace("ENDLESS_REPICK rejected reason=payload bytes=%zu event=%u trailing=%zu",
-				thePayload.Size(), anEventWire, thePayload.Remaining());
+			NetTrace("ENDLESS_REPICK rejected reason=payload bytes=%zu trailing=%zu",
+				thePayload.Size(), thePayload.Remaining());
 			return;
 		}
 

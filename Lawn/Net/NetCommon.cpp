@@ -481,6 +481,95 @@ bool NetDecodeChallengeRuntimeState(NetBuffer& theBuffer,
 	return true;
 }
 
+bool NetEncodeEndlessRepickEvent(uint32_t theStage, NetBuffer& theBuffer)
+{
+	if (theStage > NET_ENDLESS_STAGE_MAX)
+		return false;
+	NetBuffer aWire;
+	aWire.WriteU8(BOARDEV_ENDLESS_REPICK);
+	aWire.WriteU32(theStage);
+	if (aWire.Size() != NET_ENDLESS_REPICK_WIRE_BYTES)
+		return false;
+	theBuffer.WriteBytes(aWire.Data(), aWire.Size());
+	return true;
+}
+
+bool NetDecodeEndlessRepickEvent(NetBuffer& theBuffer, uint32_t& theStage)
+{
+	const size_t aStartReadPos = theBuffer.mReadPos;
+	uint8_t anEvent = 0;
+	uint32_t aStage = 0;
+	if (theBuffer.Remaining() != NET_ENDLESS_REPICK_WIRE_BYTES ||
+		!theBuffer.ReadU8(&anEvent) || !theBuffer.ReadU32(&aStage) ||
+		theBuffer.Remaining() != 0 || anEvent != BOARDEV_ENDLESS_REPICK ||
+		aStage > NET_ENDLESS_STAGE_MAX)
+	{
+		theBuffer.mReadPos = aStartReadPos;
+		return false;
+	}
+	theStage = aStage;
+	return true;
+}
+
+namespace
+{
+bool NetZombieHealthStateIsBounded(const NetZombieHealthState& theState)
+{
+	return theState.mBody <= NET_ZOMBIE_HEALTH_MAX &&
+		theState.mBodyMax <= NET_ZOMBIE_HEALTH_MAX &&
+		theState.mHelm <= NET_ZOMBIE_HEALTH_MAX &&
+		theState.mHelmMax <= NET_ZOMBIE_HEALTH_MAX &&
+		theState.mShield <= NET_ZOMBIE_HEALTH_MAX &&
+		theState.mShieldMax <= NET_ZOMBIE_HEALTH_MAX &&
+		theState.mFlying <= NET_ZOMBIE_HEALTH_MAX &&
+		theState.mFlyingMax <= NET_ZOMBIE_HEALTH_MAX;
+}
+}
+
+bool NetEncodeZombieHealthState(const NetZombieHealthState& theState,
+	NetBuffer& theBuffer)
+{
+	if (!NetZombieHealthStateIsBounded(theState))
+		return false;
+	NetBuffer aWire;
+	aWire.WriteU32(theState.mBody);
+	aWire.WriteU32(theState.mBodyMax);
+	aWire.WriteU32(theState.mHelm);
+	aWire.WriteU32(theState.mHelmMax);
+	aWire.WriteU32(theState.mShield);
+	aWire.WriteU32(theState.mShieldMax);
+	aWire.WriteU32(theState.mFlying);
+	aWire.WriteU32(theState.mFlyingMax);
+	if (aWire.Size() != NET_ZOMBIE_HEALTH_WIRE_BYTES)
+		return false;
+	theBuffer.WriteBytes(aWire.Data(), aWire.Size());
+	return true;
+}
+
+bool NetDecodeZombieHealthState(NetBuffer& theBuffer,
+	NetZombieHealthState& theState)
+{
+	const size_t aStartReadPos = theBuffer.mReadPos;
+	if (theBuffer.Remaining() < NET_ZOMBIE_HEALTH_WIRE_BYTES)
+		return false;
+	NetZombieHealthState aDecoded;
+	aDecoded.mBody = theBuffer.ReadU32Or();
+	aDecoded.mBodyMax = theBuffer.ReadU32Or();
+	aDecoded.mHelm = theBuffer.ReadU32Or();
+	aDecoded.mHelmMax = theBuffer.ReadU32Or();
+	aDecoded.mShield = theBuffer.ReadU32Or();
+	aDecoded.mShieldMax = theBuffer.ReadU32Or();
+	aDecoded.mFlying = theBuffer.ReadU32Or();
+	aDecoded.mFlyingMax = theBuffer.ReadU32Or();
+	if (!NetZombieHealthStateIsBounded(aDecoded))
+	{
+		theBuffer.mReadPos = aStartReadPos;
+		return false;
+	}
+	theState = aDecoded;
+	return true;
+}
+
 // -------------------------------------------------------------------------
 // Frame encoding
 // -------------------------------------------------------------------------

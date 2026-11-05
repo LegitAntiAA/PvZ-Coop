@@ -26,7 +26,7 @@ namespace LawnNet
 // (the host broadcasts the same sounds via events).
 extern bool gNetSuppressSounds;
 
-static const uint32_t NET_PROTOCOL_VERSION = 28; // reliable camera bootstrap + gameplay camera/conveyor presentation
+static const uint32_t NET_PROTOCOL_VERSION = 29; // unbounded Endless stages and 32-bit zombie health pools
 static const uint16_t NET_DEFAULT_PORT = 27713;			// PvZ co-op port
 static const int NET_MAX_PLAYERS = 4;					// 1 host + 3 clients
 static const int NET_MAX_NICK_CHARS = 16;
@@ -456,6 +456,41 @@ struct NetChallengeRuntimeState
 
 bool NetEncodeChallengeRuntimeState(const NetChallengeRuntimeState& theState, NetBuffer& theBuffer);
 bool NetDecodeChallengeRuntimeState(NetBuffer& theBuffer, NetChallengeRuntimeState& theState);
+
+// Endless stages are unbounded gameplay counters.  Keep both the reliable
+// repick barrier and snapshot representation wider than the old 8-bit stage.
+static const size_t NET_ENDLESS_REPICK_WIRE_BYTES = 5; // event u8 + stage u32
+static const uint32_t NET_ENDLESS_STAGE_MAX = UINT32_C(0x7FFFFFFF);
+bool NetEncodeEndlessRepickEvent(uint32_t theStage, NetBuffer& theBuffer);
+bool NetDecodeEndlessRepickEvent(NetBuffer& theBuffer, uint32_t& theStage);
+
+// Every current/max health pool is authoritative.  U32 prevents Endless health
+// scaling from silently pinning client ghosts at 65535 and keeps health-bar
+// denominators identical to the host.
+static const size_t NET_ZOMBIE_HEALTH_WIRE_BYTES = 32;
+static const uint32_t NET_ZOMBIE_HEALTH_MAX = UINT32_C(0x7FFFFFFF);
+struct NetZombieHealthState
+{
+	uint32_t mBody;
+	uint32_t mBodyMax;
+	uint32_t mHelm;
+	uint32_t mHelmMax;
+	uint32_t mShield;
+	uint32_t mShieldMax;
+	uint32_t mFlying;
+	uint32_t mFlyingMax;
+
+	NetZombieHealthState() { Reset(); }
+	void Reset()
+	{
+		mBody = mBodyMax = 0;
+		mHelm = mHelmMax = 0;
+		mShield = mShieldMax = 0;
+		mFlying = mFlyingMax = 0;
+	}
+};
+bool NetEncodeZombieHealthState(const NetZombieHealthState& theState, NetBuffer& theBuffer);
+bool NetDecodeZombieHealthState(NetBuffer& theBuffer, NetZombieHealthState& theState);
 
 // Presentation-only integer smoothing used between authoritative samples.
 // It is monotonic, cannot overshoot, and always converges even when integer

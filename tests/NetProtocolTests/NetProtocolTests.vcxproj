@@ -50,7 +50,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="LocalizedTextTests.cpp" />
-	<ClCompile Include="NetChallengeRuntimeTests.cpp" />
+     <ClCompile Include="NetChallengeRuntimeTests.cpp" />
+     <ClCompile Include="NetEndlessWireTests.cpp" />
 	<ClCompile Include="NetMowerSnapshotTests.cpp" />
 	<ClCompile Include="NetZombieAnimTests.cpp" />
     <ClCompile Include="TestMain.cpp" />
@@ -59,7 +60,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LocalizedTextTests.h" />
-	<ClInclude Include="NetChallengeRuntimeTests.h" />
+     <ClInclude Include="NetChallengeRuntimeTests.h" />
+     <ClInclude Include="NetEndlessWireTests.h" />
 	<ClInclude Include="NetMowerSnapshotTests.h" />
 	<ClInclude Include="NetZombieAnimTests.h" />
     <ClInclude Include="..\..\Lawn\Net\NetCommon.h" />
