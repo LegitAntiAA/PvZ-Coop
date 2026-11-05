@@ -86,15 +86,26 @@ class NetSmokeScenarioRuntime
 private:
 	NetSmokeScenarioId mScenario;
 	Board* mBoardIdentity;
+	uint32_t mIntroTick;
+	uint32_t mIntroLastActionTick;
 	uint32_t mPlayingTick;
 	uint32_t mActionTick;
+	int mIntroLastCutsceneTime;
+	int mIntroLastDaveMessage;
+	int mIntroLastTutorialState;
 	int mBaselinePlants;
 	int mBaselinePots;
+	bool mIntroObserved;
+	bool mIntroProgressObserved;
+	bool mIntroSawDave;
+	bool mChooserStartIssued;
 	bool mBaselineCaptured;
 	bool mActionIssued;
 	bool mActionApplied;
 	uint32_t mPostActionSamples;
 
+	bool UpdateIntro(LawnApp* theApp, const NetSmokeManifest& theManifest,
+		const NetSmokeScenarioDefinition& theDefinition, std::string& theFailure);
 	bool IssueAction(LawnApp* theApp, const NetSmokeManifest& theManifest);
 	bool ObserveActionApplied(Board* theBoard) const;
 
