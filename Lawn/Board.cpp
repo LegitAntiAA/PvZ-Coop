@@ -85,7 +85,8 @@ Board::Board(LawnApp* theApp)
 	memset(&mNetGameplayCameraTargets, 0, sizeof(mNetGameplayCameraTargets));
 	mNetPvPBrainScore = 0;
 	mNetPvPKillScore = 0;
-	mNetPvPBrainTimer = 0;
+	mNetPvPBrains = 0;
+	mNetPvPBrainTick = 0;
 	mNetPvPLastPlantsEaten = 0;
 	mNetDaveAppliedAnimKey = 255;
 	mNetDaveAppliedMessageIndex = INT_MIN;
@@ -2215,7 +2216,7 @@ void Board::InitLevel()
 		for (int i = 0; i < PVP_ZOMBIE_PACKET_COUNT; i++)
 			mSeedBank->mSeedPackets[PVP_PLANT_PACKET_COUNT + i].SetPacketType(Challenge::GetPvPZombieSeed(i));
 		AssignPvPSeedOwners();
-		mNetPvPBrainTimer = 100; // starting brains (host authority, snapshot-synced)
+		mNetPvPBrains = 100; // starting brains (host authority, snapshot-synced)
 	}
 
 	// 将所有子控件标记为已变动
@@ -6406,9 +6407,9 @@ void Board::UpdateGameObjects()
 		const int aPlantsEatenDelta = mPlantsEaten - mNetPvPLastPlantsEaten;
 		if (aPlantsEatenDelta > 0)
 		{
-			const int64_t aRewardedBrains = (int64_t)mNetPvPBrainTimer +
+			const int64_t aRewardedBrains = (int64_t)mNetPvPBrains +
 				(int64_t)aPlantsEatenDelta * PVP_BRAIN_REWARD_PER_PLANT;
-			mNetPvPBrainTimer = (int)(aRewardedBrains > 100000 ? 100000 : aRewardedBrains);
+			mNetPvPBrains = (int)(aRewardedBrains > 100000 ? 100000 : aRewardedBrains);
 			mNetPvPLastPlantsEaten = mPlantsEaten;
 		}
 	}

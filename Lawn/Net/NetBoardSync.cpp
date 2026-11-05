@@ -1033,7 +1033,7 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 	// pvp / td
 	b.WriteU8((uint8_t)min(255, mNetPvPBrainScore));
 	b.WriteU8((uint8_t)min(255, mNetPvPKillScore));
-	b.WriteI32(mNetPvPBrainTimer);
+	b.WriteI32(mNetPvPBrains);
 	b.WriteU8((uint8_t)max(0, mNetTDLives));
 
 	// ---- seed packets ----
@@ -1991,7 +1991,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 
 	mNetPvPBrainScore = b.ReadU8Or();
 	mNetPvPKillScore = b.ReadU8Or();
-	mNetPvPBrainTimer = b.ReadI32Or();
+	mNetPvPBrains = b.ReadI32Or();
 	mNetTDLives = b.ReadU8Or();
 
 	// huge wave warning banner (mirrors host-side advice)
@@ -3635,6 +3635,58 @@ void Board::NetUpdateIntroPresentation(bool theSnap)
 	}
 }
 
+// START_PLAYING is a reliable barrier, so carry the final host camera with it.
+// Gameplay snapshots keep streaming the same canonical fields afterwards, but
+// waiting for the first snapshot allowed one or more frames at the client's
+// constructor/default position (and could leave special challenge cameras
+// visibly shifted when the intro transition was skipped).
+void Board::NetEncodeCameraBootstrap(NetBuffer& b)
+{
+	b.WriteI16((int16_t)max(-2048, min(2048, mX)));
+	b.WriteI16((int16_t)max(-1024, min(1024, mY)));
+	b.WriteI16((int16_t)max(-4096, min(4096, mTreeX)));
+	b.WriteI16((int16_t)max(-4096, min(4096, mPoleX)));
+	NetTrace("camera bootstrap encoded board=(%d,%d) tree=%d pole=%d",
+		mX, mY, mTreeX, mPoleX);
+}
+
+bool Board::NetApplyCameraBootstrap(NetBuffer& b)
+{
+	if (b.Remaining() != 8)
+	{
+		NetTrace("camera bootstrap rejected: bytes=%zu expected=8", b.Remaining());
+		return false;
+	}
+	const int aBoardX = b.ReadI16Or();
+	const int aBoardY = b.ReadI16Or();
+	const int aTreeX = b.ReadI16Or();
+	const int aPoleX = b.ReadI16Or();
+	if (aBoardX < -2048 || aBoardX > 2048 ||
+		aBoardY < -1024 || aBoardY > 1024 ||
+		aTreeX < -4096 || aTreeX > 4096 ||
+		aPoleX < -4096 || aPoleX > 4096)
+	{
+		NetTrace("camera bootstrap rejected: board=(%d,%d) tree=%d pole=%d",
+			aBoardX, aBoardY, aTreeX, aPoleX);
+		return false;
+	}
+
+	Move(aBoardX, aBoardY);
+	mTreeX = aTreeX;
+	mPoleX = aPoleX;
+	mNetGameplayCameraTargets.mBoardX = aBoardX;
+	mNetGameplayCameraTargets.mBoardY = aBoardY;
+	mNetGameplayCameraTargets.mTreeX = aTreeX;
+	mNetGameplayCameraTargets.mPoleX = aPoleX;
+	mNetGameplayCameraTargets.mValid = true;
+	// The reliable bootstrap supersedes the last intro interpolation target.
+	// LawnApp::StartPlaying must not pull the board back to an older sample.
+	mNetIntroTargets.mValid = false;
+	NetTrace("camera bootstrap applied board=(%d,%d) tree=%d pole=%d",
+		aBoardX, aBoardY, aTreeX, aPoleX);
+	return true;
+}
+
 void Board::NetEncodeIntroState(NetBuffer& b)
 {
 	const int aWideX = mApp->mDDInterface ? mApp->mDDInterface->mWideScreenOffsetX : 0;
@@ -4222,12 +4274,12 @@ void Board::AssignPvPSeedOwners()
 
 bool Board::CanTakeBrains(int theAmount)
 {
-	return mNetPvPBrainTimer >= theAmount;
+	return mNetPvPBrains >= theAmount;
 }
 
 void Board::TakeBrains(int theAmount)
 {
-	mNetPvPBrainTimer = max(0, mNetPvPBrainTimer - theAmount);
+	mNetPvPBrains = max(0, mNetPvPBrains - theAmount);
 }
 
 // host-side per-tick updates for the custom modes
@@ -4245,13 +4297,13 @@ void Board::UpdatePvP()
 		return;
 
 	// brains trickle: +50 every ~10 seconds, shared by the zombie team
-	if (mNetPvPBrainTimer > 0 || mApp->mGameScene == GameScenes::SCENE_PLAYING)
+	if (mNetPvPBrains > 0 || mApp->mGameScene == GameScenes::SCENE_PLAYING)
 	{
 		mNetPvPBrainTick++;
 		if (mNetPvPBrainTick >= 1000)
 		{
 			mNetPvPBrainTick = 0;
-			mNetPvPBrainTimer += 50;
+			mNetPvPBrains += 50;
 		}
 	}
 

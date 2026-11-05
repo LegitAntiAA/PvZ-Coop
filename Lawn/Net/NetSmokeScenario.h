@@ -12,6 +12,7 @@ class LawnApp;
 
 namespace LawnNet
 {
+class NetManager;
 
 struct NetSmokeManifest;
 
@@ -28,9 +29,14 @@ enum NetSmokeScenarioId : uint8_t
         NETSMOKE_SCENARIO_ADVENTURE_8_SOAK = 8,
         NETSMOKE_SCENARIO_ADVENTURE_8_VICTORY = 9,
 	NETSMOKE_SCENARIO_TOWER_DEFENSE_CLIENT = 10,
-        NETSMOKE_SCENARIO_PORTAL_COMBAT_CLIENT = 11,
-        NETSMOKE_SCENARIO_ENDLESS_ST = 12
+	NETSMOKE_SCENARIO_PORTAL_COMBAT_CLIENT = 11,
+	NETSMOKE_SCENARIO_ENDLESS_ST = 12,
+	NETSMOKE_SCENARIO_PVP_1V1 = 13
 };
+
+// Runtime-only smoke setup.  Manifest/protocol tests never call this function,
+// so their header-only scenario resolver has no game-executable dependency.
+void NetPrepareSmokeScenarioLobby(NetSmokeScenarioId theScenario, NetManager* theManager);
 
 inline bool NetIsInteractiveChooserSmokeScenario(NetSmokeScenarioId theScenario)
 {
@@ -91,9 +97,12 @@ inline const NetSmokeScenarioDefinition* NetSmokeScenarioTable(size_t& theCount)
                 { NETSMOKE_SCENARIO_PORTAL_COMBAT_CLIENT,
                         "portal_combat_client", "portal_combat_client", 1,
                         (uint8_t)GameMode::GAMEMODE_CHALLENGE_PORTAL_COMBAT, true },
-                { NETSMOKE_SCENARIO_ENDLESS_ST,
-                        "endless_st", "endless_st", 1,
-                        (uint8_t)GameMode::GAMEMODE_COOP_ENDLESS_ST, false }
+		{ NETSMOKE_SCENARIO_ENDLESS_ST,
+			"endless_st", "endless_st", 1,
+			(uint8_t)GameMode::GAMEMODE_COOP_ENDLESS_ST, false },
+		{ NETSMOKE_SCENARIO_PVP_1V1,
+			"pvp_1v1", "pvp_1v1", 1,
+			(uint8_t)GameMode::GAMEMODE_COOP_PVP, true }
 	};
 	theCount = sizeof(aScenarios) / sizeof(aScenarios[0]);
 	return aScenarios;
@@ -126,7 +135,7 @@ inline bool NetResolveSmokeScenario(const std::string& theMode, int theLevel,
 	theError = "unsupported smoke scenario; allowed pairs are adventure/1, adventure/5, "
                 "adventure_bowling_client/5, adventure_whack_client/15, slot_machine_client/1, "
 		"adventure_soak/8, adventure_victory/8, tower_defense_client/1, "
-                "portal_combat_client/1, endless_st/1, "
+		"portal_combat_client/1, endless_st/1, pvp_1v1/1, "
 		"vasebreaker/1, beghouled/1";
 	return false;
 }
@@ -215,6 +224,17 @@ private:
 	bool mPortalHeldPacketEchoed;
 	bool mPortalHeldEchoMismatch;
 	bool mPortalPlantClickIssued;
+	bool mPvpRosterVerified;
+	bool mPvpDeckVerified;
+	bool mPvpInitialBrainsVerified;
+	bool mPvpPassiveBrainsVerified;
+	bool mPvpCursorHiddenVerified;
+	bool mPvpZombieEntryObserved;
+	bool mPvpHostPlantIssued;
+	bool mPvpHostPlantObserved;
+	uint16_t mPvpZombieId;
+	uint16_t mPvpBaselineMaxZombieId;
+	int mPvpBrainsAfterAction;
 	int mPortalConveyorInitialCounter;
 	int mPortalZombieEntryRow;
 	uint32_t mPortalZombieEntryTick;

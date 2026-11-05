@@ -1395,6 +1395,11 @@ void NetManager::HandleMessageClient(uint8_t theMsgType, NetBuffer& thePayload)
 				NetTrace("START_PLAYING deferred: chooser level has no final bank payload");
 				break;
 			}
+			if (!mApp->mBoard->NetApplyCameraBootstrap(thePayload))
+			{
+				NetTrace("START_PLAYING rejected: malformed camera bootstrap");
+				break;
+			}
 			mPendingChooserStarts.clear();
 			mRemoteChooserStates.clear();
 			mChooserOpen = false;

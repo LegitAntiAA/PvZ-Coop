@@ -858,6 +858,43 @@ bool IssueClientSlotMachineAction(LawnApp* theApp)
 }
 }
 
+void NetPrepareSmokeScenarioLobby(NetSmokeScenarioId theScenario, NetManager* theManager)
+{
+	if (theScenario != NETSMOKE_SCENARIO_PVP_1V1 || !theManager || !theManager->IsActive())
+		return;
+
+	if (theManager->IsHosting())
+	{
+		bool aChanged = false;
+		NetPlayerInfo& aHost = theManager->GetPlayerMutable(0);
+		if (aHost.mActive && aHost.mTeam != NETTEAM_PLANTS)
+		{
+			aHost.mTeam = NETTEAM_PLANTS;
+			aChanged = true;
+		}
+		NetPlayerInfo& aClient = theManager->GetPlayerMutable(1);
+		if (aClient.mActive && aClient.mTeam != NETTEAM_ZOMBIES)
+		{
+			aClient.mTeam = NETTEAM_ZOMBIES;
+			aChanged = true;
+		}
+		if (aChanged)
+		{
+			theManager->SendLobbyState();
+			NetTrace("SMOKE_PVP_TEAM_ASSIGN role=host host=plants client=zombies players=%d",
+				theManager->GetPlayerCount());
+		}
+	}
+	else if (theManager->IsConnectedToHost() && theManager->GetMyTeam() != NETTEAM_ZOMBIES)
+	{
+		// Exercise the ordinary client team request as well.  The host-side
+		// deterministic assignment above closes the startup race before PreNewGame.
+		theManager->SetMyTeam(NETTEAM_ZOMBIES);
+		NetTrace("SMOKE_PVP_TEAM_ASSIGN role=client requested=zombies slot=%d",
+			theManager->GetMySlot());
+	}
+}
+
 NetSmokeScenarioRuntime::NetSmokeScenarioRuntime()
 {
 	Reset();
@@ -942,7 +979,18 @@ void NetSmokeScenarioRuntime::Reset(NetSmokeScenarioId theScenario)
 	mPortalPlantRow = -1;
 	mPortalHeldPacketEchoed = false;
 	mPortalHeldEchoMismatch = false;
-	mPortalPlantClickIssued = false;
+        mPortalPlantClickIssued = false;
+		mPvpRosterVerified = false;
+		mPvpDeckVerified = false;
+		mPvpInitialBrainsVerified = false;
+		mPvpPassiveBrainsVerified = false;
+		mPvpCursorHiddenVerified = false;
+		mPvpZombieEntryObserved = false;
+		mPvpHostPlantIssued = false;
+		mPvpHostPlantObserved = false;
+		mPvpZombieId = 0;
+		mPvpBaselineMaxZombieId = 0;
+		mPvpBrainsAfterAction = -1;
         mPortalConveyorInitialCounter = -1;
 	mPortalZombieEntryRow = -1;
 	mPortalZombieEntryTick = 0;
@@ -1077,7 +1125,8 @@ bool NetSmokeScenarioRuntime::UpdateIntro(LawnApp* theApp,
         // Adventure 8 is the first ordinary first-time Adventure level with a
         // genuine chooser.  Exercise each peer's real chooser hit-testing and
         // network pick path; never synthesize the final seed bank in the test.
-        if (NetIsInteractiveChooserSmokeScenario(mScenario) &&
+        if ((NetIsInteractiveChooserSmokeScenario(mScenario) ||
+			mScenario == NETSMOKE_SCENARIO_PVP_1V1) &&
                 aCutScene->mSeedChoosing && theApp->mSeedChooserScreen)
         {
                 SeedChooserScreen* aChooser = theApp->mSeedChooserScreen;
@@ -1087,7 +1136,12 @@ bool NetSmokeScenarioRuntime::UpdateIntro(LawnApp* theApp,
                         theApp->mNetManager->GetMySlot() : (theManifest.IsHost() ? 0 : 1);
                 const int aOtherSlot = aLocalSlot == 0 ? 1 : 0;
                 const int aLocalCount = aChooser->CoopGetLocalQuotaPickCount();
-                const int aQuota = aChooser->mCoopPicksPerPlayer;
+		const bool aPvpChooser = mScenario == NETSMOKE_SCENARIO_PVP_1V1;
+		const bool aPvpZombie = aPvpChooser && theApp->mNetManager &&
+			theApp->mNetManager->GetMyTeam() == NETTEAM_ZOMBIES;
+		const int aQuota = theApp->mNetManager ?
+			theApp->mNetManager->mChooserPickQuota[aLocalSlot] :
+			aChooser->mCoopPicksPerPlayer;
                 if (aLocalCount != mSoakChooserLastCount)
                 {
                         mSoakChooserLastCount = aLocalCount;
@@ -1096,6 +1150,20 @@ bool NetSmokeScenarioRuntime::UpdateIntro(LawnApp* theApp,
                                 aChooser->mCoopRemotePickCount[aOtherSlot], aQuota,
                                 aChooser->mSeedsInFlight);
                 }
+		if (aPvpZombie)
+		{
+			if (aQuota != 0 || aLocalCount != 0)
+			{
+				theFailure = "PvP zombie chooser received a non-zero plant quota";
+				return false;
+			}
+			if (!mSoakChooserVerified)
+			{
+				mSoakChooserVerified = true;
+				NetTrace("SMOKE_PVP_CHOOSER_VERIFIED role=client team=zombies quota=0 picks=0");
+			}
+			return true;
+		}
                 if (aQuota <= 0)
                 {
                         theFailure = "Adventure soak chooser unexpectedly assigned a zero pick quota";
@@ -1133,14 +1201,33 @@ bool NetSmokeScenarioRuntime::UpdateIntro(LawnApp* theApp,
                                 return true;
                         }
                 }
-                const int aRemoteCount = aChooser->mCoopRemotePickCount[aOtherSlot];
-                if (aLocalCount == aQuota && aRemoteCount == aQuota &&
-                        aChooser->mSeedsInFlight == 0)
+		const int aRemoteCount = aChooser->mCoopRemotePickCount[aOtherSlot];
+		bool anAllEligibleReady = aLocalCount == aQuota;
+		if (aPvpChooser && theApp->mNetManager)
+		{
+			for (int aSlot = 0; aSlot < NET_MAX_PLAYERS; aSlot++)
+			{
+				const NetPlayerInfo& aPlayer = theApp->mNetManager->GetPlayer(aSlot);
+				if (!aPlayer.mActive || aPlayer.mTeam != NETTEAM_PLANTS)
+					continue;
+				const int aCount = aSlot == aLocalSlot ? aLocalCount :
+					aChooser->mCoopRemotePickCount[aSlot];
+				if (aCount != theApp->mNetManager->mChooserPickQuota[aSlot])
+					anAllEligibleReady = false;
+			}
+		}
+		else
+		{
+			anAllEligibleReady = anAllEligibleReady && aRemoteCount == aQuota;
+		}
+                if (anAllEligibleReady && aChooser->mSeedsInFlight == 0)
                 {
                         if (!mSoakChooserVerified)
                         {
                                 mSoakChooserVerified = true;
-                                NetTrace("SMOKE_SOAK_CHOOSER_VERIFIED role=%s local=%d remote=%d quota=%d",
+				NetTrace(aPvpChooser ?
+					"SMOKE_PVP_CHOOSER_VERIFIED role=%s team=plants local=%d remote=%d quota=%d" :
+					"SMOKE_SOAK_CHOOSER_VERIFIED role=%s local=%d remote=%d quota=%d",
                                         theManifest.IsHost() ? "host" : "client",
                                         aLocalCount, aRemoteCount, aQuota);
                         }
@@ -1733,6 +1820,12 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
 			aBoard->mChallenge->mSlotMachineRollCount : 0;
 		mBaselineSunMoney = aBoard->mSunMoney;
 		mBaselinePlantGridHash = SmokePlantGridHash(aBoard);
+		if (mScenario == NETSMOKE_SCENARIO_PVP_1V1)
+		{
+			Zombie* aZombie = nullptr;
+			while (aBoard->mZombies.IterateNext(aZombie))
+				mPvpBaselineMaxZombieId = max(mPvpBaselineMaxZombieId, aZombie->mNetId);
+		}
 		if (mScenario == NETSMOKE_SCENARIO_VASEBREAKER && mBaselinePots <= 0)
 			return true;
 		if (mScenario == NETSMOKE_SCENARIO_BEGHOULED &&
@@ -1757,6 +1850,210 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
                         theManifest.IsHost() ? "host" : "client", aDefinition->mName,
                         mBaselinePlants, mBaselinePots, aBoard->mZombies.mSize, theGameplaySnapshots);
         }
+
+	if (mScenario == NETSMOKE_SCENARIO_PVP_1V1)
+	{
+		const uint32_t aNow = GetTickCount();
+		NetManager* aNet = theApp->mNetManager;
+		if (!aNet || !aBoard->IsPvPMode() || !aBoard->mSeedBank || !aBoard->mChallenge)
+		{
+			theFailure = "PvP smoke lost its network, board, seed bank, or challenge state";
+			return false;
+		}
+
+		if (!mPvpRosterVerified)
+		{
+			const NetPlayerInfo& aHost = aNet->GetPlayer(0);
+			const NetPlayerInfo& aClient = aNet->GetPlayer(1);
+			if (aNet->GetPlayerCount() != 2 || !aHost.mActive || !aClient.mActive ||
+				aHost.mTeam != NETTEAM_PLANTS || aClient.mTeam != NETTEAM_ZOMBIES ||
+				aNet->GetMySlot() != (theManifest.IsHost() ? 0 : 1))
+			{
+				theFailure = "PvP smoke did not start with the canonical plants-host/zombies-client 1v1 roster";
+				return false;
+			}
+			mPvpRosterVerified = true;
+			NetTrace("SMOKE_PVP_ROSTER role=%s players=2 hostTeam=plants clientTeam=zombies localSlot=%d localTeam=%s",
+				theManifest.IsHost() ? "host" : "client", aNet->GetMySlot(),
+				aNet->GetMyTeam() == NETTEAM_PLANTS ? "plants" : "zombies");
+		}
+
+		if (!mPvpDeckVerified)
+		{
+			if (aBoard->mSeedBank->mNumPackets != PVP_PACKET_COUNT)
+			{
+				theFailure = "PvP smoke seed bank did not contain exactly 10 plant and 16 zombie cards";
+				return false;
+			}
+			std::ostringstream aTypes;
+			std::ostringstream anOwners;
+			for (int i = 0; i < PVP_PACKET_COUNT; ++i)
+			{
+				SeedPacket& aPacket = aBoard->mSeedBank->mSeedPackets[i];
+				const bool aZombieCard = aBoard->mChallenge->IsZombieSeedType(aPacket.mPacketType);
+				const bool aValidPlant = i < PVP_PLANT_PACKET_COUNT && !aZombieCard &&
+					aPacket.mPacketType != SeedType::SEED_NONE && aPacket.mNetOwnerSlot == 0;
+				const int aZombieIndex = i - PVP_PLANT_PACKET_COUNT;
+				const bool aValidZombie = i >= PVP_PLANT_PACKET_COUNT && aZombieCard &&
+					aPacket.mPacketType == Challenge::GetPvPZombieSeed(aZombieIndex) &&
+					aPacket.mNetOwnerSlot == NET_SHARED_OWNER;
+				if ((!aValidPlant && i < PVP_PLANT_PACKET_COUNT) ||
+					(!aValidZombie && i >= PVP_PLANT_PACKET_COUNT) || aPacket.mNetId == 0)
+				{
+					NetTrace("SMOKE_PVP_DECK_INVALID role=%s index=%d id=%u type=%d owner=%u zombie=%d",
+						theManifest.IsHost() ? "host" : "client", i, aPacket.mNetId,
+						(int)aPacket.mPacketType, aPacket.mNetOwnerSlot, aZombieCard ? 1 : 0);
+					theFailure = "PvP smoke found an invalid card identity, type, order, or owner";
+					return false;
+				}
+				if (i != 0) { aTypes << ','; anOwners << ','; }
+				aTypes << (int)aPacket.mPacketType;
+				anOwners << (int)aPacket.mNetOwnerSlot;
+			}
+			mPvpDeckVerified = true;
+			NetTrace("SMOKE_PVP_DECK role=%s plants=10 zombies=16 shared=16 total=26 types=%s owners=%s",
+				theManifest.IsHost() ? "host" : "client",
+				aTypes.str().c_str(), anOwners.str().c_str());
+		}
+
+		if (!mPvpInitialBrainsVerified)
+		{
+			if (aBoard->mNetPvPBrains != 100 ||
+				(theManifest.IsHost() && (aBoard->mNetPvPBrainTick < 0 || aBoard->mNetPvPBrainTick >= 1000)))
+			{
+				NetTrace("SMOKE_PVP_BRAINS_INVALID role=%s phase=initial brains=%d tick=%d",
+					theManifest.IsHost() ? "host" : "client", aBoard->mNetPvPBrains,
+					theManifest.IsHost() ? aBoard->mNetPvPBrainTick : -1);
+				theFailure = "PvP initial brains or host trickle cadence state was invalid";
+				return false;
+			}
+			mPvpInitialBrainsVerified = true;
+			NetTrace("SMOKE_PVP_BRAINS role=%s phase=initial brains=100 tick=%d",
+				theManifest.IsHost() ? "host" : "client",
+				theManifest.IsHost() ? aBoard->mNetPvPBrainTick : -1);
+		}
+
+		if (!mPvpCursorHiddenVerified)
+		{
+			const int anOtherSlot = theManifest.IsHost() ? 1 : 0;
+			if (aNet->mRemoteCursors[anOtherSlot].mValid)
+			{
+				mPvpCursorHiddenVerified = true;
+				NetTrace("SMOKE_PVP_CURSOR_HIDDEN role=%s remoteSlot=%d remoteValid=1 overlaySuppressed=1",
+					theManifest.IsHost() ? "host" : "client", anOtherSlot);
+			}
+		}
+
+		if (theManifest.IsClient() && !mActionIssued && mPvpRosterVerified &&
+			mPvpDeckVerified && mPvpInitialBrainsVerified)
+		{
+			SeedPacket& aPacket = aBoard->mSeedBank->mSeedPackets[PVP_PLANT_PACKET_COUNT];
+			if (aPacket.CanPickUp())
+			{
+				const int aPacketX = aBoard->mSeedBank->mX + aPacket.mX +
+					aPacket.mOffsetX + aPacket.mWidth / 2;
+				const int aPacketY = aBoard->mSeedBank->mY + aPacket.mY + aPacket.mHeight / 2;
+				const int aSpawnX = BOARD_WIDTH - 80;
+				const int aSpawnY = aBoard->GridToPixelY(8, 2) + 45;
+				SmokeClientClick(theApp, aPacketX, aPacketY);
+				SmokeClientClick(theApp, aSpawnX, aSpawnY);
+				mActionIssued = true;
+				mActionTick = aNow;
+				NetTrace("SMOKE_PVP_CLIENT_ZOMBIE_INPUT index=%d type=%d owner=%u brains=%d row=2",
+					PVP_PLANT_PACKET_COUNT, (int)aPacket.mPacketType,
+					aPacket.mNetOwnerSlot, aBoard->mNetPvPBrains);
+				NetTrace("SMOKE_CHECKPOINT role=client scenario=pvp_1v1 step=ACTION_ISSUED owner=client");
+			}
+		}
+
+		Zombie* aSpawned = mPvpZombieId ? FindSmokeZombieById(aBoard, mPvpZombieId) : nullptr;
+		if (!mPvpZombieEntryObserved)
+		{
+			Zombie* aZombie = nullptr;
+			while (aBoard->mZombies.IterateNext(aZombie))
+			{
+				if (aZombie->mDead || aZombie->mNetId <= mPvpBaselineMaxZombieId ||
+					(theManifest.IsClient() && !aZombie->mNetGhost))
+					continue;
+				if (!aSpawned || aZombie->mNetId < aSpawned->mNetId)
+					aSpawned = aZombie;
+			}
+			if (aSpawned)
+			{
+				if (aSpawned->mPosX <= BOARD_WIDTH)
+				{
+					NetTrace("SMOKE_PVP_ZOMBIE_ENTRY_INVALID role=%s id=%u x=%.2f row=%d ghost=%d",
+						theManifest.IsHost() ? "host" : "client", aSpawned->mNetId,
+						aSpawned->mPosX, aSpawned->mRow, aSpawned->mNetGhost ? 1 : 0);
+					theFailure = "PvP zombie first appeared on the lawn instead of offscreen right";
+					return false;
+				}
+				mPvpZombieId = aSpawned->mNetId;
+				mPvpZombieEntryObserved = true;
+				mActionApplied = true;
+				mPvpBrainsAfterAction = aBoard->mNetPvPBrains;
+				NetTrace("SMOKE_PVP_ZOMBIE_ENTRY role=%s id=%u x=%.2f row=%d ghost=%d brains=%d",
+					theManifest.IsHost() ? "host" : "client", aSpawned->mNetId,
+					aSpawned->mPosX, aSpawned->mRow, aSpawned->mNetGhost ? 1 : 0,
+					aBoard->mNetPvPBrains);
+				NetTrace("SMOKE_CHECKPOINT role=%s scenario=pvp_1v1 step=ACTION_APPLIED zombies=%d baselineId=%u",
+					theManifest.IsHost() ? "host" : "client", aBoard->mZombies.mSize,
+					mPvpBaselineMaxZombieId);
+			}
+		}
+
+		if (theManifest.IsHost() && !mPvpHostPlantIssued &&
+			(uint32_t)(aNow - mPlayingTick) >= 1500U && IssueSoakSeedAction(theApp, false))
+		{
+			mPvpHostPlantIssued = true;
+			NetTrace("SMOKE_PVP_HOST_PLANT_INPUT baseline=%d", mBaselinePlants);
+		}
+		if (!mPvpHostPlantObserved && aBoard->mPlants.mSize > mBaselinePlants)
+		{
+			mPvpHostPlantObserved = true;
+			NetTrace("SMOKE_PVP_HOST_PLANT role=%s plants=%d baseline=%d",
+				theManifest.IsHost() ? "host" : "client", aBoard->mPlants.mSize, mBaselinePlants);
+		}
+
+		if (mPvpZombieEntryObserved && !mPvpPassiveBrainsVerified &&
+			mPvpBrainsAfterAction >= 0 && aBoard->mNetPvPBrains != mPvpBrainsAfterAction)
+		{
+			const int aDelta = aBoard->mNetPvPBrains - mPvpBrainsAfterAction;
+			if (aDelta == 50)
+			{
+				mPvpPassiveBrainsVerified = true;
+				NetTrace("SMOKE_PVP_BRAINS role=%s phase=passive before=%d after=%d delta=%d",
+					theManifest.IsHost() ? "host" : "client", mPvpBrainsAfterAction,
+					aBoard->mNetPvPBrains, aDelta);
+			}
+			else if (aDelta > 50)
+			{
+				NetTrace("SMOKE_PVP_BRAINS_INVALID role=%s phase=passive before=%d after=%d",
+					theManifest.IsHost() ? "host" : "client", mPvpBrainsAfterAction,
+					aBoard->mNetPvPBrains);
+				theFailure = "PvP passive brain award skipped the exact +50 authoritative state";
+				return false;
+			}
+			else
+			{
+				// A client can receive the zombie cost (-25) and the first +50
+				// award in one authoritative snapshot.  Preserve that combined
+				// transition as the new baseline; the next positive transition
+				// must still prove the exact +50 cadence on both peers.
+				NetTrace("SMOKE_PVP_BRAINS_REBASE role=%s before=%d after=%d delta=%d",
+					theManifest.IsHost() ? "host" : "client", mPvpBrainsAfterAction,
+					aBoard->mNetPvPBrains, aDelta);
+				mPvpBrainsAfterAction = aBoard->mNetPvPBrains;
+			}
+		}
+
+		if (mActionIssued && !mPvpZombieEntryObserved && aNow - mActionTick >= 15000U)
+		{
+			theFailure = "PvP client zombie input did not create an authoritative zombie within 15 seconds";
+			return false;
+		}
+		return true;
+	}
 
         if (mScenario == NETSMOKE_SCENARIO_ENDLESS_ST)
         {
@@ -2712,12 +3009,17 @@ bool NetSmokeScenarioRuntime::IsComplete(uint32_t theRequiredPostActionSnapshots
                          mPortalZombieTeleportObserved && mPortalClientPlantObserved &&
                          mPortalAdviceShown && mPortalAdviceCleared &&
                          mPortalRelocationVerified)) &&
-		(mScenario != NETSMOKE_SCENARIO_ENDLESS_ST ||
-			(mEndlessModeVerified && mEndlessTimeChanged &&
+                (mScenario != NETSMOKE_SCENARIO_ENDLESS_ST ||
+                        (mEndlessModeVerified && mEndlessTimeChanged &&
 			 mEndlessWaveProgressed && mEndlessRepickOpened &&
 			 mEndlessRepickLogged &&
 			 mEndlessRepickCompleted && mEndlessHealthScaled &&
-			 mEndlessThawed)) &&
+                         mEndlessThawed)) &&
+				(mScenario != NETSMOKE_SCENARIO_PVP_1V1 ||
+					(mPvpRosterVerified && mPvpDeckVerified &&
+					 mPvpInitialBrainsVerified && mPvpPassiveBrainsVerified &&
+					 mPvpCursorHiddenVerified && mPvpZombieEntryObserved &&
+					 mPvpHostPlantObserved)) &&
                 (!NetIsBowlingSmokeScenario(mScenario) || mBowlingZombieObserved) &&
 		theRequiredPostActionSnapshots > 0 &&
 		mPostActionSamples >= theRequiredPostActionSnapshots;

@@ -596,7 +596,7 @@ public:
 	CursorObject*					mNetPlayerCursors[LawnNet::NET_MAX_PLAYERS]; // host-authoritative cursor per slot
 	int								mNetPvPBrainScore;			// zombies team score
 	int								mNetPvPKillScore;			// plants team score
-	int								mNetPvPBrainTimer;			// brain currency trickle
+	int								mNetPvPBrains;				// shared zombie-team brain currency
 	int								mNetPvPLastPlantsEaten;		// host-side reward watermark
 	std::vector<uint8_t>			mTDPath;					// tower defense: pairs (row, col)
 	bool							mNetTDRoadDrawLogged = false;	// first complete TD road render for this board/process
@@ -607,7 +607,7 @@ public:
 	uint16_t						mNetFogTimer;				// fog remaining ticks
 	uint16_t						mNetStormTimer;				// storm remaining ticks
 	int								mNetTDLives;				// tower defense: brains left
-	int								mNetPvPBrainTick;			// pvp: brain trickle counter
+	int								mNetPvPBrainTick;			// pvp: brain trickle cadence counter
 	uint8_t							mNetDaveAppliedAnimKey;		// client: edge-triggered Dave animation
 	int								mNetDaveAppliedMessageIndex;	// client: edge-triggered Dave dialog
 	void							UpdateEndlessWeather();
@@ -626,6 +626,8 @@ public:
 	uint16_t						NetAllocId();
 	void							NetHostTick();				// host: send snapshot/cursor at rate
 	void							NetEncodeSnapshot(LawnNet::NetBuffer& theBuffer);
+	void							NetEncodeCameraBootstrap(LawnNet::NetBuffer& theBuffer);
+	bool							NetApplyCameraBootstrap(LawnNet::NetBuffer& theBuffer);
 	void							NetEncodeIntroState(LawnNet::NetBuffer& theBuffer);
 	void							NetApplyIntroState(LawnNet::NetBuffer& theBuffer);
 	void							NetUpdateIntroPresentation(bool theSnap);

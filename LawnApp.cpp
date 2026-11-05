@@ -1490,8 +1490,9 @@ void LawnApp::StartPlaying()
 		mGameScene = GameScenes::SCENE_PLAYING;
 		LawnNet::NetTrace("host entering gameplay; broadcasting barrier mode=%d level=%d", (int)mGameMode, mBoard ? mBoard->mLevel : -1);
 		mNetManager->AdvanceInputPhase(LawnNet::NETINPUT_PLAYING, "START_PLAYING");
-		LawnNet::NetBuffer anEmpty;
-		mNetManager->BroadcastMessage(LawnNet::NETMSG_START_PLAYING, anEmpty);
+		LawnNet::NetBuffer aCameraBootstrap;
+		mBoard->NetEncodeCameraBootstrap(aCameraBootstrap);
+		mNetManager->BroadcastMessage(LawnNet::NETMSG_START_PLAYING, aCameraBootstrap);
 		mBoard->StartLevel();
 	}
 	else
@@ -5793,6 +5794,7 @@ void LawnApp::CoopSmokeUpdate()
 				return;
 			}
 			mCoopSmokeGameStarted = true;
+			LawnNet::NetPrepareSmokeScenarioLobby(mCoopSmokeManifest.mScenario, mNetManager);
 			if (mPlayerInfo)
 				mPlayerInfo->SetLevel(mCoopSmokeManifest.mLevel);
 			LawnNet::NetTrace("SMOKE_START role=host scenario=%s mode=%s gameMode=%u level=%d seed=%u skipIntro=%d",

@@ -26,7 +26,7 @@ namespace LawnNet
 // (the host broadcasts the same sounds via events).
 extern bool gNetSuppressSounds;
 
-static const uint32_t NET_PROTOCOL_VERSION = 27; // gameplay camera/conveyor presentation + held packet identity
+static const uint32_t NET_PROTOCOL_VERSION = 28; // reliable camera bootstrap + gameplay camera/conveyor presentation
 static const uint16_t NET_DEFAULT_PORT = 27713;			// PvZ co-op port
 static const int NET_MAX_PLAYERS = 4;					// 1 host + 3 clients
 static const int NET_MAX_NICK_CHARS = 16;
@@ -85,7 +85,7 @@ enum NetMsgType : uint8_t
 	NETMSG_START_GAME = 12,		// h->all: u8 gameMode, i32 level, u8 playerCount, u8 teams[4], TD path cells
 	NETMSG_SCENE_CMD = 13,		// h->all: u8 cmd, i32 param (menu/challenge/award/etc sync)
 	NETMSG_BACK_TO_MENU = 14,	// h->all: (host ended the game)
-	NETMSG_START_PLAYING = 15,	// h->all: seed chooser/intro finished; enter gameplay now
+	NETMSG_START_PLAYING = 15,	// h->all: i16 board x/y/tree x/pole x camera bootstrap; enter gameplay now
 	NETMSG_INTRO_STATE = 16,	// h->all: authoritative cutscene presentation + preview zombies
 	NETMSG_DAVE_STATE = 17,		// h->all: fixed 12-byte Crazy Dave presentation state
 

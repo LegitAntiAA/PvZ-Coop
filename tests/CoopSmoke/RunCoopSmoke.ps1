@@ -14,7 +14,7 @@ param(
     [int]$GracefulExitSeconds = 10,
     [ValidateRange(0, 65535)]
     [int]$Port = 0,
-    [ValidateSet("Adventure1", "Adventure5Bowling", "Adventure5BowlingClient", "Adventure8Soak", "Adventure8Victory", "Adventure15WhackClient", "SlotMachineClient", "TowerDefenseClient", "PortalCombatClient", "EndlessST", "Vasebreaker", "Beghouled")]
+    [ValidateSet("Adventure1", "Adventure5Bowling", "Adventure5BowlingClient", "Adventure8Soak", "Adventure8Victory", "Adventure15WhackClient", "SlotMachineClient", "TowerDefenseClient", "PortalCombatClient", "PvP1v1", "EndlessST", "Vasebreaker", "Beghouled")]
     [string]$Scenario = "Adventure1",
     [ValidateSet(0, 1)]
     [int]$SkipIntro = 1,
@@ -725,6 +725,7 @@ $scenarioSpec = switch ($Scenario) {
     "SlotMachineClient" { [ordered]@{ Mode = "slot_machine_client"; Level = 1; Marker = "slot_machine_client" } }
     "TowerDefenseClient" { [ordered]@{ Mode = "tower_defense_client"; Level = 1; Marker = "tower_defense_client" } }
     "PortalCombatClient" { [ordered]@{ Mode = "portal_combat_client"; Level = 1; Marker = "portal_combat_client" } }
+    "PvP1v1" { [ordered]@{ Mode = "pvp_1v1"; Level = 1; Marker = "pvp_1v1" } }
     "EndlessST" { [ordered]@{ Mode = "endless_st"; Level = 1; Marker = "endless_st" } }
     "Vasebreaker" { [ordered]@{ Mode = "vasebreaker"; Level = 1; Marker = "vasebreaker" } }
     "Beghouled" { [ordered]@{ Mode = "beghouled"; Level = 1; Marker = "beghouled" } }
@@ -1066,6 +1067,38 @@ try {
             @{ Label = "client Tower Defense plant"; Pattern = '(?im)\bSMOKE_TD_CLIENT_PLANT\b[^\r\n]*\brole=client\b[^\r\n]*\bid=[1-9]\d*\b[^\r\n]*\bcell=\([0-8],[0-5]\)[^\r\n]*\broad=0\b' }
         )
     }
+    if ($Scenario -eq "PvP1v1") {
+        $pvpDeckPattern = '(?im)\bSMOKE_PVP_DECK\b[^\r\n]*\btypes=([^\s]+)\s+owners=([^\s]+)'
+        $hostPvpDeck = [regex]::Match($hostLog, $pvpDeckPattern)
+        $clientPvpDeck = [regex]::Match($clientLog, $pvpDeckPattern)
+        if (-not $hostPvpDeck.Success -or -not $clientPvpDeck.Success -or
+            $hostPvpDeck.Groups[1].Value -ne $clientPvpDeck.Groups[1].Value -or
+            $hostPvpDeck.Groups[2].Value -ne $clientPvpDeck.Groups[2].Value) {
+            throw "PvP card type/order/owner manifests are missing or differ between peers."
+        }
+
+        $pvpZombiePattern = '(?im)\bSMOKE_PVP_ZOMBIE_ENTRY\b[^\r\n]*\bid=([1-9]\d*)\b[^\r\n]*\bx=(-?\d+\.\d{2})\b[^\r\n]*\brow=([0-5])\b'
+        $hostPvpZombie = [regex]::Match($hostLog, $pvpZombiePattern)
+        $clientPvpZombie = [regex]::Match($clientLog, $pvpZombiePattern)
+        if (-not $hostPvpZombie.Success -or -not $clientPvpZombie.Success -or
+            $hostPvpZombie.Groups[1].Value -ne $clientPvpZombie.Groups[1].Value -or
+            $hostPvpZombie.Groups[3].Value -ne $clientPvpZombie.Groups[3].Value -or
+            [double]$hostPvpZombie.Groups[2].Value -le 800.0 -or
+            [double]$clientPvpZombie.Groups[2].Value -le 800.0) {
+            throw "PvP client-owned zombie identity/row/offscreen entry did not correlate."
+        }
+
+        $pvpPassivePattern = '(?im)\bSMOKE_PVP_BRAINS\b[^\r\n]*\bphase=passive\b[^\r\n]*\bbefore=(\d+)\b[^\r\n]*\bafter=(\d+)\b[^\r\n]*\bdelta=(\d+)\b'
+        $hostPvpPassive = [regex]::Match($hostLog, $pvpPassivePattern)
+        $clientPvpPassive = [regex]::Match($clientLog, $pvpPassivePattern)
+        if (-not $hostPvpPassive.Success -or -not $clientPvpPassive.Success -or
+            $hostPvpPassive.Groups[2].Value -ne $clientPvpPassive.Groups[2].Value -or
+            [int]$hostPvpPassive.Groups[3].Value -ne 50 -or
+            [int]$clientPvpPassive.Groups[3].Value -ne 50) {
+            throw "PvP passive brain award was missing, not exactly +50, or not synchronized."
+        }
+    }
+
     if ($Scenario -eq "PortalCombatClient") {
         $hostPositivePatterns += @(
             @{ Label = "host Portal Combat layout"; Pattern = '(?im)\bSMOKE_PORTAL_LAYOUT\b[^\r\n]*\brole=host\b[^\r\n]*\bcount=4\b[^\r\n]*\bcircles=2\b[^\r\n]*\bsquares=2\b[^\r\n]*\bresources=4\b[^\r\n]*\btracks=[1-9]\d*\b' },
@@ -1091,6 +1124,27 @@ try {
             @{ Label = "client Portal advice clear"; Pattern = '(?im)\bSMOKE_PORTAL_ADVICE\b[^\r\n]*\brole=client\b[^\r\n]*\bphase=clear\b' },
             @{ Label = "client Portal advice applied show"; Pattern = '(?im)\badvice applied op=0\b' },
             @{ Label = "client Portal advice applied clear"; Pattern = '(?im)\badvice applied op=1\b' }
+        )
+    }
+    if ($Scenario -eq "PvP1v1") {
+        $hostPositivePatterns += @(
+            @{ Label = "host PvP 1v1 roster"; Pattern = '(?im)\bSMOKE_PVP_ROSTER\b[^\r\n]*\brole=host\b[^\r\n]*\bplayers=2\b[^\r\n]*\bhostTeam=plants\b[^\r\n]*\bclientTeam=zombies\b[^\r\n]*\blocalSlot=0\b[^\r\n]*\blocalTeam=plants\b' },
+            @{ Label = "host PvP deck"; Pattern = '(?im)\bSMOKE_PVP_DECK\b[^\r\n]*\brole=host\b[^\r\n]*\bplants=10\b[^\r\n]*\bzombies=16\b[^\r\n]*\bshared=16\b[^\r\n]*\btotal=26\b' },
+            @{ Label = "host PvP initial brains"; Pattern = '(?im)\bSMOKE_PVP_BRAINS\b[^\r\n]*\brole=host\b[^\r\n]*\bphase=initial\b[^\r\n]*\bbrains=100\b' },
+            @{ Label = "host PvP offscreen client zombie"; Pattern = '(?im)\bSMOKE_PVP_ZOMBIE_ENTRY\b[^\r\n]*\brole=host\b[^\r\n]*\bid=[1-9]\d*\b[^\r\n]*\bx=(?:8\d\d|9\d\d|[1-9]\d{3,})\.\d{2}\b[^\r\n]*\bghost=0\b' },
+            @{ Label = "host PvP plant action"; Pattern = '(?im)\bSMOKE_PVP_HOST_PLANT\b[^\r\n]*\brole=host\b' },
+            @{ Label = "host PvP passive brains"; Pattern = '(?im)\bSMOKE_PVP_BRAINS\b[^\r\n]*\brole=host\b[^\r\n]*\bphase=passive\b[^\r\n]*\bdelta=50\b' },
+            @{ Label = "host PvP remote cursor hidden"; Pattern = '(?im)\bSMOKE_PVP_CURSOR_HIDDEN\b[^\r\n]*\brole=host\b[^\r\n]*\boverlaySuppressed=1\b' }
+        )
+        $clientPositivePatterns += @(
+            @{ Label = "client PvP 1v1 roster"; Pattern = '(?im)\bSMOKE_PVP_ROSTER\b[^\r\n]*\brole=client\b[^\r\n]*\bplayers=2\b[^\r\n]*\blocalSlot=1\b[^\r\n]*\blocalTeam=zombies\b' },
+            @{ Label = "client PvP deck"; Pattern = '(?im)\bSMOKE_PVP_DECK\b[^\r\n]*\brole=client\b[^\r\n]*\bplants=10\b[^\r\n]*\bzombies=16\b[^\r\n]*\bshared=16\b[^\r\n]*\btotal=26\b' },
+            @{ Label = "client PvP initial brains"; Pattern = '(?im)\bSMOKE_PVP_BRAINS\b[^\r\n]*\brole=client\b[^\r\n]*\bphase=initial\b[^\r\n]*\bbrains=100\b' },
+            @{ Label = "client PvP zombie input"; Pattern = '(?im)\bSMOKE_PVP_CLIENT_ZOMBIE_INPUT\b[^\r\n]*\bindex=10\b[^\r\n]*\bowner=255\b[^\r\n]*\bbrains=100\b' },
+            @{ Label = "client PvP offscreen zombie ghost"; Pattern = '(?im)\bSMOKE_PVP_ZOMBIE_ENTRY\b[^\r\n]*\brole=client\b[^\r\n]*\bid=[1-9]\d*\b[^\r\n]*\bx=(?:8\d\d|9\d\d|[1-9]\d{3,})\.\d{2}\b[^\r\n]*\bghost=1\b' },
+            @{ Label = "client sees host PvP plant"; Pattern = '(?im)\bSMOKE_PVP_HOST_PLANT\b[^\r\n]*\brole=client\b' },
+            @{ Label = "client PvP passive brains"; Pattern = '(?im)\bSMOKE_PVP_BRAINS\b[^\r\n]*\brole=client\b[^\r\n]*\bphase=passive\b[^\r\n]*\bdelta=50\b' },
+            @{ Label = "client PvP remote cursor hidden"; Pattern = '(?im)\bSMOKE_PVP_CURSOR_HIDDEN\b[^\r\n]*\brole=client\b[^\r\n]*\boverlaySuppressed=1\b' }
         )
     }
     if ($Scenario -eq "EndlessST") {
@@ -1152,6 +1206,14 @@ try {
             @{ Label = "rejected Portal advice"; Pattern = '(?im)\badvice (?:TX|applied)[^\r\n]*\brejected\b' }
         )
     }
+    if ($Scenario -eq "PvP1v1") {
+        $negativePatterns += @(
+            @{ Label = "invalid PvP deck"; Pattern = '(?im)\bSMOKE_PVP_DECK_INVALID\b' },
+            @{ Label = "invalid PvP brains"; Pattern = '(?im)\bSMOKE_PVP_BRAINS_INVALID\b' },
+            @{ Label = "on-lawn PvP zombie entry"; Pattern = '(?im)\bSMOKE_PVP_ZOMBIE_ENTRY_INVALID\b' },
+            @{ Label = "remote cursor rendered during PvP"; Pattern = '(?im)\bSMOKE_REMOTE_CURSOR_RENDER\b' }
+        )
+    }
     if ($Scenario -eq "EndlessST") {
         $negativePatterns += @(
             @{ Label = "invalid EndlessST combined mode"; Pattern = '(?im)\bSMOKE_ENDLESS_ST_MODE\b[^\r\n]*(?:\bendless=(?!1\b)\d+|\btimed=(?!1\b)\d+|\brepick=(?!1\b)\d+|\bwavesPerStage=(?!10\b)\d+)' },
@@ -1172,6 +1234,7 @@ try {
         $Scenario -eq "SlotMachineClient" -or
         $Scenario -eq "TowerDefenseClient" -or
         $Scenario -eq "PortalCombatClient" -or
+        $Scenario -eq "PvP1v1" -or
         $Scenario -eq "Vasebreaker" -or $Scenario -eq "Beghouled") { "client" } else { "host" }
     $actionIssuedPattern = ('(?im)\bSMOKE_CHECKPOINT\b[^\r\n]*scenario={0}[^\r\n]*step=ACTION_ISSUED[^\r\n]*owner={1}\b' -f
         ([regex]::Escape($scenarioMarker)), $expectedActionOwner)
@@ -1335,6 +1398,19 @@ try {
     }
 
     if ($Scenario -eq "PortalCombatClient") {
+        $cameraBootstrapPattern = '(?im)\bcamera bootstrap (?:encoded|applied) board=\((-?\d+),(-?\d+)\) tree=(-?\d+) pole=(-?\d+)'
+        $hostCameraBootstrap = [regex]::Match($hostLog, $cameraBootstrapPattern)
+        $clientCameraBootstrap = [regex]::Match($clientLog, $cameraBootstrapPattern)
+        if (-not $hostCameraBootstrap.Success -or -not $clientCameraBootstrap.Success) {
+            throw "Missing reliable Portal Combat START_PLAYING camera bootstrap evidence."
+        }
+        for ($group = 1; $group -le 4; ++$group) {
+            if ($hostCameraBootstrap.Groups[$group].Value -ne $clientCameraBootstrap.Groups[$group].Value) {
+                throw ("Portal Combat START_PLAYING camera bootstrap mismatch in group {0}: host={1}, client={2}." -f
+                    $group, $hostCameraBootstrap.Groups[$group].Value, $clientCameraBootstrap.Groups[$group].Value)
+            }
+        }
+
         $portalCameraPattern = '(?im)\bSMOKE_CAMERA_SYNC\b[^\r\n]*\bphase=start\b[^\r\n]*\bboard=\((-?\d+),(-?\d+)\)[^\r\n]*\btarget=\((-?\d+),(-?\d+)\)[^\r\n]*\btree=(-?\d+)\s+targetTree=(-?\d+)\s+pole=(-?\d+)\s+targetPole=(-?\d+)[^\r\n]*\bdelta=\((\d+),(\d+)\)[^\r\n]*\bvalid=1\b'
         $hostPortalCamera = [regex]::Match($hostLog, $portalCameraPattern)
         $clientPortalCamera = [regex]::Match($clientLog, $portalCameraPattern)

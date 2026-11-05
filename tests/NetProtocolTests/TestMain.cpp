@@ -576,6 +576,17 @@ void TestSmokeManifestAndHashValidation()
 
 	anError.clear();
 	CHECK(aTree.Parse(aTree.MakeManifest(aTree.mAppData.string(), aTree.mResult.string(),
+		"pvp_1v1", 1, 1), aManifest, anError));
+	CHECK(anError.empty());
+	CHECK(aManifest.mScenario == LawnNet::NETSMOKE_SCENARIO_PVP_1V1);
+	CHECK(aManifest.mGameMode == (uint8_t)GameMode::GAMEMODE_COOP_PVP);
+	const LawnNet::NetSmokeScenarioDefinition* aPvP1v1 =
+		LawnNet::NetGetSmokeScenario(LawnNet::NETSMOKE_SCENARIO_PVP_1V1);
+	CHECK(aPvP1v1 != nullptr);
+	CHECK(aPvP1v1 && aPvP1v1->mActionIsClientOwned);
+
+	anError.clear();
+	CHECK(aTree.Parse(aTree.MakeManifest(aTree.mAppData.string(), aTree.mResult.string(),
 		"endless_st", 1, 0), aManifest, anError));
 	CHECK(anError.empty());
 	CHECK(aManifest.mScenario == LawnNet::NETSMOKE_SCENARIO_ENDLESS_ST);
