@@ -343,6 +343,9 @@ float RandRangeFloat(float theMin, float theMax)
 //0x511CE0
 void TodDrawString(Graphics* g, const SexyString& theText, int thePosX, int thePosY, Font* theFont, const Color& theColor, DrawStringJustification theJustification)
 {
+	if (!g || !theFont)
+		return;
+
 	SexyString aFinalString = TodStringTranslate(theText);
 
 	int aPosX = thePosX;
@@ -422,11 +425,11 @@ void TodDrawStringMatrix(Graphics* g, const Font* theFont, const SexyMatrix3& th
 	int aCurPoolIdx = 0;
 	for (int aCharNum = 0; aCharNum < (int)aFinalString.size(); aCharNum++)
 	{
-		SexyChar aChar = aFont->GetMappedChar(aFinalString[aCharNum]);
-		SexyChar aNextChar = '\0';
+		const unsigned char aChar = static_cast<unsigned char>(aFont->GetMappedChar(aFinalString[aCharNum]));
+		unsigned char aNextChar = 0;
 		if (aCharNum < (int)aFinalString.size() - 1)
 		{
-			aNextChar = aFont->GetMappedChar(aFinalString[aCharNum + 1]);
+			aNextChar = static_cast<unsigned char>(aFont->GetMappedChar(aFinalString[aCharNum + 1]));
 		}
 		int aMaxXPos = aCurXPos;
 		int aLayerCount = 0;

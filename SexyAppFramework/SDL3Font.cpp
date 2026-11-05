@@ -44,8 +44,10 @@ void SDL3Font::SetActive(bool active)
 	mIsActive = active;
 	if (prevActive != mIsActive && active) {
 		float scale = 1.0f;
-		int pw, ph;
-		SDL_GetWindowSizeInPixels(LawnApp::mSDLWindow, &pw, &ph);
+		int pw = 800;
+		int ph = 600;
+		if (LawnApp::mSDLWindow)
+			SDL_GetWindowSizeInPixels(LawnApp::mSDLWindow, &pw, &ph);
 		float gScale = max(static_cast<float>(pw) / 800.0f, static_cast<float>(ph) / 600.0f);
 		if (pw >= 800 || ph >= 600) scale = max(floor(gScale * 4.0f) / 4.0f, 1.0f);
 		float prevMScale = mScale;
@@ -61,11 +63,13 @@ void SDL3Font::SetActive(bool active)
 
 void SDL3Font::Init(SexyAppBase* theApp, const std::string& theFace, int thePointSize, bool bold, bool italics, bool underline)
 {
-	if (mInitializedScale) {
+	if (!mInitializedScale) {
 		mInitializedScale = true;
 		float scale = 1.0f;
-		int pw, ph;
-		SDL_GetWindowSizeInPixels(LawnApp::mSDLWindow, &pw, &ph);
+		int pw = 800;
+		int ph = 600;
+		if (LawnApp::mSDLWindow)
+			SDL_GetWindowSizeInPixels(LawnApp::mSDLWindow, &pw, &ph);
 		float gScale = max(static_cast<float>(pw) / 800.0f, static_cast<float>(ph) / 600.0f);
 		if (pw >= 800 || ph >= 600) scale = max(floor(gScale * 4.0f) / 4.0f, 1.0f);
 		mScale = scale;
@@ -76,7 +80,17 @@ void SDL3Font::Init(SexyAppBase* theApp, const std::string& theFace, int thePoin
 	mApp = theApp;
 	mPointSize = thePointSize;
 	mPathFile = theFace;
+	mBold = bold;
+	mItalic = italics;
+	mUnderline = underline;
+	mFont = nullptr;
+
+	if (TTF_WasInit() == 0 && !TTF_Init())
+		return;
+
 	mFont = TTF_OpenFont(mPathFile.c_str(), int(floor(thePointSize * (mScale * mDefaultScale))));
+	if (!mFont)
+		return;
 
 	int style = TTF_STYLE_NORMAL;
 	if (bold) style |= TTF_STYLE_BOLD;
@@ -87,10 +101,6 @@ void SDL3Font::Init(SexyAppBase* theApp, const std::string& theFace, int thePoin
 	TTF_SetFontHinting(mFont, TTF_HINTING_LIGHT_SUBPIXEL);
 	TTF_SetFontKerning(mFont, true);
 
-	mBold = bold;
-	mItalic = italics;
-	mUnderline = underline;
-
 	Color defaultColor(255, 255, 255, 255);
 	for (char c = 32; c < 127; ++c)
 		CacheGlyph(c, defaultColor);
@@ -98,7 +108,7 @@ void SDL3Font::Init(SexyAppBase* theApp, const std::string& theFace, int thePoin
 
 void SDL3Font::CacheGlyph(Uint32 c, const Color& color)
 {
-	if (!mFont || mGlyphCache.find(c) != mGlyphCache.end()) return;
+	if (!mFont || !LawnApp::mSDLRenderer || mGlyphCache.find(c) != mGlyphCache.end()) return;
 
 	const Uint32 aRenderCodePoint = ResolveGlyphCodePoint(c,
 		[this](Uint32 theCodePoint) { return TTF_FontHasGlyph(mFont, theCodePoint); });
@@ -188,7 +198,7 @@ int SDL3Font::StringWidth(const SexyString& theString)
 
 void SDL3Font::DrawString(Graphics* g, int theX, int theY, const SexyString& theString, const Color& theColor, const Rect& theClipRect)
 {
-	if (!mFont) return;
+	if (!mFont || !g || !LawnApp::mSDLRenderer) return;
 
 	SDL_Renderer* aRenderer = LawnApp::mSDLRenderer;
 	SDL_Rect aPreviousClip = {};
@@ -244,14 +254,16 @@ SDL3Font* SDL3Font::Duplicate()
 	return newFont;
 }
 
-int	SDL3Font::GetAscent() { return TTF_GetFontAscent(mFont) / GetRelativeScale(); }
+int	SDL3Font::GetAscent() { return mFont ? TTF_GetFontAscent(mFont) / GetRelativeScale() : 0; }
 int	SDL3Font::GetAscentPadding() { return 0; }
-int	SDL3Font::GetDescent() { return TTF_GetFontDescent(mFont) / GetRelativeScale(); }
-int	SDL3Font::GetHeight() { return TTF_GetFontHeight(mFont) / GetRelativeScale(); }
+int	SDL3Font::GetDescent() { return mFont ? TTF_GetFontDescent(mFont) / GetRelativeScale() : 0; }
+int	SDL3Font::GetHeight() { return mFont ? TTF_GetFontHeight(mFont) / GetRelativeScale() : 0; }
 int SDL3Font::GetLineSpacingOffset() { return GetHeight() + GetLineSpacing(); }
-int SDL3Font::GetLineSpacing() { return TTF_GetFontLineSkip(mFont) / GetRelativeScale(); }
+int SDL3Font::GetLineSpacing() { return mFont ? TTF_GetFontLineSkip(mFont) / GetRelativeScale() : 0; }
 int SDL3Font::CharWidth(SexyChar theChar)
 {
+	if (!mFont) return 0;
+
 	Uint32 aChar = (unsigned char)theChar;
 	if (aChar >= 0x80)
 		return max(1, mPointSize / 2); // one half of a typical two-byte Cyrillic UTF-8 sequence
@@ -262,6 +274,8 @@ int SDL3Font::CharWidth(SexyChar theChar)
 
 int SDL3Font::CharWidthKern(SexyChar theChar, SexyChar thePrevChar)
 {
+	if (!mFont) return 0;
+
 	Uint32 aChar = (unsigned char)theChar;
 	Uint32 aPrevChar = (unsigned char)thePrevChar;
 	if (aChar >= 0x80 || aPrevChar >= 0x80)
