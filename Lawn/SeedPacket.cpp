@@ -711,7 +711,8 @@ void SeedPacket::Draw(Graphics* g)
 			mNetOwnerSlot != mApp->mNetManager->GetMySlot() && mPacketType != SeedType::SEED_NONE)
 		{
 			LawnNet::NetColor aColor = LawnNet::GetRelativePlayerColor(mApp->mNetManager->GetMySlot(), mNetOwnerSlot);
-			g->SetColor(Color(aColor.r, aColor.g, aColor.b, 110));
+			g->SetColor(Color(aColor.r, aColor.g, aColor.b,
+				mApp->mNetManager->mConfig.mHotbarTintAlpha));
 			g->FillRect(mOffsetX + 2, 2, mWidth - 4, mHeight - 4);
 		}
 		

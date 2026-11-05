@@ -26,7 +26,7 @@ namespace LawnNet
 // (the host broadcasts the same sounds via events).
 extern bool gNetSuppressSounds;
 
-static const uint32_t NET_PROTOCOL_VERSION = 24; // Exact plant flash + bounded plant reanimation channels
+static const uint32_t NET_PROTOCOL_VERSION = 25; // Ready-set-plant presentation event
 static const uint16_t NET_DEFAULT_PORT = 27713;			// PvZ co-op port
 static const int NET_MAX_PLAYERS = 4;					// 1 host + 3 clients
 static const int NET_MAX_NICK = 16;						// bytes (without terminator)
@@ -168,7 +168,8 @@ enum NetBoardEvent : uint8_t
 	BOARDEV_ZOMBIE_STATE = 20,		// u16 id, phase byte (anim transitions)
 	BOARDEV_POTATO_EXPLODED = 21,	// u16 plant id, i16 effect x/y, u8 row
 	BOARDEV_BUSH_RUSTLE = 22,		// u8 row
-	BOARDEV_ADVICE_STATE = 23		// u32 board seed, u8 op/style/help/len, label bytes
+	BOARDEV_ADVICE_STATE = 23,		// u32 board seed, u8 op/style/help/len, label bytes
+	BOARDEV_READY_SET_PLANT = 24		// empty: materialize the stock intro reanimation
 };
 
 // Exact payload sizes for coin/sun board events.  Keep these shared by the
@@ -539,6 +540,9 @@ struct NetConfig
 	int  mWindowWidth;			// 0 = default 1066
 	int  mWindowHeight;			// 0 = default 600
 	bool mBorderlessFullscreen;	// fullscreen = borderless desktop (native res)
+	int  mHeldPlantTintAlpha;
+	int  mHotbarTintAlpha;
+	int  mHeldPlantOutlineAlpha;
 
 	NetConfig() { Reset(); }
 	void Reset()
@@ -550,6 +554,9 @@ struct NetConfig
 		mWindowWidth = 0;
 		mWindowHeight = 0;
 		mBorderlessFullscreen = true;
+		mHeldPlantTintAlpha = 150;
+		mHotbarTintAlpha = 110;
+		mHeldPlantOutlineAlpha = 180;
 	}
 };
 

@@ -22,6 +22,7 @@
 #include "../../SexyAppFramework/WidgetManager.h"
 #include "../../SexyAppFramework/DDInterface.h"
 #include "NetManager.h"
+#include "../System/Music.h"
 #include <float.h>
 #include <limits.h>
 
@@ -1721,6 +1722,30 @@ void Board::NetApplyEvent(NetBuffer& b)
 		aBushReanim->mLastFrameTime = 0.0f;
 		aBushReanim->mAnimTime = 0.0f;
 		aBushReanim->mLoopCount = 0;
+		break;
+	}
+	case BOARDEV_READY_SET_PLANT:
+	{
+		const bool aValidContext = b.Remaining() == 0 && mApp &&
+			mApp->NetIsClient() && mApp->mBoard == this &&
+			mApp->mGameScene == GameScenes::SCENE_LEVEL_INTRO;
+		if (!aValidContext)
+		{
+			NetTrace("READY_SET_PLANT rejected: bytes=%zu client=%d scene=%d boardMatch=%d",
+				b.Remaining(), mApp && mApp->NetIsClient() ? 1 : 0,
+				mApp ? (int)mApp->mGameScene : -1,
+				mApp && mApp->mBoard == this ? 1 : 0);
+			break;
+		}
+		ReanimatorEnsureDefinitionLoaded(ReanimationType::REANIM_READYSETPLANT, true);
+		Reanimation* aReady = mApp->AddReanimation(400.0f, 324.0f,
+			MakeRenderOrder(RenderLayer::RENDER_LAYER_SCREEN_FADE, 0, 0),
+			ReanimationType::REANIM_READYSETPLANT);
+		if (!mApp->IsFinalBossLevel())
+			mApp->mMusic->FadeOut(150);
+		if (aReady)
+			NetTrace("READY_SET_PLANT applied reanim=%u cutsceneTime=%d",
+				(unsigned)mApp->ReanimationGetID(aReady), mCutScene->mCutsceneTime);
 		break;
 	}
 	default:

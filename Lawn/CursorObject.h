@@ -23,7 +23,13 @@ public:
 
 	void					Update();
 	void					Draw(Graphics* g);
+	bool					DrawRemoteAtMouse(Graphics* g, int theMouseX, int theMouseY,
+		CursorType theCursorType, SeedType theSeedType, SeedType theImitaterType);
 	void					Die();
+
+private:
+	bool					DrawContent(Graphics* g, CursorType theCursorType,
+		SeedType theSeedType, SeedType theImitaterType, int theMouseX, int theMouseY);
 };
 
 class CursorPreview : public GameObject

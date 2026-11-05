@@ -12,6 +12,7 @@
 #include "../SeedPacket.h"
 #include "../Zombie.h"
 #include "../Widget/GameButton.h"
+#include "../Widget/AwardScreen.h"
 #include "../Widget/SeedChooserScreen.h"
 #include "../../LawnApp.h"
 #include "../../SexyAppFramework/DDInterface.h"
@@ -26,6 +27,8 @@ namespace
 const uint32_t SMOKE_INTRO_TIMEOUT_MS = 60000;
 const uint32_t SMOKE_INTRO_ACTION_INTERVAL_MS = 500;
 const uint32_t SMOKE_SOAK_DURATION_MS = 60000;
+const uint32_t SMOKE_VICTORY_INTERACTION_MS = 20000;
+const uint32_t SMOKE_VICTORY_TERMINAL_TIMEOUT_MS = 30000;
 
 int SmokeLocalX(LawnApp* theApp, int theCanonicalX)
 {
@@ -585,6 +588,12 @@ void NetSmokeScenarioRuntime::Reset(NetSmokeScenarioId theScenario)
         mSoakLossCameraObserved = false;
         mSoakLossBrainsObserved = false;
         mSoakLossDialogObserved = false;
+	mVictoryTick = 0;
+	mVictoryIssued = false;
+	mVictoryFadeObserved = false;
+	mVictoryLevelCompleteSnapshotObserved = false;
+	mVictoryAwardObserved = false;
+	mVictoryBoardReleasedObserved = false;
         mPostActionSamples = 0;
 }
 
@@ -655,7 +664,7 @@ bool NetSmokeScenarioRuntime::UpdateIntro(LawnApp* theApp,
         // Adventure 8 is the first ordinary first-time Adventure level with a
         // genuine chooser.  Exercise each peer's real chooser hit-testing and
         // network pick path; never synthesize the final seed bank in the test.
-        if (mScenario == NETSMOKE_SCENARIO_ADVENTURE_8_SOAK &&
+        if (NetIsAdventure8InteractiveSmokeScenario(mScenario) &&
                 aCutScene->mSeedChoosing && theApp->mSeedChooserScreen)
         {
                 SeedChooserScreen* aChooser = theApp->mSeedChooserScreen;
@@ -1016,13 +1025,53 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
 	uint32_t theGameplaySnapshots, std::string& theFailure)
 {
 	theFailure.clear();
-	if (!theApp || !theApp->mBoard)
-		return true;
 	const NetSmokeScenarioDefinition* aDefinition = NetGetSmokeScenario(mScenario);
 	if (!aDefinition)
 	{
 		theFailure = "smoke scenario runtime has no resolved definition";
 		return false;
+	}
+	if (!theApp)
+		return true;
+
+	// A successful Adventure transition destroys the Board before installing
+	// the award widget.  Inspect this terminal state before the ordinary
+	// board-required path so the smoke runtime cannot silently stop observing at
+	// the exact lifecycle boundary it is meant to verify.
+	if (mScenario == NETSMOKE_SCENARIO_ADVENTURE_8_VICTORY &&
+		theApp->mGameScene == GameScenes::SCENE_AWARD)
+	{
+		AwardScreen* anAward = theApp->mAwardScreen;
+		if (theApp->mBoard || !anAward ||
+			anAward->mAwardType != AwardType::AWARD_FORLEVEL ||
+			theApp->GetDialog(Dialogs::DIALOG_GAME_OVER))
+		{
+			theFailure = "victory award scene retained a board, lacked its award UI, used the wrong award, or showed game-over";
+			return false;
+		}
+		if (!mVictoryFadeObserved || !mVictoryLevelCompleteSnapshotObserved)
+		{
+			theFailure = "victory award arrived before this peer observed the synchronized fade and level-complete snapshot";
+			return false;
+		}
+		mVictoryBoardReleasedObserved = true;
+		if (!mVictoryAwardObserved)
+		{
+			mVictoryAwardObserved = true;
+			NetTrace("SMOKE_VICTORY_AWARD role=%s award=%d board=0 screen=1 fadeCounter=%d size=%dx%d",
+				theManifest.IsHost() ? "host" : "client", (int)anAward->mAwardType,
+				anAward->mFadeInCounter, theApp->mWidth, theApp->mHeight);
+		}
+		return true;
+	}
+	if (!theApp->mBoard)
+	{
+		if (mScenario == NETSMOKE_SCENARIO_ADVENTURE_8_VICTORY && mVictoryFadeObserved)
+		{
+			theFailure = "victory destroyed the board without entering the synchronized award scene";
+			return false;
+		}
+		return true;
 	}
 
 	Board* aBoard = theApp->mBoard;
@@ -1074,6 +1123,28 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
                 }
                 return true;
         }
+	if (mScenario == NETSMOKE_SCENARIO_ADVENTURE_8_VICTORY &&
+		theApp->mGameScene == GameScenes::SCENE_PLAYING &&
+		aBoard->mBoardFadeOutCounter > 0)
+	{
+		if (!mVictoryFadeObserved)
+		{
+			mVictoryFadeObserved = true;
+			mVictoryTick = GetTickCount();
+			NetTrace("SMOKE_VICTORY_FADE role=%s fade=%d levelComplete=%d plants=%d sunClicks=%d",
+				theManifest.IsHost() ? "host" : "client", aBoard->mBoardFadeOutCounter,
+				aBoard->mLevelComplete ? 1 : 0, mSoakPlantsIssued, mSoakSunClicks);
+		}
+	}
+	if (mScenario == NETSMOKE_SCENARIO_ADVENTURE_8_VICTORY &&
+		mVictoryFadeObserved && !mVictoryAwardObserved && mVictoryTick != 0 &&
+		(uint32_t)(GetTickCount() - mVictoryTick) >= SMOKE_VICTORY_TERMINAL_TIMEOUT_MS)
+	{
+		theFailure = "victory fade did not reach the synchronized award UI within 30 seconds";
+		return false;
+	}
+	if (mScenario == NETSMOKE_SCENARIO_ADVENTURE_8_VICTORY && mVictoryFadeObserved)
+		return true;
         if (theApp->mGameScene != GameScenes::SCENE_PLAYING)
                 return true;
 
@@ -1133,7 +1204,7 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
 
         if (mPlayingTick == 0)
         {
-                if (mScenario == NETSMOKE_SCENARIO_ADVENTURE_8_SOAK &&
+                if (NetIsAdventure8InteractiveSmokeScenario(mScenario) &&
                         !mSoakChooserVerified && aBoard->mSeedBank && theApp->mNetManager)
                 {
                         int anOwnerCounts[NET_MAX_PLAYERS] = {};
@@ -1231,7 +1302,7 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
                         mBaselinePlants, mBaselinePots, aBoard->mZombies.mSize, theGameplaySnapshots);
         }
 
-        if (mScenario == NETSMOKE_SCENARIO_ADVENTURE_8_SOAK)
+        if (NetIsAdventure8InteractiveSmokeScenario(mScenario))
         {
                 const uint32_t aNow = GetTickCount();
                 const uint32_t aSoakElapsed = aNow - mPlayingTick;
@@ -1272,7 +1343,28 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
                                 theManifest.IsHost() ? "host" : "client", aDefinition->mName,
                                 aBoard->mPlants.mSize, mBaselinePlants);
                 }
-                if (aSoakElapsed >= SMOKE_SOAK_DURATION_MS && !mSoakLossIssued)
+                if (mScenario == NETSMOKE_SCENARIO_ADVENTURE_8_VICTORY &&
+			aSoakElapsed >= SMOKE_VICTORY_INTERACTION_MS && !mVictoryIssued)
+		{
+			if (mSoakPlantsIssued < 1 || !mActionApplied)
+			{
+				theFailure = "Adventure victory reached its transition without a real local plant input and applied action";
+				return false;
+			}
+			if (theManifest.IsHost())
+			{
+				mVictoryIssued = true;
+				mVictoryTick = aNow;
+				NetTrace("SMOKE_VICTORY_FORCE_FADE role=host elapsed=%u plants=%d sunClicks=%d snapshots=%u",
+					aSoakElapsed, mSoakPlantsIssued, mSoakSunClicks,
+					theGameplaySnapshots);
+				// Use the stock completion sequence: win audio, mower scoring,
+				// board fade, level-complete snapshot and award transition.
+				aBoard->FadeOutLevel();
+			}
+		}
+                else if (mScenario == NETSMOKE_SCENARIO_ADVENTURE_8_SOAK &&
+			aSoakElapsed >= SMOKE_SOAK_DURATION_MS && !mSoakLossIssued)
                 {
                         if (mSoakPlantsIssued < 1 || mSoakSunClicks < 1 || !mActionApplied)
                         {
@@ -1350,6 +1442,18 @@ void NetSmokeScenarioRuntime::OnSnapshotApplied(uint32_t theHash, size_t theByte
 		mPostActionSamples, theBytes, theHash);
 }
 
+void NetSmokeScenarioRuntime::OnLevelCompleteSnapshot(bool theHost, int theFadeCounter)
+{
+	if (mScenario != NETSMOKE_SCENARIO_ADVENTURE_8_VICTORY ||
+		mVictoryLevelCompleteSnapshotObserved)
+	{
+		return;
+	}
+	mVictoryLevelCompleteSnapshotObserved = true;
+	NetTrace("SMOKE_VICTORY_LEVEL_COMPLETE_SNAPSHOT role=%s fade=%d",
+		theHost ? "host" : "client", theFadeCounter);
+}
+
 void NetSmokeScenarioRuntime::OnAuthoritativeWhackHit(uint16_t theZombieId)
 {
 	if (mScenario != NETSMOKE_SCENARIO_ADVENTURE_15_WHACK_CLIENT || theZombieId == 0)
@@ -1375,6 +1479,10 @@ bool NetSmokeScenarioRuntime::IsComplete(uint32_t theRequiredPostActionSnapshots
                          mSoakLossCameraObserved && mSoakLossBrainsObserved &&
                          mSoakLossDialogObserved && mSoakPlantsIssued > 0 &&
                          mSoakSunClicks > 0)) &&
+		(mScenario != NETSMOKE_SCENARIO_ADVENTURE_8_VICTORY ||
+			(mSoakChooserVerified && mVictoryFadeObserved &&
+			 mVictoryLevelCompleteSnapshotObserved && mVictoryAwardObserved &&
+			 mVictoryBoardReleasedObserved && mSoakPlantsIssued > 0)) &&
                 (!NetIsBowlingSmokeScenario(mScenario) || mBowlingZombieObserved) &&
 		theRequiredPostActionSnapshots > 0 &&
 		mPostActionSamples >= theRequiredPostActionSnapshots;

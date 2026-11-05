@@ -5723,8 +5723,12 @@ void LawnApp::CoopSmokeUpdate()
                 const bool aSmokeTerminalScene =
                         mCoopSmokeManifest.mScenario == LawnNet::NETSMOKE_SCENARIO_ADVENTURE_8_SOAK &&
                         mGameScene == GameScenes::SCENE_ZOMBIES_WON;
-                if (mCoopSmokeGameStarted && mBoard &&
-                        (mGameScene == GameScenes::SCENE_PLAYING || aSmokeTerminalScene) &&
+		const bool aSmokeVictoryScene =
+			mCoopSmokeManifest.mScenario == LawnNet::NETSMOKE_SCENARIO_ADVENTURE_8_VICTORY &&
+			mGameScene == GameScenes::SCENE_AWARD && mAwardScreen && !mBoard;
+                if (mCoopSmokeGameStarted &&
+                        (aSmokeVictoryScene || (mBoard &&
+			 (mGameScene == GameScenes::SCENE_PLAYING || aSmokeTerminalScene))) &&
 			mNetManager->GetPlayerCount() == 2 &&
 			mCoopSmokeSnapshotsSent >= mCoopSmokeManifest.mMinimumSnapshots &&
 			mCoopSmokeScenarioRuntime.IsComplete(mCoopSmokeManifest.mMinimumSnapshots))
@@ -5760,7 +5764,11 @@ void LawnApp::CoopSmokeUpdate()
                 const bool aSmokeTerminalScene =
                         mCoopSmokeManifest.mScenario == LawnNet::NETSMOKE_SCENARIO_ADVENTURE_8_SOAK &&
                         mGameScene == GameScenes::SCENE_ZOMBIES_WON;
-                if (mBoard && (mGameScene == GameScenes::SCENE_PLAYING || aSmokeTerminalScene) &&
+		const bool aSmokeVictoryScene =
+			mCoopSmokeManifest.mScenario == LawnNet::NETSMOKE_SCENARIO_ADVENTURE_8_VICTORY &&
+			mGameScene == GameScenes::SCENE_AWARD && mAwardScreen && !mBoard;
+                if ((aSmokeVictoryScene || (mBoard &&
+			(mGameScene == GameScenes::SCENE_PLAYING || aSmokeTerminalScene))) &&
 			mCoopSmokeSnapshotsApplied >= mCoopSmokeManifest.mMinimumSnapshots &&
 			mCoopSmokeScenarioRuntime.IsComplete(mCoopSmokeManifest.mMinimumSnapshots))
 		{
@@ -5780,6 +5788,8 @@ void LawnApp::CoopSmokeOnSnapshotTx(uint32_t theHash, size_t theBytes)
 	LawnNet::NetTrace("SMOKE_SNAPSHOT_TX index=%u bytes=%zu hash=%08x",
 		mCoopSmokeSnapshotsSent, theBytes, theHash);
 	mCoopSmokeScenarioRuntime.OnSnapshotTx(theHash, theBytes);
+	if (mBoard->mLevelComplete)
+		mCoopSmokeScenarioRuntime.OnLevelCompleteSnapshot(true, mBoard->mBoardFadeOutCounter);
 }
 
 void LawnApp::CoopSmokeOnSnapshotRx(uint32_t theHash, size_t theBytes)
@@ -5801,6 +5811,8 @@ void LawnApp::CoopSmokeOnSnapshotApplied(uint32_t theHash, size_t theBytes)
 	LawnNet::NetTrace("SMOKE_SNAPSHOT_APPLIED index=%u bytes=%zu hash=%08x",
 		mCoopSmokeSnapshotsApplied, theBytes, theHash);
 	mCoopSmokeScenarioRuntime.OnSnapshotApplied(theHash, theBytes);
+	if (mBoard->mLevelComplete)
+		mCoopSmokeScenarioRuntime.OnLevelCompleteSnapshot(false, mBoard->mBoardFadeOutCounter);
 }
 
 void LawnApp::NetInit()
@@ -6031,12 +6043,16 @@ bool LawnApp::NetOnSceneCmd(uint8_t aCmd, uint32_t aParam)
 		}
 		return false;
 	case LawnNet::SCENECMD_SHOW_AWARD:
-		if (mBoard)
-		{
-			ShowAwardScreen((AwardType)aParam, false);
+		// The host destroys its completed board before broadcasting the award.
+		// Mirror that lifecycle boundary so the client cannot retain a live game
+		// underneath the award widget (and cannot keep processing stale snapshots).
+		if (mAwardScreen && mGameScene == GameScenes::SCENE_AWARD)
 			return true;
-		}
-		return false;
+		if (!mBoard)
+			return false;
+		KillBoard();
+		ShowAwardScreen((AwardType)aParam, false);
+		return true;
 	case LawnNet::SCENECMD_SHOW_SEED_CHOOSER:
 		if (mBoard)
 		{
@@ -6336,7 +6352,9 @@ void LawnApp::NetDrawCursorOverlay()
 
                 const bool aHoldingPlant = mBoard &&
                         aCursor.mHeldSeed < (uint8_t)SeedType::NUM_SEED_TYPES &&
-                        aCursor.mCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_BANK;
+                        (aCursor.mCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_BANK ||
+                         aCursor.mCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_USABLE_COIN ||
+                         aCursor.mCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_DUPLICATOR);
                 if (aHoldingPlant)
                 {
                         SeedType aSeed = (SeedType)aCursor.mHeldSeed;
@@ -6367,16 +6385,41 @@ void LawnApp::NetDrawCursorOverlay()
                                 else if (aSeed == SeedType::SEED_ZOMBIE_POLEVAULTER)
                                         anOffsetX -= 50.0f;
                         }
-                        Graphics aTinted(g);
-                        aTinted.SetColorizeImages(true);
-                        aTinted.SetColor(Color(aColor.r, aColor.g, aColor.b, 150));
-                        Plant::DrawSeedType(&aTinted, aSeed, anImitater, VARIATION_NORMAL,
-                                (float)aCursorX + anOffsetX, (float)aCursorY + anOffsetY);
+                        Plant::DrawSeedTypeTintedOutline(&g, aSeed, anImitater, VARIATION_NORMAL,
+                                (float)aCursorX + anOffsetX, (float)aCursorY + anOffsetY,
+                                Color(aColor.r, aColor.g, aColor.b),
+                                mNetManager->mConfig.mHeldPlantTintAlpha,
+                                mNetManager->mConfig.mHeldPlantOutlineAlpha);
                 }
 
-                // The stock cursor becomes the held plant silhouette.  Drawing
-                // both at once creates a misleading second hotspot.
-                if (!aHoldingPlant)
+                bool aDrewSpecialCursor = false;
+                if (!aHoldingPlant && mBoard &&
+                        aCursor.mCursorType != CursorType::CURSOR_TYPE_NORMAL &&
+                        i >= 0 && i < LawnNet::NET_MAX_PLAYERS)
+                {
+                        CursorObject* aVisualCursor = mBoard->mNetPlayerCursors[i];
+                        if (aVisualCursor)
+                        {
+                                const SeedType aRemoteSeed =
+                                        aCursor.mHeldSeed < (uint8_t)SeedType::NUM_SEED_TYPES ?
+                                                (SeedType)aCursor.mHeldSeed : SeedType::SEED_NONE;
+                                const SeedType aRemoteImitater =
+                                        aCursor.mHeldImitater < (uint8_t)SeedType::NUM_SEED_TYPES ?
+                                                (SeedType)aCursor.mHeldImitater : SeedType::SEED_NONE;
+                                Graphics aTintedTool(g);
+                                aTintedTool.SetColorizeImages(true);
+                                aTintedTool.SetColor(Color(aColor.r, aColor.g, aColor.b));
+                                aDrewSpecialCursor = aVisualCursor->DrawRemoteAtMouse(
+                                        &aTintedTool, aCursorX, aCursorY,
+                                        (CursorType)aCursor.mCursorType,
+                                        aRemoteSeed, aRemoteImitater);
+                        }
+                }
+
+                // The stock pointer becomes either the held plant silhouette or
+                // the mode-specific tool.  Fall back to Cursor13 for NORMAL and
+                // for a special visual whose optional resource is unavailable.
+                if (!aHoldingPlant && !aDrewSpecialCursor)
                 {
                         g.SetColorizeImages(true);
                         g.SetColor(Color(aColor.r, aColor.g, aColor.b));

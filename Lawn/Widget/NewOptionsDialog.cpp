@@ -25,6 +25,7 @@ NewOptionsDialog::NewOptionsDialog(LawnApp* theApp, bool theFromGameSelector) :
     mAlmanacButton = MakeButton(NewOptionsDialog::NewOptionsDialog_Almanac, this, _S("[VIEW_ALMANAC_BUTTON]"));
     mRestartButton = MakeButton(NewOptionsDialog::NewOptionsDialog_Restart, this, _S("[RESTART_LEVEL]"));
     mBackToMainButton = MakeButton(NewOptionsDialog::NewOptionsDialog_MainMenu, this, _S("[MAIN_MENU_BUTTON]"));
+    mCoopAppearanceButton = MakeButton(NewOptionsDialog::NewOptionsDialog_CoopAppearance, this, _S("CO-OP"));
 
    /* mGameplayButton = MakeButton(NewOptionsDialog::NewOptionsDialog_VideoGraphics, this, _S("[GAMEPLAY_SETTINGS_BUTTON]"));
     mControllerButton = MakeButton(NewOptionsDialog::NewOptionsDialog_SoundSystem, this, _S("[CONTROLLER_BUTTON]"));
@@ -109,7 +110,7 @@ NewOptionsDialog::NewOptionsDialog(LawnApp* theApp, bool theFromGameSelector) :
     //}
 }
 
-//0x45C760¡¢0x45C780
+//0x45C760 - 0x45C780
 NewOptionsDialog::~NewOptionsDialog()
 {
     delete mMusicVolumeSlider;
@@ -119,6 +120,7 @@ NewOptionsDialog::~NewOptionsDialog()
     delete mAlmanacButton;
     delete mRestartButton;
     delete mBackToMainButton;
+    delete mCoopAppearanceButton;
     delete mBackToGameButton;
     /*delete mGameplayButton;
     delete mControllerButton;
@@ -141,6 +143,7 @@ void NewOptionsDialog::AddedToManager(Sexy::WidgetManager* theWidgetManager)
     AddWidget(mAlmanacButton);
     AddWidget(mRestartButton);
     AddWidget(mBackToMainButton);
+    AddWidget(mCoopAppearanceButton);
     AddWidget(mMusicVolumeSlider);
     AddWidget(mSfxVolumeSlider);
     AddWidget(mHardwareAccelerationCheckbox);
@@ -158,6 +161,7 @@ void NewOptionsDialog::RemovedFromManager(Sexy::WidgetManager* theWidgetManager)
     RemoveWidget(mAlmanacButton);
     RemoveWidget(mRestartButton);
     RemoveWidget(mBackToMainButton);
+    RemoveWidget(mCoopAppearanceButton);
     RemoveWidget(mMusicVolumeSlider);
     RemoveWidget(mSfxVolumeSlider);
     RemoveWidget(mHardwareAccelerationCheckbox);
@@ -176,6 +180,7 @@ void NewOptionsDialog::Resize(int theX, int theY, int theWidth, int theHeight)
     mAlmanacButton->Resize(107, 241, 209, 46);
     mRestartButton->Resize(mAlmanacButton->mX, mAlmanacButton->mY + 43, 209, 46);
     mBackToMainButton->Resize(mRestartButton->mX, mRestartButton->mY + 43, 209, 46);
+    mCoopAppearanceButton->Resize(322, 241, 90, 46);
     mBackToGameButton->Resize(30, 381, mBackToGameButton->mWidth, mBackToGameButton->mHeight);
 
     /*mGameplayButton->Resize(mAlmanacButton->mX, 116, 209, 46);
@@ -357,6 +362,11 @@ void NewOptionsDialog::ButtonDepress(int theId)
 
     switch (theId)
     {
+    case NewOptionsDialog::NewOptionsDialog_CoopAppearance:
+        if (!mApp->GetDialog(Dialogs::DIALOG_MORESETTINGS))
+            mApp->DoMoreSettingsDialog();
+        break;
+
     case NewOptionsDialog::NewOptionsDialog_Almanac:
     {
         AlmanacDialog* aDialog = mApp->DoAlmanacDialog(SeedType::SEED_NONE, ZombieType::ZOMBIE_INVALID);

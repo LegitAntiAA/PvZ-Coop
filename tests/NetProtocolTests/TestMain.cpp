@@ -293,24 +293,33 @@ void TestConfigDefaults()
 	CHECK(aConfig.mEnableCoop);
 	CHECK(aConfig.mBaseSnapshotHz == LawnNet::NET_SNAPSHOT_HZ_DEFAULT);
 	CHECK(aConfig.mWindowWidth == 0);
-	CHECK(aConfig.mWindowHeight == 0);
-	CHECK(aConfig.mBorderlessFullscreen);
+        CHECK(aConfig.mWindowHeight == 0);
+        CHECK(aConfig.mBorderlessFullscreen);
+        CHECK(aConfig.mHeldPlantTintAlpha == 150);
+        CHECK(aConfig.mHotbarTintAlpha == 110);
+        CHECK(aConfig.mHeldPlantOutlineAlpha == 180);
 
 	std::strcpy(aConfig.mNick, "Changed");
 	aConfig.mUnlockAllMinigames = true;
 	aConfig.mEnableCoop = false;
 	aConfig.mBaseSnapshotHz = 29;
 	aConfig.mWindowWidth = 1920;
-	aConfig.mWindowHeight = 1080;
-	aConfig.mBorderlessFullscreen = false;
+        aConfig.mWindowHeight = 1080;
+        aConfig.mBorderlessFullscreen = false;
+        aConfig.mHeldPlantTintAlpha = 1;
+        aConfig.mHotbarTintAlpha = 2;
+        aConfig.mHeldPlantOutlineAlpha = 3;
 	aConfig.Reset();
 	CHECK(std::strcmp(aConfig.mNick, "Player") == 0);
 	CHECK(!aConfig.mUnlockAllMinigames);
 	CHECK(aConfig.mEnableCoop);
 	CHECK(aConfig.mBaseSnapshotHz == LawnNet::NET_SNAPSHOT_HZ_DEFAULT);
 	CHECK(aConfig.mWindowWidth == 0);
-	CHECK(aConfig.mWindowHeight == 0);
-	CHECK(aConfig.mBorderlessFullscreen);
+        CHECK(aConfig.mWindowHeight == 0);
+        CHECK(aConfig.mBorderlessFullscreen);
+        CHECK(aConfig.mHeldPlantTintAlpha == 150);
+        CHECK(aConfig.mHotbarTintAlpha == 110);
+        CHECK(aConfig.mHeldPlantOutlineAlpha == 180);
 }
 
 class ScopedTemporaryWorkingDirectory
@@ -674,8 +683,11 @@ void TestConfigRoundTripInIsolatedDirectory()
 	aSaved.mEnableCoop = false;
 	aSaved.mBaseSnapshotHz = 29;
 	aSaved.mWindowWidth = 1920;
-	aSaved.mWindowHeight = 1080;
-	aSaved.mBorderlessFullscreen = false;
+        aSaved.mWindowHeight = 1080;
+        aSaved.mBorderlessFullscreen = false;
+        aSaved.mHeldPlantTintAlpha = 201;
+        aSaved.mHotbarTintAlpha = 99;
+        aSaved.mHeldPlantOutlineAlpha = 231;
 	CHECK(LawnNet::NetSaveConfig(aSaved));
 	CHECK(std::filesystem::is_regular_file("coop.ini"));
 
@@ -686,8 +698,11 @@ void TestConfigRoundTripInIsolatedDirectory()
 	CHECK(!aLoaded.mEnableCoop);
 	CHECK(aLoaded.mBaseSnapshotHz == 29);
 	CHECK(aLoaded.mWindowWidth == 1920);
-	CHECK(aLoaded.mWindowHeight == 1080);
-	CHECK(!aLoaded.mBorderlessFullscreen);
+        CHECK(aLoaded.mWindowHeight == 1080);
+        CHECK(!aLoaded.mBorderlessFullscreen);
+        CHECK(aLoaded.mHeldPlantTintAlpha == 201);
+        CHECK(aLoaded.mHotbarTintAlpha == 99);
+        CHECK(aLoaded.mHeldPlantOutlineAlpha == 231);
 }
 
 } // namespace

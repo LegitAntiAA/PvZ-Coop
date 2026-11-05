@@ -29,7 +29,8 @@ protected:
 		NewOptionsDialog_HardwareAcceleration,
 		NewOptionsDialog_VideoGraphics,
 		NewOptionsDialog_SoundSystem,
-		NewOptionsDialog_Language
+		NewOptionsDialog_Language,
+		NewOptionsDialog_CoopAppearance
 	};
 
 public:
@@ -45,6 +46,7 @@ public:
 	LawnStoneButton*		mGameplayButton;
 	LawnStoneButton*		mControllerButton;
 	LawnStoneButton*		mLanguageButton;
+	LawnStoneButton*		mCoopAppearanceButton;
 	bool					mFromGameSelector;					//+0x17C
 
 public:

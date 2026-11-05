@@ -74,7 +74,38 @@ void CursorObject::Draw(Graphics* g)
     g->PushState();
     g->TranslateF(-mApp->mDDInterface->mWideScreenOffsetX, -mApp->mDDInterface->mWideScreenOffsetY);
 
-    switch (mCursorType)
+    DrawContent(g, mCursorType, mType, mImitaterType,
+        mBoard->mPrevMouseX, mBoard->mPrevMouseY);
+    g->PopState();
+}
+
+bool CursorObject::DrawRemoteAtMouse(Graphics* g, int theMouseX, int theMouseY,
+    CursorType theCursorType, SeedType theSeedType, SeedType theImitaterType)
+{
+    // These cursors carry object ids which are local to the authoritative
+    // board.  Until that object identity is part of the cursor wire state, a
+    // peer must use the normal pointer instead of dereferencing an unrelated id.
+    if (theCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_GLOVE ||
+        theCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_WHEEL_BARROW)
+    {
+        return false;
+    }
+
+    Graphics aCursorGraphics(*g);
+    // CursorObject is a widget rooted at mouse-25,-35.  The network overlay is
+    // screen-space, so reproduce that widget transform before drawing the same
+    // stock cursor content used by the local player.
+    aCursorGraphics.TranslateF((float)theMouseX - 25.0f, (float)theMouseY - 35.0f);
+    return DrawContent(&aCursorGraphics, theCursorType, theSeedType,
+        theImitaterType, theMouseX, theMouseY);
+}
+
+bool CursorObject::DrawContent(Graphics* g, CursorType theCursorType,
+    SeedType theSeedType, SeedType theImitaterType, int theMouseX, int theMouseY)
+{
+    bool aDrewCursor = true;
+
+    switch (theCursorType)
     {
     case CursorType::CURSOR_TYPE_SHOVEL:
         TodDrawImageScaledF(g, IMAGE_SHOVEL_HI_RES, 22, -22, 0.5f, 0.5f);
@@ -196,15 +227,15 @@ void CursorObject::Draw(Graphics* g)
     case CursorType::CURSOR_TYPE_PLANT_FROM_DUPLICATOR:
     {
         float aOffsetX = -10.0f;
-        float aOffsetY = PlantDrawHeightOffset(mBoard, nullptr, mType, -1, -1) - 10.0f;
+        float aOffsetY = PlantDrawHeightOffset(mBoard, nullptr, theSeedType, -1, -1) - 10.0f;
 #ifdef _HAS_BLOOM_AND_DOOM_CONTENTS
-        if (mType == SeedType::SEED_STINGER)
+        if (theSeedType == SeedType::SEED_STINGER)
         {
             aOffsetY -= 60.0f;
         }
         else 
 #endif
-        if (Plant::IsFlying(mType) || mType == SeedType::SEED_GRAVEBUSTER)
+        if (Plant::IsFlying(theSeedType) || theSeedType == SeedType::SEED_GRAVEBUSTER)
         {
             aOffsetY += 30.0f;
         }
@@ -213,21 +244,21 @@ void CursorObject::Draw(Graphics* g)
         {
             aOffsetX -= 55.0f;
             aOffsetY -= 70.0f;
-            if (mType == SeedType::SEED_ZOMBIE_BUNGEE)
+            if (theSeedType == SeedType::SEED_ZOMBIE_BUNGEE)
             {
                 aOffsetY -= 600;
             }
-            else if (mType ==  SeedType::SEED_ZOMBONI)
+            else if (theSeedType == SeedType::SEED_ZOMBONI)
             {
                 aOffsetX += 10;
                 aOffsetY -= 25;
             }
-            else if (mType == SeedType::SEED_ZOMBIE_POLEVAULTER)
+            else if (theSeedType == SeedType::SEED_ZOMBIE_POLEVAULTER)
             {
                 aOffsetX -= 50;
             }
         }
-        Plant::DrawSeedType(g, mType, mImitaterType, DrawVariation::VARIATION_NORMAL, aOffsetX, aOffsetY);
+        Plant::DrawSeedType(g, theSeedType, theImitaterType, DrawVariation::VARIATION_NORMAL, aOffsetX, aOffsetY);
         break;
     }
     
@@ -239,17 +270,21 @@ void CursorObject::Draw(Graphics* g)
         Reanimation* aHammerReanim = mApp->ReanimationTryToGet(mReanimCursorID);
         if (aHammerReanim)
             aHammerReanim->Draw(g);
+        else
+            aDrewCursor = false;
         break;
     }
 
     case CursorType::CURSOR_TYPE_COBCANNON_TARGET:
     {
         HitResult aHitResult;
-        mBoard->MouseHitTest(mBoard->mPrevMouseX, mBoard->mPrevMouseY, &aHitResult);
-        if (aHitResult.mObjectType == GameObjectType::OBJECT_TYPE_NONE && mBoard->mPrevMouseY >= 80)
+        mBoard->MouseHitTest(theMouseX, theMouseY, &aHitResult);
+        if (aHitResult.mObjectType == GameObjectType::OBJECT_TYPE_NONE && theMouseY >= 80)
         {
             g->DrawImageCel(IMAGE_COBCANNON_TARGET, -11, 7, 0);
         }
+        else
+            aDrewCursor = false;
 
         break;
     }
@@ -257,8 +292,13 @@ void CursorObject::Draw(Graphics* g)
     case CursorType::CURSOR_TYPE_BUTTER:
         g->DrawImageF(Sexy::IMAGE_REANIM_CORNPULT_BUTTER, 11, 21);
         break;
+
+    case CursorType::CURSOR_TYPE_NORMAL:
+    default:
+        aDrewCursor = false;
+        break;
     }
-    g->PopState();
+    return aDrewCursor;
 }
 
 //0x438D50

@@ -100,7 +100,7 @@ Board::Board(LawnApp* theApp)
 	for (int i = 0; i < LawnNet::NET_MAX_PLAYERS; i++)
 		mNetPlayerCursors[i] = nullptr;
 	mNetPlayerCursors[0] = mCursorObject;
-	if (mApp->NetIsHost())
+	if (mApp->NetActive())
 	{
 		for (int i = 1; i < LawnNet::NET_MAX_PLAYERS; i++)
 			mNetPlayerCursors[i] = new CursorObject();

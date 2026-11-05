@@ -14,7 +14,7 @@ param(
     [int]$GracefulExitSeconds = 10,
     [ValidateRange(0, 65535)]
     [int]$Port = 0,
-    [ValidateSet("Adventure1", "Adventure5Bowling", "Adventure5BowlingClient", "Adventure8Soak", "Adventure15WhackClient", "SlotMachineClient", "Vasebreaker", "Beghouled")]
+    [ValidateSet("Adventure1", "Adventure5Bowling", "Adventure5BowlingClient", "Adventure8Soak", "Adventure8Victory", "Adventure15WhackClient", "SlotMachineClient", "Vasebreaker", "Beghouled")]
     [string]$Scenario = "Adventure1",
     [ValidateSet(0, 1)]
     [int]$SkipIntro = 1,
@@ -717,6 +717,7 @@ $scenarioSpec = switch ($Scenario) {
     "Adventure5Bowling" { [ordered]@{ Mode = "adventure"; Level = 5; Marker = "adventure5_bowling" } }
     "Adventure5BowlingClient" { [ordered]@{ Mode = "adventure_bowling_client"; Level = 5; Marker = "adventure5_bowling_client" } }
     "Adventure8Soak" { [ordered]@{ Mode = "adventure_soak"; Level = 8; Marker = "adventure8_soak" } }
+    "Adventure8Victory" { [ordered]@{ Mode = "adventure_victory"; Level = 8; Marker = "adventure8_victory" } }
     "Adventure15WhackClient" { [ordered]@{ Mode = "adventure_whack_client"; Level = 15; Marker = "adventure15_whack_client" } }
     "SlotMachineClient" { [ordered]@{ Mode = "slot_machine_client"; Level = 1; Marker = "slot_machine_client" } }
     "Vasebreaker" { [ordered]@{ Mode = "vasebreaker"; Level = 1; Marker = "vasebreaker" } }
@@ -727,8 +728,8 @@ $Mode = [string]$scenarioSpec.Mode
 $Level = [int]$scenarioSpec.Level
 $scenarioMarker = [string]$scenarioSpec.Marker
 $isBowlingScenario = $Scenario -in @("Adventure5Bowling", "Adventure5BowlingClient")
-if ($Scenario -eq "Adventure8Soak" -and $SkipIntro -ne 0) {
-    throw "Adventure8Soak requires -SkipIntro 0 so the two-player seed chooser is exercised."
+if ($Scenario -in @("Adventure8Soak", "Adventure8Victory") -and $SkipIntro -ne 0) {
+    throw ("{0} requires -SkipIntro 0 so the two-player seed chooser is exercised." -f $Scenario)
 }
 $runId = [Guid]::NewGuid().ToString("N")
 $runRoot = Join-Path $ArtifactsRoot ("run_" + $runId)
@@ -964,6 +965,23 @@ try {
             @{ Label = "client loss camera"; Pattern = '(?im)\bSMOKE_SOAK_LOSS_CAMERA\b[^\r\n]*\brole=client\b' },
             @{ Label = "client brains presentation"; Pattern = '(?im)\bSMOKE_SOAK_LOSS_BRAINS\b[^\r\n]*\brole=client\b' },
             @{ Label = "client visual loss dialog"; Pattern = '(?im)\bSMOKE_SOAK_LOSS_DIALOG\b[^\r\n]*\brole=client\b' }
+        )
+    }
+    if ($Scenario -eq "Adventure8Victory") {
+        $hostPositivePatterns += @(
+            @{ Label = "host victory chooser quota"; Pattern = '(?im)\bSMOKE_SOAK_CHOOSER_VERIFIED\b[^\r\n]*\brole=host\b' },
+            @{ Label = "host victory plant input"; Pattern = '(?im)\bSMOKE_SOAK_PLANT\b[^\r\n]*\brole=host\b' },
+            @{ Label = "host stock victory fade request"; Pattern = '(?im)\bSMOKE_VICTORY_FORCE_FADE\b[^\r\n]*\brole=host\b[^\r\n]*\belapsed=[2-9]\d{4,}\b' },
+            @{ Label = "host observed victory fade"; Pattern = '(?im)\bSMOKE_VICTORY_FADE\b[^\r\n]*\brole=host\b[^\r\n]*\bfade=[1-9]\d*\b' },
+            @{ Label = "host emitted level-complete snapshot"; Pattern = '(?im)\bSMOKE_VICTORY_LEVEL_COMPLETE_SNAPSHOT\b[^\r\n]*\brole=host\b' },
+            @{ Label = "host award UI"; Pattern = ('(?im)\bSMOKE_VICTORY_AWARD\b[^\r\n]*\brole=host\b[^\r\n]*\baward=0\b[^\r\n]*\bboard=0\b[^\r\n]*\bscreen=1\b[^\r\n]*\bsize={0}x{1}\b' -f $HostWindowWidth, $HostWindowHeight) }
+        )
+        $clientPositivePatterns += @(
+            @{ Label = "client victory chooser quota"; Pattern = '(?im)\bSMOKE_SOAK_CHOOSER_VERIFIED\b[^\r\n]*\brole=client\b' },
+            @{ Label = "client victory plant input"; Pattern = '(?im)\bSMOKE_SOAK_PLANT\b[^\r\n]*\brole=client\b' },
+            @{ Label = "client observed synchronized victory fade"; Pattern = '(?im)\bSMOKE_VICTORY_FADE\b[^\r\n]*\brole=client\b[^\r\n]*\bfade=[1-9]\d*\b' },
+            @{ Label = "client applied level-complete snapshot"; Pattern = '(?im)\bSMOKE_VICTORY_LEVEL_COMPLETE_SNAPSHOT\b[^\r\n]*\brole=client\b' },
+            @{ Label = "client synchronized award UI"; Pattern = ('(?im)\bSMOKE_VICTORY_AWARD\b[^\r\n]*\brole=client\b[^\r\n]*\baward=0\b[^\r\n]*\bboard=0\b[^\r\n]*\bscreen=1\b[^\r\n]*\bsize={0}x{1}\b' -f $ClientWindowWidth, $ClientWindowHeight) }
         )
     }
     $negativePatterns = @(

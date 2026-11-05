@@ -17,6 +17,7 @@
 #include "Widget/StoreScreen.h"
 #include "Widget/ChallengeScreen.h"
 #include "Net/NetCommon.h"
+#include "Net/NetManager.h"
 #include "../Sexy.TodLib/TodFoley.h"
 #include "Widget/SeedChooserScreen.h"
 #include "../Sexy.TodLib/TodCommon.h"
@@ -1517,6 +1518,11 @@ void CutScene::AnimateBoard()
 	if (mReadySetPlantTime > 0 && mCutsceneTime == aTimeReadySetPlant)
 	{
 		mApp->AddReanimation(400, 324, Board::MakeRenderOrder(RenderLayer::RENDER_LAYER_SCREEN_FADE, 0, 0), ReanimationType::REANIM_READYSETPLANT);
+		if (mApp->mNetManager && mApp->mNetManager->IsHosting())
+		{
+			LawnNet::NetBuffer anEvent;
+			mApp->mNetManager->SendBoardEvent(anEvent, LawnNet::BOARDEV_READY_SET_PLANT);
+		}
 		mApp->PlaySample(SOUND_READYSETPLANT);
 		if (!mApp->IsFinalBossLevel())
 		{

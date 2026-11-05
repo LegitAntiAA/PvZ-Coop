@@ -860,11 +860,20 @@ bool NetLoadConfig(NetConfig& theConfig)
 			theConfig.mWindowHeight = atoi(aValue.c_str());
 		else if (aKey == "borderless_fullscreen")
 			theConfig.mBorderlessFullscreen = (aValue == "1" || aValue == "true" || aValue == "yes");
+		else if (aKey == "held_plant_tint_alpha")
+			theConfig.mHeldPlantTintAlpha = atoi(aValue.c_str());
+		else if (aKey == "hotbar_tint_alpha")
+			theConfig.mHotbarTintAlpha = atoi(aValue.c_str());
+		else if (aKey == "held_plant_outline_alpha")
+			theConfig.mHeldPlantOutlineAlpha = atoi(aValue.c_str());
 	}
 	fclose(aFile);
 
 	if (theConfig.mBaseSnapshotHz < NET_SNAPSHOT_HZ_MIN) theConfig.mBaseSnapshotHz = NET_SNAPSHOT_HZ_MIN;
 	if (theConfig.mBaseSnapshotHz > NET_SNAPSHOT_HZ_MAX) theConfig.mBaseSnapshotHz = NET_SNAPSHOT_HZ_MAX;
+	theConfig.mHeldPlantTintAlpha = max(0, min(255, theConfig.mHeldPlantTintAlpha));
+	theConfig.mHotbarTintAlpha = max(0, min(255, theConfig.mHotbarTintAlpha));
+	theConfig.mHeldPlantOutlineAlpha = max(0, min(255, theConfig.mHeldPlantOutlineAlpha));
 	return true;
 }
 
@@ -884,6 +893,9 @@ bool NetSaveConfig(const NetConfig& theConfig)
 	fprintf(aFile, "window_width=%d\n", theConfig.mWindowWidth);
 	fprintf(aFile, "window_height=%d\n", theConfig.mWindowHeight);
 	fprintf(aFile, "borderless_fullscreen=%d\n", theConfig.mBorderlessFullscreen ? 1 : 0);
+	fprintf(aFile, "held_plant_tint_alpha=%d\n", max(0, min(255, theConfig.mHeldPlantTintAlpha)));
+	fprintf(aFile, "hotbar_tint_alpha=%d\n", max(0, min(255, theConfig.mHotbarTintAlpha)));
+	fprintf(aFile, "held_plant_outline_alpha=%d\n", max(0, min(255, theConfig.mHeldPlantOutlineAlpha)));
 	fclose(aFile);
 	return true;
 }

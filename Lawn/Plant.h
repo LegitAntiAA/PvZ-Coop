@@ -250,6 +250,7 @@ public:
     void                    GetPeaHeadOffset(int& theOffsetX, int& theOffsetY);
     /*inline*/ bool         MakesSun();
     static void             DrawSeedType(Graphics* g, SeedType theSeedType, SeedType theImitaterType, DrawVariation theDrawVariation, float thePosX, float thePosY, unsigned int theBitVariation = 0U);
+    static void             DrawSeedTypeTintedOutline(Graphics* g, SeedType theSeedType, SeedType theImitaterType, DrawVariation theDrawVariation, float thePosX, float thePosY, const Color& theTint, int theTintAlpha, int theOutlineAlpha);
     void                    KillAllPlantsNearDoom();
     bool                    IsOnHighGround();
     void                    UpdateTorchwood();

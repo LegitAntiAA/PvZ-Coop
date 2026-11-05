@@ -5386,6 +5386,36 @@ void Plant::DrawSeedType(Graphics* g, SeedType theSeedType, SeedType theImitater
     g->PopState();
 }
 
+void Plant::DrawSeedTypeTintedOutline(Graphics* g, SeedType theSeedType, SeedType theImitaterType,
+    DrawVariation theDrawVariation, float thePosX, float thePosY, const Color& theTint,
+    int theTintAlpha, int theOutlineAlpha)
+{
+    const int aTintAlpha = max(0, min(255, theTintAlpha));
+    const int anOutlineAlpha = max(0, min(255, theOutlineAlpha));
+
+    if (anOutlineAlpha > 0)
+    {
+        Graphics anOutline(*g);
+        anOutline.SetColorizeImages(true);
+        anOutline.SetColor(Color(theTint.mRed * 3 / 5, theTint.mGreen * 3 / 5,
+            theTint.mBlue * 3 / 5, anOutlineAlpha));
+        static const int anOffsets[4][2] = { { -2, 0 }, { 2, 0 }, { 0, -2 }, { 0, 2 } };
+        for (int i = 0; i < 4; i++)
+        {
+            DrawSeedType(&anOutline, theSeedType, theImitaterType, theDrawVariation,
+                thePosX + anOffsets[i][0], thePosY + anOffsets[i][1]);
+        }
+    }
+
+    if (aTintAlpha > 0)
+    {
+        Graphics aFill(*g);
+        aFill.SetColorizeImages(true);
+        aFill.SetColor(Color(theTint.mRed, theTint.mGreen, theTint.mBlue, aTintAlpha));
+        DrawSeedType(&aFill, theSeedType, theImitaterType, theDrawVariation, thePosX, thePosY);
+    }
+}
+
 //0x466390
 void Plant::MouseDown(int x, int y, int theClickCount)
 {

@@ -25,8 +25,15 @@ enum NetSmokeScenarioId : uint8_t
 	NETSMOKE_SCENARIO_ADVENTURE_5_BOWLING_CLIENT = 5,
         NETSMOKE_SCENARIO_ADVENTURE_15_WHACK_CLIENT = 6,
         NETSMOKE_SCENARIO_SLOT_MACHINE_CLIENT = 7,
-        NETSMOKE_SCENARIO_ADVENTURE_8_SOAK = 8
+        NETSMOKE_SCENARIO_ADVENTURE_8_SOAK = 8,
+        NETSMOKE_SCENARIO_ADVENTURE_8_VICTORY = 9
 };
+
+inline bool NetIsAdventure8InteractiveSmokeScenario(NetSmokeScenarioId theScenario)
+{
+	return theScenario == NETSMOKE_SCENARIO_ADVENTURE_8_SOAK ||
+		theScenario == NETSMOKE_SCENARIO_ADVENTURE_8_VICTORY;
+}
 
 inline bool NetIsBowlingSmokeScenario(NetSmokeScenarioId theScenario)
 {
@@ -69,7 +76,10 @@ inline const NetSmokeScenarioDefinition* NetSmokeScenarioTable(size_t& theCount)
                         (uint8_t)GameMode::GAMEMODE_CHALLENGE_SLOT_MACHINE, true },
                 { NETSMOKE_SCENARIO_ADVENTURE_8_SOAK,
                         "adventure8_soak", "adventure_soak", 8,
-                        (uint8_t)GameMode::GAMEMODE_ADVENTURE, false }
+                        (uint8_t)GameMode::GAMEMODE_ADVENTURE, false },
+		{ NETSMOKE_SCENARIO_ADVENTURE_8_VICTORY,
+			"adventure8_victory", "adventure_victory", 8,
+			(uint8_t)GameMode::GAMEMODE_ADVENTURE, false }
 	};
 	theCount = sizeof(aScenarios) / sizeof(aScenarios[0]);
 	return aScenarios;
@@ -101,7 +111,7 @@ inline bool NetResolveSmokeScenario(const std::string& theMode, int theLevel,
 	}
 	theError = "unsupported smoke scenario; allowed pairs are adventure/1, adventure/5, "
 		"adventure_bowling_client/5, adventure_whack_client/15, slot_machine_client/1, "
-                "adventure_soak/8, vasebreaker/1, beghouled/1";
+		"adventure_soak/8, adventure_victory/8, vasebreaker/1, beghouled/1";
 	return false;
 }
 
@@ -154,6 +164,12 @@ private:
         bool mSoakLossCameraObserved;
         bool mSoakLossBrainsObserved;
         bool mSoakLossDialogObserved;
+	uint32_t mVictoryTick;
+	bool mVictoryIssued;
+	bool mVictoryFadeObserved;
+	bool mVictoryLevelCompleteSnapshotObserved;
+	bool mVictoryAwardObserved;
+	bool mVictoryBoardReleasedObserved;
         uint32_t mPostActionSamples;
 
 	bool UpdateIntro(LawnApp* theApp, const NetSmokeManifest& theManifest,
@@ -169,6 +185,7 @@ public:
 		uint32_t theGameplaySnapshots, std::string& theFailure);
 	void OnSnapshotTx(uint32_t theHash, size_t theBytes);
 	void OnSnapshotApplied(uint32_t theHash, size_t theBytes);
+	void OnLevelCompleteSnapshot(bool theHost, int theFadeCounter);
 	void OnAuthoritativeWhackHit(uint16_t theZombieId);
 	void OnSlotMachineSound(bool theHost);
 	bool IsComplete(uint32_t theRequiredPostActionSnapshots) const;
