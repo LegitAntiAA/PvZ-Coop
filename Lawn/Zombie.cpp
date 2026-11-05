@@ -4877,11 +4877,15 @@ void Zombie::UpdateZombiePosition()
     // Keep all of the original zombie state, speed, chill/freeze and animation
     // handling.  Tower defense only projects the distance that the stock
     // walking code actually covered onto the generated road.
-    if (mBoard && mBoard->IsTowerDefense() && mFromWave >= 0)
+    const bool aUseTowerDefensePath = mBoard && mBoard->IsTowerDefense() &&
+        mFromWave >= 0 && mZombieType != ZombieType::ZOMBIE_BUNGEE &&
+        !mBlowingAway && mBoard->mTDPath.size() >= 4;
+    if (aUseTowerDefensePath)
     {
         float aDistanceWalked = aPreviousX - mPosX;
         UpdateTowerDefense(aDistanceWalked);
-        return;
+        if (mDead)
+            return;
     }
 
     CheckForZombieStep();
@@ -4896,7 +4900,10 @@ void Zombie::UpdateZombiePosition()
         }
     }
 
-    if (mZombieHeight == ZombieHeight::HEIGHT_ZOMBIE_NORMAL)
+    // UpdateTowerDefense already supplied the stock anchor for both horizontal
+    // and vertical road segments.  The usual lane correction would otherwise
+    // pull a zombie off every vertical segment toward the centre of mRow.
+    if (!aUseTowerDefensePath && mZombieHeight == ZombieHeight::HEIGHT_ZOMBIE_NORMAL)
     {
         float aDesiredY = GetPosYBasedOnRow(mRow);
         if (mPosY < aDesiredY)

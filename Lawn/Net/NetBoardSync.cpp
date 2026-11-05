@@ -3363,20 +3363,37 @@ void Board::NetDrawPvPScore(Graphics* g)
 void Zombie::UpdateTowerDefense(float theDistanceWalked)
 {
 	Board* aBoard = mBoard;
+	// Bungees pick a target cell and move vertically through their own state
+	// machine.  They must never inherit the road entry/off-screen projection.
+	if (!aBoard || mZombieType == ZombieType::ZOMBIE_BUNGEE)
+		return;
+
 	int aCells = (int)(aBoard->mTDPath.size() / 2);
 	if (aCells < 2 || mDead)
 		return;
 
+	auto GetRoadAnchor = [&](int theRow, int theCol, float& theX, float& theY)
+	{
+		theX = (float)aBoard->GridToPixelX(theCol, theRow) - 25.0f;
+		theY = aBoard->GetPosYBasedOnRow(theX + 40.0f, theRow) - 30.0f;
+		if (mZombieType == ZombieType::ZOMBIE_BALLOON)
+			theY -= 30.0f;
+		else if (mZombieType == ZombieType::ZOMBIE_POGO)
+			theY -= 16.0f;
+	};
+
 	int aStartRow = aBoard->mTDPath[0] >> 1;
 	int aStartCol = aBoard->mTDPath[1];
-	float aStartX = (float)aBoard->GridToPixelX(aStartCol, aStartRow);
-	float aStartY = (float)aBoard->GridToPixelY(aStartCol, aStartRow);
+	float aStartX;
+	float aStartY;
+	GetRoadAnchor(aStartRow, aStartCol, aStartX, aStartY);
 
 	// Spawned zombies walk in from off-screen exactly as in the original game,
 	// then enter the first road cell without a teleport.
 	if (mTdPathPos <= 0.0f && mPosX > aStartX)
 	{
-		mRow = aStartRow;
+		if (mRow != aStartRow)
+			SetRow(aStartRow);
 		mPosY = aStartY;
 		return;
 	}
@@ -3391,10 +3408,12 @@ void Zombie::UpdateTowerDefense(float theDistanceWalked)
 		int aRowB = aBoard->mTDPath[(anIndex + 1) * 2] >> 1;
 		int aColB = aBoard->mTDPath[(anIndex + 1) * 2 + 1];
 
-		float aXA = (float)aBoard->GridToPixelX(aColA, aRowA);
-		float aYA = (float)aBoard->GridToPixelY(aColA, aRowA);
-		float aXB = (float)aBoard->GridToPixelX(aColB, aRowB);
-		float aYB = (float)aBoard->GridToPixelY(aColB, aRowB);
+		float aXA;
+		float aYA;
+		float aXB;
+		float aYB;
+		GetRoadAnchor(aRowA, aColA, aXA, aYA);
+		GetRoadAnchor(aRowB, aColB, aXB, aYB);
 		float aDeltaX = aXB - aXA;
 		float aDeltaY = aYB - aYA;
 		float aSegmentLength = sqrtf(aDeltaX * aDeltaX + aDeltaY * aDeltaY);
@@ -3404,7 +3423,9 @@ void Zombie::UpdateTowerDefense(float theDistanceWalked)
 			float aT = aSegmentLength > 0.0f ? aDistanceLeft / aSegmentLength : 0.0f;
 			mPosX = aXA + aDeltaX * aT;
 			mPosY = aYA + aDeltaY * aT;
-			mRow = aT < 0.5f ? aRowA : aRowB;
+			int aProjectedRow = aT < 0.5f ? aRowA : aRowB;
+			if (mRow != aProjectedRow)
+				SetRow(aProjectedRow);
 			return;
 		}
 
