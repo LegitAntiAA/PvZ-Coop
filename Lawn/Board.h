@@ -565,6 +565,8 @@ public:
 	float							mNetGhostTimeAcc;
 	int								mNetLastApplyMs;
 	bool							mNetPausedOverlay;			// client: host has paused
+	ChallengeState				mNetPresentedSlotMachineState; // last fully accepted cosmetic generation
+	int								mNetPresentedSlotMachineRollCount;
 	struct NetIntroPresentationTargets
 	{
 		bool mValid;

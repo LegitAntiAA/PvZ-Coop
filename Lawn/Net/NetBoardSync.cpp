@@ -1722,10 +1722,11 @@ void Board::NetApplySnapshot(NetBuffer& b)
 {
 	const size_t aSmokeSnapshotBytes = b.Size();
 	const uint32_t aSmokeSnapshotHash = NetFnv1a32(b.Data(), b.Size());
-	const ChallengeState aPreviousChallengeState = mChallenge ?
-		mChallenge->mChallengeState : ChallengeState::STATECHALLENGE_NORMAL;
-	const int aPreviousSlotMachineRollCount = mChallenge ?
-		mChallenge->mSlotMachineRollCount : 0;
+	// Presentation baselines advance only after the entire snapshot validates.
+	// Core fields below are committed early, so using mChallenge here would let a
+	// later malformed section consume an edge-triggered Slot Machine animation.
+	const ChallengeState aPreviousChallengeState = mNetPresentedSlotMachineState;
+	const int aPreviousSlotMachineRollCount = mNetPresentedSlotMachineRollCount;
 	// Fixed core through the seed-packet count.  Validate it before touching
 	// board/profile state so a truncated datagram cannot partially apply.
 	static const size_t NET_SNAPSHOT_CORE_BYTES =
@@ -3150,6 +3151,8 @@ void Board::NetApplySnapshot(NetBuffer& b)
 			NetTrace("slot-machine presentation return roll=%u",
 				aChallengeRuntime.mSlotMachineRollCount);
 		}
+		mNetPresentedSlotMachineState = aChallengeState;
+		mNetPresentedSlotMachineRollCount = aChallengeRuntime.mSlotMachineRollCount;
 	}
 	if (mApp && mApp->CoopSmokeActive())
 		mApp->CoopSmokeOnSnapshotApplied(aSmokeSnapshotHash, aSmokeSnapshotBytes);

@@ -79,6 +79,8 @@ Board::Board(LawnApp* theApp)
 	mNetGhostTimeAcc = 0.0f;
 	mNetLastApplyMs = 0;
 	mNetPausedOverlay = false;
+	mNetPresentedSlotMachineState = ChallengeState::STATECHALLENGE_NORMAL;
+	mNetPresentedSlotMachineRollCount = 0;
 	memset(&mNetIntroTargets, 0, sizeof(mNetIntroTargets));
 	mNetPvPBrainScore = 0;
 	mNetPvPKillScore = 0;
