@@ -335,14 +335,24 @@ void NetConnection::Disconnect()
 	SOCKET aSocket = mSocket;
 	mSocket = INVALID_SOCKET;
 	if (aSocket != INVALID_SOCKET)
+	{
+		NetTrace("connection shutdown begin socket=%llu", (unsigned long long)aSocket);
 		shutdown(aSocket, SD_BOTH);
+		NetTrace("connection shutdown complete socket=%llu", (unsigned long long)aSocket);
+	}
 
 	if (mRecvThread.joinable())
+	{
+		NetTrace("connection recv join begin socket=%llu", (unsigned long long)aSocket);
 		mRecvThread.join();
+		NetTrace("connection recv join complete socket=%llu", (unsigned long long)aSocket);
+	}
 
 	if (aSocket != INVALID_SOCKET)
 	{
+		NetTrace("connection close begin socket=%llu", (unsigned long long)aSocket);
 		closesocket(aSocket);
+		NetTrace("connection close complete socket=%llu", (unsigned long long)aSocket);
 	}
 }
 

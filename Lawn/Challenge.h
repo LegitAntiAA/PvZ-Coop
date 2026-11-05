@@ -212,6 +212,7 @@ public:
     void                    IZombiePlantDropRemainingSun(Plant* thePlant);
     void                    IZombieSquishBrain(GridItem* theBrain);
     void                    IZombieScoreBrain(GridItem* theBrain);
+    void                    LastStandUpdateButton();
     void                    LastStandUpdate();
     void                    WhackAZombiePlaceGraves(int theGraveCount);
     bool                    BeghouledTwistSquareFromMouse(int theX, int theY, int& theGridX, int& theGridY);

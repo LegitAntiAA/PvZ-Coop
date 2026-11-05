@@ -14,18 +14,18 @@ param(
     [int]$GracefulExitSeconds = 10,
     [ValidateRange(0, 65535)]
     [int]$Port = 0,
-    [ValidateSet("Adventure1", "Adventure5Bowling", "Vasebreaker")]
+    [ValidateSet("Adventure1", "Adventure5Bowling", "Vasebreaker", "Beghouled")]
     [string]$Scenario = "Adventure1",
     [ValidateSet(0, 1)]
     [int]$SkipIntro = 1,
     [ValidateRange(800, 3840)]
-    [int]$HostWindowWidth = 1366,
+    [int]$HostWindowWidth = 800,
     [ValidateRange(600, 2160)]
-    [int]$HostWindowHeight = 768,
+    [int]$HostWindowHeight = 600,
     [ValidateRange(800, 3840)]
-    [int]$ClientWindowWidth = 1920,
+    [int]$ClientWindowWidth = 800,
     [ValidateRange(600, 2160)]
-    [int]$ClientWindowHeight = 1080,
+    [int]$ClientWindowHeight = 600,
     [uint32]$Seed = 424242,
     [ValidateRange(1, 1000)]
     [int]$MinimumSnapshots = 3,
@@ -38,6 +38,85 @@ $ErrorActionPreference = "Stop"
 function Write-SmokeStatus {
     param([Parameter(Mandatory = $true)][string]$Message)
     Write-Host ("[CoopSmoke] {0}" -f $Message)
+}
+
+if (-not ("CoopSmokeNativeWindow" -as [type])) {
+    Add-Type -TypeDefinition @"
+using System;
+using System.Runtime.InteropServices;
+
+public static class CoopSmokeNativeWindow
+{
+    private delegate bool EnumWindowsProc(IntPtr hwnd, IntPtr lParam);
+
+    [DllImport("user32.dll")]
+    private static extern bool EnumWindows(EnumWindowsProc callback, IntPtr lParam);
+    [DllImport("user32.dll")]
+    private static extern uint GetWindowThreadProcessId(IntPtr hwnd, out uint processId);
+    [DllImport("user32.dll")]
+    private static extern bool IsWindowVisible(IntPtr hwnd);
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetWindow(IntPtr hwnd, uint command);
+    [DllImport("user32.dll")]
+    public static extern bool ShowWindowAsync(IntPtr hwnd, int command);
+    [DllImport("user32.dll")]
+    public static extern bool SetWindowPos(IntPtr hwnd, IntPtr insertAfter,
+        int x, int y, int width, int height, uint flags);
+
+    public static IntPtr FindVisibleTopLevelWindow(int processId)
+    {
+        IntPtr result = IntPtr.Zero;
+        EnumWindows(delegate(IntPtr hwnd, IntPtr ignored)
+        {
+            uint ownerProcessId;
+            GetWindowThreadProcessId(hwnd, out ownerProcessId);
+            if (ownerProcessId == (uint)processId && IsWindowVisible(hwnd) &&
+                GetWindow(hwnd, 4) == IntPtr.Zero)
+            {
+                result = hwnd;
+                return false;
+            }
+            return true;
+        }, IntPtr.Zero);
+        return result;
+    }
+}
+"@
+}
+
+function Set-SmokeWindowLayout {
+    param(
+        [Parameter(Mandatory = $true)][System.Diagnostics.Process]$Process,
+        [Parameter(Mandatory = $true)][string]$Role,
+        [Parameter(Mandatory = $true)][int]$X,
+        [Parameter(Mandatory = $true)][int]$Y,
+        [Parameter(Mandatory = $true)][int]$Width,
+        [Parameter(Mandatory = $true)][int]$Height
+    )
+
+    $window = [IntPtr]::Zero
+    for ($attempt = 0; $attempt -lt 200; $attempt++) {
+        if ($Process.HasExited) {
+            throw ("The {0} process exited before its visible window appeared." -f $Role)
+        }
+        $window = [CoopSmokeNativeWindow]::FindVisibleTopLevelWindow($Process.Id)
+        if ($window -ne [IntPtr]::Zero) {
+            break
+        }
+        Start-Sleep -Milliseconds 25
+    }
+    if ($window -eq [IntPtr]::Zero) {
+        throw ("The {0} process did not create a visible top-level window." -f $Role)
+    }
+
+    [void][CoopSmokeNativeWindow]::ShowWindowAsync($window, 9) # SW_RESTORE
+    $shown = [CoopSmokeNativeWindow]::SetWindowPos(
+        $window, [IntPtr]::Zero, $X, $Y, $Width, $Height, 0x0040) # SWP_SHOWWINDOW
+    if (-not $shown) {
+        throw ("Could not place the {0} window side-by-side." -f $Role)
+    }
+    Write-SmokeStatus ("Visible {0} window placed at ({1},{2}) size={3}x{4} HWND=0x{5}." -f
+        $Role, $X, $Y, $Width, $Height, $window.ToInt64().ToString("X"))
 }
 
 function Get-NormalizedPath {
@@ -176,8 +255,18 @@ function Start-SmokeProcess {
     $startInfo.Arguments = '-coop-smoke-manifest="' + $ManifestPath + '"'
     $startInfo.UseShellExecute = $false
     $startInfo.CreateNoWindow = $false
-    $startInfo.EnvironmentVariables["PVZ_COOP_SMOKE_RUN_ID"] = $RunId
-    $startInfo.EnvironmentVariables["PVZ_COOP_SMOKE_ROLE"] = $Role
+    # Newer Windows PowerShell/.NET combinations can expose the legacy
+    # EnvironmentVariables property as null while the IDictionary Environment
+    # view remains valid.  Use the latter so the role guard is always inherited.
+    $childEnvironment = $startInfo.Environment
+    if ($null -eq $childEnvironment) {
+        $childEnvironment = $startInfo.EnvironmentVariables
+    }
+    if ($null -eq $childEnvironment) {
+        throw "ProcessStartInfo did not expose a writable child environment."
+    }
+    $childEnvironment["PVZ_COOP_SMOKE_RUN_ID"] = $RunId
+    $childEnvironment["PVZ_COOP_SMOKE_ROLE"] = $Role
 
     $process = New-Object System.Diagnostics.Process
     $process.StartInfo = $startInfo
@@ -552,8 +641,15 @@ function Request-OwnedProcessClose {
         return
     }
     Write-SmokeStatus ("Closing owned {0} PID {1} after both results arrived." -f $Role, $Process.Id)
+    # Process.MainWindowHandle is cached.  PvZ can recreate its top-level HWND
+    # while switching from loading/menu presentation into a differently sized
+    # gameplay window, so refresh before asking .NET to post WM_CLOSE.
+    $Process.Refresh()
     if (-not $Process.CloseMainWindow()) {
-        throw ("The {0} process has no responsive main window for graceful close." -f $Role)
+        # A smoke host self-closes after observing the client's orderly departure.
+        # Its HWND can disappear just before the process object reports HasExited;
+        # let Wait-ForCleanProcessExit distinguish that normal race from a hang.
+        Write-SmokeStatus ("The {0} window is already closing; waiting for PID {1}." -f $Role, $Process.Id)
     }
 }
 
@@ -573,6 +669,7 @@ function Stop-OwnedProcess {
         }
 
         Write-SmokeStatus ("Requesting graceful close of {0} PID {1}." -f $Role, $Process.Id)
+        $Process.Refresh()
         [void]$Process.CloseMainWindow()
         if (-not $Process.WaitForExit(5000)) {
             Write-SmokeStatus ("Force-closing owned {0} PID {1}." -f $Role, $Process.Id)
@@ -619,16 +716,12 @@ $scenarioSpec = switch ($Scenario) {
     "Adventure1" { [ordered]@{ Mode = "adventure"; Level = 1; Marker = "adventure1" } }
     "Adventure5Bowling" { [ordered]@{ Mode = "adventure"; Level = 5; Marker = "adventure5_bowling" } }
     "Vasebreaker" { [ordered]@{ Mode = "vasebreaker"; Level = 1; Marker = "vasebreaker" } }
+    "Beghouled" { [ordered]@{ Mode = "beghouled"; Level = 1; Marker = "beghouled" } }
     default { throw ("Unsupported smoke scenario: {0}" -f $Scenario) }
 }
 $Mode = [string]$scenarioSpec.Mode
 $Level = [int]$scenarioSpec.Level
 $scenarioMarker = [string]$scenarioSpec.Marker
-if (($HostWindowWidth -eq $ClientWindowWidth) -and
-    ($HostWindowHeight -eq $ClientWindowHeight)) {
-    throw "Host and client window dimensions must be asymmetric for this smoke suite."
-}
-
 $runId = [Guid]::NewGuid().ToString("N")
 $runRoot = Join-Path $ArtifactsRoot ("run_" + $runId)
 $hostRoot = Join-Path $runRoot "host"
@@ -701,6 +794,8 @@ try {
     Write-SmokeStatus ("Starting host on 127.0.0.1:{0}." -f $Port)
     $hostProcess = Start-SmokeProcess -Executable $GameExe -WorkingDirectory $gameDirectory `
         -ManifestPath $hostManifestPath -Role "host" -RunId $runId
+    Set-SmokeWindowLayout -Process $hostProcess -Role "host" -X 0 -Y 0 `
+        -Width $HostWindowWidth -Height $HostWindowHeight
     Save-PidLedger -Path $pidLedgerPath -Executable $GameExe `
         -HostProcess $hostProcess -ClientProcess $null
 
@@ -711,6 +806,8 @@ try {
     Write-SmokeStatus "Host is listening; starting client."
     $clientProcess = Start-SmokeProcess -Executable $GameExe -WorkingDirectory $gameDirectory `
         -ManifestPath $clientManifestPath -Role "client" -RunId $runId
+    Set-SmokeWindowLayout -Process $clientProcess -Role "client" -X $HostWindowWidth -Y 0 `
+        -Width $ClientWindowWidth -Height $ClientWindowHeight
     Save-PidLedger -Path $pidLedgerPath -Executable $GameExe `
         -HostProcess $hostProcess -ClientProcess $clientProcess
 
@@ -737,7 +834,7 @@ try {
         @{ Label = "authenticated client"; Pattern = '(?im)peer authenticated slot=1 nick=SmokeClient\b' },
         @{ Label = "deterministic game start"; Pattern = ('(?im)start game broadcast mode=\d+ level={0} players=2 seed={1}\b' -f $Level, $Seed) },
         @{ Label = "scenario start"; Pattern = ('(?im)\bSMOKE_START\b[^\r\n]*scenario={0}\b' -f ([regex]::Escape($scenarioMarker))) },
-        @{ Label = "asymmetric host PLAYING checkpoint"; Pattern = ('(?im)\bSMOKE_CHECKPOINT\b[^\r\n]*scenario={0}[^\r\n]*step=PLAYING[^\r\n]*size={1}x{2}\b' -f ([regex]::Escape($scenarioMarker)), $HostWindowWidth, $HostWindowHeight) },
+        @{ Label = "visible host PLAYING checkpoint"; Pattern = ('(?im)\bSMOKE_CHECKPOINT\b[^\r\n]*scenario={0}[^\r\n]*step=PLAYING[^\r\n]*size={1}x{2}\b' -f ([regex]::Escape($scenarioMarker)), $HostWindowWidth, $HostWindowHeight) },
         @{ Label = "host action applied"; Pattern = ('(?im)\bSMOKE_CHECKPOINT\b[^\r\n]*scenario={0}[^\r\n]*step=ACTION_APPLIED\b' -f ([regex]::Escape($scenarioMarker))) },
         @{ Label = "post-action TX hash"; Pattern = '(?im)\bSMOKE_POST_ACTION_TX\b[^\r\n]*\bhash=(?:0x)?[0-9a-f]{8,16}\b' }
     )
@@ -748,7 +845,7 @@ try {
         @{ Label = "profile sync"; Pattern = '(?im)PROFILE_SYNC applied\b' },
         @{ Label = "matching game start"; Pattern = ('(?im)client START_GAME decoded mode=\d+ level={0} seed={1}\b' -f $Level, $Seed) },
         @{ Label = "gameplay scene"; Pattern = '(?im)gameplay entered client=1\b' },
-        @{ Label = "asymmetric client PLAYING checkpoint"; Pattern = ('(?im)\bSMOKE_CHECKPOINT\b[^\r\n]*scenario={0}[^\r\n]*step=PLAYING[^\r\n]*size={1}x{2}\b' -f ([regex]::Escape($scenarioMarker)), $ClientWindowWidth, $ClientWindowHeight) },
+        @{ Label = "visible client PLAYING checkpoint"; Pattern = ('(?im)\bSMOKE_CHECKPOINT\b[^\r\n]*scenario={0}[^\r\n]*step=PLAYING[^\r\n]*size={1}x{2}\b' -f ([regex]::Escape($scenarioMarker)), $ClientWindowWidth, $ClientWindowHeight) },
         @{ Label = "client action applied"; Pattern = ('(?im)\bSMOKE_CHECKPOINT\b[^\r\n]*scenario={0}[^\r\n]*step=ACTION_APPLIED\b' -f ([regex]::Escape($scenarioMarker))) },
         @{ Label = "post-action applied hash"; Pattern = '(?im)\bSMOKE_POST_ACTION_APPLIED\b[^\r\n]*\bhash=(?:0x)?[0-9a-f]{8,16}\b' }
     )
@@ -770,7 +867,7 @@ try {
     Assert-NoNegativePatterns -Role "client" -Text $clientLog -Patterns $negativePatterns
 
     $combinedActionLog = $hostLog + [Environment]::NewLine + $clientLog
-    $expectedActionOwner = if ($Scenario -eq "Vasebreaker") { "client" } else { "host" }
+    $expectedActionOwner = if ($Scenario -eq "Vasebreaker" -or $Scenario -eq "Beghouled") { "client" } else { "host" }
     $actionIssuedPattern = ('(?im)\bSMOKE_CHECKPOINT\b[^\r\n]*scenario={0}[^\r\n]*step=ACTION_ISSUED[^\r\n]*owner={1}\b' -f
         ([regex]::Escape($scenarioMarker)), $expectedActionOwner)
     if (-not [regex]::IsMatch($combinedActionLog, $actionIssuedPattern)) {
@@ -795,6 +892,9 @@ try {
 }
 catch {
     $failureMessage = $_.Exception.Message
+    if (-not [string]::IsNullOrWhiteSpace($_.ScriptStackTrace)) {
+        $failureMessage += " | " + $_.ScriptStackTrace
+    }
     Write-Host ("[CoopSmoke] FAIL: {0}" -f $failureMessage) -ForegroundColor Red
 }
 finally {

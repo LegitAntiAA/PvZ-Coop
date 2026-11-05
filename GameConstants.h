@@ -63,6 +63,7 @@ const int           SUN_COUNTDOWN_MAX = 950;
 const int           SURVIVAL_NORMAL_FLAGS = 5;
 const int           SURVIVAL_HARD_FLAGS = 10;
 const int           PVP_ZOMBIE_LIMIT = 100;
+const int           PVP_BRAIN_REWARD_PER_PLANT = 25;
 
 // ============================================================
 // ■ 商店相关

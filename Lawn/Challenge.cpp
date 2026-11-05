@@ -19,6 +19,7 @@
 #include "System/PlayerInfo.h"
 #include "Widget/GameButton.h"
 #include "Widget/StoreScreen.h"
+#include "Net/NetManager.h"
 #include "../Sexy.TodLib/TodDebug.h"
 #include "../Sexy.TodLib/TodFoley.h"
 #include "../Sexy.TodLib/TodCommon.h"
@@ -572,8 +573,16 @@ void Challenge::StartLevel()
 	if (aGameMode == GAMEMODE_CHALLENGE_ZOMBIQUARIUM)
 	{
 		mBoard->DisplayAdvice(_S("[ADVICE_ZOMBIQUARIUM_CLICK_TO_FEED]"), MESSAGE_STYLE_HINT_TALL_FAST, ADVICE_ZOMBIQUARIUM_CLICK_TO_FEED);
-		ZombiquariumSpawnSnorkle();
-		ZombiquariumSpawnSnorkle();
+		// The host owns every gameplay entity.  A client-created snorkel is a
+		// non-ghost, so snapshot reconciliation cannot match or retire it and a
+		// second presentation zombie is created for the host wire id.  Do not
+		// create the provisional pair on clients; the first snapshot supplies the
+		// two authoritative ghost presentations.
+		if (!mApp->NetIsClient())
+		{
+			ZombiquariumSpawnSnorkle();
+			ZombiquariumSpawnSnorkle();
+		}
 	}
 	if (mApp->IsIZombieLevel())
 	{
@@ -1258,7 +1267,14 @@ bool Challenge::UpdateToolTip(int theX, int theY)
 //0x421B10
 void Challenge::MouseDownWhackAZombie(int theX, int theY)
 {
-	mApp->ReanimationTryToGet(mBoard->mCursorObject->mReanimCursorID)->mAnimTime = 0.2f;
+	// A host owns one CursorObject per connected player.  During a scene
+	// transition (or after an effect-system reset) a remote hammer can briefly
+	// have no live reanimation.  The hit itself is authoritative and must remain
+	// usable instead of dereferencing a stale/null presentation object.
+	Reanimation* aHammerReanim = mApp->ReanimationTryToGet(
+		mBoard->mCursorObject->mReanimCursorID);
+	if (aHammerReanim)
+		aHammerReanim->mAnimTime = 0.2f;
 	mApp->PlayFoley(FOLEY_SWING);
 
 	Zombie* aZombie = nullptr;
@@ -5742,14 +5758,26 @@ void Challenge::UpdateRain()
 }
 
 //0x42C5C0
-void Challenge::LastStandUpdate()
+void Challenge::LastStandUpdateButton()
 {
-	if (mBoard->mNextSurvivalStageCounter == 0 && mChallengeState == STATECHALLENGE_NORMAL && mBoard->mStoreButton->mBtnNoDraw)
-	{
-		GameButton* aButton = mBoard->mStoreButton;
-		aButton->mBtnNoDraw = false;
-		aButton->mDisabled = false;
+	GameButton* aButton = mBoard ? mBoard->mStoreButton : nullptr;
+	if (!aButton)
+		return;
 
+	// These fields are all host-authoritative snapshot state.  Deriving the
+	// button from them makes a client converge even though its Board::Update
+	// deliberately skips Challenge::Update and never simulates Last Stand.
+	const bool aShouldShow = mBoard->mNextSurvivalStageCounter == 0 &&
+		mChallengeState == STATECHALLENGE_NORMAL;
+	if (!aShouldShow)
+	{
+		aButton->mBtnNoDraw = true;
+		aButton->mDisabled = true;
+		return;
+	}
+
+	if (aButton->mBtnNoDraw)
+	{
 		if (mSurvivalStage == 0)
 		{
 			aButton->SetLabel(_S("[START_ONSLAUGHT]"));
@@ -5761,6 +5789,14 @@ void Challenge::LastStandUpdate()
 			aButton->Resize(270 + mApp->mDDInterface->mWideScreenOffsetX, 559 + mApp->mDDInterface->mWideScreenOffsetY, 257, 46);
 		}
 	}
+	aButton->mBtnNoDraw = false;
+	aButton->mDisabled = false;
+}
+
+//0x42C5C0
+void Challenge::LastStandUpdate()
+{
+	LastStandUpdateButton();
 
 	if (mChallengeState == STATECHALLENGE_LAST_STAND_ONSLAUGHT && mApp->mGameScene == SCENE_PLAYING)
 		mChallengeStateCounter++;
@@ -6405,8 +6441,13 @@ void Challenge::HeatWaveUpdate()
 	if (shoutAllowed)
 	{
 		float rms = mApp->mVoiceVolume / SHOUT_THRESHOLD;
+		const bool aHostQDown = mApp->mWidgetManager &&
+			mApp->mWidgetManager->mKeyDown[GetKeyCodeFromName("q")];
+		const bool aRemoteQDown = mApp->NetIsHost() && mApp->mNetManager &&
+			mApp->mNetManager->IsRemoteHeatWaveShoutKeyActive();
+		const bool aKeyboardShout = aHostQDown || aRemoteQDown;
 
-		bool isVolumeMet = rms >= 0.8f;
+		bool isVolumeMet = rms >= 0.8f || aKeyboardShout;
 
 		if (shoutAllowed && isVolumeMet && mShoutingCounter < 100)
 		{
@@ -6458,7 +6499,7 @@ void Challenge::HeatWaveUpdate()
 			}
 		}
 
-		if (mShoutingCounter > 0 && rms < 0.8f && !mApp->mWidgetManager->mKeyDown[GetKeyCodeFromName("q")])
+		if (mShoutingCounter > 0 && rms < 0.8f && !aKeyboardShout)
 		{
 			mShoutingCounter--;
 			if (mBoard->mMainCounter % 2 == 1 && mBoard->mMainCounter != 0)

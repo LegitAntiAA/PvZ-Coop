@@ -586,6 +586,7 @@ public:
 	int								mNetPvPBrainScore;			// zombies team score
 	int								mNetPvPKillScore;			// plants team score
 	int								mNetPvPBrainTimer;			// brain currency trickle
+	int								mNetPvPLastPlantsEaten;		// host-side reward watermark
 	std::vector<uint8_t>			mTDPath;					// tower defense: pairs (row, col)
 
 	// endless T weather (host-simulated, synced via snapshots)
@@ -638,7 +639,7 @@ public:
 	bool							ApplyTowerDefensePathToGrid();
 	static void						GenerateTowerDefensePath(std::vector<uint8_t>& thePath);
 	static void						SetTowerDefensePath(const std::vector<uint8_t>& thePath);
-	void							NetGhostUpdateZombie(Zombie* theZombie, uint8_t theAnimKey);
+	void							NetGhostUpdateZombie(Zombie* theZombie);
 	void							NetGhostUpdateOthers();
 };
 extern bool gShownMoreSunTutorial;

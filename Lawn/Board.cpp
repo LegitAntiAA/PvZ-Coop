@@ -83,6 +83,7 @@ Board::Board(LawnApp* theApp)
 	mNetPvPBrainScore = 0;
 	mNetPvPKillScore = 0;
 	mNetPvPBrainTimer = 0;
+	mNetPvPLastPlantsEaten = 0;
 	mNetDaveAppliedAnimKey = 255;
 	mNetDaveAppliedMessageIndex = INT_MIN;
 	mTDPath.clear();
@@ -6266,6 +6267,23 @@ void Board::UpdateGameObjects()
 		}
 	}
 
+	// PvP brain currency is shared by the zombie team.  Award it once on the
+	// authoritative host for every plant that the simulation records as eaten.
+	if (IsPvPMode() && !mApp->NetIsClient())
+	{
+		if (mPlantsEaten < mNetPvPLastPlantsEaten)
+			mNetPvPLastPlantsEaten = mPlantsEaten;
+
+		const int aPlantsEatenDelta = mPlantsEaten - mNetPvPLastPlantsEaten;
+		if (aPlantsEatenDelta > 0)
+		{
+			const int64_t aRewardedBrains = (int64_t)mNetPvPBrainTimer +
+				(int64_t)aPlantsEatenDelta * PVP_BRAIN_REWARD_PER_PLANT;
+			mNetPvPBrainTimer = (int)(aRewardedBrains > 100000 ? 100000 : aRewardedBrains);
+			mNetPvPLastPlantsEaten = mPlantsEaten;
+		}
+	}
+
 	Projectile* aProjectile = nullptr;
 	while (IterateProjectiles(aProjectile))
 	{
@@ -7135,6 +7153,19 @@ void Board::Update()
 		mCutScene->Update();
 		UpdateMousePosition();
 		NetClientTick();
+		if (mApp->IsLastStand())
+		{
+			// The client does not run Challenge::Update.  Rebuild this one
+			// presentation-only control from the host snapshot and tick it so hover
+			// and press feedback remain live while clicks are forwarded to the host.
+			mChallenge->LastStandUpdateButton();
+			if (mStoreButton)
+			{
+				if (!mStoreButton->mBtnNoDraw)
+					mStoreButton->mDisabled = !CanInteractWithBoardButtons() || mIgnoreMouseUp;
+				mStoreButton->Update();
+			}
+		}
 		UpdateLayers();
 		if (!mPaused)
 		{

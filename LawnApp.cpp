@@ -164,6 +164,10 @@ bool LawnApp::PlayVideo(std::string url, bool isSkipable, Color bgColor)
 			case SDL_EVENT_QUIT:
 				willShutdown = true;
 				break;
+			case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+				if (!mSDLWindow || event.window.windowID == SDL_GetWindowID(mSDLWindow))
+					willShutdown = true;
+				break;
 			case SDL_EVENT_WINDOW_FOCUS_GAINED:
 				mActive = true;
 				RehupFocus();
@@ -519,7 +523,11 @@ bool LawnApp::UpdateAppStep(bool* updated)
 				switch (event.type)
 				{
 					case SDL_EVENT_QUIT:
-						Shutdown();
+						CloseRequestAsync();
+						break;
+					case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+						if (!mSDLWindow || event.window.windowID == SDL_GetWindowID(mSDLWindow))
+							CloseRequestAsync();
 						break;
 
 					case SDL_EVENT_MOUSE_MOTION:
@@ -541,7 +549,17 @@ bool LawnApp::UpdateAppStep(bool* updated)
 				switch (event.type)
 				{
 				case SDL_EVENT_QUIT:
-					Shutdown();
+					LawnNet::NetTrace("SDL close requested event=quit");
+					CloseRequestAsync();
+					break;
+				case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+					if (!mSDLWindow || event.window.windowID == SDL_GetWindowID(mSDLWindow))
+					{
+						LawnNet::NetTrace("SDL close requested event=window windowId=%u mainWindowId=%u",
+							(unsigned)event.window.windowID,
+							mSDLWindow ? (unsigned)SDL_GetWindowID(mSDLWindow) : 0U);
+						CloseRequestAsync();
+					}
 					break;
 				case SDL_EVENT_MOUSE_BUTTON_DOWN:
 					if ((!gInAssert) && (!mSEHOccured) && !imguiWantsMouse)
@@ -598,6 +616,17 @@ bool LawnApp::UpdateAppStep(bool* updated)
 						mWidgetManager->RemapMouse(x, y);
 						mLastUserInputTick = mLastTimerTime;
 						mWidgetManager->MouseMove(x, y);
+						if (NetIsClient() && mBoard && mGameScene == GameScenes::SCENE_PLAYING && GetDialogCount() == 0)
+						{
+							int aDragButton = 0;
+							if (event.motion.state & SDL_BUTTON_LMASK)
+								aDragButton = 1;
+							else if (event.motion.state & SDL_BUTTON_RMASK)
+								aDragButton = -1;
+							else if (event.motion.state & SDL_BUTTON_MMASK)
+								aDragButton = 3;
+							mNetManager->SendMouseMove(aDragButton, x, y);
+						}
 
 						if (!mMouseIn)
 						{
@@ -620,6 +649,8 @@ bool LawnApp::UpdateAppStep(bool* updated)
 					EnforceCursor();
 					break;
 				case SDL_EVENT_WINDOW_FOCUS_LOST:
+					if (NetIsClient() && mNetManager)
+						mNetManager->SendHeatWaveShoutKey(false);
 					mActive = false;
 					RehupFocus();
 					break;
@@ -638,6 +669,8 @@ bool LawnApp::UpdateAppStep(bool* updated)
 					if (!imguiWantsKeyboard)
 					{
 						mLastUserInputTick = mLastTimerTime;
+						if (NetIsClient() && mNetManager && event.key.key == SDLK_Q)
+							mNetManager->SendHeatWaveShoutKey(true);
 						if (mDebugKeysEnabled)
 						{
 							if (DebugKeyDown(GetKeyCodeFromCodeSDL(event.key.key)))
@@ -743,7 +776,9 @@ bool LawnApp::UpdateAppStep(bool* updated)
 					}
 					break;
 				}
-				case SDL_EVENT_KEY_UP:					
+				case SDL_EVENT_KEY_UP:
+					if (NetIsClient() && mNetManager && event.key.key == SDLK_Q)
+						mNetManager->SendHeatWaveShoutKey(false);
 					if (!imguiWantsKeyboard)
 					{
 						mLastUserInputTick = mLastTimerTime;
@@ -5544,8 +5579,23 @@ void LawnApp::CoopSmokeStartLifecycle()
 
 void LawnApp::CoopSmokeUpdate()
 {
-	if (!CoopSmokeActive() || mCoopSmokeResultWritten)
+	if (!CoopSmokeActive())
 		return;
+	// The harness deliberately keeps both peers alive until both result files
+	// exist, then closes the client first.  Once a successful host has observed
+	// that orderly peer departure it can terminate itself; this avoids relying
+	// on Process.CloseMainWindow selecting the correct HWND after PvZ recreates
+	// its presentation window for a different resolution.
+	if (mCoopSmokeResultWritten)
+	{
+		if (mCoopSmokeManifest.IsHost() && mCoopSmokePeerReady && mNetManager &&
+			mNetManager->IsHosting() && mNetManager->GetPlayerCount() < 2)
+		{
+			LawnNet::NetTrace("SMOKE_SHUTDOWN role=host reason=completed_client_departure");
+			CloseRequestAsync();
+		}
+		return;
+	}
 
 	uint32_t aNow = GetTickCount();
 	if (mCoopSmokeStartedTick == 0)
@@ -6047,9 +6097,25 @@ void LawnApp::NetHandleRemoteInputs()
 				anInput.mSlot, anInput.mEpoch, anInput.mSequence, anInput.mAction,
 				anInput.mButton, anInput.mX, anInput.mY, (void*)aBatchBoard);
 			if (anInput.mAction == LawnNet::NETINPUT_MOUSE_DOWN)
+			{
+				aBatchBoard->MouseMove(anInput.mX, anInput.mY);
 				aBatchBoard->MouseDown(anInput.mX, anInput.mY, anInput.mButton);
+			}
+			else if (anInput.mAction == LawnNet::NETINPUT_MOUSE_MOVE)
+			{
+				if (anInput.mButton != 0)
+					aBatchBoard->MouseDrag(anInput.mX, anInput.mY);
+				else
+					aBatchBoard->MouseMove(anInput.mX, anInput.mY);
+			}
 			else
+			{
+				// Apply the release position while challenge capture is still alive.
+				// This makes short/faster drags deterministic even if all coalesced
+				// motion packets between DOWN and UP were intentionally throttled.
+				aBatchBoard->MouseDrag(anInput.mX, anInput.mY);
 				aBatchBoard->MouseUp(anInput.mX, anInput.mY, anInput.mButton);
+			}
 		}
 
 		if (!mNetManager)

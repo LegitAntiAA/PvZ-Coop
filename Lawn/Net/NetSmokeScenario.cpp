@@ -3,6 +3,7 @@
 #include "NetCommon.h"
 #include "NetManager.h"
 #include "../Board.h"
+#include "../Challenge.h"
 #include "../CutScene.h"
 #include "../CursorObject.h"
 #include "../GridItem.h"
@@ -52,6 +53,116 @@ void SmokeClientClick(LawnApp* theApp, int theCanonicalX, int theCanonicalY)
 	const int aLocalY = SmokeLocalY(theApp, theCanonicalY);
 	theApp->mNetManager->SendInput(true, 1, aLocalX, aLocalY);
 	theApp->mNetManager->SendInput(false, 1, aLocalX, aLocalY);
+}
+
+void SmokeClientDrag(LawnApp* theApp, int theFromX, int theFromY,
+	int theToX, int theToY)
+{
+	if (!theApp || !theApp->mNetManager)
+		return;
+	const int aFromLocalX = SmokeLocalX(theApp, theFromX);
+	const int aFromLocalY = SmokeLocalY(theApp, theFromY);
+	const int aToLocalX = SmokeLocalX(theApp, theToX);
+	const int aToLocalY = SmokeLocalY(theApp, theToY);
+	theApp->mNetManager->SendInput(true, 1, aFromLocalX, aFromLocalY);
+	theApp->mNetManager->SendMouseMove(1, aToLocalX, aToLocalY);
+	theApp->mNetManager->SendInput(false, 1, aToLocalX, aToLocalY);
+}
+
+SeedType SmokeBeghouledSeedAt(Board* theBoard, int theGridX, int theGridY)
+{
+	Plant* aPlant = theBoard->GetTopPlantAt(theGridX, theGridY,
+		PlantPriority::TOPPLANT_ONLY_NORMAL_POSITION);
+	return aPlant ? aPlant->mSeedType : SeedType::SEED_NONE;
+}
+
+uint32_t SmokePlantGridHash(Board* theBoard)
+{
+	uint32_t aHash = 2166136261U;
+	if (!theBoard)
+		return aHash;
+	for (int aRow = 0; aRow < BEGHOULED_MAX_GRIDSIZEY; ++aRow)
+	{
+		for (int aColumn = 0; aColumn < BEGHOULED_MAX_GRIDSIZEX; ++aColumn)
+		{
+			const uint32_t aValue = (uint32_t)SmokeBeghouledSeedAt(theBoard,
+				aColumn, aRow) + 1U;
+			aHash ^= aValue;
+			aHash *= 16777619U;
+		}
+	}
+	return aHash;
+}
+
+bool SmokeBeghouledMatchAt(SeedType theGrid[BEGHOULED_MAX_GRIDSIZEX][BEGHOULED_MAX_GRIDSIZEY],
+	int theGridX, int theGridY)
+{
+	const SeedType aSeed = theGrid[theGridX][theGridY];
+	if (aSeed == SeedType::SEED_NONE)
+		return false;
+	int aHorizontal = 1;
+	for (int x = theGridX - 1; x >= 0 && theGrid[x][theGridY] == aSeed; --x)
+		++aHorizontal;
+	for (int x = theGridX + 1; x < BEGHOULED_MAX_GRIDSIZEX &&
+		theGrid[x][theGridY] == aSeed; ++x)
+		++aHorizontal;
+	int aVertical = 1;
+	for (int y = theGridY - 1; y >= 0 && theGrid[theGridX][y] == aSeed; --y)
+		++aVertical;
+	for (int y = theGridY + 1; y < BEGHOULED_MAX_GRIDSIZEY &&
+		theGrid[theGridX][y] == aSeed; ++y)
+		++aVertical;
+	return aHorizontal >= 3 || aVertical >= 3;
+}
+
+bool FindBeghouledSmokeMove(Board* theBoard, int& theFromX, int& theFromY,
+	int& theToX, int& theToY)
+{
+	if (!theBoard || !theBoard->mChallenge ||
+		theBoard->mChallenge->mChallengeState != ChallengeState::STATECHALLENGE_NORMAL ||
+		theBoard->mChallenge->mBeghouledMouseCapture)
+		return false;
+
+	SeedType aGrid[BEGHOULED_MAX_GRIDSIZEX][BEGHOULED_MAX_GRIDSIZEY];
+	for (int y = 0; y < BEGHOULED_MAX_GRIDSIZEY; ++y)
+		for (int x = 0; x < BEGHOULED_MAX_GRIDSIZEX; ++x)
+			aGrid[x][y] = SmokeBeghouledSeedAt(theBoard, x, y);
+
+	for (int y = 0; y < BEGHOULED_MAX_GRIDSIZEY; ++y)
+	{
+		for (int x = 0; x < BEGHOULED_MAX_GRIDSIZEX; ++x)
+		{
+			const int aNeighbours[2][2] = { { x + 1, y }, { x, y + 1 } };
+			for (int i = 0; i < 2; ++i)
+			{
+				const int aToX = aNeighbours[i][0];
+				const int aToY = aNeighbours[i][1];
+				if (aToX >= BEGHOULED_MAX_GRIDSIZEX || aToY >= BEGHOULED_MAX_GRIDSIZEY ||
+					theBoard->mChallenge->mBeghouledEated[x][y] ||
+					theBoard->mChallenge->mBeghouledEated[aToX][aToY] ||
+					aGrid[x][y] == SeedType::SEED_NONE || aGrid[aToX][aToY] == SeedType::SEED_NONE ||
+					aGrid[x][y] == aGrid[aToX][aToY])
+					continue;
+
+				const SeedType aSwap = aGrid[x][y];
+				aGrid[x][y] = aGrid[aToX][aToY];
+				aGrid[aToX][aToY] = aSwap;
+				const bool aMatches = SmokeBeghouledMatchAt(aGrid, x, y) ||
+					SmokeBeghouledMatchAt(aGrid, aToX, aToY);
+				aGrid[aToX][aToY] = aGrid[x][y];
+				aGrid[x][y] = aSwap;
+				if (aMatches)
+				{
+					theFromX = x;
+					theFromY = y;
+					theToX = aToX;
+					theToY = aToY;
+					return true;
+				}
+			}
+		}
+	}
+	return false;
 }
 
 int CountScaryPots(Board* theBoard)
@@ -171,6 +282,8 @@ void NetSmokeScenarioRuntime::Reset(NetSmokeScenarioId theScenario)
 	mIntroLastTutorialState = -1;
 	mBaselinePlants = 0;
 	mBaselinePots = 0;
+	mBaselineChallengeScore = 0;
+	mBaselinePlantGridHash = 0;
 	mIntroObserved = false;
 	mIntroProgressObserved = false;
 	mIntroSawDave = false;
@@ -368,6 +481,23 @@ bool NetSmokeScenarioRuntime::IssueAction(LawnApp* theApp, const NetSmokeManifes
 		SmokeClientClick(theApp, aX, aY);
 		return true;
 	}
+	if (mScenario == NETSMOKE_SCENARIO_BEGHOULED)
+	{
+		int aFromX = 0;
+		int aFromY = 0;
+		int aToX = 0;
+		int aToY = 0;
+		if (!FindBeghouledSmokeMove(theApp->mBoard, aFromX, aFromY, aToX, aToY))
+			return false;
+		const int aFromPixelX = theApp->mBoard->GridToPixelX(aFromX, aFromY) + 40;
+		const int aFromPixelY = theApp->mBoard->GridToPixelY(aFromX, aFromY) + 45;
+		const int aToPixelX = theApp->mBoard->GridToPixelX(aToX, aToY) + 40;
+		const int aToPixelY = theApp->mBoard->GridToPixelY(aToX, aToY) + 45;
+		SmokeClientDrag(theApp, aFromPixelX, aFromPixelY, aToPixelX, aToPixelY);
+		NetTrace("SMOKE_BEGHOULED_DRAG from=(%d,%d) to=(%d,%d)",
+			aFromX, aFromY, aToX, aToY);
+		return true;
+	}
 
 	return IssueHostSeedAction(theApp);
 }
@@ -378,6 +508,10 @@ bool NetSmokeScenarioRuntime::ObserveActionApplied(Board* theBoard) const
 		return false;
 	if (mScenario == NETSMOKE_SCENARIO_VASEBREAKER)
 		return CountScaryPots(theBoard) < mBaselinePots;
+	if (mScenario == NETSMOKE_SCENARIO_BEGHOULED)
+		return theBoard->mChallenge &&
+			(theBoard->mChallenge->mChallengeScore > mBaselineChallengeScore ||
+				SmokePlantGridHash(theBoard) != mBaselinePlantGridHash);
 	return theBoard->mPlants.mSize > mBaselinePlants;
 }
 
@@ -442,7 +576,13 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
 			return true;
 		mBaselinePlants = aBoard->mPlants.mSize;
 		mBaselinePots = CountScaryPots(aBoard);
+		mBaselineChallengeScore = aBoard->mChallenge ? aBoard->mChallenge->mChallengeScore : 0;
+		mBaselinePlantGridHash = SmokePlantGridHash(aBoard);
 		if (mScenario == NETSMOKE_SCENARIO_VASEBREAKER && mBaselinePots <= 0)
+			return true;
+		if (mScenario == NETSMOKE_SCENARIO_BEGHOULED &&
+			(!aBoard->mChallenge ||
+				aBoard->mChallenge->mChallengeState != ChallengeState::STATECHALLENGE_NORMAL))
 			return true;
 		mBaselineCaptured = true;
 		mActionTick = GetTickCount();

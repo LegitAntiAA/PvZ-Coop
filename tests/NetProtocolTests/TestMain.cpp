@@ -1,5 +1,7 @@
 #include "../../Lawn/Net/NetCommon.h"
 #include "LocalizedTextTests.h"
+#include "NetChallengeRuntimeTests.h"
+#include "NetZombieAnimTests.h"
 
 #include <chrono>
 #include <cstdio>
@@ -494,6 +496,13 @@ void TestSmokeManifestAndHashValidation()
 	CHECK(aManifest.mGameMode == (uint8_t)GameMode::GAMEMODE_CHALLENGE_VASEBREAKER);
 
 	anError.clear();
+	CHECK(aTree.Parse(aTree.MakeManifest(aTree.mAppData.string(), aTree.mResult.string(),
+		"beghouled", 1, 1), aManifest, anError));
+	CHECK(anError.empty());
+	CHECK(aManifest.mScenario == LawnNet::NETSMOKE_SCENARIO_BEGHOULED);
+	CHECK(aManifest.mGameMode == (uint8_t)GameMode::GAMEMODE_CHALLENGE_BEGHOULED);
+
+	anError.clear();
 	CHECK(!aTree.Parse(aTree.MakeManifest(aTree.mAppData.string(), aTree.mResult.string(),
 		"adventure", 2, 1), aManifest, anError));
 	CHECK(!anError.empty());
@@ -649,6 +658,13 @@ int main()
 	gChecks += aTextResult.mChecks;
 	gFailures += aTextResult.mFailures;
 	gSkipped += aTextResult.mSkipped;
+	const NetZombieAnimTestResult aZombieAnimResult = RunNetZombieAnimTests();
+	gChecks += aZombieAnimResult.mChecks;
+	gFailures += aZombieAnimResult.mFailures;
+	const NetChallengeRuntimeTestResult aChallengeRuntimeResult =
+		RunNetChallengeRuntimeTests();
+	gChecks += aChallengeRuntimeResult.mChecks;
+	gFailures += aChallengeRuntimeResult.mFailures;
 
 	std::printf("\nchecks=%d failures=%d skipped=%d\n", gChecks, gFailures, gSkipped);
 	return gFailures == 0 ? 0 : 1;

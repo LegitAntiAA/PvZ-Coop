@@ -79,8 +79,8 @@ static const size_t NET_SEED_PACKET_WIRE_BYTES = 14;
 // plus authoritative live x/y (4) and render order (4).
 static const size_t NET_PLANT_WIRE_BYTES = 20;
 // Zombie: id/type/row/position(8), health pools(10), phase/visual state(10),
-// velocity/altitude/animation rate(12) and the coarse animation key(1).
-static const size_t NET_ZOMBIE_WIRE_BYTES = 41;
+// velocity/altitude/original animation rate(12), and exact body animation(11).
+static const size_t NET_ZOMBIE_WIRE_BYTES = 40 + NET_ZOMBIE_ANIM_WIRE_BYTES;
 // Projectile: id(2), type/row(2), x/y/z/shadow(16), order(4),
 // rotation(4), motion/frame/high-ground(3).
 static const size_t NET_PROJECTILE_WIRE_BYTES = 31;
@@ -103,6 +103,64 @@ void NetRetireZombiePresentation(LawnApp* theApp, Zombie* theZombie)
 	theApp->RemoveReanimation(theZombie->mMoweredReanimID);
 	theApp->RemoveReanimation(theZombie->mSpecialHeadReanimID);
 	theZombie->mDead = true;
+}
+
+uint32_t NetGetReanimationFrameCapacity(const Reanimation* theReanim)
+{
+	if (!theReanim || !theReanim->mDefinition ||
+		theReanim->mDefinition->mTracks.count <= 0 ||
+		!theReanim->mDefinition->mTracks.tracks ||
+		theReanim->mDefinition->mTracks.tracks[0].mTransforms.count <= 0)
+		return 0;
+	return (uint32_t)theReanim->mDefinition->mTracks.tracks[0].mTransforms.count;
+}
+
+bool NetCaptureZombieAnimState(LawnApp* theApp, Zombie* theZombie,
+	NetZombieAnimState& theState)
+{
+	theState.Reset();
+	if (!theApp || !theZombie)
+		return true;
+
+	Reanimation* aBody = theApp->ReanimationTryToGet(theZombie->mBodyReanimID);
+	if (!aBody)
+		return true;
+	const uint32_t aFrameCapacity = NetGetReanimationFrameCapacity(aBody);
+	const int aLoopType = (int)aBody->mLoopType;
+	if (aBody->mFrameStart < 0 || aBody->mFrameStart > 65535 ||
+		aBody->mFrameCount <= 0 || aBody->mFrameCount > 65535 ||
+		aLoopType < 0 || aLoopType > 5 || !_finite(aBody->mAnimTime) ||
+		!_finite(aBody->mAnimRate))
+		return false;
+
+	theState.mPresent = true;
+	theState.mDead = aBody->mDead;
+	theState.mFrameStart = (uint16_t)aBody->mFrameStart;
+	theState.mFrameCount = (uint16_t)aBody->mFrameCount;
+	theState.mAnimTime = aBody->mAnimTime;
+	theState.mAnimRate = aBody->mAnimRate;
+	theState.mLoopType = (uint8_t)aLoopType;
+	theState.mLoopCount = (uint8_t)max(0, min(255, aBody->mLoopCount));
+	return NetZombieAnimStateFitsFrames(theState, aFrameCapacity);
+}
+
+bool NetGetZombieTypeFrameCapacity(uint8_t theZombieType, uint32_t& theFrameCapacity)
+{
+	theFrameCapacity = 0;
+	if (theZombieType >= (uint8_t)ZombieType::NUM_ZOMBIE_TYPES)
+		return false;
+	const ZombieDefinition& aZombieDef = GetZombieDefinition((ZombieType)theZombieType);
+	const int aReanimType = (int)aZombieDef.mReanimationType;
+	if (aReanimType < 0 || (unsigned int)aReanimType >= gReanimatorDefCount ||
+		!gReanimatorDefArray)
+		return false;
+	ReanimatorEnsureDefinitionLoaded(aZombieDef.mReanimationType, true);
+	const ReanimatorDefinition& aDefinition = gReanimatorDefArray[aReanimType];
+	if (aDefinition.mTracks.count <= 0 || !aDefinition.mTracks.tracks ||
+		aDefinition.mTracks.tracks[0].mTransforms.count <= 0)
+		return false;
+	theFrameCapacity = (uint32_t)aDefinition.mTracks.tracks[0].mTransforms.count;
+	return true;
 }
 
 bool NetIsValidSeedPacketType(uint8_t theType)
@@ -783,6 +841,42 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 	b.WriteU16((uint16_t)min(65535, max(0, mChallenge->mChallengeStateCounter)));
 	b.WriteI16((int16_t)max(-32768, min(32767, mChallenge->mChallengeScore)));
 
+	// Fixed-size challenge runtime/presentation block.  The client mirrors these
+	// values but never advances challenge gameplay from them.
+	NetChallengeRuntimeState aChallengeRuntime;
+	aChallengeRuntime.mProgressMeterWidth = (uint16_t)max(0,
+		min(NET_CHALLENGE_PROGRESS_MAX, mProgressMeterWidth));
+	aChallengeRuntime.mChallengePoints = max(0,
+		min(NET_CHALLENGE_POINTS_MAX, mChallenge->mChallengePoints));
+	aChallengeRuntime.mBombsLeft = (int16_t)max(NET_CHALLENGE_BOMBS_MIN,
+		min(NET_CHALLENGE_BOMBS_MAX, mChallenge->mBombsLeft));
+	aChallengeRuntime.mSlotMachineRollCount = (uint16_t)max(0,
+		min(NET_CHALLENGE_SLOT_ROLL_MAX, mChallenge->mSlotMachineRollCount));
+	aChallengeRuntime.mTreeOfWisdomTalkIndex = (uint16_t)max(0,
+		min(NET_CHALLENGE_TREE_TALK_MAX, mChallenge->mTreeOfWisdomTalkIndex));
+	const int aChallengeRecordIndex = mApp->GetCurrentChallengeIndex();
+	const int aChallengeRecordCount = mApp->mPlayerInfo ?
+		(int)(sizeof(mApp->mPlayerInfo->mChallengeRecords) /
+			sizeof(mApp->mPlayerInfo->mChallengeRecords[0])) : 0;
+	if (aChallengeRecordIndex >= 0 && aChallengeRecordIndex < aChallengeRecordCount)
+		aChallengeRuntime.mCurrentChallengeRecord =
+			max(0, min(NET_CHALLENGE_RECORD_MAX,
+				mApp->mPlayerInfo->mChallengeRecords[aChallengeRecordIndex]));
+	for (int aGridX = 0; aGridX < 9; ++aGridX)
+		for (int aGridY = 0; aGridY < 6; ++aGridY)
+			aChallengeRuntime.SetBeghouledEaten(aGridX, aGridY,
+				mChallenge->mBeghouledEated[aGridX][aGridY]);
+	const bool aChallengeRuntimeWritten =
+		NetEncodeChallengeRuntimeState(aChallengeRuntime, b);
+	TOD_ASSERT(aChallengeRuntimeWritten);
+	if (!aChallengeRuntimeWritten)
+	{
+		// Capture above is bounded.  Preserve record alignment in a corrupted
+		// release build instead of shifting the variable-length sections.
+		aChallengeRuntime.Reset();
+		NetEncodeChallengeRuntimeState(aChallengeRuntime, b);
+	}
+
 	// weather (endless T)
 	b.WriteU8(mNetDayPhase);
 	b.WriteU16(mNetWeatherTimer);
@@ -890,9 +984,22 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 		aBody.WriteF32(aZombie->mVelX);
 		aBody.WriteF32(aZombie->mAltitude);
 		aBody.WriteF32(aZombie->mOriginalAnimRate > 0 ? aZombie->mOriginalAnimRate : 12.0f);
-		uint8_t anAnimKey = aZombie->mZombiePhase == ZombiePhase::PHASE_ZOMBIE_DYING ? 2 :
-			(aZombie->mIsEating ? 1 : 0);
-		aBody.WriteU8(anAnimKey);
+		NetZombieAnimState anAnimState;
+		if (!NetCaptureZombieAnimState(mApp, aZombie, anAnimState))
+		{
+			NetTrace("snapshot zombie body animation omitted: invalid host state id=%u type=%d",
+				aZombie->mNetId, (int)aZombie->mZombieType);
+			anAnimState.Reset();
+		}
+		const bool anAnimWritten = NetEncodeZombieAnimState(anAnimState, aBody);
+		TOD_ASSERT(anAnimWritten);
+		if (!anAnimWritten)
+		{
+			// NetCaptureZombieAnimState has already bounded every live field.  Keep
+			// the record aligned even in a corrupted release build.
+			anAnimState.Reset();
+			NetEncodeZombieAnimState(anAnimState, aBody);
+		}
 		aCount++;
 	}
 	TOD_ASSERT(aBody.Size() == (size_t)aCount * NET_ZOMBIE_WIRE_BYTES);
@@ -1509,7 +1616,8 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	const uint32_t aSmokeSnapshotHash = NetFnv1a32(b.Data(), b.Size());
 	// Fixed core through the seed-packet count.  Validate it before touching
 	// board/profile state so a truncated datagram cannot partially apply.
-	static const size_t NET_SNAPSHOT_CORE_BYTES = 72;
+	static const size_t NET_SNAPSHOT_CORE_BYTES =
+		72 + NET_CHALLENGE_RUNTIME_WIRE_BYTES;
 	if (b.Remaining() < NET_SNAPSHOT_CORE_BYTES)
 	{
 		NetTrace("snapshot core rejected: bytes=%zu expected-at-least=%zu", b.Remaining(), NET_SNAPSHOT_CORE_BYTES);
@@ -1555,10 +1663,61 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		mIceTimer[i] = b.ReadU16Or();
 	}
 
-	mChallenge->mSurvivalStage = b.ReadU8Or();
-	mChallenge->mChallengeState = (ChallengeState)b.ReadU8Or();
-	mChallenge->mChallengeStateCounter = b.ReadU16Or();
-	mChallenge->mChallengeScore = b.ReadI16Or();
+	const int aSurvivalStage = b.ReadU8Or();
+	const ChallengeState aChallengeState = (ChallengeState)b.ReadU8Or();
+	const int aChallengeStateCounter = b.ReadU16Or();
+	const int aChallengeScore = b.ReadI16Or();
+	NetChallengeRuntimeState aChallengeRuntime;
+	if (!NetDecodeChallengeRuntimeState(b, aChallengeRuntime))
+	{
+		NetTrace("snapshot challenge runtime rejected: remaining=%zu expected=%zu",
+			b.Remaining(), NET_CHALLENGE_RUNTIME_WIRE_BYTES);
+		return;
+	}
+
+	// Apply the complete fixed block only after its logical bounds and unused
+	// Beghouled bits have all passed validation.
+	mChallenge->mSurvivalStage = aSurvivalStage;
+	mChallenge->mChallengeState = aChallengeState;
+	mChallenge->mChallengeStateCounter = aChallengeStateCounter;
+	mChallenge->mChallengeScore = aChallengeScore;
+	mProgressMeterWidth = aChallengeRuntime.mProgressMeterWidth;
+	mChallenge->mChallengePoints = aChallengeRuntime.mChallengePoints;
+	mChallenge->mBombsLeft = aChallengeRuntime.mBombsLeft;
+	mChallenge->mSlotMachineRollCount = aChallengeRuntime.mSlotMachineRollCount;
+	mChallenge->mTreeOfWisdomTalkIndex =
+		aChallengeRuntime.mTreeOfWisdomTalkIndex;
+	for (int aGridX = 0; aGridX < 9; ++aGridX)
+		for (int aGridY = 0; aGridY < 6; ++aGridY)
+			mChallenge->mBeghouledEated[aGridX][aGridY] =
+				aChallengeRuntime.IsBeghouledEaten(aGridX, aGridY);
+
+	const int aChallengeRecordIndex = mApp->GetCurrentChallengeIndex();
+	const int aChallengeRecordCount = mApp->mPlayerInfo ?
+		(int)(sizeof(mApp->mPlayerInfo->mChallengeRecords) /
+			sizeof(mApp->mPlayerInfo->mChallengeRecords[0])) : 0;
+	if (aChallengeRuntime.mCurrentChallengeRecord != NET_CHALLENGE_RECORD_NONE &&
+		aChallengeRecordIndex >= 0 && aChallengeRecordIndex < aChallengeRecordCount)
+	{
+		const int aPreviousRecord =
+			mApp->mPlayerInfo->mChallengeRecords[aChallengeRecordIndex];
+		mApp->mPlayerInfo->mChallengeRecords[aChallengeRecordIndex] =
+			aChallengeRuntime.mCurrentChallengeRecord;
+		if (mApp->mGameMode == GameMode::GAMEMODE_TREE_OF_WISDOM &&
+			aPreviousRecord != aChallengeRuntime.mCurrentChallengeRecord)
+		{
+			Reanimation* aTreeReanim =
+				mApp->ReanimationTryToGet(mChallenge->mReanimChallenge);
+			if (aTreeReanim)
+			{
+				const int aTreeSize = max(1,
+					min(51, aChallengeRuntime.mCurrentChallengeRecord));
+				aTreeReanim->PlayReanim(
+					StrFormat("anim_grow%d", aTreeSize).c_str(),
+					ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD, 0, 8.0f);
+			}
+		}
+	}
 
 	mNetDayPhase = b.ReadU8Or();
 	mNetWeatherTimer = b.ReadU16Or();
@@ -1719,8 +1878,15 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		if (mSeedBank->mSeedPackets[i].mNetOwnerSlot != LawnNet::NET_SHARED_OWNER)
 			aCanonicalOwnershipSafe = false;
 	}
+	// Beghouled legitimately creates its four upgrade buttons (and optional
+	// crater button) only after the first successful match.  Clients do not run
+	// that gameplay callback, so their zero-card bank must be rebuilt from the
+	// authoritative shared identities just like a conveyor/slot-machine bank.
+	const bool aDynamicBeghouledBank = mApp &&
+		(mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_BEGHOULED ||
+		 mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_BEGHOULED_TWIST);
 	const bool aCanonicalFallbackMode = HasConveyorBeltSeedBank() ||
-		(mApp && mApp->IsSlotMachineLevel());
+		(mApp && mApp->IsSlotMachineLevel()) || aDynamicBeghouledBank;
 	const bool aCanonicalFallback = !anIdentityMultisetMatch &&
 		aCanonicalFallbackMode && aCanonicalOwnershipSafe;
 	if (!anIdentityMultisetMatch && !aCanonicalFallback)
@@ -1743,9 +1909,10 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	}
 	if (aCanonicalFallback)
 	{
-		NetTrace("snapshot seed canonical fallback mode=%d conveyor=%d slot=%d localCount=%d wireCount=%u",
+		NetTrace("snapshot seed canonical fallback mode=%d conveyor=%d slot=%d beghouled=%d localCount=%d wireCount=%u",
 			mApp ? (int)mApp->mGameMode : -1, HasConveyorBeltSeedBank() ? 1 : 0,
-			mApp && mApp->IsSlotMachineLevel() ? 1 : 0, aLocalPacketCount, aNumPackets);
+			mApp && mApp->IsSlotMachineLevel() ? 1 : 0, aDynamicBeghouledBank ? 1 : 0,
+			aLocalPacketCount, aNumPackets);
 	}
 
 	auto ApplySeedRuntimeState = [&](SeedPacket& thePacket,
@@ -1992,7 +2159,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		float mVelX;
 		float mAltitude;
 		float mAnimRate;
-		uint8_t mAnimKey;
+		NetZombieAnimState mBodyAnim;
 	};
 	std::vector<NetZombieWire> aZombieWires;
 	aZombieWires.reserve(aCount);
@@ -2023,7 +2190,12 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		aWire.mVelX = b.ReadF32Or();
 		aWire.mAltitude = b.ReadF32Or();
 		aWire.mAnimRate = b.ReadF32Or();
-		aWire.mAnimKey = b.ReadU8Or();
+		if (!NetDecodeZombieAnimState(b, aWire.mBodyAnim))
+		{
+			NetTrace("snapshot zombie section rejected malformed body animation index=%d id=%u",
+				i, aWire.mId);
+			return;
+		}
 
 #ifdef _HAS_BLOOM_AND_DOOM_CONTENTS
 		const uint8_t aMaxPhase = (uint8_t)ZombiePhase::PHASE_DOG_FREE;
@@ -2036,7 +2208,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 			aWire.mHeight <= (uint8_t)ZombieHeight::HEIGHT_ZOMBIQUARIUM &&
 			aWire.mHelmType <= (uint8_t)HelmType::HELMTYPE_BLACK_FOOTBALL &&
 			aWire.mShieldType <= (uint8_t)ShieldType::SHIELDTYPE_TRASHCAN &&
-			aWire.mAnimKey <= 2 && _finite(aWire.mVelX) &&
+			_finite(aWire.mVelX) &&
 			_finite(aWire.mAltitude) && _finite(aWire.mAnimRate) &&
 			aWire.mVelX >= -2048.0f && aWire.mVelX <= 2048.0f &&
 			aWire.mAltitude >= -8192.0f && aWire.mAltitude <= 8192.0f &&
@@ -2044,13 +2216,42 @@ void Board::NetApplySnapshot(NetBuffer& b)
 			aSeenZombies.find(aWire.mId) == aSeenZombies.end();
 		if (!aValid)
 		{
-			NetTrace("snapshot zombie section rejected index=%d id=%u type=%u row=%u phase=%u height=%u helm=%u shield=%u anim=%u",
+			NetTrace("snapshot zombie section rejected index=%d id=%u type=%u row=%u phase=%u height=%u helm=%u shield=%u",
 				i, aWire.mId, aWire.mType, aWire.mRow, aWire.mPhase,
-				aWire.mHeight, aWire.mHelmType, aWire.mShieldType, aWire.mAnimKey);
+				aWire.mHeight, aWire.mHelmType, aWire.mShieldType);
 			return;
 		}
 		aSeenZombies[aWire.mId] = true;
 		aZombieWires.push_back(aWire);
+	}
+
+	// Validate all type-specific animation ranges before creating or mutating a
+	// single presentation entity.  Existing ghosts can supply their exact body
+	// definition; new ghosts use the preloaded definition for the wire type.
+	for (const NetZombieWire& aWire : aZombieWires)
+	{
+		if (!aWire.mBodyAnim.mPresent)
+			continue;
+		uint32_t aFrameCapacity = 0;
+		Zombie* anExistingZombie = NetGetGhostZombie(aWire.mId);
+		if (anExistingZombie && anExistingZombie->mZombieType == (ZombieType)aWire.mType)
+		{
+			Reanimation* anExistingBody = mApp->ReanimationTryToGet(anExistingZombie->mBodyReanimID);
+			aFrameCapacity = NetGetReanimationFrameCapacity(anExistingBody);
+		}
+		if (aFrameCapacity == 0 && !NetGetZombieTypeFrameCapacity(aWire.mType, aFrameCapacity))
+		{
+			NetTrace("snapshot zombie body animation rejected: definition unavailable id=%u type=%u",
+				aWire.mId, aWire.mType);
+			return;
+		}
+		if (!NetZombieAnimStateFitsFrames(aWire.mBodyAnim, aFrameCapacity))
+		{
+			NetTrace("snapshot zombie body animation rejected: id=%u type=%u frames=%u+%u capacity=%u",
+				aWire.mId, aWire.mType, aWire.mBodyAnim.mFrameStart,
+				aWire.mBodyAnim.mFrameCount, aFrameCapacity);
+			return;
+		}
 	}
 
 	// Validate the complete variable-length section before creating, replacing,
@@ -2060,6 +2261,15 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		Zombie* aZombie = NetGetGhostZombie(aWire.mId);
 		if (aZombie && aZombie->mZombieType != (ZombieType)aWire.mType)
 		{
+			NetRetireZombiePresentation(mApp, aZombie);
+			aZombie = nullptr;
+		}
+		if (aZombie && aWire.mBodyAnim.mPresent && !aWire.mBodyAnim.mDead &&
+			!mApp->ReanimationTryToGet(aZombie->mBodyReanimID))
+		{
+			// EffectSystem frees terminal/absent reanimations after a frame.  If
+			// the host later publishes a live body again, rebuild the complete
+			// presentation object rather than leaving a permanently headless ghost.
 			NetRetireZombiePresentation(mApp, aZombie);
 			aZombie = nullptr;
 		}
@@ -2112,7 +2322,37 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		aZombie->mAltitude = aWire.mAltitude;
 		aZombie->mOriginalAnimRate = aWire.mAnimRate;
 
-		NetGhostUpdateZombie(aZombie, aWire.mAnimKey);
+		Reanimation* aBody = mApp->ReanimationTryToGet(aZombie->mBodyReanimID);
+		if (aBody)
+		{
+			if (!aWire.mBodyAnim.mPresent)
+			{
+				// A locally initialized track must not keep playing when the host has
+				// no body reanimation.  Do not destroy it: a later present snapshot
+				// can safely revive the same resource without rebuilding attachments.
+				aBody->mAnimRate = 0.0f;
+				aBody->mDead = true;
+			}
+			else
+			{
+				aBody->mFrameStart = aWire.mBodyAnim.mFrameStart;
+				aBody->mFrameCount = aWire.mBodyAnim.mFrameCount;
+				aBody->mAnimTime = aWire.mBodyAnim.mAnimTime;
+				aBody->mLastFrameTime = aWire.mBodyAnim.mAnimTime;
+				aBody->mAnimRate = aWire.mBodyAnim.mAnimRate;
+				aBody->mLoopType = (ReanimLoopType)aWire.mBodyAnim.mLoopType;
+				aBody->mLoopCount = aWire.mBodyAnim.mLoopCount;
+				aBody->mDead = aWire.mBodyAnim.mDead;
+			}
+		}
+		else if (aWire.mBodyAnim.mPresent)
+		{
+			// Entity state remains usable even if its cosmetic resource could not
+			// be allocated.  Crucially, there is no fallback track guess here.
+			NetTrace("snapshot zombie body animation unavailable after create id=%u type=%u",
+				aWire.mId, aWire.mType);
+		}
+
 	}
 	{
 		Zombie* aZombie = nullptr;
@@ -2700,59 +2940,13 @@ void Board::NetApplySnapshot(NetBuffer& b)
 // Client ghost per-tick updates
 // ==========================================================================
 
-void Board::NetGhostUpdateZombie(Zombie* theZombie, uint8_t theAnimKey)
+void Board::NetGhostUpdateZombie(Zombie* theZombie)
 {
 	// interpolate position toward the authoritative target
 	theZombie->mPosX += (theZombie->mNetTargetX - theZombie->mPosX) * 0.25f;
 	theZombie->mPosY += (theZombie->mNetTargetY - theZombie->mPosY) * 0.25f;
 	theZombie->mX = (int)theZombie->mPosX;
 	theZombie->mY = (int)theZombie->mPosY;
-
-	if (theAnimKey != theZombie->mNetAnimKey)
-	{
-		theZombie->mNetAnimKey = theAnimKey;
-		Reanimation* aBody = mApp->ReanimationTryToGet(theZombie->mBodyReanimID);
-		if (aBody)
-		{
-			float aHostVelocity = theZombie->mVelX;
-			if (theAnimKey == 1)
-			{
-				theZombie->mIsEating = false;
-				theZombie->StartEating();
-			}
-			else if (theAnimKey == 2)
-			{
-				// The snapshot has already set PHASE_ZOMBIE_DYING, so calling
-				// PlayDeathAnim would return immediately and leave the old chew track
-				// running. Apply only the visual track; gameplay death stays host-only.
-				theZombie->mIsEating = false;
-				const char* aDeathTrack = "anim_death";
-				if (theZombie->mZombieHeight == ZombieHeight::HEIGHT_ZOMBIQUARIUM &&
-					aBody->TrackExists("anim_aquarium_death"))
-					aDeathTrack = "anim_aquarium_death";
-				else if (theZombie->mZombieType == ZombieType::ZOMBIE_SNORKEL &&
-					!theZombie->mInPool && aBody->TrackExists("anim_deathground"))
-					aDeathTrack = "anim_deathground";
-				else if (theZombie->mInPool && aBody->TrackExists("anim_waterdeath"))
-					aDeathTrack = "anim_waterdeath";
-				if (aBody->TrackExists(aDeathTrack))
-				{
-					const float aRate = theZombie->mOriginalAnimRate > 0.0f ?
-						theZombie->mOriginalAnimRate : 24.0f;
-					aBody->PlayReanim(aDeathTrack,
-						ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD, 20, aRate);
-				}
-			}
-			else
-			{
-				if (theZombie->mIsEating)
-					theZombie->StopEating();
-				else
-					theZombie->StartWalkAnim(10);
-			}
-			theZombie->mVelX = aHostVelocity;
-		}
-	}
 
 	// cosmetic counters
 	if (theZombie->mJustGotShotCounter > 0)
@@ -3148,7 +3342,7 @@ void Board::NetClientTick()
 			continue;
 		if (aZombie->mNetGhost)
 		{
-			NetGhostUpdateZombie(aZombie, aZombie->mNetAnimKey);
+			NetGhostUpdateZombie(aZombie);
 		}
 		else if (mApp->mGameScene == GameScenes::SCENE_LEVEL_INTRO)
 		{

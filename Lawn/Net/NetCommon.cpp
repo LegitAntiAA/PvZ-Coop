@@ -1,5 +1,6 @@
 #include "NetCommon.h"
 
+#include <cmath>
 #include <cstdarg>
 #include <cctype>
 #include <cstdio>
@@ -122,6 +123,190 @@ int NetApproachPresentationInt(int theCurrent, int theTarget)
 	if ((aDelta > 0 && aNext > theTarget) || (aDelta < 0 && aNext < theTarget))
 		return theTarget;
 	return (int)aNext;
+}
+
+bool NetZombieAnimStateFitsFrames(const NetZombieAnimState& theState, uint32_t theTotalFrames)
+{
+	if (!theState.mPresent)
+		return true;
+	if (theState.mFrameCount == 0 || theTotalFrames == 0)
+		return false;
+	const uint32_t anEndFrame = (uint32_t)theState.mFrameStart + (uint32_t)theState.mFrameCount;
+	return anEndFrame <= theTotalFrames;
+}
+
+bool NetEncodeZombieAnimState(const NetZombieAnimState& theState, NetBuffer& theBuffer)
+{
+	NetBuffer aWire;
+	if (!theState.mPresent)
+	{
+		// Keep absence canonical.  This makes stale/corrupt payloads observable
+		// instead of silently interpreting their unused bytes later.
+		aWire.WriteU16(0);
+		aWire.WriteU16(0);
+		aWire.WriteU16(0);
+		aWire.WriteI16(0);
+		aWire.WriteU8(0);
+		aWire.WriteU8(0);
+		aWire.WriteU8(0);
+		theBuffer.WriteBytes(aWire.Data(), aWire.Size());
+		return true;
+	}
+
+	const uint32_t anEndFrame = (uint32_t)theState.mFrameStart + (uint32_t)theState.mFrameCount;
+	if (theState.mFrameCount == 0 || anEndFrame > 65536U ||
+		!std::isfinite(theState.mAnimTime) || !std::isfinite(theState.mAnimRate) ||
+		theState.mLoopType > 5)
+		return false;
+
+	float anAnimTime = theState.mAnimTime;
+	if (anAnimTime < 0.0f) anAnimTime = 0.0f;
+	if (anAnimTime > 1.0f) anAnimTime = 1.0f;
+	const uint16_t anAnimTimeQ = (uint16_t)(anAnimTime * 65535.0f + 0.5f);
+
+	float anAnimRate = theState.mAnimRate;
+	if (anAnimRate < -1024.0f) anAnimRate = -1024.0f;
+	const float aMaxRate = 32767.0f / 32.0f;
+	if (anAnimRate > aMaxRate) anAnimRate = aMaxRate;
+	int anAnimRateQ32 = (int)(anAnimRate * 32.0f + (anAnimRate >= 0.0f ? 0.5f : -0.5f));
+	if (anAnimRateQ32 < -32768) anAnimRateQ32 = -32768;
+	if (anAnimRateQ32 > 32767) anAnimRateQ32 = 32767;
+
+	aWire.WriteU16(theState.mFrameStart);
+	aWire.WriteU16(theState.mFrameCount);
+	aWire.WriteU16(anAnimTimeQ);
+	aWire.WriteI16((int16_t)anAnimRateQ32);
+	aWire.WriteU8(theState.mLoopType);
+	aWire.WriteU8(theState.mLoopCount);
+	aWire.WriteU8((uint8_t)(NET_ZOMBIE_ANIM_PRESENT |
+		(theState.mDead ? NET_ZOMBIE_ANIM_DEAD : 0)));
+	if (aWire.Size() != NET_ZOMBIE_ANIM_WIRE_BYTES)
+		return false;
+	theBuffer.WriteBytes(aWire.Data(), aWire.Size());
+	return true;
+}
+
+bool NetDecodeZombieAnimState(NetBuffer& theBuffer, NetZombieAnimState& theState)
+{
+	// Decode into locals and roll the cursor back on failure. Copying the whole
+	// snapshot buffer for every zombie would make this section quadratic.
+	const size_t aStartReadPos = theBuffer.mReadPos;
+	if (theBuffer.Remaining() < NET_ZOMBIE_ANIM_WIRE_BYTES)
+		return false;
+
+	const uint16_t aFrameStart = theBuffer.ReadU16Or();
+	const uint16_t aFrameCount = theBuffer.ReadU16Or();
+	const uint16_t anAnimTimeQ = theBuffer.ReadU16Or();
+	const int16_t anAnimRateQ = theBuffer.ReadI16Or();
+	const uint8_t aLoopType = theBuffer.ReadU8Or();
+	const uint8_t aLoopCount = theBuffer.ReadU8Or();
+	const uint8_t aFlags = theBuffer.ReadU8Or();
+	if ((aFlags & ~(NET_ZOMBIE_ANIM_PRESENT | NET_ZOMBIE_ANIM_DEAD)) != 0)
+	{
+		theBuffer.mReadPos = aStartReadPos;
+		return false;
+	}
+
+	const bool aPresent = (aFlags & NET_ZOMBIE_ANIM_PRESENT) != 0;
+	const bool aDead = (aFlags & NET_ZOMBIE_ANIM_DEAD) != 0;
+	if (!aPresent)
+	{
+		if (aDead || aFrameStart != 0 || aFrameCount != 0 || anAnimTimeQ != 0 ||
+			anAnimRateQ != 0 || aLoopType != 0 || aLoopCount != 0)
+		{
+			theBuffer.mReadPos = aStartReadPos;
+			return false;
+		}
+	}
+	else
+	{
+		const uint32_t anEndFrame = (uint32_t)aFrameStart + (uint32_t)aFrameCount;
+		if (aFrameCount == 0 || anEndFrame > 65536U || aLoopType > 5)
+		{
+			theBuffer.mReadPos = aStartReadPos;
+			return false;
+		}
+	}
+
+	NetZombieAnimState aDecoded;
+	aDecoded.mPresent = aPresent;
+	aDecoded.mDead = aDead;
+	aDecoded.mFrameStart = aFrameStart;
+	aDecoded.mFrameCount = aFrameCount;
+	aDecoded.mAnimTime = anAnimTimeQ / 65535.0f;
+	aDecoded.mAnimRate = anAnimRateQ / 32.0f;
+	aDecoded.mLoopType = aLoopType;
+	aDecoded.mLoopCount = aLoopCount;
+	theState = aDecoded;
+	return true;
+}
+
+bool NetEncodeChallengeRuntimeState(const NetChallengeRuntimeState& theState,
+	NetBuffer& theBuffer)
+{
+	if (theState.mProgressMeterWidth > NET_CHALLENGE_PROGRESS_MAX ||
+		theState.mChallengePoints < 0 ||
+		theState.mChallengePoints > NET_CHALLENGE_POINTS_MAX ||
+		theState.mBombsLeft < NET_CHALLENGE_BOMBS_MIN ||
+		theState.mBombsLeft > NET_CHALLENGE_BOMBS_MAX ||
+		theState.mSlotMachineRollCount > NET_CHALLENGE_SLOT_ROLL_MAX ||
+		theState.mTreeOfWisdomTalkIndex > NET_CHALLENGE_TREE_TALK_MAX ||
+		theState.mCurrentChallengeRecord < NET_CHALLENGE_RECORD_NONE ||
+		theState.mCurrentChallengeRecord > NET_CHALLENGE_RECORD_MAX ||
+		(theState.mBeghouledEatenBits & ~NET_CHALLENGE_BEGHOULDED_MASK) != 0)
+		return false;
+
+	NetBuffer aWire;
+	aWire.WriteU16(theState.mProgressMeterWidth);
+	aWire.WriteI32(theState.mChallengePoints);
+	aWire.WriteI16(theState.mBombsLeft);
+	aWire.WriteU16(theState.mSlotMachineRollCount);
+	aWire.WriteU16(theState.mTreeOfWisdomTalkIndex);
+	aWire.WriteI32(theState.mCurrentChallengeRecord);
+	for (int aByte = 0; aByte < 7; ++aByte)
+		aWire.WriteU8((uint8_t)(theState.mBeghouledEatenBits >> (aByte * 8)));
+	if (aWire.Size() != NET_CHALLENGE_RUNTIME_WIRE_BYTES)
+		return false;
+	theBuffer.WriteBytes(aWire.Data(), aWire.Size());
+	return true;
+}
+
+bool NetDecodeChallengeRuntimeState(NetBuffer& theBuffer,
+	NetChallengeRuntimeState& theState)
+{
+	const size_t aStartReadPos = theBuffer.mReadPos;
+	if (theBuffer.Remaining() < NET_CHALLENGE_RUNTIME_WIRE_BYTES)
+		return false;
+
+	NetChallengeRuntimeState aDecoded;
+	aDecoded.mProgressMeterWidth = theBuffer.ReadU16Or();
+	aDecoded.mChallengePoints = theBuffer.ReadI32Or();
+	aDecoded.mBombsLeft = theBuffer.ReadI16Or();
+	aDecoded.mSlotMachineRollCount = theBuffer.ReadU16Or();
+	aDecoded.mTreeOfWisdomTalkIndex = theBuffer.ReadU16Or();
+	aDecoded.mCurrentChallengeRecord = theBuffer.ReadI32Or();
+	aDecoded.mBeghouledEatenBits = 0;
+	for (int aByte = 0; aByte < 7; ++aByte)
+		aDecoded.mBeghouledEatenBits |=
+			(uint64_t)theBuffer.ReadU8Or() << (aByte * 8);
+
+	if (aDecoded.mProgressMeterWidth > NET_CHALLENGE_PROGRESS_MAX ||
+		aDecoded.mChallengePoints < 0 ||
+		aDecoded.mChallengePoints > NET_CHALLENGE_POINTS_MAX ||
+		aDecoded.mBombsLeft < NET_CHALLENGE_BOMBS_MIN ||
+		aDecoded.mBombsLeft > NET_CHALLENGE_BOMBS_MAX ||
+		aDecoded.mSlotMachineRollCount > NET_CHALLENGE_SLOT_ROLL_MAX ||
+		aDecoded.mTreeOfWisdomTalkIndex > NET_CHALLENGE_TREE_TALK_MAX ||
+		aDecoded.mCurrentChallengeRecord < NET_CHALLENGE_RECORD_NONE ||
+		aDecoded.mCurrentChallengeRecord > NET_CHALLENGE_RECORD_MAX ||
+		(aDecoded.mBeghouledEatenBits & ~NET_CHALLENGE_BEGHOULDED_MASK) != 0)
+	{
+		theBuffer.mReadPos = aStartReadPos;
+		return false;
+	}
+
+	theState = aDecoded;
+	return true;
 }
 
 // -------------------------------------------------------------------------

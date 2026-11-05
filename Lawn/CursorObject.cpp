@@ -232,8 +232,15 @@ void CursorObject::Draw(Graphics* g)
     }
     
     case CursorType::CURSOR_TYPE_HAMMER:
-        mApp->ReanimationGet(mReanimCursorID)->Draw(g);
+    {
+        // Presentation resources can be rebuilt independently of the cursor
+        // during co-op board transitions.  A missing hammer should hide for a
+        // frame, not turn a valid Whack-a-Zombie input into an access violation.
+        Reanimation* aHammerReanim = mApp->ReanimationTryToGet(mReanimCursorID);
+        if (aHammerReanim)
+            aHammerReanim->Draw(g);
         break;
+    }
 
     case CursorType::CURSOR_TYPE_COBCANNON_TARGET:
     {

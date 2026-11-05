@@ -26,7 +26,7 @@ namespace LawnNet
 // (the host broadcasts the same sounds via events).
 extern bool gNetSuppressSounds;
 
-static const uint32_t NET_PROTOCOL_VERSION = 17; // synchronized Adventure start presentation
+static const uint32_t NET_PROTOCOL_VERSION = 20; // exact animation/runtime + ordered mouse/Q gameplay input
 static const uint16_t NET_DEFAULT_PORT = 27713;			// PvZ co-op port
 static const int NET_MAX_PLAYERS = 4;					// 1 host + 3 clients
 static const int NET_MAX_NICK = 16;						// bytes (without terminator)
@@ -37,6 +37,7 @@ static const int NET_SNAPSHOT_HZ_MIN = 15;				// adaptive snapshot rate bounds
 static const int NET_SNAPSHOT_HZ_MAX = 30;
 static const int NET_SNAPSHOT_HZ_DEFAULT = 15;
 static const int NET_CURSOR_HZ = 30;					// cosmetic cursor updates
+static const int NET_INPUT_MOVE_HZ = 30;				// authoritative motion/drag cap
 static const int NET_INPUT_QUEUE_PER_PLAYER = 64;	// hard back-pressure limit per peer
 static const int NET_INPUT_QUEUE_TOTAL = 128;		// hard back-pressure limit for the host
 static const int NET_INPUT_APPLY_BUDGET = 16;		// maximum remote actions applied per frame
@@ -86,7 +87,7 @@ enum NetMsgType : uint8_t
 	NETMSG_BOARD_EVENT = 21,	// h->c: u8 eventType + payload (sounds, instant visuals)
 
 	NETMSG_INPUT_MOUSE = 30,	// c->h: u32 epoch/seq, u8 action/button, i16 canonical x/y, i16 seed index + type/imitater/owner
-	NETMSG_INPUT_KEY = 31,		// c->h: u16 keyCode, u8 down
+	NETMSG_INPUT_KEY = 31,		// c->h: u32 epoch/seq, u16 keyCode (Q only), u8 down
 	NETMSG_CURSOR = 32,			// both: u8 slot, i16 x, i16 y, u8 cursorType, u8 heldSeed, u8 heldImitater, u8 flags
 	NETMSG_PAUSE = 33,			// h->c: u8 paused
 	NETMSG_PAUSE_REQ = 34,		// c->h: (client asks; host may ignore)
@@ -122,7 +123,8 @@ enum NetInputPhase : uint8_t
 enum NetInputAction : uint8_t
 {
 	NETINPUT_MOUSE_UP = 0,
-	NETINPUT_MOUSE_DOWN = 1
+	NETINPUT_MOUSE_DOWN = 1,
+	NETINPUT_MOUSE_MOVE = 2
 };
 
 // Scene commands (NETMSG_SCENE_CMD)
@@ -293,6 +295,103 @@ inline bool NetPayloadHasExactBytes(const NetBuffer& thePayload, size_t theExpec
 {
 	return thePayload.Remaining() == theExpectedBytes;
 }
+
+// The body animation is part of the authoritative zombie snapshot.  The wire
+// representation is deliberately fixed-size so the zombie section keeps its
+// count/remaining hard bounds and malformed records cannot shift later data.
+// Animation time is Q0.16 over [0, 1], rate is signed Q10.5, and the two flag
+// bits distinguish a missing body reanimation from a terminal one.
+static const size_t NET_ZOMBIE_ANIM_WIRE_BYTES = 11;
+enum NetZombieAnimFlag : uint8_t
+{
+	NET_ZOMBIE_ANIM_PRESENT = 1,
+	NET_ZOMBIE_ANIM_DEAD = 2
+};
+
+struct NetZombieAnimState
+{
+	bool mPresent;
+	bool mDead;
+	uint16_t mFrameStart;
+	uint16_t mFrameCount;
+	float mAnimTime;
+	float mAnimRate;
+	uint8_t mLoopType;
+	uint8_t mLoopCount;
+
+	NetZombieAnimState() { Reset(); }
+	void Reset()
+	{
+		mPresent = false;
+		mDead = false;
+		mFrameStart = 0;
+		mFrameCount = 0;
+		mAnimTime = 0.0f;
+		mAnimRate = 0.0f;
+		mLoopType = 0;
+		mLoopCount = 0;
+	}
+};
+
+bool NetEncodeZombieAnimState(const NetZombieAnimState& theState, NetBuffer& theBuffer);
+bool NetDecodeZombieAnimState(NetBuffer& theBuffer, NetZombieAnimState& theState);
+bool NetZombieAnimStateFitsFrames(const NetZombieAnimState& theState, uint32_t theTotalFrames);
+
+// Fixed-size, host-authoritative challenge presentation state.  Beghouled's
+// 9x6 removal mask is column-major (bit = x * 6 + y), matching the native
+// bool mBeghouledEated[9][6] layout without putting compiler bools on the wire.
+static const size_t NET_CHALLENGE_RUNTIME_WIRE_BYTES = 23;
+static const int NET_CHALLENGE_PROGRESS_MAX = 150;
+static const int NET_CHALLENGE_POINTS_MAX = 100000000;
+static const int NET_CHALLENGE_BOMBS_MIN = -1;
+static const int NET_CHALLENGE_BOMBS_MAX = 1000;
+static const int NET_CHALLENGE_SLOT_ROLL_MAX = 10000;
+static const int NET_CHALLENGE_TREE_TALK_MAX = 1100;
+static const int NET_CHALLENGE_RECORD_NONE = -1;
+static const int NET_CHALLENGE_RECORD_MAX = 1000000;
+static const uint64_t NET_CHALLENGE_BEGHOULDED_MASK = (UINT64_C(1) << 54) - 1;
+
+struct NetChallengeRuntimeState
+{
+	uint16_t mProgressMeterWidth;
+	int32_t mChallengePoints;
+	int16_t mBombsLeft;
+	uint16_t mSlotMachineRollCount;
+	uint16_t mTreeOfWisdomTalkIndex;
+	int32_t mCurrentChallengeRecord;
+	uint64_t mBeghouledEatenBits;
+
+	NetChallengeRuntimeState() { Reset(); }
+	void Reset()
+	{
+		mProgressMeterWidth = 0;
+		mChallengePoints = 0;
+		mBombsLeft = NET_CHALLENGE_BOMBS_MIN;
+		mSlotMachineRollCount = 0;
+		mTreeOfWisdomTalkIndex = 0;
+		mCurrentChallengeRecord = NET_CHALLENGE_RECORD_NONE;
+		mBeghouledEatenBits = 0;
+	}
+	bool IsBeghouledEaten(int theX, int theY) const
+	{
+		if (theX < 0 || theX >= 9 || theY < 0 || theY >= 6)
+			return false;
+		return (mBeghouledEatenBits & (UINT64_C(1) << (theX * 6 + theY))) != 0;
+	}
+	void SetBeghouledEaten(int theX, int theY, bool theEaten)
+	{
+		if (theX < 0 || theX >= 9 || theY < 0 || theY >= 6)
+			return;
+		const uint64_t aBit = UINT64_C(1) << (theX * 6 + theY);
+		if (theEaten)
+			mBeghouledEatenBits |= aBit;
+		else
+			mBeghouledEatenBits &= ~aBit;
+	}
+};
+
+bool NetEncodeChallengeRuntimeState(const NetChallengeRuntimeState& theState, NetBuffer& theBuffer);
+bool NetDecodeChallengeRuntimeState(NetBuffer& theBuffer, NetChallengeRuntimeState& theState);
 
 // Presentation-only integer smoothing used between authoritative samples.
 // It is monotonic, cannot overshoot, and always converges even when integer

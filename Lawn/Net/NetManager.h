@@ -116,6 +116,8 @@ public:
 
 	// ---- outgoing helpers ----
 	void SendInput(bool theDown, int theClickCount, int theX, int theY); // client -> host
+	void SendMouseMove(int theDragButton, int theX, int theY);           // client -> host (coalesced)
+	void SendHeatWaveShoutKey(bool theDown);                             // client -> host (Q only)
 	void SendSeedPick(bool theUnpick, int theSeedType, int theImitater); // client -> host chooser
 	void SendStoreAction(const NetBuffer& thePayload);                  // client -> host buy request
 	void SendCursor(int theCursorType, int theHeldSeed, int theHeldImitater, uint8_t theFlags, int theX, int theY);
@@ -128,6 +130,7 @@ public:
 	void AdvanceInputPhase(NetInputPhase thePhase, const char* theReason); // host barrier
 	void PurgePendingInputs(const char* theReason, int theSlot = -1);
 	bool PopPendingInput(NetRemoteInput& theInput);
+	bool IsRemoteHeatWaveShoutKeyActive();
 	uint32_t GetInputEpoch() const { return mInputEpoch; }
 	NetInputPhase GetInputPhase() const { return mInputPhase; }
 
@@ -161,6 +164,11 @@ private:
 	// host-side message handlers
 	void OnHello(NetSession* theSession, NetBuffer& thePayload);
 	void OnClientInput(NetSession* theSession, NetBuffer& thePayload);
+	void OnClientKeyInput(NetSession* theSession, NetBuffer& thePayload);
+	void SendMouseInputAction(uint8_t theAction, int theButton, int theX, int theY);
+	bool ConsumeExpectedInputSequence(uint8_t theSlot, uint32_t theEpoch,
+		uint32_t theSequence, const char* theKind);
+	void ClearHeatWaveShoutKeys(const char* theReason, int theSlot = -1);
 	void OnClientCursor(NetSession* theSession, NetBuffer& thePayload);
 	void OnClientSeedPick(NetSession* theSession, NetBuffer& thePayload, bool theUnpick);
 	void OnClientTeamSelect(NetSession* theSession, NetBuffer& thePayload);
@@ -218,6 +226,8 @@ private:
 	std::deque<NetRemoteInput> mPendingInputs;
 	size_t mPendingInputCount[NET_MAX_PLAYERS];
 	uint32_t mLastInputSequence[NET_MAX_PLAYERS];
+	bool mRemoteHeatWaveQDown[NET_MAX_PLAYERS];
+	uint32_t mRemoteHeatWaveQDownTick[NET_MAX_PLAYERS];
 	std::atomic<bool> mChooserStateEchoRequested;
 
 	// client state
@@ -233,6 +243,8 @@ private:
 	int mActingPlayerSlot;					// host: slot whose queued input is being applied
 	uint32_t mInputEpoch;
 	uint32_t mNextInputSequence;			// client: non-zero sequence within mInputEpoch
+	uint32_t mLastInputMoveTick;			// client: bounds authoritative motion traffic
+	bool mClientHeatWaveQDown;			// client: suppress repeat downs and guarantee one release
 	NetInputPhase mInputPhase;
 	uint32_t mAdventureStartFxGeneration;	// host: next presentation serial
 	uint32_t mLastAdventureStartFxGeneration;	// client: last applied presentation serial

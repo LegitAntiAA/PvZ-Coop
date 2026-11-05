@@ -80,6 +80,16 @@ static bool NetIsValidHeldSeed(uint8_t theSeed)
 	return theSeed == 255 || theSeed < (uint8_t)SeedType::NUM_SEED_TYPES;
 }
 
+// NETMSG_INPUT_KEY intentionally exposes one semantic key only.  Keeping the
+// wire value independent of the platform KeyCode enum prevents a peer from
+// smuggling pause/menu/debug keys through this gameplay-only channel.
+static const uint16_t NET_HEAT_WAVE_Q_WIRE = (uint16_t)'Q';
+static const size_t NET_HEAT_WAVE_KEY_INPUT_BYTES = sizeof(uint32_t) * 2 +
+	sizeof(uint16_t) + sizeof(uint8_t);
+// A missed focus/key-up event must not leave a remote shout latched forever.
+// One valid press is still long enough to fill Heat Wave's 100-tick meter.
+static const uint32_t NET_HEAT_WAVE_Q_MAX_HOLD_MS = 2000U;
+
 NetManager* gNetManager = nullptr;
 
 // -------------------------------------------------------------------------
@@ -95,6 +105,8 @@ NetManager::NetManager() :
 	mActingPlayerSlot(-1),
 	mInputEpoch(1),
 	mNextInputSequence(1),
+	mLastInputMoveTick(0),
+	mClientHeatWaveQDown(false),
 	mInputPhase(NETINPUT_MENU),
 	mAdventureStartFxGeneration(0),
 	mLastAdventureStartFxGeneration(0),
@@ -115,6 +127,8 @@ NetManager::NetManager() :
 		mDeferredDrop[i] = false;
 		mPendingInputCount[i] = 0;
 		mLastInputSequence[i] = 0;
+		mRemoteHeatWaveQDown[i] = false;
+		mRemoteHeatWaveQDownTick[i] = 0;
 	}
 	mChooserStateEchoRequested.store(false, std::memory_order_relaxed);
 	mRemotePaused = false;
@@ -185,6 +199,8 @@ bool NetManager::StartHost(uint16_t thePort)
 	mMySlot = 0;
 	mInputEpoch = 1;
 	mNextInputSequence = 1;
+	mLastInputMoveTick = 0;
+	mClientHeatWaveQDown = false;
 	mInputPhase = NETINPUT_MENU;
 	mAdventureStartFxGeneration = 0;
 	mLastAdventureStartFxGeneration = 0;
@@ -238,6 +254,8 @@ bool NetManager::StartClient(const char* theIP, uint16_t thePort)
 	mMode = MODE_CLIENT;
 	mInputEpoch = 1;
 	mNextInputSequence = 1;
+	mLastInputMoveTick = 0;
+	mClientHeatWaveQDown = false;
 	mInputPhase = NETINPUT_MENU;
 	mAdventureStartFxGeneration = 0;
 	mLastAdventureStartFxGeneration = 0;
@@ -336,6 +354,8 @@ void NetManager::Disconnect()
 	mActingPlayerSlot = -1;
 	mInputEpoch = 1;
 	mNextInputSequence = 1;
+	mLastInputMoveTick = 0;
+	mClientHeatWaveQDown = false;
 	mInputPhase = NETINPUT_MENU;
 	mAdventureStartFxGeneration = 0;
 	mLastAdventureStartFxGeneration = 0;
@@ -358,6 +378,8 @@ void NetManager::Disconnect()
 		mChooserPickQuota[i] = 0;
 		mDeferredDrop[i] = false;
 		mLastInputSequence[i] = 0;
+		mRemoteHeatWaveQDown[i] = false;
+		mRemoteHeatWaveQDownTick[i] = 0;
 	}
 	for (int i = 0; i < NET_MAX_PLAYERS; i++)
 		mPlayers[i].Reset();
@@ -406,16 +428,27 @@ void NetManager::DropSession(int theSlot, bool theNotify)
 			aCursor->mGlovePlantID = PlantID::PLANTID_NULL;
 		}
 	}
+	NetTrace("drop peer slot=%d checkpoint=disconnect_begin", theSlot);
 	aSession.mConn.Disconnect();
+	NetTrace("drop peer slot=%d checkpoint=disconnect_complete", theSlot);
 	aSession.mAssigned = false;
 	mDeferredDrop[theSlot] = false;
 	mLastInputSequence[theSlot] = 0;
+	NetTrace("drop peer slot=%d checkpoint=purge_inputs_begin", theSlot);
 	PurgePendingInputs("PEER_DISCONNECT", theSlot);
+	NetTrace("drop peer slot=%d checkpoint=purge_inputs_complete", theSlot);
+	ClearHeatWaveShoutKeys("PEER_DISCONNECT", theSlot);
+	NetTrace("drop peer slot=%d checkpoint=clear_keys_complete", theSlot);
 	mPlayers[theSlot].mActive = false;
 	mRemoteCursors[theSlot].Clear();
 	RequestChooserStateEcho("peer_disconnect", theSlot, -1);
 	if (theNotify)
+	{
+		NetTrace("drop peer slot=%d checkpoint=lobby_notify_begin", theSlot);
 		SendLobbyState();
+		NetTrace("drop peer slot=%d checkpoint=lobby_notify_complete", theSlot);
+	}
+	NetTrace("drop peer slot=%d complete", theSlot);
 }
 
 // -------------------------------------------------------------------------
@@ -624,10 +657,8 @@ void NetManager::HandleMessage(NetSession* theSession, uint8_t theMsgType, NetBu
 		OnClientInput(theSession, thePayload);
 		break;
 	case NETMSG_INPUT_KEY:
-	{
-		// key events are unused for now (host-only pause/menu), kept for future
+		OnClientKeyInput(theSession, thePayload);
 		break;
-	}
 	case NETMSG_CURSOR:
 		OnClientCursor(theSession, thePayload);
 		break;
@@ -701,6 +732,42 @@ void NetManager::OnHello(NetSession* theSession, NetBuffer& thePayload)
 	SendLobbyState();
 }
 
+bool NetManager::ConsumeExpectedInputSequence(uint8_t theSlot, uint32_t theEpoch,
+	uint32_t theSequence, const char* theKind)
+{
+	const char* aKind = theKind ? theKind : "input";
+	if (theEpoch != mInputEpoch)
+	{
+		NetTrace("%s reject slot=%u reason=epoch packetEpoch=%u hostEpoch=%u seq=%u",
+			aKind, theSlot, theEpoch, mInputEpoch, theSequence);
+		return false;
+	}
+
+	uint32_t anExpectedSequence = 0;
+	bool aSequenceAccepted = false;
+	{
+		std::lock_guard<std::mutex> aLock(mSessionsMutex);
+		anExpectedSequence = mLastInputSequence[theSlot] + 1U;
+		if (theSequence != 0 && theSequence == anExpectedSequence)
+		{
+			// Mouse and key actions share one ordered stream.  Consume a decoded
+			// packet before semantic/context validation so rejection at N can never
+			// turn every valid N+1 action into a permanent sequence gap.
+			mLastInputSequence[theSlot] = theSequence;
+			aSequenceAccepted = true;
+		}
+	}
+	if (!aSequenceAccepted)
+	{
+		NetTrace("%s reject slot=%u reason=sequence got=%u expected=%u epoch=%u",
+			aKind, theSlot, theSequence, anExpectedSequence, theEpoch);
+		return false;
+	}
+	NetTrace("%s sequence consumed slot=%u epoch=%u seq=%u before semantic validation",
+		aKind, theSlot, theEpoch, theSequence);
+	return true;
+}
+
 void NetManager::OnClientInput(NetSession* theSession, NetBuffer& thePayload)
 {
 	const uint8_t aSlot = theSession ? theSession->mSlot : 255;
@@ -735,37 +802,8 @@ void NetManager::OnClientInput(NetSession* theSession, NetBuffer& thePayload)
 		return;
 	}
 
-	if (anEpoch != mInputEpoch)
-	{
-		NetTrace("mouse reject slot=%u reason=epoch packetEpoch=%u hostEpoch=%u seq=%u",
-			aSlot, anEpoch, mInputEpoch, aSequence);
+	if (!ConsumeExpectedInputSequence(aSlot, anEpoch, aSequence, "mouse"))
 		return;
-	}
-
-	uint32_t anExpectedSequence = 0;
-	bool aSequenceAccepted = false;
-	{
-		std::lock_guard<std::mutex> aLock(mSessionsMutex);
-		anExpectedSequence = mLastInputSequence[aSlot] + 1U;
-		if (aSequence != 0 && aSequence == anExpectedSequence)
-		{
-			// TCP preserves packet order, so once a structurally decoded packet for
-			// the current epoch reaches its expected sequence, consume that sequence
-			// even if a later context/semantic/queue check rejects the action.  If it
-			// were consumed only on enqueue, a pause race or stale seed identity at N
-			// would make every valid N+1 packet look permanently out of order.
-			mLastInputSequence[aSlot] = aSequence;
-			aSequenceAccepted = true;
-		}
-	}
-	if (!aSequenceAccepted)
-	{
-		NetTrace("mouse reject slot=%u reason=sequence got=%u expected=%u epoch=%u",
-			aSlot, aSequence, anExpectedSequence, anEpoch);
-		return;
-	}
-	NetTrace("mouse sequence consumed slot=%u epoch=%u seq=%u before semantic validation",
-		aSlot, anEpoch, aSequence);
 
 	Board* aBoard = mApp ? mApp->mBoard : nullptr;
 	if (mInputPhase != NETINPUT_PLAYING || !aBoard ||
@@ -780,7 +818,9 @@ void NetManager::OnClientInput(NetSession* theSession, NetBuffer& thePayload)
 		return;
 	}
 
-	if (anAction > NETINPUT_MOUSE_DOWN || !NetValidMouseButton(aButton) ||
+	const bool aButtonValid = anAction == NETINPUT_MOUSE_MOVE ?
+		(aButton == 0 || NetValidMouseButton(aButton)) : NetValidMouseButton(aButton);
+	if (anAction > NETINPUT_MOUSE_MOVE || !aButtonValid ||
 		aCanonicalX < -4096 || aCanonicalX > 4096 ||
 		aCanonicalY < -2048 || aCanonicalY > 2048)
 	{
@@ -854,9 +894,9 @@ void NetManager::OnClientInput(NetSession* theSession, NetBuffer& thePayload)
 		NetTrace("mouse reject slot=%u reason=missing_seed_identity hostIndex=%d", aSlot, aHostSeedHit);
 		return;
 	}
-	else if (anAction == NETINPUT_MOUSE_UP && !aCleanNoSeedIdentity)
+	else if (anAction != NETINPUT_MOUSE_DOWN && !aCleanNoSeedIdentity)
 	{
-		NetTrace("mouse reject slot=%u reason=seed_identity_on_mouse_up", aSlot);
+		NetTrace("mouse reject slot=%u reason=seed_identity_on_non_down action=%u", aSlot, anAction);
 		return;
 	}
 
@@ -890,6 +930,94 @@ void NetManager::OnClientInput(NetSession* theSession, NetBuffer& thePayload)
 	NetTrace("mouse queued slot=%u epoch=%u seq=%u action=%u button=%d local=(%d,%d) pendingSlot=%zu pendingTotal=%zu",
 		aSlot, anEpoch, aSequence, anAction, aButton, anInput.mX, anInput.mY,
 		mPendingInputCount[aSlot], mPendingInputs.size());
+}
+
+void NetManager::OnClientKeyInput(NetSession* theSession, NetBuffer& thePayload)
+{
+	const uint8_t aSlot = theSession ? theSession->mSlot : 255;
+	if (thePayload.Remaining() != NET_HEAT_WAVE_KEY_INPUT_BYTES)
+	{
+		NetTrace("key reject slot=%u reason=size expected=%zu actual=%zu", aSlot,
+			NET_HEAT_WAVE_KEY_INPUT_BYTES, thePayload.Remaining());
+		return;
+	}
+
+	uint32_t anEpoch = 0;
+	uint32_t aSequence = 0;
+	uint16_t aKey = 0;
+	uint8_t aDownWire = 0;
+	const bool aDecoded = thePayload.ReadU32(&anEpoch) &&
+		thePayload.ReadU32(&aSequence) && thePayload.ReadU16(&aKey) &&
+		thePayload.ReadU8(&aDownWire) && thePayload.Remaining() == 0;
+	if (!aDecoded || aSlot == 0 || aSlot >= NET_MAX_PLAYERS || !theSession ||
+		!theSession->mAssigned || !mPlayers[aSlot].mActive)
+	{
+		NetTrace("key reject slot=%u reason=decode_or_session", aSlot);
+		return;
+	}
+	if (!ConsumeExpectedInputSequence(aSlot, anEpoch, aSequence, "key"))
+		return;
+
+	// Consume the sequence first, then reject every semantic value except Q and
+	// a canonical 0/1 edge.  This protects the shared mouse/key ordering without
+	// ever dispatching an arbitrary remote KeyDown into the widget tree.
+	if (aKey != NET_HEAT_WAVE_Q_WIRE || aDownWire > 1)
+	{
+		NetTrace("key reject slot=%u reason=fields key=%u down=%u epoch=%u seq=%u",
+			aSlot, aKey, aDownWire, anEpoch, aSequence);
+		return;
+	}
+
+	Board* aBoard = mApp ? mApp->mBoard : nullptr;
+	const bool aHeatWavePlaying = mInputPhase == NETINPUT_PLAYING && mApp &&
+		aBoard && mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_HEAT_WAVE &&
+		mApp->mGameScene == GameScenes::SCENE_PLAYING && !mApp->mSeedChooserScreen;
+	if (!aHeatWavePlaying)
+	{
+		ClearHeatWaveShoutKeys("KEY_CONTEXT", aSlot);
+		NetTrace("key reject slot=%u reason=context down=%u phase=%u mode=%d scene=%d board=%p chooser=%p",
+			aSlot, aDownWire, (unsigned)mInputPhase,
+			mApp ? (int)mApp->mGameMode : -1,
+			mApp ? (int)mApp->mGameScene : -1, (void*)aBoard,
+			mApp ? (void*)mApp->mSeedChooserScreen : nullptr);
+		return;
+	}
+
+	const bool aDown = aDownWire != 0;
+	// A release is always allowed while this board/epoch remains current, even
+	// if a pause dialog or a Heat Wave substate appeared after the down edge.
+	// This is what prevents a legitimate key-up from latching the slot.
+	if (aDown && (aBoard->mPaused || mApp->GetDialogCount() > 0))
+	{
+		NetTrace("key reject slot=%u reason=blocked_down paused=%d dialogs=%d epoch=%u seq=%u",
+			aSlot, aBoard->mPaused ? 1 : 0, mApp->GetDialogCount(), anEpoch, aSequence);
+		return;
+	}
+
+	const uint32_t aNow = GetTickCount();
+	bool aChanged = false;
+	{
+		std::lock_guard<std::mutex> aLock(mSessionsMutex);
+		if (aDown)
+		{
+			// OS key-repeat must not refresh the safety timeout.  Only a real
+			// up->down edge starts a fresh shout interval.
+			if (!mRemoteHeatWaveQDown[aSlot])
+			{
+				mRemoteHeatWaveQDown[aSlot] = true;
+				mRemoteHeatWaveQDownTick[aSlot] = aNow;
+				aChanged = true;
+			}
+		}
+		else
+		{
+			aChanged = mRemoteHeatWaveQDown[aSlot];
+			mRemoteHeatWaveQDown[aSlot] = false;
+			mRemoteHeatWaveQDownTick[aSlot] = 0;
+		}
+	}
+	NetTrace("heat-wave Q slot=%u down=%d changed=%d epoch=%u seq=%u",
+		aSlot, aDown ? 1 : 0, aChanged ? 1 : 0, anEpoch, aSequence);
 }
 
 void NetManager::OnClientCursor(NetSession* theSession, NetBuffer& thePayload)
@@ -1444,6 +1572,50 @@ void NetManager::PurgePendingInputs(const char* theReason, int theSlot)
 			theReason ? theReason : "unspecified", theSlot, aRemoved, mPendingInputs.size());
 }
 
+void NetManager::ClearHeatWaveShoutKeys(const char* theReason, int theSlot)
+{
+	std::lock_guard<std::mutex> aLock(mSessionsMutex);
+	const int aFirst = theSlot < 0 ? 0 : theSlot;
+	const int anEnd = theSlot < 0 ? NET_MAX_PLAYERS : theSlot + 1;
+	bool aChanged = false;
+	for (int i = aFirst; i < anEnd && i < NET_MAX_PLAYERS; i++)
+	{
+		if (i < 0)
+			continue;
+		aChanged = aChanged || mRemoteHeatWaveQDown[i];
+		mRemoteHeatWaveQDown[i] = false;
+		mRemoteHeatWaveQDownTick[i] = 0;
+	}
+	if (aChanged)
+		NetTrace("heat-wave Q cleared reason=%s slot=%d",
+			theReason ? theReason : "unspecified", theSlot);
+}
+
+bool NetManager::IsRemoteHeatWaveShoutKeyActive()
+{
+	if (mMode != MODE_HOST || mInputPhase != NETINPUT_PLAYING || !mApp ||
+		!mApp->mBoard || mApp->mGameMode != GameMode::GAMEMODE_CHALLENGE_HEAT_WAVE ||
+		mApp->mGameScene != GameScenes::SCENE_PLAYING || mApp->mBoard->mPaused)
+		return false;
+
+	const uint32_t aNow = GetTickCount();
+	std::lock_guard<std::mutex> aLock(mSessionsMutex);
+	for (int i = 1; i < NET_MAX_PLAYERS; i++)
+	{
+		if (!mRemoteHeatWaveQDown[i])
+			continue;
+		if (!mPlayers[i].mActive ||
+			aNow - mRemoteHeatWaveQDownTick[i] > NET_HEAT_WAVE_Q_MAX_HOLD_MS)
+		{
+			mRemoteHeatWaveQDown[i] = false;
+			mRemoteHeatWaveQDownTick[i] = 0;
+			continue;
+		}
+		return true;
+	}
+	return false;
+}
+
 bool NetManager::PopPendingInput(NetRemoteInput& theInput)
 {
 	std::lock_guard<std::mutex> aLock(mSessionsMutex);
@@ -1487,6 +1659,7 @@ void NetManager::AdvanceInputPhase(NetInputPhase thePhase, const char* theReason
 	mInputPhase = thePhase;
 	mChooserOpen = thePhase == NETINPUT_CHOOSER;
 	PurgePendingInputs(theReason ? theReason : "INPUT_PHASE");
+	ClearHeatWaveShoutKeys(theReason ? theReason : "INPUT_PHASE");
 	for (int i = 0; i < NET_MAX_PLAYERS; i++)
 		mLastInputSequence[i] = 0;
 	NetTrace("input phase advanced epoch=%u phase=%u reason=%s", mInputEpoch,
@@ -1525,6 +1698,7 @@ void NetManager::OnInputEpoch(NetBuffer& thePayload)
 	mInputEpoch = anEpoch;
 	mInputPhase = aPhase;
 	mNextInputSequence = 1;
+	mClientHeatWaveQDown = false;
 	mChooserOpen = aPhase == NETINPUT_CHOOSER;
 	NetTrace("input epoch applied epoch=%u phase=%u", mInputEpoch, (unsigned)mInputPhase);
 }
@@ -1897,15 +2071,62 @@ void NetManager::OnStoreAction(NetSession* theSession, NetBuffer& thePayload)
 
 void NetManager::SendInput(bool theDown, int theClickCount, int theX, int theY)
 {
+	SendMouseInputAction(theDown ? NETINPUT_MOUSE_DOWN : NETINPUT_MOUSE_UP,
+		theClickCount, theX, theY);
+}
+
+void NetManager::SendMouseMove(int theDragButton, int theX, int theY)
+{
+	const uint32_t aNow = GetTickCount();
+	if (aNow - mLastInputMoveTick < 1000U / NET_INPUT_MOVE_HZ)
+		return;
+	mLastInputMoveTick = aNow;
+	SendMouseInputAction(NETINPUT_MOUSE_MOVE, theDragButton, theX, theY);
+}
+
+void NetManager::SendHeatWaveShoutKey(bool theDown)
+{
 	Board* aBoard = mApp ? mApp->mBoard : nullptr;
+	const bool aBaseContext = mMode == MODE_CLIENT && mHostConn && mClientConnected &&
+		mInputPhase == NETINPUT_PLAYING && mInputEpoch != 0 && mApp && aBoard &&
+		mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_HEAT_WAVE &&
+		mApp->mGameScene == GameScenes::SCENE_PLAYING && !mApp->mSeedChooserScreen;
+	if (!aBaseContext || (theDown && (aBoard->mPaused || mRemotePaused ||
+		mApp->GetDialogCount() > 0)) || theDown == mClientHeatWaveQDown)
+		return;
+
+	const uint32_t aSequence = mNextInputSequence;
+	if (aSequence == 0)
+	{
+		NetTrace("key send blocked reason=sequence_exhausted epoch=%u", mInputEpoch);
+		return;
+	}
+
+	NetBuffer aMsg;
+	aMsg.WriteU32(mInputEpoch);
+	aMsg.WriteU32(aSequence);
+	aMsg.WriteU16(NET_HEAT_WAVE_Q_WIRE);
+	aMsg.WriteU8(theDown ? 1 : 0);
+	mHostConn->SendMessage(NETMSG_INPUT_KEY, aMsg);
+	mNextInputSequence++;
+	mClientHeatWaveQDown = theDown;
+	NetTrace("key send epoch=%u seq=%u key=Q down=%d", mInputEpoch,
+		aSequence, theDown ? 1 : 0);
+}
+
+void NetManager::SendMouseInputAction(uint8_t theAction, int theButton, int theX, int theY)
+{
+	Board* aBoard = mApp ? mApp->mBoard : nullptr;
+	const bool aButtonValid = theAction == NETINPUT_MOUSE_MOVE ?
+		(theButton == 0 || NetValidMouseButton(theButton)) : NetValidMouseButton(theButton);
 	if (mMode != MODE_CLIENT || !mHostConn || !mClientConnected ||
 		mInputPhase != NETINPUT_PLAYING || mInputEpoch == 0 || !aBoard ||
 		!mApp || mApp->mGameScene != GameScenes::SCENE_PLAYING ||
 		mApp->mSeedChooserScreen || mApp->GetDialogCount() > 0 ||
-		aBoard->mPaused || mRemotePaused || !NetValidMouseButton(theClickCount))
+		aBoard->mPaused || mRemotePaused || theAction > NETINPUT_MOUSE_MOVE || !aButtonValid)
 	{
-		NetTrace("mouse send blocked down=%d button=%d epoch=%u phase=%u board=%p scene=%d chooser=%p dialogs=%d paused=%d remotePaused=%d",
-			theDown ? 1 : 0, theClickCount, mInputEpoch, (unsigned)mInputPhase,
+		NetTrace("mouse send blocked action=%u button=%d epoch=%u phase=%u board=%p scene=%d chooser=%p dialogs=%d paused=%d remotePaused=%d",
+			theAction, theButton, mInputEpoch, (unsigned)mInputPhase,
 			(void*)aBoard, mApp ? (int)mApp->mGameScene : -1,
 			mApp ? (void*)mApp->mSeedChooserScreen : nullptr,
 			mApp ? mApp->GetDialogCount() : -1, aBoard && aBoard->mPaused ? 1 : 0,
@@ -1926,7 +2147,7 @@ void NetManager::SendInput(bool theDown, int theClickCount, int theX, int theY)
 	uint8_t aSeedType = 255;
 	uint8_t anImitater = 255;
 	uint8_t anOwner = 255;
-	if (theDown)
+	if (theAction == NETINPUT_MOUSE_DOWN)
 	{
 		const int aHitIndex = NetSeedPacketAt(aBoard, aCanonicalX, aCanonicalY);
 		if (aHitIndex >= 0 && aHitIndex < aBoard->mSeedBank->mNumPackets &&
@@ -1947,14 +2168,13 @@ void NetManager::SendInput(bool theDown, int theClickCount, int theX, int theY)
 		return;
 	}
 	NetTrace("mouse send epoch=%u seq=%u action=%u button=%d local=(%d,%d) canonical=(%d,%d) seed=(%d,%u,%u,%u)",
-		mInputEpoch, aSequence, theDown ? NETINPUT_MOUSE_DOWN : NETINPUT_MOUSE_UP,
-		theClickCount, theX, theY, aCanonicalX, aCanonicalY,
+		mInputEpoch, aSequence, theAction, theButton, theX, theY, aCanonicalX, aCanonicalY,
 		aSeedIndex, aSeedType, anImitater, anOwner);
 	NetBuffer aMsg;
 	aMsg.WriteU32(mInputEpoch);
 	aMsg.WriteU32(aSequence);
-	aMsg.WriteU8(theDown ? NETINPUT_MOUSE_DOWN : NETINPUT_MOUSE_UP);
-	aMsg.WriteU8((uint8_t)theClickCount);
+	aMsg.WriteU8(theAction);
+	aMsg.WriteU8((uint8_t)theButton);
 	aMsg.WriteI16((int16_t)aCanonicalX);
 	aMsg.WriteI16((int16_t)aCanonicalY);
 	aMsg.WriteI16(aSeedIndex);

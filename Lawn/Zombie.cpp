@@ -4944,11 +4944,13 @@ void Zombie::Update()
     TOD_ASSERT(!mDead);
 
     // co-op pvp: zombie reaching the house scores a brain for the zombie team
-    if (mBoard && mBoard->IsPvPMode() && mFromWave >= 0 && mPosX < 30.0f)
-    {
-        mBoard->NetPvPZombieScored(this);
-        return;
-    }
+	if (mBoard && mBoard->IsPvPMode() && mFromWave >= 0 && mPosX < 30.0f)
+	{
+		// Reaching the house is a zombie-team score, not a plant-team kill.
+		mNetKillCounted = true;
+		mBoard->NetPvPZombieScored(this);
+		return;
+	}
 
     mZombieAge++;
     bool doUpdate = false;
