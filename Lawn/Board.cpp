@@ -453,6 +453,12 @@ int Board::CountUntriggerLawnMowers()
 //0x408C30
 void Board::TryToSaveGame()
 {
+	if (mApp && mApp->mNetBlockProfileSave)
+	{
+		NetTrace("save game blocked entry=Board::TryToSaveGame level=%d mode=%d", mLevel, (int)mApp->mGameMode);
+		return;
+	}
+
 	SexyString aFileName = GetSavedGameName(mApp->mGameMode, mApp->mPlayerInfo->mId, mLevel);
 
 	if (NeedSaveGame())
@@ -476,6 +482,9 @@ void Board::TryToSaveGame()
 //0x408DA0
 bool Board::NeedSaveGame()
 {
+	if (mApp && mApp->mNetBlockProfileSave)
+		return false;
+
 	return 
 		mApp->mGameMode != GameMode::GAMEMODE_CHALLENGE_ICE && 
 		mApp->mGameMode != GameMode::GAMEMODE_UPSELL && 
@@ -486,7 +495,13 @@ bool Board::NeedSaveGame()
 }
 
 void Board::SaveGame(const SexyString& theFileName)
-{ 
+{
+	if (mApp && mApp->mNetBlockProfileSave)
+	{
+		NetTrace("save game blocked entry=Board::SaveGame level=%d mode=%d", mLevel, (int)mApp->mGameMode);
+		return;
+	}
+
 	LawnSaveGame(this, theFileName);
 }
 

@@ -910,6 +910,7 @@ LawnApp::LawnApp()
 	mNetLobbyPanel = nullptr;
 	mNetBoardSeed = 0;
 	mNetBlockProfileSave = false;
+	mNetLocalProfileBackup = nullptr;
 	mNetCoopGameOverHandled = false;
 	mNetCursorImage = nullptr;
 	mCoopSmokeArgSeen = false;
@@ -956,13 +957,11 @@ LawnApp::LawnApp()
 //0x44EDD0、0x44EDF0
 LawnApp::~LawnApp()
 {
+	const bool aHadBoard = mBoard != nullptr;
+	const bool aHadNetProfileOverride = mNetBlockProfileSave || mNetLocalProfileBackup != nullptr;
+
 	delete mNetCursorImage;
 	mNetCursorImage = nullptr;
-
-	if (mBoard)
-	{
-		WriteCurrentUserConfig();
-	}
 
 	if (mBoard)
 	{
@@ -972,6 +971,13 @@ LawnApp::~LawnApp()
 		delete mBoard;
 		mBoard = nullptr;
 	}
+
+	// A client board may still contain host-synchronised progress.  Keep the
+	// write guard active through its complete teardown, then restore the local
+	// profile before any final profile write.
+	NetRestoreLocalProfile();
+	if (aHadBoard || aHadNetProfileOverride)
+		WriteCurrentUserConfig();
 
 	if (mTitleScreen)
 	{
@@ -1062,6 +1068,12 @@ LawnApp::~LawnApp()
 	delete mProfileMgr;
 	delete mLastLevelStats;
 
+	// NetRestoreLocalProfile deliberately retains this backup on failure so
+	// every remaining save path stays fail-closed.  At final object destruction
+	// there can be no retry, so only the heap copy itself needs releasing.
+	delete mNetLocalProfileBackup;
+	mNetLocalProfileBackup = nullptr;
+
 	mResourceManager->DeleteResources("");
 #ifdef _DEBUG
 	BetaSubmit(true);
@@ -1079,6 +1091,8 @@ void LawnApp::Shutdown()
 	if (CoopSmokeActive() && !mCoopSmokeResultWritten)
 		CoopSmokeWriteResult(false, "process closed before smoke completion");
 
+	const bool aHadBoard = mBoard != nullptr;
+	const bool aHadNetProfileOverride = mNetBlockProfileSave || mNetLocalProfileBackup != nullptr;
 	NetShutdown();
 
 	if (!mShutdown)
@@ -1093,8 +1107,13 @@ void LawnApp::Shutdown()
 			mBoardResult = BoardResult::BOARDRESULT_QUIT_APP;
 			mBoard->TryToSaveGame();
 			KillBoard();
-			WriteCurrentUserConfig();
 		}
+
+		// The host profile mirror must remain read-only until Board/Zen Garden
+		// disposal is finished.  Restore even when no Board was ever created.
+		NetRestoreLocalProfile();
+		if (aHadBoard || aHadNetProfileOverride)
+			WriteCurrentUserConfig();
 
 #ifdef _HAS_ZOMBATAR
 		if (mGameSelector && mGameSelector->mZombatarWidget && mGameSelector->mZombatarWidget->mZombie) {
@@ -1262,14 +1281,21 @@ void LawnApp::WriteToRegistry()
 	{
 		// The smoke profile may persist only below its isolated appdata root;
 		// never change the interactive user's CurUser or display/audio registry.
-		if (mPlayerInfo)
+		if (mPlayerInfo && !mNetBlockProfileSave)
 			mPlayerInfo->SaveDetails();
+		else if (mPlayerInfo)
+			LawnNet::NetTrace("profile save blocked entry=WriteToRegistry smoke=1 client=%d",
+				NetIsClient() ? 1 : 0);
 		return;
 	}
 	if (mPlayerInfo)
 	{
 		RegistryWriteString("CurUser", SexyStringToString(mPlayerInfo->mName));
-		mPlayerInfo->SaveDetails();
+		if (!mNetBlockProfileSave)
+			mPlayerInfo->SaveDetails();
+		else
+			LawnNet::NetTrace("profile save blocked entry=WriteToRegistry smoke=0 client=%d",
+				NetIsClient() ? 1 : 0);
 	}
 
 	SexyAppBase::WriteToRegistry();
@@ -1285,6 +1311,13 @@ void LawnApp::ReadFromRegistry()
 //0x44F540
 bool LawnApp::WriteCurrentUserConfig()
 {
+	if (mNetBlockProfileSave)
+	{
+		LawnNet::NetTrace("profile save blocked entry=WriteCurrentUserConfig client=%d profile=%p",
+			NetIsClient() ? 1 : 0, (void*)mPlayerInfo);
+		return false;
+	}
+
 	if (mPlayerInfo)
 		mPlayerInfo->SaveDetails();
 
@@ -5883,14 +5916,14 @@ void LawnApp::NetOnHostLost()
 	if (CoopSmokeActive())
 		CoopSmokeFail("connection to smoke host was lost");
 
-	// leave the session and return to the main menu with a message
-	mNetManager->Disconnect();
-
+	// Tear down the board while NetIsClient() and the profile-save guard still
+	// identify this as a read-only client.  Zen Garden disposal must never run
+	// host-only feeding/coin/profile mutations against snapshot ghosts.
 	KillBoard();
 	if (mSeedChooserScreen)
 		KillSeedChooserScreen();
-	mNetBlockProfileSave = false;
-	PreloadForUser(); // restore our own profile state
+	mNetManager->Disconnect();
+	NetRestoreLocalProfile();
 	ShowGameSelector();
 
 	DoDialog(Dialogs::DIALOG_INFO, true, _S("Co-op"), _S("Connection to the host was lost."), _S(""),
@@ -5899,13 +5932,61 @@ void LawnApp::NetOnHostLost()
 
 void LawnApp::NetOnBackToMenu()
 {
-	if (mBoard || mGameScene != GameScenes::SCENE_MENU)
+	const bool aNeedsMenuTransition = mBoard || mGameScene != GameScenes::SCENE_MENU;
+	if (aNeedsMenuTransition)
 	{
 		KillBoard();
 		if (mSeedChooserScreen)
 			KillSeedChooserScreen();
-		ShowGameSelector();
 	}
+	if (aNeedsMenuTransition)
+		ShowGameSelector();
+}
+
+void LawnApp::NetRestoreLocalProfile()
+{
+	if (!mNetBlockProfileSave && !mNetLocalProfileBackup)
+		return;
+	if (!mNetLocalProfileBackup)
+	{
+		// Never fail open: without the original data there is no safe profile to
+		// persist.  Retaining the guard protects every central save entry point.
+		mNetBlockProfileSave = true;
+		LawnNet::NetTrace("local profile restore failed: backup missing; save guard retained current=%p",
+			(void*)mPlayerInfo);
+		return;
+	}
+
+	PlayerInfo* aRestoreTarget = nullptr;
+	if (mPlayerInfo && mPlayerInfo->mId == mNetLocalProfileBackup->mId)
+		aRestoreTarget = mPlayerInfo;
+	else if (mProfileMgr)
+	{
+		PlayerInfo* aNamedProfile = mProfileMgr->GetProfile(mNetLocalProfileBackup->mName);
+		if (aNamedProfile && aNamedProfile->mId == mNetLocalProfileBackup->mId)
+			aRestoreTarget = aNamedProfile;
+	}
+
+	if (!aRestoreTarget)
+	{
+		mNetBlockProfileSave = true;
+		LawnNet::NetTrace("local profile restore failed: matching target unavailable id=%lu name=%s current=%p; backup and guard retained",
+			(unsigned long)mNetLocalProfileBackup->mId,
+			SexyStringToString(mNetLocalProfileBackup->mName).c_str(), (void*)mPlayerInfo);
+		return;
+	}
+
+	*aRestoreTarget = *mNetLocalProfileBackup;
+	// If profile selection changed while connected, make the restored local
+	// object current again instead of leaving a host-mirrored pointer active.
+	mPlayerInfo = aRestoreTarget;
+	mPlayerLevelRef = aRestoreTarget->GetLevel();
+	LawnNet::NetTrace("local profile restored after client session id=%lu level=%d coins=%d",
+		(unsigned long)aRestoreTarget->mId, aRestoreTarget->mLevel, aRestoreTarget->mCoins);
+
+	delete mNetLocalProfileBackup;
+	mNetLocalProfileBackup = nullptr;
+	mNetBlockProfileSave = false;
 }
 
 bool LawnApp::NetOnSceneCmd(uint8_t aCmd, uint32_t aParam)
@@ -5977,6 +6058,12 @@ void LawnApp::NetBroadcastProfile()
 
 void LawnApp::NetOnProfileSync(LawnNet::NetBuffer& thePayload)
 {
+	if (!NetIsClient())
+	{
+		LawnNet::NetTrace("PROFILE_SYNC rejected: receiver is not a network client");
+		return;
+	}
+
 	if (!mPlayerInfo)
 	{
 		LawnNet::NetTrace("PROFILE_SYNC rejected: player profile is unavailable");
@@ -6010,7 +6097,19 @@ void LawnApp::NetOnProfileSync(LawnNet::NetBuffer& thePayload)
 		return;
 	}
 
-	mNetBlockProfileSave = true;
+	if (!mNetBlockProfileSave)
+	{
+		delete mNetLocalProfileBackup;
+		mNetLocalProfileBackup = new PlayerInfo(*mPlayerInfo);
+		mNetBlockProfileSave = true;
+		LawnNet::NetTrace("local profile backed up before host sync id=%lu level=%d coins=%d",
+			(unsigned long)mPlayerInfo->mId, mPlayerInfo->mLevel, mPlayerInfo->mCoins);
+	}
+	else if (!mNetLocalProfileBackup)
+	{
+		LawnNet::NetTrace("PROFILE_SYNC rejected: save guard is active but local profile backup is unavailable");
+		return;
+	}
 	PlayerInfo* aP = mPlayerInfo;
 	aP->mLevel = aLevel;
 	aP->mCoins = aCoins;

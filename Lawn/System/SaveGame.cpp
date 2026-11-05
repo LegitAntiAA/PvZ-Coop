@@ -15,6 +15,7 @@
 #include "../../Sexy.TodLib/TodParticle.h"
 #include "../../Sexy.TodLib/EffectSystem.h"
 #include "../../GameConstants.h"
+#include "../Net/NetCommon.h"
 
 #include <memory>
 
@@ -546,6 +547,13 @@ bool LawnLoadGame(Board* theBoard, const SexyString& theFilePath)
 //0x4820D0
 bool LawnSaveGame(Board* theBoard, const SexyString& theFilePath)
 {
+	if (theBoard && theBoard->mApp && theBoard->mApp->mNetBlockProfileSave)
+	{
+		LawnNet::NetTrace("save game blocked entry=LawnSaveGame level=%d mode=%d",
+			theBoard->mLevel, (int)theBoard->mApp->mGameMode);
+		return false;
+	}
+
 	SaveGameContext aContext;
 	aContext.mFailed = false;
 	aContext.mReading = false;

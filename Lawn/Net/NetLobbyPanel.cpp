@@ -361,6 +361,7 @@ void NetLobbyPanel::ActivateButton(int theButtonId)
 		case BTN_HOST:
 		{
 			ApplyNick();
+			mApp->NetRestoreLocalProfile();
 			uint16_t aPort = (uint16_t)atoi(SexyStringToStringFast(mPortEdit->mString).c_str());
 			if (aPort == 0)
 				aPort = NET_DEFAULT_PORT;
@@ -374,6 +375,7 @@ void NetLobbyPanel::ActivateButton(int theButtonId)
 		case BTN_CONNECT:
 		{
 			ApplyNick();
+			mApp->NetRestoreLocalProfile();
 			uint16_t aPort = (uint16_t)atoi(SexyStringToStringFast(mPortEdit->mString).c_str());
 			if (aPort == 0)
 				aPort = NET_DEFAULT_PORT;
@@ -383,6 +385,7 @@ void NetLobbyPanel::ActivateButton(int theButtonId)
 		}
 		case BTN_DISCONNECT:
 			aNet->Disconnect();
+			mApp->NetRestoreLocalProfile();
 			break;
 		case BTN_TEAM_PLANTS:
 			aNet->SetMyTeam(NETTEAM_PLANTS);

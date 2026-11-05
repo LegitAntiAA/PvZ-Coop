@@ -260,17 +260,31 @@ PottedPlant* ZenGarden::PottedPlantFromIndex(int thePottedPlantIndex)
 void ZenGarden::ZenGardenInitLevel(bool theJustSwitchingGardens)
 {
     mBoard = mApp->mBoard;
-    for (int i = 0; i < mApp->mPlayerInfo->mNumPottedPlants; i++)
+    const bool aReadOnlyNetworkClient = mApp->NetIsClient() || mApp->mNetBlockProfileSave;
+    if (!aReadOnlyNetworkClient)
     {
-        PottedPlant* aPottedPlant = PottedPlantFromIndex(i);
-        if (aPottedPlant->mWhichZenGarden == mGardenType)
+        for (int i = 0; i < mApp->mPlayerInfo->mNumPottedPlants; i++)
         {
-            PlacePottedPlant(i);
+            PottedPlant* aPottedPlant = PottedPlantFromIndex(i);
+            if (aPottedPlant->mWhichZenGarden == mGardenType)
+            {
+                PlacePottedPlant(i);
+            }
         }
+
+        AddStinky();
+    }
+    else
+    {
+        // The authoritative snapshot supplies all active plants/grid items.  In
+        // particular, do not expose or mutate the client's private Zen records
+        // while it is temporarily presenting the host's profile.
+        LawnNet::NetTrace("client Zen init is presentation-only garden=%d switching=%d localPotted=%d",
+            (int)mGardenType, theJustSwitchingGardens ? 1 : 0,
+            mApp->mPlayerInfo ? mApp->mPlayerInfo->mNumPottedPlants : -1);
     }
 
     mBoard->mChallenge->mChallengeStateCounter = 3000;
-    AddStinky();
 
     if (!mApp->mMusic->mMusicInterface)	mApp->mMusic->mMusicInterface = gSexyAppBase->mMusicInterface;
     if (!mApp->mMusic->mApp) mApp->mMusic->mApp = mApp;
@@ -2494,6 +2508,17 @@ SeedType ZenGarden::PickRandomSeedType()
 //0x5223F0
 void ZenGarden::LeaveGarden()
 {
+    if (mApp->NetIsClient() || mApp->mNetBlockProfileSave)
+    {
+        // Board/DataArray/effect disposal owns presentation cleanup.  Running
+        // the normal path here would apply pending feeding tools, score coins
+        // and persist Stinky coordinates into the client's local profile.  A
+        // snapshot plant also deliberately has mPottedPlantIndex == -1.
+        LawnNet::NetTrace("client Zen leave skipped persistent cleanup board=%p profileGuard=%d",
+            (void*)mBoard, mApp->mNetBlockProfileSave ? 1 : 0);
+        return;
+    }
+
     {
         GridItem* aGridItem = nullptr;
         while (mBoard->IterateGridItems(aGridItem))

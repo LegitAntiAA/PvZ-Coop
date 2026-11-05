@@ -177,6 +177,7 @@ public:
 	LawnNet::NetLobbyPanel*			mNetLobbyPanel;
 	uint32_t						mNetBoardSeed;			// shared board RNG seed for coop level creation
 	bool							mNetBlockProfileSave;	// client: never write host-synced profile to disk
+	PlayerInfo*					mNetLocalProfileBackup;	// complete local profile restored when the client session ends
 	bool							mNetCoopGameOverHandled;
 	Sexy::DDImage*				mNetCursorImage;
 
@@ -207,6 +208,7 @@ public:
 	void							NetOnStartGame(LawnNet::NetBuffer& thePayload);			// client: apply
 	void							NetOnHostLost();
 	void							NetOnBackToMenu();
+	void							NetRestoreLocalProfile();
 	bool							NetOnSceneCmd(uint8_t theCmd, uint32_t theParam);
 	void							NetOnProfileSync(LawnNet::NetBuffer& thePayload);
 	void							NetBroadcastProfile();									// host: push profile to clients
