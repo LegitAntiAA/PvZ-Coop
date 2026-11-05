@@ -1569,7 +1569,7 @@ void NetManager::OnBoardEvent(NetBuffer& thePayload)
 	// Advice is presentation state and is also valid during LEVEL_INTRO, where
 	// normal board events are deliberately discarded.  Apply the reliable event
 	// immediately so titles/tutorial prompts retain their host ordering.
-	if (anEvent == BOARDEV_ADVICE_STATE)
+		if (anEvent == BOARDEV_ADVICE_STATE)
 	{
 		uint8_t anEventWire = 0;
 		uint32_t aBoardSeed = 0;
@@ -1616,9 +1616,29 @@ void NetManager::OnBoardEvent(NetBuffer& thePayload)
 		}
 		NetTrace("advice applied op=%u style=%u help=%u bytes=%u scene=%d",
 			anOp, aStyle, aHelp, aLength, (int)mApp->mGameScene);
-		return;
-	}
-	// Intro preview entities are created locally by CutScene on every peer.
+			return;
+		}
+		// READY/SET/PLANT is a transient intro presentation event.  Normal board
+		// events are intentionally dropped outside SCENE_PLAYING below, so apply
+		// this one synchronously while the client is still in LEVEL_INTRO.  Queuing
+		// it until gameplay would either discard it or show it after the intro.
+		if (anEvent == BOARDEV_READY_SET_PLANT)
+		{
+			Board* aBoard = mApp ? mApp->mBoard : nullptr;
+			const bool aContextValid = IsClient() && mApp && aBoard &&
+				mApp->mGameScene == GameScenes::SCENE_LEVEL_INTRO &&
+				thePayload.Size() == 1;
+			if (!aContextValid)
+			{
+				NetTrace("READY_SET_PLANT rejected before apply bytes=%zu client=%d scene=%d board=%p",
+					thePayload.Size(), IsClient() ? 1 : 0,
+					mApp ? (int)mApp->mGameScene : -1, (void*)aBoard);
+				return;
+			}
+			aBoard->NetApplyEvent(thePayload);
+			return;
+		}
+		// Intro preview entities are created locally by CutScene on every peer.
 	// Applying the host's preview events as well would duplicate them and could
 	// access reanimation definitions before the client's preload has completed.
 	if (mApp && mApp->mBoard && mApp->mGameScene != GameScenes::SCENE_PLAYING)

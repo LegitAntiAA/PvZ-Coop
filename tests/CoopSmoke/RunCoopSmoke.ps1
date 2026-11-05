@@ -970,6 +970,7 @@ try {
     if ($Scenario -eq "Adventure8Victory") {
         $hostPositivePatterns += @(
             @{ Label = "host victory chooser quota"; Pattern = '(?im)\bSMOKE_SOAK_CHOOSER_VERIFIED\b[^\r\n]*\brole=host\b' },
+            @{ Label = "host ready-set-plant animation"; Pattern = '(?im)\bREADY_SET_PLANT sent\b[^\r\n]*\breanim=[1-9]\d*\b' },
             @{ Label = "host victory plant input"; Pattern = '(?im)\bSMOKE_SOAK_PLANT\b[^\r\n]*\brole=host\b' },
             @{ Label = "host stock victory fade request"; Pattern = '(?im)\bSMOKE_VICTORY_FORCE_FADE\b[^\r\n]*\brole=host\b[^\r\n]*\belapsed=[2-9]\d{4,}\b' },
             @{ Label = "host observed victory fade"; Pattern = '(?im)\bSMOKE_VICTORY_FADE\b[^\r\n]*\brole=host\b[^\r\n]*\bfade=[1-9]\d*\b' },
@@ -977,6 +978,7 @@ try {
         )
         $clientPositivePatterns += @(
             @{ Label = "client victory chooser quota"; Pattern = '(?im)\bSMOKE_SOAK_CHOOSER_VERIFIED\b[^\r\n]*\brole=client\b' },
+            @{ Label = "client ready-set-plant animation"; Pattern = '(?im)\bREADY_SET_PLANT applied\b[^\r\n]*\breanim=[1-9]\d*\b' },
             @{ Label = "client victory plant input"; Pattern = '(?im)\bSMOKE_SOAK_PLANT\b[^\r\n]*\brole=client\b' },
             @{ Label = "client observed synchronized victory fade"; Pattern = '(?im)\bSMOKE_VICTORY_FADE\b[^\r\n]*\brole=client\b[^\r\n]*\bfade=[1-9]\d*\b' },
             @{ Label = "client synchronized award UI"; Pattern = ('(?im)\bSMOKE_VICTORY_AWARD\b[^\r\n]*\brole=client\b[^\r\n]*\baward=0\b[^\r\n]*\bboard=0\b[^\r\n]*\bscreen=1\b[^\r\n]*\bsize={0}x{1}\b' -f $ClientWindowWidth, $ClientWindowHeight) }

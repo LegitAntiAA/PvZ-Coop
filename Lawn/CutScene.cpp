@@ -1517,11 +1517,15 @@ void CutScene::AnimateBoard()
 	int aTimeReadySetPlant = TimeReadySetPlantStart + mLawnMowerTime + mSodTime + mGraveStoneTime + mCrazyDaveTime + mFogTime + mBossTime;
 	if (mReadySetPlantTime > 0 && mCutsceneTime == aTimeReadySetPlant)
 	{
-		mApp->AddReanimation(400, 324, Board::MakeRenderOrder(RenderLayer::RENDER_LAYER_SCREEN_FADE, 0, 0), ReanimationType::REANIM_READYSETPLANT);
+		Reanimation* aReady = mApp->AddReanimation(400, 324,
+			Board::MakeRenderOrder(RenderLayer::RENDER_LAYER_SCREEN_FADE, 0, 0),
+			ReanimationType::REANIM_READYSETPLANT);
 		if (mApp->mNetManager && mApp->mNetManager->IsHosting())
 		{
 			LawnNet::NetBuffer anEvent;
 			mApp->mNetManager->SendBoardEvent(anEvent, LawnNet::BOARDEV_READY_SET_PLANT);
+			LawnNet::NetTrace("READY_SET_PLANT sent reanim=%u cutsceneTime=%d",
+				aReady ? (unsigned)mApp->ReanimationGetID(aReady) : 0U, mCutsceneTime);
 		}
 		mApp->PlaySample(SOUND_READYSETPLANT);
 		if (!mApp->IsFinalBossLevel())
