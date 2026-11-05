@@ -3882,7 +3882,8 @@ void Board::NetDrawRemoteCursors(Graphics* g)
 
 void Board::NetDrawTowerDefensePath(Graphics* g)
 {
-	if (mTDPath.empty() || mApp->mGameMode != GameMode::GAMEMODE_COOP_TOWER_DEFENSE)
+	if (!g || !mApp || mTDPath.empty() ||
+		mApp->mGameMode != GameMode::GAMEMODE_COOP_TOWER_DEFENSE)
 		return;
 	if (!Sexy::IMAGE_BACKGROUND1UNSODDED)
 	{
@@ -3892,7 +3893,11 @@ void Board::NetDrawTowerDefensePath(Graphics* g)
 			aMissingRoadImageTraced = true;
 			NetTrace("TD road draw skipped: DelayLoad_BackgroundUnsodded did not provide IMAGE_BACKGROUND1UNSODDED");
 		}
-		TOD_ASSERT(Sexy::IMAGE_BACKGROUND1UNSODDED != nullptr);
+		return;
+	}
+	if ((mTDPath.size() & 1U) != 0U)
+	{
+		NetTrace("TD road draw skipped: malformed odd path byteCount=%zu", mTDPath.size());
 		return;
 	}
 
@@ -3904,10 +3909,27 @@ void Board::NetDrawTowerDefensePath(Graphics* g)
 	{
 		int aRow = mTDPath[i] >> 1;
 		int aCol = mTDPath[i + 1];
+		if ((mTDPath[i] & 1U) != 0U || aRow < 0 || aRow >= 5 ||
+			aCol < 0 || aCol >= MAX_GRID_SIZE_X)
+		{
+			NetTrace("TD road draw skipped: invalid cell=%zu rowByte=%u row=%d col=%d",
+				i / 2, (unsigned)mTDPath[i], aRow, aCol);
+			return;
+		}
 		int aX = GridToPixelX(aCol, aRow);
 		int aY = GridToPixelY(aCol, aRow);
 
 		Rect aSrcRect(aX - aBgX, aY - aBgY, 80, 100);
+		if (aSrcRect.mX < 0 || aSrcRect.mY < 0 ||
+			aSrcRect.mX + aSrcRect.mWidth > Sexy::IMAGE_BACKGROUND1UNSODDED->GetWidth() ||
+			aSrcRect.mY + aSrcRect.mHeight > Sexy::IMAGE_BACKGROUND1UNSODDED->GetHeight())
+		{
+			NetTrace("TD road draw skipped: source out of bounds cell=%zu rect=(%d,%d,%d,%d) image=%dx%d",
+				i / 2, aSrcRect.mX, aSrcRect.mY, aSrcRect.mWidth, aSrcRect.mHeight,
+				Sexy::IMAGE_BACKGROUND1UNSODDED->GetWidth(),
+				Sexy::IMAGE_BACKGROUND1UNSODDED->GetHeight());
+			return;
+		}
 		g->DrawImage(Sexy::IMAGE_BACKGROUND1UNSODDED, aX, aY, aSrcRect);
 	}
 }

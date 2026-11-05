@@ -4255,7 +4255,23 @@ Reanimation* LawnApp::ReanimationGet(ReanimationID theReanimationID)
 //0x453CB0
 Reanimation* LawnApp::ReanimationTryToGet(ReanimationID theReanimationID)
 {
-	return mEffectSystem->mReanimationHolder->mReanimations.DataArrayTryToGet((unsigned int)theReanimationID);
+	// Presentation callbacks can outlive a board by one deferred widget tick.
+	// Treat a torn-down effect system like a missing reanimation instead of
+	// dereferencing the holder during transitions/custom-mode startup.
+	if (!mEffectSystem || !mEffectSystem->mReanimationHolder)
+	{
+		static bool aMissingHolderTraced = false;
+		if (!aMissingHolderTraced)
+		{
+			aMissingHolderTraced = true;
+			LawnNet::NetTrace("ReanimationTryToGet skipped: effect system unavailable id=%u effect=%p holder=%p scene=%d board=%p",
+				(unsigned)theReanimationID, (void*)mEffectSystem,
+				mEffectSystem ? (void*)mEffectSystem->mReanimationHolder : nullptr,
+				(int)mGameScene, (void*)mBoard);
+		}
+		return nullptr;
+	}
+        return mEffectSystem->mReanimationHolder->mReanimations.DataArrayTryToGet((unsigned int)theReanimationID);
 }
 
 //0x453CF0
