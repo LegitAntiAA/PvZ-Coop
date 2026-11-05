@@ -883,6 +883,7 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 	if (mApp->mGameScene == GameScenes::SCENE_ZOMBIES_WON) aFlags |= SNAPFLAG_ZOMBIES_WON;
 	if (mFogBlownCountDown > 0) aFlags |= SNAPFLAG_FOG_BLOWN;
 	if (mApp->mShowHealthBar) aFlags |= SNAPFLAG_HEALTHBAR;
+	if (mChallenge && mChallenge->mShowBowlingLine) aFlags |= SNAPFLAG_BOWLING_LINE;
 
 	b.WriteU8(aFlags);
 	b.WriteI32(mSunMoney);
@@ -1743,11 +1744,12 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	bool aLevelComplete = (aFlags & SNAPFLAG_LEVEL_COMPLETE) != 0;
 	bool aZombiesWon = (aFlags & SNAPFLAG_ZOMBIES_WON) != 0;
 	bool aShowHealthBar = (aFlags & SNAPFLAG_HEALTHBAR) != 0;
+	bool aShowBowlingLine = (aFlags & SNAPFLAG_BOWLING_LINE) != 0;
 
 	int aSunMoney = b.ReadI32Or();
 	int aCoinTotal = b.ReadI32Or();
 	if ((aFlags & ~(SNAPFLAG_PAUSED | SNAPFLAG_LEVEL_COMPLETE | SNAPFLAG_ZOMBIES_WON |
-		SNAPFLAG_FOG_BLOWN | SNAPFLAG_HEALTHBAR)) != 0 ||
+		SNAPFLAG_FOG_BLOWN | SNAPFLAG_HEALTHBAR | SNAPFLAG_BOWLING_LINE)) != 0 ||
 		aCoinTotal < 0 || aCoinTotal > 99999)
 	{
 		NetTrace("snapshot core rejected: flags=%u coins=%d", aFlags, aCoinTotal);
@@ -3154,6 +3156,8 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		mNetPresentedSlotMachineState = aChallengeState;
 		mNetPresentedSlotMachineRollCount = aChallengeRuntime.mSlotMachineRollCount;
 	}
+	if (mChallenge)
+		mChallenge->mShowBowlingLine = aShowBowlingLine;
 	if (mApp && mApp->CoopSmokeActive())
 		mApp->CoopSmokeOnSnapshotApplied(aSmokeSnapshotHash, aSmokeSnapshotBytes);
 }

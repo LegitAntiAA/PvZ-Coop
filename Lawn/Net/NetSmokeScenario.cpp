@@ -922,6 +922,15 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
 
 	if (mPlayingTick == 0)
 	{
+		if (NetIsBowlingSmokeScenario(mScenario) &&
+			(!aBoard->mChallenge || !aBoard->mChallenge->mShowBowlingLine))
+		{
+			theFailure = "Bowling line was not enabled on this peer at gameplay start";
+			return false;
+		}
+		if (NetIsBowlingSmokeScenario(mScenario))
+			NetTrace("SMOKE_BOWLING_LINE role=%s visible=1",
+				theManifest.IsHost() ? "host" : "client");
 		if (!theManifest.mSkipIntro)
 		{
 			if (!mIntroObserved || !mIntroProgressObserved)

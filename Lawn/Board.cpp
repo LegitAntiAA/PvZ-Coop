@@ -2359,6 +2359,8 @@ void Board::StartLevelClientPresentation()
 {
 	NetCleanupCrazyDavePresentation();
 	mCoinBankFadeCount = 0;
+	if (mApp->IsWallnutBowlingLevel() && mChallenge)
+		mChallenge->mShowBowlingLine = true;
 	LawnNet::gNetSuppressSounds = true;
 	RemoveCutsceneZombies();
 	LawnNet::gNetSuppressSounds = false;
@@ -2668,6 +2670,20 @@ void Board::DisplayAdvice(const SexyString& theAdvice, MessageStyle theMessageSt
 
 	mAdvice->SetLabel(theAdvice, theMessageStyle);
 	mHelpIndex = theHelpIndex;
+	if (mApp->NetIsHost() && mApp->mNetManager)
+	{
+		NetBuffer anEvent;
+		const size_t aLabelBytes = min((size_t)(MAX_MESSAGE_LENGTH - 1), theAdvice.size());
+		anEvent.WriteU32(mApp->mNetBoardSeed);
+		anEvent.WriteU8(0); // SHOW
+		anEvent.WriteU8((uint8_t)theMessageStyle);
+		anEvent.WriteU8(theHelpIndex == AdviceType::ADVICE_NONE ? 255 : (uint8_t)theHelpIndex);
+		anEvent.WriteU8((uint8_t)aLabelBytes);
+		anEvent.WriteBytes(theAdvice.data(), aLabelBytes);
+		mApp->mNetManager->SendBoardEvent(anEvent, BOARDEV_ADVICE_STATE);
+		NetTrace("advice TX op=show style=%u help=%d bytes=%zu", (unsigned)theMessageStyle,
+			(int)theHelpIndex, aLabelBytes);
+	}
 }
 
 //0x40CA10
@@ -2685,6 +2701,17 @@ void Board::ClearAdviceImmediately()
 {
 	ClearAdvice(AdviceType::ADVICE_NONE);
 	mAdvice->mDuration = 0;
+	if (mApp->NetIsHost() && mApp->mNetManager)
+	{
+		NetBuffer anEvent;
+		anEvent.WriteU32(mApp->mNetBoardSeed);
+		anEvent.WriteU8(2); // CLEAR_IMMEDIATE
+		anEvent.WriteU8(0);
+		anEvent.WriteU8(255);
+		anEvent.WriteU8(0);
+		mApp->mNetManager->SendBoardEvent(anEvent, BOARDEV_ADVICE_STATE);
+		NetTrace("advice TX op=clear_immediate");
+	}
 }
 
 //0x40CAB0
@@ -2694,6 +2721,17 @@ void Board::ClearAdvice(AdviceType theHelpIndex)
 	{
 		mAdvice->ClearLabel();
 		mHelpIndex = AdviceType::ADVICE_NONE;
+		if (mApp->NetIsHost() && mApp->mNetManager)
+		{
+			NetBuffer anEvent;
+			anEvent.WriteU32(mApp->mNetBoardSeed);
+			anEvent.WriteU8(1); // CLEAR
+			anEvent.WriteU8(0);
+			anEvent.WriteU8(255);
+			anEvent.WriteU8(0);
+			mApp->mNetManager->SendBoardEvent(anEvent, BOARDEV_ADVICE_STATE);
+			NetTrace("advice TX op=clear");
+		}
 	}
 }
 

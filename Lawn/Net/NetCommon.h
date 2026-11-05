@@ -26,7 +26,7 @@ namespace LawnNet
 // (the host broadcasts the same sounds via events).
 extern bool gNetSuppressSounds;
 
-static const uint32_t NET_PROTOCOL_VERSION = 22; // stable seed-packet identity + exact shared-conveyor input
+static const uint32_t NET_PROTOCOL_VERSION = 23; // Bowling presentation flag + stable shared-conveyor input
 static const uint16_t NET_DEFAULT_PORT = 27713;			// PvZ co-op port
 static const int NET_MAX_PLAYERS = 4;					// 1 host + 3 clients
 static const int NET_MAX_NICK = 16;						// bytes (without terminator)
@@ -165,7 +165,8 @@ enum NetBoardEvent : uint8_t
 	BOARDEV_PLANT_STATE = 19,		// u16 id, u8 state byte (anim transitions)
 	BOARDEV_ZOMBIE_STATE = 20,		// u16 id, phase byte (anim transitions)
 	BOARDEV_POTATO_EXPLODED = 21,	// u16 plant id, i16 effect x/y, u8 row
-	BOARDEV_BUSH_RUSTLE = 22		// u8 row
+	BOARDEV_BUSH_RUSTLE = 22,		// u8 row
+	BOARDEV_ADVICE_STATE = 23		// u32 board seed, u8 op/style/help/len, label bytes
 };
 
 // Exact payload sizes for coin/sun board events.  Keep these shared by the
@@ -181,7 +182,8 @@ enum NetSnapshotFlag : uint8_t
 	SNAPFLAG_LEVEL_COMPLETE = 2,
 	SNAPFLAG_ZOMBIES_WON = 4,
 	SNAPFLAG_FOG_BLOWN = 8,
-	SNAPFLAG_HEALTHBAR = 0x10
+	SNAPFLAG_HEALTHBAR = 0x10,
+	SNAPFLAG_BOWLING_LINE = 0x20
 };
 
 // PvP teams

@@ -5,6 +5,7 @@
 #include "../CursorObject.h"
 #include "../Challenge.h"
 #include "../CutScene.h"
+#include "../MessageWidget.h"
 #include "../Widget/StoreScreen.h"
 #include "../Widget/SeedChooserScreen.h"
 #include "../../SexyAppFramework/Common.h"
@@ -1563,6 +1564,58 @@ void NetManager::OnBoardEvent(NetBuffer& thePayload)
 		NetTrace("ENDLESS_REPICK applied stage=%u mode=%d scene=%d chooser=%p",
 			aNextStage, (int)mApp->mGameMode, (int)mApp->mGameScene,
 			(void*)mApp->mSeedChooserScreen);
+		return;
+	}
+	// Advice is presentation state and is also valid during LEVEL_INTRO, where
+	// normal board events are deliberately discarded.  Apply the reliable event
+	// immediately so titles/tutorial prompts retain their host ordering.
+	if (anEvent == BOARDEV_ADVICE_STATE)
+	{
+		uint8_t anEventWire = 0;
+		uint32_t aBoardSeed = 0;
+		uint8_t anOp = 255;
+		uint8_t aStyle = 0;
+		uint8_t aHelp = 255;
+		uint8_t aLength = 0;
+		char aLabel[MAX_MESSAGE_LENGTH] = {};
+		const bool aHeaderValid = thePayload.ReadU8(&anEventWire) &&
+			thePayload.ReadU32(&aBoardSeed) && thePayload.ReadU8(&anOp) &&
+			thePayload.ReadU8(&aStyle) && thePayload.ReadU8(&aHelp) &&
+			thePayload.ReadU8(&aLength);
+		const bool aFieldsValid = aHeaderValid && anEventWire == BOARDEV_ADVICE_STATE &&
+			anOp <= 2 && aLength < MAX_MESSAGE_LENGTH &&
+			(anOp != 0 || (aStyle > (uint8_t)MessageStyle::MESSAGE_STYLE_OFF &&
+				aStyle <= (uint8_t)MessageStyle::MESSAGE_STYLE_ACHIEVEMENT)) &&
+			(aHelp == 255 || aHelp < (uint8_t)NUM_ADVICE_TYPES) &&
+			thePayload.Remaining() == aLength;
+		const bool aLabelValid = aFieldsValid &&
+			(aLength == 0 || thePayload.ReadBytes(aLabel, aLength)) &&
+			thePayload.Remaining() == 0;
+		Board* aBoard = mApp ? mApp->mBoard : nullptr;
+		const bool aContextValid = IsClient() && mApp && aBoard && aBoard->mAdvice &&
+			aBoardSeed == mApp->mNetBoardSeed;
+		if (!aLabelValid || !aContextValid)
+		{
+			NetTrace("advice rejected op=%u style=%u help=%u len=%u seed=%u expectedSeed=%u bytes=%zu context=%d",
+				anOp, aStyle, aHelp, aLength, aBoardSeed,
+				mApp ? mApp->mNetBoardSeed : 0, thePayload.Size(), aContextValid ? 1 : 0);
+			return;
+		}
+		aLabel[aLength] = 0;
+		if (anOp == 0)
+		{
+			aBoard->mAdvice->SetLabel(SexyString(aLabel), (MessageStyle)aStyle);
+			aBoard->mHelpIndex = aHelp == 255 ? AdviceType::ADVICE_NONE : (AdviceType)aHelp;
+		}
+		else
+		{
+			aBoard->mAdvice->ClearLabel();
+			aBoard->mHelpIndex = AdviceType::ADVICE_NONE;
+			if (anOp == 2)
+				aBoard->mAdvice->mDuration = 0;
+		}
+		NetTrace("advice applied op=%u style=%u help=%u bytes=%u scene=%d",
+			anOp, aStyle, aHelp, aLength, (int)mApp->mGameScene);
 		return;
 	}
 	// Intro preview entities are created locally by CutScene on every peer.
