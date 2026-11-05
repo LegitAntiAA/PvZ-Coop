@@ -14,7 +14,7 @@
 
 namespace
 {
-static const size_t NET_MOUSE_INPUT_BYTES = 19;
+static const size_t NET_MOUSE_INPUT_BYTES = 21;
 
 int NetCanonicalX(LawnApp* theApp, int theLocalX)
 {
@@ -785,13 +785,15 @@ void NetManager::OnClientInput(NetSession* theSession, NetBuffer& thePayload)
 	int16_t aCanonicalX = 0;
 	int16_t aCanonicalY = 0;
 	int16_t aSeedIndex = -1;
+	uint16_t aSeedPacketId = 0;
 	uint8_t aSeedType = 255;
 	uint8_t anImitater = 255;
 	uint8_t anOwner = 255;
 	const bool aDecoded = thePayload.ReadU32(&anEpoch) && thePayload.ReadU32(&aSequence) &&
 		thePayload.ReadU8(&anAction) && thePayload.ReadU8(&aButtonWire) &&
 		thePayload.ReadI16(&aCanonicalX) && thePayload.ReadI16(&aCanonicalY) &&
-		thePayload.ReadI16(&aSeedIndex) && thePayload.ReadU8(&aSeedType) &&
+		thePayload.ReadI16(&aSeedIndex) && thePayload.ReadU16(&aSeedPacketId) &&
+		thePayload.ReadU8(&aSeedType) &&
 		thePayload.ReadU8(&anImitater) && thePayload.ReadU8(&anOwner) &&
 		thePayload.Remaining() == 0;
 	const int aButton = (int)(int8_t)aButtonWire;
@@ -830,16 +832,16 @@ void NetManager::OnClientInput(NetSession* theSession, NetBuffer& thePayload)
 	}
 
 	const bool aHasSeedIdentity = aSeedIndex >= 0;
-	const bool aCleanNoSeedIdentity = aSeedIndex == -1 && aSeedType == 255 &&
+	const bool aCleanNoSeedIdentity = aSeedIndex == -1 && aSeedPacketId == 0 && aSeedType == 255 &&
 		anImitater == 255 && anOwner == 255;
 	if ((!aHasSeedIdentity && !aCleanNoSeedIdentity) ||
 		(aHasSeedIdentity && (aSeedIndex >= SEEDBANK_CAPACITY ||
-			aSeedType == 255 ||
+			aSeedPacketId == 0 || aSeedType == 255 ||
 			(anImitater != 255 && anImitater >= (uint8_t)SeedType::NUM_SEED_TYPES) ||
 			(anOwner >= NET_MAX_PLAYERS && anOwner != NET_SHARED_OWNER))))
 	{
-		NetTrace("mouse reject slot=%u reason=seed_identity index=%d type=%u imitater=%u owner=%u",
-			aSlot, aSeedIndex, aSeedType, anImitater, anOwner);
+		NetTrace("mouse reject slot=%u reason=seed_identity index=%d packetId=%u type=%u imitater=%u owner=%u",
+			aSlot, aSeedIndex, aSeedPacketId, aSeedType, anImitater, anOwner);
 		return;
 	}
 
@@ -855,16 +857,17 @@ void NetManager::OnClientInput(NetSession* theSession, NetBuffer& thePayload)
 			return;
 		}
 
-		// The sender's index is viewer-relative (its own cards are first), so it is
-		// diagnostic only.  Resolve the click exclusively through the semantic
-		// identity that both banks share.  Ambiguous duplicates are rejected rather
-		// than letting an untrusted local index select one of them on the host.
+		// The sender's index is viewer-relative and therefore diagnostic only.  The
+		// host-assigned packet id survives conveyor compaction and disambiguates two
+		// identical Wall-nuts without trusting client-side layout.  The semantic
+		// fields are still checked so a stale/replayed id cannot change card meaning.
 		int aHostSeedIndex = -1;
 		int aMatchCount = 0;
 		for (int i = 0; i < aHostBank->mNumPackets; i++)
 		{
 			const SeedPacket& aCandidate = aHostBank->mSeedPackets[i];
-			if ((uint8_t)aCandidate.mPacketType == aSeedType &&
+			if (aCandidate.mNetId == aSeedPacketId &&
+				(uint8_t)aCandidate.mPacketType == aSeedType &&
 				(uint8_t)aCandidate.mImitaterType == anImitater &&
 				aCandidate.mNetOwnerSlot == anOwner)
 			{
@@ -874,15 +877,15 @@ void NetManager::OnClientInput(NetSession* theSession, NetBuffer& thePayload)
 		}
 		if (aMatchCount != 1)
 		{
-			NetTrace("mouse reject slot=%u reason=seed_identity_%s localIndex=%d identity=(%u,%u,%u) matches=%d",
+			NetTrace("mouse reject slot=%u reason=seed_packet_id_%s localIndex=%d packetId=%u identity=(%u,%u,%u) matches=%d",
 				aSlot, aMatchCount == 0 ? "missing" : "ambiguous", aSeedIndex,
-				aSeedType, anImitater, anOwner, aMatchCount);
+				aSeedPacketId, aSeedType, anImitater, anOwner, aMatchCount);
 			return;
 		}
 
 		SeedPacket& aPacket = aHostBank->mSeedPackets[aHostSeedIndex];
-		NetTrace("mouse seed remap slot=%u localIndex=%d hostIndex=%d identity=(%u,%u,%u)",
-			aSlot, aSeedIndex, aHostSeedIndex, aSeedType, anImitater, anOwner);
+		NetTrace("mouse seed remap slot=%u localIndex=%d hostIndex=%d packetId=%u identity=(%u,%u,%u)",
+			aSlot, aSeedIndex, aHostSeedIndex, aSeedPacketId, aSeedType, anImitater, anOwner);
 		// Packet motion between the client's last snapshot and this ordered click
 		// must not select a neighbour.  Resolve the validated semantic identity to
 		// the host packet's current centre while preserving Board's normal path.
@@ -916,6 +919,10 @@ void NetManager::OnClientInput(NetSession* theSession, NetBuffer& thePayload)
 	anInput.mButton = (int8_t)aButton;
 	anInput.mX = (int16_t)aLocalX;
 	anInput.mY = (int16_t)aLocalY;
+	anInput.mSeedPacketId = aSeedPacketId;
+	anInput.mSeedType = aSeedType;
+	anInput.mSeedImitater = anImitater;
+	anInput.mSeedOwner = anOwner;
 
 	std::lock_guard<std::mutex> aLock(mSessionsMutex);
 	if (mPendingInputCount[aSlot] >= NET_INPUT_QUEUE_PER_PLAYER ||
@@ -2144,6 +2151,7 @@ void NetManager::SendMouseInputAction(uint8_t theAction, int theButton, int theX
 	}
 
 	int16_t aSeedIndex = -1;
+	uint16_t aSeedPacketId = 0;
 	uint8_t aSeedType = 255;
 	uint8_t anImitater = 255;
 	uint8_t anOwner = 255;
@@ -2155,6 +2163,7 @@ void NetManager::SendMouseInputAction(uint8_t theAction, int theButton, int theX
 		{
 			SeedPacket& aPacket = aBoard->mSeedBank->mSeedPackets[aHitIndex];
 			aSeedIndex = (int16_t)aHitIndex;
+			aSeedPacketId = aPacket.mNetId;
 			aSeedType = (uint8_t)aPacket.mPacketType;
 			anImitater = (uint8_t)aPacket.mImitaterType;
 			anOwner = aPacket.mNetOwnerSlot;
@@ -2167,9 +2176,9 @@ void NetManager::SendMouseInputAction(uint8_t theAction, int theButton, int theX
 		NetTrace("mouse send blocked reason=sequence_exhausted epoch=%u", mInputEpoch);
 		return;
 	}
-	NetTrace("mouse send epoch=%u seq=%u action=%u button=%d local=(%d,%d) canonical=(%d,%d) seed=(%d,%u,%u,%u)",
+	NetTrace("mouse send epoch=%u seq=%u action=%u button=%d local=(%d,%d) canonical=(%d,%d) seed=(%d,%u,%u,%u,%u)",
 		mInputEpoch, aSequence, theAction, theButton, theX, theY, aCanonicalX, aCanonicalY,
-		aSeedIndex, aSeedType, anImitater, anOwner);
+		aSeedIndex, aSeedPacketId, aSeedType, anImitater, anOwner);
 	NetBuffer aMsg;
 	aMsg.WriteU32(mInputEpoch);
 	aMsg.WriteU32(aSequence);
@@ -2178,6 +2187,7 @@ void NetManager::SendMouseInputAction(uint8_t theAction, int theButton, int theX
 	aMsg.WriteI16((int16_t)aCanonicalX);
 	aMsg.WriteI16((int16_t)aCanonicalY);
 	aMsg.WriteI16(aSeedIndex);
+	aMsg.WriteU16(aSeedPacketId);
 	aMsg.WriteU8(aSeedType);
 	aMsg.WriteU8(anImitater);
 	aMsg.WriteU8(anOwner);

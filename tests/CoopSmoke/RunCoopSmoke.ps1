@@ -14,7 +14,7 @@ param(
     [int]$GracefulExitSeconds = 10,
     [ValidateRange(0, 65535)]
     [int]$Port = 0,
-    [ValidateSet("Adventure1", "Adventure5Bowling", "Vasebreaker", "Beghouled")]
+    [ValidateSet("Adventure1", "Adventure5Bowling", "Adventure5BowlingClient", "Vasebreaker", "Beghouled")]
     [string]$Scenario = "Adventure1",
     [ValidateSet(0, 1)]
     [int]$SkipIntro = 1,
@@ -715,6 +715,7 @@ $ArtifactsRoot = Get-NormalizedPath -Path $ArtifactsRoot
 $scenarioSpec = switch ($Scenario) {
     "Adventure1" { [ordered]@{ Mode = "adventure"; Level = 1; Marker = "adventure1" } }
     "Adventure5Bowling" { [ordered]@{ Mode = "adventure"; Level = 5; Marker = "adventure5_bowling" } }
+    "Adventure5BowlingClient" { [ordered]@{ Mode = "adventure_bowling_client"; Level = 5; Marker = "adventure5_bowling_client" } }
     "Vasebreaker" { [ordered]@{ Mode = "vasebreaker"; Level = 1; Marker = "vasebreaker" } }
     "Beghouled" { [ordered]@{ Mode = "beghouled"; Level = 1; Marker = "beghouled" } }
     default { throw ("Unsupported smoke scenario: {0}" -f $Scenario) }
@@ -722,6 +723,7 @@ $scenarioSpec = switch ($Scenario) {
 $Mode = [string]$scenarioSpec.Mode
 $Level = [int]$scenarioSpec.Level
 $scenarioMarker = [string]$scenarioSpec.Marker
+$isBowlingScenario = $Scenario -in @("Adventure5Bowling", "Adventure5BowlingClient")
 $runId = [Guid]::NewGuid().ToString("N")
 $runRoot = Join-Path $ArtifactsRoot ("run_" + $runId)
 $hostRoot = Join-Path $runRoot "host"
@@ -849,7 +851,7 @@ try {
         @{ Label = "client action applied"; Pattern = ('(?im)\bSMOKE_CHECKPOINT\b[^\r\n]*scenario={0}[^\r\n]*step=ACTION_APPLIED\b' -f ([regex]::Escape($scenarioMarker))) },
         @{ Label = "post-action applied hash"; Pattern = '(?im)\bSMOKE_POST_ACTION_APPLIED\b[^\r\n]*\bhash=(?:0x)?[0-9a-f]{8,16}\b' }
     )
-    if ($Scenario -eq "Adventure5Bowling") {
+    if ($isBowlingScenario) {
         $hostPositivePatterns += @{
             Label = "host moving Bowling nut"
             Pattern = '(?im)\bSMOKE_BOWLING_NUT_MOVING\b[^\r\n]*\brole=host\b[^\r\n]*\bid=\d+\b'
@@ -865,6 +867,16 @@ try {
         $clientPositivePatterns += @{
             Label = "client offscreen zombie spawn"
             Pattern = '(?im)\bSMOKE_ZOMBIE_SPAWN_OBSERVED\b[^\r\n]*\brole=client\b[^\r\n]*\bid=\d+\b'
+        }
+        if ($Scenario -eq "Adventure5BowlingClient") {
+            $hostPositivePatterns += @{
+                Label = "host accepted remote conveyor packet"
+                Pattern = '(?im)\bmouse seed remap\b[^\r\n]*\bslot=1\b[^\r\n]*\bpacketId=[1-9]\d*\b'
+            }
+            $clientPositivePatterns += @{
+                Label = "client issued remote Bowling input"
+                Pattern = '(?im)\bSMOKE_BOWLING_CLIENT_INPUT\b[^\r\n]*\bindex=\d+\b[^\r\n]*\bpacketId=[1-9]\d*\b[^\r\n]*\bduplicates=\d+\b'
+            }
         }
     }
     $negativePatterns = @(
@@ -889,7 +901,8 @@ try {
     Assert-NoNegativePatterns -Role "client" -Text $clientLog -Patterns $negativePatterns
 
     $combinedActionLog = $hostLog + [Environment]::NewLine + $clientLog
-    $expectedActionOwner = if ($Scenario -eq "Vasebreaker" -or $Scenario -eq "Beghouled") { "client" } else { "host" }
+    $expectedActionOwner = if ($Scenario -eq "Adventure5BowlingClient" -or
+        $Scenario -eq "Vasebreaker" -or $Scenario -eq "Beghouled") { "client" } else { "host" }
     $actionIssuedPattern = ('(?im)\bSMOKE_CHECKPOINT\b[^\r\n]*scenario={0}[^\r\n]*step=ACTION_ISSUED[^\r\n]*owner={1}\b' -f
         ([regex]::Escape($scenarioMarker)), $expectedActionOwner)
     if (-not [regex]::IsMatch($combinedActionLog, $actionIssuedPattern)) {
@@ -897,7 +910,7 @@ try {
             $expectedActionOwner)
     }
 
-    if ($Scenario -eq "Adventure5Bowling") {
+    if ($isBowlingScenario) {
         $hostNut = [regex]::Match($hostLog,
             '(?im)\bSMOKE_BOWLING_NUT_MOVING\b[^\r\n]*\brole=host\b[^\r\n]*\bid=(\d+)\b')
         $clientNut = [regex]::Match($clientLog,
@@ -915,6 +928,32 @@ try {
             ($hostZombie.Groups[1].Value -ne $clientZombie.Groups[1].Value)) {
             throw ("Zombie spawn identity/presentation mismatch: host={0}, client={1}." -f
                 $hostZombie.Groups[1].Value, $clientZombie.Groups[1].Value)
+        }
+        if ($Scenario -eq "Adventure5BowlingClient") {
+            $clientPacket = [regex]::Match($clientLog,
+                '(?im)\bSMOKE_BOWLING_CLIENT_INPUT\b[^\r\n]*\bpacketId=([1-9]\d*)\b[^\r\n]*\bduplicates=(\d+)\b')
+            $hostRemap = [regex]::Match($hostLog,
+                '(?im)\bmouse seed remap\b[^\r\n]*\bslot=1\b[^\r\n]*\bpacketId=([1-9]\d*)\b')
+            $hostApply = [regex]::Match($hostLog,
+                '(?im)\bmouse apply seed revalidated\b[^\r\n]*\bslot=1\b[^\r\n]*\bpacketId=([1-9]\d*)\b')
+            if ((-not $clientPacket.Success) -or (-not $hostRemap.Success) -or
+                (-not $hostApply.Success)) {
+                throw ("Missing remote Bowling packet evidence: client={0}, remap={1}, apply={2}." -f
+                    $clientPacket.Success, $hostRemap.Success, $hostApply.Success)
+            }
+            $duplicateCount = [int]$clientPacket.Groups[2].Value
+            $clientPacketId = [uint32]$clientPacket.Groups[1].Value
+            $hostRemapPacketId = [uint32]$hostRemap.Groups[1].Value
+            $hostApplyPacketId = [uint32]$hostApply.Groups[1].Value
+            if ($duplicateCount -lt 2) {
+                throw ("Remote Bowling input did not exercise duplicate cards: duplicates={0}." -f
+                    $duplicateCount)
+            }
+            if (($clientPacketId -ne $hostRemapPacketId) -or
+                ($clientPacketId -ne $hostApplyPacketId)) {
+                throw ("Remote Bowling packet identity mismatch: client={0}, remap={1}, apply={2}." -f
+                    $clientPacketId, $hostRemapPacketId, $hostApplyPacketId)
+            }
         }
     }
 

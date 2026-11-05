@@ -206,6 +206,38 @@ SeedPacket* FindUsablePacket(Board* theBoard)
 	return nullptr;
 }
 
+SeedPacket* FindDuplicateUsablePacket(Board* theBoard, int& theDuplicateCount)
+{
+	theDuplicateCount = 0;
+	if (!theBoard || !theBoard->mSeedBank)
+		return nullptr;
+	SeedBank* aBank = theBoard->mSeedBank;
+	for (int i = 0; i < aBank->mNumPackets; ++i)
+	{
+		SeedPacket* aPacket = &aBank->mSeedPackets[i];
+		if (aPacket->mPacketType == SeedType::SEED_NONE || aPacket->mNetId == 0 ||
+			!aPacket->CanPickUp())
+			continue;
+		int aMatchCount = 1;
+		for (int j = 0; j < aBank->mNumPackets; ++j)
+		{
+			if (i == j)
+				continue;
+			const SeedPacket& anOther = aBank->mSeedPackets[j];
+			if (anOther.mNetId != 0 && anOther.mPacketType == aPacket->mPacketType &&
+				anOther.mImitaterType == aPacket->mImitaterType &&
+				anOther.mNetOwnerSlot == aPacket->mNetOwnerSlot)
+				aMatchCount++;
+		}
+		if (aMatchCount >= 2)
+		{
+			theDuplicateCount = aMatchCount;
+			return aPacket;
+		}
+	}
+	return nullptr;
+}
+
 bool FindEmptySmokeCell(Board* theBoard, int& theGridX, int& theGridY)
 {
 	if (!theBoard)
@@ -245,6 +277,36 @@ bool IssueHostSeedAction(LawnApp* theApp)
 	const int aPlantX = aBoard->GridToPixelX(aGridX, aGridY) + 40;
 	const int aPlantY = aBoard->GridToPixelY(aGridX, aGridY) + 45;
 	SmokeHostClick(theApp, aPlantX, aPlantY);
+	return true;
+}
+
+bool IssueClientSeedAction(LawnApp* theApp)
+{
+	Board* aBoard = theApp ? theApp->mBoard : nullptr;
+	// Wait for a real duplicate conveyor identity.  Adventure 5 has two packet
+	// types, so its third live card guarantees this case and proves that stable
+	// packet ids—not an ambiguous type tuple—drive the remote click.
+	int aDuplicateCount = 0;
+	SeedPacket* aPacket = FindDuplicateUsablePacket(aBoard, aDuplicateCount);
+	int aGridX = 0;
+	int aGridY = 0;
+	if (!aBoard || !aPacket || !FindEmptySmokeCell(aBoard, aGridX, aGridY))
+		return false;
+
+	const int aPacketIndex = (int)(aPacket - aBoard->mSeedBank->mSeedPackets);
+	const int aPacketX = aBoard->mSeedBank->mX + aPacket->mX + aPacket->mOffsetX + aPacket->mWidth / 2;
+	const int aPacketY = aBoard->mSeedBank->mY + aPacket->mY + aPacket->mHeight / 2;
+	const int aPlantX = aBoard->GridToPixelX(aGridX, aGridY) + 40;
+	const int aPlantY = aBoard->GridToPixelY(aGridX, aGridY) + 45;
+
+	// Both clicks travel through the same ordered client input stream as real
+	// gameplay.  The host resolves the conveyor packet and owns creation of the
+	// rolling nut; the client never mutates its mirror directly.
+	SmokeClientClick(theApp, aPacketX, aPacketY);
+	SmokeClientClick(theApp, aPlantX, aPlantY);
+	NetTrace("SMOKE_BOWLING_CLIENT_INPUT index=%d packetId=%u type=%d owner=%u duplicates=%d cell=(%d,%d)",
+		aPacketIndex, aPacket->mNetId, (int)aPacket->mPacketType,
+		aPacket->mNetOwnerSlot, aDuplicateCount, aGridX, aGridY);
 	return true;
 }
 
@@ -532,6 +594,8 @@ bool NetSmokeScenarioRuntime::IssueAction(LawnApp* theApp, const NetSmokeManifes
 			aFromX, aFromY, aToX, aToY);
 		return true;
 	}
+	if (mScenario == NETSMOKE_SCENARIO_ADVENTURE_5_BOWLING_CLIENT)
+		return IssueClientSeedAction(theApp);
 
 	return IssueHostSeedAction(theApp);
 }
@@ -547,7 +611,7 @@ bool NetSmokeScenarioRuntime::ObserveActionApplied(Board* theBoard,
 		return theBoard->mChallenge &&
 			(theBoard->mChallenge->mChallengeScore > mBaselineChallengeScore ||
 				SmokePlantGridHash(theBoard) != mBaselinePlantGridHash);
-	if (mScenario == NETSMOKE_SCENARIO_ADVENTURE_5_BOWLING)
+	if (NetIsBowlingSmokeScenario(mScenario))
 	{
 		Plant* aNut = FindBowlingSmokeNut(theBoard, mBowlingNutId);
 		if (!aNut)
@@ -650,7 +714,7 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
 		}
 	}
 
-	if (mScenario == NETSMOKE_SCENARIO_ADVENTURE_5_BOWLING &&
+	if (NetIsBowlingSmokeScenario(mScenario) &&
 		!mBowlingZombieObserved && aBoard->mCurrentWave > 0)
 	{
 		Zombie* aZombie = nullptr;
@@ -694,7 +758,7 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
 				theFailure = "gameplay began without observing synchronized real intro progress";
 				return false;
 			}
-			if (mScenario == NETSMOKE_SCENARIO_ADVENTURE_5_BOWLING && !mIntroSawDave)
+			if (NetIsBowlingSmokeScenario(mScenario) && !mIntroSawDave)
 			{
 				theFailure = "Adventure 5 gameplay began without observing synchronized Dave presentation";
 				return false;
@@ -767,7 +831,7 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
 		theFailure = "scripted smoke action was not applied within 30 seconds";
 		return false;
 	}
-	if (mScenario == NETSMOKE_SCENARIO_ADVENTURE_5_BOWLING && !mActionApplied &&
+	if (NetIsBowlingSmokeScenario(mScenario) && !mActionApplied &&
 		(uint32_t)(GetTickCount() - mActionTick) >= 30000)
 	{
 		theFailure = "Bowling nut was not visibly moving on this peer within 30 seconds";
@@ -797,7 +861,7 @@ void NetSmokeScenarioRuntime::OnSnapshotApplied(uint32_t theHash, size_t theByte
 bool NetSmokeScenarioRuntime::IsComplete(uint32_t theRequiredPostActionSnapshots) const
 {
 	return mActionApplied &&
-		(mScenario != NETSMOKE_SCENARIO_ADVENTURE_5_BOWLING || mBowlingZombieObserved) &&
+		(!NetIsBowlingSmokeScenario(mScenario) || mBowlingZombieObserved) &&
 		theRequiredPostActionSnapshots > 0 &&
 		mPostActionSamples >= theRequiredPostActionSnapshots;
 }

@@ -26,7 +26,7 @@ namespace LawnNet
 // (the host broadcasts the same sounds via events).
 extern bool gNetSuppressSounds;
 
-static const uint32_t NET_PROTOCOL_VERSION = 21; // exact mower presentation + ordered mouse/Q gameplay input
+static const uint32_t NET_PROTOCOL_VERSION = 22; // stable seed-packet identity + exact shared-conveyor input
 static const uint16_t NET_DEFAULT_PORT = 27713;			// PvZ co-op port
 static const int NET_MAX_PLAYERS = 4;					// 1 host + 3 clients
 static const int NET_MAX_NICK = 16;						// bytes (without terminator)
@@ -86,7 +86,7 @@ enum NetMsgType : uint8_t
 	NETMSG_SNAPSHOT = 20,		// h->c: full logical board state
 	NETMSG_BOARD_EVENT = 21,	// h->c: u8 eventType + payload (sounds, instant visuals)
 
-	NETMSG_INPUT_MOUSE = 30,	// c->h: u32 epoch/seq, u8 action/button, i16 canonical x/y, i16 seed index + type/imitater/owner
+	NETMSG_INPUT_MOUSE = 30,	// c->h: u32 epoch/seq, u8 action/button, i16 canonical x/y/index, u16 packet id, u8 type/imitater/owner
 	NETMSG_INPUT_KEY = 31,		// c->h: u32 epoch/seq, u16 keyCode (Q only), u8 down
 	NETMSG_CURSOR = 32,			// both: u8 slot, i16 x, i16 y, u8 cursorType, u8 heldSeed, u8 heldImitater, u8 flags
 	NETMSG_PAUSE = 33,			// h->c: u8 paused

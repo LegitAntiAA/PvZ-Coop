@@ -6162,6 +6162,47 @@ void LawnApp::NetHandleRemoteInputs()
 			!mNetManager->IsPlayerActive(anInput.mSlot) || !aBatchBoard->mNetPlayerCursors[anInput.mSlot])
 			continue;
 
+		// A packet may move or the conveyor may compact after the receive phase
+		// validates a click but before the main thread applies it.  Resolve the
+		// stable host id again at the actual mutation point; never let a queued
+		// coordinate select a different identical card that inherited its slot.
+		if (anInput.mAction == LawnNet::NETINPUT_MOUSE_DOWN && anInput.mSeedPacketId != 0)
+		{
+			SeedBank* aBank = aBatchBoard->mSeedBank;
+			SeedPacket* aResolvedPacket = nullptr;
+			int aMatchCount = 0;
+			if (aBank && aBank->mNumPackets >= 0 && aBank->mNumPackets <= SEEDBANK_CAPACITY)
+			{
+				for (int i = 0; i < aBank->mNumPackets; i++)
+				{
+					SeedPacket& aCandidate = aBank->mSeedPackets[i];
+					if (aCandidate.mNetId == anInput.mSeedPacketId &&
+						(uint8_t)aCandidate.mPacketType == anInput.mSeedType &&
+						(uint8_t)aCandidate.mImitaterType == anInput.mSeedImitater &&
+						aCandidate.mNetOwnerSlot == anInput.mSeedOwner)
+					{
+						aResolvedPacket = &aCandidate;
+						aMatchCount++;
+					}
+				}
+			}
+			if (aMatchCount != 1)
+			{
+				LawnNet::NetTrace("mouse apply dropped slot=%u reason=seed_packet_id_revalidate packetId=%u matches=%d seq=%u",
+					anInput.mSlot, anInput.mSeedPacketId, aMatchCount, anInput.mSequence);
+				continue;
+			}
+			const int aWideX = mDDInterface ? mDDInterface->mWideScreenOffsetX : 0;
+			const int aWideY = mDDInterface ? mDDInterface->mWideScreenOffsetY : 0;
+			anInput.mX = (int16_t)(aBank->mX + aResolvedPacket->mX +
+				aResolvedPacket->mOffsetX + aResolvedPacket->mWidth / 2 + aWideX);
+			anInput.mY = (int16_t)(aBank->mY + aResolvedPacket->mY +
+				aResolvedPacket->mHeight / 2 + aWideY);
+			LawnNet::NetTrace("mouse apply seed revalidated slot=%u packetId=%u index=%d local=(%d,%d) seq=%u",
+				anInput.mSlot, anInput.mSeedPacketId, aResolvedPacket->mIndex,
+				anInput.mX, anInput.mY, anInput.mSequence);
+		}
+
 		// Board input can synchronously open/close UI and, in challenge code,
 		// even replace the board.  The guard restores host authority on every
 		// return path, but never dereferences a board after LawnApp stopped owning

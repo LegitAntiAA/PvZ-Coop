@@ -65,6 +65,10 @@ struct NetRemoteInput
 	uint8_t mAction;
 	int8_t mButton;
 	int16_t mX, mY;
+	uint16_t mSeedPacketId;
+	uint8_t mSeedType;
+	uint8_t mSeedImitater;
+	uint8_t mSeedOwner;
 };
 
 class NetManager

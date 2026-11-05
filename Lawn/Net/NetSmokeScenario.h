@@ -21,8 +21,15 @@ enum NetSmokeScenarioId : uint8_t
 	NETSMOKE_SCENARIO_ADVENTURE_1 = 1,
 	NETSMOKE_SCENARIO_ADVENTURE_5_BOWLING = 2,
 	NETSMOKE_SCENARIO_VASEBREAKER = 3,
-	NETSMOKE_SCENARIO_BEGHOULED = 4
+	NETSMOKE_SCENARIO_BEGHOULED = 4,
+	NETSMOKE_SCENARIO_ADVENTURE_5_BOWLING_CLIENT = 5
 };
+
+inline bool NetIsBowlingSmokeScenario(NetSmokeScenarioId theScenario)
+{
+	return theScenario == NETSMOKE_SCENARIO_ADVENTURE_5_BOWLING ||
+		theScenario == NETSMOKE_SCENARIO_ADVENTURE_5_BOWLING_CLIENT;
+}
 
 struct NetSmokeScenarioDefinition
 {
@@ -47,7 +54,10 @@ inline const NetSmokeScenarioDefinition* NetSmokeScenarioTable(size_t& theCount)
 		{ NETSMOKE_SCENARIO_VASEBREAKER, "vasebreaker", "vasebreaker", 1,
 			(uint8_t)GameMode::GAMEMODE_CHALLENGE_VASEBREAKER, true },
 		{ NETSMOKE_SCENARIO_BEGHOULED, "beghouled", "beghouled", 1,
-			(uint8_t)GameMode::GAMEMODE_CHALLENGE_BEGHOULED, true }
+			(uint8_t)GameMode::GAMEMODE_CHALLENGE_BEGHOULED, true },
+		{ NETSMOKE_SCENARIO_ADVENTURE_5_BOWLING_CLIENT,
+			"adventure5_bowling_client", "adventure_bowling_client", 5,
+			(uint8_t)GameMode::GAMEMODE_ADVENTURE, true }
 	};
 	theCount = sizeof(aScenarios) / sizeof(aScenarios[0]);
 	return aScenarios;
@@ -77,7 +87,8 @@ inline bool NetResolveSmokeScenario(const std::string& theMode, int theLevel,
 			return true;
 		}
 	}
-	theError = "unsupported smoke scenario; allowed pairs are adventure/1, adventure/5, vasebreaker/1, beghouled/1";
+	theError = "unsupported smoke scenario; allowed pairs are adventure/1, adventure/5, "
+		"adventure_bowling_client/5, vasebreaker/1, beghouled/1";
 	return false;
 }
 

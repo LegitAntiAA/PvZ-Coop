@@ -488,6 +488,22 @@ void TestSmokeManifestAndHashValidation()
 	CHECK(aManifest.mScenario == LawnNet::NETSMOKE_SCENARIO_ADVENTURE_5_BOWLING);
 	CHECK(aManifest.mGameMode == (uint8_t)GameMode::GAMEMODE_ADVENTURE);
 	CHECK(!aManifest.mSkipIntro);
+	const LawnNet::NetSmokeScenarioDefinition* aHostBowling =
+		LawnNet::NetGetSmokeScenario(LawnNet::NETSMOKE_SCENARIO_ADVENTURE_5_BOWLING);
+	CHECK(aHostBowling != nullptr);
+	CHECK(aHostBowling && !aHostBowling->mActionIsClientOwned);
+
+	anError.clear();
+	CHECK(aTree.Parse(aTree.MakeManifest(aTree.mAppData.string(), aTree.mResult.string(),
+		"adventure_bowling_client", 5, 0), aManifest, anError));
+	CHECK(anError.empty());
+	CHECK(aManifest.mScenario == LawnNet::NETSMOKE_SCENARIO_ADVENTURE_5_BOWLING_CLIENT);
+	CHECK(aManifest.mGameMode == (uint8_t)GameMode::GAMEMODE_ADVENTURE);
+	const LawnNet::NetSmokeScenarioDefinition* aClientBowling =
+		LawnNet::NetGetSmokeScenario(LawnNet::NETSMOKE_SCENARIO_ADVENTURE_5_BOWLING_CLIENT);
+	CHECK(aClientBowling != nullptr);
+	CHECK(aClientBowling && aClientBowling->mActionIsClientOwned);
+	CHECK(LawnNet::NetIsBowlingSmokeScenario(aManifest.mScenario));
 
 	anError.clear();
 	CHECK(aTree.Parse(aTree.MakeManifest(aTree.mAppData.string(), aTree.mResult.string(),

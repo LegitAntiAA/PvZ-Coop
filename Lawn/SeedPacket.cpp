@@ -1200,7 +1200,12 @@ void SeedBank::AddSeed(SeedType theSeedType, bool thePlaceOnLeft)
 	}
 
 	SeedPacket* aSeedPacket = &mSeedPackets[aNumSeeds];
+	// This is a new logical conveyor card even when it reuses an array slot.
+	// The host assigns a fresh stable packet id in the next snapshot.
+	aSeedPacket->mNetId = 0;
+	aSeedPacket->mNetGhost = false;
 	aSeedPacket->mPacketType = theSeedType;
+	aSeedPacket->mImitaterType = SeedType::SEED_NONE;
 	aSeedPacket->mRefreshCounter = 0;
 	aSeedPacket->mRefreshTime = 0;
 	aSeedPacket->mRefreshing = false;
@@ -1254,12 +1259,17 @@ void SeedBank::RemoveSeed(int theIndex)
 		if (i == mNumPackets - 1)
 		{
 			aSeedPacket->mPacketType = SeedType::SEED_NONE;
+			aSeedPacket->mImitaterType = SeedType::SEED_NONE;
+			aSeedPacket->mNetId = 0;
 			aSeedPacket->mOffsetX = 0;
 		}
 		else
 		{
 			SeedPacket* aNextPacket = &mSeedPackets[i + 1];
 			aSeedPacket->mPacketType = aNextPacket->mPacketType;
+			aSeedPacket->mImitaterType = aNextPacket->mImitaterType;
+			aSeedPacket->mNetOwnerSlot = aNextPacket->mNetOwnerSlot;
+			aSeedPacket->mNetId = aNextPacket->mNetId;
 			aSeedPacket->mOffsetX = aNextPacket->mOffsetX + SEED_PACKET_WIDTH + 1;
 		}
 

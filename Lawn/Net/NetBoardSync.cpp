@@ -72,9 +72,9 @@ const NetDaveAnimSpec gNetDaveAnimSpecs[NET_DAVE_ANIM_COUNT] =
 };
 
 static const size_t NET_DAVE_STATE_BYTES = 12;
-// Seed packet: type, imitater, cooldown, owner, active, signed horizontal offset,
-// plus the authoritative slot-machine countdown, next card and scroll phase.
-static const size_t NET_SEED_PACKET_WIRE_BYTES = 14;
+// Seed packet: stable id, type, imitater, cooldown, owner, active, signed
+// horizontal offset, slot-machine countdown, next card and scroll phase.
+static const size_t NET_SEED_PACKET_WIRE_BYTES = 16;
 // Plant: id/type/imitater/row/column/health/max-health/state/flags (12),
 // plus authoritative live x/y (4) and render order (4).
 static const size_t NET_PLANT_WIRE_BYTES = 20;
@@ -800,6 +800,15 @@ uint16_t Board::NetAllocId()
 	// sessions can wrap the 16-bit counter, so also avoid every still-live id.
 	auto IsLiveId = [&](uint16_t theId)
 	{
+		if (mSeedBank)
+		{
+			for (int i = 0; i < mSeedBank->mNumPackets && i < SEEDBANK_CAPACITY; i++)
+			{
+				const SeedPacket& aPacket = mSeedBank->mSeedPackets[i];
+				if (aPacket.mPacketType != SeedType::SEED_NONE && aPacket.mNetId == theId)
+					return true;
+			}
+		}
 		Plant* aPlant = nullptr;
 		while (mPlants.IterateNext(aPlant)) if (!aPlant->mDead && aPlant->mNetId == theId) return true;
 		Zombie* aZombie = nullptr;
@@ -959,6 +968,11 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 	for (int i = 0; i < mSeedBank->mNumPackets; i++)
 	{
 		SeedPacket& aPacket = mSeedBank->mSeedPackets[i];
+		if (aPacket.mPacketType == SeedType::SEED_NONE)
+			aPacket.mNetId = 0;
+		else if (aPacket.mNetId == 0)
+			aPacket.mNetId = NetAllocId();
+		b.WriteU16(aPacket.mNetId);
 		b.WriteU8((uint8_t)aPacket.mPacketType);
 		b.WriteU8((uint8_t)aPacket.mImitaterType);
 		uint8_t aCooldown = 255;
@@ -1869,6 +1883,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 
 	struct NetSeedPacketWire
 	{
+		uint16_t mId;
 		uint8_t mType;
 		uint8_t mImitater;
 		uint8_t mCooldown;
@@ -1884,6 +1899,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	for (int i = 0; i < aNumPackets; i++)
 	{
 		NetSeedPacketWire aWire = {};
+		aWire.mId = b.ReadU16Or();
 		aWire.mType = b.ReadU8Or();
 		aWire.mImitater = b.ReadU8Or();
 		aWire.mCooldown = b.ReadU8Or();
@@ -1895,19 +1911,31 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		aWire.mSlotPosition = b.ReadF32Or();
 
 		bool aTypeValid = NetIsValidSeedPacketType(aWire.mType);
+		bool anIdValid = aWire.mType == 255 ? aWire.mId == 0 : aWire.mId != 0;
+		if (anIdValid && aWire.mId != 0)
+		{
+			for (const NetSeedPacketWire& anExisting : aSeedPackets)
+			{
+				if (anExisting.mId == aWire.mId)
+				{
+					anIdValid = false;
+					break;
+				}
+			}
+		}
 		bool anImitaterValid = aWire.mImitater == 255 ||
 			aWire.mImitater < (uint8_t)SeedType::NUM_SEED_TYPES;
 		bool anOwnerValid = aWire.mOwner == LawnNet::NET_SHARED_OWNER ||
 			aWire.mOwner < LawnNet::NET_MAX_PLAYERS;
-		if (!aTypeValid || !anImitaterValid || !anOwnerValid ||
+		if (!aTypeValid || !anIdValid || !anImitaterValid || !anOwnerValid ||
 			aWire.mActive > 1 || aWire.mOffsetX < 0 || aWire.mOffsetX > 1024 ||
 			aWire.mSlotCountdown > SLOT_MACHINE_TIME ||
 			!NetIsValidSlotMachineSeed(aWire.mSlotNextSeed) ||
 			!_finite(aWire.mSlotPosition) ||
 			aWire.mSlotPosition < 0.0f || aWire.mSlotPosition > 1.0f)
 		{
-			NetTrace("snapshot seed rejected index=%d type=%u imitater=%u owner=%u active=%u offset=%d slot=(%u,%u,%.3f)",
-				i, aWire.mType, aWire.mImitater, aWire.mOwner, aWire.mActive,
+			NetTrace("snapshot seed rejected index=%d id=%u type=%u imitater=%u owner=%u active=%u offset=%d slot=(%u,%u,%.3f)",
+				i, aWire.mId, aWire.mType, aWire.mImitater, aWire.mOwner, aWire.mActive,
 				aWire.mOffsetX, aWire.mSlotCountdown, aWire.mSlotNextSeed, aWire.mSlotPosition);
 			return;
 		}
@@ -1935,6 +1963,21 @@ void Board::NetApplySnapshot(NetBuffer& b)
 			const SeedPacket& aLocalPacket = mSeedBank->mSeedPackets[aLocalIndex];
 			const uint8_t aLocalType = (uint8_t)aLocalPacket.mPacketType;
 			const uint8_t aLocalImitater = (uint8_t)aLocalPacket.mImitaterType;
+			if (aLocalPacket.mNetId != 0)
+			{
+				for (int aWireIndex = 0; aWireIndex < aNumPackets; aWireIndex++)
+				{
+					if (!aWireUsed[aWireIndex] &&
+						aSeedPackets[aWireIndex].mId == aLocalPacket.mNetId)
+					{
+						aWireUsed[aWireIndex] = true;
+						aWireForLocal[aLocalIndex] = aWireIndex;
+						break;
+					}
+				}
+			}
+			if (aWireForLocal[aLocalIndex] >= 0)
+				continue;
 			for (int aWireIndex = 0; aWireIndex < aNumPackets; aWireIndex++)
 			{
 				const NetSeedPacketWire& aWire = aSeedPackets[aWireIndex];
@@ -1981,8 +2024,11 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		 mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_BEGHOULED_TWIST);
 	const bool aCanonicalFallbackMode = HasConveyorBeltSeedBank() ||
 		(mApp && mApp->IsSlotMachineLevel()) || aDynamicBeghouledBank;
-	const bool aCanonicalFallback = !anIdentityMultisetMatch &&
-		aCanonicalFallbackMode && aCanonicalOwnershipSafe;
+	// Conveyor array indices are physical slots: RemoveSeed compacts them and mX
+	// is index-derived.  Apply the authoritative wire order even when the same
+	// identity multiset could otherwise be greedily matched in a stale local order.
+	const bool aCanonicalFallback = aCanonicalOwnershipSafe &&
+		(HasConveyorBeltSeedBank() || (!anIdentityMultisetMatch && aCanonicalFallbackMode));
 	if (!anIdentityMultisetMatch && !aCanonicalFallback)
 	{
 		uint8_t aMismatchType = 255;
@@ -2001,7 +2047,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 			aCanonicalFallbackMode ? 1 : 0, aCanonicalOwnershipSafe ? 1 : 0);
 		return;
 	}
-	if (aCanonicalFallback)
+	if (aCanonicalFallback && !anIdentityMultisetMatch)
 	{
 		NetTrace("snapshot seed canonical fallback mode=%d conveyor=%d slot=%d beghouled=%d localCount=%d wireCount=%u",
 			mApp ? (int)mApp->mGameMode : -1, HasConveyorBeltSeedBank() ? 1 : 0,
@@ -2012,6 +2058,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	auto ApplySeedRuntimeState = [&](SeedPacket& thePacket,
 		const NetSeedPacketWire& theWire, bool theApplyCanonicalIdentity)
 	{
+		thePacket.mNetId = theWire.mId;
 		if (theApplyCanonicalIdentity)
 		{
 			SeedType aType = theWire.mType == 255 ? SeedType::SEED_NONE : (SeedType)theWire.mType;
@@ -2054,7 +2101,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	{
 		const int aWireIndex = aCanonicalFallback ? aLocalIndex : aWireForLocal[aLocalIndex];
 		ApplySeedRuntimeState(mSeedBank->mSeedPackets[aLocalIndex],
-			aSeedPackets[aWireIndex], aCanonicalFallback);
+			aSeedPackets[aWireIndex], true);
 	}
 	mSeedBank->mNumPackets = aNumPackets;
 
