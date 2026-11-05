@@ -1513,6 +1513,58 @@ void NetManager::OnBoardEvent(NetBuffer& thePayload)
 {
 	uint8_t anEvent = thePayload.Size() ? thePayload.mData[0] : 255;
 	NetTrace("board event received type=%u bytes=%zu", anEvent, thePayload.Size());
+	// Repick is an ordered lifecycle barrier, not a normal gameplay mutation.
+	// Apply it synchronously so the client is in LEVEL_INTRO before the following
+	// INPUT_EPOCH/CHOOSER_OPEN frames on this same TCP stream are dispatched.
+	if (anEvent == BOARDEV_ENDLESS_REPICK)
+	{
+		uint8_t anEventWire = 0;
+		uint8_t aNextStage = 0;
+		if (thePayload.Remaining() != 2 || !thePayload.ReadU8(&anEventWire) ||
+			!thePayload.ReadU8(&aNextStage) || thePayload.Remaining() != 0 ||
+			anEventWire != BOARDEV_ENDLESS_REPICK)
+		{
+			NetTrace("ENDLESS_REPICK rejected reason=payload bytes=%zu event=%u trailing=%zu",
+				thePayload.Size(), anEventWire, thePayload.Remaining());
+			return;
+		}
+
+		Board* aBoard = mApp ? mApp->mBoard : nullptr;
+		const bool aRepickMode = mApp && mApp->IsCoopEndlessRepick(mApp->mGameMode);
+		const int aCurrentStage = aBoard && aBoard->mChallenge ?
+			aBoard->mChallenge->mSurvivalStage : -1;
+		if (IsClient() && mApp && aBoard && aBoard->mChallenge &&
+			aRepickMode && mApp->mGameScene == GameScenes::SCENE_LEVEL_INTRO &&
+			aCurrentStage == (int)aNextStage)
+		{
+			NetTrace("ENDLESS_REPICK duplicate stage=%u ignored", aNextStage);
+			return;
+		}
+		const bool aContextValid = IsClient() && mApp && aBoard &&
+			aBoard->mChallenge && aBoard->mCutScene && mApp->mWidgetManager &&
+			aRepickMode && mApp->mGameScene == GameScenes::SCENE_PLAYING &&
+			!mApp->mSeedChooserScreen;
+		if (!aContextValid ||
+			(aCurrentStage != (int)aNextStage && aCurrentStage + 1 != (int)aNextStage))
+		{
+			NetTrace("ENDLESS_REPICK rejected reason=context stage=%u current=%d mode=%d scene=%d chooser=%p context=%d",
+				aNextStage, aCurrentStage, mApp ? (int)mApp->mGameMode : -1,
+				mApp ? (int)mApp->mGameScene : -1,
+				mApp ? (void*)mApp->mSeedChooserScreen : nullptr,
+				aContextValid ? 1 : 0);
+			return;
+		}
+
+		ClearPendingBoardMessages("ENDLESS_REPICK");
+		aBoard->mNukeCounter = 0;
+		aBoard->mChallenge->mSurvivalStage = aNextStage;
+		mApp->KillGameSelector();
+		aBoard->InitSurvivalStage();
+		NetTrace("ENDLESS_REPICK applied stage=%u mode=%d scene=%d chooser=%p",
+			aNextStage, (int)mApp->mGameMode, (int)mApp->mGameScene,
+			(void*)mApp->mSeedChooserScreen);
+		return;
+	}
 	// Intro preview entities are created locally by CutScene on every peer.
 	// Applying the host's preview events as well would duplicate them and could
 	// access reanimation definitions before the client's preload has completed.
@@ -1777,6 +1829,7 @@ void NetManager::OnChooserOpen(NetBuffer& thePayload)
 	const bool aContextValid = IsClient() && mApp && mApp->mBoard &&
 		mApp->mBoard->mCutScene && mApp->mWidgetManager &&
 		mApp->mGameScene == GameScenes::SCENE_LEVEL_INTRO &&
+		mInputPhase == NETINPUT_CHOOSER &&
 		mMySlot < NET_MAX_PLAYERS && mPlayers[mMySlot].mActive &&
 		mPlayers[mMySlot].mSlot == mMySlot;
 	const bool aPvP = aContextValid && mApp->mGameMode == GameMode::GAMEMODE_COOP_PVP;

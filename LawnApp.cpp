@@ -3004,6 +3004,18 @@ void LawnApp::CheckForGameEnd()
 		{
 			mBoard->mNukeCounter = 0;
 			mBoard->mChallenge->mSurvivalStage++;
+			// Endless S/ST re-open the chooser after every ten-wave stage.  Tell
+			// clients to enter the survival intro before the ordered INPUT_EPOCH
+			// and CHOOSER_OPEN messages emitted by InitSurvivalStage().  A queued
+			// board event is too late: chooser messages are consumed immediately.
+			if (NetIsHost() && IsCoopEndlessRepick(mGameMode) && mNetManager)
+			{
+				LawnNet::NetBuffer aRepick;
+				aRepick.WriteU8((uint8_t)mBoard->mChallenge->mSurvivalStage);
+				mNetManager->SendBoardEvent(aRepick, LawnNet::BOARDEV_ENDLESS_REPICK);
+				LawnNet::NetTrace("ENDLESS_REPICK TX stage=%d mode=%d",
+					mBoard->mChallenge->mSurvivalStage, (int)mGameMode);
+			}
 			KillGameSelector();
 			mBoard->InitSurvivalStage();
 		}
