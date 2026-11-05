@@ -5526,6 +5526,27 @@ void Board::PickUpTool(GameObjectType theObjectType)
 	mCursorObject->mType = SeedType::SEED_NONE;
 }
 
+static bool RemoteLastStandButtonHitTest(Board* theBoard, int theBoardX, int theBoardY)
+{
+	if (!theBoard || !theBoard->mApp || !theBoard->mApp->IsLastStand() ||
+		!theBoard->mStoreButton || theBoard->mStoreButton->mBtnNoDraw ||
+		theBoard->mStoreButton->mDisabled || !theBoard->CanInteractWithBoardButtons())
+	{
+		return false;
+	}
+
+	const int aWideOffsetX = theBoard->mApp->mDDInterface ?
+		theBoard->mApp->mDDInterface->mWideScreenOffsetX : 0;
+	const int aWideOffsetY = theBoard->mApp->mDDInterface ?
+		theBoard->mApp->mDDInterface->mWideScreenOffsetY : 0;
+	const Rect aCanonicalButtonRect(
+		theBoard->mStoreButton->mX - aWideOffsetX,
+		theBoard->mStoreButton->mY - aWideOffsetY,
+		theBoard->mStoreButton->mWidth,
+		theBoard->mStoreButton->mHeight);
+	return aCanonicalButtonRect.Contains(theBoardX, theBoardY);
+}
+
 //0x411F20
 void Board::MouseDown(int x, int y, int theClickCount)
 {
@@ -5538,6 +5559,8 @@ void Board::MouseDown(int x, int y, int theClickCount)
 		return;
 	const bool aRemoteInput = mApp->NetIsHost() && mApp->mNetManager &&
 		mApp->mNetManager->GetRawActingPlayerSlot() > 0;
+	const bool aRemoteLastStandButton = aRemoteInput && theClickCount > 0 &&
+		RemoteLastStandButtonHitTest(this, x, y);
 
 	mIgnoreMouseUp = !CanInteractWithBoardButtons();
 	if (mTimeStopCounter > 0)
@@ -5565,7 +5588,8 @@ void Board::MouseDown(int x, int y, int theClickCount)
 	{
 		mApp->PlaySample(Sexy::SOUND_GRAVEBUTTON);
 	}
-	else if (!aRemoteInput && mStoreButton && mStoreButton->IsMouseOver() && CanInteractWithBoardButtons() && theClickCount > 0)
+	else if (mStoreButton && CanInteractWithBoardButtons() && theClickCount > 0 &&
+		((!aRemoteInput && mStoreButton->IsMouseOver()) || aRemoteLastStandButton))
 	{
 		if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN || mApp->mGameMode == GameMode::GAMEMODE_TREE_OF_WISDOM)
 		{
@@ -5796,9 +5820,14 @@ void Board::MouseUp(int x, int y, int theClickCount)
 
 	const bool aRemoteInput = mApp->NetIsHost() && mApp->mNetManager &&
 		mApp->mNetManager->GetRawActingPlayerSlot() > 0;
-	if (!aRemoteInput && CanInteractWithBoardButtons() && theClickCount > 0)
+	const int aWideOffsetX = mApp->mDDInterface ? mApp->mDDInterface->mWideScreenOffsetX : 0;
+	const int aWideOffsetY = mApp->mDDInterface ? mApp->mDDInterface->mWideScreenOffsetY : 0;
+	const bool aRemoteLastStandButton = aRemoteInput && theClickCount > 0 &&
+		RemoteLastStandButtonHitTest(this, x - aWideOffsetX, y - aWideOffsetY);
+	if (CanInteractWithBoardButtons() && theClickCount > 0 &&
+		(!aRemoteInput || aRemoteLastStandButton))
 	{
-		if (mMenuButton->IsMouseOver() && !mApp->GetDialog(Dialogs::DIALOG_GAME_OVER) && !mApp->GetDialog(Dialogs::DIALOG_LEVEL_COMPLETE))
+		if (!aRemoteInput && mMenuButton->IsMouseOver() && !mApp->GetDialog(Dialogs::DIALOG_GAME_OVER) && !mApp->GetDialog(Dialogs::DIALOG_LEVEL_COMPLETE))
 		{
 			mMenuButton->mIsOver = false;
 			mMenuButton->mIsDown = false;
@@ -5819,7 +5848,7 @@ void Board::MouseUp(int x, int y, int theClickCount)
 				mApp->DoBackToMain();
 			}
 		}
-		else if(mStoreButton && mStoreButton->IsMouseOver())
+		else if (mStoreButton && ((!aRemoteInput && mStoreButton->IsMouseOver()) || aRemoteLastStandButton))
 		{
 			if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN)
 			{
