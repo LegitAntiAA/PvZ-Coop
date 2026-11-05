@@ -477,8 +477,8 @@ void NetManager::Update()
 		std::lock_guard<std::mutex> aLock(mPendingConnMutex);
 		for (SOCKET aSock : mPendingConns)
 		{
-			if (mMode == MODE_HOST)
-			{
+        if (mMode == MODE_HOST)
+        {
 				// find a free slot
 				int aFreeSlot = -1;
 				for (int i = 1; i < NET_MAX_PLAYERS; i++)
@@ -531,8 +531,8 @@ void NetManager::Update()
 	if (mMode == MODE_HOST)
 	{
 		bool aDropAfterPump[NET_MAX_PLAYERS] = {};
-		for (int i = 1; i < NET_MAX_PLAYERS; i++)
-		{
+                for (int i = 1; i < NET_MAX_PLAYERS; i++)
+                {
 			if (mSessions[i].mAssigned)
 			{
 				mSessions[i].mConn.PumpMessages();
@@ -546,10 +546,53 @@ void NetManager::Update()
 			if (!aDropAfterPump[i])
 				continue;
 			DropSession(i, true);
-			if (mApp && mApp->mBoard)
-				mApp->mBoard->mPaused = true;
+                        if (mApp && mApp->mBoard)
+                                mApp->mBoard->mPaused = true;
+                }
+
+		// CursorObject is the host-authoritative semantic state for every
+		// player.  Publish changes here instead of waiting for another cursor
+		// packet from that client: automatic hammer/butter modes, shovel pickup,
+		// cob targeting and future CursorType changes are then all caught by the
+		// same path, even while the remote window is stalled or minimized.
+		if (mApp && mApp->mBoard)
+		{
+			for (int aSlot = 1; aSlot < NET_MAX_PLAYERS; ++aSlot)
+			{
+				if (!mPlayers[aSlot].mActive || !mRemoteCursors[aSlot].mValid)
+					continue;
+				CursorObject* anAuthoritative = mApp->mBoard->mNetPlayerCursors[aSlot];
+				if (!anAuthoritative)
+					continue;
+				NetRemoteCursor& aPublished = mRemoteCursors[aSlot];
+				uint8_t aType = (uint8_t)anAuthoritative->mCursorType;
+				uint8_t aSeed = (uint8_t)anAuthoritative->mType;
+				uint8_t anImitater = (uint8_t)anAuthoritative->mImitaterType;
+				if (!NetIsValidHeldSeed(aSeed)) aSeed = 255;
+				if (anImitater != 255 && anImitater >= (uint8_t)SeedType::NUM_SEED_TYPES)
+					anImitater = 255;
+				if (aPublished.mCursorType == aType && aPublished.mHeldSeed == aSeed &&
+					aPublished.mHeldImitater == anImitater && aPublished.mFlags == 0)
+					continue;
+
+				aPublished.mCursorType = aType;
+				aPublished.mHeldSeed = aSeed;
+				aPublished.mHeldImitater = anImitater;
+				aPublished.mFlags = 0;
+				NetBuffer aRelay;
+				aRelay.WriteU8((uint8_t)aSlot);
+				aRelay.WriteI16((int16_t)NetCanonicalX(mApp, aPublished.mX));
+				aRelay.WriteI16((int16_t)NetCanonicalY(mApp, aPublished.mY));
+				aRelay.WriteU8(aType);
+				aRelay.WriteU8(aSeed);
+				aRelay.WriteU8(anImitater);
+				aRelay.WriteU8(0);
+				BroadcastMessage(NETMSG_CURSOR, aRelay);
+				NetTrace("cursor authority publish slot=%d type=%u seed=%u imitater=%u",
+					aSlot, aType, aSeed, anImitater);
+			}
 		}
-	}
+        }
 	else if (mMode == MODE_CLIENT && mHostConn)
 	{
 		mHostConn->PumpMessages();
@@ -1044,23 +1087,25 @@ void NetManager::OnClientCursor(NetSession* theSession, NetBuffer& thePayload)
 	uint8_t aClaimedCursorType = thePayload.ReadU8Or();
 	uint8_t aClaimedSeed = thePayload.ReadU8Or();
 	uint8_t aClaimedImitater = thePayload.ReadU8Or();
-	aCursor.mFlags = thePayload.ReadU8Or();
+        const uint8_t aClaimedFlags = thePayload.ReadU8Or();
 
 	// During a game the host's per-player cursor is authoritative.  Clients
 	// provide only pointer coordinates, never the plant/tool they claim to hold.
 	CursorObject* anAuthoritativeCursor = mApp && mApp->mBoard ? mApp->mBoard->mNetPlayerCursors[aSlot] : nullptr;
-	if (anAuthoritativeCursor)
-	{
+        if (anAuthoritativeCursor)
+        {
 		aCursor.mCursorType = (uint8_t)anAuthoritativeCursor->mCursorType;
 		aCursor.mHeldSeed = (uint8_t)anAuthoritativeCursor->mType;
-		aCursor.mHeldImitater = (uint8_t)anAuthoritativeCursor->mImitaterType;
-	}
-	else
-	{
+                aCursor.mHeldImitater = (uint8_t)anAuthoritativeCursor->mImitaterType;
+		aCursor.mFlags = 0; // semantic/visual flags are host-derived only
+        }
+        else
+        {
 		aCursor.mCursorType = aClaimedCursorType;
 		aCursor.mHeldSeed = aClaimedSeed;
-		aCursor.mHeldImitater = aClaimedImitater;
-	}
+                aCursor.mHeldImitater = aClaimedImitater;
+		aCursor.mFlags = aClaimedFlags;
+        }
 	if (!NetIsValidHeldSeed(aCursor.mHeldSeed))
 		aCursor.mHeldSeed = 255;
 	if (aCursor.mHeldImitater != 255 && aCursor.mHeldImitater >= (uint8_t)SeedType::NUM_SEED_TYPES)
