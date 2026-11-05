@@ -5720,7 +5720,11 @@ void LawnApp::CoopSmokeUpdate()
 			CoopSmokeFail(aScenarioFailure.c_str());
 			return;
 		}
-		if (mCoopSmokeGameStarted && mBoard && mGameScene == GameScenes::SCENE_PLAYING &&
+                const bool aSmokeTerminalScene =
+                        mCoopSmokeManifest.mScenario == LawnNet::NETSMOKE_SCENARIO_ADVENTURE_8_SOAK &&
+                        mGameScene == GameScenes::SCENE_ZOMBIES_WON;
+                if (mCoopSmokeGameStarted && mBoard &&
+                        (mGameScene == GameScenes::SCENE_PLAYING || aSmokeTerminalScene) &&
 			mNetManager->GetPlayerCount() == 2 &&
 			mCoopSmokeSnapshotsSent >= mCoopSmokeManifest.mMinimumSnapshots &&
 			mCoopSmokeScenarioRuntime.IsComplete(mCoopSmokeManifest.mMinimumSnapshots))
@@ -5753,7 +5757,10 @@ void LawnApp::CoopSmokeUpdate()
 			CoopSmokeFail(aScenarioFailure.c_str());
 			return;
 		}
-		if (mBoard && mGameScene == GameScenes::SCENE_PLAYING &&
+                const bool aSmokeTerminalScene =
+                        mCoopSmokeManifest.mScenario == LawnNet::NETSMOKE_SCENARIO_ADVENTURE_8_SOAK &&
+                        mGameScene == GameScenes::SCENE_ZOMBIES_WON;
+                if (mBoard && (mGameScene == GameScenes::SCENE_PLAYING || aSmokeTerminalScene) &&
 			mCoopSmokeSnapshotsApplied >= mCoopSmokeManifest.mMinimumSnapshots &&
 			mCoopSmokeScenarioRuntime.IsComplete(mCoopSmokeManifest.mMinimumSnapshots))
 		{

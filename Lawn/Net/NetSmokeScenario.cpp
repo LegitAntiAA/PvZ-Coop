@@ -4,6 +4,7 @@
 #include "NetManager.h"
 #include "../Board.h"
 #include "../Challenge.h"
+#include "../Coin.h"
 #include "../CutScene.h"
 #include "../CursorObject.h"
 #include "../GridItem.h"
@@ -24,6 +25,7 @@ namespace
 {
 const uint32_t SMOKE_INTRO_TIMEOUT_MS = 60000;
 const uint32_t SMOKE_INTRO_ACTION_INTERVAL_MS = 500;
+const uint32_t SMOKE_SOAK_DURATION_MS = 60000;
 
 int SmokeLocalX(LawnApp* theApp, int theCanonicalX)
 {
@@ -205,6 +207,94 @@ SeedPacket* FindUsablePacket(Board* theBoard)
 			return aPacket;
 	}
 	return nullptr;
+}
+
+SeedPacket* FindOwnedUsablePacket(Board* theBoard, unsigned char theOwner)
+{
+        if (!theBoard || !theBoard->mSeedBank)
+                return nullptr;
+        for (int i = 0; i < theBoard->mSeedBank->mNumPackets; ++i)
+        {
+                SeedPacket* aPacket = &theBoard->mSeedBank->mSeedPackets[i];
+                if (aPacket->mPacketType != SeedType::SEED_NONE && aPacket->CanPickUp() &&
+                        (aPacket->mNetOwnerSlot == theOwner ||
+                         aPacket->mNetOwnerSlot == NET_SHARED_OWNER))
+                        return aPacket;
+        }
+        return nullptr;
+}
+
+bool IssueSoakSeedAction(LawnApp* theApp, bool theClient)
+{
+        Board* aBoard = theApp ? theApp->mBoard : nullptr;
+        if (!aBoard || !theApp->mNetManager)
+                return false;
+        const unsigned char anOwner = (unsigned char)theApp->mNetManager->GetMySlot();
+        SeedPacket* aPacket = FindOwnedUsablePacket(aBoard, anOwner);
+        if (!aPacket)
+                return false;
+        const int aFirstRow = theClient ? 3 : 1;
+        int aGridX = -1;
+        int aGridY = -1;
+        for (int aRowPass = 0; aRowPass < 5 && aGridX < 0; ++aRowPass)
+        {
+                const int aRow = (aFirstRow + aRowPass) % 5;
+                for (int aColumn = 0; aColumn < 5; ++aColumn)
+                {
+                        if (!aBoard->GetTopPlantAt(aColumn, aRow, PlantPriority::TOPPLANT_ANY) &&
+                                aBoard->CanPlantAt(aColumn, aRow, aPacket->mPacketType) ==
+                                        PlantingReason::PLANTING_OK)
+                        {
+                                aGridX = aColumn;
+                                aGridY = aRow;
+                                break;
+                        }
+                }
+        }
+        if (aGridX < 0)
+                return false;
+        const int aPacketX = aBoard->mSeedBank->mX + aPacket->mX +
+                aPacket->mOffsetX + aPacket->mWidth / 2;
+        const int aPacketY = aBoard->mSeedBank->mY + aPacket->mY + aPacket->mHeight / 2;
+        const int aPlantX = aBoard->GridToPixelX(aGridX, aGridY) + 40;
+        const int aPlantY = aBoard->GridToPixelY(aGridX, aGridY) + 45;
+        if (theClient)
+        {
+                SmokeClientClick(theApp, aPacketX, aPacketY);
+                SmokeClientClick(theApp, aPlantX, aPlantY);
+        }
+        else
+        {
+                SmokeHostClick(theApp, aPacketX, aPacketY);
+                SmokeHostClick(theApp, aPlantX, aPlantY);
+        }
+        NetTrace("SMOKE_SOAK_PLANT role=%s owner=%u type=%d cell=(%d,%d)",
+                theClient ? "client" : "host", anOwner, (int)aPacket->mPacketType,
+                aGridX, aGridY);
+        return true;
+}
+
+bool IssueSoakSunClick(LawnApp* theApp, bool theClient)
+{
+        Board* aBoard = theApp ? theApp->mBoard : nullptr;
+        if (!aBoard)
+                return false;
+        Coin* aCoin = nullptr;
+        while (aBoard->mCoins.IterateNext(aCoin))
+        {
+                if (aCoin->mDead || aCoin->mIsBeingCollected || !aCoin->IsSun())
+                        continue;
+                const int aX = (int)aCoin->mPosX + 20;
+                const int aY = (int)aCoin->mPosY + 20;
+                if (theClient)
+                        SmokeClientClick(theApp, aX, aY);
+                else
+                        SmokeHostClick(theApp, aX, aY);
+                NetTrace("SMOKE_SOAK_SUN_CLICK role=%s pos=(%d,%d) type=%d",
+                        theClient ? "client" : "host", aX, aY, (int)aCoin->mType);
+                return true;
+        }
+        return false;
 }
 
 SeedPacket* FindDuplicateUsablePacket(Board* theBoard, int& theDuplicateCount)
@@ -482,10 +572,20 @@ void NetSmokeScenarioRuntime::Reset(NetSmokeScenarioId theScenario)
 	mBowlingNutMoved = false;
 	mBowlingZombieObserved = false;
 	mWhackRemovalObserved = false;
-	mSlotMachinePresentationObserved = false;
-	mSlotMachineReturnObserved = false;
-	mSlotMachineSoundCount = 0;
-	mPostActionSamples = 0;
+        mSlotMachinePresentationObserved = false;
+        mSlotMachineReturnObserved = false;
+        mSlotMachineSoundCount = 0;
+        mSoakChooserLastCount = -1;
+        mSoakPlantsIssued = 0;
+        mSoakSunClicks = 0;
+        mSoakLastActionTick = 0;
+        mSoakChooserVerified = false;
+        mSoakLossIssued = false;
+        mSoakLossObserved = false;
+        mSoakLossCameraObserved = false;
+        mSoakLossBrainsObserved = false;
+        mSoakLossDialogObserved = false;
+        mPostActionSamples = 0;
 }
 
 bool NetSmokeScenarioRuntime::UpdateIntro(LawnApp* theApp,
@@ -540,7 +640,7 @@ bool NetSmokeScenarioRuntime::UpdateIntro(LawnApp* theApp,
 	}
 
 	const uint32_t anElapsed = aNow - mIntroTick;
-	if (anElapsed >= SMOKE_INTRO_TIMEOUT_MS)
+        if (anElapsed >= SMOKE_INTRO_TIMEOUT_MS)
 	{
 		NetTrace("SMOKE_INTRO_TIMEOUT role=%s scenario=%s elapsed=%u cutscene=%d dave=%d daveState=%d tutorial=%d seedChoosing=%d chooser=%p mouse=%d",
 			theManifest.IsHost() ? "host" : "client", theDefinition.mName,
@@ -549,10 +649,82 @@ bool NetSmokeScenarioRuntime::UpdateIntro(LawnApp* theApp,
 			aCutScene->mSeedChoosing ? 1 : 0, (void*)theApp->mSeedChooserScreen,
 			theApp->mSeedChooserScreen && theApp->mSeedChooserScreen->mMouseVisible ? 1 : 0);
 		theFailure = "real intro did not reach gameplay within 60 seconds";
-		return false;
-	}
+                return false;
+        }
 
-	// skip_intro=1 is deliberately still owned by LawnApp's existing CancelIntro
+        // Adventure 8 is the first ordinary first-time Adventure level with a
+        // genuine chooser.  Exercise each peer's real chooser hit-testing and
+        // network pick path; never synthesize the final seed bank in the test.
+        if (mScenario == NETSMOKE_SCENARIO_ADVENTURE_8_SOAK &&
+                aCutScene->mSeedChoosing && theApp->mSeedChooserScreen)
+        {
+                SeedChooserScreen* aChooser = theApp->mSeedChooserScreen;
+                if (!aChooser->mCoopChooserActive || !aChooser->mMouseVisible)
+                        return true;
+                const int aLocalSlot = theApp->mNetManager ?
+                        theApp->mNetManager->GetMySlot() : (theManifest.IsHost() ? 0 : 1);
+                const int aOtherSlot = aLocalSlot == 0 ? 1 : 0;
+                const int aLocalCount = aChooser->CoopGetLocalQuotaPickCount();
+                const int aQuota = aChooser->mCoopPicksPerPlayer;
+                if (aLocalCount != mSoakChooserLastCount)
+                {
+                        mSoakChooserLastCount = aLocalCount;
+                        NetTrace("SMOKE_SOAK_CHOOSER_PROGRESS role=%s local=%d remote=%d quota=%d flight=%d",
+                                theManifest.IsHost() ? "host" : "client", aLocalCount,
+                                aChooser->mCoopRemotePickCount[aOtherSlot], aQuota,
+                                aChooser->mSeedsInFlight);
+                }
+                if (aQuota <= 0)
+                {
+                        theFailure = "Adventure soak chooser unexpectedly assigned a zero pick quota";
+                        return false;
+                }
+                if (aLocalCount < aQuota && aChooser->mSeedsInFlight == 0 &&
+                        (uint32_t)(aNow - mIntroLastActionTick) >= SMOKE_INTRO_ACTION_INTERVAL_MS)
+                {
+                        const int aStart = theManifest.IsClient() ? NUM_SEEDS_IN_CHOOSER - 1 : 0;
+                        const int aStep = theManifest.IsClient() ? -1 : 1;
+                        for (int i = aStart; i >= 0 && i < NUM_SEEDS_IN_CHOOSER; i += aStep)
+                        {
+                                ChosenSeed& aSeed = aChooser->mChosenSeeds[i];
+                                if (aSeed.mSeedState != SEED_IN_CHOOSER ||
+                                        !theApp->SeedTypeAvailable(aSeed.mSeedType) ||
+                                        aChooser->SeedNotAllowedToPick(aSeed.mSeedType) ||
+                                        aChooser->SeedNotAllowedDuringTrial(aSeed.mSeedType) ||
+                                        aChooser->CoopIsPickedByOthers((int)aSeed.mSeedType))
+                                        continue;
+                                mIntroLastActionTick = aNow;
+                                aChooser->MouseDown(aSeed.mX + 25, aSeed.mY + 35, 1);
+                                NetTrace("SMOKE_SOAK_CHOOSER_CLICK role=%s seed=%d pos=(%d,%d)",
+                                        theManifest.IsHost() ? "host" : "client",
+                                        (int)aSeed.mSeedType, aSeed.mX + 25, aSeed.mY + 35);
+                                return true;
+                        }
+                }
+                const int aRemoteCount = aChooser->mCoopRemotePickCount[aOtherSlot];
+                if (aLocalCount == aQuota && aRemoteCount == aQuota &&
+                        aChooser->mSeedsInFlight == 0)
+                {
+                        if (!mSoakChooserVerified)
+                        {
+                                mSoakChooserVerified = true;
+                                NetTrace("SMOKE_SOAK_CHOOSER_VERIFIED role=%s local=%d remote=%d quota=%d",
+                                        theManifest.IsHost() ? "host" : "client",
+                                        aLocalCount, aRemoteCount, aQuota);
+                        }
+                        if (theManifest.IsHost() && !mChooserStartIssued &&
+                                aChooser->mStartButton && !aChooser->mStartButton->mDisabled)
+                        {
+                                mIntroLastActionTick = aNow;
+                                aChooser->OnStartButton();
+                                mChooserStartIssued = true;
+                                NetTrace("SMOKE_SOAK_CHOOSER_START role=host quota=%d", aQuota);
+                        }
+                }
+                return true;
+        }
+
+        // skip_intro=1 is deliberately still owned by LawnApp's existing CancelIntro
 	// hook.  The driver below exists only to exercise the real, synchronized
 	// host presentation path.
 	if (theManifest.mSkipIntro || !theManifest.IsHost() ||
@@ -861,10 +1033,49 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
 		mIntroTick = GetTickCount();
 	}
 
-	if (theApp->mGameScene == GameScenes::SCENE_LEVEL_INTRO)
-		return UpdateIntro(theApp, theManifest, *aDefinition, theFailure);
-	if (theApp->mGameScene != GameScenes::SCENE_PLAYING)
-		return true;
+        if (theApp->mGameScene == GameScenes::SCENE_LEVEL_INTRO)
+                return UpdateIntro(theApp, theManifest, *aDefinition, theFailure);
+        if (mScenario == NETSMOKE_SCENARIO_ADVENTURE_8_SOAK &&
+                theApp->mGameScene == GameScenes::SCENE_ZOMBIES_WON)
+        {
+                if (!mSoakLossObserved)
+                {
+                        mSoakLossObserved = true;
+                        NetTrace("SMOKE_SOAK_LOSS_OBSERVED role=%s scene=%d plants=%d sunClicks=%d",
+                                theManifest.IsHost() ? "host" : "client",
+                                (int)theApp->mGameScene, mSoakPlantsIssued, mSoakSunClicks);
+                }
+                if (!mSoakLossCameraObserved && aBoard->mCutScene &&
+                        aBoard->mCutScene->mCutsceneTime >= 3500 &&
+                        aBoard->mX == BOARD_OFFSET)
+                {
+                        mSoakLossCameraObserved = true;
+                        NetTrace("SMOKE_SOAK_LOSS_CAMERA role=%s cutscene=%d boardX=%d",
+                                theManifest.IsHost() ? "host" : "client",
+                                aBoard->mCutScene->mCutsceneTime, aBoard->mX);
+                }
+                if (!mSoakLossBrainsObserved && aBoard->mCutScene &&
+                        aBoard->mCutScene->mZombiesWonReanimID != ReanimationID::REANIMATIONID_NULL &&
+                        theApp->ReanimationTryToGet(aBoard->mCutScene->mZombiesWonReanimID))
+                {
+                        mSoakLossBrainsObserved = true;
+                        NetTrace("SMOKE_SOAK_LOSS_BRAINS role=%s cutscene=%d reanim=%u",
+                                theManifest.IsHost() ? "host" : "client",
+                                aBoard->mCutScene->mCutsceneTime,
+                                (unsigned)aBoard->mCutScene->mZombiesWonReanimID);
+                }
+                if (!mSoakLossDialogObserved &&
+                        theApp->GetDialog(Dialogs::DIALOG_GAME_OVER))
+                {
+                        mSoakLossDialogObserved = true;
+                        NetTrace("SMOKE_SOAK_LOSS_DIALOG role=%s cutscene=%d",
+                                theManifest.IsHost() ? "host" : "client",
+                                aBoard->mCutScene ? aBoard->mCutScene->mCutsceneTime : -1);
+                }
+                return true;
+        }
+        if (theApp->mGameScene != GameScenes::SCENE_PLAYING)
+                return true;
 
 	if (theManifest.IsClient())
 	{
@@ -920,9 +1131,35 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
 		}
 	}
 
-	if (mPlayingTick == 0)
-	{
-		if (NetIsBowlingSmokeScenario(mScenario) &&
+        if (mPlayingTick == 0)
+        {
+                if (mScenario == NETSMOKE_SCENARIO_ADVENTURE_8_SOAK &&
+                        !mSoakChooserVerified && aBoard->mSeedBank && theApp->mNetManager)
+                {
+                        int anOwnerCounts[NET_MAX_PLAYERS] = {};
+                        for (int i = 0; i < aBoard->mSeedBank->mNumPackets; ++i)
+                        {
+                                const unsigned char anOwner =
+                                        aBoard->mSeedBank->mSeedPackets[i].mNetOwnerSlot;
+                                if (anOwner < NET_MAX_PLAYERS)
+                                        ++anOwnerCounts[anOwner];
+                        }
+                        const int aHostQuota = theApp->mNetManager->mChooserPickQuota[0];
+                        const int aClientQuota = theApp->mNetManager->mChooserPickQuota[1];
+                        if (aHostQuota > 0 && aClientQuota > 0 &&
+                                anOwnerCounts[0] == aHostQuota &&
+                                anOwnerCounts[1] == aClientQuota)
+                        {
+                                mSoakChooserVerified = true;
+                                NetTrace("SMOKE_SOAK_CHOOSER_VERIFIED role=%s local=%d remote=%d quota=%d source=seedbank",
+                                        theManifest.IsHost() ? "host" : "client",
+                                        anOwnerCounts[theApp->mNetManager->GetMySlot()],
+                                        anOwnerCounts[theApp->mNetManager->GetMySlot() == 0 ? 1 : 0],
+                                        theApp->mNetManager->mChooserPickQuota[
+                                                theApp->mNetManager->GetMySlot()]);
+                        }
+                }
+                if (NetIsBowlingSmokeScenario(mScenario) &&
 			(!aBoard->mChallenge || !aBoard->mChallenge->mShowBowlingLine))
 		{
 			theFailure = "Bowling line was not enabled on this peer at gameplay start";
@@ -986,14 +1223,75 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
 		{
 			return true;
 		}
-		mBaselineCaptured = true;
-		mActionTick = GetTickCount();
+                mBaselineCaptured = true;
+                mActionTick = GetTickCount();
+                mSoakLastActionTick = mActionTick;
 		NetTrace("SMOKE_CHECKPOINT role=%s scenario=%s step=BASELINE plants=%d pots=%d zombies=%d snapshots=%u",
 			theManifest.IsHost() ? "host" : "client", aDefinition->mName,
-			mBaselinePlants, mBaselinePots, aBoard->mZombies.mSize, theGameplaySnapshots);
-	}
+                        mBaselinePlants, mBaselinePots, aBoard->mZombies.mSize, theGameplaySnapshots);
+        }
 
-	if (!mActionIssued && aDefinition->mActionIsClientOwned == theManifest.IsClient())
+        if (mScenario == NETSMOKE_SCENARIO_ADVENTURE_8_SOAK)
+        {
+                const uint32_t aNow = GetTickCount();
+                const uint32_t aSoakElapsed = aNow - mPlayingTick;
+                // Stagger the two peers so their real input streams overlap without
+                // repeatedly racing for the same sun or lawn cell.
+                const uint32_t anOffset = theManifest.IsClient() ? 1800U : 0U;
+                if (aSoakElapsed >= 2500U + anOffset &&
+                        (uint32_t)(aNow - mSoakLastActionTick) >= 4500U)
+                {
+                        bool anIssued = false;
+                        if (mSoakPlantsIssued < 3)
+                        {
+                                anIssued = IssueSoakSeedAction(theApp, theManifest.IsClient());
+                                if (anIssued)
+                                        ++mSoakPlantsIssued;
+                        }
+                        if (!anIssued)
+                        {
+                                anIssued = IssueSoakSunClick(theApp, theManifest.IsClient());
+                                if (anIssued)
+                                        ++mSoakSunClicks;
+                        }
+                        if (anIssued)
+                                mSoakLastActionTick = aNow;
+                }
+                if (!mActionIssued && mSoakPlantsIssued > 0)
+                {
+                        mActionIssued = true;
+                        mActionTick = aNow;
+                        NetTrace("SMOKE_CHECKPOINT role=%s scenario=%s step=ACTION_ISSUED owner=%s",
+                                theManifest.IsHost() ? "host" : "client", aDefinition->mName,
+                                theManifest.IsHost() ? "host" : "client");
+                }
+                if (!mActionApplied && aBoard->mPlants.mSize > mBaselinePlants)
+                {
+                        mActionApplied = true;
+                        NetTrace("SMOKE_CHECKPOINT role=%s scenario=%s step=ACTION_APPLIED plants=%d baseline=%d",
+                                theManifest.IsHost() ? "host" : "client", aDefinition->mName,
+                                aBoard->mPlants.mSize, mBaselinePlants);
+                }
+                if (aSoakElapsed >= SMOKE_SOAK_DURATION_MS && !mSoakLossIssued)
+                {
+                        if (mSoakPlantsIssued < 1 || mSoakSunClicks < 1 || !mActionApplied)
+                        {
+                                theFailure = "Adventure soak reached one minute without a local plant, sun collection, and applied action";
+                                return false;
+                        }
+                        if (theManifest.IsHost())
+                        {
+                                mSoakLossIssued = true;
+                                NetTrace("SMOKE_SOAK_FORCE_LOSS role=host elapsed=%u plants=%d sunClicks=%d snapshots=%u",
+                                        aSoakElapsed, mSoakPlantsIssued, mSoakSunClicks,
+                                        theGameplaySnapshots);
+                                aBoard->ZombiesWon(nullptr);
+                        }
+                }
+                return true;
+        }
+
+        if (!mActionIssued && aDefinition->mActionIsClientOwned == theManifest.IsClient())
 	{
 		if (IssueAction(theApp, theManifest))
 		{
@@ -1071,8 +1369,13 @@ void NetSmokeScenarioRuntime::OnSlotMachineSound(bool theHost)
 
 bool NetSmokeScenarioRuntime::IsComplete(uint32_t theRequiredPostActionSnapshots) const
 {
-	return mActionApplied &&
-		(!NetIsBowlingSmokeScenario(mScenario) || mBowlingZombieObserved) &&
+        return mActionApplied &&
+                (mScenario != NETSMOKE_SCENARIO_ADVENTURE_8_SOAK ||
+                        (mSoakChooserVerified && mSoakLossObserved &&
+                         mSoakLossCameraObserved && mSoakLossBrainsObserved &&
+                         mSoakLossDialogObserved && mSoakPlantsIssued > 0 &&
+                         mSoakSunClicks > 0)) &&
+                (!NetIsBowlingSmokeScenario(mScenario) || mBowlingZombieObserved) &&
 		theRequiredPostActionSnapshots > 0 &&
 		mPostActionSamples >= theRequiredPostActionSnapshots;
 }

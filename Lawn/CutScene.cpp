@@ -1585,6 +1585,13 @@ void CutScene::StartSeedChooser()
 	mApp->mSeedChooserScreen->mVisible = true;
 	mApp->mSeedChooserScreen->mMouseVisible = true;
 	mSeedChoosing = true;
+	// ShowSeedChooserScreen deliberately inserts full-screen widgets at the
+	// back of the manager.  The authoritative host's stock UpdateIntro then
+	// raises the chooser every frame, but network clients do not run that
+	// simulation (their intro is presentation-only).  Raise it here as part of
+	// the actual chooser activation so a client cannot have a visible and
+	// interactive widget hidden behind Board.
+	mApp->mWidgetManager->BringToFront(mApp->mSeedChooserScreen);
 	mApp->mWidgetManager->SetFocus(mApp->mSeedChooserScreen);
 	if (mApp->mSeedChooserScreen->mRandomButton)
 		mApp->mSeedChooserScreen->mRandomButton->SetDisabled(false);
@@ -1622,6 +1629,21 @@ void CutScene::Update()
 	// logic and eventually call StartLevel a second time.
 	if (mApp->NetIsClient())
 	{
+		// Gameplay remains host-authoritative, but the loss sequence is entirely
+		// local presentation.  Once a terminal snapshot starts it, advance the
+		// stock camera pan, brains graphic and game-over dialog on the client too.
+		// Keeping this ahead of the general client return avoids running any of the
+		// intro/Dave/profile authority code below.
+		if (mApp->mGameScene == GameScenes::SCENE_ZOMBIES_WON)
+		{
+			// A terminal snapshot can retain the gameplay pause bit after the host
+			// has stopped simulating the board.  The loss cutscene is presentation
+			// only, so it must keep advancing or the client will freeze on the
+			// brains graphic and never reach the game-over dialog.
+			mCutsceneTime += 10;
+			UpdateZombiesWon();
+			return;
+		}
 		if (mApp->mGameScene == GameScenes::SCENE_LEVEL_INTRO &&
 			mBoard->mDrawCount > 0 && !mPreloaded)
 		{

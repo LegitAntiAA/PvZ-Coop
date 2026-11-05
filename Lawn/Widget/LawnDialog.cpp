@@ -495,6 +495,12 @@ GameOverDialog::~GameOverDialog()
 //0x457E50
 void GameOverDialog::ButtonDepress(int theId)
 {
+	// The host owns restart/menu transitions in co-op.  Clients still receive
+	// and render this dialog so they can follow the loss sequence, but clicking
+	// it must not tear down or restart their board independently.
+	if (mApp->NetIsClient())
+		return;
+
     if (theId == 1)
     {
         mApp->KillDialog(Dialogs::DIALOG_GAME_OVER);
