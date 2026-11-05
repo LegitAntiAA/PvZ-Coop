@@ -10,6 +10,7 @@
 #include "../GridItem.h"
 #include "../Plant.h"
 #include "../SeedPacket.h"
+#include "../System/Music.h"
 #include "../Zombie.h"
 #include "../Widget/GameButton.h"
 #include "../Widget/AwardScreen.h"
@@ -951,9 +952,29 @@ void NetSmokeScenarioRuntime::Reset(NetSmokeScenarioId theScenario)
 	mPortalInitialCameraY = 0;
 	memset(mPortalObservedZombieIds, 0, sizeof(mPortalObservedZombieIds));
 	memset(mPortalObservedZombieRows, 0, sizeof(mPortalObservedZombieRows));
-	memset(mPortalObservedZombieXs, 0, sizeof(mPortalObservedZombieXs));
-	memset(mPortalObservedZombieTicks, 0, sizeof(mPortalObservedZombieTicks));
-	memset(mPortalObservedZombieEligible, 0, sizeof(mPortalObservedZombieEligible));
+        memset(mPortalObservedZombieXs, 0, sizeof(mPortalObservedZombieXs));
+        memset(mPortalObservedZombieTicks, 0, sizeof(mPortalObservedZombieTicks));
+        memset(mPortalObservedZombieEligible, 0, sizeof(mPortalObservedZombieEligible));
+        mEndlessModeVerified = false;
+        mEndlessWeatherAccelerated = false;
+        mEndlessTimeChanged = false;
+        mEndlessWaveProgressed = false;
+	mEndlessStageTriggered = false;
+	mEndlessRepickOpened = false;
+	mEndlessRepickLogged = false;
+	mEndlessRepickCompleted = false;
+	mEndlessHealthScaled = false;
+	mEndlessThawed = false;
+	mEndlessInitialPhase = 0;
+	mEndlessInitialWave = 0;
+	mEndlessInitialStage = 0;
+	mEndlessWaveTick = 0;
+	mEndlessStageTick = 0;
+	mEndlessThawReanim = 0;
+	mEndlessThawAnimTime = 0.0f;
+	mEndlessThawSampleTick = 0;
+	mEndlessPreRepickMaxZombieId = 0;
+	memset(mEndlessBaseHealth, 0, sizeof(mEndlessBaseHealth));
         mPostActionSamples = 0;
 }
 
@@ -969,8 +990,40 @@ bool NetSmokeScenarioRuntime::UpdateIntro(LawnApp* theApp,
 		return false;
 	}
 
-	const uint32_t aNow = GetTickCount();
-	if (!mIntroObserved)
+        const uint32_t aNow = GetTickCount();
+        if (mScenario == NETSMOKE_SCENARIO_ENDLESS_ST && mEndlessModeVerified &&
+                !mEndlessRepickOpened && aBoard->mChallenge &&
+                aBoard->mChallenge->mSurvivalStage > mEndlessInitialStage)
+        {
+                // CheckForGameEnd/InitSurvivalStage owns this transition.  Reset only
+                // smoke bookkeeping so the second real chooser is exercised afresh.
+                mEndlessRepickOpened = true;
+                mEndlessStageTick = aNow;
+                mIntroObserved = false;
+                mIntroProgressObserved = false;
+                mIntroSawDave = false;
+                mIntroTick = aNow;
+                mIntroLastCutsceneTime = -1;
+		mIntroLastDaveMessage = -2;
+		mIntroLastTutorialState = -1;
+		mIntroLastActionTick = 0;
+		mPlayingTick = 0;
+		mSoakChooserVerified = false;
+                mSoakChooserLastCount = -1;
+                mChooserStartIssued = false;
+	}
+	if (mScenario == NETSMOKE_SCENARIO_ENDLESS_ST && mEndlessRepickOpened &&
+		!mEndlessRepickLogged && aCutScene->mSeedChoosing &&
+		theApp->mSeedChooserScreen)
+	{
+		mEndlessRepickLogged = true;
+		NetTrace("SMOKE_ENDLESS_ST_REPICK_OPEN role=%s stage=%d scene=%d seedChoosing=1 chooser=%p wavesPerStage=%d",
+			theManifest.IsHost() ? "host" : "client",
+			aBoard->mChallenge->mSurvivalStage, (int)theApp->mGameScene,
+			(void*)theApp->mSeedChooserScreen,
+			aBoard->GetNumWavesPerSurvivalStage());
+	}
+        if (!mIntroObserved)
 	{
 		mIntroObserved = true;
 		mIntroTick = aNow;
@@ -1057,11 +1110,12 @@ bool NetSmokeScenarioRuntime::UpdateIntro(LawnApp* theApp,
 				// plants after the host's first five.  This still exercises real
 				// 5+5 ownership while guaranteeing at least one packet can satisfy
 				// the normal cost/prerequisite rules during the bounded smoke run.
-				const bool aTowerDefense =
-					mScenario == NETSMOKE_SCENARIO_TOWER_DEFENSE_CLIENT;
-				const int aStart = theManifest.IsClient() ?
-					(aTowerDefense ? 5 : NUM_SEEDS_IN_CHOOSER - 1) : 0;
-				const int aStep = theManifest.IsClient() && !aTowerDefense ? -1 : 1;
+                                const bool aSafeClientStock =
+                                        mScenario == NETSMOKE_SCENARIO_TOWER_DEFENSE_CLIENT ||
+                                        mScenario == NETSMOKE_SCENARIO_ENDLESS_ST;
+                                const int aStart = theManifest.IsClient() ?
+                                        (aSafeClientStock ? 5 : NUM_SEEDS_IN_CHOOSER - 1) : 0;
+                                const int aStep = theManifest.IsClient() && !aSafeClientStock ? -1 : 1;
                         for (int i = aStart; i >= 0 && i < NUM_SEEDS_IN_CHOOSER; i += aStep)
                         {
                                 ChosenSeed& aSeed = aChooser->mChosenSeeds[i];
@@ -1578,7 +1632,28 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
 
         if (mPlayingTick == 0)
         {
-		if (mScenario == NETSMOKE_SCENARIO_TOWER_DEFENSE_CLIENT &&
+                if (mScenario == NETSMOKE_SCENARIO_ENDLESS_ST && !mEndlessModeVerified)
+                {
+                        if (theApp->mGameMode != GameMode::GAMEMODE_COOP_ENDLESS_ST ||
+                                !theApp->IsCoopEndlessMode(theApp->mGameMode) ||
+                                !theApp->IsCoopEndlessRepick(theApp->mGameMode) ||
+                                !aBoard->IsEndlessT() || !aBoard->mChallenge ||
+                                aBoard->GetNumWavesPerSurvivalStage() != 10)
+                        {
+                                theFailure = "EndlessST did not start with endless, timed-weather, ten-wave, and repick properties combined";
+                                return false;
+                        }
+                        mEndlessModeVerified = true;
+                        mEndlessInitialPhase = aBoard->mNetDayPhase;
+                        mEndlessInitialWave = aBoard->mCurrentWave;
+                        mEndlessInitialStage = aBoard->mChallenge->mSurvivalStage;
+                        NetTrace("SMOKE_ENDLESS_ST_MODE role=%s mode=%d endless=1 timed=1 repick=1 wavesPerStage=10 stage=%d wave=%d phase=%u authority=%s",
+                                theManifest.IsHost() ? "host" : "client",
+                                (int)theApp->mGameMode, mEndlessInitialStage,
+                                mEndlessInitialWave, (unsigned)mEndlessInitialPhase,
+                                theManifest.IsHost() ? "host" : "snapshot");
+                }
+                if (mScenario == NETSMOKE_SCENARIO_TOWER_DEFENSE_CLIENT &&
 			!mTdPathVerified)
 		{
 			if (!ValidateTowerDefenseSmokePath(aBoard, theManifest, theFailure))
@@ -1678,12 +1753,216 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
                 mBaselineCaptured = true;
                 mActionTick = GetTickCount();
                 mSoakLastActionTick = mActionTick;
-		NetTrace("SMOKE_CHECKPOINT role=%s scenario=%s step=BASELINE plants=%d pots=%d zombies=%d snapshots=%u",
-			theManifest.IsHost() ? "host" : "client", aDefinition->mName,
+                NetTrace("SMOKE_CHECKPOINT role=%s scenario=%s step=BASELINE plants=%d pots=%d zombies=%d snapshots=%u",
+                        theManifest.IsHost() ? "host" : "client", aDefinition->mName,
                         mBaselinePlants, mBaselinePots, aBoard->mZombies.mSize, theGameplaySnapshots);
         }
 
-	if (mScenario == NETSMOKE_SCENARIO_PORTAL_COMBAT_CLIENT)
+        if (mScenario == NETSMOKE_SCENARIO_ENDLESS_ST)
+        {
+                const uint32_t aNow = GetTickCount();
+                if (!aBoard->mChallenge || !mEndlessModeVerified ||
+                        theApp->mGameMode != GameMode::GAMEMODE_COOP_ENDLESS_ST)
+                {
+                        theFailure = "EndlessST authoritative mode or challenge state disappeared during gameplay";
+                        return false;
+                }
+
+                if (theManifest.IsHost() && !mEndlessWeatherAccelerated &&
+                        aBoard->mChallenge->mSurvivalStage == mEndlessInitialStage)
+                {
+                        // Test-only timer compression: stock UpdateEndlessWeather and
+                        // UpdateZombieSpawning still own both transitions.
+                        aBoard->mNetWeatherTimer = 2;
+                        aBoard->mZombieCountDown = 6;
+                        aBoard->mZombieCountDownStart = 6;
+                        mEndlessWeatherAccelerated = true;
+                        NetTrace("SMOKE_ENDLESS_ST_ACCELERATE role=host weatherTimer=2 zombieCountdown=6");
+                }
+
+                if (!mEndlessTimeChanged &&
+                        aBoard->mNetDayPhase != mEndlessInitialPhase)
+                {
+                        mEndlessTimeChanged = true;
+                        NetTrace("SMOKE_ENDLESS_ST_TIME role=%s from=%u to=%u weatherTimer=%u fog=%u storm=%u visible=1",
+                                theManifest.IsHost() ? "host" : "client",
+                                (unsigned)mEndlessInitialPhase,
+                                (unsigned)aBoard->mNetDayPhase,
+                                (unsigned)aBoard->mNetWeatherTimer,
+                                (unsigned)aBoard->mNetFogTimer,
+                                (unsigned)aBoard->mNetStormTimer);
+                }
+
+                if (!mEndlessRepickOpened &&
+                        aBoard->mCurrentWave > mEndlessInitialWave)
+                {
+			if (!mEndlessWaveProgressed)
+			{
+				mEndlessWaveProgressed = true;
+				mEndlessWaveTick = aNow;
+                                NetTrace("SMOKE_ENDLESS_ST_WAVE role=%s from=%d to=%d stage=%d stockSpawner=1",
+                                        theManifest.IsHost() ? "host" : "client",
+                                        mEndlessInitialWave, aBoard->mCurrentWave,
+                                        aBoard->mChallenge->mSurvivalStage);
+                        }
+                        Zombie* aZombie = nullptr;
+                        while (aBoard->mZombies.IterateNext(aZombie))
+                        {
+                                const int aType = (int)aZombie->mZombieType;
+                                if (aZombie->mDead || aZombie->mFromWave < 0 ||
+                                        aType < 0 || aType >= NUM_ZOMBIE_TYPES ||
+                                        aZombie->mBodyMaxHealth <= 0)
+                                {
+                                        continue;
+                                }
+				if (mEndlessBaseHealth[aType] == 0)
+				{
+                                        mEndlessBaseHealth[aType] = aZombie->mBodyMaxHealth;
+                                        NetTrace("SMOKE_ENDLESS_ST_HEALTH_BASE role=%s type=%d stage=%d max=%d",
+                                                theManifest.IsHost() ? "host" : "client", aType,
+                                                aBoard->mChallenge->mSurvivalStage,
+						aZombie->mBodyMaxHealth);
+				}
+				mEndlessPreRepickMaxZombieId = max(
+					mEndlessPreRepickMaxZombieId, aZombie->mNetId);
+                        }
+                }
+
+                bool aHasBaseHealth = false;
+                for (int i = 0; i < NUM_ZOMBIE_TYPES; ++i)
+                        aHasBaseHealth |= mEndlessBaseHealth[i] > 0;
+		if (theManifest.IsHost() && !mEndlessStageTriggered &&
+			mEndlessTimeChanged && mEndlessWaveProgressed && aHasBaseHealth &&
+			mEndlessWaveTick != 0 &&
+			(uint32_t)(aNow - mEndlessWaveTick) >= 1000U)
+                {
+                        // Complete the current ten-wave stage through the same stock
+                        // CheckForGameEnd -> InitSurvivalStage path used in play.  No
+                        // zombie is repositioned or advanced by the smoke harness.
+                        mEndlessStageTriggered = true;
+                        mEndlessStageTick = aNow;
+                        mActionIssued = true;
+                        mActionTick = aNow;
+                        aBoard->mLevelComplete = true;
+                        NetTrace("SMOKE_CHECKPOINT role=host scenario=endless_st step=ACTION_ISSUED owner=host");
+                        NetTrace("SMOKE_ENDLESS_ST_STAGE_TRIGGER role=host stage=%d wave=%d wavesPerStage=10 stockCheckForGameEnd=1",
+                                aBoard->mChallenge->mSurvivalStage, aBoard->mCurrentWave);
+                        return true;
+                }
+
+                if (mEndlessRepickOpened && theApp->mGameScene == GameScenes::SCENE_PLAYING &&
+                        aBoard->mChallenge->mSurvivalStage > mEndlessInitialStage &&
+                        mSoakChooserVerified)
+                {
+                        if (!mEndlessRepickCompleted)
+                        {
+                                mEndlessRepickCompleted = true;
+                                NetTrace("SMOKE_ENDLESS_ST_REPICK_COMPLETE role=%s fromStage=%d toStage=%d chooser=1 wavesPerStage=10",
+                                        theManifest.IsHost() ? "host" : "client",
+                                        mEndlessInitialStage,
+                                        aBoard->mChallenge->mSurvivalStage);
+                        }
+			if (theManifest.IsHost() && !mEndlessHealthScaled &&
+				aBoard->mZombieCountDown > 6)
+                        {
+                                aBoard->mZombieCountDown = 6;
+				aBoard->mZombieCountDownStart = 6;
+			}
+
+			// A synchronized snapshot can continue arriving even when the client
+			// presentation is still frozen.  Require a real non-attachment
+			// reanimation to advance between two local samples, and require game
+			// music to be unpaused, before this smoke can pass.
+			if (!mEndlessThawed)
+			{
+				bool aStoredReanimFound = false;
+				Reanimation* aReanim = nullptr;
+				while (aBoard->IterateReanimations(aReanim))
+				{
+					if (aReanim->mDead || aReanim->mIsAttachment ||
+						aReanim->mAnimRate <= 0.0f)
+					{
+						continue;
+					}
+					if (mEndlessThawReanim == 0)
+					{
+						mEndlessThawReanim = (uintptr_t)aReanim;
+						mEndlessThawAnimTime = aReanim->mAnimTime;
+						mEndlessThawSampleTick = aNow;
+						break;
+					}
+					if ((uintptr_t)aReanim != mEndlessThawReanim)
+						continue;
+					aStoredReanimFound = true;
+					if ((uint32_t)(aNow - mEndlessThawSampleTick) >= 100U &&
+						fabsf(aReanim->mAnimTime - mEndlessThawAnimTime) > 0.0001f &&
+						theApp->mMusic && !theApp->mMusic->mPaused)
+					{
+						mEndlessThawed = true;
+						NetTrace("SMOKE_ENDLESS_ST_THAW role=%s thawed=1 reanim=%p rate=%.2f from=%.4f to=%.4f musicPaused=0",
+							theManifest.IsHost() ? "host" : "client", (void*)aReanim,
+							aReanim->mAnimRate, mEndlessThawAnimTime,
+							aReanim->mAnimTime);
+					}
+					break;
+				}
+				if (mEndlessThawReanim != 0 && !aStoredReanimFound &&
+					(uint32_t)(aNow - mEndlessThawSampleTick) >= 100U)
+				{
+					mEndlessThawReanim = 0;
+					mEndlessThawAnimTime = 0.0f;
+					mEndlessThawSampleTick = 0;
+				}
+			}
+
+			Zombie* aZombie = nullptr;
+                        while (!mEndlessHealthScaled && aBoard->mZombies.IterateNext(aZombie))
+                        {
+                                const int aType = (int)aZombie->mZombieType;
+				if (aZombie->mDead || aZombie->mFromWave < 0 ||
+					aZombie->mNetId <= mEndlessPreRepickMaxZombieId ||
+					aType < 0 || aType >= NUM_ZOMBIE_TYPES ||
+                                        mEndlessBaseHealth[aType] <= 0)
+                                {
+                                        continue;
+                                }
+                                const float aScale = 1.0f +
+                                        aBoard->mChallenge->mSurvivalStage * 0.12f;
+                                const int anExpected =
+                                        (int)(mEndlessBaseHealth[aType] * aScale);
+                                if (aZombie->mBodyMaxHealth != anExpected ||
+                                        aZombie->mBodyMaxHealth <= mEndlessBaseHealth[aType])
+                                {
+                                        theFailure = "EndlessST spawned a post-repick zombie without authoritative health scaling";
+                                        return false;
+                                }
+				mEndlessHealthScaled = true;
+				NetTrace("SMOKE_ENDLESS_ST_HEALTH_SCALE role=%s type=%d stage=%d base=%d scaled=%d expected=%d factor=%.2f",
+                                        theManifest.IsHost() ? "host" : "client", aType,
+                                        aBoard->mChallenge->mSurvivalStage,
+                                        mEndlessBaseHealth[aType], aZombie->mBodyMaxHealth,
+                                        anExpected, aScale);
+			}
+			if (mEndlessHealthScaled && mEndlessThawed && !mActionApplied)
+			{
+				mActionApplied = true;
+				NetTrace("SMOKE_CHECKPOINT role=%s scenario=endless_st step=ACTION_APPLIED stage=%d wave=%d thawed=1",
+					theManifest.IsHost() ? "host" : "client",
+					aBoard->mChallenge->mSurvivalStage,
+					aBoard->mCurrentWave);
+			}
+                }
+
+                if (mEndlessRepickOpened && !mActionApplied && mEndlessStageTick != 0 &&
+                        (uint32_t)(aNow - mEndlessStageTick) >= 60000U)
+                {
+                        theFailure = "EndlessST repick did not return to scaled stock gameplay within 60 seconds";
+                        return false;
+                }
+                return true;
+        }
+
+        if (mScenario == NETSMOKE_SCENARIO_PORTAL_COMBAT_CLIENT)
 	{
 		const uint32_t aNow = GetTickCount();
 		if (!mPortalCameraVerified)
@@ -2428,11 +2707,17 @@ bool NetSmokeScenarioRuntime::IsComplete(uint32_t theRequiredPostActionSnapshots
 		(mScenario != NETSMOKE_SCENARIO_TOWER_DEFENSE_CLIENT ||
 			(mSoakChooserVerified && mTdPathVerified && mTdZombieEntryObserved &&
 			 mTdZombieTurnObserved && mTdClientPlantObserved)) &&
-		(mScenario != NETSMOKE_SCENARIO_PORTAL_COMBAT_CLIENT ||
-			(mPortalCameraVerified && mPortalLayoutVerified && mPortalConveyorVerified && mPortalZombieEntryObserved &&
-			 mPortalZombieTeleportObserved && mPortalClientPlantObserved &&
-			 mPortalAdviceShown && mPortalAdviceCleared &&
-			 mPortalRelocationVerified)) &&
+                (mScenario != NETSMOKE_SCENARIO_PORTAL_COMBAT_CLIENT ||
+                        (mPortalCameraVerified && mPortalLayoutVerified && mPortalConveyorVerified && mPortalZombieEntryObserved &&
+                         mPortalZombieTeleportObserved && mPortalClientPlantObserved &&
+                         mPortalAdviceShown && mPortalAdviceCleared &&
+                         mPortalRelocationVerified)) &&
+		(mScenario != NETSMOKE_SCENARIO_ENDLESS_ST ||
+			(mEndlessModeVerified && mEndlessTimeChanged &&
+			 mEndlessWaveProgressed && mEndlessRepickOpened &&
+			 mEndlessRepickLogged &&
+			 mEndlessRepickCompleted && mEndlessHealthScaled &&
+			 mEndlessThawed)) &&
                 (!NetIsBowlingSmokeScenario(mScenario) || mBowlingZombieObserved) &&
 		theRequiredPostActionSnapshots > 0 &&
 		mPostActionSamples >= theRequiredPostActionSnapshots;

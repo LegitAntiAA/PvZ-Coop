@@ -14,7 +14,7 @@ param(
     [int]$GracefulExitSeconds = 10,
     [ValidateRange(0, 65535)]
     [int]$Port = 0,
-    [ValidateSet("Adventure1", "Adventure5Bowling", "Adventure5BowlingClient", "Adventure8Soak", "Adventure8Victory", "Adventure15WhackClient", "SlotMachineClient", "TowerDefenseClient", "PortalCombatClient", "Vasebreaker", "Beghouled")]
+    [ValidateSet("Adventure1", "Adventure5Bowling", "Adventure5BowlingClient", "Adventure8Soak", "Adventure8Victory", "Adventure15WhackClient", "SlotMachineClient", "TowerDefenseClient", "PortalCombatClient", "EndlessST", "Vasebreaker", "Beghouled")]
     [string]$Scenario = "Adventure1",
     [ValidateSet(0, 1)]
     [int]$SkipIntro = 1,
@@ -725,6 +725,7 @@ $scenarioSpec = switch ($Scenario) {
     "SlotMachineClient" { [ordered]@{ Mode = "slot_machine_client"; Level = 1; Marker = "slot_machine_client" } }
     "TowerDefenseClient" { [ordered]@{ Mode = "tower_defense_client"; Level = 1; Marker = "tower_defense_client" } }
     "PortalCombatClient" { [ordered]@{ Mode = "portal_combat_client"; Level = 1; Marker = "portal_combat_client" } }
+    "EndlessST" { [ordered]@{ Mode = "endless_st"; Level = 1; Marker = "endless_st" } }
     "Vasebreaker" { [ordered]@{ Mode = "vasebreaker"; Level = 1; Marker = "vasebreaker" } }
     "Beghouled" { [ordered]@{ Mode = "beghouled"; Level = 1; Marker = "beghouled" } }
     default { throw ("Unsupported smoke scenario: {0}" -f $Scenario) }
@@ -738,6 +739,9 @@ if ($Scenario -in @("Adventure8Soak", "Adventure8Victory") -and $SkipIntro -ne 0
 }
 if ($Scenario -eq "TowerDefenseClient" -and $SkipIntro -ne 0) {
     throw "TowerDefenseClient requires -SkipIntro 0 so the generated path and client plant action are exercised."
+}
+if ($Scenario -eq "EndlessST" -and $SkipIntro -ne 0) {
+    throw "EndlessST requires -SkipIntro 0 so both the initial chooser and ten-wave repick chooser are exercised."
 }
 $runId = [Guid]::NewGuid().ToString("N")
 $runRoot = Join-Path $ArtifactsRoot ("run_" + $runId)
@@ -1089,6 +1093,26 @@ try {
             @{ Label = "client Portal advice applied clear"; Pattern = '(?im)\badvice applied op=1\b' }
         )
     }
+    if ($Scenario -eq "EndlessST") {
+        $hostPositivePatterns += @(
+            @{ Label = "host EndlessST combined mode"; Pattern = '(?im)\bSMOKE_ENDLESS_ST_MODE\b[^\r\n]*\brole=host\b[^\r\n]*\bendless=1\b[^\r\n]*\btimed=1\b[^\r\n]*\brepick=1\b[^\r\n]*\bwavesPerStage=10\b[^\r\n]*\bauthority=host\b' },
+            @{ Label = "host EndlessST visible time/weather transition"; Pattern = '(?im)\bSMOKE_ENDLESS_ST_TIME\b[^\r\n]*\brole=host\b[^\r\n]*\bfrom=[01]\b[^\r\n]*\bto=[01]\b[^\r\n]*\bvisible=1\b' },
+            @{ Label = "host EndlessST stock wave progression"; Pattern = '(?im)\bSMOKE_ENDLESS_ST_WAVE\b[^\r\n]*\brole=host\b[^\r\n]*\bfrom=-?\d+\b[^\r\n]*\bto=\d+\b[^\r\n]*\bstockSpawner=1\b' },
+            @{ Label = "host EndlessST ten-wave repick opened"; Pattern = '(?im)\bSMOKE_ENDLESS_ST_REPICK_OPEN\b[^\r\n]*\brole=host\b[^\r\n]*\bstage=[1-9]\d*\b[^\r\n]*\bseedChoosing=1\b[^\r\n]*\bchooser=(?!0+\b)[0-9a-f]+\b[^\r\n]*\bwavesPerStage=10\b' },
+            @{ Label = "host EndlessST repick completed"; Pattern = '(?im)\bSMOKE_ENDLESS_ST_REPICK_COMPLETE\b[^\r\n]*\brole=host\b[^\r\n]*\bfromStage=0\b[^\r\n]*\btoStage=[1-9]\d*\b[^\r\n]*\bchooser=1\b[^\r\n]*\bwavesPerStage=10\b' },
+            @{ Label = "host EndlessST presentation thawed"; Pattern = '(?im)\bSMOKE_ENDLESS_ST_THAW\b[^\r\n]*\brole=host\b[^\r\n]*\bthawed=1\b[^\r\n]*\breanim=(?!0+\b)[0-9a-f]+\b[^\r\n]*\brate=(?!0\.00\b)\d+\.\d+\b[^\r\n]*\bfrom=\d+\.\d+\b[^\r\n]*\bto=\d+\.\d+\b[^\r\n]*\bmusicPaused=0\b' },
+            @{ Label = "host EndlessST health scaling"; Pattern = '(?im)\bSMOKE_ENDLESS_ST_HEALTH_SCALE\b[^\r\n]*\brole=host\b[^\r\n]*\bstage=[1-9]\d*\b[^\r\n]*\bbase=[1-9]\d*\b[^\r\n]*\bscaled=[1-9]\d*\b[^\r\n]*\bexpected=[1-9]\d*\b[^\r\n]*\bfactor=1\.12\b' }
+        )
+        $clientPositivePatterns += @(
+            @{ Label = "client EndlessST combined snapshot mode"; Pattern = '(?im)\bSMOKE_ENDLESS_ST_MODE\b[^\r\n]*\brole=client\b[^\r\n]*\bendless=1\b[^\r\n]*\btimed=1\b[^\r\n]*\brepick=1\b[^\r\n]*\bwavesPerStage=10\b[^\r\n]*\bauthority=snapshot\b' },
+            @{ Label = "client EndlessST visible time/weather transition"; Pattern = '(?im)\bSMOKE_ENDLESS_ST_TIME\b[^\r\n]*\brole=client\b[^\r\n]*\bfrom=[01]\b[^\r\n]*\bto=[01]\b[^\r\n]*\bvisible=1\b' },
+            @{ Label = "client EndlessST synchronized wave progression"; Pattern = '(?im)\bSMOKE_ENDLESS_ST_WAVE\b[^\r\n]*\brole=client\b[^\r\n]*\bfrom=-?\d+\b[^\r\n]*\bto=\d+\b[^\r\n]*\bstockSpawner=1\b' },
+            @{ Label = "client EndlessST synchronized repick opened"; Pattern = '(?im)\bSMOKE_ENDLESS_ST_REPICK_OPEN\b[^\r\n]*\brole=client\b[^\r\n]*\bstage=[1-9]\d*\b[^\r\n]*\bseedChoosing=1\b[^\r\n]*\bchooser=(?!0+\b)[0-9a-f]+\b[^\r\n]*\bwavesPerStage=10\b' },
+            @{ Label = "client EndlessST repick completed"; Pattern = '(?im)\bSMOKE_ENDLESS_ST_REPICK_COMPLETE\b[^\r\n]*\brole=client\b[^\r\n]*\bfromStage=0\b[^\r\n]*\btoStage=[1-9]\d*\b[^\r\n]*\bchooser=1\b[^\r\n]*\bwavesPerStage=10\b' },
+            @{ Label = "client EndlessST presentation thawed"; Pattern = '(?im)\bSMOKE_ENDLESS_ST_THAW\b[^\r\n]*\brole=client\b[^\r\n]*\bthawed=1\b[^\r\n]*\breanim=(?!0+\b)[0-9a-f]+\b[^\r\n]*\brate=(?!0\.00\b)\d+\.\d+\b[^\r\n]*\bfrom=\d+\.\d+\b[^\r\n]*\bto=\d+\.\d+\b[^\r\n]*\bmusicPaused=0\b' },
+            @{ Label = "client EndlessST health scaling"; Pattern = '(?im)\bSMOKE_ENDLESS_ST_HEALTH_SCALE\b[^\r\n]*\brole=client\b[^\r\n]*\bstage=[1-9]\d*\b[^\r\n]*\bbase=[1-9]\d*\b[^\r\n]*\bscaled=[1-9]\d*\b[^\r\n]*\bexpected=[1-9]\d*\b[^\r\n]*\bfactor=1\.12\b' }
+        )
+    }
     $negativePatterns = @(
         @{ Label = "access violation"; Pattern = '(?im)Access Violation' },
         @{ Label = "fatal network error"; Pattern = '(?im)\bfatal:' },
@@ -1126,6 +1150,14 @@ try {
             @{ Label = "interpolated Portal teleport"; Pattern = '(?im)\bSMOKE_PORTAL_ZOMBIE_TELEPORT\b[^\r\n]*\bsnap=(?!1\b)\d+' },
             @{ Label = "invalid Portal relocation"; Pattern = '(?im)\bSMOKE_PORTAL_RELOCATION\b[^\r\n]*(?:\blive=(?!4\b)\d+|\bopen=(?!4\b)\d+|\bpairs=(?!2\b)\d+)' },
             @{ Label = "rejected Portal advice"; Pattern = '(?im)\badvice (?:TX|applied)[^\r\n]*\brejected\b' }
+        )
+    }
+    if ($Scenario -eq "EndlessST") {
+        $negativePatterns += @(
+            @{ Label = "invalid EndlessST combined mode"; Pattern = '(?im)\bSMOKE_ENDLESS_ST_MODE\b[^\r\n]*(?:\bendless=(?!1\b)\d+|\btimed=(?!1\b)\d+|\brepick=(?!1\b)\d+|\bwavesPerStage=(?!10\b)\d+)' },
+            @{ Label = "invalid EndlessST repick"; Pattern = '(?im)\bSMOKE_ENDLESS_ST_REPICK_(?:OPEN|COMPLETE)\b[^\r\n]*(?:\bseedChoosing=(?!1\b)\d+|\bchooser=0+\b|\bwavesPerStage=(?!10\b)\d+)' },
+            @{ Label = "invalid EndlessST thaw"; Pattern = '(?im)\bSMOKE_ENDLESS_ST_THAW\b[^\r\n]*(?:\bthawed=(?!1\b)\d+|\breanim=0+\b|\brate=0\.00\b|\bmusicPaused=(?!0\b)\d+)' },
+            @{ Label = "invalid EndlessST health scale"; Pattern = '(?im)\bSMOKE_ENDLESS_ST_HEALTH_SCALE\b[^\r\n]*(?:\bbase=0\b|\bscaled=0\b|\bexpected=0\b|\bfactor=(?!1\.12\b)\S+)' }
         )
     }
 
@@ -1397,6 +1429,50 @@ try {
             $hostPortalRelocation.Groups[2].Value -ne $clientPortalRelocation.Groups[2].Value -or
             $hostPortalRelocation.Groups[1].Value -eq $hostPortalRelocation.Groups[2].Value) {
             throw "Portal Combat relocation hashes are missing, mismatched, or unchanged."
+        }
+    }
+
+    if ($Scenario -eq "EndlessST") {
+        $endlessTimePattern = '(?im)\bSMOKE_ENDLESS_ST_TIME\b[^\r\n]*\bfrom=([01])\b[^\r\n]*\bto=([01])\b'
+        $endlessRepickPattern = '(?im)\bSMOKE_ENDLESS_ST_REPICK_COMPLETE\b[^\r\n]*\bfromStage=(\d+)\b[^\r\n]*\btoStage=(\d+)\b'
+        $endlessHealthPattern = '(?im)\bSMOKE_ENDLESS_ST_HEALTH_SCALE\b[^\r\n]*\btype=(\d+)\b[^\r\n]*\bstage=(\d+)\b[^\r\n]*\bbase=(\d+)\b[^\r\n]*\bscaled=(\d+)\b[^\r\n]*\bexpected=(\d+)\b'
+        $hostEndlessTime = [regex]::Match($hostLog, $endlessTimePattern)
+        $clientEndlessTime = [regex]::Match($clientLog, $endlessTimePattern)
+        $hostEndlessRepick = [regex]::Match($hostLog, $endlessRepickPattern)
+        $clientEndlessRepick = [regex]::Match($clientLog, $endlessRepickPattern)
+        $hostEndlessHealth = [regex]::Match($hostLog, $endlessHealthPattern)
+        $clientEndlessHealth = [regex]::Match($clientLog, $endlessHealthPattern)
+        $endlessEvidence = @($hostEndlessTime, $clientEndlessTime,
+            $hostEndlessRepick, $clientEndlessRepick,
+            $hostEndlessHealth, $clientEndlessHealth)
+        if (@($endlessEvidence | Where-Object { -not $_.Success }).Count -ne 0) {
+            throw "Missing EndlessST time, repick, or health-scaling correlation evidence."
+        }
+        if ($hostEndlessTime.Groups[1].Value -eq $hostEndlessTime.Groups[2].Value -or
+            $hostEndlessTime.Groups[1].Value -ne $clientEndlessTime.Groups[1].Value -or
+            $hostEndlessTime.Groups[2].Value -ne $clientEndlessTime.Groups[2].Value) {
+            throw "EndlessST day/night phase did not change identically on host and client."
+        }
+        for ($group = 1; $group -le 2; ++$group) {
+            if ($hostEndlessRepick.Groups[$group].Value -ne
+                $clientEndlessRepick.Groups[$group].Value) {
+                throw "EndlessST repick stage transition mismatch."
+            }
+        }
+        if ([int]$hostEndlessRepick.Groups[2].Value -ne
+            ([int]$hostEndlessRepick.Groups[1].Value + 1)) {
+            throw "EndlessST repick did not advance exactly one ten-wave stage."
+        }
+        for ($group = 1; $group -le 5; ++$group) {
+            if ($hostEndlessHealth.Groups[$group].Value -ne
+                $clientEndlessHealth.Groups[$group].Value) {
+                throw ("EndlessST health scaling mismatch in group {0}." -f $group)
+            }
+        }
+        if ($hostEndlessHealth.Groups[4].Value -ne $hostEndlessHealth.Groups[5].Value -or
+            [int]$hostEndlessHealth.Groups[4].Value -le
+            [int]$hostEndlessHealth.Groups[3].Value) {
+            throw "EndlessST post-repick health did not equal the authoritative scaled value."
         }
     }
 

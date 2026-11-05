@@ -1,6 +1,6 @@
 # Two-process co-op smoke harness
 
-`RunCoopSmoke.ps1` launches one host and one client against loopback, starts one of ten deterministic scenarios, performs one scenario-specific gameplay action, validates both result files and diagnostic logs, and checks that a post-action snapshot transmitted by the host was applied by the client with the same FNV-1a hash.
+`RunCoopSmoke.ps1` launches one host and one client against loopback, starts one of the audited deterministic scenarios, performs one scenario-specific gameplay action, validates both result files and diagnostic logs, and checks that a post-action snapshot transmitted by the host was applied by the client with the same FNV-1a hash.
 
 The runner has no external dependencies beyond Windows PowerShell 5.1. It uses the game-side `-coop-smoke-manifest=<absolute path>` hook described by `SmokeManifest.example.ini`. Each process has isolated appdata, config, logs, result, window dimensions, and profile state. The hook automatically hosts/connects/starts and writes `result_path` atomically only after the scripted action is visible on both sides and at least `minimum_snapshots` post-action snapshots were observed. The runner then closes the exact client process first and the exact host process second through their main windows.
 
@@ -17,6 +17,7 @@ Supported scenarios are deliberately fail-closed:
 | `SlotMachineClient` | `mode=slot_machine_client`, `level=1` | Client pulls the lever; both peers must observe the same roll, pull/return animations, three completed reels, 25 sun spent, and exactly one slot-machine sound. |
 | `TowerDefenseClient` | `mode=tower_defense_client`, `level=1` | Client plants on a non-road cell. Both peers must report the same generated path bytes/hash, road cell count, zombie ID through off-lawn entry and a path turn, and planted ID/cell. The road alternates through exactly three separated edge visits (`top-bottom-top` or `bottom-top-bottom`), never creates an adjacent 2x2 road block, and uses the dirt road renderer. |
 | `PortalCombatClient` | `mode=portal_combat_client`, `level=1` | Client plants from the stock conveyor. Both peers require exactly four live portals (two of each type) with matching IDs/cells/states and real portal resources, then observe the same stock zombie before and after a real portal teleport, a one-apply client snap, relocation advice show/clear, and a clean four-open-portal relocated layout. |
+| `EndlessST` | `mode=endless_st`, `level=1` | Both peers exercise the initial 5+5 chooser, authoritative EndlessST mode, a stock day/night and weather update, stock wave progression, the ten-wave stage boundary through `CheckForGameEnd`, the synchronized repick chooser, and matching 1.12x zombie health scaling in the next stage. After repick, both peers must also prove one live non-attachment animation advances between two samples with positive rate and unpaused music; snapshot/health evidence alone cannot pass. The harness compresses only stock timers and never moves zombies. |
 | `Vasebreaker` | `mode=vasebreaker`, `level=1` | Client clicks the first live vase through the strict network input path. |
 | `Beghouled` | `mode=beghouled`, `level=1` | Client performs a valid drag through the strict network input path. |
 
@@ -39,18 +40,18 @@ Useful overrides:
   -Seed 424242 -TimeoutSeconds 180 -MinimumSnapshots 5
 ```
 
-Run the ten-scenario tranche explicitly:
+Run the smoke tranche explicitly:
 
 ```powershell
 foreach ($scenario in "Adventure1", "Adventure5Bowling", "Adventure5BowlingClient", "Adventure15WhackClient", "Vasebreaker", "Beghouled") {
   .\tests\CoopSmoke\RunCoopSmoke.ps1 -Scenario $scenario -SkipIntro 1
 }
-foreach ($scenario in "Adventure8Soak", "Adventure8Victory", "SlotMachineClient", "TowerDefenseClient") {
+foreach ($scenario in "Adventure8Soak", "Adventure8Victory", "SlotMachineClient", "TowerDefenseClient", "PortalCombatClient", "EndlessST") {
   .\tests\CoopSmoke\RunCoopSmoke.ps1 -Scenario $scenario -SkipIntro 0
 }
 ```
 
-The Slot Machine and Tower Defense scenarios deliberately run the stock intro. Slot Machine waits for the seed bank and handle to finish their normal slide-on lifecycle; Tower Defense waits for path generation and the client-side plant action. `TowerDefenseClient`, `Adventure8Soak`, and `Adventure8Victory` reject `-SkipIntro 1` instead of silently weakening their coverage.
+The Slot Machine, Tower Defense, Portal Combat, and EndlessST scenarios deliberately run the stock intro. Slot Machine waits for the seed bank and handle to finish their normal slide-on lifecycle; Tower Defense waits for path generation and the client-side plant action; EndlessST also exercises the second chooser after its ten-wave stage transition. `TowerDefenseClient`, `EndlessST`, `Adventure8Soak`, and `Adventure8Victory` reject `-SkipIntro 1` instead of silently weakening their coverage.
 
 `-SkipIntro` accepts `0` or `1`. With `0`, the smoke controller waits for the normal intro to enter `SCENE_PLAYING`; it never injects a gameplay action during cutscene, chooser, dialog, or pause state. Host and client dimensions may differ to exercise coordinate canonicalization; both windows are always visible and placed side by side.
 
@@ -68,4 +69,4 @@ The Adventure 5 and Whack cursor assertions require the stock shovel/hammer draw
 
 Each GUID artifact tree preserves generated configs/manifests, role logs, atomic result JSON, a PID ledger, and `summary.json`. Failed runs are never cleaned automatically.
 
-The game must run in an interactive Windows desktop session; this is process automation, not a headless renderer. This tranche proves launch/lifecycle, coordinate handling, representative host/client actions, and post-action state convergence for the ten scenarios. It is not a complete scripted playthrough or a substitute for the broader mini-game regression matrix.
+The game must run in an interactive Windows desktop session; this is process automation, not a headless renderer. This tranche proves launch/lifecycle, coordinate handling, representative host/client actions, and post-action state convergence for its audited scenarios. It is not a complete scripted playthrough or a substitute for the broader mini-game regression matrix.

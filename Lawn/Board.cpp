@@ -1051,7 +1051,13 @@ void Board::PickZombieWaves()
 //0x40A110
 int Board::GetLevelRandSeed()
 {
-	int aRndSeed = mApp->mPlayerInfo->mId + mBoardRandSeed;
+	// A profile id is intentionally part of stock single-player variety, but it
+	// is private per peer.  Using it in co-op makes survival repicks build
+	// different allowed-zombie tables and chooser recommendations before the
+	// authoritative snapshots arrive.  The board seed is session-canonical.
+	int aRndSeed = mBoardRandSeed;
+	if (!mApp->NetActive())
+		aRndSeed += mApp->mPlayerInfo->mId;
 	if (mApp->IsAdventureMode())
 	{
 		aRndSeed += mApp->mPlayerInfo->mFinishedAdventure * 101 + mLevel;
@@ -2415,6 +2421,18 @@ void Board::StartLevelClientPresentation()
 {
 	NetCleanupCrazyDavePresentation();
 	mCoinBankFadeCount = 0;
+	// InitSurvivalStage freezes every non-attached reanimation and pauses the
+	// sound system while S/ST re-opens the chooser.  The authoritative host
+	// thaws those presentation systems in StartLevel; clients deliberately do
+	// not call StartLevel because Challenge::StartLevel mutates gameplay state.
+	// Mirror only the presentation half here or a client remains visually and
+	// audibly frozen after the first ten-wave repick.
+	if ((mApp->IsSurvivalMode() || mApp->IsLastStandEndless(mApp->mGameMode)) &&
+		mChallenge && mChallenge->mSurvivalStage > 0)
+	{
+		FreezeEffectsForCutscene(false);
+		mApp->mSoundSystem->GamePause(false);
+	}
 	if (mApp->IsWallnutBowlingLevel() && mChallenge)
 		mChallenge->mShowBowlingLine = true;
 	LawnNet::gNetSuppressSounds = true;
@@ -7165,14 +7183,17 @@ void Board::UpdateEndlessWeather()
 		mNetDayPhase = mNetDayPhase ? 0 : 1;
 		mNetWeatherTimer = 6000;
 
+		// Weather choices are exclusive.  Explicitly clear the previous effect
+		// before rolling so delayed/custom timer values cannot overlap fog and
+		// storm on the next phase.
+		mNetFogTimer = 0;
+		mNetStormTimer = 0;
 		// random weather after each switch
 		int aRoll = Rand(100);
 		if (aRoll < 25)
 			mNetFogTimer = 3000;       // ~30 s of fog
 		else if (aRoll < 45)
 			mNetStormTimer = 2000;     // ~20 s of storm
-		else
-			mNetFogTimer = 0;
 	}
 
 	if (mNetFogTimer > 0)

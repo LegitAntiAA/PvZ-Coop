@@ -576,6 +576,18 @@ void TestSmokeManifestAndHashValidation()
 
 	anError.clear();
 	CHECK(aTree.Parse(aTree.MakeManifest(aTree.mAppData.string(), aTree.mResult.string(),
+		"endless_st", 1, 0), aManifest, anError));
+	CHECK(anError.empty());
+	CHECK(aManifest.mScenario == LawnNet::NETSMOKE_SCENARIO_ENDLESS_ST);
+	CHECK(aManifest.mGameMode == (uint8_t)GameMode::GAMEMODE_COOP_ENDLESS_ST);
+	CHECK(LawnNet::NetIsInteractiveChooserSmokeScenario(aManifest.mScenario));
+	const LawnNet::NetSmokeScenarioDefinition* anEndlessST =
+		LawnNet::NetGetSmokeScenario(LawnNet::NETSMOKE_SCENARIO_ENDLESS_ST);
+	CHECK(anEndlessST != nullptr);
+	CHECK(anEndlessST && !anEndlessST->mActionIsClientOwned);
+
+	anError.clear();
+	CHECK(aTree.Parse(aTree.MakeManifest(aTree.mAppData.string(), aTree.mResult.string(),
 		"vasebreaker", 1, 1), aManifest, anError));
 	CHECK(anError.empty());
 	CHECK(aManifest.mScenario == LawnNet::NETSMOKE_SCENARIO_VASEBREAKER);

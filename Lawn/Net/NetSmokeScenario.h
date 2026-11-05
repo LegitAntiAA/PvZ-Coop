@@ -28,14 +28,16 @@ enum NetSmokeScenarioId : uint8_t
         NETSMOKE_SCENARIO_ADVENTURE_8_SOAK = 8,
         NETSMOKE_SCENARIO_ADVENTURE_8_VICTORY = 9,
 	NETSMOKE_SCENARIO_TOWER_DEFENSE_CLIENT = 10,
-	NETSMOKE_SCENARIO_PORTAL_COMBAT_CLIENT = 11
+        NETSMOKE_SCENARIO_PORTAL_COMBAT_CLIENT = 11,
+        NETSMOKE_SCENARIO_ENDLESS_ST = 12
 };
 
 inline bool NetIsInteractiveChooserSmokeScenario(NetSmokeScenarioId theScenario)
 {
         return theScenario == NETSMOKE_SCENARIO_ADVENTURE_8_SOAK ||
 		theScenario == NETSMOKE_SCENARIO_ADVENTURE_8_VICTORY ||
-		theScenario == NETSMOKE_SCENARIO_TOWER_DEFENSE_CLIENT;
+                theScenario == NETSMOKE_SCENARIO_TOWER_DEFENSE_CLIENT ||
+                theScenario == NETSMOKE_SCENARIO_ENDLESS_ST;
 }
 
 inline bool NetIsBowlingSmokeScenario(NetSmokeScenarioId theScenario)
@@ -86,9 +88,12 @@ inline const NetSmokeScenarioDefinition* NetSmokeScenarioTable(size_t& theCount)
 		{ NETSMOKE_SCENARIO_TOWER_DEFENSE_CLIENT,
 			"tower_defense_client", "tower_defense_client", 1,
 			(uint8_t)GameMode::GAMEMODE_COOP_TOWER_DEFENSE, true },
-		{ NETSMOKE_SCENARIO_PORTAL_COMBAT_CLIENT,
-			"portal_combat_client", "portal_combat_client", 1,
-			(uint8_t)GameMode::GAMEMODE_CHALLENGE_PORTAL_COMBAT, true }
+                { NETSMOKE_SCENARIO_PORTAL_COMBAT_CLIENT,
+                        "portal_combat_client", "portal_combat_client", 1,
+                        (uint8_t)GameMode::GAMEMODE_CHALLENGE_PORTAL_COMBAT, true },
+                { NETSMOKE_SCENARIO_ENDLESS_ST,
+                        "endless_st", "endless_st", 1,
+                        (uint8_t)GameMode::GAMEMODE_COOP_ENDLESS_ST, false }
 	};
 	theCount = sizeof(aScenarios) / sizeof(aScenarios[0]);
 	return aScenarios;
@@ -121,7 +126,7 @@ inline bool NetResolveSmokeScenario(const std::string& theMode, int theLevel,
 	theError = "unsupported smoke scenario; allowed pairs are adventure/1, adventure/5, "
                 "adventure_bowling_client/5, adventure_whack_client/15, slot_machine_client/1, "
 		"adventure_soak/8, adventure_victory/8, tower_defense_client/1, "
-		"portal_combat_client/1, "
+                "portal_combat_client/1, endless_st/1, "
 		"vasebreaker/1, beghouled/1";
 	return false;
 }
@@ -200,7 +205,7 @@ private:
 	uint32_t mPortalAdviceClearTick;
 	bool mPortalRelocationVerified;
 	bool mPortalCameraVerified;
-	bool mPortalCameraMovementVerified;
+        bool mPortalCameraMovementVerified;
 	uint16_t mPortalZombieId;
 	uint16_t mPortalPlantId;
 	uint16_t mPortalHeldPacketId;
@@ -223,6 +228,26 @@ private:
 	float mPortalObservedZombieXs[PORTAL_ZOMBIE_OBSERVATION_CAPACITY];
 	uint32_t mPortalObservedZombieTicks[PORTAL_ZOMBIE_OBSERVATION_CAPACITY];
 	bool mPortalObservedZombieEligible[PORTAL_ZOMBIE_OBSERVATION_CAPACITY];
+	bool mEndlessModeVerified;
+	bool mEndlessWeatherAccelerated;
+	bool mEndlessTimeChanged;
+	bool mEndlessWaveProgressed;
+	bool mEndlessStageTriggered;
+	bool mEndlessRepickOpened;
+	bool mEndlessRepickLogged;
+	bool mEndlessRepickCompleted;
+	bool mEndlessHealthScaled;
+	bool mEndlessThawed;
+	uint8_t mEndlessInitialPhase;
+	int mEndlessInitialWave;
+	int mEndlessInitialStage;
+	uint32_t mEndlessWaveTick;
+	uint32_t mEndlessStageTick;
+	uintptr_t mEndlessThawReanim;
+	float mEndlessThawAnimTime;
+	uint32_t mEndlessThawSampleTick;
+	uint16_t mEndlessPreRepickMaxZombieId;
+	int mEndlessBaseHealth[NUM_ZOMBIE_TYPES];
 	uint32_t mPostActionSamples;
 
 	bool UpdateIntro(LawnApp* theApp, const NetSmokeManifest& theManifest,

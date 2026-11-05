@@ -1972,10 +1972,22 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		}
 	}
 
-	mNetDayPhase = b.ReadU8Or();
-	mNetWeatherTimer = b.ReadU16Or();
-	mNetFogTimer = b.ReadU16Or();
-	mNetStormTimer = b.ReadU16Or();
+	const uint8_t aNetDayPhase = b.ReadU8Or();
+	const uint16_t aNetWeatherTimer = b.ReadU16Or();
+	const uint16_t aNetFogTimer = b.ReadU16Or();
+	const uint16_t aNetStormTimer = b.ReadU16Or();
+	if (aNetDayPhase > 1 || aNetWeatherTimer > 6000 ||
+		aNetFogTimer > 3000 || aNetStormTimer > 2000 ||
+		(aNetFogTimer != 0 && aNetStormTimer != 0))
+	{
+		NetTrace("snapshot weather rejected: phase=%u switch=%u fog=%u storm=%u",
+			aNetDayPhase, aNetWeatherTimer, aNetFogTimer, aNetStormTimer);
+		return;
+	}
+	mNetDayPhase = aNetDayPhase;
+	mNetWeatherTimer = aNetWeatherTimer;
+	mNetFogTimer = aNetFogTimer;
+	mNetStormTimer = aNetStormTimer;
 
 	mNetPvPBrainScore = b.ReadU8Or();
 	mNetPvPKillScore = b.ReadU8Or();
@@ -4139,7 +4151,9 @@ void Board::DrawEndlessWeather(Graphics* g)
 	// storm: lightning flash
 	if (mNetStormTimer > 0)
 	{
-		int aFlash = mMainCounter % 180;
+		// The storm timer is authoritative and snapshot-synchronized.  Using the
+		// local mMainCounter made lightning flash on different frames per peer.
+		int aFlash = mNetStormTimer % 180;
 		if (aFlash < 6)
 		{
 			g->SetColor(Color(255, 255, 255, 130 - aFlash * 15));
