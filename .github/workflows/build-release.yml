@@ -33,8 +33,14 @@ jobs:
             'lib/ffmpegWin32', 'lib/portaudio', 'lib/tinyfiledialogs',
             'lib/zlibWin32', 'lib/dx8sdk'
           ) | ForEach-Object { Join-Path $root $_ }
-          $env:INCLUDE = ($inc -join ';') + ';' + $env:INCLUDE
-          $env:LIB = ($libs -join ';') + ';' + $env:LIB
+          # The .vcxproj explicitly sets empty AdditionalIncludeDirectories.
+          # MSVC's CL and LINK environment variables inject flags directly.
+          $env:CL = (($inc | ForEach-Object { '/I"' + $_ + '"' }) -join ' ')
+          $env:LINK = (($libs | ForEach-Object { '/LIBPATH:"' + $_ + '"' }) -join ' ')
+          Write-Host "Injected $($inc.Count) include paths and $($libs.Count) library paths"
+          foreach ($dir in $inc + $libs) {
+            if (!(Test-Path $dir)) { throw "Missing dependency directory: $dir" }
+          }
           msbuild SexyAppFramework/SexyAppBase.vcxproj /m /p:Configuration=ReleaseGOTY /p:Platform=Win32 /p:PlatformToolset=v143 /verbosity:minimal
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
