@@ -21,7 +21,22 @@ jobs:
       - name: Build ReleaseGOTY
         shell: pwsh
         run: |
+          $root = (Get-Location).Path
+          $inc = @(
+            'include', 'include/imgui', 'include/sdl3', 'include/sdl3_ttf',
+            'include/ImageLib', 'include/bass', 'include/ffmpegWin32',
+            'include/portaudio', 'include/tinyfiledialogs', 'include/zlib',
+            'include/dx8sdk'
+          ) | ForEach-Object { Join-Path $root $_ }
+          $libs = @(
+            'lib/sdl3/x86', 'lib/sdl3_ttf/x86', 'lib/bassWin32',
+            'lib/ffmpegWin32', 'lib/portaudio', 'lib/tinyfiledialogs',
+            'lib/zlibWin32', 'lib/dx8sdk'
+          ) | ForEach-Object { Join-Path $root $_ }
+          $env:INCLUDE = ($inc -join ';') + ';' + $env:INCLUDE
+          $env:LIB = ($libs -join ';') + ';' + $env:LIB
           msbuild SexyAppFramework/SexyAppBase.vcxproj /m /p:Configuration=ReleaseGOTY /p:Platform=Win32 /p:PlatformToolset=v143 /verbosity:minimal
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Run network tests (Win32)
         if: true
