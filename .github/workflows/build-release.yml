@@ -38,74 +38,7 @@ jobs:
           # The legacy DirectX 8 SDK ships basetsd.h, which conflicts with modern Windows SDK winnt.h.
           # Force the modern SDK basetsd.h first; its include guard prevents the old one from replacing it.
           $sdkBase = Join-Path ${env:ProgramFiles(x86)} 'Windows Kits/10/Include'
-          $sdkVersion = Get-ChildItem $sdkBase -Directory | Where-Object { $_.Name -match '^10\.\d+\.\d+\.\d+
-          if (!$sdkVersion) { throw 'Windows SDK include directory not found' }
-          $modernBasetsd = Join-Path $sdkVersion.FullName 'shared/basetsd.h'
-          if (!(Test-Path $modernBasetsd)) { throw "Missing modern SDK basetsd.h: $modernBasetsd" }
-          $env:CL = '/FI"' + $modernBasetsd + '" ' + (($inc | ForEach-Object { '/I"' + $_ + '"' }) -join ' ')
-          $env:LINK = (($libs | ForEach-Object { '/LIBPATH:"' + $_ + '"' }) -join ' ')
-          Write-Host "Injected $($inc.Count) include paths and $($libs.Count) library paths"
-          foreach ($dir in $inc + $libs) {
-            if (!(Test-Path $dir)) { throw "Missing dependency directory: $dir" }
-          }
-          msbuild SexyAppFramework/SexyAppBase.vcxproj /m /p:Configuration=ReleaseGOTY /p:Platform=Win32 /p:PlatformToolset=v143 /verbosity:minimal
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-      - name: Run network tests (Win32)
-        if: true
-        shell: pwsh
-        run: |
-          msbuild tests/NetProtocolTests/NetProtocolTests.vcxproj /m /p:Configuration=ReleaseGOTY /p:Platform=Win32 /p:PlatformToolset=v143 /verbosity:minimal
-          & "build/ReleaseGOTY_Win32/tests/NetProtocolTests.exe"
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-      - name: Package distributable (exclude original game files)
-        shell: pwsh
-        run: |
-          $source = "build/ReleaseGOTY_Win32/bin"
-          $exe = Join-Path $source "PlantsVsZombies.exe"
-          if (!(Test-Path $exe)) { throw "Build output missing: $exe" }
-          $stage = Join-Path $env:RUNNER_TEMP "PvZ-Coop-Win32"
-          New-Item -ItemType Directory -Force -Path $stage | Out-Null
-          Copy-Item $exe $stage
-          Get-ChildItem $source -Filter '*.dll' -File | Copy-Item -Destination $stage
-          if (Test-Path 'coop.ini') { Copy-Item 'coop.ini' $stage }
-          @'
-          PvZ Co-op
-          ==========
-          This archive does not include the original Plants vs. Zombies game assets.
-          You must own the original game and supply its main.pak and properties
-          directory from your legally obtained copy, next to PlantsVsZombies.exe.
-          See the repository README for instructions.
-          '@ | Set-Content (Join-Path $stage 'INSTALL.txt')
-          $zip = "PvZ-Coop-Win32.zip"
-          Compress-Archive -Path "$stage/*" -DestinationPath $zip -Force
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: PvZ-Coop-Win32
-          path: PvZ-Coop-Win32.zip
-          if-no-files-found: error
-
-  release:
-    if: startsWith(github.ref, 'refs/tags/v')
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: PvZ-Coop-Win32
-          
-      - name: Publish GitHub Release
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-          TAG: ${{ github.ref_name }}
-        run: |
-          gh release create "$TAG" PvZ-Coop-Win32.zip --verify-tag --generate-notes --title "PvZ Co-op $TAG"
- } | Sort-Object { [version]$_.Name } -Descending | Select-Object -First 1
+          $sdkVersion = Get-ChildItem $sdkBase -Directory | Where-Object { $_.Name -match '^10[.]\d+[.]\d+[.]\d+$' } | Sort-Object { [version]$_.Name } -Descending | Select-Object -First 1
           if (!$sdkVersion) { throw 'Windows SDK include directory not found' }
           $modernBasetsd = Join-Path $sdkVersion.FullName 'shared/basetsd.h'
           if (!(Test-Path $modernBasetsd)) { throw "Missing modern SDK basetsd.h: $modernBasetsd" }
