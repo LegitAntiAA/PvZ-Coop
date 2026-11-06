@@ -35,7 +35,14 @@ jobs:
           ) | ForEach-Object { Join-Path $root $_ }
           # The .vcxproj explicitly sets empty AdditionalIncludeDirectories.
           # MSVC's CL and LINK environment variables inject flags directly.
-          $env:CL = (($inc | ForEach-Object { '/I"' + $_ + '"' }) -join ' ')
+          # The legacy DirectX 8 SDK ships basetsd.h, which conflicts with modern Windows SDK winnt.h.
+          # Force the modern SDK basetsd.h first; its include guard prevents the old one from replacing it.
+          $sdkBase = Join-Path ${env:ProgramFiles(x86)} 'Windows Kits/10/Include'
+          $sdkVersion = Get-ChildItem $sdkBase -Directory | Sort-Object Name -Descending | Select-Object -First 1
+          if (!$sdkVersion) { throw 'Windows SDK include directory not found' }
+          $modernBasetsd = Join-Path $sdkVersion.FullName 'shared/basetsd.h'
+          if (!(Test-Path $modernBasetsd)) { throw "Missing modern SDK basetsd.h: $modernBasetsd" }
+          $env:CL = '/FI"' + $modernBasetsd + '" ' + (($inc | ForEach-Object { '/I"' + $_ + '"' }) -join ' ')
           $env:LINK = (($libs | ForEach-Object { '/LIBPATH:"' + $_ + '"' }) -join ' ')
           Write-Host "Injected $($inc.Count) include paths and $($libs.Count) library paths"
           foreach ($dir in $inc + $libs) {
