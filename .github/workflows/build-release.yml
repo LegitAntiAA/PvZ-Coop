@@ -14,10 +14,6 @@ permissions:
 jobs:
   build:
     runs-on: windows-2022
-    strategy:
-      fail-fast: false
-      matrix:
-        platform: [Win32, x64]
     steps:
       - uses: actions/checkout@v4
       - uses: microsoft/setup-msbuild@v2
@@ -25,10 +21,10 @@ jobs:
       - name: Build ReleaseGOTY
         shell: pwsh
         run: |
-          msbuild SexyAppFramework/SexyAppBase.vcxproj /m /p:Configuration=ReleaseGOTY /p:Platform=${{ matrix.platform }} /p:PlatformToolset=v143 /verbosity:minimal
+          msbuild SexyAppFramework/SexyAppBase.vcxproj /m /p:Configuration=ReleaseGOTY /p:Platform=Win32 /p:PlatformToolset=v143 /verbosity:minimal
 
       - name: Run network tests (Win32)
-        if: matrix.platform == 'Win32'
+        if: true
         shell: pwsh
         run: |
           msbuild tests/NetProtocolTests/NetProtocolTests.vcxproj /m /p:Configuration=ReleaseGOTY /p:Platform=Win32 /p:PlatformToolset=v143 /verbosity:minimal
@@ -38,11 +34,10 @@ jobs:
       - name: Package distributable (exclude original game files)
         shell: pwsh
         run: |
-          $platform = "${{ matrix.platform }}"
-          $source = "build/ReleaseGOTY_${platform}/bin"
+          $source = "build/ReleaseGOTY_Win32/bin"
           $exe = Join-Path $source "PlantsVsZombies.exe"
           if (!(Test-Path $exe)) { throw "Build output missing: $exe" }
-          $stage = Join-Path $env:RUNNER_TEMP "PvZ-Coop-${platform}"
+          $stage = Join-Path $env:RUNNER_TEMP "PvZ-Coop-Win32"
           New-Item -ItemType Directory -Force -Path $stage | Out-Null
           Copy-Item $exe $stage
           Get-ChildItem $source -Filter '*.dll' -File | Copy-Item -Destination $stage
@@ -55,13 +50,13 @@ jobs:
           directory from your legally obtained copy, next to PlantsVsZombies.exe.
           See the repository README for instructions.
           '@ | Set-Content (Join-Path $stage 'INSTALL.txt')
-          $zip = "PvZ-Coop-${platform}.zip"
+          $zip = "PvZ-Coop-Win32.zip"
           Compress-Archive -Path "$stage/*" -DestinationPath $zip -Force
 
       - uses: actions/upload-artifact@v4
         with:
-          name: PvZ-Coop-${{ matrix.platform }}
-          path: PvZ-Coop-${{ matrix.platform }}.zip
+          name: PvZ-Coop-Win32
+          path: PvZ-Coop-Win32.zip
           if-no-files-found: error
 
   release:
@@ -73,12 +68,12 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          pattern: PvZ-Coop-*
-          merge-multiple: true
+          name: PvZ-Coop-Win32
+          
       - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           TAG: ${{ github.ref_name }}
         run: |
-          gh release create "$TAG" PvZ-Coop-*.zip --verify-tag --generate-notes --title "PvZ Co-op $TAG"
+          gh release create "$TAG" PvZ-Coop-Win32.zip --verify-tag --generate-notes --title "PvZ Co-op $TAG"
