@@ -62,7 +62,7 @@ jobs:
       - name: Package distributable (exclude original game files)
         shell: pwsh
         run: |
-          $source = "build/ReleaseGOTY_Win32/bin"
+          $source = "SexyAppFramework/build/ReleaseGOTY_Win32/bin"
           $exe = Join-Path $source "PlantsVsZombies.exe"
           if (!(Test-Path $exe)) { throw "Build output missing: $exe" }
           $stage = Join-Path $env:RUNNER_TEMP "PvZ-Coop-Win32"
