@@ -86,6 +86,9 @@ online_endpoint=https://pvz-coop-signaling.your-subdomain.workers.dev
 stun_server=stun:stun.cloudflare.com:3478
 ```
 
+Этот публичный STUN-адрес указан в
+[официальной документации Cloudflare](https://developers.cloudflare.com/realtime/sfu/get-started/connection-patterns/).
+
 `/signal` добавляется автоматически, если указан корневой адрес Worker.
 Раздайте всем участникам одинаковый URL и одинаковую сборку игры.
 
@@ -140,6 +143,17 @@ ICE/DTLS/SCTP: максимальный кадр 65 538 байт и 32 упор�
 Успешный результат — `ONLINE_TESTS passed=15 failed=0`; тест Worker — 8/8.
 Это проверка транспорта на одном компьютере. Между двумя внешними сетями
 нужен отдельный запуск после настройки настоящего URL.
+
+Полный двухпроцессный сценарий игры через тот же Worker запускается отдельно:
+
+```powershell
+.\tests\CoopSmoke\RunCoopSmoke.ps1 -Background -Scenario Adventure1 -SkipIntro 0 -OnlineEndpoint http://127.0.0.1:8787
+```
+
+Он создаёт отдельную защищённую комнату для своего run ID, использует штатный
+игровой протокол и проверяет совпадение применённых снапшотов. Runner требует
+следов реального принятого DataChannel на обеих сторонах и отклоняет TCP-путь.
+Для проверки опубликованного Worker замените локальный адрес на его HTTPS URL.
 
 ## Частые ошибки
 

@@ -65,6 +65,18 @@ bool LawnNet::NetNormalizeUtf8(const std::string& theInput, size_t theMaxBytes,
 
 namespace LawnNet
 {
+bool NetSpectatorMaySend(uint8_t theMessageType)
+{
+	switch (theMessageType)
+	{
+	case NETMSG_PING: case NETMSG_PONG: case NETMSG_CHAT_SEND: case NETMSG_CURSOR:
+	case NETMSG_ANNOTATION: case NETMSG_STATS: case NETMSG_ZOMBATAR: case NETMSG_KICK_ACK:
+		return true;
+	default:
+		return false;
+	}
+}
+
 int NetStrokeAlpha(uint32_t theAgeSinceEnd, int thePointIndex, int thePointCount)
 {
 	if (theAgeSinceEnd <= 8000U) return 255;
@@ -178,6 +190,9 @@ const char* NetMessageName(uint8_t theMsgType)
 	case NETMSG_PAUSE: return "PAUSE"; case NETMSG_PAUSE_REQ: return "PAUSE_REQ";
 	case NETMSG_INPUT_EPOCH: return "INPUT_EPOCH";
 	case NETMSG_CHAT_SEND: return "CHAT_SEND"; case NETMSG_CHAT_BROADCAST: return "CHAT_BROADCAST";
+	case NETMSG_READY: return "READY"; case NETMSG_KICKED: return "KICKED";
+	case NETMSG_KICK_ACK: return "KICK_ACK"; case NETMSG_ZOMBATAR: return "ZOMBATAR";
+	case NETMSG_ANNOTATION: return "ANNOTATION"; case NETMSG_SPECTATOR_START: return "SPECTATOR_START";
 	case NETMSG_CHOOSER_OPEN: return "CHOOSER_OPEN"; case NETMSG_SEED_PICK: return "SEED_PICK";
 	case NETMSG_SEED_UNPICK: return "SEED_UNPICK"; case NETMSG_CHOOSER_STATE: return "CHOOSER_STATE";
 	case NETMSG_CHOOSER_START: return "CHOOSER_START"; case NETMSG_PROFILE_SYNC: return "PROFILE_SYNC";

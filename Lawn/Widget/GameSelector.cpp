@@ -48,7 +48,7 @@ GameSelector::GameSelector(LawnApp* theApp)
 	TodHesitationTrace("pregameselector");
 
 	mApp = theApp;
-	mGithubImage = theApp->GetImage(_S("extension/github-mark.png"));
+	mGithubImage = theApp->GetImage(_S("extension/github-mark"));
 	mLevel = 1;
 	mLoading = false;
 	mHasTrophy = false;
@@ -1183,12 +1183,14 @@ void GameSelector::DrawOverlay(Graphics* g)
 	g->PopState();
 	if (mGithubImage && !mStartingGame)
 	{
+		const Rect anIconRect = GetGithubIconRect();
 		Graphics anIcon(*g);
 		anIcon.SetColor(Color(250, 246, 225));
-		anIcon.FillRect(8, 8, 32, 32);
-		anIcon.DrawImage(mGithubImage, 11, 11, 26, 26);
+		anIcon.FillRect(anIconRect);
+		anIcon.DrawImage(mGithubImage, anIconRect.mX + 3, anIconRect.mY + 3,
+			anIconRect.mWidth - 6, anIconRect.mHeight - 6);
 		anIcon.SetColor(Color(78, 66, 48));
-		anIcon.DrawRect(8, 8, 31, 31);
+		anIcon.DrawRect(anIconRect.mX, anIconRect.mY, anIconRect.mWidth - 1, anIconRect.mHeight - 1);
 	}
 }
 
@@ -1918,7 +1920,7 @@ void GameSelector::KeyChar(char theChar)
 //0x44C360
 void GameSelector::MouseDown(int x, int y, int theClickCount)
 {
-	if (theClickCount == 1 && !mStartingGame && Rect(8, 8, 32, 32).Contains(x, y))
+	if (theClickCount == 1 && !mStartingGame && GetGithubIconRect().Contains(x, y))
 	{
 		mApp->OpenURL("https://github.com/LegitAntiAA/PvZ-Coop", false);
 		return;

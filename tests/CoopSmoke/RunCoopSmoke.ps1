@@ -32,6 +32,9 @@ param(
     [int]$MinimumSnapshots = 3,
     [switch]$VerifyUnicodeChat,
     [switch]$VerifyInteractions,
+    [switch]$VerifyPresentation,
+    [switch]$VerifyModes,
+    [switch]$VerifyFirstAdventure,
     [switch]$Background,
     [switch]$CleanupOnSuccess
 )
@@ -66,6 +69,23 @@ public static class CoopSmokeNativeWindow
     [DllImport("user32.dll")]
     public static extern bool SetWindowPos(IntPtr hwnd, IntPtr insertAfter,
         int x, int y, int width, int height, uint flags);
+
+    [DllImport("user32.dll")]
+    private static extern bool PostMessage(IntPtr hwnd, uint message, IntPtr wParam, IntPtr lParam);
+
+    public static bool CloseOwnedWindow(int processId)
+    {
+        IntPtr result = IntPtr.Zero;
+        EnumWindows(delegate(IntPtr hwnd, IntPtr ignored)
+        {
+            uint owner;
+            GetWindowThreadProcessId(hwnd, out owner);
+            if (owner == (uint)processId && GetWindow(hwnd, 4) == IntPtr.Zero)
+            { result = hwnd; return false; }
+            return true;
+        }, IntPtr.Zero);
+        return result != IntPtr.Zero && PostMessage(result, 0x0010, IntPtr.Zero, IntPtr.Zero);
+    }
 
     public static IntPtr FindVisibleTopLevelWindow(int processId)
     {
@@ -276,8 +296,14 @@ function Start-SmokeProcess {
     }
     $childEnvironment["PVZ_COOP_SMOKE_RUN_ID"] = $RunId
     $childEnvironment["PVZ_COOP_SMOKE_ROLE"] = $Role
+    if ($env:PVZ_COOP_SMOKE_SPECTATOR -eq "1") {
+        $childEnvironment["PVZ_COOP_SMOKE_SPECTATOR_ROLE"] = $Role
+    }
     $childEnvironment["PVZ_COOP_SMOKE_UNICODE_CHAT"] = $(if ($EnableUnicodeChat) { "1" } else { "0" })
     $childEnvironment["PVZ_COOP_SMOKE_INTERACTIONS"] = $(if ($VerifyInteractions) { "1" } else { "0" })
+    $childEnvironment["PVZ_COOP_SMOKE_PRESENTATION"] = $(if ($VerifyPresentation) { "1" } else { "0" })
+    $childEnvironment["PVZ_COOP_SMOKE_MODES"] = $(if ($VerifyModes) { "1" } else { "0" })
+    $childEnvironment["PVZ_COOP_SMOKE_FIRST_ADVENTURE"] = $(if ($VerifyFirstAdventure) { "1" } else { "0" })
     $childEnvironment["PVZ_COOP_SMOKE_BACKGROUND"] = $(if ($Background) { "1" } else { "0" })
     $childEnvironment["PVZ_COOP_SMOKE_ONLINE_ENDPOINT"] = $OnlineEndpoint
     if ($Background) {
@@ -661,7 +687,8 @@ function Request-OwnedProcessClose {
     # while switching from loading/menu presentation into a differently sized
     # gameplay window, so refresh before asking .NET to post WM_CLOSE.
     $Process.Refresh()
-    if (-not $Process.CloseMainWindow()) {
+    $closeRequested = if ($Background) { [CoopSmokeNativeWindow]::CloseOwnedWindow($Process.Id) } else { $Process.CloseMainWindow() }
+    if (-not $closeRequested) {
         # A smoke host self-closes after observing the client's orderly departure.
         # Its HWND can disappear just before the process object reports HasExited;
         # let Wait-ForCleanProcessExit distinguish that normal race from a hang.
@@ -686,7 +713,8 @@ function Stop-OwnedProcess {
 
         Write-SmokeStatus ("Requesting graceful close of {0} PID {1}." -f $Role, $Process.Id)
         $Process.Refresh()
-        [void]$Process.CloseMainWindow()
+        if ($Background) { [void][CoopSmokeNativeWindow]::CloseOwnedWindow($Process.Id) }
+        else { [void]$Process.CloseMainWindow() }
         if (-not $Process.WaitForExit(5000)) {
             Write-SmokeStatus ("Force-closing owned {0} PID {1}." -f $Role, $Process.Id)
             $Process.Kill()
@@ -746,12 +774,31 @@ $scenarioSpec = switch ($Scenario) {
     default { throw ("Unsupported smoke scenario: {0}" -f $Scenario) }
 }
 
+if ($VerifyPresentation -and (-not $Background -or $Scenario -ne "Adventure1" -or $SkipIntro -ne 0 -or
+    $VerifyInteractions -or $VerifyModes -or $VerifyFirstAdventure -or $VerifyUnicodeChat -or $OnlineEndpoint -or
+    $env:PVZ_COOP_SMOKE_SPECTATOR -eq "1" -or
+    $HostWindowWidth -ne 800 -or $HostWindowHeight -ne 600 -or
+    $ClientWindowWidth -ne 800 -or $ClientWindowHeight -ne 600)) {
+    throw "VerifyPresentation requires isolated -Background -Scenario Adventure1 -SkipIntro 0 at 800x600, without other opt-in workflows."
+}
 if ($VerifyInteractions -and (-not $Background -or $Scenario -ne "Adventure1" -or
     $HostWindowWidth -ne 800 -or $HostWindowHeight -ne 600 -or
     $ClientWindowWidth -ne 800 -or $ClientWindowHeight -ne 600)) {
     throw "VerifyInteractions requires -Background -Scenario Adventure1 and host/client 800x600 dimensions."
 }
+if ($VerifyFirstAdventure -and (-not $Background -or $Scenario -ne "Adventure1" -or
+    $SkipIntro -ne 0 -or $TimeoutSeconds -lt 180 -or $VerifyInteractions -or $VerifyUnicodeChat -or
+    $OnlineEndpoint -or $env:PVZ_COOP_SMOKE_SPECTATOR -eq "1" -or
+    $HostWindowWidth -ne 800 -or $HostWindowHeight -ne 600 -or
+    $ClientWindowWidth -ne 800 -or $ClientWindowHeight -ne 600)) {
+    throw "VerifyFirstAdventure requires -Background -Scenario Adventure1 -SkipIntro 0 -TimeoutSeconds 180+ and 800x600 peers; run other optional workflows separately."
+}
 $Mode = [string]$scenarioSpec.Mode
+if ($VerifyModes -and (-not $Background -or $Scenario -notin @("PvP1v1", "TowerDefenseClient") -or
+    $HostWindowWidth -ne 800 -or $HostWindowHeight -ne 600 -or
+    $ClientWindowWidth -ne 800 -or $ClientWindowHeight -ne 600)) {
+    throw "VerifyModes requires -Background and PvP1v1 or TowerDefenseClient with host/client 800x600."
+}
 $Level = [int]$scenarioSpec.Level
 $scenarioMarker = [string]$scenarioSpec.Marker
 $isBowlingScenario = $Scenario -in @("Adventure5Bowling", "Adventure5BowlingClient")
@@ -878,6 +925,14 @@ try {
     # client as a lost-host failure. Both exact Process objects remain PID-scoped.
     Request-OwnedProcessClose -Process $clientProcess -Role "client"
     Wait-ForCleanProcessExit -Process $clientProcess -Role "client" -TimeoutSeconds $GracefulExitSeconds
+    # Let the still-running host complete its real disconnect/ownership path.
+    $dropDeadline = [DateTime]::UtcNow.AddSeconds(5)
+    do {
+        $dropLog = Get-CombinedLogText -LogDirectory $hostLogDirectory
+        if ($dropLog -match '(?im)drop peer slot=1 complete') { break }
+        if ($hostProcess.HasExited) { break }
+        Start-Sleep -Milliseconds 50
+    } while ([DateTime]::UtcNow -lt $dropDeadline)
     Request-OwnedProcessClose -Process $hostProcess -Role "host"
     Wait-ForCleanProcessExit -Process $hostProcess -Role "host" -TimeoutSeconds $GracefulExitSeconds
 
@@ -946,7 +1001,7 @@ try {
     if ($VerifyInteractions) {
         $interactionPatterns = @(
             @{ Label = "SDL middle-button ping cooldown"; Pattern = '(?im)\bSMOKE_INTERACTIONS_PING\b[^\r\n]*\baccepted=2\b[^\r\n]*\battempts=3\b[^\r\n]*\bcooldownMs=500\b[^\r\n]*\bauthority=received\b' },
-            @{ Label = "SDL Control drawing lifecycle"; Pattern = '(?im)\bSMOKE_INTERACTIONS_STROKE\b[^\r\n]*\bpoints=[4-9]\d*\b[^\r\n]*\bbegin=1\b[^\r\n]*\bend=1\b' },
+            @{ Label = "SDL Control drawing lifecycle"; Pattern = '(?im)\bSMOKE_INTERACTIONS_STROKE\b[^\r\n]*\bpoints=(?:[4-9]|[1-9]\d+)\b[^\r\n]*\bbegin=1\b[^\r\n]*\bend=1\b' },
             @{ Label = "SDL Alt seed identity and cooldown chat"; Pattern = '(?im)\bSMOKE_INTERACTIONS_SEED\b[^\r\n]*\bid=[1-9]\d*\b[^\r\n]*\bname=1\b[^\r\n]*\bcooldownText=1\b' },
             @{ Label = "drawing stays opaque before eight seconds"; Pattern = '(?im)\bSMOKE_INTERACTIONS_HOLD\b[^\r\n]*\bfirst=255\b[^\r\n]*\blast=255\b' },
             @{ Label = "drawing fades from end to start"; Pattern = '(?im)\bSMOKE_INTERACTIONS_FADE\b[^\r\n]*\bdirection=end_to_start\b' },
@@ -955,6 +1010,115 @@ try {
         )
         $hostPositivePatterns += $interactionPatterns
         $clientPositivePatterns += $interactionPatterns
+    }
+    if ($VerifyPresentation) {
+        foreach ($stage in @('normal', 'arm', 'head', 'jack_pop', 'jack_blast', 'snail', 'registry', 'avatar', 'retained')) {
+            $bounds = if ($stage -eq 'registry') { 0 } else { 1 }
+            $pattern = @{ Label = ('real presentation state and resource bounds: ' + $stage); Pattern = ('(?im)SMOKE_PRESENTATION_OBSERVED[^\r\n]*stage={0}\b[^\r\n]*assetBounds={1}' -f $stage, $bounds) }
+            $hostPositivePatterns += $pattern
+            $clientPositivePatterns += $pattern
+        }
+        $complete = @{ Label = 'presentation workflow complete'; Pattern = '(?im)SMOKE_PRESENTATION_COMPLETE[^\r\n]*limbs=2 jack=1 snail=1 clientAvatar=1 stableAppearance=1' }
+        $hostPositivePatterns += $complete
+        $clientPositivePatterns += $complete
+    }
+    if ($VerifyModes -and $Scenario -eq "PvP1v1") {
+        $hostPositivePatterns += @{ Label = "PvP server shovel authorization"; Pattern = '(?im)SMOKE_MODES_SHOVEL role=host sdl=blocked raw=blocked forgedCursor=blocked plantTool=working' }
+        $clientPositivePatterns += @{ Label = "PvP zombie shovel UI and raw input rejected"; Pattern = '(?im)SMOKE_MODES_SHOVEL role=client sdl=blocked raw=blocked plantPreserved=1 zombieTool=0' }
+        $clientPositivePatterns += @{ Label = "host-confirmed zombie hand and lane silhouette"; Pattern = '(?im)SMOKE_MODES_ZOMBIE_HELD role=client packetId=[1-9]\d* index=\d+ type=\d+ hostEcho=1 handVisible=1 previewVisible=1 row=2 col=6' }
+        foreach ($role in @("host", "client")) {
+            $goalPatterns = @(
+                @{ Label = "PvP real99 nonterminal state"; Pattern = ('(?im)SMOKE_MODES_GOAL role={0} kills=99 award=0 fade=-1 complete=0 fixtureSeed=98 actualDeaths=1' -f $role) },
+                @{ Label = "PvP real100 monotonic victory fade"; Pattern = ('(?im)SMOKE_MODES_GOAL role={0} kills=100 fadeEdge=1 counter=\d+ previous=\d+ fixtureSeed=98 actualDeaths=2' -f $role) }
+            )
+            if ($role -eq "host") { $hostPositivePatterns += $goalPatterns } else { $clientPositivePatterns += $goalPatterns }
+            $captureRoot = if ($role -eq "host") { $hostRoot } else { $clientRoot }
+            foreach ($frame in @('modes_goal99.bmp', 'modes_goal100.bmp')) {
+                if (-not (Test-Path -LiteralPath (Join-Path $captureRoot $frame) -PathType Leaf)) {
+                    throw ("PvP goal renderer evidence missing: {0}/{1}" -f $role, $frame)
+                }
+            }
+        }
+        foreach ($frame in @('modes_zombie_held.bmp', 'modes_zombie_hud.bmp')) {
+            if (-not (Test-Path -LiteralPath (Join-Path $clientRoot $frame) -PathType Leaf)) {
+                throw ("PvP zombie renderer evidence missing: {0}" -f $frame)
+            }
+        }
+        if (-not (Test-Path -LiteralPath (Join-Path $hostRoot 'modes_plant_hud.bmp') -PathType Leaf)) {
+            throw "PvP plant renderer evidence missing."
+        }
+    }
+    if ($VerifyModes -and $Scenario -eq "TowerDefenseClient") {
+        $hostPositivePatterns += @{ Label = "difficulty10 wave budget roster and stock HP"; Pattern = '(?im)SMOKE_MODES_DIFFICULTY role=host difficulty=10 baseWaves=[1-9]\d* waves=[1-9]\d* basePoints=\d+ points=\d+ zombies=[1-9]\d* garg=1 football=1 hpUnchanged=1' }
+        $hostPositivePatterns += @{ Label = "departed active client's five cards redistributed without orphan ownership"; Pattern = '(?im)seed redistribution slot=1 packets=10 owners=10,0,0,0 orphaned=0' }
+        $clientPositivePatterns += @{ Label = "difficulty10 client wave plan and roster"; Pattern = '(?im)SMOKE_MODES_DIFFICULTY role=client difficulty=10 baseWaves=[1-9]\d* waves=[1-9]\d* basePoints=\d+ points=\d+ zombies=[1-9]\d* garg=1 football=1 hpUnchanged=0' }
+        $hostPositivePatterns += @{ Label = "remote semantic cursor mapped into a different local card index"; Pattern = '(?im)SMOKE_MODES_CURSOR role=host packetId=[1-9]\d* localIndex=[5-9] remoteIndex=0 mapped=1 pointInside=1 renderSettled=1' }
+        $clientPositivePatterns += @{ Label = "client SDL motion over own first card"; Pattern = '(?im)SMOKE_MODES_CURSOR role=client packetId=[1-9]\d* localIndex=0 mapped=1 pointInside=1 renderSettled=1' }
+        $hostCursor = [regex]::Match($hostLog, '(?im)SMOKE_MODES_CURSOR role=host packetId=(\d+)')
+        $clientCursor = [regex]::Match($clientLog, '(?im)SMOKE_MODES_CURSOR role=client packetId=(\d+)')
+        if (-not $hostCursor.Success -or -not $clientCursor.Success -or
+            $hostCursor.Groups[1].Value -ne $clientCursor.Groups[1].Value) {
+            throw "Relative cursor smoke did not observe the same stable packet ID on both layouts."
+        }
+    }
+    if ($VerifyPresentation) {
+        $appearance = '010B0F100D100F100B0E100D10'
+        foreach ($stage in @('normal', 'arm', 'head', 'jack_pop', 'jack_blast', 'snail', 'avatar', 'retained')) {
+            $pattern = '(?im)SMOKE_PRESENTATION_OBSERVED[^\r\n]*stage={0}\b[^\r\n]*id=(\d+)\b[^\r\n]*appearance=([A-F0-9]{{26}}) bytes=13' -f $stage
+            $hostState = [regex]::Match($hostLog, $pattern)
+            $clientState = [regex]::Match($clientLog, $pattern)
+            if (-not $hostState.Success -or -not $clientState.Success -or
+                $hostState.Groups[1].Value -ne $clientState.Groups[1].Value -or
+                $hostState.Groups[2].Value -ne $clientState.Groups[2].Value -or
+                (($stage -eq 'avatar' -or $stage -eq 'retained') -and $hostState.Groups[2].Value -ne $appearance)) {
+                throw ('Presentation peer identity/13-byte appearance evidence differs at ' + $stage)
+            }
+        }
+        if ($hostLog -notmatch 'SMOKE_PRESENTATION_OBSERVED[^\r\n]*stage=avatar\b[^\r\n]*attempts=(?:[1-9]|[1-8]\d|9[0-6])\b') {
+            throw 'Native occasional client avatar selection exceeded the bounded spawn fixture.'
+        }
+        Add-Type -AssemblyName System.Drawing
+        foreach ($roleRoot in @($hostRoot, $clientRoot)) {
+            foreach ($stage in @('normal', 'arm', 'head', 'jack_pop', 'jack_blast', 'snail', 'registry', 'avatar', 'retained')) {
+                $frame = Join-Path $roleRoot ('presentation_' + $stage + '.bmp')
+                if (-not (Test-Path -LiteralPath $frame -PathType Leaf)) { throw ('Missing presentation frame: ' + $frame) }
+                $bitmap = [Drawing.Bitmap]::new($frame)
+                try {
+                    $hasColor = $false
+                    for ($x = 20; $x -lt $bitmap.Width -and -not $hasColor; $x += 80) {
+                        for ($y = 20; $y -lt $bitmap.Height; $y += 80) {
+                            $pixel = $bitmap.GetPixel($x, $y)
+                            if ($pixel.R -or $pixel.G -or $pixel.B) { $hasColor = $true; break }
+                        }
+                    }
+                    if (-not $hasColor) { throw ('Presentation frame is blank: ' + $frame) }
+                }
+                finally { $bitmap.Dispose() }
+            }
+        }
+    }
+    if ($VerifyFirstAdventure) {
+        $firstAdventurePatterns = @(
+            @{ Label = "fresh zero-progress profile"; Pattern = '(?im)\bSMOKE_FRESH_PROFILE\b[^\r\n]*\blevel=1 finished=0\b' },
+            @{ Label = "stock opening demo plants and zombies"; Pattern = '(?im)\bSMOKE_FRESH_INTRO\b[^\r\n]*\bplants=[1-9]\d* zombies=[1-9]\d*\b[^\r\n]*\bcapture=1\b' },
+            @{ Label = "moving sod roll"; Pattern = '(?im)\bSMOKE_FRESH_SOD\b[^\r\n]*\bactive=1 advanced=1\b' },
+            @{ Label = "complete long UTF-8 tutorial label"; Pattern = '(?im)\bSMOKE_FRESH_LABEL\b[^\r\n]*\bbytes=[1-9]\d{2,} utf8=1 complete=1\b' },
+            @{ Label = "loaded native GitHub menu icon"; Pattern = '(?im)\bSMOKE_FRESH_GITHUB\b[^\r\n]*\bloaded=1\b' },
+            @{ Label = "native CO-OP options below controls"; Pattern = '(?im)\bSMOKE_FRESH_OPTIONS\b[^\r\n]*\bbelow=1 bounds=1\b' },
+            @{ Label = "animated aligned unclipped sunflower preview"; Pattern = '(?im)\bSMOKE_FRESH_PREVIEW\b[^\r\n]*\bsample=2\b[^\r\n]*\baligned=1 unclipped=1 advanced=1\b' }
+        )
+        foreach ($firstStep in @("flash", "baseline_flash_off", "award_idle_rays", "award_pickup_rays",
+            "award_sunflower", "next_level_clean", "menu_unlocks", "profile_switched", "challenge_open",
+            "challenge_closed", "store_open", "store_page", "store_closed", "profile_restored",
+            "options_coop", "settings_sunflower_a", "settings_sunflower_b", "settings_closed",
+            "options_closed", "online_browser", "online_closed", "complete")) {
+            $firstAdventurePatterns += @{
+                Label = ("fresh adventure " + $firstStep)
+                Pattern = ('(?im)\bSMOKE_FRESH_CHECK\b[^\r\n]*\bstep=' + [regex]::Escape($firstStep) + '\b[^\r\n]*\bcapture=1\b')
+            }
+        }
+        $hostPositivePatterns += $firstAdventurePatterns
+        $clientPositivePatterns += $firstAdventurePatterns
     }
     if ($isBowlingScenario) {
         $hostPositivePatterns += @{
@@ -1309,6 +1473,27 @@ try {
         if (-not $hostPacket.Success -or -not $clientPacket.Success -or
             $hostPacket.Groups[1].Value -ne $clientPacket.Groups[1].Value) {
             throw "Alt-click packet ping resolved to different authoritative identities."
+        }
+    }
+    if ($VerifyFirstAdventure) {
+        $introIdentityPattern = '(?im)\bSMOKE_FRESH_INTRO\b[^\r\n]*\bfirstPlant=(\d+) firstZombie=(\d+)\b'
+        $hostIntroIdentity = [regex]::Match($hostLog, $introIdentityPattern)
+        $clientIntroIdentity = [regex]::Match($clientLog, $introIdentityPattern)
+        if (-not $hostIntroIdentity.Success -or -not $clientIntroIdentity.Success -or
+            $hostIntroIdentity.Groups[1].Value -ne $clientIntroIdentity.Groups[1].Value -or
+            $hostIntroIdentity.Groups[2].Value -ne $clientIntroIdentity.Groups[2].Value) {
+            throw "Stock opening demo used different plant/zombie identities across peers."
+        }
+        foreach ($roleRoot in @($hostRoot, $clientRoot)) {
+            foreach ($frameName in @("intro", "sod", "flash", "baseline_flash_off", "award_idle_rays",
+                "award_pickup_rays", "award_sunflower", "next_level_clean", "menu_unlocks", "profile_switched",
+                "challenge_open", "challenge_closed", "store_open", "store_page", "store_closed", "profile_restored",
+                "options_coop", "settings_sunflower_a", "settings_sunflower_b", "settings_closed", "options_closed",
+                "online_browser", "online_closed", "complete")) {
+                if (-not (Test-Path -LiteralPath (Join-Path $roleRoot ("fresh_" + $frameName + ".bmp")) -PathType Leaf)) {
+                    throw ("Missing first-adventure render capture: {0}/{1}" -f $roleRoot, $frameName)
+                }
+            }
         }
     }
     Assert-NoNegativePatterns -Role "host" -Text $hostLog -Patterns $negativePatterns
@@ -1750,6 +1935,7 @@ finally {
         mode = $Mode
         level = $Level
         skip_intro = $SkipIntro
+        verify_first_adventure = [bool]$VerifyFirstAdventure
         host_window = ("{0}x{1}" -f $HostWindowWidth, $HostWindowHeight)
         client_window = ("{0}x{1}" -f $ClientWindowWidth, $ClientWindowHeight)
         seed = $Seed

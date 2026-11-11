@@ -826,6 +826,10 @@ void SeedChooserScreen::OnStartButton()
 {
 	if (mCoopChooserActive && mApp->mNetManager)
 	{
+		// The widget stays alive during the stock slide-out. Starting it again
+		// would reset EndSeedChooser's cutscene position every frame.
+		if (!mMouseVisible || !mBoard->mCutScene->mSeedChoosing)
+			return;
 		if (!mApp->mNetManager->IsHosting() || !mApp->mNetManager->AreAllPlayersReady() || !CoopAllPicksComplete())
 			return;
 		// An aborted stock warning must require the host to ready again.
@@ -1929,6 +1933,10 @@ static void CoopBuildBankInternal(SeedBank* theBank, int theMySlot,
 			if (aSeedType == SEED_NONE)
 				continue;
 			SeedPacket& aPacket = theBank->mSeedPackets[aPos];
+			// Packet IDs belong to card identity, not to a viewer-relative index.
+			if (aPacket.mPacketType != aSeedType || aPacket.mImitaterType != theImitaters[aSlot][j] ||
+				aPacket.mNetOwnerSlot != (unsigned char)aSlot)
+				aPacket.mNetId = 0;
 			aPacket.SetPacketType(aSeedType, theImitaters[aSlot][j]);
 			aPacket.mNetOwnerSlot = (unsigned char)aSlot;
 			aPos++;
@@ -1939,15 +1947,28 @@ static void CoopBuildBankInternal(SeedBank* theBank, int theMySlot,
 		// Plant slots remain a fixed first row even if somebody selected fewer
 		// cards; the complete zombie-team palette starts after all ten slots.
 		while (aPos < PVP_PLANT_PACKET_COUNT)
-			theBank->mSeedPackets[aPos++].SetPacketType(SEED_NONE, SEED_NONE);
+		{
+			SeedPacket& aPacket = theBank->mSeedPackets[aPos++];
+			aPacket.mNetId = 0;
+			aPacket.mNetOwnerSlot = LawnNet::NET_SHARED_OWNER;
+			aPacket.SetPacketType(SEED_NONE, SEED_NONE);
+		}
 		for (int i = 0; i < PVP_ZOMBIE_PACKET_COUNT; i++)
-			theBank->mSeedPackets[aPos++].SetPacketType(Challenge::GetPvPZombieSeed(i));
+		{
+			SeedPacket& aPacket = theBank->mSeedPackets[aPos++];
+			aPacket.mNetId = 0; // AssignPvPSeedOwners sets the final team ownership below.
+			aPacket.SetPacketType(Challenge::GetPvPZombieSeed(i));
+		}
 	}
 	theBank->mNumPackets = max(aPos, 1);
 	if (gLawnApp && gLawnApp->mBoard && gLawnApp->mGameMode == GameMode::GAMEMODE_COOP_PVP)
 		gLawnApp->mBoard->AssignPvPSeedOwners();
 	for (int i = aPos; i < SEEDBANK_CAPACITY; i++)
+	{
+		theBank->mSeedPackets[i].mNetId = 0;
+		theBank->mSeedPackets[i].mNetOwnerSlot = LawnNet::NET_SHARED_OWNER;
 		theBank->mSeedPackets[i].SetPacketType(SEED_NONE, SEED_NONE);
+	}
 }
 
 void SeedChooserScreen::CoopBuildBankFromLocalState()

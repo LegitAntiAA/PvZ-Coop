@@ -19,7 +19,7 @@ namespace LawnNet
 {
 class NetOnlineChannel;
 
-// One TCP session. Owns the socket, a reader thread and a send mutex.
+// One framed session over TCP or WebRTC. TCP owns its socket and reader thread.
 // Complete frames are pushed into mRecvQueue; the game thread pops them.
 class NetConnection
 {

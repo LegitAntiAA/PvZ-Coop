@@ -161,6 +161,7 @@ bool NetConnection::Adopt(std::shared_ptr<NetOnlineChannel> theChannel)
 	mChannel = std::move(theChannel);
 	mConnected = true;
 	mBytesSent = 0; mBytesRecv = 0;
+	NetTrace("connection adopted transport=webrtc peer=%s",mChannel->GetPeerId().c_str());
 	return true;
 }
 

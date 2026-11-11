@@ -21,7 +21,11 @@ try {
     }
     $sequence++
     [IO.File]::WriteAllText($CounterPath, [string]$sequence, [Text.Encoding]::ASCII)
-    $identity = '0.30.' + $sequence
+    $sourceRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+    $commit = (& git -C $sourceRoot rev-parse --short=10 HEAD).Trim()
+    if ($LASTEXITCODE -ne 0) { throw 'Could not determine source revision for the mod build.' }
+    $stamp = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
+    $identity = '0.30.' + $sequence + '-' + $commit + '-' + $stamp
     $header = '#pragma once' + "`r`n" + '#define NET_MOD_BUILD_STRING "' + $identity + '"' + "`r`n"
     [IO.File]::WriteAllText($OutputPath, $header, [Text.Encoding]::ASCII)
     Write-Output ('Co-op build identity: ' + $identity)

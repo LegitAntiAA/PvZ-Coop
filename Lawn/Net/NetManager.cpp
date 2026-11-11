@@ -65,14 +65,42 @@ int NetSeedPacketAt(Board* theBoard, int theCanonicalX, int theCanonicalY, int t
 	{
 		SeedPacket& aPacket = aBank->mSeedPackets[i];
 		if (!theBoard->IsSeedPacketVisibleToSlot(i, theSlot)) continue;
+		const bool aZombieCard = theBoard->IsPvPMode() && theBoard->mChallenge->IsZombieSeedType(aPacket.mPacketType);
 		if (aPacket.mSlotMachineCountDown > 0 || aPacket.mPacketType == SeedType::SEED_NONE)
 			continue;
 		if (aBankX >= aPacket.mX + aPacket.mOffsetX &&
-			aBankX < aPacket.mX + aPacket.mOffsetX + aPacket.mWidth &&
-			aBankY >= aPacket.mY && aBankY < aPacket.mY + aPacket.mHeight)
+			aBankX < aPacket.mX + aPacket.mOffsetX + (aZombieCard ? 36 : aPacket.mWidth) &&
+			aBankY >= aPacket.mY && aBankY < aPacket.mY + (aZombieCard ? 51 : aPacket.mHeight))
 			return i;
 	}
 	return -1;
+}
+
+SeedPacket* NetCursorPacket(LawnApp* app, uint16_t id)
+{
+	if (!id || !app || !app->mBoard || !app->mBoard->mSeedBank) return nullptr;
+	SeedBank* bank = app->mBoard->mSeedBank;
+	for (int i=0;i<bank->mNumPackets;++i) if (bank->mSeedPackets[i].mNetId == id) return &bank->mSeedPackets[i];
+	return nullptr;
+}
+
+bool NetResolveCursorPoint(LawnApp* app, int slot, uint16_t id, int16_t& x, int16_t& y)
+{
+	if (!id) return x >= -4096 && x <= 4096 && y >= -2048 && y <= 2048;
+	SeedPacket* packet = NetCursorPacket(app,id);
+	if (!packet || x < 0 || y < 0 || x >= packet->mWidth || y >= packet->mHeight) return false;
+	SeedBank* bank = app->mBoard->mSeedBank;
+	if (!app->mBoard->IsSeedPacketVisibleToSlot((int)(packet-bank->mSeedPackets),slot)) return false;
+	x += bank->mX + packet->mX + packet->mOffsetX; y += bank->mY + packet->mY;
+	return true;
+}
+
+void NetRelativeCursorPoint(LawnApp* app, uint16_t& id, int16_t& x, int16_t& y)
+{
+	SeedPacket* packet = NetCursorPacket(app,id);
+	if (!packet) { id = 0; return; }
+	x -= app->mBoard->mSeedBank->mX + packet->mX + packet->mOffsetX;
+	y -= app->mBoard->mSeedBank->mY + packet->mY;
 }
 }
 
@@ -403,6 +431,7 @@ void NetManager::Disconnect()
 		mLastDrawTick[i] = 0;
 		mPlayerZombatars[i] = {};
 		mKicked[i] = false;
+		mKickDeadline[i] = 0;
 	}
 	for (int i = 0; i < NET_MAX_PLAYERS; i++)
 		mPlayers[i].Reset();
@@ -419,6 +448,8 @@ void NetManager::DropSession(int theSlot, bool theNotify)
 	const std::string aDepartedNick = mPlayers[theSlot].mNick;
 	const bool aWasActive = mPlayers[theSlot].mActive;
 	const bool aWasKicked = mKicked[theSlot];
+	if (aWasKicked && mOnline && !aSession.mConn.GetOnlinePeerId().empty())
+		mOnline->KickPeer(aSession.mConn.GetOnlinePeerId());
 	RedistributeSeeds(theSlot);
 	NetTrace("dropping peer slot=%d nick=%s notify=%d", theSlot, mPlayers[theSlot].mNick, theNotify ? 1 : 0);
 
@@ -479,6 +510,13 @@ void NetManager::DropSession(int theSlot, bool theNotify)
 		NetTrace("drop peer slot=%d checkpoint=lobby_notify_begin", theSlot);
 		SendLobbyState();
 		NetTrace("drop peer slot=%d checkpoint=lobby_notify_complete", theSlot);
+		if (aWasActive && mApp && mApp->mSeedChooserScreen && mChooserOpen)
+		{
+			ResetReadyState();
+			mApp->KillSeedChooserScreen();
+			mApp->ShowSeedChooserScreen();
+			if (mApp->mSeedChooserScreen) mApp->mSeedChooserScreen->CoopBroadcastChooserState(true);
+		}
 	}
 	NetTrace("drop peer slot=%d complete", theSlot);
 }
@@ -565,7 +603,8 @@ void NetManager::Update()
 			if (mSessions[i].mAssigned)
 			{
 				mSessions[i].mConn.PumpMessages();
-				aDropAfterPump[i] = mDeferredDrop[i] || !mSessions[i].mConn.IsConnected();
+				aDropAfterPump[i] = mDeferredDrop[i] || !mSessions[i].mConn.IsConnected() ||
+					(mKicked[i] && (int32_t)(GetTickCount() - mKickDeadline[i]) >= 0);
 			}
 		}
 		// PumpMessages invokes user callbacks.  Session storage must stay alive
@@ -616,13 +655,16 @@ void NetManager::Update()
 				aPublished.mHeldPacketId = aHeldPacketId;
 				NetBuffer aRelay;
 				aRelay.WriteU8((uint8_t)aSlot);
-				aRelay.WriteI16((int16_t)NetCanonicalX(mApp, aPublished.mX));
-				aRelay.WriteI16((int16_t)NetCanonicalY(mApp, aPublished.mY));
+				int16_t aWireX = (int16_t)NetCanonicalX(mApp,aPublished.mX), aWireY = (int16_t)NetCanonicalY(mApp,aPublished.mY);
+				uint16_t aHoverId = aPublished.mHoverPacketId;
+				NetRelativeCursorPoint(mApp,aHoverId,aWireX,aWireY);
+				aRelay.WriteI16(aWireX); aRelay.WriteI16(aWireY);
 				aRelay.WriteU8(aType);
 				aRelay.WriteU8(aSeed);
 				aRelay.WriteU8(anImitater);
 				aRelay.WriteU8(0);
 				aRelay.WriteU16(aHeldPacketId);
+				aRelay.WriteU16(aHoverId);
 				BroadcastMessage(NETMSG_CURSOR, aRelay);
 				NetTrace("cursor authority publish slot=%d type=%u seed=%u imitater=%u",
 					aSlot, aType, aSeed, anImitater);
@@ -714,10 +756,17 @@ void NetManager::HandleMessage(NetSession* theSession, uint8_t theMsgType, NetBu
 			theSession->mSlot, NetMessageName(theMsgType), theMsgType);
 		return;
 	}
+	if (mKicked[theSession->mSlot] && theMsgType != NETMSG_KICK_ACK &&
+		theMsgType != NETMSG_PING && theMsgType != NETMSG_PONG) return;
+	if (mPlayers[theSession->mSlot].mSpectator && !NetSpectatorMaySend(theMsgType))
+	{ NetTrace("spectator mutation rejected slot=%u type=%s",theSession->mSlot,NetMessageName(theMsgType)); return; }
 	if (theMsgType != NETMSG_CURSOR && theMsgType != NETMSG_PING && theMsgType != NETMSG_PONG)
 		NetTrace("RX host slot=%u type=%s(%u) bytes=%zu", theSession ? theSession->mSlot : 255, NetMessageName(theMsgType), theMsgType, thePayload.Size());
 	switch (theMsgType)
 	{
+	case NETMSG_KICK_ACK:
+		if (mKicked[theSession->mSlot] && thePayload.Remaining() == 0) mDeferredDrop[theSession->mSlot] = true;
+		break;
 	case NETMSG_PING:
 	{
 		uint32_t aSeq = thePayload.ReadU32Or();
@@ -1139,7 +1188,7 @@ void NetManager::OnClientKeyInput(NetSession* theSession, NetBuffer& thePayload)
 
 void NetManager::OnClientCursor(NetSession* theSession, NetBuffer& thePayload)
 {
-	static const size_t NET_CURSOR_WIRE_BYTES = 11;
+	static const size_t NET_CURSOR_WIRE_BYTES = 13;
 	if (thePayload.Remaining() != NET_CURSOR_WIRE_BYTES)
 	{
 		NetTrace("cursor rejected slot=%u expected=%zu bytes actual=%zu",
@@ -1154,7 +1203,6 @@ void NetManager::OnClientCursor(NetSession* theSession, NetBuffer& thePayload)
 	NetRemoteCursor& aCursor = mRemoteCursors[aSlot];
 	int16_t aCanonicalX = thePayload.ReadI16Or();
 	int16_t aCanonicalY = thePayload.ReadI16Or();
-	aCursor.SetTarget((int16_t)NetLocalX(mApp, aCanonicalX), (int16_t)NetLocalY(mApp, aCanonicalY));
 	if (mApp && mApp->mWidgetManager)
 		mApp->mWidgetManager->MarkAllDirty();
 	uint8_t aClaimedCursorType = thePayload.ReadU8Or();
@@ -1162,6 +1210,11 @@ void NetManager::OnClientCursor(NetSession* theSession, NetBuffer& thePayload)
 	uint8_t aClaimedImitater = thePayload.ReadU8Or();
         const uint8_t aClaimedFlags = thePayload.ReadU8Or();
 	thePayload.ReadU16Or(); // claimed packet id is never authoritative
+	const uint16_t aHoverId = thePayload.ReadU16Or();
+	int16_t aResolvedX = aCanonicalX, aResolvedY = aCanonicalY;
+	if (!NetResolveCursorPoint(mApp,aSlot,aHoverId,aResolvedX,aResolvedY)) return;
+	aCursor.SetTarget((int16_t)NetLocalX(mApp,aResolvedX),(int16_t)NetLocalY(mApp,aResolvedY));
+	aCursor.mHoverPacketId = aHoverId;
 
 	// During a game the host's per-player cursor is authoritative.  Clients
 	// provide only pointer coordinates, never the plant/tool they claim to hold.
@@ -1204,6 +1257,7 @@ void NetManager::OnClientCursor(NetSession* theSession, NetBuffer& thePayload)
 			anAuthoritativeCursor->mSeedBankIndex].mNetId;
 	aCursor.mHeldPacketId = aHeldPacketId;
 	aRelay.WriteU16(aHeldPacketId);
+	aRelay.WriteU16(aHoverId);
 	BroadcastMessage(NETMSG_CURSOR, aRelay);
 }
 
@@ -1298,6 +1352,7 @@ void NetManager::OnClientTeamSelect(NetSession* theSession, NetBuffer& thePayloa
 	if (aTeam > NETTEAM_ZOMBIES || (mApp && mApp->mBoard))
 		return;
 	mPlayers[theSession->mSlot].mTeam = aTeam;
+	mPlayers[theSession->mSlot].mReady = 0;
 	SendLobbyState();
 }
 
@@ -1388,6 +1443,7 @@ void NetManager::HandleMessageClient(uint8_t theMsgType, NetBuffer& thePayload)
 		break;
 	case NETMSG_KICKED:
 		mDisconnectReason = "You were kicked by the host.";
+		if (mHostConn) mHostConn->SendMessage(NETMSG_KICK_ACK);
 		break;
 	case NETMSG_ANNOTATION:
 		OnAnnotation(nullptr, thePayload);
@@ -1405,7 +1461,7 @@ void NetManager::HandleMessageClient(uint8_t theMsgType, NetBuffer& thePayload)
 			if (mApp->mSeedChooserScreen) mApp->KillSeedChooserScreen();
 			mChooserOpen = false;
 			if (mApp->mBoard->mCutScene) mApp->mBoard->mCutScene->mSeedChoosing = false;
-			if (aScene != SCENE_LEVEL_INTRO) mApp->StartPlaying();
+			if (aScene == SCENE_PLAYING) mApp->StartPlaying();
 			NetTrace("late join spectator initialized scene=%u", aScene);
 		}
 		break;
@@ -1810,9 +1866,14 @@ void NetManager::OnBoardEvent(NetBuffer& thePayload)
 			aBoard->NetApplyEvent(thePayload);
 			return;
 		}
-		// Intro preview entities are created locally by CutScene on every peer.
-	// Applying the host's preview events as well would duplicate them and could
-	// access reanimation definitions before the client's preload has completed.
+	if (mApp && mApp->mBoard && mApp->mGameScene == SCENE_LEVEL_INTRO &&
+		(anEvent == BOARDEV_PRESENTATION_PARTICLE || anEvent == BOARDEV_PRESENTATION_REANIM))
+	{
+		if (mApp->mBoard->mCutScene && !mApp->mBoard->mCutScene->mPreloaded)
+			mApp->mBoard->mCutScene->PreloadResources();
+		mApp->mBoard->NetApplyEvent(thePayload);
+		return;
+	}
 	if (mApp && mApp->mBoard && mApp->mGameScene != GameScenes::SCENE_PLAYING)
 	{
 		NetTrace("board event dropped outside gameplay type=%u scene=%d", anEvent, (int)mApp->mGameScene);
@@ -1961,6 +2022,7 @@ void NetManager::AdvanceInputPhase(NetInputPhase thePhase, const char* theReason
 		aNextEpoch = 1;
 	mInputEpoch = aNextEpoch;
 	mInputPhase = thePhase;
+	mAnnotations.clear();
 	mChooserOpen = thePhase == NETINPUT_CHOOSER;
 	PurgePendingInputs(theReason ? theReason : "INPUT_PHASE");
 	ClearHeatWaveShoutKeys(theReason ? theReason : "INPUT_PHASE");
@@ -2001,6 +2063,7 @@ void NetManager::OnInputEpoch(NetBuffer& thePayload)
 	}
 	mInputEpoch = anEpoch;
 	mInputPhase = aPhase;
+	mAnnotations.clear();
 	mNextInputSequence = 1;
 	mClientHeatWaveQDown = false;
 	mChooserOpen = aPhase == NETINPUT_CHOOSER;
@@ -2009,7 +2072,7 @@ void NetManager::OnInputEpoch(NetBuffer& thePayload)
 
 void NetManager::OnCursor(NetBuffer& thePayload)
 {
-	static const size_t NET_CURSOR_WIRE_BYTES = 11;
+	static const size_t NET_CURSOR_WIRE_BYTES = 13;
 	if (thePayload.Remaining() != NET_CURSOR_WIRE_BYTES)
 	{
 		NetTrace("cursor echo rejected expected=%zu bytes actual=%zu",
@@ -2026,6 +2089,7 @@ void NetManager::OnCursor(NetBuffer& thePayload)
 	uint8_t aHeldImitater = thePayload.ReadU8Or();
 	uint8_t aFlags = thePayload.ReadU8Or();
 	uint16_t aHeldPacketId = thePayload.ReadU16Or();
+	const uint16_t aHoverId = thePayload.ReadU16Or();
 
 	// Echoes for our own slot carry the host-confirmed held seed.  Apply only
 	// that semantic state locally; local mouse coordinates remain immediate.
@@ -2056,6 +2120,12 @@ void NetManager::OnCursor(NetBuffer& thePayload)
 				aLocalCursor->mImitaterType = SeedType::SEED_NONE;
 			}
 			aLocalCursor->mSeedBankIndex = aHeldIndex;
+			if (aHeldIndex >= 0)
+			{
+				const SeedPacket& aHeld = mApp->mBoard->mSeedBank->mSeedPackets[aHeldIndex];
+				aLocalCursor->mType = aHeld.mPacketType;
+				aLocalCursor->mImitaterType = aHeld.mImitaterType;
+			}
 			NetTrace("cursor held packet echo slot=%u id=%u index=%d type=%u",
 				aSlot, aHeldPacketId, aHeldIndex, aHeldSeed);
 			if (mApp->CoopSmokeActive())
@@ -2066,7 +2136,9 @@ void NetManager::OnCursor(NetBuffer& thePayload)
 	}
 
 	NetRemoteCursor& aCursor = mRemoteCursors[aSlot];
+	if (!NetResolveCursorPoint(mApp,mMySlot,aHoverId,aX,aY)) return;
 	aCursor.SetTarget((int16_t)NetLocalX(mApp, aX), (int16_t)NetLocalY(mApp, aY));
+	aCursor.mHoverPacketId = aHoverId;
 	aCursor.mCursorType = aCursorType;
 	aCursor.mHeldSeed = aHeldSeed;
 	aCursor.mHeldImitater = aHeldImitater;
@@ -2308,6 +2380,7 @@ void NetManager::SetMyTeam(uint8_t theTeam)
 	if (mMode == MODE_HOST)
 	{
 		mPlayers[0].mTeam = theTeam;
+		mPlayers[0].mReady = 0;
 		SendLobbyState();
 	}
 	else if (mMode == MODE_CLIENT && mHostConn)
@@ -2371,12 +2444,17 @@ void NetManager::BroadcastMessage(uint8_t theMsgType, const NetBuffer& thePayloa
 		theMsgType != NETMSG_PING && theMsgType != NETMSG_PONG)
 		NetTrace("TX broadcast type=%s(%u) bytes=%zu", NetMessageName(theMsgType), theMsgType, thePayload.Size());
 	for (int i = 1; i < NET_MAX_PLAYERS; i++)
-		if (mSessions[i].mAssigned)
+		if (mSessions[i].mAssigned && mPlayers[i].mActive)
 			mSessions[i].mConn.SendMessage(theMsgType, thePayload);
 }
 
 void NetManager::BroadcastSceneCmd(uint8_t theCmd, int theParam)
 {
+	if (theCmd == SCENECMD_SHOW_GAME_SELECTOR && IsHosting())
+	{
+		for (auto& player : mPlayers) { player.mSpectator = false; player.mReady = 0; }
+		SendLobbyState();
+	}
 	NetBuffer aMsg;
 	aMsg.WriteU8(theCmd);
 	aMsg.WriteI32(theParam);
@@ -2579,11 +2657,19 @@ void NetManager::SendCursor(int theCursorType, int theHeldSeed, int theHeldImita
 	if (aNow - sLastCursorSend < 1000 / NET_CURSOR_HZ)
 		return;
 	sLastCursorSend = aNow;
+	int16_t aWireX = (int16_t)NetCanonicalX(mApp,theX), aWireY = (int16_t)NetCanonicalY(mApp,theY);
+	uint16_t aHoverId = 0;
+	if (mApp && mApp->mBoard && mApp->mGameScene == SCENE_PLAYING)
+	{
+		int hit = NetSeedPacketAt(mApp->mBoard,aWireX,aWireY,mMySlot);
+		if (hit >= 0) aHoverId = mApp->mBoard->mSeedBank->mSeedPackets[hit].mNetId;
+	}
+	NetRelativeCursorPoint(mApp,aHoverId,aWireX,aWireY);
 
 	NetBuffer aMsg;
 	aMsg.WriteU8((uint8_t)mMySlot);
-	aMsg.WriteI16((int16_t)NetCanonicalX(mApp, theX));
-	aMsg.WriteI16((int16_t)NetCanonicalY(mApp, theY));
+	aMsg.WriteI16(aWireX);
+	aMsg.WriteI16(aWireY);
 	aMsg.WriteU8((uint8_t)theCursorType);
 	aMsg.WriteU8((uint8_t)theHeldSeed);
 	aMsg.WriteU8((uint8_t)theHeldImitater);
@@ -2599,6 +2685,7 @@ void NetManager::SendCursor(int theCursorType, int theHeldSeed, int theHeldImita
 				aCursor->mSeedBankIndex].mNetId;
 	}
 	aMsg.WriteU16(aHeldPacketId);
+	aMsg.WriteU16(aHoverId);
 
 	if (mMode == MODE_HOST)
 		BroadcastMessage(NETMSG_CURSOR, aMsg);

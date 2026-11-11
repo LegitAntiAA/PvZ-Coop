@@ -67,10 +67,11 @@ void NetManager::SendSystemChat(const std::string& theText)
 
 void NetManager::KickPlayer(int theSlot)
 {
-	if (!IsHosting() || theSlot <= 0 || theSlot >= NET_MAX_PLAYERS || !mPlayers[theSlot].mActive) return;
+	if (!IsHosting() || theSlot <= 0 || theSlot >= NET_MAX_PLAYERS || !mPlayers[theSlot].mActive || mKicked[theSlot]) return;
 	mKicked[theSlot] = true;
+	mKickDeadline[theSlot] = GetTickCount() + 500U;
+	mPlayers[theSlot].mReady = 0;
 	mSessions[theSlot].mConn.SendMessage(NETMSG_KICKED);
-	mDeferredDrop[theSlot] = true;
 }
 
 void NetManager::RedistributeSeeds(int theDepartedSlot)
@@ -96,7 +97,16 @@ void NetManager::RedistributeSeeds(int theDepartedSlot)
 		packet.mNetOwnerSlot = least < 0 ? NET_SHARED_OWNER : (uint8_t)least;
 		if (least >= 0) ++counts[least];
 	}
-	NetTrace("departed seed ownership redistributed slot=%d packets=%d", theDepartedSlot, bank->mNumPackets);
+	int owners[NET_MAX_PLAYERS] = {}, orphaned = 0;
+	for (int i=0;i<bank->mNumPackets;++i)
+	{
+		const auto& packet = bank->mSeedPackets[i];
+		if (packet.mPacketType == SeedType::SEED_NONE) continue;
+		if (packet.mNetOwnerSlot < NET_MAX_PLAYERS) ++owners[packet.mNetOwnerSlot];
+		if (packet.mNetOwnerSlot == theDepartedSlot) ++orphaned;
+	}
+	NetTrace("seed redistribution slot=%d packets=%d owners=%d,%d,%d,%d orphaned=%d",
+		theDepartedSlot,bank->mNumPackets,owners[0],owners[1],owners[2],owners[3],orphaned);
 }
 
 void NetManager::SendLateJoinState(NetSession* theSession)
@@ -168,6 +178,7 @@ void NetManager::OnAnnotation(NetSession* theSession, NetBuffer& thePayload)
 		if (!seed) return;
 	}
 	const uint32_t now = GetTickCount();
+	const bool aVisibleHere = !mApp->mBoard->IsPvPMode() || mPlayers[slot].mTeam == GetMyTeam();
 	if (IsHosting())
 	{
 		uint32_t& last = kind == NETANNOTATION_PING || kind == NETANNOTATION_SEED ? mLastAnnotationTick[slot] : mLastDrawTick[slot];
@@ -183,14 +194,14 @@ void NetManager::OnAnnotation(NetSession* theSession, NetBuffer& thePayload)
 			const int seconds = seed->mRefreshing ? max(0, seed->mRefreshTime - seed->mRefreshCounter + 99) / 100 : 0;
 			const std::string text = SexyStringToString(Plant::GetNameString(seed->mPacketType, seed->mImitaterType)) +
 				" (" + std::to_string(seconds) + "s)";
-			AddChatLine(slot, text);
+			if (aVisibleHere) AddChatLine(slot, text);
 			NetBuffer chat; chat.WriteU8(slot); chat.WriteString(text.c_str());
 			for (int peer = 1; peer < NET_MAX_PLAYERS; ++peer)
 				if (mPlayers[peer].mActive && (!mApp->mBoard->IsPvPMode() || mPlayers[peer].mTeam == mPlayers[slot].mTeam))
 					mSessions[peer].mConn.SendMessage(NETMSG_CHAT_BROADCAST, chat);
 		}
 	}
-	ApplyAnnotation(slot, kind, x, y, id);
+	if (aVisibleHere) ApplyAnnotation(slot, kind, x, y, id);
 }
 
 void NetManager::ApplyAnnotation(uint8_t theSlot, uint8_t theKind, int16_t theX, int16_t theY, uint16_t theId)

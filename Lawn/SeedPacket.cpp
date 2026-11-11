@@ -1129,7 +1129,7 @@ void SeedBank::Draw(Graphics* g)
 	}
 	else
 	{
-		int aExtraWidth = mBoard->GetSeedBankExtraWidth();
+		int aExtraWidth = mBoard->IsPvPMode() ? 153 : mBoard->GetSeedBankExtraWidth();
 		Rect theSrcRect(IMAGE_SEEDBANK->mWidth - aExtraWidth - 12, 0, aExtraWidth + 12, IMAGE_SEEDBANK->mHeight);
 		g->DrawImage(IMAGE_SEEDBANK, 0, 0);
 		g->DrawImage(IMAGE_SEEDBANK, IMAGE_SEEDBANK->mWidth - 12, 0, theSrcRect);
@@ -1163,7 +1163,7 @@ void SeedBank::Draw(Graphics* g)
 	if (!mBoard->HasConveyorBeltSeedBank())
 	{
 		SexyString aMoneyLabel = StrFormat(_S("%d"), max(aZombieView ? mBoard->mNetPvPBrains : mBoard->mSunMoney, 0));
-		Color aMoneyColor(0, 0, 0);
+		Color aMoneyColor = aZombieView ? Color(255, 240, 200) : Color(0, 0, 0);
 		if (mBoard->mOutOfMoneyCounter > 0 && mBoard->mOutOfMoneyCounter % 20 < 10)
 		{
 			aMoneyColor = Color(255, 0, 0);

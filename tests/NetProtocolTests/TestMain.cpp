@@ -782,6 +782,22 @@ void TestFairFixedSeedQuotas()
 	CHECK(!LawnNet::NetComputeSeedQuotas(2,3,two,q));
 }
 
+void TestSpectatorAuthorityAndStrokeLifetime()
+{
+	const uint8_t mutations[] = {LawnNet::NETMSG_INPUT_MOUSE,LawnNet::NETMSG_INPUT_KEY,
+		LawnNet::NETMSG_STORE_ACTION,LawnNet::NETMSG_SEED_PICK,LawnNet::NETMSG_SEED_UNPICK,
+		LawnNet::NETMSG_TEAM_SELECT,LawnNet::NETMSG_READY,LawnNet::NETMSG_START_GAME,255};
+	for (uint8_t type : mutations) CHECK(!LawnNet::NetSpectatorMaySend(type));
+	CHECK(LawnNet::NetSpectatorMaySend(LawnNet::NETMSG_CHAT_SEND));
+	CHECK(LawnNet::NetSpectatorMaySend(LawnNet::NETMSG_ANNOTATION));
+	CHECK(LawnNet::NetSpectatorMaySend(LawnNet::NETMSG_KICK_ACK));
+	CHECK(LawnNet::NetStrokeAlpha(7999,0,5) == 255);
+	CHECK(LawnNet::NetStrokeAlpha(8000,4,5) == 255);
+	CHECK(LawnNet::NetStrokeAlpha(8500,0,5) > LawnNet::NetStrokeAlpha(8500,4,5));
+	CHECK(LawnNet::NetStrokeAlpha(10000,0,5) == 0);
+	CHECK(LawnNet::NetStrokeAlpha(10000,4,5) == 0);
+}
+
 int main()
 {
 	std::printf("PvZ NetProtocolTests (protocol %u)\n", LawnNet::NET_PROTOCOL_VERSION);
@@ -795,6 +811,7 @@ int main()
 	RunTest("Frame.MaximumPayload", TestFrameMaximumPayload);
 	RunTest("Players.RelativeColors", TestRelativePlayerColors);
 	RunTest("Chooser.FixedCardsFairQuotas", TestFairFixedSeedQuotas);
+	RunTest("Spectator.AuthorityAndStrokeLifetime", TestSpectatorAuthorityAndStrokeLifetime);
 	RunTest("Config.Defaults", TestConfigDefaults);
 	RunTest("Config.IsolatedRoundTrip", TestConfigRoundTripInIsolatedDirectory);
 	RunTest("Smoke.ManifestAndHashValidation", TestSmokeManifestAndHashValidation);

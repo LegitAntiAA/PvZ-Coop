@@ -7,7 +7,7 @@
  * Architecture: host-authoritative (server-client).
  *  - The host runs the only real simulation (Board, zombies, plants, sun, waves, RNG).
  *  - Clients mirror the state from full-state snapshots and send raw input events.
- *  - Transport: TCP over the Radmin VPN LAN interface, length-prefixed frames.
+ *  - Reliable ordered transport: LAN/VPN TCP or WebRTC DataChannel, using the same frames.
  */
 
 #include <cstdint>
@@ -114,6 +114,7 @@ enum NetMsgType : uint8_t
 	NETMSG_STORE_ACTION = 51,	// c->h: u8 item, u8 action
 	NETMSG_STORE_SYNC = 52,		// h->c: coins + store purchases
 	NETMSG_ZOMBATAR = 53,         // client: appearance; host: slot + appearance
+	NETMSG_KICK_ACK = 54,         // c->h: kick reason received; host may close now
 
 	NETMSG_STATS = 60,			// c->h: u16 pingMs, u16 snapshotApplyMs
 	NETMSG_RATE = 61,			// h->c: u16 snapshotHz
@@ -630,6 +631,7 @@ bool NetSaveConfig(const NetConfig& theConfig);
 bool NetComputeSeedQuotas(int theBankCount, int theFixedHostCount,
 	const bool theEligible[NET_MAX_PLAYERS], int theQuotas[NET_MAX_PLAYERS]);
 int NetStrokeAlpha(uint32_t theAgeSinceEnd, int thePointIndex, int thePointCount);
+bool NetSpectatorMaySend(uint8_t theMessageType);
 
 } // namespace LawnNet
 

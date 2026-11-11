@@ -556,6 +556,16 @@ bool LawnApp::DrawDirtyStuff()
 	return SexyAppBase::DrawDirtyStuff();
 }
 
+bool LawnApp::CoopSmokeCaptureFrame(const char* theBasename)
+{
+	const char* dir = CoopSmokeActive() ? getenv("PVZ_COOP_SMOKE_CAPTURE_DIR") : nullptr;
+	if (!dir || !theBasename || !mCoopSmokeFrame) return false;
+	const std::string name(theBasename);
+	if (name.empty() || name.size() > 96 || name.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-") != std::string::npos) return false;
+	const std::string path = std::string(dir) + "\\" + name + ".bmp";
+	return SDL_SaveBMP(mCoopSmokeFrame.get(),path.c_str());
+}
+
 void LawnApp::Redraw(Rect* theClipRect)
 {
 	if (mIsPlayingVideo) return;
@@ -567,25 +577,28 @@ void LawnApp::Redraw(Rect* theClipRect)
 	// Co-op overlays are the final visual layer, above widgets and dialogs.
 	NetDrawChatOverlay();
 	NetDrawCursorOverlay();
-	// Background smoke captures the game's own render target, never the desktop.
+	// Read this SDL renderer's actual backbuffer before Present invalidates it.
+	// The widget image is only a drawing facade, not a rendered texture.
 	const char* aCaptureDir = CoopSmokeActive() ? getenv("PVZ_COOP_SMOKE_CAPTURE_DIR") : nullptr;
 	static uint32_t aLastCaptureTick = 0;
+	static uint32_t aLastFrameTick = 0;
+	static int aLastFrameScene = -1;
 	static int aLastCaptureScene = -1;
-	if (aCaptureDir && mLoadingThreadCompleted && mWidgetManager && mWidgetManager->mImage &&
-		(aLastCaptureScene != (int)mGameScene || GetTickCount() - aLastCaptureTick >= 2000U))
+	if (aCaptureDir && mLoadingThreadCompleted &&
+		(aLastFrameScene != (int)mGameScene || GetTickCount() - aLastFrameTick >= 100U))
 	{
-		aLastCaptureTick = GetTickCount();
-		aLastCaptureScene = (int)mGameScene;
-		SDL_Texture* aPreviousTarget = SDL_GetRenderTarget(mSDLRenderer);
-		SDL_SetRenderTarget(mSDLRenderer, (SDL_Texture*)mWidgetManager->mImage->mD3DData);
 		SDL_Surface* aFrame = SDL_RenderReadPixels(mSDLRenderer, nullptr);
-		SDL_SetRenderTarget(mSDLRenderer, aPreviousTarget);
 		if (aFrame)
 		{
-			std::string aPath = std::string(aCaptureDir) + "\\scene_" + std::to_string(aLastCaptureScene) + ".bmp";
-			SDL_SaveBMP(aFrame, aPath.c_str());
-			SDL_DestroySurface(aFrame);
+			mCoopSmokeFrame.reset(aFrame,SDL_DestroySurface);
+			aLastFrameTick = GetTickCount(); aLastFrameScene = (int)mGameScene;
 		}
+	}
+	if (aCaptureDir && mCoopSmokeFrame &&
+		(aLastCaptureScene != (int)mGameScene || GetTickCount() - aLastCaptureTick >= 2000U))
+	{
+		aLastCaptureTick = GetTickCount(); aLastCaptureScene = (int)mGameScene;
+		CoopSmokeCaptureFrame(("scene_" + std::to_string(aLastCaptureScene)).c_str());
 	}
 	SDL_RenderPresent(mSDLRenderer);
 }
@@ -5875,12 +5888,18 @@ bool LawnApp::CoopSmokeUpdateUnicodeChat()
 		const char* aLocalText = mNetManager->GetMySlot() == 0 ? aHostNick : aClientNick;
 		if (!NetHandleChatKey(KeyCode::KEYCODE_RETURN) ||
 			!NetHandleChatText(aLocalText) ||
+			!NetHandleChatText(" ") || SexyStringToStringFast(mNetChatDraft) != std::string(aLocalText) + " " ||
+			!NetHandleChatText("\xD1\x91") ||
+			!NetHandleChatKey(KeyCode::KEYCODE_BACK) || SexyStringToStringFast(mNetChatDraft) != std::string(aLocalText) + " " ||
+			!NetHandleChatKey(KeyCode::KEYCODE_BACK) || SexyStringToStringFast(mNetChatDraft) != aLocalText ||
 			!NetHandleChatKey(KeyCode::KEYCODE_RETURN))
 		{
 			CoopSmokeFail("Enter chat input path rejected smoke message");
 			return false;
 		}
 		mCoopSmokeUnicodeChatSent = true;
+		LawnNet::NetTrace("SMOKE_CHAT_DRAFT role=%s space=1 cyrillicBackspace=1 literal=1",
+			mCoopSmokeManifest.IsHost() ? "host" : "client");
 		LawnNet::NetTrace("SMOKE_CHAT_ENTER role=%s slot=%d utf8Bytes=%zu",
 			mCoopSmokeManifest.IsHost() ? "host" : "client",
 			mNetManager->GetMySlot(), strlen(aLocalText));
@@ -5936,6 +5955,18 @@ void LawnApp::CoopSmokeUpdate()
 	}
 	if (!mCoopSmokeLifecycleStarted || !mNetManager)
 		return;
+	if (!CoopSmokeUpdateOnline())
+		return;
+	const char* aSpectatorRole = getenv("PVZ_COOP_SMOKE_SPECTATOR_ROLE");
+	if (aSpectatorRole && std::string(aSpectatorRole) == "spectator")
+	{
+		CoopSmokeUpdateSpectator();
+		return;
+	}
+	const bool aSpectatorReady = CoopSmokeUpdateSpectator();
+	const bool aFirstAdventureReady = CoopSmokeUpdateFirstAdventure();
+	const bool aInteractionsReady = CoopSmokeUpdateInteractions();
+	const bool aModesReady = CoopSmokeUpdateModes();
 	const bool aUnicodeChatReady = CoopSmokeUpdateUnicodeChat();
 	if (mCoopSmokeResultWritten)
 		return;
@@ -5946,7 +5977,8 @@ void LawnApp::CoopSmokeUpdate()
 		CoopSmokeFail("resolved smoke scenario disappeared at runtime");
 		return;
 	}
-	if (mSeedChooserScreen && mSeedChooserScreen->mCoopChooserActive &&
+	if (mSeedChooserScreen && mSeedChooserScreen->mMouseVisible && mSeedChooserScreen->mCoopChooserActive &&
+		mBoard && mBoard->mCutScene && mBoard->mCutScene->mSeedChoosing &&
 		mSeedChooserScreen->CoopAllPicksComplete() && !mNetManager->IsMyReady())
 	{
 		mNetManager->SetMyReady(true);
@@ -5966,12 +5998,14 @@ void LawnApp::CoopSmokeUpdate()
 		}
 
 		int aPlayerCount = mNetManager->GetPlayerCount();
-		if (aPlayerCount > 2)
+		const char* aSpectatorRun = getenv("PVZ_COOP_SMOKE_SPECTATOR");
+		const int aMaximumPlayers = aSpectatorRun && std::string(aSpectatorRun) == "1" ? 3 : 2;
+		if (aPlayerCount > aMaximumPlayers)
 		{
 			CoopSmokeFail("smoke host accepted more than one client");
 			return;
 		}
-		if (aPlayerCount == 2)
+		if (aPlayerCount >= 2)
 			mCoopSmokePeerReady = true;
 		else if (mCoopSmokePeerReady)
 		{
@@ -5995,7 +6029,8 @@ void LawnApp::CoopSmokeUpdate()
 				(unsigned)mCoopSmokeManifest.mGameMode, mCoopSmokeManifest.mLevel,
 				mCoopSmokeManifest.mSeed, mCoopSmokeManifest.mSkipIntro ? 1 : 0);
 			KillGameSelector();
-			const GameMode aGameMode = (GameMode)mCoopSmokeManifest.mGameMode;
+			const GameMode aGameMode = CoopSmokeFirstAdventureEnabled() ?
+				GAMEMODE_INTRO : (GameMode)mCoopSmokeManifest.mGameMode;
 			if (aGameMode == GameMode::GAMEMODE_ADVENTURE)
 				PreNewGame(aGameMode, false, mCoopSmokeManifest.mLevel);
 			else
@@ -6012,7 +6047,7 @@ void LawnApp::CoopSmokeUpdate()
 		}
 
 		std::string aScenarioFailure;
-		if (!mCoopSmokeScenarioRuntime.Update(this, mCoopSmokeManifest,
+		if (CoopSmokeFirstAdventureRunBaseline() && !mCoopSmokeScenarioRuntime.Update(this, mCoopSmokeManifest,
 			mCoopSmokeSnapshotsSent, aScenarioFailure))
 		{
 			CoopSmokeFail(aScenarioFailure.c_str());
@@ -6030,7 +6065,7 @@ void LawnApp::CoopSmokeUpdate()
 			mNetManager->GetPlayerCount() == 2 &&
 			mCoopSmokeSnapshotsSent >= mCoopSmokeManifest.mMinimumSnapshots &&
 			mCoopSmokeScenarioRuntime.IsComplete(mCoopSmokeManifest.mMinimumSnapshots) &&
-			aUnicodeChatReady)
+			aUnicodeChatReady && aInteractionsReady && aFirstAdventureReady && aSpectatorReady && aModesReady)
 		{
 			bool aPublished = CoopSmokeWriteResult(true, nullptr);
 			if (!aPublished || mCoopSmokeManifest.mCloseOnResult)
@@ -6054,7 +6089,7 @@ void LawnApp::CoopSmokeUpdate()
 		}
 
 		std::string aScenarioFailure;
-		if (!mCoopSmokeScenarioRuntime.Update(this, mCoopSmokeManifest,
+		if (CoopSmokeFirstAdventureRunBaseline() && !mCoopSmokeScenarioRuntime.Update(this, mCoopSmokeManifest,
 			mCoopSmokeSnapshotsApplied, aScenarioFailure))
 		{
 			CoopSmokeFail(aScenarioFailure.c_str());
@@ -6070,7 +6105,7 @@ void LawnApp::CoopSmokeUpdate()
 			(mGameScene == GameScenes::SCENE_PLAYING || aSmokeTerminalScene))) &&
 			mCoopSmokeSnapshotsApplied >= mCoopSmokeManifest.mMinimumSnapshots &&
 			mCoopSmokeScenarioRuntime.IsComplete(mCoopSmokeManifest.mMinimumSnapshots) &&
-			aUnicodeChatReady)
+			aUnicodeChatReady && aInteractionsReady && aFirstAdventureReady && aSpectatorReady && aModesReady)
 		{
 			bool aPublished = CoopSmokeWriteResult(true, nullptr);
 			if (!aPublished || mCoopSmokeManifest.mCloseOnResult)
@@ -6189,9 +6224,10 @@ void LawnApp::NetOnStartGame(LawnNet::NetBuffer& thePayload)
 			(aPathLength >= 4 && (aPathLength & 1U) == 0U) :
 			(aPathLength == 0);
                 aValid = aValid && aCheck.Remaining() == 0 &&
-                        aMode == mCoopSmokeManifest.mGameMode &&
-                        aLevel == mCoopSmokeManifest.mLevel && aSeed == mCoopSmokeManifest.mSeed &&
-			aPlayerCount == 2 && aPathShapeValid;
+                        ((aMode == mCoopSmokeManifest.mGameMode && aLevel == mCoopSmokeManifest.mLevel) ||
+			 CoopSmokeFirstAdventureAllowsStart(aMode, aLevel)) && aSeed == mCoopSmokeManifest.mSeed &&
+			(aPlayerCount == 2 || (getenv("PVZ_COOP_SMOKE_SPECTATOR_ROLE") &&
+				strcmp(getenv("PVZ_COOP_SMOKE_SPECTATOR_ROLE"),"spectator") == 0 && aPlayerCount == 3)) && aPathShapeValid;
 		if (!aValid)
 		{
 			LawnNet::NetTrace("SMOKE START_GAME malformed/mismatch bytes=%zu mode=%u level=%d players=%u seed=%u path=%u trailing=%zu",
@@ -6250,7 +6286,7 @@ void LawnApp::NetOnHostLost()
 	if (!mNetManager)
 		return;
 	const std::string aDisconnectReason = mNetManager->GetDisconnectReason();
-	if (CoopSmokeActive())
+	if (CoopSmokeActive() && !CoopSmokeExpectedSpectatorKick(aDisconnectReason))
 		CoopSmokeFail("connection to smoke host was lost");
 
 	// Tear down the board while NetIsClient() and the profile-save guard still
@@ -6863,8 +6899,9 @@ void LawnApp::NetDrawChatOverlay()
 			LawnNet::GetRelativePlayerColor(mNetManager->GetMySlot(), aLine.mSlot);
 		g.SetColor(Color(0, 0, 0, anAlpha * 2 / 3));
 		g.FillRect(8, aY - 15, 520, 20);
-		TodDrawString(&g, aText, 14, aY, Sexy::FONT_BRIANNETOD12,
-			Color(aColor.r, aColor.g, aColor.b, anAlpha), DrawStringJustification::DS_ALIGN_LEFT);
+		// User content is literal: [nickname] must never become a localization key.
+		Sexy::FONT_BRIANNETOD12->DrawString(&g,14,aY,aText,
+			Color(aColor.r,aColor.g,aColor.b,anAlpha),g.mClipRect);
 		aY += 22;
 	}
 	const char* aVerifyChat = getenv("PVZ_COOP_SMOKE_UNICODE_CHAT");
@@ -6903,8 +6940,7 @@ void LawnApp::NetDrawChatOverlay()
 			}
 			else aDraft.erase(6, 1);
 		}
-		TodDrawString(&g, aDraft, 14, 583,
-			Sexy::FONT_BRIANNETOD12, Color(255, 255, 255), DrawStringJustification::DS_ALIGN_LEFT);
+		Sexy::FONT_BRIANNETOD12->DrawString(&g,14,583,aDraft,Color(255,255,255),g.mClipRect);
 		if ((aNow / 500U) % 2 == 0)
 		{
 			g.SetColor(Color(255, 255, 255));

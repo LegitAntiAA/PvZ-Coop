@@ -1,152 +1,129 @@
-
-# PvZ Co-op (stabledecompile fork)
+# PvZ Co-op
 
 English | [Русский](#русский)
 
-## What is this
+A host-authoritative online co-op fork of **Plants vs. Zombies / stabledecompile**. Play Adventure, mini-games, Survival and six custom modes with up to four people. The host owns the simulation and progression; clients render authoritative snapshots and send input. Presentation, UI transitions and input lifetime barriers are synchronized separately from gameplay state.
 
-A fork of the **stabledecompile** Plants vs. Zombies project that adds **full online co-op** to the classic game.
-Play the entire campaign, every minigame, survival and custom modes together over a LAN or a VPN (e.g. **Radmin VPN**, Hamachi, ZeroTier).
+## Playing together
 
-### The concept
+**Online rooms, without a VPN:** open **ONLINE ROOMS**, enter your signaling service URL, create a room or select one to join. Rooms support a name, optional password and a total capacity of 2–4 players. The directory shows the same mod build; the gameplay handshake also rejects a different build. A reliable, ordered WebRTC DataChannel carries gameplay directly between computers; Cloudflare handles discovery/signaling.
 
-- **Host-authoritative server-client architecture.** The host runs the *only* real simulation. Clients are smart renderers: they receive full-state snapshots (~15–30 Hz, adaptive) and send back raw input events. This makes desyncs impossible by design — the client never simulates gameplay.
-- **Up to 4 players** (1 host + 3 clients). Player colors are relative: you always see yourself uncolored, other players appear **blue / red / green** on your HUD (seed packets, cursors, held-plant silhouettes).
-- **Shared economy.** Sun money is shared; the host's profile (level, coins, store purchases, challenge records) is the authority for everyone.
-- **Shared seed picking.** The seed bank is split between players: `bank size / player count` picks each, no duplicates across players. In the bank your packets come first, other players' packets are tinted with their color, show their cooldowns and cannot be clicked by you.
-- **Everything is synchronized**: pausing (host-only), win/lose, scene transitions, minigames, the store, wave banners, sounds, cursors (visible even in the menu, with nickname + ping).
+Follow the [Cloudflare Free and WebRTC setup guide (Russian)](docs/ONLINE_SETUP_RU.md). The repository includes the Worker and reproducible native dependency build. No hosted public directory is preconfigured. STUN without TURN cannot connect every NAT/firewall combination; LAN/VPN remains available when direct connectivity fails. Free services have usage limits.
 
-### New game modes (all playable solo or in co-op)
+**LAN / VPN:** enter a nickname and press **HOST GAME**. Other players enter the host's IPv4 address and port `27713`, then press **CONNECT**. For Radmin VPN, use the host's `26.x.x.x` address. The host starts games through the normal menu.
 
-1. **Endless** — infinite waves; zombies get stronger over time.
-2. **Endless T** — the same, plus a day/night cycle and random fog/storm events.
-3. **Endless S** — the same as endless, but every 10 waves you re-pick your seeds.
-4. **Endless ST** — Endless T + re-picking.
-5. **Tower Defense** — a random road is drawn over the lawn and zombies can only walk along it.
-6. **PvP** — one team plays zombies (spawning them with a "brains" currency earned over time and by eating plants), the other plays plants. Teams can be 2v2, 1v3, 3v1 — chosen in the lobby before the game. Cursors are hidden in this mode.
+Distribute the **same compiled build** to everyone. Each game build generates a new identity containing its counter, source revision and build timestamp. Rebuilding a copy independently produces a different identity.
 
-### How to play (Radmin VPN)
+## Co-op controls and rules
 
-1. Download and install [Radmin VPN](https://www.radmin-vpn.com/) (free).
-2. One player creates a network (e.g. `pvzcoop`), everyone else joins it.
-3. The host launches the game, enters their nickname in the **PvZ CO-OP panel** (left side of the main menu) and presses **HOST GAME**.
-4. Other players press **CONNECT** and enter the host's **Radmin VPN IP** (`26.x.x.x`, shown in Radmin VPN) and the port (`27713`).
-5. The player list appears on the left with nicknames and pings. The host starts any game through the normal menu — everyone is pulled in automatically.
-6. Before a PvP game everyone picks a team (PLANTS / ZOMBIES button in the panel).
+| Action | Control / behavior |
+|---|---|
+| Chat | Enter to type/send, Escape to cancel; UTF-8 nicknames and messages |
+| Point ping | Middle mouse button; sound and 0.5-second cooldown |
+| Draw | Hold Ctrl and move the mouse; the stroke starts fading from its end after 8 seconds |
+| Plant packet ping | Alt + left click; flashes the same packet for everyone and announces its name / remaining recharge time |
+| Seed selection | Picks appear in the native top bank, tinted by player; fixed cards count toward the host's total quota |
+| Start after picking | Every participant presses the ready button; it shows ready/total and red/green state |
+| Difficulty | Host chooses 1–10 in the lobby; 1 preserves the standard game, higher settings add zombies, waves and types without increasing HP |
+| Join an ongoing game | Read-only spectator: watch, ping and draw; no planting or other gameplay input |
+| Kick | Host uses the player-row button in the lobby or the player list while paused; an active departing player's packets are reassigned fairly |
+| Personal Zombatar | Save it in the native editor; participating players' custom heads can occasionally appear on zombies |
 
-### Configuration (`coop.ini`, next to the exe)
+Sun, progression, store purchases and profile name belong to the host. Other players' packets are visible but cannot be used. Chat includes join/leave/kick messages. The GitHub icon in the top-left menu opens this repository.
+
+### Custom modes
+
+- **Endless / Endless T / Endless S / Endless ST:** endless stages; T adds actual day/night gameplay and weather, S adds seed repicking every ten waves. Endless retains its own progressive zombie-health scaling.
+- **Tower Defense:** zombies follow a generated road; the roster includes strong enemies and Gargantuars.
+- **PvP:** select plants or zombies after opening the mode, before the level loads. Every participant confirms readiness. Zombies use brains and a compact zombie palette; the opposing plant packets and sun balance are hidden. Plant tools are restricted to the plant team. Plants win at 100 zombie kills; zombies win by reaching the house objective.
+
+## Configuration
+
+`coop.ini` next to the executable:
 
 ```ini
 nickname=Player
-unlock_all_minigames=0      ; 1 = every minigame/mode unlocked without adventure progress
+unlock_all_minigames=0
+# 1 unlocks all mini-games/custom modes and their menu buttons
+
 enable_coop=1
-base_snapshot_rate=15       ; starting sync rate (15..30), adapts up automatically
-window_width=0              ; 0 = default 1066, e.g. 1366x768 or 1920x1080
+base_snapshot_rate=15
+window_width=0
 window_height=0
-borderless_fullscreen=1     ; fullscreen = borderless desktop at native resolution
+borderless_fullscreen=1
+
+# Optional: your deployed Cloudflare signaling URL
+online_endpoint=
+stun_server=stun:stun.cloudflare.com:3478
 ```
 
-### Building
+Default window size is 1066×600; set both dimensions for another size. The host's effective mini-game unlock setting is mirrored to clients. Tint settings and the saved personal Zombatar are also persisted by the game.
 
-- Visual Studio 2022+ (v143/v145 toolset), C++20.
-- Open `PlantsVsZombies.sln`, pick `ReleaseGOTY` + `Win32`/`x64`, build.
-- You must own the original game: copy its folder (with `main.pak` and `properties/`) into the workspace as `Plants Vs. Zombies/` before building — the post-build step copies the game assets.
+## Building
 
-### Roadmap / status
+1. Use Visual Studio C++ Build Tools (v145, or v143 with an explicit toolset override), C++20, and the Windows SDK. Win32 ReleaseGOTY is the currently verified target; x64 is configured but not covered by the current validation.
+2. For online rooms, build the pinned native dependency with `powershell -NoProfile -ExecutionPolicy Bypass -File tools/BuildOnlineDeps.ps1 -Platform Win32`. See [dependency notices](third_party/ONLINE_DEPENDENCIES.md). LAN/TCP can run without the WebRTC DLL.
+3. Build `PlantsVsZombies.sln`, `ReleaseGOTY | Win32`. The post-build step copies `datachannel.dll`, when built, and its license notices beside the game.
+4. Supply your legally owned original `main.pak` and `properties/` files. Original game assets are not included in releases. Local build output is `build/ReleaseGOTY_Win32/bin/PlantsVsZombies.exe`.
 
-- [x] TCP transport, framing, threads, ping, adaptive snapshot rate
-- [x] Full-state snapshot sync (plants, zombies, projectiles, coins, mowers, grid items, seed packets)
-- [x] Ghost entities with interpolation on clients
-- [x] Lobby panel in the main menu (nick, IP, port, host/connect, player list, PvP team select)
-- [x] Host-only pause / mode selection; clients' play buttons blocked
-- [x] Remote cursors with nick + ping (menu and board), held-plant silhouettes in player colors
-- [x] Configurable window size, borderless fullscreen
-- [x] Six new modes (4 endless variants, tower defense, PvP)
-- [ ] Deep per-minigame state sync polish (conveyor/scary-potter edge cases)
-- [ ] Playtesting & desync hunting
+## Verification and roadmap
+
+The 2026-11-11 play-test fixes are undergoing integration and background game verification. The [delivery board](docs/agent/WORKBOARD.md) records implementation separately from executed tests. [Smoke documentation](tests/CoopSmoke/README.md) describes deterministic two-process tests; `-Background` keeps windows hidden and captures only the game's own renderer.
+
+- [x] Host-authoritative TCP, snapshots, ordered input and adaptive snapshot rate
+- [x] Shared seed selection, relative player colors, custom modes
+- [x] Native WebRTC transport and Cloudflare signaling source; native local integration tests
+- [ ] Complete the current play-test regression matrix and real-network NAT testing
+- [ ] Lua modding API — planned, not implemented
+- [ ] More custom mini-games — planned, not implemented
+- [ ] New custom Adventure modes — planned, not implemented
+- [ ] Update mod UI/UX — planned, not implemented
 
 ---
 
 ## Русский
 
-## Что это
+Кооперативный форк **Plants vs. Zombies / stabledecompile**: Adventure, мини-игры, выживание и шесть дополнительных режимов для компании до четырёх человек. Хост рассчитывает игру и хранит общий прогресс. Клиенты получают состояние и отправляют ввод; анимации и переходы интерфейса передаются отдельными механизмами.
 
-Форк проекта **stabledecompile** (Plants vs. Zombies), добавляющий в классическую игру **полноценный онлайн-кооператив**.
-Проходите кампанию, все мини-игры, выживания и новые режимы вместе по локальной сети или через VPN (например **Radmin VPN**, Hamachi, ZeroTier).
+### Подключение
 
-### Задумка
+**Без VPN:** нажмите **ONLINE ROOMS**, укажите URL своего сервиса сигналинга и создайте комнату либо подключитесь к существующей. Можно задать имя, пароль и вместимость 2–4 игрока. Каталог показывает комнаты той же сборки; версия также проверяется при игровом подключении. Игровые данные идут напрямую по WebRTC, Cloudflare обслуживает каталог и установку соединения.
 
-- **Архитектура «сервер-клиент», авторитет у хоста.** Симуляция — только на хосте. Клиенты — «умные рендереры»: получают полные снапшоты состояния (~15–30 Гц, адаптивно) и отправляют обратно события ввода. Рассинхрон исключён самой архитектурой — клиент не симулирует игру.
-- **До 4 игроков** (1 хост + 3 клиента). Цвета относительные: себя ты видишь обычным, остальные игроки на твоём HUD — **синий / красный / зелёный** (пакеты семян, курсоры, силуэты растений в руках).
-- **Общая экономика.** Солнце общее; профиль хоста (уровень, монеты, покупки, рекорды) — авторитет для всех.
-- **Общий выбор растений.** Банк семян делится между игроками: `размер банка / число игроков` выборов каждому, дубликаты запрещены. В банке сначала твои пакеты, чужие подсвечены их цветом, видны их кулдауны, но нажать их нельзя.
-- **Синхронизировано всё**: пауза (только хост), победы/поражения, переходы между сценами, мини-игры, магазин, баннеры волн, звуки, курсоры (видны даже в меню, с ником и пингом).
+[Подробная настройка бесплатного Cloudflare Worker и WebRTC](docs/ONLINE_SETUP_RU.md). Готовый общий сервер в игре не задан: исходники сервиса входят в репозиторий. У бесплатного тарифа есть лимиты. Без TURN некоторые NAT/корпоративные сети не позволяют прямое соединение; в таком случае доступно подключение по LAN/VPN.
 
-### Новые режимы (играются и соло, и в коопе)
+**LAN / VPN:** хост вводит ник и нажимает **HOST GAME**. Остальные вводят его IPv4 и порт `27713`, затем **CONNECT**. В Radmin VPN используется адрес хоста вида `26.x.x.x`. Режим запускает хост через обычное меню.
 
-1. **Endless** — бесконечные волны; зомби постепенно сильнее.
-2. **Endless T** — то же + смена дня и ночи со временем, случайные туман/гроза.
-3. **Endless S** — то же, но каждые 10 волн можно заново выбрать растения.
-4. **Endless ST** — Endless T + перевыбор растений.
-5. **Tower Defense** — по газону рисуется случайная дорога, зомби могут идти только по ней.
-6. **PvP** — одна команда играет за зомби (спавнит их за «мозги» — валюту, которая копится со временем и за съеденные растения), вторая — за растения. Составы 2х2, 1х3, 3х1 — выбираются в лобби перед игрой. Курсоры в этом режиме скрыты.
+Всем нужна **одна и та же готовая сборка**. При каждом билде автоматически меняется идентификатор: счётчик, ревизия исходников и время сборки. Самостоятельно пересобранная копия получает другой идентификатор.
 
-### Как играть (Radmin VPN)
+### Управление и правила
 
-1. Скачайте и установите [Radmin VPN](https://www.radmin-vpn.com/) (бесплатно).
-2. Один игрок создаёт сеть (например `pvzcoop`), остальные подключаются.
-3. Хост запускает игру, вводит ник в **панели PvZ CO-OP** (слева в главном меню) и жмёт **HOST GAME**.
-4. Остальные жмут **CONNECT** и вводят **IP хоста из Radmin VPN** (`26.x.x.x`, виден в Radmin VPN) и порт (`27713`).
-5. Слева появляется список игроков с никами и пингом. Хост запускает любую игру через обычное меню — всех перекидывает автоматически.
-6. Перед игрой в PvP все выбирают команду (кнопки PLANTS / ZOMBIES в панели).
+- **Enter** — открыть чат / отправить, **Escape** — отменить. Поддерживаются русские ники и сообщения.
+- **Колёсико мыши** — звуковой пинг, перезарядка 0,5 секунды.
+- **Зажать Ctrl и двигать мышью** — рисовать. Через 8 секунд линия начинает исчезать от конца к началу.
+- **Alt + ЛКМ по пакету растения** — подсветить именно этот пакет у всех, отправить его название и оставшийся кулдаун в чат. Указатель над банком также привязан к пакету, независимо от его позиции у другого игрока.
+- При выборе растения переходят в штатный верхний банк и окрашиваются цветом владельца. Обязательные карты входят в общую квоту хоста. Для старта **все участники нажимают готовность**; кнопка показывает число готовых и меняет цвет.
+- Хост выбирает **сложность 1–10** в лобби. На 1 сохраняется стандартная игра, выше увеличиваются количество/типы зомби и волны, а не их HP.
+- Подключившийся во время игры становится **наблюдателем**: смотрит, пингует и рисует, но не управляет игрой.
+- Хост может кикнуть игрока кнопкой возле имени в лобби или в списке слева во время паузы. Пакеты ушедшего активного игрока распределяются между оставшимися участниками.
+- Сохранённые в редакторе **зомботары игроков** иногда появляются на зомби. Игровой ресурс поддерживает собственную голову; одежда сохраняется для портрета редактора, а игровая форма зомби остаётся штатной.
 
-### Конфигурация (`coop.ini`, рядом с exe)
+Прогресс, магазин, имя профиля и общая валюта принадлежат хосту. Чужие пакеты видны, но недоступны для использования. В чате есть сообщения о входе, выходе и кике. Значок GitHub в левом верхнем углу меню открывает репозиторий.
 
-```ini
-nickname=Player
-unlock_all_minigames=0      ; 1 = все мини-игры/режимы открыты без прохождения приключения
-enable_coop=1
-base_snapshot_rate=15       ; стартовая частота синхронизации (15..30), растёт автоматически
-window_width=0              ; 0 = по умолчанию 1066, можно 1366x768 или 1920x1080
-window_height=0
-borderless_fullscreen=1     ; полный экран = безрамочный на нативном разрешении
-```
+### Дополнительные режимы
 
-### Сборка
+- **Endless / Endless T / Endless S / Endless ST:** бесконечные этапы; T — настоящая смена дня/ночи и погода, S — перевыбор растений каждые десять волн. У Endless сохраняется собственное постепенное усиление HP зомби.
+- **Tower Defense:** движение по случайной дороге; усиленный состав врагов, включая гаргантюа.
+- **PvP:** команда выбирается после открытия режима, перед загрузкой уровня. Зомби видят мозги и компактную панель зомби; пакеты растений и количество солнца противника скрыты. Инструменты растений недоступны команде зомби. Цель растений — 100 убийств, цель зомби — добраться до дома.
 
-- Visual Studio 2022+ (toolset v143/v145), C++20.
-- Откройте `PlantsVsZombies.sln`, выберите `ReleaseGOTY` + `Win32`/`x64`, соберите.
-- Нужно owning-копия оригинальной игры: скопируйте папку игры (с `main.pak` и `properties/`) в папку проекта как `Plants Vs. Zombies/` перед сборкой — пост-билд скопирует ресурсы.
+Параметры `coop.ini` приведены выше. `unlock_all_minigames=1` открывает мини-игры, дополнительные режимы и кнопки меню; эффективная настройка хоста передаётся клиентам. Инструкция сборки и расположение результата также приведены выше.
 
-### Статус
+### Проверки и планы
 
-- [x] TCP-транспорт, фрейминг, потоки, пинг, адаптивная частота снапшотов
-- [x] Полные снапшоты состояния (растения, зомби, снаряды, солнца, косилки, объекты сетки, пакеты семян)
-- [x] Ghost-сущности с интерполяцией на клиентах
-- [x] Панель лобби в главном меню (ник, IP, порт, хост/коннект, список игроков, выбор команд PvP)
-- [x] Пауза и запуск игр — только хост; кнопки игр у клиентов заблокированы
-- [x] Чужие курсоры с ником + пингом (меню и поле), силуэты растений в цвете игрока
-- [x] Настраиваемый размер окна, безрамочный полный экран
-- [x] Шесть новых режимов (4 варианта endless, tower defense, PvP)
-- [ ] Тонкая полировка синхронизации отдельных мини-игр
-- [ ] Плейтесты и вылов рассинхронов
+[Доска текущих задач и фактических проверок](docs/agent/WORKBOARD.md). Набор исправлений плей-теста проходит интеграционные проверки; реализация и проверенное поведение отмечаются отдельно.
 
-### Двухпроцессный PvP smoke
-
-`tests/CoopSmoke/RunCoopSmoke.ps1 -Scenario PvP1v1 -SkipIntro 1` запускает
-видимый fail-closed матч 1x1 (хост — растения, клиент — зомби). Проверяются
-состав команд, ровно 10 карточек растений и 16 общих карточек зомби, начальные
-100 мозгов, клиентский спавн зомби строго справа за экраном, действие хоста с
-растением, штатное начисление +50 мозгов, скрытие сетевых курсоров и совпадение
-ключевых идентификаторов/состояний на обоих процессах.
-
-Smoke намеренно не публикует фиктивный маркер победы. Командно-зависимые
-экраны победы/поражения пока не покрыты: для такого теста gameplay должен
-сначала иметь реальный локально-зависимый результат вместо общего stock
-`ZombiesWon`/`FadeOutLevel` перехода.
+Пока **не реализуются**, только запланированы: Lua modding API, дополнительные мини-игры, новые Adventure-режимы и обновление UI/UX мода.
 
 ---
-
 # DISCLAIMER
 
 This project does not condone piracy

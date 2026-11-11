@@ -135,6 +135,7 @@ public:
     void                        SyncProfile(bool theShowLoading);
     virtual void                Draw(Graphics* g);
     virtual void                DrawOverlay(Graphics* g);
+    Rect                        GetGithubIconRect() const { return Rect(8, 8, 32, 32); }
     virtual void                Update();
     virtual void                AddedToManager(WidgetManager* theWidgetManager);
     virtual void                RemovedFromManager(WidgetManager* theWidgetManager);

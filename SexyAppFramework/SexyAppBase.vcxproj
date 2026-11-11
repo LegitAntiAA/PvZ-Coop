@@ -537,6 +537,12 @@ EXIT /B 0</Command>
     <ClCompile Include="..\Lawn\Net\NetInteractions.cpp" />
     <ClCompile Include="..\Lawn\Net\NetOnlineManager.cpp" />
     <ClCompile Include="..\Lawn\Net\NetOnline.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetOnlineSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetInteractionSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFirstAdventureSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetSpectatorSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetPresentationSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetModesSmoke.cpp" />
     <ClCompile Include="..\Lawn\Widget\NetOnlineDialog.cpp" />
     <ClCompile Include="..\Lawn\Net\NetZombatar.cpp" />
     <ClCompile Include="..\Lawn\Net\NetZombatarSync.cpp" />
@@ -1460,5 +1466,12 @@ EXIT /B 0</Command>
   <Target Name="CopyNetworkCursor" AfterTargets="Build">
     <Copy SourceFiles="$(SolutionDir)Cursor13.bmp" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="$(SolutionDir)Cursor13.png" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  </Target>
+  <Target Name="CopyOnlineRuntime" AfterTargets="Build">
+    <ItemGroup>
+      <OnlineLicense Include="$(ProjectDir)..\third_party\online-licenses\*" />
+    </ItemGroup>
+    <Copy SourceFiles="$(ProjectDir)..\lib\online\$(Platform)\datachannel.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" Condition="Exists('$(ProjectDir)..\lib\online\$(Platform)\datachannel.dll')" />
+    <Copy SourceFiles="@(OnlineLicense)" DestinationFolder="$(OutDir)licenses" SkipUnchangedFiles="true" />
   </Target>
 </Project>

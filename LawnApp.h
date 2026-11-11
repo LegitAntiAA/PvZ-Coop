@@ -13,6 +13,7 @@
 #include "SexyAppFramework/Common.h"
 
 #include <SDL3/SDL.h>
+#include <memory>
 #include "SexyAppFramework/SDL3Image.h"
 
 #define SAMPLE_RATE  44100
@@ -240,12 +241,22 @@ public:
 	void							CoopSmokeOnSnapshotApplied(uint32_t theHash, size_t theBytes);
 	bool							CoopSmokeUpdateUnicodeChat();
 	bool                            CoopSmokeUpdateOnline();
+	bool                            CoopSmokeUpdateModes();
+	void                            CoopSmokeRecordModeWavePlan(int theBaseWaves, int theWaves, int theBasePoints, int thePoints);
+	bool                            CoopSmokeFirstAdventureEnabled() const;
+	bool                            CoopSmokeFirstAdventureAllowsStart(int theMode, int theLevel) const;
+	bool                            CoopSmokeFirstAdventureRunBaseline() const;
+	bool                            CoopSmokeUpdateFirstAdventure();
 	bool							CoopSmokeUpdateInteractions();
+	bool CoopSmokeUpdateSpectator();
+	bool CoopSmokeExpectedSpectatorKick(const std::string& theReason);
 	void							NetDrawCursorOverlay();
 	void							NetDrawChatOverlay();
 	bool							NetHandleChatKey(int theKey);
 	bool							NetHandleChatText(const char* theUtf8Text);
 	bool NetHandlePointerInput(int theAction, int theButton, int theX, int theY);
+	bool CoopSmokeCaptureFrame(const char* theBasename);
+	std::shared_ptr<SDL_Surface> mCoopSmokeFrame;
 	bool mNetDrawing = false;
 	unsigned short mNetDrawingId = 0;
 	int mNetLastDrawX = 0, mNetLastDrawY = 0;

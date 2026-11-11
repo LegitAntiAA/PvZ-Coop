@@ -18,6 +18,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: microsoft/setup-msbuild@v2
 
+      - name: Build native WebRTC runtime
+        shell: pwsh
+        run: ./tools/BuildOnlineDeps.ps1 -Platform Win32
+
       - name: Build ReleaseGOTY
         shell: pwsh
         run: |
@@ -69,6 +73,8 @@ jobs:
           New-Item -ItemType Directory -Force -Path $stage | Out-Null
           Copy-Item $exe $stage
           Get-ChildItem $source -Filter '*.dll' -File | Copy-Item -Destination $stage
+          Copy-Item 'third_party/online-licenses' (Join-Path $stage 'licenses') -Recurse
+          Copy-Item 'docs/ONLINE_SETUP_RU.md' $stage
           if (Test-Path 'coop.ini') { Copy-Item 'coop.ini' $stage }
           @'
           PvZ Co-op

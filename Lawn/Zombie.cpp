@@ -8998,6 +8998,8 @@ void Zombie::BungeeDie()
 //0x530510
 void Zombie::DieNoLoot()
 {
+    if (mBoard)
+        mBoard->NetPvPZombieKilled(this);
     if (IsOnBoard() && !mApp->GetDialog(DIALOG_ALMANAC) && mApp->ChallengeHasScores(mApp->mGameMode) && (mApp->IsScaryPotterLevel() || mApp->IsSurvivalMode() || mApp->IsLastStandEndless(mApp->mGameMode))) {
         int points = ((mBodyMaxHealth + mHelmMaxHealth + mShieldMaxHealth + mFlyingMaxHealth - mBodyMaxHealth / 3) / 20 + 1) * 10;
         if (mHasObject && (mZombieType == ZombieType::ZOMBIE_GARGANTUAR || mZombieType == ZombieType::ZOMBIE_REDEYE_GARGANTUAR)) {

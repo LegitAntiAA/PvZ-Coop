@@ -2296,7 +2296,9 @@ void Board::NetApplySnapshot(NetBuffer& b)
 				for (int aWireIndex = 0; aWireIndex < aNumPackets; aWireIndex++)
 				{
 					if (!aWireUsed[aWireIndex] &&
-						aSeedPackets[aWireIndex].mId == aLocalPacket.mNetId)
+						aSeedPackets[aWireIndex].mId == aLocalPacket.mNetId &&
+						aSeedPackets[aWireIndex].mType == aLocalType &&
+						aSeedPackets[aWireIndex].mImitater == aLocalImitater)
 					{
 						aWireUsed[aWireIndex] = true;
 						aWireForLocal[aLocalIndex] = aWireIndex;
@@ -2355,7 +2357,10 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	// Conveyor array indices are physical slots: RemoveSeed compacts them and mX
 	// is index-derived.  Apply the authoritative wire order even when the same
 	// identity multiset could otherwise be greedily matched in a stale local order.
-	const bool aCanonicalFallback = mApp->mGameScene == GameScenes::SCENE_LEVEL_INTRO ||
+	// An initial intro bank (including a late spectator's mixed-owner bank)
+	// may need adoption. A valid chosen bank already has viewer-relative order.
+	const bool aCanonicalFallback =
+		(!anIdentityMultisetMatch && mApp->mGameScene == GameScenes::SCENE_LEVEL_INTRO) ||
 		(aCanonicalOwnershipSafe &&
 		 (HasConveyorBeltSeedBank() || (!anIdentityMultisetMatch && aCanonicalFallbackMode)));
 	if (!anIdentityMultisetMatch && !aCanonicalFallback)
@@ -4455,6 +4460,16 @@ bool Board::IsSeedPacketVisibleToSlot(int theIndex, int theSlot) const
 	return aZombiePacket == (aPlayer.mTeam == LawnNet::NETTEAM_ZOMBIES);
 }
 
+bool Board::CanUsePlantTools(int theSlot) const
+{
+	if (mApp->mGameMode != GameMode::GAMEMODE_COOP_PVP)
+		return true;
+	if (!mApp->mNetManager || theSlot < 0 || theSlot >= LawnNet::NET_MAX_PLAYERS)
+		return false;
+	const NetPlayerInfo& aPlayer = mApp->mNetManager->GetPlayer(theSlot);
+	return aPlayer.mActive && !aPlayer.mSpectator && aPlayer.mTeam == LawnNet::NETTEAM_PLANTS;
+}
+
 void Board::AssignPvPSeedOwners()
 {
 	if (!IsPvPMode() || !mSeedBank || !mApp->mNetManager)
@@ -4521,23 +4536,19 @@ void Board::UpdateTowerDefenseGame()
 
 void Board::UpdatePvP()
 {
-	if (!IsPvPMode() || mApp->NetIsClient() || mBoardFadeOutCounter >= 0)
+	if (!IsPvPMode() || mApp->NetIsClient() || mBoardFadeOutCounter >= 0 ||
+		mApp->mGameScene != GameScenes::SCENE_PLAYING)
 		return;
 
 	// brains trickle: +50 every ~10 seconds, shared by the zombie team
-	if (mNetPvPBrains > 0 || mApp->mGameScene == GameScenes::SCENE_PLAYING)
+	mNetPvPBrainTick++;
+	if (mNetPvPBrainTick >= 1000)
 	{
-		mNetPvPBrainTick++;
-		if (mNetPvPBrainTick >= 1000)
-		{
-			mNetPvPBrainTick = 0;
-			mNetPvPBrains += 50;
-		}
+		mNetPvPBrainTick = 0;
+		mNetPvPBrains += 50;
 	}
 
 	// win checks
-	if (mApp->mGameScene != GameScenes::SCENE_PLAYING)
-		return;
 	if (mNetPvPBrainScore >= 5)
 	{
 		ZombiesWon(nullptr);
@@ -4550,7 +4561,19 @@ void Board::UpdatePvP()
 	}
 }
 
-// a zombie crossed into the house: brain for the zombie team
+// Deaths can happen before or after the zombie update loop. Count at the death
+// edge so instant/projectile kills cannot disappear between iterator passes.
+void Board::NetPvPZombieKilled(Zombie* theZombie)
+{
+	if (!IsPvPMode() || mApp->NetIsClient() || !theZombie || theZombie->mNetKillCounted ||
+		!theZombie->IsOnBoard() || mApp->mGameScene != GameScenes::SCENE_PLAYING ||
+		mBoardFadeOutCounter >= 0 || mLevelComplete)
+		return;
+	theZombie->mNetKillCounted = true;
+	++mNetPvPKillScore;
+}
+
+// A zombie crossed into the house: brain for the zombie team.
 void Board::NetPvPZombieScored(Zombie* theZombie)
 {
 	if (!IsPvPMode() || mApp->NetIsClient())
@@ -4568,9 +4591,13 @@ void Board::NetDrawPvPScore(Graphics* g)
 	if (!IsPvPMode())
 		return;
 
+	g->PushState();
+	g->SetColor(Color(45, 32, 20, 220));
+	g->FillRect(230, BOARD_HEIGHT - 26, 340, 26);
 	SexyString aScoreStr = StrFormat(_S("BRAINS %d/5    KILLS %d/100"), mNetPvPBrainScore, mNetPvPKillScore);
 	TodDrawString(g, aScoreStr, BOARD_WIDTH / 2, BOARD_HEIGHT - 8, Sexy::FONT_BRIANNETOD12,
 		Color(255, 240, 200), DrawStringJustification::DS_ALIGN_CENTER);
+	g->PopState();
 }
 
 // ==========================================================================

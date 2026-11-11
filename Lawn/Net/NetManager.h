@@ -51,8 +51,9 @@ struct NetRemoteCursor
 	uint8_t mHeldImitater;
 	uint8_t mFlags;
 	uint16_t mHeldPacketId;
+	uint16_t mHoverPacketId;
 	NetRemoteCursor() { Clear(); }
-	void Clear() { mValid = false; mX = 0; mY = 0; mRenderX = 0; mRenderY = 0; mCursorType = 0; mHeldSeed = 255; mHeldImitater = 255; mFlags = 0; mHeldPacketId = 0; }
+	void Clear() { mValid = false; mX = 0; mY = 0; mRenderX = 0; mRenderY = 0; mCursorType = 0; mHeldSeed = 255; mHeldImitater = 255; mFlags = 0; mHeldPacketId = 0; mHoverPacketId = 0; }
 	void SetTarget(int16_t theX, int16_t theY)
 	{
 		if (!mValid) { mRenderX = (float)theX; mRenderY = (float)theY; }
@@ -301,6 +302,7 @@ private:
 	char mConnectStatus[128];
 	std::string mDisconnectReason;
 	bool mKicked[NET_MAX_PLAYERS] = {};
+	uint32_t mKickDeadline[NET_MAX_PLAYERS] = {};
 
 	// lobby
 	NetPlayerInfo mPlayers[NET_MAX_PLAYERS];

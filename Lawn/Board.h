@@ -616,6 +616,7 @@ public:
 	bool							IsTowerDefense();
 	bool							IsPvPMode();
 	bool                            IsSeedPacketVisibleToSlot(int theIndex, int theSlot) const;
+	bool                            CanUsePlantTools(int theSlot) const;
 	int                             GetCoopDifficulty();
 	void							AssignPvPSeedOwners();
 	bool							CanTakeBrains(int theAmount);
@@ -623,6 +624,7 @@ public:
 	void							UpdatePvP();
 	void							UpdateTowerDefenseGame();
 	void							NetPvPZombieScored(Zombie* theZombie);
+	void                            NetPvPZombieKilled(Zombie* theZombie);
 	void							NetDrawPvPScore(Graphics* g);
 
 	uint16_t						NetAllocId();

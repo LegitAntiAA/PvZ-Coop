@@ -4,10 +4,11 @@
 #include "../Plant.h"
 #include "../SeedPacket.h"
 #include "../CursorObject.h"
-#include "../../SexyAppFramework/WidgetManager.h"
 #include <cstdlib>
 #include <string>
 #include <vector>
+
+namespace LawnNet { bool NetSmokeUpdatePresentation(LawnApp* theApp); }
 
 namespace
 {
@@ -66,24 +67,15 @@ bool PushModifier(LawnApp* theApp, SDL_Keycode theKey, SDL_Scancode theScan, boo
 
 bool CaptureFrame(LawnApp* theApp, const char* theName)
 {
-	const char* aDirectory = getenv("PVZ_COOP_SMOKE_CAPTURE_DIR");
-	if (!aDirectory || !theApp->mWidgetManager || !theApp->mWidgetManager->mImage)
-		return false;
-	SDL_Texture* anOldTarget = SDL_GetRenderTarget(theApp->mSDLRenderer);
-	if (!SDL_SetRenderTarget(theApp->mSDLRenderer,
-		(SDL_Texture*)theApp->mWidgetManager->mImage->mD3DData)) return false;
-	SDL_Surface* aFrame = SDL_RenderReadPixels(theApp->mSDLRenderer, nullptr);
-	SDL_SetRenderTarget(theApp->mSDLRenderer, anOldTarget);
-	if (!aFrame) return false;
-	const std::string aPath = std::string(aDirectory) + "\\interactions_" + theName + ".bmp";
-	const bool aSaved = SDL_SaveBMP(aFrame, aPath.c_str());
-	SDL_DestroySurface(aFrame);
-	return aSaved;
+	return theApp->CoopSmokeCaptureFrame((std::string("interactions_") + theName).c_str());
 }
 }
 
 bool LawnApp::CoopSmokeUpdateInteractions()
 {
+	const char* aPresentation = getenv("PVZ_COOP_SMOKE_PRESENTATION");
+	if (aPresentation && std::string(aPresentation) == "1")
+		return LawnNet::NetSmokeUpdatePresentation(this);
 	const char* anEnabled = getenv("PVZ_COOP_SMOKE_INTERACTIONS");
 	if (!anEnabled || std::string(anEnabled) != "1") return true;
 	static InteractionSmokeState s;

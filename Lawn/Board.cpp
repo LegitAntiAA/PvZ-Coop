@@ -820,6 +820,8 @@ void Board::PickZombieWaves()
 			mNumWaves = 40;
 	}
 
+	const int aBaseWaveCount = mNumWaves;
+	int aBasePointTotal = 0, aScaledPointTotal = 0;
 	const int aDifficulty = GetCoopDifficulty();
 	if (aDifficulty > 1 && mNumWaves > 0)
 		mNumWaves = min(MAX_ZOMBIE_WAVES, mNumWaves + (mNumWaves * (aDifficulty - 1) + 4) / 5);
@@ -936,6 +938,7 @@ void Board::PickZombieWaves()
 		// ------------------------------------------------------------------------------------------------
 		// △ 向出怪列表中加入固定刷出的僵尸
 		// ------------------------------------------------------------------------------------------------
+		const int aBasePoints = aZombiePoints;
 		if (aDifficulty > 1)
 			aZombiePoints += (aZombiePoints * (aDifficulty - 1) * 35 + 99) / 100;
 		if (IsTowerDefense())
@@ -946,6 +949,8 @@ void Board::PickZombieWaves()
 			if (aIsFlagWave)
 				PutZombieInWave(ZombieType::ZOMBIE_GARGANTUAR, aWave, &aZombiePicker);
 		}
+		if (aWave < aBaseWaveCount) aBasePointTotal += aBasePoints;
+		aScaledPointTotal += aZombiePoints;
 
 		// 部分新出现的僵尸会在特定波固定刷出
 		if (aIntroZombieType != ZombieType::ZOMBIE_INVALID && aIntroZombieType != ZombieType::ZOMBIE_DUCKY_TUBE)
@@ -1062,6 +1067,8 @@ void Board::PickZombieWaves()
 			PutZombieInWave(aZombieType, aWave, &aZombiePicker);
 		}
 	}
+	if (mApp->CoopSmokeActive())
+		mApp->CoopSmokeRecordModeWavePlan(aBaseWaveCount, mNumWaves, aBasePointTotal, aScaledPointTotal);
 }
 
 //0x40A110
@@ -1767,7 +1774,10 @@ void Board::InitSurvivalStage()
 //0x40AE70
 Rect Board::GetShovelButtonRect()
 {
-	Rect aRect(GetSeedBankExtraWidth() + 456, mSeedBank->mY, Sexy::IMAGE_SHOVELBANK->GetWidth(), Sexy::IMAGE_SEEDBANK->GetHeight());
+	// PvP retains a wide logical bank for sixteen zombie cards, while the
+	// plant team uses the stock ten-card HUD and its normal shovel position.
+	const int aToolBankExtra = IsPvPMode() ? 153 : GetSeedBankExtraWidth();
+	Rect aRect(aToolBankExtra + 456, mSeedBank->mY, Sexy::IMAGE_SHOVELBANK->GetWidth(), Sexy::IMAGE_SEEDBANK->GetHeight());
 
 	if (mApp->IsChallengeWithoutSeedBank() && !mApp->IsScaryPotterLevel())
 	{
@@ -5264,6 +5274,13 @@ void Board::TutorialArrowRemove()
 //0x411060
 void Board::MouseDownWithTool(int x, int y, int theClickCount, CursorType theCursorType)
 {
+	const int anActingSlot = mApp->mNetManager ? mApp->mNetManager->GetActingPlayerSlot() : 0;
+	if (!CanUsePlantTools(anActingSlot))
+	{
+		ClearCursor();
+		LawnNet::NetTrace("PvP tool rejected slot=%d cursor=%d reason=team", anActingSlot, (int)theCursorType);
+		return;
+	}
 	if (theClickCount < 0)
 	{
 		ClearCursor();
@@ -5467,7 +5484,8 @@ bool Board::MouseHitTest(int x, int y, HitResult* theHitResult)
 			mCursorObject->mCursorType == CursorType::CURSOR_TYPE_HAMMER)
 			return true;
 	}
-	if (mShowShovel && aShovelButtonRect.Contains(x, y) && CanInteractWithBoardButtons() &&
+	const int aToolSlot = mApp->mNetManager ? mApp->mNetManager->GetActingPlayerSlot() : 0;
+	if (mShowShovel && CanUsePlantTools(aToolSlot) && aShovelButtonRect.Contains(x, y) && CanInteractWithBoardButtons() &&
 		mApp->mGameMode != GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN && mApp->mGameMode != GameMode::GAMEMODE_TREE_OF_WISDOM)
 	{
 		theHitResult->mObjectType = GameObjectType::OBJECT_TYPE_SHOVEL;
@@ -5597,6 +5615,9 @@ bool Board::MouseHitTest(int x, int y, HitResult* theHitResult)
 //0x411C10
 void Board::PickUpTool(GameObjectType theObjectType)
 {
+	const int anActingSlot = mApp->mNetManager ? mApp->mNetManager->GetActingPlayerSlot() : 0;
+	if (!CanUsePlantTools(anActingSlot))
+		return;
 	if (mPaused || (mApp->mGameScene != GameScenes::SCENE_PLAYING && !mCutScene->IsInShovelTutorial()))
 		return;
 
@@ -6429,12 +6450,6 @@ void Board::UpdateGameObjects()
 	{
 		aZombie->Update();
 
-		// co-op pvp: score kills (once per zombie)
-		if (IsPvPMode() && aZombie->mDead && !aZombie->mNetKillCounted)
-		{
-			aZombie->mNetKillCounted = true;
-			mNetPvPKillScore++;
-		}
 	}
 
 	// PvP brain currency is shared by the zombie team.  Award it once on the
@@ -8981,6 +8996,9 @@ void Board::DrawZenButtons(Graphics* g)
 //0x418B70
 void Board::DrawShovel(Graphics* g)
 {
+	const int aViewer = mApp->mNetManager ? mApp->mNetManager->GetMySlot() : 0;
+	if (!CanUsePlantTools(aViewer))
+		return;
 	if (mApp->mGameMode != GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN && mApp->mGameMode != GameMode::GAMEMODE_TREE_OF_WISDOM)
 	{
 		if (mShowShovel)
@@ -9480,7 +9498,6 @@ void Board::DrawUIBottom(Graphics* g)
 			mSeedBank->Draw(g);
 			mSeedBank->EndDraw(g);
 		}
-		NetDrawPvPScore(g);
 
 #ifdef _DS_MINIGAMES
 		if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_HEAT_WAVE && mApp->mGameScene == SCENE_PLAYING) {
@@ -10099,6 +10116,7 @@ void Board::DrawUITop(Graphics* g)
 #endif
 		DrawProgressMeter(g);
 		DrawLevel(g);
+		NetDrawPvPScore(g);
 	}
 	if (mStoreButton && (mApp->IsLastStand()
 #ifdef _DS_MINIGAMES

@@ -14,10 +14,8 @@ MessageWidget::MessageWidget(LawnApp* theApp)
 	mApp = theApp;
 	mDisplayTime = 0;
 	mDuration = 0;
-	mLabel[0] = _S('\0');
 	mMessageStyle = MessageStyle::MESSAGE_STYLE_OFF;
 	mReanimType = ReanimationType::REANIM_NONE;
-	mLabelNext[0] = _S('\0');
 	mMessageStyleNext = MessageStyle::MESSAGE_STYLE_OFF;
 	mSlideOffTime = 100;
 	for (int i = 0; i < MAX_MESSAGE_LENGTH; i++)
@@ -67,18 +65,17 @@ void MessageWidget::ClearLabel()
 void MessageWidget::SetLabel(const SexyString& theNewLabel, MessageStyle theMessageStyle)
 {
 	SexyString aLabel = TodStringTranslate(theNewLabel);
-	TOD_ASSERT(aLabel.length() < MAX_MESSAGE_LENGTH - 1);
 
 	if (mReanimType != ReanimationType::REANIM_NONE && mDuration > 0)
 	{
 		mMessageStyleNext = theMessageStyle;
-		sexystrcpy(mLabelNext, aLabel.c_str());
+		mLabelNext = aLabel;
 		ClearLabel();
 	}
 	else
 	{
 		ClearReanim();
-		sexystrcpy(mLabel, aLabel.c_str());
+		mLabel = aLabel;
 		mMessageStyle = theMessageStyle;
 		mReanimType = ReanimationType::REANIM_NONE;
 
@@ -137,21 +134,20 @@ void MessageWidget::SetLabel(const SexyString& theNewLabel, MessageStyle theMess
 		
                 if (mReanimType != ReanimationType::REANIM_NONE)
                 {
-                        bool aHasUtf8 = false;
-                        for (const unsigned char* aByte = reinterpret_cast<const unsigned char*>(mLabel); *aByte; ++aByte)
+                        bool aCanAnimate = mLabel.size() < MAX_MESSAGE_LENGTH;
+                        int aLines = 1;
+                        for (SexyChar aChar : mLabel)
                         {
-                                if (*aByte >= 0x80)
-                                {
-                                        aHasUtf8 = true;
-                                        break;
-                                }
+                                if (static_cast<unsigned int>(aChar) > 0x7FU)
+                                        aCanAnimate = false;
+                                if (aChar == _S('\n') && ++aLines > MAX_REANIM_LINES)
+                                        aCanAnimate = false;
                         }
 
-                        // The stock letter animation indexes one reanimation per
-                        // byte, not per UTF-8 code point.  Draw localized text as
-                        // one normal Unicode string; otherwise a Cyrillic glyph
-                        // is split into invalid continuation-byte "letters".
-                        if (aHasUtf8)
+                        // The stock animation has fixed per-byte/per-line arrays.
+                        // Preserve complete localized or long labels in dynamic
+                        // storage and draw them normally, without splitting UTF-8.
+                        if (!aCanAnimate)
                                 mReanimType = ReanimationType::REANIM_NONE;
                         else
                                 LayoutReanimText();
@@ -166,7 +162,7 @@ void MessageWidget::LayoutReanimText()
 	float aMaxWidth = 0;
 	int aCurLine = 0, aCurPos = 0;
 	Font* aFont = GetFont();
-	int aLabelLen = sexystrlen(mLabel);
+	int aLabelLen = (int)mLabel.size();
 	mSlideOffTime = aLabelLen + 100;
 
 	float aLineWidth[MAX_REANIM_LINES];
@@ -231,7 +227,7 @@ void MessageWidget::Update()
 		}
 	}
 
-	int aLabelLen = sexystrlen(mLabel);
+	int aLabelLen = min((int)mLabel.size(), MAX_MESSAGE_LENGTH);
 	// 以下遍历每个文字的动画，设置其动画速率并更新其动画
 	for (int aPos = 0; aPos < aLabelLen; aPos++)
 	{
@@ -270,7 +266,7 @@ void MessageWidget::Update()
 //0x459710
 void MessageWidget::DrawReanimatedText(Graphics* g, Font* theFont, const Color& theColor, float thePosY)
 {
-	int aLabelLen = sexystrlen(mLabel);
+	int aLabelLen = min((int)mLabel.size(), MAX_MESSAGE_LENGTH);
 	for (int aPos = 0; aPos < aLabelLen; aPos++)
 	{
 		Reanimation* aTextReanim = mApp->ReanimationTryToGet(mTextReanimID[aPos]);

@@ -26,6 +26,26 @@ Source: `REQUEST.txt` (user's complete list). Root owns integration and evidence
 - Initial Adventure1 skip_intro0: Passed, protocol29 hash963905EC; artifacts `run_d1df890f599147728d5375921bc3e865` under system-temp/PvZ-Coop-Smoke.
 - New changes are NOT runtime verified until recorded here. Source completion and an author's review are not proof of success.
 
+### New implementation evidence
+
+- Integration4c/4d: Passed, Win32 ReleaseGOTY; current protocol tests checks650 failures0 skipped0. Source includes universal spectator message authority policy, packet-ID/semantic bank matching and the PvP client hand identity correction.
+
+- Integration builds1/2/3/4/4b: Passed, Win32 ReleaseGOTY. Local protocol suite on4b: checks633 failures0 skipped0.
+- Background Adventure1 skip_intro0: Passed, protocol30/hash4413B3C5. Its first widget-texture BMPs were black and are excluded from visual evidence.
+- Background interactions3: logic Passed, hash0EF21305; pings2/3, stroke begin+3points+end, packetID7, hold/fade/clear alpha checks. Actual scene3 renders are valid; eight older helper captures are black, so visual interaction verification must repeat.
+- Native WebRTC15 checks and Worker8 checks: Passed. Actual game WebRTC Adventure1: Passed, eight common post-action hashes, native DataChannel adopted on each peer, actual nonblack host/client game frames inspected. External NAT/Internet deployment not tested.
+- Fresh3: Failed fixture ACK barrier (not a completed game regression pass); demo/sod/Sunflower sub-observations retained.
+- Fresh4b: Passed, hashF818C08F,19 markers and17 frames per peer; complete153-byte UTF-8 advice; intro, sod, tutorial flash, reward idle/pickup rays, correct Sunflower, next-level UI cleanup, profile/name/unlocks, challenge/store lifecycle.
+- Actual Fresh menu review then found the missing GitHub icon; basename fix and stable menu/store image assertions await the next build/run.
+- Spectator3: Failed TD intro precondition; late join Not executed. Chooser reentry fixed;4b retest in progress.
+- PvP tool/100-kill and difficulty10/semantic cursor regressions: source ready, runtime pending.
+- Modes4b: PvP Failed before fixture because brains trickled during intro; fixed by PLAYING lifecycle gate. TD difficulty10 subchecks Passed (40→100waves,308→15854points, strong types and stock HP), then Failed viewer-relative-bank check; fixed ID reset/INTRO semantic matching. Both require current-binary repeat.
+
+### Git checkpoints
+
+- a991342: initial implementation WIP checkpoint, including preserved earlier EndlessOverflow work.
+- 512ccdd: merged13 origin/main commits without conflicts and pushed main through the user's gh-auth. GitHub Build and Release / Unit Tests succeeded for this checkpoint. Later work is not implied to be in this commit.
+
 ## Constraints and contracts
 
 - User steering: no Computer Use, no game-window activation, no desktop capture. Background smoke uses hidden SDL windows and captures only its own render target. No user keyboard/mouse injection.
