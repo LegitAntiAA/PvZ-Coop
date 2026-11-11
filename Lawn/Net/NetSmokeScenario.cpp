@@ -1025,7 +1025,24 @@ void NetSmokeScenarioRuntime::Reset(NetSmokeScenarioId theScenario)
 	mEndlessThawSampleTick = 0;
 	mEndlessPreRepickMaxZombieId = 0;
 	memset(mEndlessBaseHealth, 0, sizeof(mEndlessBaseHealth));
-        mPostActionSamples = 0;
+	mOverflowModeVerified = false;
+	mOverflowStage255Set = false;
+	mOverflowStage255Observed = false;
+	mOverflowGargSpawned = false;
+	mOverflowGargObserved = false;
+	mOverflowTransitionTriggered = false;
+	mOverflowRepickOpened = false;
+	mOverflowRepickLogged = false;
+	mOverflowStage256Observed = false;
+	mOverflowRepickCompleted = false;
+	mOverflowBaselineMaxZombieId = 0;
+	mOverflowGargId = 0;
+	mOverflowStageSetTick = 0;
+	mOverflowGargTick = 0;
+	mOverflowTransitionTick = 0;
+	mOverflowGargBodyHealth = 0;
+	mOverflowGargMaxHealth = 0;
+	mPostActionSamples = 0;
 }
 
 bool NetSmokeScenarioRuntime::UpdateIntro(LawnApp* theApp,
@@ -1040,8 +1057,40 @@ bool NetSmokeScenarioRuntime::UpdateIntro(LawnApp* theApp,
 		return false;
 	}
 
-        const uint32_t aNow = GetTickCount();
-        if (mScenario == NETSMOKE_SCENARIO_ENDLESS_ST && mEndlessModeVerified &&
+	const uint32_t aNow = GetTickCount();
+	if (mScenario == NETSMOKE_SCENARIO_ENDLESS_OVERFLOW && mOverflowModeVerified &&
+		mOverflowStage255Observed && !mOverflowRepickOpened && aBoard->mChallenge &&
+		aBoard->mChallenge->mSurvivalStage == 256)
+	{
+		// The stock CheckForGameEnd/InitSurvivalStage transition owns stage 256.
+		// Reset only smoke bookkeeping so both peers exercise the second chooser.
+		mOverflowRepickOpened = true;
+		mOverflowTransitionTick = aNow;
+		mIntroObserved = false;
+		mIntroProgressObserved = false;
+		mIntroSawDave = false;
+		mIntroTick = aNow;
+		mIntroLastCutsceneTime = -1;
+		mIntroLastDaveMessage = -2;
+		mIntroLastTutorialState = -1;
+		mIntroLastActionTick = 0;
+		mPlayingTick = 0;
+		mSoakChooserVerified = false;
+		mSoakChooserLastCount = -1;
+		mChooserStartIssued = false;
+	}
+	if (mScenario == NETSMOKE_SCENARIO_ENDLESS_OVERFLOW && mOverflowRepickOpened &&
+		!mOverflowRepickLogged && aCutScene->mSeedChoosing &&
+		theApp->mSeedChooserScreen)
+	{
+		mOverflowRepickLogged = true;
+		NetTrace("SMOKE_ENDLESS_OVERFLOW_REPICK_OPEN role=%s stage=%d scene=%d seedChoosing=1 chooser=%p wavesPerStage=%d",
+			theManifest.IsHost() ? "host" : "client",
+			aBoard->mChallenge->mSurvivalStage, (int)theApp->mGameScene,
+			(void*)theApp->mSeedChooserScreen,
+			aBoard->GetNumWavesPerSurvivalStage());
+	}
+	if (mScenario == NETSMOKE_SCENARIO_ENDLESS_ST && mEndlessModeVerified &&
                 !mEndlessRepickOpened && aBoard->mChallenge &&
                 aBoard->mChallenge->mSurvivalStage > mEndlessInitialStage)
         {
@@ -1180,9 +1229,10 @@ bool NetSmokeScenarioRuntime::UpdateIntro(LawnApp* theApp,
 				// plants after the host's first five.  This still exercises real
 				// 5+5 ownership while guaranteeing at least one packet can satisfy
 				// the normal cost/prerequisite rules during the bounded smoke run.
-                                const bool aSafeClientStock =
-                                        mScenario == NETSMOKE_SCENARIO_TOWER_DEFENSE_CLIENT ||
-                                        mScenario == NETSMOKE_SCENARIO_ENDLESS_ST;
+				const bool aSafeClientStock =
+					mScenario == NETSMOKE_SCENARIO_TOWER_DEFENSE_CLIENT ||
+					mScenario == NETSMOKE_SCENARIO_ENDLESS_ST ||
+					mScenario == NETSMOKE_SCENARIO_ENDLESS_OVERFLOW;
                                 const int aStart = theManifest.IsClient() ?
                                         (aSafeClientStock ? 5 : NUM_SEEDS_IN_CHOOSER - 1) : 0;
                                 const int aStep = theManifest.IsClient() && !aSafeClientStock ? -1 : 1;
@@ -1736,12 +1786,29 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
                         mEndlessInitialPhase = aBoard->mNetDayPhase;
                         mEndlessInitialWave = aBoard->mCurrentWave;
                         mEndlessInitialStage = aBoard->mChallenge->mSurvivalStage;
-                        NetTrace("SMOKE_ENDLESS_ST_MODE role=%s mode=%d endless=1 timed=1 repick=1 wavesPerStage=10 stage=%d wave=%d phase=%u authority=%s",
+			NetTrace("SMOKE_ENDLESS_ST_MODE role=%s mode=%d endless=1 timed=1 repick=1 wavesPerStage=10 stage=%d wave=%d phase=%u authority=%s",
                                 theManifest.IsHost() ? "host" : "client",
                                 (int)theApp->mGameMode, mEndlessInitialStage,
                                 mEndlessInitialWave, (unsigned)mEndlessInitialPhase,
-                                theManifest.IsHost() ? "host" : "snapshot");
-                }
+				theManifest.IsHost() ? "host" : "snapshot");
+		}
+		if (mScenario == NETSMOKE_SCENARIO_ENDLESS_OVERFLOW && !mOverflowModeVerified)
+		{
+			if (theApp->mGameMode != GameMode::GAMEMODE_COOP_ENDLESS_ST ||
+				!theApp->IsCoopEndlessMode(theApp->mGameMode) ||
+				!theApp->IsCoopEndlessRepick(theApp->mGameMode) ||
+				!aBoard->IsEndlessT() || !aBoard->mChallenge ||
+				aBoard->GetNumWavesPerSurvivalStage() != 10)
+			{
+				theFailure = "EndlessOverflow did not start on the deterministic EndlessST board";
+				return false;
+			}
+			mOverflowModeVerified = true;
+			NetTrace("SMOKE_ENDLESS_OVERFLOW_MODE role=%s mode=%d endless=1 timed=1 repick=1 wavesPerStage=10 stage=%d authority=%s",
+				theManifest.IsHost() ? "host" : "client", (int)theApp->mGameMode,
+				aBoard->mChallenge->mSurvivalStage,
+				theManifest.IsHost() ? "host" : "snapshot");
+		}
                 if (mScenario == NETSMOKE_SCENARIO_TOWER_DEFENSE_CLIENT &&
 			!mTdPathVerified)
 		{
@@ -1828,6 +1895,12 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
 			while (aBoard->mZombies.IterateNext(aZombie))
 				mPvpBaselineMaxZombieId = max(mPvpBaselineMaxZombieId, aZombie->mNetId);
 		}
+		if (mScenario == NETSMOKE_SCENARIO_ENDLESS_OVERFLOW)
+		{
+			Zombie* aZombie = nullptr;
+			while (aBoard->mZombies.IterateNext(aZombie))
+				mOverflowBaselineMaxZombieId = max(mOverflowBaselineMaxZombieId, aZombie->mNetId);
+		}
 		if (mScenario == NETSMOKE_SCENARIO_VASEBREAKER && mBaselinePots <= 0)
 			return true;
 		if (mScenario == NETSMOKE_SCENARIO_BEGHOULED &&
@@ -1851,7 +1924,167 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
                 NetTrace("SMOKE_CHECKPOINT role=%s scenario=%s step=BASELINE plants=%d pots=%d zombies=%d snapshots=%u",
                         theManifest.IsHost() ? "host" : "client", aDefinition->mName,
                         mBaselinePlants, mBaselinePots, aBoard->mZombies.mSize, theGameplaySnapshots);
-        }
+	}
+
+	if (mScenario == NETSMOKE_SCENARIO_ENDLESS_OVERFLOW)
+	{
+		const uint32_t aNow = GetTickCount();
+		if (!aBoard->mChallenge || !mOverflowModeVerified ||
+			theApp->mGameMode != GameMode::GAMEMODE_COOP_ENDLESS_ST)
+		{
+			theFailure = "EndlessOverflow authoritative mode or challenge state disappeared";
+			return false;
+		}
+
+		if (theManifest.IsHost() && !mOverflowStage255Set)
+		{
+			// This is the only direct boundary setup.  The actual 255 -> 256
+			// transition below remains owned by the stock survival lifecycle.
+			aBoard->mChallenge->mSurvivalStage = 255;
+			mOverflowStage255Set = true;
+			mOverflowStageSetTick = aNow;
+			NetTrace("SMOKE_ENDLESS_OVERFLOW_STAGE_SET role=host stage=255 source=test_boundary_setup");
+		}
+
+		const int anObservedStage = aBoard->mChallenge->mSurvivalStage;
+		if (!mOverflowStage255Observed && anObservedStage == 255)
+		{
+			mOverflowStage255Observed = true;
+			if (mOverflowStageSetTick == 0)
+				mOverflowStageSetTick = aNow;
+			NetTrace("SMOKE_ENDLESS_OVERFLOW_STAGE role=%s phase=pre stage=255 authority=%s noWrap=1",
+				theManifest.IsHost() ? "host" : "client",
+				theManifest.IsHost() ? "host" : "snapshot");
+		}
+		else if (mOverflowStage255Observed && !mOverflowRepickOpened &&
+			anObservedStage != 255 && anObservedStage != 256)
+		{
+			NetTrace("SMOKE_ENDLESS_OVERFLOW_STAGE_INVALID role=%s phase=pre expected=255 actual=%d wrap=%d",
+				theManifest.IsHost() ? "host" : "client", anObservedStage,
+				anObservedStage == 0 ? 1 : 0);
+			theFailure = "EndlessOverflow stage 255 wrapped or changed before the stock transition";
+			return false;
+		}
+
+		if (theManifest.IsHost() && mOverflowStage255Observed && !mOverflowGargSpawned &&
+			(uint32_t)(aNow - mOverflowStageSetTick) >= 1500U)
+		{
+			Zombie* aGarg = aBoard->AddZombieInRow(ZombieType::ZOMBIE_REDEYE_GARGANTUAR, 2, 0);
+			if (!aGarg || aGarg->mNetId == 0)
+			{
+				theFailure = "EndlessOverflow stock Gargantuar creation lacked a network identity";
+				return false;
+			}
+			mOverflowGargSpawned = true;
+			mOverflowGargId = aGarg->mNetId;
+			mOverflowGargTick = aNow;
+			NetTrace("SMOKE_ENDLESS_OVERFLOW_GARG_SPAWN role=host id=%u row=%d stockAddZombie=1",
+				aGarg->mNetId, aGarg->mRow);
+		}
+
+		if (!mOverflowGargObserved && mOverflowStage255Observed)
+		{
+			Zombie* aZombie = nullptr;
+			Zombie* aCandidate = nullptr;
+			while (aBoard->mZombies.IterateNext(aZombie))
+			{
+				if (aZombie->mDead || aZombie->mNetId <= mOverflowBaselineMaxZombieId ||
+				aZombie->mZombieType != ZombieType::ZOMBIE_REDEYE_GARGANTUAR ||
+					(theManifest.IsClient() && !aZombie->mNetGhost))
+					continue;
+				if (!aCandidate || aZombie->mNetId < aCandidate->mNetId)
+					aCandidate = aZombie;
+			}
+			if (aCandidate)
+			{
+				if (aCandidate->mBodyHealth <= 65535 || aCandidate->mBodyMaxHealth <= 65535 ||
+					aCandidate->mBodyHealth > aCandidate->mBodyMaxHealth)
+				{
+					NetTrace("SMOKE_ENDLESS_OVERFLOW_HEALTH_INVALID role=%s id=%u stage=%d body=%d max=%d clipped=%d",
+						theManifest.IsHost() ? "host" : "client", aCandidate->mNetId,
+						anObservedStage, aCandidate->mBodyHealth, aCandidate->mBodyMaxHealth,
+						aCandidate->mBodyMaxHealth <= 65535 ? 1 : 0);
+					theFailure = "EndlessOverflow Gargantuar health was clipped at the 16-bit boundary";
+					return false;
+				}
+				mOverflowGargObserved = true;
+				mOverflowGargId = aCandidate->mNetId;
+				mOverflowGargBodyHealth = aCandidate->mBodyHealth;
+				mOverflowGargMaxHealth = aCandidate->mBodyMaxHealth;
+				mOverflowGargTick = aNow;
+				NetTrace("SMOKE_ENDLESS_OVERFLOW_HEALTH role=%s id=%u type=%d stage=255 body=%d max=%d ghost=%d over16=1",
+					theManifest.IsHost() ? "host" : "client", aCandidate->mNetId,
+					(int)aCandidate->mZombieType, aCandidate->mBodyHealth,
+					aCandidate->mBodyMaxHealth, aCandidate->mNetGhost ? 1 : 0);
+			}
+		}
+
+		if (theManifest.IsHost() && mOverflowGargObserved && !mOverflowTransitionTriggered &&
+			(uint32_t)(aNow - mOverflowGargTick) >= 1500U)
+		{
+			mOverflowTransitionTriggered = true;
+			mOverflowTransitionTick = aNow;
+			mActionIssued = true;
+			mActionTick = aNow;
+			aBoard->mLevelComplete = true;
+			NetTrace("SMOKE_CHECKPOINT role=host scenario=endless_overflow step=ACTION_ISSUED owner=host");
+			NetTrace("SMOKE_ENDLESS_OVERFLOW_STAGE_TRIGGER role=host from=255 wave=%d stockCheckForGameEnd=1",
+				aBoard->mCurrentWave);
+			return true;
+		}
+
+		if (mOverflowRepickOpened && theApp->mGameScene == GameScenes::SCENE_PLAYING &&
+			mSoakChooserVerified)
+		{
+			if (anObservedStage != 256)
+			{
+				NetTrace("SMOKE_ENDLESS_OVERFLOW_STAGE_INVALID role=%s phase=post expected=256 actual=%d wrap=%d",
+					theManifest.IsHost() ? "host" : "client", anObservedStage,
+					anObservedStage == 0 ? 1 : 0);
+				theFailure = "EndlessOverflow stock repick did not preserve exact stage 256";
+				return false;
+			}
+			if (!mOverflowStage256Observed)
+			{
+				mOverflowStage256Observed = true;
+				NetTrace("SMOKE_ENDLESS_OVERFLOW_STAGE role=%s phase=post stage=256 authority=%s noWrap=1",
+					theManifest.IsHost() ? "host" : "client",
+					theManifest.IsHost() ? "host" : "snapshot");
+			}
+			if (!mOverflowRepickCompleted)
+			{
+				mOverflowRepickCompleted = true;
+				NetTrace("SMOKE_ENDLESS_OVERFLOW_REPICK_COMPLETE role=%s from=255 to=256 chooser=1 wavesPerStage=10",
+					theManifest.IsHost() ? "host" : "client");
+			}
+			if (!mActionApplied)
+			{
+				mActionApplied = true;
+				NetTrace("SMOKE_CHECKPOINT role=%s scenario=endless_overflow step=ACTION_APPLIED stage=256 chooser=1",
+					theManifest.IsHost() ? "host" : "client");
+			}
+		}
+
+		if (!mOverflowStage255Observed && mPlayingTick != 0 &&
+			(uint32_t)(aNow - mPlayingTick) >= 15000U)
+		{
+			theFailure = "EndlessOverflow client did not receive exact stage 255 within 15 seconds";
+			return false;
+		}
+		if (mOverflowStage255Observed && !mOverflowGargObserved &&
+			(uint32_t)(aNow - mOverflowStageSetTick) >= 15000U)
+		{
+			theFailure = "EndlessOverflow did not observe the same oversized Gargantuar within 15 seconds";
+			return false;
+		}
+		if (mOverflowTransitionTriggered && !mOverflowRepickCompleted &&
+			(uint32_t)(aNow - mOverflowTransitionTick) >= 60000U)
+		{
+			theFailure = "EndlessOverflow stock stage 256 repick did not complete within 60 seconds";
+			return false;
+		}
+		return true;
+	}
 
 	if (mScenario == NETSMOKE_SCENARIO_PVP_1V1)
 	{
@@ -3045,12 +3278,19 @@ bool NetSmokeScenarioRuntime::IsComplete(uint32_t theRequiredPostActionSnapshots
                          mPortalZombieTeleportObserved && mPortalClientPlantObserved &&
                          mPortalAdviceShown && mPortalAdviceCleared &&
                          mPortalRelocationVerified)) &&
-                (mScenario != NETSMOKE_SCENARIO_ENDLESS_ST ||
-                        (mEndlessModeVerified && mEndlessTimeChanged &&
+		(mScenario != NETSMOKE_SCENARIO_ENDLESS_ST ||
+			(mEndlessModeVerified && mEndlessTimeChanged &&
 			 mEndlessWaveProgressed && mEndlessRepickOpened &&
 			 mEndlessRepickLogged &&
 			 mEndlessRepickCompleted && mEndlessHealthScaled &&
-                         mEndlessThawed)) &&
+			 mEndlessThawed)) &&
+		(mScenario != NETSMOKE_SCENARIO_ENDLESS_OVERFLOW ||
+			(mOverflowModeVerified && mOverflowStage255Observed &&
+			 mOverflowGargObserved && mOverflowRepickOpened &&
+			 mOverflowRepickLogged && mOverflowStage256Observed &&
+			 mOverflowRepickCompleted && mSoakChooserVerified &&
+			 mOverflowGargBodyHealth > 65535 &&
+			 mOverflowGargMaxHealth > 65535)) &&
 				(mScenario != NETSMOKE_SCENARIO_PVP_1V1 ||
 					(mPvpRosterVerified && mPvpDeckVerified &&
 					 mPvpInitialBrainsVerified && mPvpPassiveBrainsVerified &&

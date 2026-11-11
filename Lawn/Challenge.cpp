@@ -2785,7 +2785,19 @@ void Challenge::InitZombieWaves()
 {
 	GameMode aGameMode = mApp->mGameMode;
 	bool* aList = mBoard->mZombieAllowed;
-	if (mApp->IsSurvivalMode())
+	if (mBoard->IsTowerDefense())
+	{
+		// Ground-walking archetypes follow the shared road steering.  Include
+		// tanks and special attackers from the first run instead of inheriting
+		// the three-type fallback intended for a new survival campaign.
+		const ZombieType aRoadZombies[] = { ZOMBIE_NORMAL, ZOMBIE_TRAFFIC_CONE,
+			ZOMBIE_PAIL, ZOMBIE_NEWSPAPER, ZOMBIE_DOOR, ZOMBIE_FOOTBALL,
+			ZOMBIE_POLEVAULTER, ZOMBIE_JACK_IN_THE_BOX, ZOMBIE_LADDER,
+			ZOMBIE_POGO, ZOMBIE_GARGANTUAR };
+		for (ZombieType aType : aRoadZombies)
+			aList[aType] = true;
+	}
+	else if (mApp->IsSurvivalMode())
 	{
 		if (mSurvivalStage == 0)
 		{

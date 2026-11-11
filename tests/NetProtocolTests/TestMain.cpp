@@ -4,6 +4,7 @@
 #include "NetEndlessWireTests.h"
 #include "NetMowerSnapshotTests.h"
 #include "NetZombieAnimTests.h"
+#include "NetZombatarTests.h"
 
 #include <chrono>
 #include <cstdio>
@@ -595,8 +596,20 @@ void TestSmokeManifestAndHashValidation()
 	CHECK(LawnNet::NetIsInteractiveChooserSmokeScenario(aManifest.mScenario));
 	const LawnNet::NetSmokeScenarioDefinition* anEndlessST =
 		LawnNet::NetGetSmokeScenario(LawnNet::NETSMOKE_SCENARIO_ENDLESS_ST);
-	CHECK(anEndlessST != nullptr);
-	CHECK(anEndlessST && !anEndlessST->mActionIsClientOwned);
+        CHECK(anEndlessST != nullptr);
+        CHECK(anEndlessST && !anEndlessST->mActionIsClientOwned);
+
+		anError.clear();
+		CHECK(aTree.Parse(aTree.MakeManifest(aTree.mAppData.string(), aTree.mResult.string(),
+				"endless_overflow", 1, 0), aManifest, anError));
+		CHECK(anError.empty());
+		CHECK(aManifest.mScenario == LawnNet::NETSMOKE_SCENARIO_ENDLESS_OVERFLOW);
+		CHECK(aManifest.mGameMode == (uint8_t)GameMode::GAMEMODE_COOP_ENDLESS_ST);
+		CHECK(LawnNet::NetIsInteractiveChooserSmokeScenario(aManifest.mScenario));
+		const LawnNet::NetSmokeScenarioDefinition* anEndlessOverflow =
+			LawnNet::NetGetSmokeScenario(LawnNet::NETSMOKE_SCENARIO_ENDLESS_OVERFLOW);
+		CHECK(anEndlessOverflow != nullptr);
+		CHECK(anEndlessOverflow && !anEndlessOverflow->mActionIsClientOwned);
 
 	anError.clear();
 	CHECK(aTree.Parse(aTree.MakeManifest(aTree.mAppData.string(), aTree.mResult.string(),
@@ -753,6 +766,22 @@ void TestConfigRoundTripInIsolatedDirectory()
 
 } // namespace
 
+void TestFairFixedSeedQuotas()
+{
+	const bool two[4] = {true,true,false,false};
+	int q[4] = {};
+	CHECK(LawnNet::NetComputeSeedQuotas(10,3,two,q));
+	CHECK(q[0] == 5 && q[1] == 5 && q[2] == 0 && q[3] == 0);
+	CHECK(LawnNet::NetComputeSeedQuotas(10,7,two,q));
+	CHECK(q[0] == 7 && q[1] == 3);
+	const bool sparse[4] = {true,false,true,true};
+	CHECK(LawnNet::NetComputeSeedQuotas(10,0,sparse,q));
+	CHECK(q[0] == 4 && q[1] == 0 && q[2] == 3 && q[3] == 3);
+	const bool none[4] = {};
+	CHECK(!LawnNet::NetComputeSeedQuotas(10,0,none,q));
+	CHECK(!LawnNet::NetComputeSeedQuotas(2,3,two,q));
+}
+
 int main()
 {
 	std::printf("PvZ NetProtocolTests (protocol %u)\n", LawnNet::NET_PROTOCOL_VERSION);
@@ -765,6 +794,7 @@ int main()
 	RunTest("Frame.RejectsMalformedSizes", TestFrameRejectsMalformedSizes);
 	RunTest("Frame.MaximumPayload", TestFrameMaximumPayload);
 	RunTest("Players.RelativeColors", TestRelativePlayerColors);
+	RunTest("Chooser.FixedCardsFairQuotas", TestFairFixedSeedQuotas);
 	RunTest("Config.Defaults", TestConfigDefaults);
 	RunTest("Config.IsolatedRoundTrip", TestConfigRoundTripInIsolatedDirectory);
 	RunTest("Smoke.ManifestAndHashValidation", TestSmokeManifestAndHashValidation);
@@ -789,6 +819,9 @@ int main()
 		RunNetMowerSnapshotTests();
 	gChecks += aMowerSnapshotResult.mChecks;
 	gFailures += aMowerSnapshotResult.mFailures;
+	const auto aZombatarResult = RunNetZombatarTests();
+	gChecks += aZombatarResult.mChecks;
+	gFailures += aZombatarResult.mFailures;
 
 	std::printf("\nchecks=%d failures=%d skipped=%d\n", gChecks, gFailures, gSkipped);
 	return gFailures == 0 ? 0 : 1;

@@ -101,6 +101,8 @@ public:
     int                     CoopCountGlobalFixedPicks() const;
     static int              CoopExpectedGlobalFixedPicks(LawnApp* theApp, Board* theBoard);
     int                     CoopGetLocalQuotaPickCount() const;
+    bool                    CoopAllPicksComplete() const;
+    void                    CoopToggleReady();
     void                    CoopRefreshStartButton();
     void                    CoopDrawRemotePicks(Graphics* g);
     void                    CoopBroadcastChooserState(bool theForce = false);

@@ -169,6 +169,10 @@ void TestNetworkUtf8Normalization()
 	LOCAL_CHECK(LawnNet::NetNormalizeUtf8("  Sun Flower  ", 64U, 16U, true, anOutput));
 	LOCAL_CHECK(anOutput == "Sun Flower");
 	LOCAL_CHECK(!LawnNet::NetNormalizeUtf8("Sun Flower", 64U, 16U, false, anOutput));
+	LOCAL_CHECK(LawnNet::NetNormalizeUtf8("Sun ", 64U, 16U, true, anOutput, false));
+	LOCAL_CHECK(anOutput == "Sun ");
+	LOCAL_CHECK(LawnNet::NetNormalizeUtf8(" ", 64U, 16U, true, anOutput, false));
+	LOCAL_CHECK(anOutput == " ");
 }
 
 std::filesystem::path FindMainPak()

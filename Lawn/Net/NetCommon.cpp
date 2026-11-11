@@ -13,14 +13,14 @@
 #include <windows.h>
 
 bool LawnNet::NetNormalizeUtf8(const std::string& theInput, size_t theMaxBytes,
-	size_t theMaxCodePoints, bool theAllowSpaces, std::string& theOutput)
+	size_t theMaxCodePoints, bool theAllowSpaces, std::string& theOutput, bool theTrim)
 {
 	theOutput.clear();
 	size_t aBegin = 0;
 	size_t anEnd = theInput.size();
-	while (aBegin < anEnd && (theInput[aBegin] == ' ' || theInput[aBegin] == '\t'))
+	while (theTrim && aBegin < anEnd && (theInput[aBegin] == ' ' || theInput[aBegin] == '\t'))
 		++aBegin;
-	while (anEnd > aBegin && (theInput[anEnd - 1] == ' ' || theInput[anEnd - 1] == '\t'))
+	while (theTrim && anEnd > aBegin && (theInput[anEnd - 1] == ' ' || theInput[anEnd - 1] == '\t'))
 		--anEnd;
 
 	size_t aCodePointCount = 0;
@@ -65,6 +65,32 @@ bool LawnNet::NetNormalizeUtf8(const std::string& theInput, size_t theMaxBytes,
 
 namespace LawnNet
 {
+int NetStrokeAlpha(uint32_t theAgeSinceEnd, int thePointIndex, int thePointCount)
+{
+	if (theAgeSinceEnd <= 8000U) return 255;
+	const int delay = thePointCount > 1 ? 1000 * (thePointCount - 1 - thePointIndex) / (thePointCount - 1) : 0;
+	const int fade = (int)(theAgeSinceEnd - 8000U) - delay;
+	return fade <= 0 ? 255 : fade >= 1000 ? 0 : 255 - fade * 255 / 1000;
+}
+
+bool NetComputeSeedQuotas(int theBankCount, int theFixedHostCount,
+	const bool theEligible[NET_MAX_PLAYERS], int theQuotas[NET_MAX_PLAYERS])
+{
+	if (!theEligible || !theQuotas || theBankCount < 0 || theBankCount > 64 ||
+		theFixedHostCount < 0 || theFixedHostCount > theBankCount ||
+		(theFixedHostCount && !theEligible[0])) return false;
+	for (int i = 0; i < NET_MAX_PLAYERS; ++i) theQuotas[i] = 0;
+	theQuotas[0] = theFixedHostCount;
+	for (int n = theFixedHostCount; n < theBankCount; ++n)
+	{
+		int aLeast = -1;
+		for (int i = 0; i < NET_MAX_PLAYERS; ++i)
+			if (theEligible[i] && (aLeast < 0 || theQuotas[i] < theQuotas[aLeast])) aLeast = i;
+		if (aLeast < 0) return false;
+		++theQuotas[aLeast];
+	}
+	return true;
+}
 
 namespace
 {
@@ -1008,6 +1034,12 @@ bool NetLoadConfig(NetConfig& theConfig)
 			theConfig.mHotbarTintAlpha = atoi(aValue.c_str());
 		else if (aKey == "held_plant_outline_alpha")
 			theConfig.mHeldPlantOutlineAlpha = atoi(aValue.c_str());
+		else if (aKey == "zombatar")
+			NetDecodeZombatarHex(aValue, theConfig.mZombatar);
+		else if (aKey == "online_endpoint")
+			theConfig.mOnlineEndpoint = aValue;
+		else if (aKey == "stun_server")
+			theConfig.mStunServer = aValue;
 	}
 	fclose(aFile);
 
@@ -1038,6 +1070,9 @@ bool NetSaveConfig(const NetConfig& theConfig)
 	fprintf(aFile, "held_plant_tint_alpha=%d\n", max(0, min(255, theConfig.mHeldPlantTintAlpha)));
 	fprintf(aFile, "hotbar_tint_alpha=%d\n", max(0, min(255, theConfig.mHotbarTintAlpha)));
 	fprintf(aFile, "held_plant_outline_alpha=%d\n", max(0, min(255, theConfig.mHeldPlantOutlineAlpha)));
+	fprintf(aFile, "zombatar=%s\n", NetZombatarHex(theConfig.mZombatar).c_str());
+	fprintf(aFile, "online_endpoint=%s\n", theConfig.mOnlineEndpoint.c_str());
+	fprintf(aFile, "stun_server=%s\n", theConfig.mStunServer.c_str());
 	fclose(aFile);
 	return true;
 }

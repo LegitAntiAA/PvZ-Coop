@@ -5,6 +5,7 @@
 #include "../../SexyAppFramework/SliderListener.h"
 
 class LawnApp;
+class Reanimation;
 namespace Sexy
 {
 	class Slider;
@@ -25,6 +26,7 @@ public:
 	Sexy::Slider*		mHotbarTintSlider;
 	Sexy::Slider*		mHeldPlantOutlineSlider;
 	bool				mSavePending;
+	Reanimation*        mPreviewReanim;
 
 public:
 	MoreSettingsDialog(LawnApp* theApp);

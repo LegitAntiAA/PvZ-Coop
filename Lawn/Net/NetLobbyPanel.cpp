@@ -85,6 +85,7 @@ void NetLobbyPanel::LayoutButtons()
 		UiButton aJoin = { BTN_CONNECT, Rect(aX + 142, aY, 128, 30), _S("CONNECT"), false, false };
 		mButtons.push_back(aHost);
 		mButtons.push_back(aJoin);
+		mButtons.push_back({BTN_ONLINE, Rect(aX, aY + 36, 270, 26), _S("ONLINE ROOMS"), false, false});
 	}
 	else if (aNet->IsConnecting())
 	{
@@ -93,12 +94,13 @@ void NetLobbyPanel::LayoutButtons()
 	}
 	else
 	{
-		UiButton aPlants = { BTN_TEAM_PLANTS, Rect(aX, aY, 128, 28), _S("TEAM PLANTS"), false, false };
-		UiButton aZombies = { BTN_TEAM_ZOMBIES, Rect(aX + 142, aY, 128, 28), _S("TEAM ZOMBIES"), false, false };
 		UiButton aLeave = { BTN_DISCONNECT, Rect(aX, aY + 36, 128, 26), _S("DISCONNECT"), false, false };
-		mButtons.push_back(aPlants);
-		mButtons.push_back(aZombies);
 		mButtons.push_back(aLeave);
+		mButtons.push_back({BTN_DIFFICULTY_DOWN, Rect(aX + 200, aPanel.mY + 180, 30, 26), _S("-"), !aNet->IsHosting() || aNet->GetDifficulty() <= 1, false});
+		mButtons.push_back({BTN_DIFFICULTY_UP, Rect(aX + 240, aPanel.mY + 180, 30, 26), _S("+"), !aNet->IsHosting() || aNet->GetDifficulty() >= 10, false});
+		if (aNet->IsHosting()) for (int slot = 1; slot < NET_MAX_PLAYERS; ++slot)
+			if (aNet->IsPlayerActive(slot))
+				mButtons.push_back({BTN_KICK_BASE + slot, Rect(aPanel.mX + 246, aPanel.mY + 76 + slot*20, 34, 18), _S("X"), false, false});
 	}
 
 	// restore hover state (LayoutButtons runs every frame and would otherwise
@@ -275,17 +277,14 @@ void NetLobbyPanel::Draw(Graphics* g)
 					aRow += _S(" (you)");
 				SexyString aPing = StrFormat(_S("%ums"), aP.mPing);
 				TodDrawString(g, aRow, aPanel.mX + 30, aY, Sexy::FONT_BRIANNETOD12, Color(60, 35, 10), DrawStringJustification::DS_ALIGN_LEFT);
-				TodDrawString(g, aPing, aPanel.mX + aPanel.mWidth - 14, aY, Sexy::FONT_BRIANNETOD12, Color(90, 55, 20), DrawStringJustification::DS_ALIGN_RIGHT);
-				if (aP.mTeam == NETTEAM_PLANTS)
-					TodDrawString(g, _S("P"), aPanel.mX + 260, aY, Sexy::FONT_BRIANNETOD12, Color(40, 140, 40), DrawStringJustification::DS_ALIGN_LEFT);
-				else if (aP.mTeam == NETTEAM_ZOMBIES)
-					TodDrawString(g, _S("Z"), aPanel.mX + 260, aY, Sexy::FONT_BRIANNETOD12, Color(150, 40, 40), DrawStringJustification::DS_ALIGN_LEFT);
+				TodDrawString(g, aPing, aPanel.mX + (aNet->IsHosting() ? 238 : aPanel.mWidth - 14), aY, Sexy::FONT_BRIANNETOD12, Color(90, 55, 20), DrawStringJustification::DS_ALIGN_RIGHT);
 			}
 			aY += 20;
 		}
 
 		aY += 6;
-		TodDrawString(g, _S("PvP team (for PvP mode):"), aPanel.mX + 10, aY + 8, Sexy::FONT_BRIANNETOD12, Color(120, 85, 35), DrawStringJustification::DS_ALIGN_LEFT);
+		TodDrawString(g, StrFormat(_S("Difficulty: %d/10"), aNet->GetDifficulty()), aPanel.mX + 10, aPanel.mY + 198,
+			Sexy::FONT_BRIANNETOD12, Color(90,55,20), DrawStringJustification::DS_ALIGN_LEFT);
 	}
 
 	// ---- buttons ----
@@ -356,6 +355,8 @@ void NetLobbyPanel::ActivateButton(int theButtonId)
 	if (!aNet)
 		return;
 
+	if (theButtonId > BTN_KICK_BASE && theButtonId < BTN_KICK_BASE + NET_MAX_PLAYERS)
+	{ aNet->KickPlayer(theButtonId - BTN_KICK_BASE); return; }
 	switch (theButtonId)
 	{
 		case BTN_HOST:
@@ -387,6 +388,12 @@ void NetLobbyPanel::ActivateButton(int theButtonId)
 			aNet->Disconnect();
 			mApp->NetRestoreLocalProfile();
 			break;
+		case BTN_ONLINE:
+			ApplyNick(); mApp->NetShowOnlineBrowser(); break;
+		case BTN_DIFFICULTY_DOWN:
+			aNet->SetDifficulty(aNet->GetDifficulty() - 1); break;
+		case BTN_DIFFICULTY_UP:
+			aNet->SetDifficulty(aNet->GetDifficulty() + 1); break;
 		case BTN_TEAM_PLANTS:
 			aNet->SetMyTeam(NETTEAM_PLANTS);
 			break;

@@ -4,6 +4,7 @@
 #include "GameObject.h"
 #include "../GameConstants.h"
 #include "../Sexy.TodLib/FilterEffect.h"
+#include "Net/NetZombatar.h"
 
 #define MAX_ZOMBIE_FOLLOWERS 4
 #define NUM_BOBSLED_FOLLOWERS 3
@@ -186,6 +187,7 @@ public:
     ReanimationID                   mZombatarAccessoryID;
     ReanimationID                   mZombatarHatID;
     ReanimationID                   mZombatarHatLineID;
+    LawnNet::NetZombatarAppearance   mNetZombatar;
     unsigned char                   mNetAnimKey;    // co-op: host-computed anim intent (0 walk, 1 eat, 2 dying)
     float                           mTdPathPos;     // tower defense: original walking distance travelled on the path
     bool                            mNetKillCounted; // co-op pvp: kill already scored
@@ -423,6 +425,7 @@ public:
     bool                            IsSquashTarget(Plant* theExcept);
     static /*inline*/ bool			IsZombotany(ZombieType theZombieType);
     void                            AttachHelmet();
+    void                            ApplyNetZombatar(const LawnNet::NetZombatarAppearance& theAppearance);
 #ifdef _HAS_BLOOM_AND_DOOM_CONTENTS
     void                            UpdateZombieDogWalker();
     void                            UpdateZombieDog();

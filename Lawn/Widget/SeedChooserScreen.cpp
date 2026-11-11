@@ -44,7 +44,7 @@ SeedChooserScreen::SeedChooserScreen()
 	mApp = (LawnApp*)gSexyAppBase;
 	mBoard = mApp->mBoard;
 	mClip = false;
-	// mSeedChooserAge = 0;  原版并没有初始化 mSeedChooserAge
+	mSeedChooserAge = 0;
 	mSeedsInFlight = 0;
 	mSeedsInBank = 0;
 	mLastMouseX = -1;
@@ -457,7 +457,7 @@ void SeedChooserScreen::Draw(Graphics* g)
 		if (mApp->SeedTypeAvailable(aSeedShadow))
 		{
 			ChosenSeed& aChosenSeed = mChosenSeeds[aSeedShadow];
-			if (aChosenSeed.mSeedState != SEED_IN_CHOOSER)
+			if (aChosenSeed.mSeedState != SEED_IN_CHOOSER || CoopIsPickedByOthers(aSeedShadow))
 			{
 				Graphics aSeedGraphics(*g);
 				const bool expandedRows = Has7Rows() || mAllowBetaSeedpackets;
@@ -503,6 +503,8 @@ void SeedChooserScreen::Draw(Graphics* g)
 		if (mApp->SeedTypeAvailable(aSeedType) && aSeedState != SEED_FLYING_TO_BANK && aSeedState != SEED_SHIFTING_IN_BANK && aSeedState != SEED_FLYING_TO_CHOOSER &&
 			aSeedState != SEED_PACKET_HIDDEN && (aSeedState == SEED_IN_CHOOSER || mBoard->mCutScene->mSeedChoosing))
 		{
+			if (aSeedState == SEED_IN_CHOOSER && CoopIsPickedByOthers(aSeedType))
+				continue;
 			bool aGrayed = false;
 			if (((SeedNotRecommendedToPick(aSeedType) || SeedNotAllowedToPick(aSeedType)) && aSeedState == SEED_IN_CHOOSER) ||
 				SeedNotAllowedDuringTrial(aSeedType))
@@ -530,6 +532,13 @@ void SeedChooserScreen::Draw(Graphics* g)
 				aSeedGraphics.SetClipRect(Rect(22, startY, 443, seedHeight * 5 - 68 + startY));
 			}
 			DrawSeedPacket(&aSeedGraphics, aPosX, aPosY, aChosenSeed.mSeedType, aChosenSeed.mImitaterType, 0, aGrayed ? 115 : 255, true, false);
+			if (mCoopChooserActive && aSeedState == SEED_IN_BANK &&
+				aChosenSeed.mCrazyDavePicked && mApp->NetIsClient())
+			{
+				const NetColor aColor = GetRelativePlayerColor(mApp->mNetManager->GetMySlot(), 0);
+				aSeedGraphics.SetColor(Color(aColor.r, aColor.g, aColor.b, 70));
+				aSeedGraphics.FillRect((int)aPosX + 1, (int)aPosY + 1, SEED_PACKET_WIDTH - 2, SEED_PACKET_HEIGHT - 2);
+			}
 		}
 	}
 
@@ -574,6 +583,14 @@ void SeedChooserScreen::Draw(Graphics* g)
 	g->PushState();
 	g->TranslateF(-mApp->mDDInterface->mWideScreenOffsetX, -mApp->mDDInterface->mWideScreenOffsetY);
 	mStartButton->Draw(g);
+	if (mCoopChooserActive && mApp->mNetManager)
+	{
+		g->PushState();
+		g->SetColor(mApp->mNetManager->IsMyReady() ? Color(40, 195, 45, 48) : Color(235, 45, 30, 48));
+		g->FillRect(mStartButton->mX + 3, mStartButton->mY + 3,
+			mStartButton->mWidth - 6, mStartButton->mHeight - 6);
+		g->PopState();
+	}
 	mRandomButton->Draw(g);
 	g->PopState();
 	mViewLawnButton->Draw(g);
@@ -722,6 +739,13 @@ void SeedChooserScreen::Update()
 		}
 	}
 
+	CoopRefreshStartButton();
+	if (mCoopChooserActive && mApp->mNetManager && mApp->mNetManager->IsHosting() &&
+		mApp->mNetManager->AreAllPlayersReady() && CoopAllPicksComplete())
+	{
+		OnStartButton();
+		return;
+	}
 	ShowToolTip();
 	mStartButton->Update();
 	mRandomButton->Update();
@@ -800,6 +824,13 @@ bool SeedChooserScreen::CheckSeedUpgrade(SeedType theSeedTypeTo, SeedType theSee
 //0x485600
 void SeedChooserScreen::OnStartButton()
 {
+	if (mCoopChooserActive && mApp->mNetManager)
+	{
+		if (!mApp->mNetManager->IsHosting() || !mApp->mNetManager->AreAllPlayersReady() || !CoopAllPicksComplete())
+			return;
+		// An aborted stock warning must require the host to ready again.
+		mApp->mNetManager->SetMyReady(false);
+	}
 	if (mCoopChooserActive && mApp->mNetManager && mApp->mNetManager->IsHosting())
 	{
 		// The host is the only start authority.  Every active eligible slot must
@@ -812,7 +843,7 @@ void SeedChooserScreen::OnStartButton()
 		for (int aSlot = 0; aSlot < NET_MAX_PLAYERS; aSlot++)
 		{
 			const NetPlayerInfo& aPlayer = mApp->mNetManager->GetPlayer(aSlot);
-			if (!aPlayer.mActive || (aPvP && aPlayer.mTeam != NETTEAM_PLANTS))
+			if (!aPlayer.mActive || aPlayer.mSpectator || (aPvP && aPlayer.mTeam != NETTEAM_PLANTS))
 				continue;
 			anEligibleCount++;
 			int aCount = aSlot == mApp->mNetManager->GetMySlot() ?
@@ -1005,6 +1036,10 @@ void SeedChooserScreen::ButtonDepress(int theId)
 		UpdateCursor();
 		mApp->DoNewOptions(false);
 	}
+	else if (mCoopChooserActive && theId == SeedChooserScreen::SeedChooserScreen_Start)
+	{
+		CoopToggleReady();
+	}
 	else if (mApp->NetIsClient() && (theId == SeedChooserScreen::SeedChooserScreen_Start || theId == SeedChooserScreen::SeedChooserScreen_Random))
 	{
 		// co-op client: only the host starts the game
@@ -1109,47 +1144,56 @@ int SeedChooserScreen::CoopGetLocalQuotaPickCount() const
 	return max(0, aCount);
 }
 
+bool SeedChooserScreen::CoopAllPicksComplete() const
+{
+    const NetManager* aNet = mApp ? mApp->mNetManager : nullptr;
+    if (!aNet || !mCoopChooserActive)
+        return false;
+    int aTotal = 0;
+    for (int aSlot = 0; aSlot < NET_MAX_PLAYERS; aSlot++)
+    {
+        const NetPlayerInfo& aPlayer = aNet->GetPlayer(aSlot);
+        if (!aPlayer.mActive || aPlayer.mSpectator ||
+            (mApp->mGameMode == GAMEMODE_COOP_PVP && aPlayer.mTeam != NETTEAM_PLANTS))
+            continue;
+        const int aCount = aSlot == aNet->GetMySlot() ?
+            CoopGetLocalQuotaPickCount() : mCoopRemotePickCount[aSlot];
+        if (aCount != aNet->mChooserPickQuota[aSlot])
+            return false;
+        aTotal += aCount;
+    }
+    return aTotal == aNet->mChooserBankCount && aTotal > 0;
+}
+
+void SeedChooserScreen::CoopToggleReady()
+{
+    NetManager* aNet = mApp ? mApp->mNetManager : nullptr;
+    if (!aNet || !mCoopChooserActive || aNet->IsSpectator())
+        return;
+    if (CoopGetLocalQuotaPickCount() != mCoopPicksPerPlayer)
+    {
+        mApp->PlaySample(SOUND_BUZZER);
+        return;
+    }
+    aNet->SetMyReady(!aNet->IsMyReady());
+    CoopRefreshStartButton();
+}
+
 void SeedChooserScreen::CoopRefreshStartButton()
 {
-	if (!mCoopChooserActive || !mApp || !mApp->mNetManager ||
-		!mApp->mNetManager->IsActive())
-		return;
-	if (!mApp->mNetManager->IsHosting())
-	{
-		EnableStartButton(false);
-		return;
-	}
-	const bool aPvP = mApp->mGameMode == GAMEMODE_COOP_PVP;
-	const int aMySlot = mApp->mNetManager->GetMySlot();
-	int aQuotaTotal = 0;
-	int aPickTotal = 0;
-	int anEligibleCount = 0;
-	for (int aSlot = 0; aSlot < NET_MAX_PLAYERS; aSlot++)
-	{
-		const NetPlayerInfo& aPlayer = mApp->mNetManager->GetPlayer(aSlot);
-		if (!aPlayer.mActive || (aPvP && aPlayer.mTeam != NETTEAM_PLANTS))
-			continue;
-		anEligibleCount++;
-		const int aCount = aSlot == aMySlot ?
-			CoopGetLocalQuotaPickCount() : mCoopRemotePickCount[aSlot];
-		aPickTotal += aCount;
-		aQuotaTotal += mApp->mNetManager->mChooserPickQuota[aSlot];
-		if (aCount != mApp->mNetManager->mChooserPickQuota[aSlot])
-		{
-			EnableStartButton(false);
-			return;
-		}
-	}
-	if (anEligibleCount <= 0 || aQuotaTotal != mApp->mNetManager->mChooserBankCount ||
-		aPickTotal != mApp->mNetManager->mChooserBankCount)
-	{
-		LawnNet::NetTrace("chooser start disabled roster/quota mismatch eligible=%d picks=%d quotas=%d bank=%d",
-			anEligibleCount, aPickTotal, aQuotaTotal,
-			mApp->mNetManager->mChooserBankCount);
-		EnableStartButton(false);
-		return;
-	}
-	EnableStartButton(true);
+    NetManager* aNet = mApp ? mApp->mNetManager : nullptr;
+    if (!mCoopChooserActive || !aNet || !aNet->IsActive())
+        return;
+    const bool aCanReady = !aNet->IsSpectator() &&
+        CoopGetLocalQuotaPickCount() == mCoopPicksPerPlayer;
+    EnableStartButton(aCanReady);
+    const bool aReady = aNet->IsMyReady();
+    mStartButton->SetLabel(StrFormat(_S("%d/%d ready"),
+        aNet->GetReadyCount(), aNet->GetReadyEligibleCount()));
+    mStartButton->SetFont(FONT_BRIANNETOD12);
+    const Color aColor = aReady ? Color(115, 255, 110) : Color(255, 110, 95);
+    mStartButton->mColors[GameButton::COLOR_LABEL] = aColor;
+    mStartButton->mColors[GameButton::COLOR_LABEL_HILITE] = aColor;
 }
 
 //0x485E90
@@ -1525,6 +1569,14 @@ void SeedChooserScreen::MouseDown(int x, int y, int theClickCount)
 //0x486CE0
 bool SeedChooserScreen::PickedPlantType(SeedType theSeedType)
 {
+    if (mCoopChooserActive)
+        for (int aSlot = 0; aSlot < NET_MAX_PLAYERS; aSlot++)
+            for (int j = 0; j < mCoopRemotePickCount[aSlot] && j < 12; j++)
+                if (mCoopRemotePicks[aSlot][j] == theSeedType ||
+                    (mCoopRemotePicks[aSlot][j] == SEED_IMITATER &&
+                     mCoopRemoteImitaters[aSlot][j] == theSeedType))
+                    return true;
+
 	for (SeedType aSeedType = SEED_PEASHOOTER; aSeedType < NUM_SEEDS_IN_CHOOSER; aSeedType = (SeedType)(aSeedType + 1))
 	{
 		ChosenSeed& aChosenSeed = mChosenSeeds[aSeedType];
@@ -1659,6 +1711,8 @@ bool SeedChooserScreen::CoopRecordRemotePick(int theSlot, int theSeedType, int t
 				mCoopRemotePicks[theSlot][mCoopRemotePickCount[theSlot] - 1] = SEED_NONE;
 				mCoopRemoteImitaters[theSlot][mCoopRemotePickCount[theSlot] - 1] = SEED_NONE;
 				mCoopRemotePickCount[theSlot]--;
+				if (mApp->mNetManager && mApp->mNetManager->IsHosting())
+					mApp->mNetManager->ResetReadyState();
 				return true;
 			}
 		}
@@ -1671,6 +1725,8 @@ bool SeedChooserScreen::CoopRecordRemotePick(int theSlot, int theSeedType, int t
 			const int anIndex = mCoopRemotePickCount[theSlot]++;
 			mCoopRemotePicks[theSlot][anIndex] = theSeedType;
 			mCoopRemoteImitaters[theSlot][anIndex] = theSeedType == SEED_IMITATER ? theImitater : SEED_NONE;
+			if (mApp->mNetManager && mApp->mNetManager->IsHosting())
+				mApp->mNetManager->ResetReadyState();
 			return true;
 		}
 	}
@@ -1685,6 +1741,7 @@ void SeedChooserScreen::CoopSendPick(int theSeedType, int theImitater, bool theU
 
 	if (aNet->IsClient())
 	{
+		aNet->SetMyReady(false);
 		aNet->SendSeedPick(theUnpick, theSeedType, theImitater);
 	}
 	else if (aNet->IsHosting())
@@ -1758,34 +1815,31 @@ void SeedChooserScreen::CoopBroadcastChooserState(bool theForce)
 
 void SeedChooserScreen::CoopDrawRemotePicks(Graphics* g)
 {
-	LawnNet::NetManager* aNet = mApp->mNetManager;
-	if (!aNet || !aNet->IsActive() || !mCoopChooserActive)
-		return;
-
-	int aDrawX = 15;
-	int aDrawY = mApp->mHeight - 60;
-	TodDrawString(g, _S("Players' picks:"), aDrawX, aDrawY - 14, Sexy::FONT_BRIANNETOD12,
-		Color(230, 215, 180), DrawStringJustification::DS_ALIGN_LEFT);
-
-	int anOffset = 0;
-	for (int i = 0; i < 4; i++)
-	{
-		if (i == aNet->GetMySlot())
-			continue;
-		for (int j = 0; j < mCoopRemotePickCount[i] && j < 12; j++)
-		{
-			SeedType aSeedType = (SeedType)mCoopRemotePicks[i][j];
-			if ((int)aSeedType < 0 || aSeedType >= SeedType::NUM_SEED_TYPES)
-				continue;
-			NetColor aColor = GetRelativePlayerColor(aNet->GetMySlot(), i);
-			g->SetColor(Color(aColor.r, aColor.g, aColor.b, 200));
-			g->FillRect(aDrawX + anOffset * 52, aDrawY, 46, 60);
-			SeedType anImitater = aSeedType == SEED_IMITATER ?
-				(SeedType)mCoopRemoteImitaters[i][j] : SEED_NONE;
-			Plant::DrawSeedType(g, aSeedType, anImitater, VARIATION_NORMAL, (float)(aDrawX + anOffset * 52 + 3), (float)(aDrawY + 3));
-			anOffset++;
-		}
-	}
+    NetManager* aNet = mApp->mNetManager;
+    if (!aNet || !aNet->IsActive() || !mCoopChooserActive)
+        return;
+    int anIndex = mSeedsInBank;
+    for (int aSlot = 0; aSlot < NET_MAX_PLAYERS; aSlot++)
+    {
+        if (aSlot == aNet->GetMySlot())
+            continue;
+        for (int j = 0; j < mCoopRemotePickCount[aSlot] && j < 12; j++)
+        {
+            const SeedType aSeed = (SeedType)mCoopRemotePicks[aSlot][j];
+            if (aSeed < SEED_PEASHOOTER || aSeed >= NUM_SEEDS_IN_CHOOSER ||
+                mChosenSeeds[aSeed].mCrazyDavePicked || anIndex >= mBoard->mSeedBank->mNumPackets)
+                continue;
+            int x, y;
+            GetSeedPositionInBank(anIndex++, x, y);
+            const SeedType anImitater = aSeed == SEED_IMITATER ?
+                (SeedType)mCoopRemoteImitaters[aSlot][j] : SEED_NONE;
+            const NetColor aColor = GetRelativePlayerColor(aNet->GetMySlot(), aSlot);
+            Graphics aPacketGraphics(*g);
+            aPacketGraphics.SetColorizeImages(true);
+            aPacketGraphics.SetColor(Color(aColor.r, aColor.g, aColor.b));
+            DrawSeedPacket(&aPacketGraphics, (float)x, (float)y, aSeed, anImitater, 0, 255, true, false);
+        }
+    }
 }
 
 // --------------------------------------------------------------------------

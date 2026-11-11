@@ -820,6 +820,10 @@ void Board::PickZombieWaves()
 			mNumWaves = 40;
 	}
 
+	const int aDifficulty = GetCoopDifficulty();
+	if (aDifficulty > 1 && mNumWaves > 0)
+		mNumWaves = min(MAX_ZOMBIE_WAVES, mNumWaves + (mNumWaves * (aDifficulty - 1) + 4) / 5);
+
 	// ====================================================================================================
 	// ▲ 一些准备工作
 	// ====================================================================================================
@@ -932,6 +936,17 @@ void Board::PickZombieWaves()
 		// ------------------------------------------------------------------------------------------------
 		// △ 向出怪列表中加入固定刷出的僵尸
 		// ------------------------------------------------------------------------------------------------
+		if (aDifficulty > 1)
+			aZombiePoints += (aZombiePoints * (aDifficulty - 1) * 35 + 99) / 100;
+		if (IsTowerDefense())
+		{
+			aZombiePoints *= 2;
+			// A long road gives ample firing time: every flag wave needs a real
+			// tank, independently of random weighted picks and campaign unlocks.
+			if (aIsFlagWave)
+				PutZombieInWave(ZombieType::ZOMBIE_GARGANTUAR, aWave, &aZombiePicker);
+		}
+
 		// 部分新出现的僵尸会在特定波固定刷出
 		if (aIntroZombieType != ZombieType::ZOMBIE_INVALID && aIntroZombieType != ZombieType::ZOMBIE_DUCKY_TUBE)
 		{
@@ -1079,6 +1094,8 @@ void Board::LoadBackgroundImages()
 	{
 	case BackgroundType::BACKGROUND_1_DAY:
 		TodLoadResources("DelayLoad_Background1");
+		if (IsEndlessT())
+			TodLoadResources("DelayLoad_Background2");
 		if ((mApp->IsAdventureMode() && mLevel <= 4) ||
 			mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_RESODDED ||
 			mApp->mGameMode == GameMode::GAMEMODE_COOP_TOWER_DEFENSE)
@@ -1615,6 +1632,29 @@ void Board::InitZombieWaves()
 	else
 	{
 		mChallenge->InitZombieWaves();
+	}
+	const int aDifficulty = GetCoopDifficulty();
+	if (aDifficulty > 1)
+	{
+		for (int aType = ZOMBIE_NORMAL; aType < NUM_ZOMBIE_TYPES; ++aType)
+		{
+			const ZombieType aZombieType = (ZombieType)aType;
+			const ZombieDefinition& aDefinition = GetZombieDefinition(aZombieType);
+			// Expand the roster by the normal campaign introduction order.  Keep
+			// movement and terrain restrictions even when unlocks are bypassed.
+			if (aDefinition.mPickWeight <= 0 || aDefinition.mStartingLevel > aDifficulty * 5 ||
+				IsZombieTypeSpawnedOnly(aZombieType) || Zombie::IsZombotany(aZombieType) ||
+				aZombieType == ZOMBIE_YETI || aZombieType == ZOMBIE_BOSS ||
+				aZombieType == ZOMBIE_DUCKY_TUBE ||
+				(IsZombieTypePoolOnly(aZombieType) && !StageHasPool()) ||
+				(StageHasRoof() && !Zombie::ZombieTypeCanGoOnHighGround(aZombieType)) ||
+				(aZombieType == ZOMBIE_ZAMBONI && StageHasGraveStones()))
+				continue;
+			if (IsTowerDefense() && (aZombieType == ZOMBIE_ZAMBONI || aZombieType == ZOMBIE_BALLOON ||
+				aZombieType == ZOMBIE_BUNGEE || aZombieType == ZOMBIE_DIGGER || aZombieType == ZOMBIE_CATAPULT))
+				continue;
+			mZombieAllowed[aType] = true;
+		}
 	}
 	PickZombieWaves();
 	TOD_ASSERT(IsZombieWaveDistributionOk());
@@ -6644,7 +6684,7 @@ bool Board::HasLevelAwardDropped()
 //0x413A70
 void Board::UpdateSunSpawning()
 {
-	if ((IsEndlessT() && mNetDayPhase == 1) || StageIsNight() || 
+	if (StageIsNight() ||
 		HasLevelAwardDropped() || 
 		mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_RAINING_SEEDS || 
 		mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ICE || 
@@ -7171,6 +7211,16 @@ bool Board::IsEndlessT()
 	return mApp->mGameMode == GameMode::GAMEMODE_COOP_ENDLESS_T || mApp->mGameMode == GameMode::GAMEMODE_COOP_ENDLESS_ST;
 }
 
+int Board::GetCoopDifficulty()
+{
+	// Only modes using the wave spawner inherit the lobby difficulty.  Puzzle,
+	// garden, boss and player-authored PvP spawns keep their own rules.
+	if (!mApp->mNetManager || IsPvPMode() || !StageHasZombieWalkInFromRight() ||
+		mApp->mGameMode == GameMode::GAMEMODE_INTRO || mApp->mGameMode == GameMode::GAMEMODE_UPSELL)
+		return 1;
+	return ClampInt(mApp->mNetManager->GetDifficulty(), 1, 10);
+}
+
 void Board::UpdateEndlessWeather()
 {
 	if (!IsEndlessT() || mApp->NetIsClient())
@@ -7183,6 +7233,13 @@ void Board::UpdateEndlessWeather()
 		// switch phase every ~60 seconds
 		mNetDayPhase = mNetDayPhase ? 0 : 1;
 		mNetWeatherTimer = 6000;
+		Plant* aPlant = nullptr;
+		while (IteratePlants(aPlant))
+		{
+			if (Plant::IsNocturnal(aPlant->mSeedType))
+				aPlant->SetSleeping(!StageIsNight());
+		}
+		mApp->mMusic->StartGameMusic();
 
 		// Weather choices are exclusive.  Explicitly clear the previous effect
 		// before rolling so delayed/custom timer values cannot overlap fog and
@@ -7683,6 +7740,8 @@ void Board::DrawBackdrop(Graphics* g)
 	case BackgroundType::BACKGROUND_6:					aBgImage = Sexy::IMAGE_BACKGROUND6;						break;
 	default:											TOD_ASSERT();											break;
 	}
+	if (IsEndlessT() && StageIsNight())
+		aBgImage = Sexy::IMAGE_BACKGROUND2;
 	static Board* aLastTracedBoard = nullptr;
 	static int aBackdropTraceCount = 0;
 	if (aLastTracedBoard != this)
@@ -9421,6 +9480,7 @@ void Board::DrawUIBottom(Graphics* g)
 			mSeedBank->Draw(g);
 			mSeedBank->EndDraw(g);
 		}
+		NetDrawPvPScore(g);
 
 #ifdef _DS_MINIGAMES
 		if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_HEAT_WAVE && mApp->mGameScene == SCENE_PLAYING) {
@@ -11539,6 +11599,8 @@ int Board::GetNumSeedsInBank()
 //0x41C010
 bool Board::StageIsNight()
 {
+	if (IsEndlessT())
+		return mNetDayPhase == 1;
 	return 
 		mBackground == BackgroundType::BACKGROUND_2_NIGHT || 
 		mBackground == BackgroundType::BACKGROUND_4_FOG || 
@@ -11610,12 +11672,12 @@ bool Board::StageHasFog()
 
 // GOTY @Patoke: inlined 0x41E669
 bool Board::StageIsDayWithoutPool() {
-	return mBackground == BackgroundType::BACKGROUND_1_DAY;
+	return mBackground == BackgroundType::BACKGROUND_1_DAY && !StageIsNight();
 }
 
 // GOTY @Patoke: inlined 0x41E5E6
 bool Board::StageIsDayWithPool() {
-	return mBackground == BackgroundType::BACKGROUND_3_POOL;
+	return mBackground == BackgroundType::BACKGROUND_3_POOL && !StageIsNight();
 }
 
 //0x41C1C0
@@ -11641,7 +11703,7 @@ int Board::GetSeedPacketPositionX(int theIndex)
 		if (theIndex < PVP_PLANT_PACKET_COUNT)
 			return theIndex * 51 + 79;
 		int aZombieIndex = theIndex - PVP_PLANT_PACKET_COUNT;
-		return (aZombieIndex % 8) * 51 + 79;
+		return aZombieIndex * 36 + 79;
 	}
 	
 	if (mSeedBank->mNumPackets <= 7)		return theIndex * 59 + 85;
@@ -11653,6 +11715,8 @@ int Board::GetSeedPacketPositionX(int theIndex)
 //0x41C290
 int Board::GetSeedBankExtraWidth()
 {
+	if (IsPvPMode())
+		return 660 - IMAGE_SEEDBANK->GetWidth();
 	int aNumPackets = mSeedBank->mNumPackets;
 	return aNumPackets <= 6 ? 0 : aNumPackets == 7 ? 60 : aNumPackets == 8 ? 76 : aNumPackets == 9 ? 112 : 153;
 }
@@ -12924,10 +12988,5 @@ void Board::ButtonDepress(int theId)
 
 int Board::GetSeedPacketPositionY(int theIndex)
 {
-	if (IsPvPMode() && theIndex >= PVP_PLANT_PACKET_COUNT)
-	{
-		int aZombieIndex = theIndex - PVP_PLANT_PACKET_COUNT;
-		return 80 + (aZombieIndex / 8) * 72;
-	}
 	return 8;
 }

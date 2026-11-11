@@ -16,6 +16,7 @@
 #include "../../Sexy.TodLib/Attachment.h"
 #include "../../SexyAppFramework/Font.h"
 #include "../../Sexy.TodLib/TodStringFile.h"
+#include "../Net/NetManager.h"
 
 ZombatarDefinition gZombatarDefinitions[] = {
 	{ZombatarItem::ZOMBATAR_BACKGROUND_CRAZYDAVE,	nullptr,							&Sexy::IMAGE_ZOMBATAR_BACKGROUND_CRAZYDAVE,	ZombatarCategory::ZombatarCategory_Backdrops,	  0, 0,		nullptr},
@@ -481,6 +482,25 @@ void ZombatarWidget::ResetZombatar() {
 	mCurAccessoryPallete = -1;
 	mCurHat = -1;
 	mCurHatPallete = -1;
+	if (mApp->mNetManager)
+	{
+		const LawnNet::NetZombatarAppearance& a = mApp->mNetManager->GetMyZombatar();
+		if (a.mPresent && LawnNet::NetValidateZombatar(a))
+		{
+			mCurSkinPallete = a.mSkin;
+			mCurHair = a.mHair == 255 ? -1 : ZombatarItem::ZOMBATAR_HAIR_1 + a.mHair;
+			mCurHairPallete = a.mHairColor == 255 ? -1 : a.mHairColor;
+			mCurTidbit = a.mTidbit == 255 ? -1 : ZombatarItem::ZOMBATAR_TIDBIT_1 + a.mTidbit;
+			mCurTidbitPallete = a.mTidbitColor == 255 ? -1 : a.mTidbitColor;
+			mCurEyeWear = a.mEyewear == 255 ? -1 : ZombatarItem::ZOMBATAR_EYEWEAR_1 + a.mEyewear;
+			mCurEyeWearPallete = a.mEyewearColor == 255 ? -1 : a.mEyewearColor;
+			mCurClothe = a.mClothes == 255 ? -1 : ZombatarItem::ZOMBATAR_CLOTHE_1 + a.mClothes;
+			mCurAccessory = a.mAccessory == 255 ? -1 : ZombatarItem::ZOMBATAR_ACCESSORY_1 + a.mAccessory;
+			mCurAccessoryPallete = a.mAccessoryColor == 255 ? -1 : a.mAccessoryColor;
+			mCurHat = a.mHat == 255 ? -1 : ZombatarItem::ZOMBATAR_HAT_1 + a.mHat;
+			mCurHatPallete = a.mHatColor == 255 ? -1 : a.mHatColor;
+		}
+	}
 	SetupZombie();
 	UpdateZombieAvatar();
 }
@@ -887,6 +907,31 @@ void ZombatarWidget::ButtonDepress(int theId)
 
 	switch (theId)
 	{
+		case ZombatarWidget::ZombatarScreen_Finish:
+		{
+			if (mApp->mNetManager)
+			{
+				auto Item = [](int theItem, int theBase) -> uint8_t
+				{
+					return theItem == -1 ? 255 : (uint8_t)(theItem - theBase);
+				};
+				LawnNet::NetZombatarAppearance a;
+				a.mPresent = 1; a.mSkin = (uint8_t)mCurSkinPallete;
+				a.mHair = Item(mCurHair, ZombatarItem::ZOMBATAR_HAIR_1);
+				a.mHairColor = (uint8_t)mCurHairPallete;
+				a.mTidbit = Item(mCurTidbit, ZombatarItem::ZOMBATAR_TIDBIT_1);
+				a.mTidbitColor = (uint8_t)mCurTidbitPallete;
+				a.mEyewear = Item(mCurEyeWear, ZombatarItem::ZOMBATAR_EYEWEAR_1);
+				a.mEyewearColor = (uint8_t)mCurEyeWearPallete;
+				a.mClothes = Item(mCurClothe, ZombatarItem::ZOMBATAR_CLOTHE_1);
+				a.mAccessory = Item(mCurAccessory, ZombatarItem::ZOMBATAR_ACCESSORY_1);
+				a.mAccessoryColor = (uint8_t)mCurAccessoryPallete;
+				a.mHat = Item(mCurHat, ZombatarItem::ZOMBATAR_HAT_1);
+				a.mHatColor = (uint8_t)mCurHatPallete;
+				mApp->mNetManager->SetMyZombatar(a);
+			}
+			[[fallthrough]];
+		}
 		case ZombatarWidget::ZombatarScreen_Back:
 		{
 			mBackButton->SetDisabled(true);

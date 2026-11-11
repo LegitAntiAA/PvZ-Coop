@@ -3,6 +3,7 @@
 [CmdletBinding()]
 param(
     [string]$GameExe = "",
+    [string]$OnlineEndpoint = "",
     [string]$ArtifactsRoot = "",
     [ValidateRange(10, 3600)]
     [int]$TimeoutSeconds = 120,
@@ -14,7 +15,7 @@ param(
     [int]$GracefulExitSeconds = 10,
     [ValidateRange(0, 65535)]
     [int]$Port = 0,
-    [ValidateSet("Adventure1", "Adventure5Bowling", "Adventure5BowlingClient", "Adventure8Soak", "Adventure8Victory", "Adventure15WhackClient", "SlotMachineClient", "TowerDefenseClient", "PortalCombatClient", "PvP1v1", "EndlessST", "Vasebreaker", "Beghouled")]
+    [ValidateSet("Adventure1", "Adventure5Bowling", "Adventure5BowlingClient", "Adventure8Soak", "Adventure8Victory", "Adventure15WhackClient", "SlotMachineClient", "TowerDefenseClient", "PortalCombatClient", "PvP1v1", "EndlessST", "EndlessOverflow", "Vasebreaker", "Beghouled")]
     [string]$Scenario = "Adventure1",
     [ValidateSet(0, 1)]
     [int]$SkipIntro = 1,
@@ -30,6 +31,8 @@ param(
     [ValidateRange(1, 1000)]
     [int]$MinimumSnapshots = 3,
     [switch]$VerifyUnicodeChat,
+    [switch]$VerifyInteractions,
+    [switch]$Background,
     [switch]$CleanupOnSuccess
 )
 
@@ -95,6 +98,10 @@ function Set-SmokeWindowLayout {
         [Parameter(Mandatory = $true)][int]$Height
     )
 
+    if ($Background) {
+        Write-SmokeStatus ("Background {0} PID {1}: game window stays hidden; renderer captures only." -f $Role, $Process.Id)
+        return
+    }
     $window = [IntPtr]::Zero
     for ($attempt = 0; $attempt -lt 200; $attempt++) {
         if ($Process.HasExited) {
@@ -270,6 +277,12 @@ function Start-SmokeProcess {
     $childEnvironment["PVZ_COOP_SMOKE_RUN_ID"] = $RunId
     $childEnvironment["PVZ_COOP_SMOKE_ROLE"] = $Role
     $childEnvironment["PVZ_COOP_SMOKE_UNICODE_CHAT"] = $(if ($EnableUnicodeChat) { "1" } else { "0" })
+    $childEnvironment["PVZ_COOP_SMOKE_INTERACTIONS"] = $(if ($VerifyInteractions) { "1" } else { "0" })
+    $childEnvironment["PVZ_COOP_SMOKE_BACKGROUND"] = $(if ($Background) { "1" } else { "0" })
+    $childEnvironment["PVZ_COOP_SMOKE_ONLINE_ENDPOINT"] = $OnlineEndpoint
+    if ($Background) {
+        $childEnvironment["PVZ_COOP_SMOKE_CAPTURE_DIR"] = [System.IO.Path]::GetDirectoryName($ManifestPath)
+    }
 
     $process = New-Object System.Diagnostics.Process
     $process.StartInfo = $startInfo
@@ -727,9 +740,16 @@ $scenarioSpec = switch ($Scenario) {
     "PortalCombatClient" { [ordered]@{ Mode = "portal_combat_client"; Level = 1; Marker = "portal_combat_client" } }
     "PvP1v1" { [ordered]@{ Mode = "pvp_1v1"; Level = 1; Marker = "pvp_1v1" } }
     "EndlessST" { [ordered]@{ Mode = "endless_st"; Level = 1; Marker = "endless_st" } }
+    "EndlessOverflow" { [ordered]@{ Mode = "endless_overflow"; Level = 1; Marker = "endless_overflow" } }
     "Vasebreaker" { [ordered]@{ Mode = "vasebreaker"; Level = 1; Marker = "vasebreaker" } }
     "Beghouled" { [ordered]@{ Mode = "beghouled"; Level = 1; Marker = "beghouled" } }
     default { throw ("Unsupported smoke scenario: {0}" -f $Scenario) }
+}
+
+if ($VerifyInteractions -and (-not $Background -or $Scenario -ne "Adventure1" -or
+    $HostWindowWidth -ne 800 -or $HostWindowHeight -ne 600 -or
+    $ClientWindowWidth -ne 800 -or $ClientWindowHeight -ne 600)) {
+    throw "VerifyInteractions requires -Background -Scenario Adventure1 and host/client 800x600 dimensions."
 }
 $Mode = [string]$scenarioSpec.Mode
 $Level = [int]$scenarioSpec.Level
@@ -743,6 +763,9 @@ if ($Scenario -eq "TowerDefenseClient" -and $SkipIntro -ne 0) {
 }
 if ($Scenario -eq "EndlessST" -and $SkipIntro -ne 0) {
     throw "EndlessST requires -SkipIntro 0 so both the initial chooser and ten-wave repick chooser are exercised."
+}
+if ($Scenario -eq "EndlessOverflow" -and $SkipIntro -ne 0) {
+    throw "EndlessOverflow requires -SkipIntro 0 so both stock seed choosers are exercised."
 }
 $runId = [Guid]::NewGuid().ToString("N")
 $runRoot = Join-Path $ArtifactsRoot ("run_" + $runId)
@@ -829,11 +852,13 @@ try {
     Save-PidLedger -Path $pidLedgerPath -Executable $GameExe `
         -HostProcess $hostProcess -ClientProcess $null
 
-    $hostReadyPattern = '(?im)host listening port=' + [regex]::Escape([string]$Port) + '\b'
+    $hostReadyPattern = if ($OnlineEndpoint) { '(?im)WebRTC room hosting build=' } else {
+        '(?im)host listening port=' + [regex]::Escape([string]$Port) + '\b'
+    }
     Wait-ForLogPattern -LogDirectory $hostLogDirectory -Pattern $hostReadyPattern `
         -Process $hostProcess -Role "host" -TimeoutSeconds $HostReadyTimeoutSeconds
 
-    Write-SmokeStatus "Host is listening; starting client."
+    Write-SmokeStatus $(if ($OnlineEndpoint) { "WebRTC room created; starting client." } else { "Host is listening; starting client." })
     $clientProcess = Start-SmokeProcess -Executable $GameExe -WorkingDirectory $gameDirectory `
         -ManifestPath $clientManifestPath -Role "client" -RunId $runId `
         -EnableUnicodeChat ([bool]$VerifyUnicodeChat)
@@ -859,6 +884,13 @@ try {
     $hostLog = Get-CombinedLogText -LogDirectory $hostLogDirectory
     $clientLog = Get-CombinedLogText -LogDirectory $clientLogDirectory
 
+    $clientTransportPattern = if ($OnlineEndpoint) {
+        '(?im)SMOKE_ONLINE_CHANNEL role=client adopted=1 transport=webrtc'
+    } else { ('(?im)client TCP connected endpoint=127\.0\.0\.1:{0}\b' -f $Port) }
+    if ($OnlineEndpoint -and ($hostLog + $clientLog) -match '(?im)host listening port=|client TCP connected endpoint=|connection adopted socket=') {
+        throw "Online smoke unexpectedly used the TCP transport."
+    }
+
     $hostPositivePatterns = @(
         @{ Label = "trace role/protocol"; Pattern = '(?im)role=host protocol=\d+ pid=\d+' },
         @{ Label = "listener"; Pattern = $hostReadyPattern },
@@ -871,7 +903,7 @@ try {
     )
     $clientPositivePatterns = @(
         @{ Label = "trace role/protocol"; Pattern = '(?im)role=client protocol=\d+ pid=\d+' },
-        @{ Label = "TCP connection"; Pattern = ('(?im)client TCP connected endpoint=127\.0\.0\.1:{0}\b' -f $Port) },
+        @{ Label = "transport connection"; Pattern = $clientTransportPattern },
         @{ Label = "WELCOME"; Pattern = ('(?im)WELCOME assignedSlot=1 hostNick=' + [regex]::Escape($hostNickname) + '(?:\s|$)') },
         @{ Label = "profile sync"; Pattern = '(?im)PROFILE_SYNC applied\b' },
         @{ Label = "matching game start"; Pattern = ('(?im)client START_GAME decoded mode=\d+ level={0} seed={1}\b' -f $Level, $Seed) },
@@ -880,6 +912,11 @@ try {
         @{ Label = "client action applied"; Pattern = ('(?im)\bSMOKE_CHECKPOINT\b[^\r\n]*scenario={0}[^\r\n]*step=ACTION_APPLIED\b' -f ([regex]::Escape($scenarioMarker))) },
         @{ Label = "post-action applied hash"; Pattern = '(?im)\bSMOKE_POST_ACTION_APPLIED\b[^\r\n]*\bhash=(?:0x)?[0-9a-f]{8,16}\b' }
     )
+    if ($OnlineEndpoint) {
+        $hostPositivePatterns += @{ Label = "WebRTC game lifecycle"; Pattern = '(?im)SMOKE_ONLINE_CHANNEL role=host adopted=1 transport=webrtc' }
+        $hostPositivePatterns += @{ Label = "native WebRTC channel adopted"; Pattern = '(?im)connection adopted transport=webrtc peer=' }
+        $clientPositivePatterns += @{ Label = "native WebRTC channel adopted"; Pattern = '(?im)connection adopted transport=webrtc peer=' }
+    }
     if ($VerifyUnicodeChat) {
         $unicodeChatPatterns = @(
             @{
@@ -905,6 +942,19 @@ try {
         )
         $hostPositivePatterns += $unicodeChatPatterns
         $clientPositivePatterns += $unicodeChatPatterns
+    }
+    if ($VerifyInteractions) {
+        $interactionPatterns = @(
+            @{ Label = "SDL middle-button ping cooldown"; Pattern = '(?im)\bSMOKE_INTERACTIONS_PING\b[^\r\n]*\baccepted=2\b[^\r\n]*\battempts=3\b[^\r\n]*\bcooldownMs=500\b[^\r\n]*\bauthority=received\b' },
+            @{ Label = "SDL Control drawing lifecycle"; Pattern = '(?im)\bSMOKE_INTERACTIONS_STROKE\b[^\r\n]*\bpoints=[4-9]\d*\b[^\r\n]*\bbegin=1\b[^\r\n]*\bend=1\b' },
+            @{ Label = "SDL Alt seed identity and cooldown chat"; Pattern = '(?im)\bSMOKE_INTERACTIONS_SEED\b[^\r\n]*\bid=[1-9]\d*\b[^\r\n]*\bname=1\b[^\r\n]*\bcooldownText=1\b' },
+            @{ Label = "drawing stays opaque before eight seconds"; Pattern = '(?im)\bSMOKE_INTERACTIONS_HOLD\b[^\r\n]*\bfirst=255\b[^\r\n]*\blast=255\b' },
+            @{ Label = "drawing fades from end to start"; Pattern = '(?im)\bSMOKE_INTERACTIONS_FADE\b[^\r\n]*\bdirection=end_to_start\b' },
+            @{ Label = "drawing fully clears"; Pattern = '(?im)\bSMOKE_INTERACTIONS_CLEAR\b[^\r\n]*\bfirst=0\b[^\r\n]*\blast=0\b' },
+            @{ Label = "interaction workflow completed without planting"; Pattern = '(?im)\bSMOKE_INTERACTIONS_COMPLETE\b[^\r\n]*\bping=1\b[^\r\n]*\bstroke=1\b[^\r\n]*\bseed=1\b[^\r\n]*\bfade=1\b[^\r\n]*\bnoPlantMutation=1\b' }
+        )
+        $hostPositivePatterns += $interactionPatterns
+        $clientPositivePatterns += $interactionPatterns
     }
     if ($isBowlingScenario) {
         $hostPositivePatterns += @{
@@ -1167,6 +1217,25 @@ try {
             @{ Label = "client EndlessST health scaling"; Pattern = '(?im)\bSMOKE_ENDLESS_ST_HEALTH_SCALE\b[^\r\n]*\brole=client\b[^\r\n]*\bstage=[1-9]\d*\b[^\r\n]*\bbase=[1-9]\d*\b[^\r\n]*\bscaled=[1-9]\d*\b[^\r\n]*\bexpected=[1-9]\d*\b[^\r\n]*\bfactor=1\.12\b' }
         )
     }
+    if ($Scenario -eq "EndlessOverflow") {
+        $hostPositivePatterns += @(
+            @{ Label = "host EndlessOverflow mode"; Pattern = '(?im)\bSMOKE_ENDLESS_OVERFLOW_MODE\b[^\r\n]*\brole=host\b[^\r\n]*\bendless=1\b[^\r\n]*\btimed=1\b[^\r\n]*\brepick=1\b[^\r\n]*\bwavesPerStage=10\b[^\r\n]*\bauthority=host\b' },
+            @{ Label = "host exact stage 255"; Pattern = '(?im)\bSMOKE_ENDLESS_OVERFLOW_STAGE\b[^\r\n]*\brole=host\b[^\r\n]*\bphase=pre\b[^\r\n]*\bstage=255\b[^\r\n]*\bnoWrap=1\b' },
+            @{ Label = "host oversized red-eye health"; Pattern = '(?im)\bSMOKE_ENDLESS_OVERFLOW_HEALTH\b[^\r\n]*\brole=host\b[^\r\n]*\bid=[1-9]\d*\b[^\r\n]*\bstage=255\b[^\r\n]*\bbody=\d+\b[^\r\n]*\bmax=\d+\b[^\r\n]*\bghost=0\b[^\r\n]*\bover16=1\b' },
+            @{ Label = "host stock stage trigger"; Pattern = '(?im)\bSMOKE_ENDLESS_OVERFLOW_STAGE_TRIGGER\b[^\r\n]*\brole=host\b[^\r\n]*\bfrom=255\b[^\r\n]*\bstockCheckForGameEnd=1\b' },
+            @{ Label = "host stage 256 repick"; Pattern = '(?im)\bSMOKE_ENDLESS_OVERFLOW_REPICK_OPEN\b[^\r\n]*\brole=host\b[^\r\n]*\bstage=256\b[^\r\n]*\bseedChoosing=1\b' },
+            @{ Label = "host exact stage 256"; Pattern = '(?im)\bSMOKE_ENDLESS_OVERFLOW_STAGE\b[^\r\n]*\brole=host\b[^\r\n]*\bphase=post\b[^\r\n]*\bstage=256\b[^\r\n]*\bnoWrap=1\b' },
+            @{ Label = "host second chooser complete"; Pattern = '(?im)\bSMOKE_ENDLESS_OVERFLOW_REPICK_COMPLETE\b[^\r\n]*\brole=host\b[^\r\n]*\bfrom=255\b[^\r\n]*\bto=256\b[^\r\n]*\bchooser=1\b' }
+        )
+        $clientPositivePatterns += @(
+            @{ Label = "client EndlessOverflow mode"; Pattern = '(?im)\bSMOKE_ENDLESS_OVERFLOW_MODE\b[^\r\n]*\brole=client\b[^\r\n]*\bendless=1\b[^\r\n]*\btimed=1\b[^\r\n]*\brepick=1\b[^\r\n]*\bwavesPerStage=10\b[^\r\n]*\bauthority=snapshot\b' },
+            @{ Label = "client snapshot stage 255"; Pattern = '(?im)\bSMOKE_ENDLESS_OVERFLOW_STAGE\b[^\r\n]*\brole=client\b[^\r\n]*\bphase=pre\b[^\r\n]*\bstage=255\b[^\r\n]*\bauthority=snapshot\b[^\r\n]*\bnoWrap=1\b' },
+            @{ Label = "client oversized red-eye health"; Pattern = '(?im)\bSMOKE_ENDLESS_OVERFLOW_HEALTH\b[^\r\n]*\brole=client\b[^\r\n]*\bid=[1-9]\d*\b[^\r\n]*\bstage=255\b[^\r\n]*\bbody=\d+\b[^\r\n]*\bmax=\d+\b[^\r\n]*\bghost=1\b[^\r\n]*\bover16=1\b' },
+            @{ Label = "client stage 256 repick"; Pattern = '(?im)\bSMOKE_ENDLESS_OVERFLOW_REPICK_OPEN\b[^\r\n]*\brole=client\b[^\r\n]*\bstage=256\b[^\r\n]*\bseedChoosing=1\b' },
+            @{ Label = "client snapshot stage 256"; Pattern = '(?im)\bSMOKE_ENDLESS_OVERFLOW_STAGE\b[^\r\n]*\brole=client\b[^\r\n]*\bphase=post\b[^\r\n]*\bstage=256\b[^\r\n]*\bauthority=snapshot\b[^\r\n]*\bnoWrap=1\b' },
+            @{ Label = "client second chooser complete"; Pattern = '(?im)\bSMOKE_ENDLESS_OVERFLOW_REPICK_COMPLETE\b[^\r\n]*\brole=client\b[^\r\n]*\bfrom=255\b[^\r\n]*\bto=256\b[^\r\n]*\bchooser=1\b' }
+        )
+    }
     $negativePatterns = @(
         @{ Label = "access violation"; Pattern = '(?im)Access Violation' },
         @{ Label = "fatal network error"; Pattern = '(?im)\bfatal:' },
@@ -1222,9 +1291,26 @@ try {
             @{ Label = "invalid EndlessST health scale"; Pattern = '(?im)\bSMOKE_ENDLESS_ST_HEALTH_SCALE\b[^\r\n]*(?:\bbase=0\b|\bscaled=0\b|\bexpected=0\b|\bfactor=(?!1\.12\b)\S+)' }
         )
     }
+    if ($Scenario -eq "EndlessOverflow") {
+        $negativePatterns += @(
+            @{ Label = "invalid EndlessOverflow stage"; Pattern = '(?im)\bSMOKE_ENDLESS_OVERFLOW_STAGE_INVALID\b' },
+            @{ Label = "clipped EndlessOverflow health"; Pattern = '(?im)\bSMOKE_ENDLESS_OVERFLOW_HEALTH_INVALID\b' },
+            @{ Label = "wrapped EndlessOverflow stage"; Pattern = '(?im)\bSMOKE_ENDLESS_OVERFLOW_(?:STAGE|REPICK_COMPLETE)\b[^\r\n]*(?:\bstage=0\b|\bto=0\b|\bwrap=1\b)' },
+            @{ Label = "16-bit ceiling health"; Pattern = '(?im)\bSMOKE_ENDLESS_OVERFLOW_HEALTH\b[^\r\n]*(?:\bbody=65535\b|\bmax=65535\b)' }
+        )
+    }
 
     Assert-PositivePatterns -Role "host" -Text $hostLog -Patterns $hostPositivePatterns
     Assert-PositivePatterns -Role "client" -Text $clientLog -Patterns $clientPositivePatterns
+    if ($VerifyInteractions) {
+        $packetPattern = '(?im)\bSMOKE_INTERACTIONS_SEED\b[^\r\n]*\bid=([1-9]\d*)\b'
+        $hostPacket = [regex]::Match($hostLog, $packetPattern)
+        $clientPacket = [regex]::Match($clientLog, $packetPattern)
+        if (-not $hostPacket.Success -or -not $clientPacket.Success -or
+            $hostPacket.Groups[1].Value -ne $clientPacket.Groups[1].Value) {
+            throw "Alt-click packet ping resolved to different authoritative identities."
+        }
+    }
     Assert-NoNegativePatterns -Role "host" -Text $hostLog -Patterns $negativePatterns
     Assert-NoNegativePatterns -Role "client" -Text $clientLog -Patterns $negativePatterns
 
@@ -1569,6 +1655,54 @@ try {
         }
     }
 
+    if ($Scenario -eq "EndlessOverflow") {
+        $overflowPrePattern = '(?im)\bSMOKE_ENDLESS_OVERFLOW_STAGE\b[^\r\n]*\bphase=pre\b[^\r\n]*\bstage=(\d+)\b'
+        $overflowPostPattern = '(?im)\bSMOKE_ENDLESS_OVERFLOW_STAGE\b[^\r\n]*\bphase=post\b[^\r\n]*\bstage=(\d+)\b'
+        $overflowHealthPattern = '(?im)\bSMOKE_ENDLESS_OVERFLOW_HEALTH\b[^\r\n]*\bid=([1-9]\d*)\b[^\r\n]*\btype=(\d+)\b[^\r\n]*\bstage=(\d+)\b[^\r\n]*\bbody=(\d+)\b[^\r\n]*\bmax=(\d+)\b'
+        $overflowRepickPattern = '(?im)\bSMOKE_ENDLESS_OVERFLOW_REPICK_COMPLETE\b[^\r\n]*\bfrom=(\d+)\b[^\r\n]*\bto=(\d+)\b[^\r\n]*\bchooser=1\b'
+        $hostOverflowPre = [regex]::Match($hostLog, $overflowPrePattern)
+        $clientOverflowPre = [regex]::Match($clientLog, $overflowPrePattern)
+        $hostOverflowPost = [regex]::Match($hostLog, $overflowPostPattern)
+        $clientOverflowPost = [regex]::Match($clientLog, $overflowPostPattern)
+        $hostOverflowHealth = [regex]::Match($hostLog, $overflowHealthPattern)
+        $clientOverflowHealth = [regex]::Match($clientLog, $overflowHealthPattern)
+        $hostOverflowRepick = [regex]::Match($hostLog, $overflowRepickPattern)
+        $clientOverflowRepick = [regex]::Match($clientLog, $overflowRepickPattern)
+        $overflowEvidence = @($hostOverflowPre, $clientOverflowPre,
+            $hostOverflowPost, $clientOverflowPost, $hostOverflowHealth,
+            $clientOverflowHealth, $hostOverflowRepick, $clientOverflowRepick)
+        if (@($overflowEvidence | Where-Object { -not $_.Success }).Count -ne 0) {
+            throw "Missing EndlessOverflow stage, health, or repick correlation evidence."
+        }
+        if ([int]$hostOverflowPre.Groups[1].Value -ne 255 -or
+            $hostOverflowPre.Groups[1].Value -ne $clientOverflowPre.Groups[1].Value -or
+            [int]$hostOverflowPost.Groups[1].Value -ne 256 -or
+            $hostOverflowPost.Groups[1].Value -ne $clientOverflowPost.Groups[1].Value) {
+            throw "EndlessOverflow stage boundary mismatch or wrap (expected 255 then 256 on both peers)."
+        }
+        for ($group = 1; $group -le 5; ++$group) {
+            if ($hostOverflowHealth.Groups[$group].Value -ne
+                $clientOverflowHealth.Groups[$group].Value) {
+                throw ("EndlessOverflow red-eye identity/health mismatch in group {0}." -f $group)
+            }
+        }
+        if ([int64]$hostOverflowHealth.Groups[4].Value -le 65535 -or
+            [int64]$hostOverflowHealth.Groups[5].Value -le 65535 -or
+            [int]$hostOverflowHealth.Groups[3].Value -ne 255) {
+            throw "EndlessOverflow red-eye health did not cross the 16-bit boundary at stage 255."
+        }
+        for ($group = 1; $group -le 2; ++$group) {
+            if ($hostOverflowRepick.Groups[$group].Value -ne
+                $clientOverflowRepick.Groups[$group].Value) {
+                throw "EndlessOverflow stock repick transition mismatch."
+            }
+        }
+        if ([int]$hostOverflowRepick.Groups[1].Value -ne 255 -or
+            [int]$hostOverflowRepick.Groups[2].Value -ne 256) {
+            throw "EndlessOverflow repick did not transition exactly from stage 255 to 256."
+        }
+    }
+
     $hostProtocol = Assert-SmokeResult -Result $hostResult -Role "host" -ExpectedMode $Mode `
         -ExpectedScenario $scenarioMarker -ExpectedLevel $Level -ExpectedSeed $Seed `
         -RequiredSnapshots $MinimumSnapshots -ExpectedSkipIntro $SkipIntro
@@ -1611,6 +1745,7 @@ finally {
         finished_utc = [DateTime]::UtcNow.ToString("o")
         executable = $GameExe
         port = $Port
+        transport = $(if ($OnlineEndpoint) { "webrtc" } else { "tcp" })
         scenario = $Scenario
         mode = $Mode
         level = $Level

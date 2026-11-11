@@ -4024,6 +4024,7 @@ LRESULT CALLBACK SexyAppBase::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LP
 
 void SexyAppBase::HandleNotifyGameMessage(int theType, int theParam)
 {
+	if (getenv("PVZ_COOP_SMOKE_BACKGROUND") && strcmp(getenv("PVZ_COOP_SMOKE_BACKGROUND"), "1") == 0) return;
 	if (theType==0) // bring to front message
 	{
 		WINDOWPLACEMENT aWindowPlacement;
@@ -5448,12 +5449,13 @@ void SexyAppBase::SwitchScreenMode(bool wantWindowed, bool is3d, bool force)
 	
 	// We need to do this check to allow IE to get focus instead of
 	//  stealing it away for ourselves
-	if (!mIsOpeningURL)
+	const bool aBackgroundSmoke = getenv("PVZ_COOP_SMOKE_BACKGROUND") && strcmp(getenv("PVZ_COOP_SMOKE_BACKGROUND"), "1") == 0;
+	if (!aBackgroundSmoke && !mIsOpeningURL)
 	{
 		::ShowWindow(mHWnd, SW_NORMAL);
 		::SetForegroundWindow(mHWnd);
 	}
-	else
+	else if (!aBackgroundSmoke)
 	{
 		// Show it but don't activate it
 		::ShowWindow(mHWnd, SW_SHOWNOACTIVATE);
@@ -6100,8 +6102,11 @@ void SexyAppBase::Start()
 	if (mAutoStartLoadingThread)
 		StartLoadingThread();
 
-	::ShowWindow(mHWnd, SW_SHOW);	
-	::SetFocus(mHWnd);
+	if (!(getenv("PVZ_COOP_SMOKE_BACKGROUND") && strcmp(getenv("PVZ_COOP_SMOKE_BACKGROUND"), "1") == 0))
+	{
+		::ShowWindow(mHWnd, SW_SHOW);
+		::SetFocus(mHWnd);
+	}
 
 	timeBeginPeriod(1);
 

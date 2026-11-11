@@ -860,6 +860,8 @@ bool StoreScreen::IsPageShown(StorePages thePage)
 //0x48C4D0
 void StoreScreen::ButtonDepress(int theId)
 {
+    if (mApp->NetIsClient())
+        return;
     if (theId == StoreScreen::StoreScreen_Back)
         mResult = 1000;
     else if (theId == StoreScreen::StoreScreen_Prev || theId == StoreScreen::StoreScreen_Next)
@@ -888,7 +890,21 @@ void StoreScreen::ButtonDepress(int theId)
                 }
             }
         } while (!IsPageShown(mPage));
+        if (mApp->NetIsHost())
+            mApp->mNetManager->BroadcastSceneCmd(LawnNet::SCENECMD_STORE_PAGE, (int)mPage);
     }
+}
+
+void StoreScreen::NetSetPage(StorePages thePage)
+{
+    if (thePage < STORE_PAGE_SLOT_UPGRADES || thePage >= NUM_STORE_PAGES || mPage == thePage)
+        return;
+    mPage = thePage;
+    mHatchTimer = 50;
+    mBubbleCountDown = 0;
+    mApp->CrazyDaveStopTalking();
+    EnableButtons(false);
+    MarkDirty();
 }
 
 //0x48C5F0

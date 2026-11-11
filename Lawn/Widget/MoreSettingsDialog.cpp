@@ -7,6 +7,7 @@
 #include "../Plant.h"
 #include "../SeedPacket.h"
 #include "../Net/NetManager.h"
+#include "../../Sexy.TodLib/Reanimator.h"
 
 using namespace Sexy;
 using namespace LawnNet;
@@ -29,6 +30,11 @@ MoreSettingsDialog::MoreSettingsDialog(LawnApp* theApp) :
 {
 	mApp = theApp;
 	mSavePending = false;
+	Plant::PreloadPlantResources(SEED_SUNFLOWER);
+	mPreviewReanim = new Reanimation();
+	mPreviewReanim->ReanimationInitializeType(365.0f, 278.0f, REANIM_SUNFLOWER);
+	mPreviewReanim->PlayReanim("anim_idle", REANIM_LOOP, 0, 12.0f);
+	mPreviewReanim->OverrideScale(0.85f, 0.85f);
 	mHeldPlantTintSlider = new Slider(IMAGE_OPTIONS_SLIDERSLOT, IMAGE_OPTIONS_SLIDERKNOB2, MoreSettingsDialog_HeldPlantTint, this);
 	mHotbarTintSlider = new Slider(IMAGE_OPTIONS_SLIDERSLOT, IMAGE_OPTIONS_SLIDERKNOB2, MoreSettingsDialog_HotbarTint, this);
 	mHeldPlantOutlineSlider = new Slider(IMAGE_OPTIONS_SLIDERSLOT, IMAGE_OPTIONS_SLIDERKNOB2, MoreSettingsDialog_HeldPlantOutline, this);
@@ -46,6 +52,7 @@ MoreSettingsDialog::MoreSettingsDialog(LawnApp* theApp) :
 MoreSettingsDialog::~MoreSettingsDialog() 
 {
 	SaveConfig();
+	delete mPreviewReanim;
 	delete mHeldPlantTintSlider;
 	delete mHotbarTintSlider;
 	delete mHeldPlantOutlineSlider;
@@ -101,10 +108,21 @@ void MoreSettingsDialog::Draw(Graphics* g)
 	g->FillRect(157, 294, 46, 66);
 	g->PopState();
 
-	Plant::DrawSeedTypeTintedOutline(g, SeedType::SEED_SUNFLOWER, SeedType::SEED_NONE,
-		DrawVariation::VARIATION_NORMAL, 365.0f, 315.0f,
-		Color(aPreviewColor.r, aPreviewColor.g, aPreviewColor.b),
-		aConfig.mHeldPlantTintAlpha, aConfig.mHeldPlantOutlineAlpha);
+	if (aConfig.mHeldPlantOutlineAlpha > 0)
+	{
+		mPreviewReanim->mColorOverride = Color(aPreviewColor.r * 3 / 5,
+			aPreviewColor.g * 3 / 5, aPreviewColor.b * 3 / 5, aConfig.mHeldPlantOutlineAlpha);
+		static const int aOffsets[4][2] = { { -2, 0 }, { 2, 0 }, { 0, -2 }, { 0, 2 } };
+		for (int i = 0; i < 4; i++)
+		{
+			Graphics anOutline(*g);
+			anOutline.Translate(aOffsets[i][0], aOffsets[i][1]);
+			mPreviewReanim->Draw(&anOutline);
+		}
+	}
+	mPreviewReanim->mColorOverride = Color(aPreviewColor.r, aPreviewColor.g,
+		aPreviewColor.b, aConfig.mHeldPlantTintAlpha);
+	mPreviewReanim->Draw(g);
 }
 
 void MoreSettingsDialog::SliderVal(int theId, double theVal)
@@ -148,6 +166,8 @@ void MoreSettingsDialog::ButtonDepress(int theId)
 void MoreSettingsDialog::Update()
 {
 	LawnDialog::Update();
+	mPreviewReanim->Update();
+	MarkDirty();
 	if (mSavePending && !mHeldPlantTintSlider->mDragging &&
 		!mHotbarTintSlider->mDragging && !mHeldPlantOutlineSlider->mDragging)
 	{

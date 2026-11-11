@@ -3,6 +3,7 @@
 
 #include "NetCommon.h"
 #include "NetConnection.h"
+#include "NetOnline.h"
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -16,9 +17,19 @@
 
 class LawnApp;
 class Board;
+namespace Sexy { class Graphics; }
 
 namespace LawnNet
 {
+enum NetAnnotationKind : uint8_t { NETANNOTATION_PING, NETANNOTATION_DRAW_BEGIN,
+	NETANNOTATION_DRAW_POINT, NETANNOTATION_DRAW_END, NETANNOTATION_SEED };
+struct NetAnnotation
+{
+	uint8_t mSlot, mKind;
+	int16_t mX, mY;
+	uint16_t mId;
+	uint32_t mTick;
+};
 
 // A connected remote player's session (host side)
 struct NetSession
@@ -95,6 +106,7 @@ public:
 	bool IsConnecting() const { return mConnecting; }
 	bool IsConnectedToHost() const { return mMode == MODE_CLIENT && mClientConnected; }
 	const char* GetConnectStatus() const { return mConnectStatus; }
+	const std::string& GetDisconnectReason() const { return mDisconnectReason; }
 
 	// ---- players / lobby ----
 	int GetMySlot() const { return mMySlot; }
@@ -113,12 +125,37 @@ public:
 	void RequestChooserStateEcho(const char* theReason, int theSlot, int theSeedType);
 	bool ConsumeChooserStateEchoRequest();
 	void SendLobbyState();						// host: broadcast lobby
+	void SetMyReady(bool theReady);
+	bool IsMyReady() const { return mPlayers[mMySlot].mReady != 0; }
+	int GetReadyCount() const;
+	int GetReadyEligibleCount() const;
+	bool AreAllPlayersReady() const;
+	void ResetReadyState();
+	int GetDifficulty() const { return mDifficulty; }
+	void SetDifficulty(int theDifficulty);
+	void KickPlayer(int theSlot);
+	bool IsSpectator() const { return mPlayers[mMySlot].mSpectator; }
+	NetOnline* GetOnline() { return mOnline.get(); }
+	bool ConnectOnlineDirectory(const std::string& theEndpoint);
+	bool CreateOnlineRoom(const std::string& theName, const std::string& thePassword, int theMaxPlayers);
+	bool JoinOnlineRoom(const std::string& theRoomId, const std::string& thePassword);
+	void SendSystemChat(const std::string& theText);
+	void SendAnnotation(uint8_t theKind, int theX, int theY, uint16_t theId = 0);
+	void DrawAnnotations(Sexy::Graphics* theGraphics);
+	bool HandlePausePlayerClick(int theX, int theY);
+	const std::deque<NetAnnotation>& GetAnnotations() const { return mAnnotations; }
+	void SendLateJoinState(NetSession* theSession);
+	const NetZombatarAppearance& GetPlayerZombatar(int theSlot) const;
+	const NetZombatarAppearance& GetMyZombatar() const;
+	void SetMyZombatar(const NetZombatarAppearance& theAppearance);
+	void BroadcastZombatars();
 	void SendChat(const std::string& theUtf8Text);
 	struct ChatLine
 	{
 		uint8_t mSlot;
 		std::string mText;
 		uint32_t mReceivedTick;
+		std::string mNick;
 	};
 	std::deque<ChatLine> mChatLines;
 
@@ -203,6 +240,12 @@ private:
 	void OnSceneCmd(NetBuffer& thePayload);
 	void OnChatBroadcast(NetBuffer& thePayload);
 	void AddChatLine(uint8_t theSlot, const std::string& theText);
+	void OnAnnotation(NetSession* theSession, NetBuffer& thePayload);
+	void ApplyAnnotation(uint8_t theSlot, uint8_t theKind, int16_t theX, int16_t theY, uint16_t theId);
+	void RedistributeSeeds(int theDepartedSlot);
+	void OnZombatar(NetSession* theSession, NetBuffer& thePayload);
+	void UpdateOnline();
+	void SendHello();
 
 	void UpdatePings();
 	void AcceptThreadProc();
@@ -230,6 +273,9 @@ public:
 
 private:
 	Mode mMode;
+	std::unique_ptr<NetOnline> mOnline;
+	uint8_t mOnlineIntent = 0;
+	bool mOnlinePlaying = false;
 	LawnApp* mApp;
 
 	// host state
@@ -253,6 +299,8 @@ private:
 	std::atomic<bool> mClientConnected;
 	NetConnection* mHostConn;
 	char mConnectStatus[128];
+	std::string mDisconnectReason;
+	bool mKicked[NET_MAX_PLAYERS] = {};
 
 	// lobby
 	NetPlayerInfo mPlayers[NET_MAX_PLAYERS];
@@ -274,6 +322,12 @@ private:
 	// ping timer
 	uint32_t mLastPingTick;
 	uint32_t mLastStatsTick;
+	int mDifficulty;
+	uint32_t mLastAnnotationTick[NET_MAX_PLAYERS] = {};
+	uint32_t mLastDrawTick[NET_MAX_PLAYERS] = {};
+	std::deque<NetAnnotation> mAnnotations;
+	NetZombatarAppearance mLocalZombatar;
+	NetZombatarAppearance mPlayerZombatars[NET_MAX_PLAYERS];
 
 	// pending connection to adopt from accept thread (host)
 	std::mutex mPendingConnMutex;

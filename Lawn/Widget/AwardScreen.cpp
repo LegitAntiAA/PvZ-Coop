@@ -453,6 +453,8 @@ void AwardScreen::KeyChar(char theChar)
 // GOTY @Patoke: 0x409530
 void AwardScreen::StartButtonPressed()
 {
+	if (mApp->NetIsClient())
+		return;
 	if (mApp->GetDialog(DIALOG_STORE))
 		return;
 
@@ -570,6 +572,8 @@ void AwardScreen::MouseDown(int x, int y, int theClickCount)
 // GOTY @Patoke: 0x409840
 void AwardScreen::MouseUp(int x, int y, int theClickCount)
 {
+	if (mApp->NetIsClient())
+		return;
 	(void)x;(void)y;
 	if (theClickCount == 1)
 	{
@@ -623,6 +627,8 @@ void AwardScreen::DrawAchievements(Graphics* g) {
 
 // GOTY @Patoke: 0x409400
 void AwardScreen::AchievementsContinuePressed() {
+	if (mApp->NetIsClient())
+		return;
 	// @Patoke: implemented
 	if (mAwardType == AWARD_ACHIEVEMENTONLY) {
 		mApp->KillAwardScreen();

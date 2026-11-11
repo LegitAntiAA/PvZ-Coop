@@ -17,6 +17,7 @@
 #include "../../Sexy.TodLib/TodFoley.h"
 #include "../../Sexy.TodLib/TodDebug.h"
 #include "../../SexyAppFramework/Font.h"
+#include "../../SexyAppFramework/DDImage.h"
 #include "../../Sexy.TodLib/Reanimator.h"
 #include "../../Sexy.TodLib/TodParticle.h"
 #include "../../SexyAppFramework/Dialog.h"
@@ -47,6 +48,7 @@ GameSelector::GameSelector(LawnApp* theApp)
 	TodHesitationTrace("pregameselector");
 
 	mApp = theApp;
+	mGithubImage = theApp->GetImage(_S("extension/github-mark.png"));
 	mLevel = 1;
 	mLoading = false;
 	mHasTrophy = false;
@@ -463,6 +465,7 @@ GameSelector::GameSelector(LawnApp* theApp)
 //0x449D00¡¢0x449D20
 GameSelector::~GameSelector()
 {
+	delete mGithubImage;
 	if (mAdventureButton)
 		delete mAdventureButton;
 	if (mMinigameButton)
@@ -689,6 +692,13 @@ void GameSelector::SyncProfile(bool theShowLoading)
 			mPuzzleLocked = true;
 			mSurvivalLocked = true;
 		}
+	}
+
+	if (mApp->NetUnlockAllMinigames())
+	{
+		mMinigamesLocked = false;
+		mPuzzleLocked = false;
+		mSurvivalLocked = false;
 	}
 
 	if (mApp->HasFinishedAdventure() && !mApp->IsTrialStageLocked())
@@ -1171,6 +1181,15 @@ void GameSelector::DrawOverlay(Graphics* g)
 	} 
 
 	g->PopState();
+	if (mGithubImage && !mStartingGame)
+	{
+		Graphics anIcon(*g);
+		anIcon.SetColor(Color(250, 246, 225));
+		anIcon.FillRect(8, 8, 32, 32);
+		anIcon.DrawImage(mGithubImage, 11, 11, 26, 26);
+		anIcon.SetColor(Color(78, 66, 48));
+		anIcon.DrawRect(8, 8, 31, 31);
+	}
 }
 
 //0x44B0D0
@@ -1899,6 +1918,11 @@ void GameSelector::KeyChar(char theChar)
 //0x44C360
 void GameSelector::MouseDown(int x, int y, int theClickCount)
 {
+	if (theClickCount == 1 && !mStartingGame && Rect(8, 8, 32, 32).Contains(x, y))
+	{
+		mApp->OpenURL("https://github.com/LegitAntiAA/PvZ-Coop", false);
+		return;
+	}
 	if (mSlideCounter > 0)
 		return;
 

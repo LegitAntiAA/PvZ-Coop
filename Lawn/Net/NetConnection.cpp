@@ -1,4 +1,5 @@
 #include "NetConnection.h"
+#include "NetOnline.h"
 #include <mstcpip.h>
 
 #pragma comment(lib, "ws2_32.lib")
@@ -153,6 +154,21 @@ bool NetConnection::Adopt(SOCKET theSocket)
 	return true;
 }
 
+bool NetConnection::Adopt(std::shared_ptr<NetOnlineChannel> theChannel)
+{
+	Disconnect();
+	if (!theChannel || !theChannel->IsOpen()) return false;
+	mChannel = std::move(theChannel);
+	mConnected = true;
+	mBytesSent = 0; mBytesRecv = 0;
+	return true;
+}
+
+std::string NetConnection::GetOnlinePeerId() const
+{
+	return mChannel ? mChannel->GetPeerId() : "";
+}
+
 void NetConnection::RecvThreadProc()
 {
 	uint8_t aChunk[8192];
@@ -249,6 +265,12 @@ bool NetConnection::SendMessage(uint8_t theMsgType, const NetBuffer& thePayload)
 
 bool NetConnection::SendAll(const uint8_t* theData, size_t theSize)
 {
+	if (mChannel)
+	{
+		const bool sent = mChannel->Send(std::vector<uint8_t>(theData, theData + theSize));
+		if (sent) mBytesSent += theSize;
+		return sent;
+	}
 	if (mSocket == INVALID_SOCKET)
 		return false;
 	size_t aSent = 0;
@@ -269,6 +291,20 @@ bool NetConnection::SendAll(const uint8_t* theData, size_t theSize)
 
 int NetConnection::PumpMessages()
 {
+	if (mChannel)
+	{
+		std::vector<uint8_t> frame;
+		for (int i = 0; i < 256 && mChannel->Receive(frame); ++i)
+		{
+			uint8_t type = 0;
+			NetBuffer payload;
+			if (!NetDecodeFrame(frame.data(), frame.size(), &type, payload))
+			{ mChannel->Close(); break; }
+			mBytesRecv += frame.size();
+			std::lock_guard<std::mutex> lock(mRecvQueueMutex);
+			mRecvQueue.push_back(std::move(payload)); mRecvTypes.push_back(type);
+		}
+	}
 	// Swap out the queue under the lock so the recv thread can keep filling.
 	decltype(mRecvQueue) aQueue;
 	decltype(mRecvTypes) aTypes;
@@ -279,7 +315,7 @@ int NetConnection::PumpMessages()
 	}
 
 	int aCount = 0;
-	while (!aQueue.empty() && mConnected)
+	while (!aQueue.empty())
 	{
 		uint8_t aMsgType = aTypes.front();
 		aTypes.pop_front();
@@ -289,6 +325,7 @@ int NetConnection::PumpMessages()
 		aQueue.pop_front();
 		aCount++;
 	}
+	if (mChannel && !mChannel->IsOpen()) mConnected = false;
 	return aCount;
 }
 
@@ -325,6 +362,7 @@ uint32_t NetConnection::GetSeqSentTime(uint32_t theSeq)
 
 void NetConnection::Disconnect()
 {
+	if (mChannel) { mChannel->Close(); mChannel.reset(); }
 	if (mSocket != INVALID_SOCKET || mConnected)
 		NetTrace("connection disconnect socket=%llu bytesSent=%llu bytesRecv=%llu", (unsigned long long)mSocket, (unsigned long long)mBytesSent.load(), (unsigned long long)mBytesRecv.load());
 	// recv() is blocking, so close its read side before joining the worker.
@@ -354,6 +392,11 @@ void NetConnection::Disconnect()
 		closesocket(aSocket);
 		NetTrace("connection close complete socket=%llu", (unsigned long long)aSocket);
 	}
+	{
+		std::lock_guard<std::mutex> lock(mRecvQueueMutex);
+		mRecvQueue.clear(); mRecvTypes.clear();
+	}
+	mPartial.clear(); mExpectedSize = 0;
 }
 
 } // namespace LawnNet

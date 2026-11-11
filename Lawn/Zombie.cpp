@@ -18,6 +18,11 @@
 #include "../Sexy.TodLib/TodParticle.h"
 #include "Widget/AchievementsScreen.h"
 #include "../Sexy.TodLib/EffectSystem.h"
+#include "Net/NetPresentation.h"
+#include "Net/NetManager.h"
+#ifdef _HAS_ZOMBATAR
+#include "Widget/ZombatarScreen.h"
+#endif
 
 ZombieDefinition gZombieDefs[NUM_ZOMBIE_TYPES] = {  //0x69DA80
     { ZOMBIE_NORMAL,            REANIM_ZOMBIE,              1,      1,      1,      4000,   _S("ZOMBIE") },
@@ -111,6 +116,7 @@ void Zombie::ZombieInitialize(int theRow, ZombieType theType, bool theVariant, Z
     mTdPathPos = 0.0f;
     mNetKillCounted = false;
     mNetAnimKey = 255;
+    mNetZombatar = LawnNet::NetZombatarAppearance();
     mVariant = theVariant;
     mIsEating = false;
     mJustGotShotCounter = 0;
@@ -973,7 +979,146 @@ void Zombie::ZombieInitialize(int theRow, ZombieType theType, bool theVariant, Z
         StartZombieSound();
     }
 
+#ifdef _HAS_ZOMBATAR
+    if (IsOnBoard() && theFromWave >= 0 && !mApp->NetIsClient() && mApp->mNetManager &&
+        (mZombieType == ZombieType::ZOMBIE_NORMAL || mZombieType == ZombieType::ZOMBIE_FLAG))
+    {
+        LawnNet::NetManager* aNet = mApp->mNetManager;
+        const LawnNet::NetZombatarAppearance* aChoices[LawnNet::NET_MAX_PLAYERS];
+        int aCount = 0;
+        if (aNet->IsActive())
+        {
+            for (int i = 0; i < LawnNet::NET_MAX_PLAYERS; ++i)
+                if (aNet->IsPlayerActive(i) && aNet->GetPlayerZombatar(i).mPresent)
+                    aChoices[aCount++] = &aNet->GetPlayerZombatar(i);
+        }
+        else if (aNet->GetMyZombatar().mPresent)
+            aChoices[aCount++] = &aNet->GetMyZombatar();
+        if (aCount > 0 && Rand(5) == 0)
+            ApplyNetZombatar(*aChoices[Rand(aCount)]);
+    }
+#endif
+
     UpdateReanim();
+}
+
+void Zombie::ApplyNetZombatar(const LawnNet::NetZombatarAppearance& theAppearance)
+{
+    if (!LawnNet::NetValidateZombatar(theAppearance))
+        return;
+#ifdef _HAS_ZOMBATAR
+    Reanimation* aBody = mApp->ReanimationTryToGet(mBodyReanimID);
+    if (!aBody || !aBody->TrackExists("anim_head1") ||
+        (mZombieType != ZombieType::ZOMBIE_NORMAL && mZombieType != ZombieType::ZOMBIE_FLAG))
+        return;
+    if (mNetZombatar == theAppearance &&
+        (!theAppearance.mPresent || mApp->ReanimationTryToGet(mZombatarTidbitID)))
+        return;
+
+    ReanimationID* aLayers[] = {&mZombatarTidbitID, &mZombatarHairID, &mZombatarHairLineID,
+        &mZombatarEyeWearID, &mZombatarEyeWearLineID, &mZombatarAccessoryID,
+        &mZombatarHatID, &mZombatarHatLineID};
+    for (ReanimationID* aLayer : aLayers)
+    {
+        mApp->RemoveReanimation(*aLayer);
+        *aLayer = ReanimationID::REANIMATIONID_NULL;
+    }
+    mNetZombatar = theAppearance;
+    aBody->SetImageOverride("anim_head1", theAppearance.mPresent ? IMAGE_BLANK : nullptr);
+    if (aBody->TrackExists("anim_head2"))
+        aBody->SetImageOverride("anim_head2", theAppearance.mPresent ? IMAGE_BLANK : nullptr);
+    if (aBody->TrackExists("anim_hair"))
+        aBody->SetImageOverride("anim_hair", theAppearance.mPresent ? IMAGE_BLANK : nullptr);
+    if (!theAppearance.mPresent)
+        return;
+
+    // Use the stock head attachment transform.  Keep the parent track visible
+    // with a blank image so normal hidden-head/death transitions also hide all
+    // child cosmetics. No player profile or editor widget is mutated here.
+    auto MakeLayer = [&](ReanimationID& theId, const char* theTrack, const Color& theColor) -> Reanimation*
+    {
+        Reanimation* aLayer = mApp->AddReanimation(0.0f, 0.0f, 0, ReanimationType::REANIM_ZOMBATAR);
+        if (!aLayer)
+            return nullptr;
+        aLayer->PlayReanim("anim_head1", ReanimLoopType::REANIM_LOOP, 0, aBody->mAnimRate);
+        for (int i = 0; i < aLayer->mDefinition->mTracks.count; ++i)
+            aLayer->mTrackInstances[i].mRenderGroup = RENDER_GROUP_HIDDEN;
+        if (theTrack && aLayer->TrackExists(theTrack))
+        {
+            ReanimatorTrackInstance* aTrack = aLayer->GetTrackInstanceByName(theTrack);
+            aTrack->mRenderGroup = RENDER_GROUP_NORMAL;
+            aTrack->mTrackColor = theColor;
+        }
+        AttachEffect* anAttachment = AttachReanim(aBody->GetTrackInstanceByName("anim_head1")->mAttachmentID,
+            aLayer, 0.0f, 0.0f);
+        if (!anAttachment)
+        {
+            aLayer->ReanimationDie();
+            return nullptr;
+        }
+        anAttachment->mDontDrawIfParentHidden = true;
+        aBody->mFrameBasePose = 0;
+        TodScaleRotateTransformMatrix(anAttachment->mOffset, -20.0f, -2.5f, 0.2f, 1.0f, 1.0f);
+        theId = mApp->ReanimationGetID(aLayer);
+        return aLayer;
+    };
+    auto ItemColor = [](int theItem, uint8_t thePalette) -> Color
+    {
+        ZombatarDefinition& aDefinition = GetZombatarDefinition((ZombatarItem)theItem);
+        return thePalette == 255 || !aDefinition.mColorGroup ?
+            Color::White : aDefinition.mColorGroup[thePalette];
+    };
+    const Color aSkin = theAppearance.mSkin == 0 ? Color::White : gZombatarSkinPalletes[theAppearance.mSkin];
+    Reanimation* aHead = MakeLayer(mZombatarTidbitID, "anim_head1", aSkin);
+    if (aHead)
+    {
+        if (aHead->TrackExists("anim_head2"))
+        {
+            aHead->GetTrackInstanceByName("anim_head2")->mRenderGroup = RENDER_GROUP_NORMAL;
+            aHead->GetTrackInstanceByName("anim_head2")->mTrackColor = aSkin;
+        }
+        if (theAppearance.mHair == 255 && aHead->TrackExists("anim_hair"))
+            aHead->GetTrackInstanceByName("anim_hair")->mRenderGroup = RENDER_GROUP_NORMAL;
+        if (theAppearance.mTidbit != 255)
+        {
+            const std::string aTrack = StrFormat("tidBits_%02d", theAppearance.mTidbit);
+            if (aHead->TrackExists(aTrack.c_str()))
+            {
+                aHead->GetTrackInstanceByName(aTrack.c_str())->mRenderGroup = RENDER_GROUP_NORMAL;
+                aHead->GetTrackInstanceByName(aTrack.c_str())->mTrackColor =
+                    ItemColor(ZombatarItem::ZOMBATAR_TIDBIT_1 + theAppearance.mTidbit, theAppearance.mTidbitColor);
+            }
+        }
+    }
+    if (theAppearance.mHair != 255)
+    {
+        MakeLayer(mZombatarHairID, StrFormat("hair_%02d", theAppearance.mHair).c_str(),
+            ItemColor(ZombatarItem::ZOMBATAR_HAIR_1 + theAppearance.mHair, theAppearance.mHairColor));
+        MakeLayer(mZombatarHairLineID, StrFormat("hair_%02d_line", theAppearance.mHair).c_str(), Color::White);
+    }
+    if (theAppearance.mEyewear != 255)
+    {
+        MakeLayer(mZombatarEyeWearID, StrFormat("eyeWear_%02d", theAppearance.mEyewear).c_str(),
+            ItemColor(ZombatarItem::ZOMBATAR_EYEWEAR_1 + theAppearance.mEyewear, theAppearance.mEyewearColor));
+        MakeLayer(mZombatarEyeWearLineID, StrFormat("eyeWear_%02d_line", theAppearance.mEyewear).c_str(), Color::White);
+    }
+    if (theAppearance.mAccessory != 255)
+    {
+        // Native resource track order differs from editor item order.
+        static const uint8_t aTrackIndex[15] = {0,1,2,3,4,14,5,6,12,7,9,10,11,13,8};
+        MakeLayer(mZombatarAccessoryID, StrFormat("accessories_%02d", aTrackIndex[theAppearance.mAccessory]).c_str(),
+            ItemColor(ZombatarItem::ZOMBATAR_ACCESSORY_1 + theAppearance.mAccessory, theAppearance.mAccessoryColor));
+    }
+    if (theAppearance.mHat != 255)
+    {
+        MakeLayer(mZombatarHatID, StrFormat("hats_%02d", theAppearance.mHat).c_str(),
+            ItemColor(ZombatarItem::ZOMBATAR_HAT_1 + theAppearance.mHat, theAppearance.mHatColor));
+        MakeLayer(mZombatarHatLineID, StrFormat("hats_%02d_line", theAppearance.mHat).c_str(), Color::White);
+    }
+    LawnNet::NetTrace("Zombatar applied zombie=%u hair=%u hat=%u", mNetId, theAppearance.mHair, theAppearance.mHat);
+#else
+    mNetZombatar = theAppearance;
+#endif
 }
 
 //0x524040
@@ -2338,6 +2483,8 @@ void Zombie::UpdateZombieJackInTheBox()
             }
 
             mApp->AddTodParticle(aPosX, aPosY, Board::MakeRenderOrder(RenderLayer::RENDER_LAYER_TOP, 0, 0), ParticleEffect::PARTICLE_JACKEXPLODE);
+            LawnNet::NetBroadcastParticle(mApp, (float)aPosX, (float)aPosY,
+                Board::MakeRenderOrder(RenderLayer::RENDER_LAYER_TOP, 0, 0), ParticleEffect::PARTICLE_JACKEXPLODE);
             mBoard->ShakeBoard(4, -6);
             DieNoLoot();
 
@@ -3881,7 +4028,7 @@ void Zombie::DropHead(unsigned int theDamageFlags)
     if (!CanLoseBodyParts() || !mHasHead)
         return;
 
-    if (mButteredCounter > 0)
+    if (!mNetGhost && mButteredCounter > 0)
     {
         mButteredCounter = 0;
         mButterFilterEffect = FilterEffect::FILTER_EFFECT_NONE;
@@ -3934,7 +4081,10 @@ void Zombie::DropHead(unsigned int theDamageFlags)
     }
     else if (mZombieType == ZombieType::ZOMBIE_POGO)
     {
-        PogoBreak(0U);
+        // Ghosts mirror host phase/health and must not execute PogoBreak's
+        // gameplay transition while presenting a severed head.
+        if (!mNetGhost)
+            PogoBreak(0U);
         aEffect = ParticleEffect::PARTICLE_ZOMBIE_POGO_HEAD;
     }
     else if (mZombieType == ZombieType::ZOMBIE_BALLOON)
@@ -4118,7 +4268,8 @@ void Zombie::DropHead(unsigned int theDamageFlags)
         //OverrideParticleScale(aParticle);
     }
 
-    mApp->PlayFoley(FoleyType::FOLEY_LIMBS_POP);
+    if (!mNetGhost)
+        mApp->PlayFoley(FoleyType::FOLEY_LIMBS_POP);
 }
 
 void Zombie::SetupReanimForLostArm(unsigned int theDamageFlags)
@@ -7430,6 +7581,10 @@ void Zombie::Draw(Graphics* g)
         }
     }
 
+    // Network Zombatars draw through their body-track attachment. The editor's
+    // older preview hides the parent track and draws its layers explicitly.
+    if (!mNetZombatar.mPresent)
+    {
     if (mZombatarTidbitID != REANIMATIONID_NULL)
     {
         Reanimation* aReanim = mApp->ReanimationTryToGet(mZombatarTidbitID);
@@ -7469,6 +7624,7 @@ void Zombie::Draw(Graphics* g)
     {
         Reanimation* aReanim = mApp->ReanimationTryToGet(mZombatarHatLineID);
         aReanim->Draw(g);
+    }
     }
 }
 
@@ -8483,6 +8639,11 @@ void Zombie::EatZombie(Zombie* theZombie)
 //0x52FE50
 bool Zombie::TrySpawnLevelAward()
 {
+    // Custom PvP objectives own their victory condition.  There are no stock
+    // waves here, so killing the last currently spawned invader is not a win.
+    if (mBoard && mBoard->IsPvPMode())
+        return false;
+
     if (!IsOnBoard() || mBoard->HasLevelAwardDropped() || mBoard->mLevelComplete || mDroppedLoot)
     {
         return false;

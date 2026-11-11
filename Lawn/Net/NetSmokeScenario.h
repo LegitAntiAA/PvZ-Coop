@@ -31,7 +31,8 @@ enum NetSmokeScenarioId : uint8_t
 	NETSMOKE_SCENARIO_TOWER_DEFENSE_CLIENT = 10,
 	NETSMOKE_SCENARIO_PORTAL_COMBAT_CLIENT = 11,
 	NETSMOKE_SCENARIO_ENDLESS_ST = 12,
-	NETSMOKE_SCENARIO_PVP_1V1 = 13
+	NETSMOKE_SCENARIO_PVP_1V1 = 13,
+	NETSMOKE_SCENARIO_ENDLESS_OVERFLOW = 14
 };
 
 // Runtime-only smoke setup.  Manifest/protocol tests never call this function,
@@ -43,7 +44,8 @@ inline bool NetIsInteractiveChooserSmokeScenario(NetSmokeScenarioId theScenario)
         return theScenario == NETSMOKE_SCENARIO_ADVENTURE_8_SOAK ||
 		theScenario == NETSMOKE_SCENARIO_ADVENTURE_8_VICTORY ||
                 theScenario == NETSMOKE_SCENARIO_TOWER_DEFENSE_CLIENT ||
-                theScenario == NETSMOKE_SCENARIO_ENDLESS_ST;
+                theScenario == NETSMOKE_SCENARIO_ENDLESS_ST ||
+		theScenario == NETSMOKE_SCENARIO_ENDLESS_OVERFLOW;
 }
 
 inline bool NetIsBowlingSmokeScenario(NetSmokeScenarioId theScenario)
@@ -100,6 +102,9 @@ inline const NetSmokeScenarioDefinition* NetSmokeScenarioTable(size_t& theCount)
 		{ NETSMOKE_SCENARIO_ENDLESS_ST,
 			"endless_st", "endless_st", 1,
 			(uint8_t)GameMode::GAMEMODE_COOP_ENDLESS_ST, false },
+		{ NETSMOKE_SCENARIO_ENDLESS_OVERFLOW,
+			"endless_overflow", "endless_overflow", 1,
+			(uint8_t)GameMode::GAMEMODE_COOP_ENDLESS_ST, false },
 		{ NETSMOKE_SCENARIO_PVP_1V1,
 			"pvp_1v1", "pvp_1v1", 1,
 			(uint8_t)GameMode::GAMEMODE_COOP_PVP, true }
@@ -135,7 +140,7 @@ inline bool NetResolveSmokeScenario(const std::string& theMode, int theLevel,
 	theError = "unsupported smoke scenario; allowed pairs are adventure/1, adventure/5, "
                 "adventure_bowling_client/5, adventure_whack_client/15, slot_machine_client/1, "
 		"adventure_soak/8, adventure_victory/8, tower_defense_client/1, "
-		"portal_combat_client/1, endless_st/1, pvp_1v1/1, "
+		"portal_combat_client/1, endless_st/1, endless_overflow/1, pvp_1v1/1, "
 		"vasebreaker/1, beghouled/1";
 	return false;
 }
@@ -270,6 +275,23 @@ private:
 	uint32_t mEndlessThawSampleTick;
 	uint16_t mEndlessPreRepickMaxZombieId;
 	int mEndlessBaseHealth[NUM_ZOMBIE_TYPES];
+	bool mOverflowModeVerified;
+	bool mOverflowStage255Set;
+	bool mOverflowStage255Observed;
+	bool mOverflowGargSpawned;
+	bool mOverflowGargObserved;
+	bool mOverflowTransitionTriggered;
+	bool mOverflowRepickOpened;
+	bool mOverflowRepickLogged;
+	bool mOverflowStage256Observed;
+	bool mOverflowRepickCompleted;
+	uint16_t mOverflowBaselineMaxZombieId;
+	uint16_t mOverflowGargId;
+	uint32_t mOverflowStageSetTick;
+	uint32_t mOverflowGargTick;
+	uint32_t mOverflowTransitionTick;
+	int mOverflowGargBodyHealth;
+	int mOverflowGargMaxHealth;
 	uint32_t mPostActionSamples;
 
 	bool UpdateIntro(LawnApp* theApp, const NetSmokeManifest& theManifest,

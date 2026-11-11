@@ -352,7 +352,7 @@ int ChallengeScreen::MoreTrophiesNeeded(int theChallengeIndex)
 	}
 
 	// co-op custom modes are always unlocked (and coop.ini can unlock everything)
-	if (mApp->mNetManager && mApp->mNetManager->mConfig.mUnlockAllMinigames)
+	if (mApp->NetUnlockAllMinigames())
 		return 0;
 	ChallengeDefinition& aCoopDef = GetChallengeDefinition(theChallengeIndex);
 	if (aCoopDef.mPage == ChallengePage::CHALLENGE_PAGE_COOP)
@@ -915,6 +915,8 @@ void ChallengeScreen::ButtonPress(int theId)
 //0x42F740
 void ChallengeScreen::ButtonDepress(int theId)
 {
+	if (mApp->NetIsClient())
+		return;
 	if (theId == ChallengeScreen::ChallengeScreen_Back)
 	{
 		mApp->KillChallengeScreen();
@@ -924,7 +926,8 @@ void ChallengeScreen::ButtonDepress(int theId)
 	int aChallengeMode = theId - ChallengeScreen::ChallengeScreen_Mode;
 	if (aChallengeMode >= 0 && aChallengeMode < NUM_CHALLENGE_MODES)
 	{
-		mApp->KillChallengeScreen();
+		if ((GameMode)(aChallengeMode + 1) != GAMEMODE_COOP_PVP || !mApp->NetIsHost())
+			mApp->KillChallengeScreen();
 		mApp->PreNewGame((GameMode)(aChallengeMode + 1), true);
 	}
 
@@ -932,6 +935,8 @@ void ChallengeScreen::ButtonDepress(int theId)
 	if (aPageIndex >= 0 && aPageIndex < ChallengePage::MAX_CHALLANGE_PAGES)
 	{
 		mPageIndex = (ChallengePage)aPageIndex;
+		if (mApp->NetIsHost())
+			mApp->mNetManager->BroadcastSceneCmd(LawnNet::SCENECMD_SHOW_CHALLENGE_PAGE, (int)mPageIndex);
 		UpdateButtons();
 		UpdateScrollRange();
 	}

@@ -3,6 +3,7 @@
 #include "ZenGarden.h"
 #include "../LawnApp.h"
 #include "CursorObject.h"
+#include "Challenge.h"
 #include "../Resources.h"
 #include "../Sexy.TodLib/Reanimator.h"
 #include "../SexyAppFramework/WidgetManager.h"
@@ -264,7 +265,8 @@ bool CursorObject::DrawContent(Graphics* g, CursorType theCursorType,
             aOffsetY += 30.0f;
         }
         aOffsetY -= 15.0f;
-        if (mApp->IsIZombieLevel())
+        if (mApp->IsIZombieLevel() ||
+            (mBoard->IsPvPMode() && mBoard->mChallenge->IsZombieSeedType(theSeedType)))
         {
             aOffsetX -= 55.0f;
             aOffsetY -= 70.0f;
@@ -415,7 +417,8 @@ void CursorPreview::Draw(Graphics* g)
     else
     {
         float aOffsetX, aOffsetY;
-        if (mApp->IsIZombieLevel())
+        if (mApp->IsIZombieLevel() ||
+            (mBoard->IsPvPMode() && mBoard->mChallenge->IsZombieSeedType(aSeedType)))
         {
             float aHeight = PlantDrawHeightOffset(mBoard, nullptr, aSeedType, mGridX, mGridY);
             if (aSeedType == SeedType::SEED_ZOMBIE_GARGANTUAR)

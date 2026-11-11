@@ -14,6 +14,7 @@ class ToolTipWidget;
 namespace Sexy
 {
     class DialogButton;
+    class DDImage;
 }
 
 using namespace Sexy;
@@ -59,6 +60,7 @@ private:
 
 public:
     LawnApp*                    mApp;                       //+0x8C
+    Sexy::DDImage*              mGithubImage;
     NewLawnButton*              mAdventureButton;           //+0x90
     NewLawnButton*              mMinigameButton;            //+0x94
     NewLawnButton*              mPuzzleButton;              //+0x98

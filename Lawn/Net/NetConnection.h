@@ -13,9 +13,11 @@
 #include <thread>
 #include <mutex>
 #include <functional>
+#include <memory>
 
 namespace LawnNet
 {
+class NetOnlineChannel;
 
 // One TCP session. Owns the socket, a reader thread and a send mutex.
 // Complete frames are pushed into mRecvQueue; the game thread pops them.
@@ -30,6 +32,8 @@ public:
 
 	// Adopt an accepted socket (host side) or a freshly connected one.
 	bool Adopt(SOCKET theSocket);
+	bool Adopt(std::shared_ptr<NetOnlineChannel> theChannel);
+	std::string GetOnlinePeerId() const;
 
 	void SetMessageHandler(MessageHandler theHandler) { mHandler = theHandler; }
 
@@ -66,6 +70,7 @@ private:
 
 private:
 	SOCKET mSocket;
+	std::shared_ptr<NetOnlineChannel> mChannel;
 	std::atomic<bool> mConnected;
 	std::thread mRecvThread;
 	std::atomic<bool> mThreadRunning;

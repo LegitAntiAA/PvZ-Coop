@@ -18,6 +18,7 @@
 #include <map>
 
 #include "NetSmokeScenario.h"
+#include "NetZombatar.h"
 
 namespace LawnNet
 {
@@ -26,7 +27,7 @@ namespace LawnNet
 // (the host broadcasts the same sounds via events).
 extern bool gNetSuppressSounds;
 
-static const uint32_t NET_PROTOCOL_VERSION = 29; // unbounded Endless stages and 32-bit zombie health pools
+static const uint32_t NET_PROTOCOL_VERSION = 30; // authoritative presentation, participants, readiness and annotations
 static const uint16_t NET_DEFAULT_PORT = 27713;			// PvZ co-op port
 static const int NET_MAX_PLAYERS = 4;					// 1 host + 3 clients
 static const int NET_MAX_NICK_CHARS = 16;
@@ -88,6 +89,8 @@ enum NetMsgType : uint8_t
 	NETMSG_START_PLAYING = 15,	// h->all: i16 board x/y/tree x/pole x camera bootstrap; enter gameplay now
 	NETMSG_INTRO_STATE = 16,	// h->all: authoritative cutscene presentation + preview zombies
 	NETMSG_DAVE_STATE = 17,		// h->all: fixed 12-byte Crazy Dave presentation state
+	NETMSG_READY = 18,           // c->h: u8 ready; authoritative echo in lobby
+	NETMSG_KICKED = 19,          // h->c: kicked by host
 
 	NETMSG_SNAPSHOT = 20,		// h->c: full logical board state
 	NETMSG_BOARD_EVENT = 21,	// h->c: u8 eventType + payload (sounds, instant visuals)
@@ -98,6 +101,8 @@ enum NetMsgType : uint8_t
 	NETMSG_PAUSE = 33,			// h->c: u8 paused
 	NETMSG_PAUSE_REQ = 34,		// c->h: (client asks; host may ignore)
 	NETMSG_INPUT_EPOCH = 35,	// h->c: u32 epoch, u8 NetInputPhase
+	NETMSG_ANNOTATION = 36,       // both: epoch, kind, canonical x/y, packet/stroke id
+	NETMSG_SPECTATOR_START = 37,  // h->c: current scene and camera for read-only late join
 
 	NETMSG_CHOOSER_OPEN = 40,	// h->all: u8 bankCount, u8 pickQuota[4]
 	NETMSG_SEED_PICK = 41,		// c->h: u8 seedType, u8 imitaterType
@@ -108,6 +113,7 @@ enum NetMsgType : uint8_t
 	NETMSG_PROFILE_SYNC = 50,	// h->c: coins, level, seed counts, challenge records
 	NETMSG_STORE_ACTION = 51,	// c->h: u8 item, u8 action
 	NETMSG_STORE_SYNC = 52,		// h->c: coins + store purchases
+	NETMSG_ZOMBATAR = 53,         // client: appearance; host: slot + appearance
 
 	NETMSG_STATS = 60,			// c->h: u16 pingMs, u16 snapshotApplyMs
 	NETMSG_RATE = 61,			// h->c: u16 snapshotHz
@@ -145,7 +151,13 @@ enum NetSceneCmd : uint8_t
 	SCENECMD_KILL_BOARD = 4,
 	SCENECMD_SHOW_SEED_CHOOSER = 5,
 	SCENECMD_SHOW_QUICKPLAY = 6,
-	SCENECMD_ADVENTURE_START_FX = 7	// param = non-zero presentation generation
+	SCENECMD_ADVENTURE_START_FX = 7,	// param = non-zero presentation generation
+	SCENECMD_CLOSE_AWARD = 8,
+	SCENECMD_CLOSE_CHALLENGE = 9,
+	SCENECMD_CLOSE_STORE = 10,
+	SCENECMD_STORE_PAGE = 11,
+	SCENECMD_TEAM_SELECT = 12,
+	SCENECMD_CLOSE_TEAM_SELECT = 13
 };
 
 // Board event types (NETMSG_BOARD_EVENT)
@@ -175,7 +187,9 @@ enum NetBoardEvent : uint8_t
 	BOARDEV_POTATO_EXPLODED = 21,	// u16 plant id, i16 effect x/y, u8 row
 	BOARDEV_BUSH_RUSTLE = 22,		// u8 row
 	BOARDEV_ADVICE_STATE = 23,		// u32 board seed, u8 op/style/help/len, label bytes
-	BOARDEV_READY_SET_PLANT = 24		// empty: materialize the stock intro reanimation
+	BOARDEV_READY_SET_PLANT = 24,		// empty: materialize the stock intro reanimation
+	BOARDEV_PRESENTATION_PARTICLE = 25, // u16 type, f32 x/y, i32 render order
+	BOARDEV_PRESENTATION_REANIM = 26    // u16 type, f32 x/y, i32 order, animation state
 };
 
 // Exact payload sizes for coin/sun board events.  Keep these shared by the
@@ -209,6 +223,7 @@ enum NetTeam : uint8_t
 struct NetPlayerInfo
 {
 	bool	mActive;
+	bool    mSpectator;
 	uint8_t	mSlot;			// 0 = host
 	uint8_t	mTeam;			// NetTeam (PvP only)
 	uint8_t	mReady;			// seed chooser / team select readiness
@@ -219,6 +234,7 @@ struct NetPlayerInfo
 	void Reset()
 	{
 		mActive = false;
+		mSpectator = false;
 		mSlot = 0;
 		mTeam = NETTEAM_NONE;
 		mReady = 0;
@@ -571,7 +587,7 @@ bool NetLoadSmokeManifest(const char* theAbsolutePath, NetSmokeManifest& theMani
 void NetSetRuntimePaths(const char* theConfigPath, const char* theLogDirectory);
 uint32_t NetFnv1a32(const void* theData, size_t theSize);
 bool NetNormalizeUtf8(const std::string& theInput, size_t theMaxBytes, size_t theMaxCodePoints,
-	bool theAllowSpaces, std::string& theOutput);
+	bool theAllowSpaces, std::string& theOutput, bool theTrim = true);
 
 // Config file (coop.ini): nickname + unlock flags
 struct NetConfig
@@ -586,6 +602,9 @@ struct NetConfig
 	int  mHeldPlantTintAlpha;
 	int  mHotbarTintAlpha;
 	int  mHeldPlantOutlineAlpha;
+	NetZombatarAppearance mZombatar;
+	std::string mOnlineEndpoint;
+	std::string mStunServer;
 
 	NetConfig() { Reset(); }
 	void Reset()
@@ -600,11 +619,17 @@ struct NetConfig
 		mHeldPlantTintAlpha = 150;
 		mHotbarTintAlpha = 110;
 		mHeldPlantOutlineAlpha = 180;
+		mZombatar = {};
+		mOnlineEndpoint.clear();
+		mStunServer = "stun:stun.cloudflare.com:3478";
 	}
 };
 
 bool NetLoadConfig(NetConfig& theConfig);		// reads coop.ini next to the exe / userdata
 bool NetSaveConfig(const NetConfig& theConfig);
+bool NetComputeSeedQuotas(int theBankCount, int theFixedHostCount,
+	const bool theEligible[NET_MAX_PLAYERS], int theQuotas[NET_MAX_PLAYERS]);
+int NetStrokeAlpha(uint32_t theAgeSinceEnd, int thePointIndex, int thePointCount);
 
 } // namespace LawnNet
 

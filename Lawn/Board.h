@@ -615,6 +615,8 @@ public:
 	bool							IsEndlessT();
 	bool							IsTowerDefense();
 	bool							IsPvPMode();
+	bool                            IsSeedPacketVisibleToSlot(int theIndex, int theSlot) const;
+	int                             GetCoopDifficulty();
 	void							AssignPvPSeedOwners();
 	bool							CanTakeBrains(int theAmount);
 	void							TakeBrains(int theAmount);

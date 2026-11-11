@@ -22,6 +22,8 @@
 #include "../../SexyAppFramework/WidgetManager.h"
 #include "../../SexyAppFramework/DDInterface.h"
 #include "NetManager.h"
+#include "NetPresentation.h"
+#include "NetZombatar.h"
 #include "../System/Music.h"
 #include <float.h>
 #include <limits.h>
@@ -84,7 +86,7 @@ static const size_t NET_PLANT_WIRE_BYTES = 23 +
         NET_PLANT_REANIM_ROLES * NET_ZOMBIE_ANIM_WIRE_BYTES;
 // Zombie: id/type/row/position(8), eight U32 health pools(32), phase/visual state(10),
 // velocity/altitude/original animation rate(12), and exact body animation(11).
-static const size_t NET_ZOMBIE_WIRE_BYTES = 62 + NET_ZOMBIE_ANIM_WIRE_BYTES;
+static const size_t NET_ZOMBIE_WIRE_BYTES = 68 + NET_ZOMBIE_ANIM_WIRE_BYTES + NET_ZOMBATAR_WIRE_BYTES;
 // Projectile: id(2), type/row(2), x/y/z/shadow(16), order(4),
 // rotation(4), motion/frame/high-ground(3).
 static const size_t NET_PROJECTILE_WIRE_BYTES = 31;
@@ -688,6 +690,27 @@ void NetEnsureGridItemVisual(GridItem* theGridItem, GridItemState thePreviousSta
 			break;
 		}
 	}
+	// Stinky's sleeping animation is a child of his shell, not a body track.
+	// Mirror that attachment without calling ZenGarden's profile/advice logic.
+	Reanimation* aSleeping = FindReanimAttachment(
+		aReanim->GetTrackInstanceByName("shell")->mAttachmentID);
+	if (theGridItem->mGridItemState == GridItemState::GRIDITEM_STINKY_SLEEPING)
+	{
+		if (!aSleeping || aSleeping->mDead)
+		{
+			aSleeping = theGridItem->mApp->AddReanimation(0.0f, 0.0f, 0,
+				ReanimationType::REANIM_SLEEPING);
+			if (aSleeping)
+			{
+				aSleeping->mAnimRate = 3.0f;
+				aSleeping->mLoopType = ReanimLoopType::REANIM_LOOP;
+				AttachReanim(aReanim->GetTrackInstanceByName("shell")->mAttachmentID,
+					aSleeping, 34.0f, 39.0f);
+			}
+		}
+	}
+	else if (aSleeping && !aSleeping->mDead)
+		aSleeping->ReanimationDie();
 
 	if (theGridItem->mGridItemState == GridItemState::GRIDITEM_STINKY_WALKING_RIGHT ||
 		theGridItem->mGridItemState == GridItemState::GRIDITEM_STINKY_TURNING_LEFT)
@@ -701,6 +724,36 @@ void NetEnsureGridItemVisual(GridItem* theGridItem, GridItemState thePreviousSta
 		aReanim->SetPosition(theGridItem->mPosX, theGridItem->mPosY);
 	}
 }
+}
+
+void LawnNet::NetBroadcastParticle(LawnApp* theApp, float theX, float theY,
+	int theRenderOrder, int theEffect)
+{
+	if (!theApp || !theApp->NetIsHost() || !theApp->mNetManager)
+		return;
+	NetBuffer anEvent;
+	anEvent.WriteU16((uint16_t)theEffect);
+	anEvent.WriteF32(theX);
+	anEvent.WriteF32(theY);
+	anEvent.WriteI32(theRenderOrder);
+	theApp->mNetManager->SendBoardEvent(anEvent, BOARDEV_PRESENTATION_PARTICLE);
+}
+
+void LawnNet::NetBroadcastReanimation(LawnApp* theApp, Reanimation* theReanim,
+	float theX, float theY, int theRenderOrder, int theType)
+{
+	if (!theApp || !theApp->NetIsHost() || !theApp->mNetManager || !theReanim)
+		return;
+	NetZombieAnimState aState;
+	if (!NetCaptureReanimState(theApp, theApp->ReanimationGetID(theReanim), aState))
+		return;
+	NetBuffer anEvent;
+	anEvent.WriteU16((uint16_t)theType);
+	anEvent.WriteF32(theX);
+	anEvent.WriteF32(theY);
+	anEvent.WriteI32(theRenderOrder);
+	if (NetEncodeZombieAnimState(aState, anEvent))
+		theApp->mNetManager->SendBoardEvent(anEvent, BOARDEV_PRESENTATION_REANIM);
 }
 
 void Board::NetCleanupCrazyDavePresentation()
@@ -918,6 +971,12 @@ void Board::NetHostTick()
 		mLastSnapshotTick = aNow;
 		if (mApp->mGameScene == GameScenes::SCENE_LEVEL_INTRO)
 		{
+			// The intro uses the same authoritative entities as gameplay.  Keeping
+			// only street-zombie previews dropped the introductory plants, moving
+			// zombies and projectiles because clients never run that simulation.
+			NetBuffer aSnap;
+			NetEncodeSnapshot(aSnap);
+			aNet->SendSnapshot(aSnap);
 			NetBuffer anIntro;
 			NetEncodeIntroState(anIntro);
 			aNet->BroadcastMessage(NETMSG_INTRO_STATE, anIntro);
@@ -966,6 +1025,10 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 	b.WriteU16((uint16_t)max(0, mFogBlownCountDown));
 	b.WriteU8((uint8_t)min(255, mLevel));
 	b.WriteU8((uint8_t)mTutorialState);
+	b.WriteI32(mTutorialTimer);
+	b.WriteU8(mShowShovel ? 1 : 0);
+	b.WriteI16((int16_t)(mApp->mMusic ? mApp->mMusic->mCurMusicTune : MusicTune::MUSIC_TUNE_NONE));
+	b.WriteU8(mApp->mMusic && mApp->mMusic->mPaused ? 1 : 0);
 	b.WriteU8((uint8_t)min(255, mIceTrapCounter));
 	b.WriteU8((uint8_t)min(255, mShakeCounter));
 	// Board widget coordinates are canonical 800x600 camera coordinates.  The
@@ -1083,6 +1146,8 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 	{
 		if (aPlant->mDead || !aPlant->mIsOnBoard)
 			continue;
+		if (aPlant->mNetId == 0)
+			aPlant->mNetId = NetAllocId();
 		aBody.WriteU16(aPlant->mNetId);
 		aBody.WriteU8((uint8_t)aPlant->mSeedType);
 		aBody.WriteU8((uint8_t)aPlant->mImitaterType);
@@ -1132,9 +1197,13 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 	{
 		if (aZombie->mDead)
 			continue;
+		if (aZombie->mNetId == 0)
+			aZombie->mNetId = NetAllocId();
 		aBody.WriteU16(aZombie->mNetId);
 		aBody.WriteU8((uint8_t)aZombie->mZombieType);
 		aBody.WriteU8((uint8_t)aZombie->mRow);
+		aBody.WriteI16((int16_t)max(-4, min(32767, aZombie->mFromWave)));
+		aBody.WriteI32(aZombie->mRenderOrder);
 		aBody.WriteI16((int16_t)(aZombie->mPosX * 4));
 		aBody.WriteI16((int16_t)(aZombie->mPosY * 4));
 		NetZombieHealthState aHealth;
@@ -1187,6 +1256,8 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 			anAnimState.Reset();
 			NetEncodeZombieAnimState(anAnimState, aBody);
 		}
+		if (!NetEncodeZombatar(aZombie->mNetZombatar, aBody))
+			NetEncodeZombatar(NetZombatarAppearance(), aBody);
 		aCount++;
 	}
 	TOD_ASSERT(aBody.Size() == (size_t)aCount * NET_ZOMBIE_WIRE_BYTES);
@@ -1240,6 +1311,7 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
                 uint8_t aCFlags = 0;
                 if (aCoin->mIsBeingCollected) aCFlags |= 1;
                 if (aCoin->mHitGround) aCFlags |= 2;
+                if (aCoin->mNeedsBouncyArrow) aCFlags |= 4;
                 aBody.WriteU8(aCFlags);
                 aBody.WriteU8((uint8_t)aCoin->mUsableSeedType);
                 aBody.WriteU8((uint8_t)min(255, max(0, aCoin->mFadeCount)));
@@ -1430,6 +1502,49 @@ void Board::NetApplyEvent(NetBuffer& b)
 	uint8_t aEvent = b.ReadU8Or();
 	switch (aEvent)
 	{
+	case BOARDEV_PRESENTATION_PARTICLE:
+	case BOARDEV_PRESENTATION_REANIM:
+	{
+		const bool aReanimation = aEvent == BOARDEV_PRESENTATION_REANIM;
+		const size_t anExpectedBytes = 14 + (aReanimation ? NET_ZOMBIE_ANIM_WIRE_BYTES : 0);
+		if (b.Remaining() != anExpectedBytes)
+		{
+			NetTrace("presentation effect rejected bytes=%zu expected=%zu", b.Remaining(), anExpectedBytes);
+			break;
+		}
+		const uint16_t aType = b.ReadU16Or();
+		const float aX = b.ReadF32Or();
+		const float aY = b.ReadF32Or();
+		const int aRenderOrder = b.ReadI32Or();
+		if (!_finite(aX) || !_finite(aY) || fabsf(aX) > 4096.0f || fabsf(aY) > 4096.0f ||
+			aRenderOrder < 0 || aRenderOrder > 1000000 ||
+			aType >= (aReanimation ? (int)ReanimationType::NUM_REANIMS : (int)ParticleEffect::NUM_PARTICLES))
+		{
+			NetTrace("presentation effect rejected type=%u pos=(%.2f,%.2f) order=%d", aType, aX, aY, aRenderOrder);
+			break;
+		}
+		if (!aReanimation)
+			mApp->AddTodParticle(aX, aY, aRenderOrder, (ParticleEffect)aType);
+		else
+		{
+			NetZombieAnimState aState;
+			if (!NetDecodeZombieAnimState(b, aState) || !aState.mPresent)
+				break;
+			ReanimatorEnsureDefinitionLoaded((ReanimationType)aType, true);
+			if (!gReanimatorDefArray || aType >= gReanimatorDefCount)
+				break;
+			const ReanimatorDefinition& aDefinition = gReanimatorDefArray[aType];
+			if (aDefinition.mTracks.count <= 0 || !aDefinition.mTracks.tracks ||
+				!NetZombieAnimStateFitsFrames(aState,
+					(uint32_t)aDefinition.mTracks.tracks[0].mTransforms.count))
+				break;
+			Reanimation* aReanim = mApp->AddReanimation(aX, aY, aRenderOrder, (ReanimationType)aType);
+			if (aReanim)
+				NetApplyReanimState(mApp, mApp->ReanimationGetID(aReanim), aState);
+		}
+		NetTrace("presentation effect applied kind=%s type=%u", aReanimation ? "reanim" : "particle", aType);
+		break;
+	}
 	case BOARDEV_PLANT_ADDED:
 	{
 		uint16_t anId = b.ReadU16Or();
@@ -1592,6 +1707,7 @@ void Board::NetApplyEvent(NetBuffer& b)
 			aCoin->mCollectY = aCoin->mPosY;
 			aCoin->mIsBeingCollected = true;
 			aCoin->mDead = false;
+			aCoin->NetUpdatePresentation();
 			if (aCoin->IsMoney())
 				ShowCoinBank();
 		}
@@ -1615,6 +1731,10 @@ void Board::NetApplyEvent(NetBuffer& b)
 			{
 				aZombie->mNetId = anId;
 				aZombie->mNetGhost = true;
+				// Spawn helpers publish this event before callers finish placing an
+				// entity (vases, graves and scripted spawns all do this).  Its first
+				// complete snapshot, rather than the provisional spawn, is visible.
+				aZombie->mVisible = false;
 				aZombie->mVariant = aVariant != 0;
 				aZombie->mVelX = aSpeed;
 				aZombie->mPosX = aPosX;
@@ -1797,7 +1917,34 @@ void Board::NetBroadcastPotatoExplosion(Plant* thePlant)
 
 void Board::NetApplyPlantPresentation(Plant* thePlant, PlantState thePreviousState, bool theCreatedOrAdopted)
 {
-	if (!thePlant || thePlant->mSeedType != SeedType::SEED_POTATOMINE)
+	if (!thePlant)
+		return;
+	// Sleeping has its own resource as well as a body track.  Match the stock
+	// offsets, but use a deterministic cosmetic clock instead of SetSleeping's
+	// random gameplay-RNG calls; exact timing follows the host reanimation block.
+	Reanimation* aSleeping = mApp->ReanimationTryToGet(thePlant->mSleepingReanimID);
+	if (thePlant->mIsAsleep && !aSleeping)
+	{
+		float aX = thePlant->mX + 50.0f;
+		float aY = thePlant->mY + 40.0f;
+		if (thePlant->mSeedType == SeedType::SEED_FUMESHROOM) aX += 12.0f;
+		else if (thePlant->mSeedType == SeedType::SEED_SCAREDYSHROOM) aY -= 20.0f;
+		else if (thePlant->mSeedType == SeedType::SEED_GLOOMSHROOM) aY -= 12.0f;
+		aSleeping = mApp->AddReanimation(aX, aY, thePlant->mRenderOrder + 2,
+			ReanimationType::REANIM_SLEEPING);
+		if (aSleeping)
+		{
+			aSleeping->mLoopType = ReanimLoopType::REANIM_LOOP;
+			aSleeping->mAnimRate = 7.0f;
+			thePlant->mSleepingReanimID = mApp->ReanimationGetID(aSleeping);
+		}
+	}
+	else if (!thePlant->mIsAsleep && aSleeping)
+	{
+		mApp->RemoveReanimation(thePlant->mSleepingReanimID);
+		thePlant->mSleepingReanimID = ReanimationID::REANIMATIONID_NULL;
+	}
+	if (thePlant->mSeedType != SeedType::SEED_POTATOMINE)
 		return;
 
 	Reanimation* aBodyReanim = mApp->ReanimationTryToGet(thePlant->mBodyReanimID);
@@ -1862,7 +2009,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	// Fixed core through the seed-packet count.  Validate it before touching
 	// board/profile state so a truncated datagram cannot partially apply.
 	static const size_t NET_SNAPSHOT_CORE_BYTES =
-		80 + NET_CHALLENGE_RUNTIME_WIRE_BYTES;
+		88 + NET_CHALLENGE_RUNTIME_WIRE_BYTES;
 	if (b.Remaining() < NET_SNAPSHOT_CORE_BYTES)
 	{
 		NetTrace("snapshot core rejected: bytes=%zu expected-at-least=%zu", b.Remaining(), NET_SNAPSHOT_CORE_BYTES);
@@ -1900,6 +2047,18 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	mFogBlownCountDown = b.ReadU16Or();
 	mLevel = b.ReadU8Or();
 	mTutorialState = (TutorialState)b.ReadU8Or();
+	const int aTutorialTimer = b.ReadI32Or();
+	const uint8_t aShowShovel = b.ReadU8Or();
+	const int aMusicTune = b.ReadI16Or();
+	const uint8_t aMusicPaused = b.ReadU8Or();
+	if (aTutorialTimer < -1 || aTutorialTimer > 1000000 || aShowShovel > 1 ||
+		aMusicTune < MusicTune::MUSIC_TUNE_NONE || aMusicTune == 0 ||
+		aMusicTune >= MusicTune::NUM_MUSIC_TUNES || aMusicPaused > 1)
+	{
+		NetTrace("snapshot presentation rejected timer=%d shovel=%u music=%d paused=%u",
+			aTutorialTimer, aShowShovel, aMusicTune, aMusicPaused);
+		return;
+	}
 	mIceTrapCounter = b.ReadU8Or();
 	mShakeCounter = b.ReadU8Or();
 	const int aGameplayBoardX = b.ReadI16Or();
@@ -2196,8 +2355,9 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	// Conveyor array indices are physical slots: RemoveSeed compacts them and mX
 	// is index-derived.  Apply the authoritative wire order even when the same
 	// identity multiset could otherwise be greedily matched in a stale local order.
-	const bool aCanonicalFallback = aCanonicalOwnershipSafe &&
-		(HasConveyorBeltSeedBank() || (!anIdentityMultisetMatch && aCanonicalFallbackMode));
+	const bool aCanonicalFallback = mApp->mGameScene == GameScenes::SCENE_LEVEL_INTRO ||
+		(aCanonicalOwnershipSafe &&
+		 (HasConveyorBeltSeedBank() || (!anIdentityMultisetMatch && aCanonicalFallbackMode)));
 	if (!anIdentityMultisetMatch && !aCanonicalFallback)
 	{
 		uint8_t aMismatchType = 255;
@@ -2519,6 +2679,8 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		uint8_t mRow;
 		int16_t mPosX4;
 		int16_t mPosY4;
+		int16_t mFromWave;
+		int32_t mRenderOrder;
 		NetZombieHealthState mHealth;
 		uint8_t mPhase;
 		uint8_t mHeight;
@@ -2534,6 +2696,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		float mAltitude;
 		float mAnimRate;
 		NetZombieAnimState mBodyAnim;
+		NetZombatarAppearance mZombatar;
 	};
 	std::vector<NetZombieWire> aZombieWires;
 	aZombieWires.reserve(aCount);
@@ -2544,6 +2707,8 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		aWire.mId = b.ReadU16Or();
 		aWire.mType = b.ReadU8Or();
 		aWire.mRow = b.ReadU8Or();
+		aWire.mFromWave = b.ReadI16Or();
+		aWire.mRenderOrder = b.ReadI32Or();
 		aWire.mPosX4 = b.ReadI16Or();
 		aWire.mPosY4 = b.ReadI16Or();
 		if (!NetDecodeZombieHealthState(b, aWire.mHealth))
@@ -2571,6 +2736,13 @@ void Board::NetApplySnapshot(NetBuffer& b)
 				i, aWire.mId);
 			return;
 		}
+		if (!NetDecodeZombatar(b, aWire.mZombatar) ||
+			(aWire.mZombatar.mPresent && aWire.mType != (uint8_t)ZombieType::ZOMBIE_NORMAL &&
+			 aWire.mType != (uint8_t)ZombieType::ZOMBIE_FLAG))
+		{
+			NetTrace("snapshot zombie appearance rejected index=%d id=%u", i, aWire.mId);
+			return;
+		}
 
 #ifdef _HAS_BLOOM_AND_DOOM_CONTENTS
 		const uint8_t aMaxPhase = (uint8_t)ZombiePhase::PHASE_DOG_FREE;
@@ -2579,6 +2751,8 @@ void Board::NetApplySnapshot(NetBuffer& b)
 #endif
 		const bool aValid = aWire.mId != 0 &&
 			aWire.mType < (uint8_t)ZombieType::NUM_ZOMBIE_TYPES &&
+			aWire.mFromWave >= Zombie::ZOMBIE_WAVE_WINNER &&
+			aWire.mRenderOrder >= 0 && aWire.mRenderOrder <= 1000000 &&
 			aWire.mRow < MAX_GRID_SIZE_Y && aWire.mPhase <= aMaxPhase &&
 			aWire.mHeight <= (uint8_t)ZombieHeight::HEIGHT_ZOMBIQUARIUM &&
 			aWire.mHelmType <= (uint8_t)HelmType::HELMTYPE_BLACK_FOOTBALL &&
@@ -2664,16 +2838,15 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		const int aPreviousRow = aZombie->mRow;
 		const float aTargetX = aWire.mPosX4 / 4.0f;
 		const float aTargetY = aWire.mPosY4 / 4.0f;
-		const bool aPortalJump = !aCreated &&
-			mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_PORTAL_COMBAT &&
-			aPreviousRow != aWire.mRow &&
+		const bool aFirstAuthoritativeSample = aCreated || !aZombie->mVisible;
+		const bool aPortalJump = !aFirstAuthoritativeSample &&
 			(fabsf(aTargetX - aZombie->mPosX) >= 120.0f ||
 			 fabsf(aTargetY - aZombie->mPosY) >= 50.0f);
 		if (aPreviousRow != aWire.mRow)
 			aZombie->SetRow(aWire.mRow);
 		aZombie->mNetTargetX = aWire.mPosX4 / 4.0f;
 		aZombie->mNetTargetY = aWire.mPosY4 / 4.0f;
-		if (aCreated || aPortalJump)
+		if (aFirstAuthoritativeSample || aPortalJump)
 		{
 			aZombie->mPosX = aZombie->mNetTargetX;
 			aZombie->mPosY = aZombie->mNetTargetY;
@@ -2684,6 +2857,10 @@ void Board::NetApplySnapshot(NetBuffer& b)
 					aWire.mId, aPreviousRow, aWire.mRow,
 					aZombie->mPosX, aZombie->mPosY);
 		}
+		aZombie->mVisible = true;
+		aZombie->mFromWave = aWire.mFromWave;
+		aZombie->mRenderOrder = aWire.mRenderOrder;
+		aZombie->ApplyNetZombatar(aWire.mZombatar);
 		aZombie->mBodyHealth = (int)aWire.mHealth.mBody;
 		aZombie->mBodyMaxHealth = (int)aWire.mHealth.mBodyMax;
 		aZombie->mHelmHealth = (int)aWire.mHealth.mHelm;
@@ -2699,8 +2876,24 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		aZombie->mIsEating = (aWire.mFlags & 1) != 0;
 		aZombie->mInPool = (aWire.mFlags & 2) != 0;
 		aZombie->mOnHighGround = (aWire.mFlags & 4) != 0;
-		aZombie->mHasHead = (aWire.mFlags & 8) != 0;
-		aZombie->mHasArm = (aWire.mFlags & 16) != 0;
+		// Flags alone cannot hide the corresponding tracks or spawn the falling
+		// limb.  Reuse the stock visual routines once at each authoritative edge;
+		// an initial headless/one-armed sample hides tracks without replaying a
+		// historical loss.  No damage, loot or challenge callbacks run here.
+		const bool aHasHead = (aWire.mFlags & 8) != 0;
+		const bool aHasArm = (aWire.mFlags & 16) != 0;
+		if (aZombie->mHasArm && !aHasArm)
+			aZombie->SetupReanimForLostArm(aFirstAuthoritativeSample ?
+				1U << (int)DamageFlags::DAMAGE_DOESNT_LEAVE_BODY : 0U);
+		if (aZombie->mHasHead && !aHasHead)
+		{
+			if (aFirstAuthoritativeSample)
+				aZombie->SetupReanimForLostHead();
+			else
+				aZombie->DropHead(0U);
+		}
+		aZombie->mHasHead = aHasHead;
+		aZombie->mHasArm = aHasArm;
 		aZombie->mHasObject = (aWire.mFlags & 32) != 0;
 		aZombie->mVariant = (aWire.mFlags & 64) != 0;
 		aZombie->mMindControlled = (aWire.mFlags & 128) != 0;
@@ -2972,7 +3165,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 			aWire.mType >= (uint8_t)CoinType::COIN_SILVER &&
 			aWire.mType <= (uint8_t)CoinType::COIN_PRESENT_SURVIVAL_MODE &&
 			aWire.mMotion <= (uint8_t)CoinMotion::COIN_MOTION_FROM_BOSS &&
-			(aWire.mFlags & ~3) == 0 &&
+			(aWire.mFlags & ~7) == 0 &&
 			(aUsablePacket ? aWire.mUsableSeed < (uint8_t)SeedType::NUM_SEED_TYPES : aWire.mUsableSeed == 255) &&
 			_finite(aWire.mPosX) && _finite(aWire.mPosY) &&
 			aWire.mPosX >= -1024.0f && aWire.mPosX <= 2048.0f &&
@@ -3066,6 +3259,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		if (!aWasBeingCollected && aCoin->mIsBeingCollected && aCoin->IsMoney())
 			ShowCoinBank();
 		aCoin->mHitGround = (aWire.mFlags & 2) != 0;
+		aCoin->mNeedsBouncyArrow = (aWire.mFlags & 4) != 0;
 		aCoin->mUsableSeedType = aWire.mUsableSeed == 255 ? SeedType::SEED_NONE : (SeedType)aWire.mUsableSeed;
 		if (aPottedPresent)
 		{
@@ -3077,6 +3271,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		}
 		aCoin->mFadeCount = aWire.mFadeCount;
 		aCoin->mDisappearCounter = aWire.mDisappearCounter;
+		aCoin->NetUpdatePresentation();
 	}
 	{
 		Coin* aCoin = nullptr;
@@ -3395,6 +3590,17 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		NetTrace("snapshot ignored trailing bytes=%zu", b.Remaining());
 		return;
 	}
+	mTutorialTimer = aTutorialTimer;
+	mShowShovel = aShowShovel != 0;
+	if (mApp->mMusic)
+	{
+		if (aMusicTune == MusicTune::MUSIC_TUNE_NONE)
+			mApp->mMusic->StopAllMusic();
+		else
+			mApp->mMusic->MakeSureMusicIsPlaying((MusicTune)aMusicTune);
+		if (mApp->mMusic->mPaused != (aMusicPaused != 0))
+			mApp->mMusic->GameMusicPause(aMusicPaused != 0);
+	}
 
 	// Challenge::Update is deliberately host-only.  Reconstruct the slot-machine
 	// handle's cosmetic transitions only after the complete snapshot was accepted.
@@ -3433,8 +3639,8 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	mNetGameplayCameraTargets.mBoardY = aGameplayBoardY;
 	mNetGameplayCameraTargets.mTreeX = aGameplayTreeX;
 	mNetGameplayCameraTargets.mPoleX = aGameplayPoleX;
-	mNetGameplayCameraTargets.mValid = true;
-	if (aFirstGameplayCameraSample || aCameraDiscontinuity)
+	mNetGameplayCameraTargets.mValid = mApp->mGameScene != GameScenes::SCENE_LEVEL_INTRO;
+	if (mNetGameplayCameraTargets.mValid && (aFirstGameplayCameraSample || aCameraDiscontinuity))
 	{
 		Move(aGameplayBoardX, aGameplayBoardY);
 		mTreeX = aGameplayTreeX;
@@ -3442,7 +3648,8 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	}
 	// Intro targets describe a different scene and must never pull a playing
 	// client back toward its final cutscene camera sample.
-	mNetIntroTargets.mValid = false;
+	if (mApp->mGameScene != GameScenes::SCENE_LEVEL_INTRO)
+		mNetIntroTargets.mValid = false;
 	// Terminal presentation is committed only after the complete snapshot passed
 	// every variable-section check.  The host continues sending terminal snapshots
 	// in ZOMBIES_WON so a dropped last gameplay packet cannot strand the client.
@@ -4196,13 +4403,6 @@ void Board::DrawEndlessWeather(Graphics* g)
 	if (!IsEndlessT())
 		return;
 
-	// night darkness
-	if (mNetDayPhase == 1)
-	{
-		g->SetColor(Color(10, 10, 40, 110));
-		g->FillRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
-	}
-
 	// fog roll from the right
 	if (mNetFogTimer > 0)
 	{
@@ -4240,6 +4440,21 @@ bool Board::IsPvPMode()
 	return mApp->mGameMode == GameMode::GAMEMODE_COOP_PVP;
 }
 
+bool Board::IsSeedPacketVisibleToSlot(int theIndex, int theSlot) const
+{
+	if (!mSeedBank || theIndex < 0 || theIndex >= mSeedBank->mNumPackets)
+		return false;
+	if (mApp->mGameMode != GameMode::GAMEMODE_COOP_PVP || !mApp->mNetManager)
+		return true;
+	if (theSlot < 0 || theSlot >= LawnNet::NET_MAX_PLAYERS)
+		return false;
+	const NetPlayerInfo& aPlayer = mApp->mNetManager->GetPlayer(theSlot);
+	if (!aPlayer.mActive)
+		return false;
+	const bool aZombiePacket = mChallenge->IsZombieSeedType(mSeedBank->mSeedPackets[theIndex].mPacketType);
+	return aZombiePacket == (aPlayer.mTeam == LawnNet::NETTEAM_ZOMBIES);
+}
+
 void Board::AssignPvPSeedOwners()
 {
 	if (!IsPvPMode() || !mSeedBank || !mApp->mNetManager)
@@ -4250,7 +4465,7 @@ void Board::AssignPvPSeedOwners()
 	for (int aSlot = 0; aSlot < LawnNet::NET_MAX_PLAYERS; aSlot++)
 	{
 		const LawnNet::NetPlayerInfo& aPlayer = mApp->mNetManager->GetPlayer(aSlot);
-		if (!aPlayer.mActive)
+		if (!aPlayer.mActive || aPlayer.mSpectator)
 			continue;
 		if (aPlayer.mTeam == LawnNet::NETTEAM_PLANTS)
 			aPlantSlots[aPlantCount++] = aSlot;
@@ -4278,6 +4493,7 @@ void Board::AssignPvPSeedOwners()
 		int anOwner = aPacket.mNetOwnerSlot;
 		bool anOwnerIsPlant = anOwner >= 0 && anOwner < LawnNet::NET_MAX_PLAYERS &&
 			mApp->mNetManager->GetPlayer(anOwner).mActive &&
+			!mApp->mNetManager->GetPlayer(anOwner).mSpectator &&
 			mApp->mNetManager->GetPlayer(anOwner).mTeam == LawnNet::NETTEAM_PLANTS;
 		if (!anOwnerIsPlant)
 			aPacket.mNetOwnerSlot = (unsigned char)aPlantSlots[aPlantRoundRobin++ % aPlantCount];
@@ -4305,7 +4521,7 @@ void Board::UpdateTowerDefenseGame()
 
 void Board::UpdatePvP()
 {
-	if (!IsPvPMode() || mApp->NetIsClient())
+	if (!IsPvPMode() || mApp->NetIsClient() || mBoardFadeOutCounter >= 0)
 		return;
 
 	// brains trickle: +50 every ~10 seconds, shared by the zombie team
@@ -4328,6 +4544,8 @@ void Board::UpdatePvP()
 	}
 	else if (mNetPvPKillScore >= 100)
 	{
+		mApp->mBoardResult = BoardResult::BOARDRESULT_WON;
+		mLevelAwardSpawned = true;
 		FadeOutLevel();
 	}
 }
@@ -4338,6 +4556,8 @@ void Board::NetPvPZombieScored(Zombie* theZombie)
 	if (!IsPvPMode() || mApp->NetIsClient())
 		return;
 	mNetPvPBrainScore++;
+	// Reaching the house is a score for the invading team, not a plant kill.
+	theZombie->mNetKillCounted = true;
 	theZombie->DieNoLoot();
 	mApp->PlaySample(Sexy::SOUND_CHOMP);
 }
@@ -4349,7 +4569,7 @@ void Board::NetDrawPvPScore(Graphics* g)
 		return;
 
 	SexyString aScoreStr = StrFormat(_S("BRAINS %d/5    KILLS %d/100"), mNetPvPBrainScore, mNetPvPKillScore);
-	TodDrawString(g, aScoreStr, BOARD_WIDTH / 2, 8, Sexy::FONT_BRIANNETOD12,
+	TodDrawString(g, aScoreStr, BOARD_WIDTH / 2, BOARD_HEIGHT - 8, Sexy::FONT_BRIANNETOD12,
 		Color(255, 240, 200), DrawStringJustification::DS_ALIGN_CENTER);
 }
 

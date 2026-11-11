@@ -63,11 +63,116 @@
 #include "SexyAppFramework/D3DInterface.h"
 
 #include "Lawn/Widget/MoreSettingsDialog.h"
+#include "Lawn/Widget/NetOnlineDialog.h"
 
 #include <windows.h>
 #include <windowsx.h>
 
 bool gIsPartnerBuild = false;
+
+namespace
+{
+class CoopTeamDialog : public LawnDialog
+{
+    LawnStoneButton* mPlants;
+    LawnStoneButton* mZombies;
+    LawnStoneButton* mReady;
+public:
+    explicit CoopTeamDialog(LawnApp* theApp) :
+        LawnDialog(theApp, Dialogs::DIALOG_COOP_TEAMS, true, _S("PvP: choose team"),
+            _S(""), _S("BACK"), Dialog::BUTTONS_FOOTER)
+    {
+        mPlants = MakeButton(101, this, _S("PLANTS"));
+        mZombies = MakeButton(102, this, _S("ZOMBIES"));
+        mReady = MakeButton(103, this, _S("READY"));
+        mPlants->Resize(70, 120, 210, 42);
+        mZombies->Resize(320, 120, 210, 42);
+        mReady->Resize(195, 345, 210, 42);
+        Resize(0, 0, 600, 480);
+        LawnApp::CenterDialog(this, mWidth, mHeight);
+        mLawnYesButton->SetVisible(theApp->NetIsHost());
+    }
+    ~CoopTeamDialog()
+    {
+        delete mPlants;
+        delete mZombies;
+        delete mReady;
+    }
+    void AddedToManager(WidgetManager* theManager) override
+    {
+        LawnDialog::AddedToManager(theManager);
+        AddWidget(mPlants);
+        AddWidget(mZombies);
+        AddWidget(mReady);
+    }
+    void RemovedFromManager(WidgetManager* theManager) override
+    {
+        RemoveWidget(mPlants);
+        RemoveWidget(mZombies);
+        RemoveWidget(mReady);
+        LawnDialog::RemovedFromManager(theManager);
+    }
+    void Update() override
+    {
+        LawnDialog::Update();
+        LawnNet::NetManager* aNet = mApp->mNetManager;
+        if (!aNet)
+            return;
+        mPlants->SetLabel(aNet->GetMyTeam() == LawnNet::NETTEAM_PLANTS ? _S("[ PLANTS ]") : _S("PLANTS"));
+        mZombies->SetLabel(aNet->GetMyTeam() == LawnNet::NETTEAM_ZOMBIES ? _S("[ ZOMBIES ]") : _S("ZOMBIES"));
+        mReady->SetLabel(StrFormat(aNet->IsMyReady() ? _S("READY %d/%d") : _S("NOT READY %d/%d"),
+            aNet->GetReadyCount(), aNet->GetReadyEligibleCount()));
+        mReady->SetDisabled(aNet->IsSpectator() || aNet->GetMyTeam() == LawnNet::NETTEAM_NONE);
+        MarkDirty();
+    }
+    void Draw(Graphics* g) override
+    {
+        LawnDialog::Draw(g);
+        LawnNet::NetManager* aNet = mApp->mNetManager;
+        int y = 200;
+        for (int i = 0; aNet && i < LawnNet::NET_MAX_PLAYERS; i++)
+        {
+            const LawnNet::NetPlayerInfo& aPlayer = aNet->GetPlayer(i);
+            if (!aPlayer.mActive || aPlayer.mSpectator)
+                continue;
+            const SexyString aTeam = aPlayer.mTeam == LawnNet::NETTEAM_PLANTS ? _S("PLANTS") :
+                aPlayer.mTeam == LawnNet::NETTEAM_ZOMBIES ? _S("ZOMBIES") : _S("CHOOSE TEAM");
+            TodDrawString(g, StringToSexyString(aPlayer.mNick) + _S(" - ") + aTeam +
+                (aPlayer.mReady ? _S("  READY") : _S("")), 80, y,
+                FONT_BRIANNETOD12, aPlayer.mReady ? Color(50, 125, 45) : Color(150, 50, 45), DS_ALIGN_LEFT);
+            y += 28;
+        }
+        TodDrawString(g, _S("Each team needs a player. Everyone must be ready."),
+            300, 325, FONT_BRIANNETOD12, Color(80, 75, 95), DS_ALIGN_CENTER);
+    }
+    void ButtonDepress(int theId) override
+    {
+        LawnNet::NetManager* aNet = mApp->mNetManager;
+        if (!aNet)
+            return;
+        if (theId == 101 || theId == 102)
+        {
+            aNet->SetMyTeam(theId == 101 ? LawnNet::NETTEAM_PLANTS : LawnNet::NETTEAM_ZOMBIES);
+            aNet->SetMyReady(false);
+        }
+        else if (theId == 103)
+            aNet->SetMyReady(!aNet->IsMyReady());
+        else if (theId == 1000 && mApp->NetIsHost())
+            mApp->NetClosePvpTeamSelection(true);
+    }
+    void KeyDown(KeyCode theKey) override
+    {
+        if (theKey == KEYCODE_RETURN)
+            ButtonDepress(103);
+        else if (theKey == KEYCODE_LEFT)
+            ButtonDepress(101);
+        else if (theKey == KEYCODE_RIGHT)
+            ButtonDepress(102);
+        else if (theKey == KEYCODE_ESCAPE && mApp->NetIsHost())
+            mApp->NetClosePvpTeamSelection(true);
+    }
+};
+}
 bool gSlowMo = false;  //0x6A9EAA
 bool gFastMo = false;  //0x6A9EAB
 LawnApp* gLawnApp = nullptr;  //0x6A9EC0
@@ -402,6 +507,9 @@ void LawnApp::MakeWindow()
 	if (!IsParticleEditor()) windowFlags |= SDL_WINDOW_RESIZABLE;
 	if (IsScreenSaver() || !mIsWindowed) windowFlags |= SDL_WINDOW_FULLSCREEN;
 	windowFlags |= SDL_WINDOW_HIGH_PIXEL_DENSITY;
+	const bool aBackgroundSmoke = CoopSmokeActive() && getenv("PVZ_COOP_SMOKE_BACKGROUND") &&
+		strcmp(getenv("PVZ_COOP_SMOKE_BACKGROUND"), "1") == 0;
+	if (aBackgroundSmoke) windowFlags |= SDL_WINDOW_HIDDEN;
 
 	SDL_RendererLogicalPresentation presentationMode;
 
@@ -436,7 +544,7 @@ void LawnApp::MakeWindow()
 	ImGui_ImplSDL3_InitForSDLRenderer(mSDLWindow, mSDLRenderer);
 	ImGui_ImplSDLRenderer3_Init(mSDLRenderer);
 
-	SDL_RaiseWindow(mSDLWindow);
+	if (!aBackgroundSmoke) SDL_RaiseWindow(mSDLWindow);
 }
 
 bool LawnApp::DrawDirtyStuff()
@@ -459,6 +567,26 @@ void LawnApp::Redraw(Rect* theClipRect)
 	// Co-op overlays are the final visual layer, above widgets and dialogs.
 	NetDrawChatOverlay();
 	NetDrawCursorOverlay();
+	// Background smoke captures the game's own render target, never the desktop.
+	const char* aCaptureDir = CoopSmokeActive() ? getenv("PVZ_COOP_SMOKE_CAPTURE_DIR") : nullptr;
+	static uint32_t aLastCaptureTick = 0;
+	static int aLastCaptureScene = -1;
+	if (aCaptureDir && mLoadingThreadCompleted && mWidgetManager && mWidgetManager->mImage &&
+		(aLastCaptureScene != (int)mGameScene || GetTickCount() - aLastCaptureTick >= 2000U))
+	{
+		aLastCaptureTick = GetTickCount();
+		aLastCaptureScene = (int)mGameScene;
+		SDL_Texture* aPreviousTarget = SDL_GetRenderTarget(mSDLRenderer);
+		SDL_SetRenderTarget(mSDLRenderer, (SDL_Texture*)mWidgetManager->mImage->mD3DData);
+		SDL_Surface* aFrame = SDL_RenderReadPixels(mSDLRenderer, nullptr);
+		SDL_SetRenderTarget(mSDLRenderer, aPreviousTarget);
+		if (aFrame)
+		{
+			std::string aPath = std::string(aCaptureDir) + "\\scene_" + std::to_string(aLastCaptureScene) + ".bmp";
+			SDL_SaveBMP(aFrame, aPath.c_str());
+			SDL_DestroySurface(aFrame);
+		}
+	}
 	SDL_RenderPresent(mSDLRenderer);
 }
 
@@ -579,6 +707,7 @@ bool LawnApp::UpdateAppStep(bool* updated)
 						}
 
 						// co-op client: during play all board clicks go to the host
+						if (NetHandlePointerInput(LawnNet::NETINPUT_MOUSE_DOWN, buttonTrans(event.button.button), x, y)) break;
 						if (NetIsClient() && mBoard && mGameScene == GameScenes::SCENE_PLAYING && GetDialogCount() == 0)
 							mNetManager->SendInput(true, buttonTrans(event.button.button), x, y);
 						else
@@ -604,6 +733,7 @@ bool LawnApp::UpdateAppStep(bool* updated)
 						}
 
 						// co-op client: during play all board clicks go to the host
+						if (NetHandlePointerInput(LawnNet::NETINPUT_MOUSE_UP, buttonTrans(event.button.button), x, y)) break;
 						if (NetIsClient() && mBoard && mGameScene == GameScenes::SCENE_PLAYING && GetDialogCount() == 0)
 							mNetManager->SendInput(false, buttonTrans(event.button.button), x, y);
 						else
@@ -618,6 +748,7 @@ bool LawnApp::UpdateAppStep(bool* updated)
 						mWidgetManager->RemapMouse(x, y);
 						mLastUserInputTick = mLastTimerTime;
 						mWidgetManager->MouseMove(x, y);
+						if (NetHandlePointerInput(LawnNet::NETINPUT_MOUSE_MOVE, 0, x, y)) break;
 						if (NetIsClient() && mBoard && mGameScene == GameScenes::SCENE_PLAYING && GetDialogCount() == 0)
 						{
 							int aDragButton = 0;
@@ -781,6 +912,8 @@ bool LawnApp::UpdateAppStep(bool* updated)
 					break;
 				}
 				case SDL_EVENT_KEY_UP:
+					if ((event.key.key == SDLK_LCTRL || event.key.key == SDLK_RCTRL) && mNetDrawing)
+						NetHandlePointerInput(LawnNet::NETINPUT_MOUSE_UP, 0, mNetLastDrawX, mNetLastDrawY);
 					if (NetIsClient() && mNetManager && event.key.key == SDLK_Q)
 						mNetManager->SendHeatWaveShoutKey(false);
 					if (!imguiWantsKeyboard)
@@ -925,6 +1058,10 @@ LawnApp::LawnApp()
 	mNetBoardSeed = 0;
 	mNetBlockProfileSave = false;
 	mNetLocalProfileBackup = nullptr;
+	mNetLastProfileHash = 0;
+	mNetHostUnlockAllMinigames = false;
+	mNetPendingPvpLevel = -1;
+	mNetPvpTeamsConfirmed = false;
 	mNetCoopGameOverHandled = false;
 	mNetCursorImage = nullptr;
 	mNetChatTyping = false;
@@ -1353,6 +1490,12 @@ void LawnApp::PreNewGame(GameMode theGameMode, bool theLookForSavedGame)
 		return;
 	}
 
+	if (theGameMode == GAMEMODE_COOP_PVP && NetIsHost() && !mNetPvpTeamsConfirmed)
+	{
+		NetShowPvpTeamSelection();
+		return;
+	}
+
 	//if (NeedRegister())
 	//{
 	//	ShowGameSelector();
@@ -1395,6 +1538,12 @@ void LawnApp::PreNewGame(GameMode theGameMode, bool theLookForSavedGame, int the
 	{
 		LawnNet::NetTrace("client PreNewGame(level) rejected mode=%d level=%d saved=%d",
 			(int)theGameMode, theLevel, theLookForSavedGame ? 1 : 0);
+		return;
+	}
+
+	if (theGameMode == GAMEMODE_COOP_PVP && NetIsHost() && !mNetPvpTeamsConfirmed)
+	{
+		NetShowPvpTeamSelection(theLevel);
 		return;
 	}
 
@@ -1541,6 +1690,7 @@ bool LawnApp::TryLoadGame(int theLevel)
 //0x44F890
 void LawnApp::NewGame()
 {
+	NetCloseTransientScreens();
 	mFirstTimeGameSelector = false;
 
 	MakeNewBoard();
@@ -1557,6 +1707,12 @@ void LawnApp::NewGame()
 void LawnApp::ShowGameSelector()
 {
 	LawnNet::NetTrace("ShowGameSelector begin board=%p selector=%p", (void*)mBoard, (void*)mGameSelector);
+	NetCloseTransientScreens();
+	if (NetIsHost())
+	{
+		NetBroadcastProfile();
+		mNetManager->BroadcastSceneCmd(LawnNet::SCENECMD_SHOW_GAME_SELECTOR, 0);
+	}
 	KillBoard();
 	if (mNetLobbyPanel)
 	{
@@ -1597,9 +1753,13 @@ void LawnApp::KillGameSelector()
 //0x44FA20
 void LawnApp::ShowAwardScreen(AwardType theAwardType, bool theShowAchievements)
 {
+	KillAwardScreen();
 	// co-op host: mirror the award screen on clients
 	if (mNetManager && mNetManager->IsHosting())
+	{
+		NetBroadcastProfile();
 		mNetManager->BroadcastSceneCmd(LawnNet::SCENECMD_SHOW_AWARD, (int)theAwardType);
+	}
 
 	mGameScene = GameScenes::SCENE_AWARD;
 	mAwardScreen = new AwardScreen(this, theAwardType, theShowAchievements);
@@ -1614,6 +1774,8 @@ void LawnApp::KillAwardScreen()
 {
 	if (mAwardScreen)
 	{
+		if (NetIsHost())
+			mNetManager->BroadcastSceneCmd(LawnNet::SCENECMD_CLOSE_AWARD, 0);
 		mWidgetManager->RemoveWidget(mAwardScreen);
 		SafeDeleteWidget(mAwardScreen);
 		mAwardScreen = nullptr;
@@ -1644,6 +1806,8 @@ void LawnApp::KillCreditScreen()
 //0x44FC30
 void LawnApp::ShowChallengeScreen(ChallengePage thePage)
 {
+	KillAwardScreen();
+	KillChallengeScreen();
 	// co-op host: mirror the challenge screen on clients
 	if (mNetManager && mNetManager->IsHosting())
 		mNetManager->BroadcastSceneCmd(LawnNet::SCENECMD_SHOW_CHALLENGE_PAGE, (int)thePage);
@@ -1661,6 +1825,8 @@ void LawnApp::KillChallengeScreen()
 {
 	if (mChallengeScreen)
 	{
+		if (NetIsHost())
+			mNetManager->BroadcastSceneCmd(LawnNet::SCENECMD_CLOSE_CHALLENGE, 0);
 		mWidgetManager->RemoveWidget(mChallengeScreen);
 		SafeDeleteWidget(mChallengeScreen);
 		mChallengeScreen = nullptr;
@@ -1874,7 +2040,7 @@ void LawnApp::DoNewOptions(bool theFromGameSelector)
 	//FinishModelessDialogs();
 
 	NewOptionsDialog* aDialog = new NewOptionsDialog(this, theFromGameSelector);
-	CenterDialog(aDialog, IMAGE_OPTIONS_MENUBACK->mWidth, IMAGE_OPTIONS_MENUBACK->mHeight);
+	CenterDialog(aDialog, IMAGE_OPTIONS_MENUBACK->mWidth, aDialog->GetPreferredHeight(IMAGE_OPTIONS_MENUBACK->mWidth));
 	AddDialog(Dialogs::DIALOG_NEWOPTIONS, aDialog);
 	mWidgetManager->SetFocus(aDialog);
 }
@@ -2394,6 +2560,8 @@ void LawnApp::ModalClose()
 //0x451800
 bool LawnApp::KillDialog(int theDialogId)
 {
+	if (theDialogId == Dialogs::DIALOG_STORE && GetDialog(theDialogId) && NetIsHost())
+		mNetManager->BroadcastSceneCmd(LawnNet::SCENECMD_CLOSE_STORE, 0);
 	if (SexyAppBase::KillDialog(theDialogId))
 	{
 		if (mDialogMap.size() == 0)
@@ -2718,7 +2886,9 @@ void LawnApp::Init()
 #endif
 	mTimer.Start();
 
-	SDL_RaiseWindow(LawnApp::mSDLWindow);
+	if (!(CoopSmokeActive() && getenv("PVZ_COOP_SMOKE_BACKGROUND") &&
+		strcmp(getenv("PVZ_COOP_SMOKE_BACKGROUND"), "1") == 0))
+		SDL_RaiseWindow(LawnApp::mSDLWindow);
 	if (!IsScreenSaver() && !IsParticleEditor() && !CoopSmokeActive())
 		PlayVideo(StrFormat("%svideos/intro.mp4", SDL_GetBasePath()).c_str(), true);
 }
@@ -3130,6 +3300,9 @@ void LawnApp::UpdateFrames()
 	if (mNetManager)
 	{
 		mNetManager->Update();
+		NetTickPvpTeamSelection();
+		if (mNetManager->IsHosting())
+			NetBroadcastProfile(false);
 		if (mNetChatTyping &&
 			!((mNetManager->IsHosting() && mNetManager->GetPlayerCount() > 1) ||
 				mNetManager->IsConnectedToHost()))
@@ -5640,7 +5813,15 @@ void LawnApp::CoopSmokeStartLifecycle()
 	mCoopSmokeScenarioRuntime.Reset(mCoopSmokeManifest.mScenario);
 
 	bool aStarted = false;
-	if (mCoopSmokeManifest.IsHost())
+	const char* anOnlineEndpoint = getenv("PVZ_COOP_SMOKE_ONLINE_ENDPOINT");
+	if (anOnlineEndpoint && *anOnlineEndpoint)
+	{
+		LawnNet::NetTraceOpen(mCoopSmokeManifest.IsHost() ? "host" : "client");
+		aStarted = mNetManager->ConnectOnlineDirectory(anOnlineEndpoint);
+		LawnNet::NetTrace("SMOKE_ONLINE_DIRECTORY_BEGIN role=%s accepted=%d",
+			mCoopSmokeManifest.IsHost() ? "host" : "client", aStarted ? 1 : 0);
+	}
+	else if (mCoopSmokeManifest.IsHost())
 		aStarted = mNetManager->StartHost(mCoopSmokeManifest.mPort);
 	else if (mCoopSmokeManifest.IsClient())
 		aStarted = mNetManager->StartClient(mCoopSmokeManifest.mEndpoint.c_str(),
@@ -5765,6 +5946,16 @@ void LawnApp::CoopSmokeUpdate()
 		CoopSmokeFail("resolved smoke scenario disappeared at runtime");
 		return;
 	}
+	if (mSeedChooserScreen && mSeedChooserScreen->mCoopChooserActive &&
+		mSeedChooserScreen->CoopAllPicksComplete() && !mNetManager->IsMyReady())
+	{
+		mNetManager->SetMyReady(true);
+		LawnNet::NetTrace("SMOKE_CHOOSER_READY role=%s ready=%d eligible=%d",
+			mCoopSmokeManifest.IsHost() ? "host" : "client",
+			mNetManager->GetReadyCount(), mNetManager->GetReadyEligibleCount());
+	}
+	if (NetIsChoosingPvpTeams() && !mNetManager->IsMyReady())
+		mNetManager->SetMyReady(true);
 
 	if (mCoopSmokeManifest.IsHost())
 	{
@@ -5809,6 +6000,8 @@ void LawnApp::CoopSmokeUpdate()
 				PreNewGame(aGameMode, false, mCoopSmokeManifest.mLevel);
 			else
 				PreNewGame(aGameMode, false);
+			if (NetIsChoosingPvpTeams())
+				return;
 			if (!mBoard || !mBoard->mCutScene)
 			{
 				CoopSmokeFail("deterministic host board creation failed");
@@ -6023,10 +6216,7 @@ void LawnApp::NetOnStartGame(LawnNet::NetBuffer& thePayload)
 
 	if (mGameSelector)
 		KillGameSelector();
-	if (mChallengeScreen)
-		KillChallengeScreen();
-	if (GetDialog(Dialogs::DIALOG_STORE))
-		KillDialog(Dialogs::DIALOG_STORE);
+	NetCloseTransientScreens();
 
 	mNetBoardSeed = aBoardSeed;
 	mGameMode = aMode;
@@ -6059,6 +6249,7 @@ void LawnApp::NetOnHostLost()
 {
 	if (!mNetManager)
 		return;
+	const std::string aDisconnectReason = mNetManager->GetDisconnectReason();
 	if (CoopSmokeActive())
 		CoopSmokeFail("connection to smoke host was lost");
 
@@ -6072,7 +6263,9 @@ void LawnApp::NetOnHostLost()
 	NetRestoreLocalProfile();
 	ShowGameSelector();
 
-	DoDialog(Dialogs::DIALOG_INFO, true, _S("Co-op"), _S("Connection to the host was lost."), _S(""),
+	DoDialog(Dialogs::DIALOG_INFO, true, _S("Co-op"),
+		aDisconnectReason.empty() ? _S("Connection to the host was lost.") : StringToSexyString(aDisconnectReason),
+		_S("[DIALOG_BUTTON_OK]"),
 		Dialog::BUTTONS_FOOTER);
 }
 
@@ -6133,6 +6326,90 @@ void LawnApp::NetRestoreLocalProfile()
 	delete mNetLocalProfileBackup;
 	mNetLocalProfileBackup = nullptr;
 	mNetBlockProfileSave = false;
+	mNetHostUnlockAllMinigames = false;
+}
+
+bool LawnApp::NetIsChoosingPvpTeams() const
+{
+	return const_cast<LawnApp*>(this)->GetDialog(Dialogs::DIALOG_COOP_TEAMS) != nullptr;
+}
+
+void LawnApp::NetShowOnlineBrowser()
+{
+	if (!mNetManager || mBoard)
+		return;
+	if (Dialog* aDialog = GetDialog(Dialogs::DIALOG_COOP_ONLINE))
+	{
+		mWidgetManager->SetFocus(aDialog);
+		return;
+	}
+	NetOnlineDialog* aDialog = new NetOnlineDialog(this);
+	AddDialog(aDialog);
+	mWidgetManager->SetFocus(aDialog);
+}
+
+void LawnApp::NetShowPvpTeamSelection(int theLevel)
+{
+	if (!mNetManager || !mNetManager->IsActive() || NetIsChoosingPvpTeams() || mBoard)
+		return;
+	mNetPendingPvpLevel = theLevel;
+	if (NetIsHost())
+	{
+		mNetManager->ResetReadyState();
+		mNetManager->BroadcastSceneCmd(LawnNet::SCENECMD_TEAM_SELECT, 0);
+	}
+	CoopTeamDialog* aDialog = new CoopTeamDialog(this);
+	AddDialog(aDialog);
+	mWidgetManager->SetFocus(aDialog);
+	LawnNet::NetTrace("PVP_TEAM_SELECT opened role=%s level=%d",
+		NetIsHost() ? "host" : "client", theLevel);
+}
+
+void LawnApp::NetClosePvpTeamSelection(bool theCancel)
+{
+	if (!NetIsChoosingPvpTeams())
+		return;
+	if (NetIsHost())
+	{
+		mNetManager->BroadcastSceneCmd(LawnNet::SCENECMD_CLOSE_TEAM_SELECT, 0);
+		if (theCancel)
+			mNetManager->ResetReadyState();
+	}
+	KillDialog(Dialogs::DIALOG_COOP_TEAMS);
+	if (theCancel && !mGameSelector && !mChallengeScreen)
+		ShowGameSelector();
+}
+
+void LawnApp::NetTickPvpTeamSelection()
+{
+	if (!NetIsHost() || !NetIsChoosingPvpTeams() ||
+		!mNetManager->AreAllPlayersReady() ||
+		mNetManager->GetTeamCount(LawnNet::NETTEAM_PLANTS) == 0 ||
+		mNetManager->GetTeamCount(LawnNet::NETTEAM_ZOMBIES) == 0)
+		return;
+	const int aLevel = mNetPendingPvpLevel;
+	NetClosePvpTeamSelection(false);
+	mNetManager->ResetReadyState();
+	mNetPvpTeamsConfirmed = true;
+	if (aLevel >= 0)
+		PreNewGame(GAMEMODE_COOP_PVP, false, aLevel);
+	else
+		PreNewGame(GAMEMODE_COOP_PVP, false);
+	mNetPvpTeamsConfirmed = false;
+	if (CoopSmokeActive() && mCoopSmokeManifest.mSkipIntro && mBoard && mBoard->mCutScene)
+		mBoard->mCutScene->CancelIntro();
+	LawnNet::NetTrace("PVP_TEAM_SELECT committed board=%p", (void*)mBoard);
+}
+
+void LawnApp::NetCloseTransientScreens()
+{
+	KillDialog(Dialogs::DIALOG_COOP_TEAMS);
+	KillAwardScreen();
+	KillChallengeScreen();
+	KillSeedChooserScreen();
+	KillStoreScreen();
+	KillAlmanacDialog();
+	KillNewOptionsDialog();
 }
 
 bool LawnApp::NetOnSceneCmd(uint8_t aCmd, uint32_t aParam)
@@ -6149,7 +6426,7 @@ bool LawnApp::NetOnSceneCmd(uint8_t aCmd, uint32_t aParam)
 		ShowChallengeScreen((ChallengePage)aParam);
 		return true;
 	case LawnNet::SCENECMD_SHOW_STORE:
-		if (mBoard && !GetDialog(Dialogs::DIALOG_STORE))
+		if (!GetDialog(Dialogs::DIALOG_STORE))
 		{
 			ShowStoreScreen();
 			return true;
@@ -6161,8 +6438,6 @@ bool LawnApp::NetOnSceneCmd(uint8_t aCmd, uint32_t aParam)
 		// underneath the award widget (and cannot keep processing stale snapshots).
 		if (mAwardScreen && mGameScene == GameScenes::SCENE_AWARD)
 			return true;
-		if (!mBoard)
-			return false;
 		KillBoard();
 		ShowAwardScreen((AwardType)aParam, false);
 		return true;
@@ -6176,6 +6451,28 @@ bool LawnApp::NetOnSceneCmd(uint8_t aCmd, uint32_t aParam)
 	case LawnNet::SCENECMD_KILL_BOARD:
 		KillBoard();
 		return true;
+	case LawnNet::SCENECMD_CLOSE_AWARD:
+		KillAwardScreen();
+		return true;
+	case LawnNet::SCENECMD_CLOSE_CHALLENGE:
+		KillChallengeScreen();
+		return true;
+	case LawnNet::SCENECMD_CLOSE_STORE:
+		KillStoreScreen();
+		return true;
+	case LawnNet::SCENECMD_STORE_PAGE:
+		if (StoreScreen* aStore = (StoreScreen*)GetDialog(Dialogs::DIALOG_STORE))
+		{
+			aStore->NetSetPage((StorePages)aParam);
+			return true;
+		}
+		return false;
+	case LawnNet::SCENECMD_TEAM_SELECT:
+		NetShowPvpTeamSelection();
+		return true;
+	case LawnNet::SCENECMD_CLOSE_TEAM_SELECT:
+		NetClosePvpTeamSelection(false);
+		return true;
 	case LawnNet::SCENECMD_ADVENTURE_START_FX:
 		if (!NetIsClient() || mGameScene != GameScenes::SCENE_MENU || !mGameSelector ||
 			mBoard)
@@ -6186,7 +6483,13 @@ bool LawnApp::NetOnSceneCmd(uint8_t aCmd, uint32_t aParam)
 	}
 }
 
-void LawnApp::NetBroadcastProfile()
+bool LawnApp::NetUnlockAllMinigames() const
+{
+	return NetIsClient() ? mNetHostUnlockAllMinigames :
+		(mNetManager && mNetManager->mConfig.mUnlockAllMinigames);
+}
+
+void LawnApp::NetBroadcastProfile(bool theForce)
 {
 	if (!mNetManager || !mNetManager->IsHosting() || !mPlayerInfo)
 		return;
@@ -6203,11 +6506,20 @@ void LawnApp::NetBroadcastProfile()
 		aMsg.WriteI32((int32_t)aP->mPurchases[i]);
 	for (int i = 0; i < 100; i++)
 		aMsg.WriteI32(aP->mChallengeRecords[i]);
+	std::string aName;
+	LawnNet::NetNormalizeUtf8(SexyStringToStringFast(aP->mName), 255, 64, true, aName);
+	aMsg.WriteString(aName.c_str());
+	aMsg.WriteU8(NetUnlockAllMinigames() ? 1 : 0);
+	const uint32_t aHash = LawnNet::NetFnv1a32(aMsg.Data(), aMsg.Size());
+	if (!theForce && aHash == mNetLastProfileHash)
+		return;
+	mNetLastProfileHash = aHash;
 	mNetManager->BroadcastMessage(LawnNet::NETMSG_PROFILE_SYNC, aMsg);
 }
 
 void LawnApp::NetOnProfileSync(LawnNet::NetBuffer& thePayload)
 {
+	LawnNet::NetBuffer aCandidate = thePayload;
 	if (!NetIsClient())
 	{
 		LawnNet::NetTrace("PROFILE_SYNC rejected: receiver is not a network client");
@@ -6221,29 +6533,40 @@ void LawnApp::NetOnProfileSync(LawnNet::NetBuffer& thePayload)
 	}
 
 	static const size_t PROFILE_SYNC_BYTES = (6 + 80 + 100) * sizeof(int32_t);
-	if (thePayload.Remaining() != PROFILE_SYNC_BYTES)
+	if (aCandidate.Remaining() < PROFILE_SYNC_BYTES + 2 ||
+		aCandidate.Remaining() > PROFILE_SYNC_BYTES + 257)
 	{
 		LawnNet::NetTrace("PROFILE_SYNC rejected: expected=%zu bytes actual=%zu",
-			PROFILE_SYNC_BYTES, thePayload.Remaining());
+			PROFILE_SYNC_BYTES, aCandidate.Remaining());
 		return;
 	}
 
-	int32_t aLevel = thePayload.ReadI32Or();
-	int32_t aCoins = thePayload.ReadI32Or();
-	int32_t aFinishedAdventure = thePayload.ReadI32Or();
-	int32_t aHasUnlockedMinigames = thePayload.ReadI32Or();
-	int32_t aHasUnlockedPuzzleMode = thePayload.ReadI32Or();
-	int32_t aHasUnlockedSurvivalMode = thePayload.ReadI32Or();
+	int32_t aLevel = aCandidate.ReadI32Or();
+	int32_t aCoins = aCandidate.ReadI32Or();
+	int32_t aFinishedAdventure = aCandidate.ReadI32Or();
+	int32_t aHasUnlockedMinigames = aCandidate.ReadI32Or();
+	int32_t aHasUnlockedPuzzleMode = aCandidate.ReadI32Or();
+	int32_t aHasUnlockedSurvivalMode = aCandidate.ReadI32Or();
 	int32_t aPurchases[80];
 	int32_t aChallengeRecords[100];
 	for (int i = 0; i < 80; i++)
-		aPurchases[i] = thePayload.ReadI32Or();
+		aPurchases[i] = aCandidate.ReadI32Or();
 	for (int i = 0; i < 100; i++)
-		aChallengeRecords[i] = thePayload.ReadI32Or();
-
-	if (thePayload.Remaining() != 0 || aLevel < 0 || aLevel > FINAL_LEVEL)
+		aChallengeRecords[i] = aCandidate.ReadI32Or();
+	char aProfileName[256] = {};
+	uint8_t anUnlockAll = 0;
+	std::string aNormalizedName;
+	if (!aCandidate.ReadString(aProfileName, sizeof(aProfileName)) ||
+		!aCandidate.ReadU8(&anUnlockAll) || anUnlockAll > 1 ||
+		!LawnNet::NetNormalizeUtf8(aProfileName, 255, 64, true, aNormalizedName))
 	{
-		LawnNet::NetTrace("PROFILE_SYNC rejected: level=%d trailing=%zu", aLevel, thePayload.Remaining());
+		LawnNet::NetTrace("PROFILE_SYNC rejected: malformed profile identity");
+		return;
+	}
+
+	if (aCandidate.Remaining() != 0 || aLevel < 0 || aLevel > FINAL_LEVEL)
+	{
+		LawnNet::NetTrace("PROFILE_SYNC rejected: level=%d trailing=%zu", aLevel, aCandidate.Remaining());
 		return;
 	}
 
@@ -6261,6 +6584,8 @@ void LawnApp::NetOnProfileSync(LawnNet::NetBuffer& thePayload)
 		return;
 	}
 	PlayerInfo* aP = mPlayerInfo;
+	aP->mName = StringToSexyString(aNormalizedName);
+	mNetHostUnlockAllMinigames = anUnlockAll != 0;
 	aP->mLevel = aLevel;
 	aP->mCoins = aCoins;
 	aP->mFinishedAdventure = aFinishedAdventure;
@@ -6272,6 +6597,13 @@ void LawnApp::NetOnProfileSync(LawnNet::NetBuffer& thePayload)
 	for (int i = 0; i < 100; i++)
 		aP->mChallengeRecords[i] = aChallengeRecords[i];
 	mPlayerLevelRef = aP->GetLevel();
+	if (mGameSelector)
+		mGameSelector->SyncProfile(false);
+	if (mChallengeScreen)
+		mChallengeScreen->UpdateButtons();
+	if (mWidgetManager)
+		mWidgetManager->MarkAllDirty();
+	thePayload.mReadPos = aCandidate.mReadPos;
 	LawnNet::NetTrace("PROFILE_SYNC applied level=%d coins=%d finishedAdventure=%d unlocks=(%d,%d,%d)",
 		aP->mLevel, aP->mCoins, aP->mFinishedAdventure,
 		aP->mHasUnlockedMinigames, aP->mHasUnlockedPuzzleMode, aP->mHasUnlockedSurvivalMode);
@@ -6467,6 +6799,14 @@ bool LawnApp::NetHandleChatKey(int theKey)
 	}
 	else if (theKey == KeyCode::KEYCODE_BACK && !mNetChatDraft.empty())
 	{
+		// A byte-string build stores UTF-8: remove one full code point.
+		if (sizeof(SexyChar) == 1)
+		{
+			size_t aStart = mNetChatDraft.size() - 1;
+			while (aStart > 0 && ((unsigned char)mNetChatDraft[aStart] & 0xC0) == 0x80) --aStart;
+			mNetChatDraft.erase(aStart);
+			return true;
+		}
 		mNetChatDraft.pop_back();
 		if (!mNetChatDraft.empty() && sizeof(SexyChar) == 2 &&
 			mNetChatDraft.back() >= 0xD800 && mNetChatDraft.back() <= 0xDBFF)
@@ -6485,7 +6825,7 @@ bool LawnApp::NetHandleChatText(const char* theUtf8Text)
 		std::string aUtf8 = SexyStringToStringFast(aCandidate);
 		std::string aChecked;
 		if (LawnNet::NetNormalizeUtf8(aUtf8, LawnNet::NET_MAX_CHAT_BYTES,
-			LawnNet::NET_MAX_CHAT_CHARS, true, aChecked) && aChecked == aUtf8)
+			LawnNet::NET_MAX_CHAT_CHARS, true, aChecked, false) && aChecked == aUtf8)
 			mNetChatDraft = aCandidate;
 	}
 	catch (const std::range_error&)
@@ -6516,9 +6856,11 @@ void LawnApp::NetDrawChatOverlay()
 		const uint32_t anAge = aNow - aLine.mReceivedTick;
 		int anAlpha = anAge <= 6500U ? 230 : (int)((8000U - anAge) * 230U / 1500U);
 		anAlpha = max(0, min(230, anAlpha));
-		const LawnNet::NetPlayerInfo& aPlayer = mNetManager->GetPlayer(aLine.mSlot);
-		SexyString aText = _S("[") + StringToSexyString(aPlayer.mNick) + _S("] ") + StringToSexyString(aLine.mText);
-		LawnNet::NetColor aColor = LawnNet::GetRelativePlayerColor(mNetManager->GetMySlot(), aLine.mSlot);
+		const bool aSystem = aLine.mSlot == LawnNet::NET_SHARED_OWNER;
+		SexyString aText = aSystem ? StringToSexyString(aLine.mText) :
+			_S("[") + StringToSexyString(aLine.mNick) + _S("] ") + StringToSexyString(aLine.mText);
+		LawnNet::NetColor aColor = aSystem ? LawnNet::NetColor{255, 220, 130} :
+			LawnNet::GetRelativePlayerColor(mNetManager->GetMySlot(), aLine.mSlot);
 		g.SetColor(Color(0, 0, 0, anAlpha * 2 / 3));
 		g.FillRect(8, aY - 15, 520, 20);
 		TodDrawString(&g, aText, 14, aY, Sexy::FONT_BRIANNETOD12,
@@ -6550,8 +6892,24 @@ void LawnApp::NetDrawChatOverlay()
 	{
 		g.SetColor(Color(0, 0, 0, 210));
 		g.FillRect(8, 565, 520, 26);
-		TodDrawString(&g, _S("Chat: ") + mNetChatDraft + _S("_"), 14, 583,
+		SexyString aDraft = _S("Chat: ") + mNetChatDraft;
+		while (aDraft.size() > 6 && Sexy::FONT_BRIANNETOD12->StringWidth(aDraft) > 492)
+		{
+			if (sizeof(SexyChar) == 1)
+			{
+				size_t aNext = 7;
+				while (aNext < aDraft.size() && ((unsigned char)aDraft[aNext] & 0xC0) == 0x80) ++aNext;
+				aDraft.erase(6, aNext - 6);
+			}
+			else aDraft.erase(6, 1);
+		}
+		TodDrawString(&g, aDraft, 14, 583,
 			Sexy::FONT_BRIANNETOD12, Color(255, 255, 255), DrawStringJustification::DS_ALIGN_LEFT);
+		if ((aNow / 500U) % 2 == 0)
+		{
+			g.SetColor(Color(255, 255, 255));
+			g.FillRect(16 + Sexy::FONT_BRIANNETOD12->StringWidth(aDraft), 570, 1, 15);
+		}
 	}
 }
 
@@ -6559,6 +6917,9 @@ void LawnApp::NetDrawCursorOverlay()
 {
 	if (!mNetManager || !mNetManager->IsActive() || !mWidgetManager || !mWidgetManager->mImage)
 		return;
+	Graphics anAnnotationLayer(mWidgetManager->mImage);
+	anAnnotationLayer.ClearClipRect();
+	mNetManager->DrawAnnotations(&anAnnotationLayer);
 	// PvP intentionally hides remote cursors over the game board.  Keep the
 	// lobby overlay interactive/visible even if an old board is still alive
 	// while returning from a match.

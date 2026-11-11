@@ -18,6 +18,7 @@
 #include "Widget/ChallengeScreen.h"
 #include "Net/NetCommon.h"
 #include "Net/NetManager.h"
+#include "Net/NetPresentation.h"
 #include "../Sexy.TodLib/TodFoley.h"
 #include "Widget/SeedChooserScreen.h"
 #include "../Sexy.TodLib/TodCommon.h"
@@ -1395,24 +1396,34 @@ void CutScene::AnimateBoard()
 		if (mCutsceneTime == aTimeRollSodStart)
 		{
 			mApp->PlayFoley(FoleyType::FOLEY_DIGGER);
+			auto AddSodReanimation = [&](float theX, float theY, int theOrder)
+			{
+				Reanimation* aReanim = mApp->AddReanimation(theX, theY, theOrder, ReanimationType::REANIM_SODROLL);
+				LawnNet::NetBroadcastReanimation(mApp, aReanim, theX, theY, theOrder, ReanimationType::REANIM_SODROLL);
+			};
+			auto AddSodParticle = [&](float theX, float theY, int theOrder)
+			{
+				mApp->AddTodParticle(theX, theY, theOrder, ParticleEffect::PARTICLE_SOD_ROLL);
+				LawnNet::NetBroadcastParticle(mApp, theX, theY, theOrder, ParticleEffect::PARTICLE_SOD_ROLL);
+			};
 			if (mBoard->mLevel == 1)
 			{
-				mApp->AddReanimation(0, 0, Board::MakeRenderOrder(RenderLayer::RENDER_LAYER_ZOMBIE, 2, 0), ReanimationType::REANIM_SODROLL);
-				mApp->AddTodParticle(35, 348, Board::MakeRenderOrder(RenderLayer::RENDER_LAYER_ZOMBIE, 2, 1), ParticleEffect::PARTICLE_SOD_ROLL);
+				AddSodReanimation(0, 0, Board::MakeRenderOrder(RenderLayer::RENDER_LAYER_ZOMBIE, 2, 0));
+				AddSodParticle(35, 348, Board::MakeRenderOrder(RenderLayer::RENDER_LAYER_ZOMBIE, 2, 1));
 			}
 			else if (mBoard->mLevel == 2)
 			{
-				mApp->AddReanimation(0, -102, Board::MakeRenderOrder(RenderLayer::RENDER_LAYER_ZOMBIE, 1, 0), ReanimationType::REANIM_SODROLL);
-				mApp->AddReanimation(0, 111, Board::MakeRenderOrder(RenderLayer::RENDER_LAYER_ZOMBIE, 1, 0), ReanimationType::REANIM_SODROLL);
-				mApp->AddTodParticle(35, 246, Board::MakeRenderOrder(RenderLayer::RENDER_LAYER_ZOMBIE, 3, 1), ParticleEffect::PARTICLE_SOD_ROLL);
-				mApp->AddTodParticle(35, 459, Board::MakeRenderOrder(RenderLayer::RENDER_LAYER_ZOMBIE, 3, 1), ParticleEffect::PARTICLE_SOD_ROLL);
+				AddSodReanimation(0, -102, Board::MakeRenderOrder(RenderLayer::RENDER_LAYER_ZOMBIE, 1, 0));
+				AddSodReanimation(0, 111, Board::MakeRenderOrder(RenderLayer::RENDER_LAYER_ZOMBIE, 1, 0));
+				AddSodParticle(35, 246, Board::MakeRenderOrder(RenderLayer::RENDER_LAYER_ZOMBIE, 3, 1));
+				AddSodParticle(35, 459, Board::MakeRenderOrder(RenderLayer::RENDER_LAYER_ZOMBIE, 3, 1));
 			}
 			else if (mBoard->mLevel == 4)
 			{
-				mApp->AddReanimation(-3, -198, Board::MakeRenderOrder(RenderLayer::RENDER_LAYER_ZOMBIE, 0, 0), ReanimationType::REANIM_SODROLL);
-				mApp->AddReanimation(-3, 203, Board::MakeRenderOrder(RenderLayer::RENDER_LAYER_ZOMBIE, 0, 0), ReanimationType::REANIM_SODROLL);
-				mApp->AddTodParticle(32, 150, Board::MakeRenderOrder(RenderLayer::RENDER_LAYER_ZOMBIE, 4, 1), ParticleEffect::PARTICLE_SOD_ROLL);
-				mApp->AddTodParticle(32, 511, Board::MakeRenderOrder(RenderLayer::RENDER_LAYER_ZOMBIE, 4, 1), ParticleEffect::PARTICLE_SOD_ROLL);
+				AddSodReanimation(-3, -198, Board::MakeRenderOrder(RenderLayer::RENDER_LAYER_ZOMBIE, 0, 0));
+				AddSodReanimation(-3, 203, Board::MakeRenderOrder(RenderLayer::RENDER_LAYER_ZOMBIE, 0, 0));
+				AddSodParticle(32, 150, Board::MakeRenderOrder(RenderLayer::RENDER_LAYER_ZOMBIE, 4, 1));
+				AddSodParticle(32, 511, Board::MakeRenderOrder(RenderLayer::RENDER_LAYER_ZOMBIE, 4, 1));
 			}
 		}
 

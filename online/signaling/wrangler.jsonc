@@ -1,0 +1,11 @@
+{
+  "name": "pvz-coop-signaling",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-11-11",
+  "workers_dev": true,
+  "durable_objects": {
+    "bindings": [{ "name": "DIRECTORY", "class_name": "RoomDirectory" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["RoomDirectory"] }],
+  "observability": { "enabled": false }
+}

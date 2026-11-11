@@ -130,7 +130,7 @@ NewOptionsDialog::~NewOptionsDialog()
 //0x45C880
 int NewOptionsDialog::GetPreferredHeight(int theWidth)
 {
-    return IMAGE_OPTIONS_MENUBACK->mWidth;
+    return IMAGE_OPTIONS_MENUBACK->mHeight + 40;
 }
 
 //0x45C890
@@ -180,7 +180,6 @@ void NewOptionsDialog::Resize(int theX, int theY, int theWidth, int theHeight)
     mAlmanacButton->Resize(107, 241, 209, 46);
     mRestartButton->Resize(mAlmanacButton->mX, mAlmanacButton->mY + 43, 209, 46);
     mBackToMainButton->Resize(mRestartButton->mX, mRestartButton->mY + 43, 209, 46);
-    mCoopAppearanceButton->Resize(322, 241, 90, 46);
     mBackToGameButton->Resize(30, 381, mBackToGameButton->mWidth, mBackToGameButton->mHeight);
 
     /*mGameplayButton->Resize(mAlmanacButton->mX, 116, 209, 46);
@@ -204,12 +203,23 @@ void NewOptionsDialog::Resize(int theX, int theY, int theWidth, int theHeight)
     {
         mAlmanacButton->mY += 43;
     }
+
+    int aButtonY = mFullscreenCheckbox->mY + mFullscreenCheckbox->mHeight + 8;
+    LawnStoneButton* aButtons[] = { mAlmanacButton, mRestartButton, mBackToMainButton, mCoopAppearanceButton };
+    for (LawnStoneButton* aButton : aButtons)
+    {
+        if (!aButton->mVisible)
+            continue;
+        aButton->Resize(107, aButtonY, 209, 32);
+        aButtonY += 36;
+    }
+    mBackToGameButton->mY = max(381, aButtonY + 8);
 }
 
 //0x45CB50
 void NewOptionsDialog::Draw(Sexy::Graphics* g)
 {
-    g->DrawImage(IMAGE_OPTIONS_MENUBACK, 0, 0);
+    g->DrawImage(IMAGE_OPTIONS_MENUBACK, 0, 0, mWidth, mHeight);
 
     int aMusicOffset = 0;
     int aSfxOffset = 0;

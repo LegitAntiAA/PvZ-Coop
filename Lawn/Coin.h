@@ -40,6 +40,7 @@ public:
     int                     mTimesDropped;          //+0xCC
     FilterEffect            mFilterEffect;
     ReanimationID           mReanimationID;
+    bool                    mNetCollectionFxStarted;
 
 public:
     Coin();
@@ -58,6 +59,7 @@ public:
     static /*inline*/ int   GetCoinValue(CoinType theCoinType);
     void                    UpdateFade();
     void                    UpdateFall();
+    void                    NetUpdatePresentation();
     void                    ScoreCoin();
     void                    UpdateCollected();
     Color                   GetColor();
@@ -80,6 +82,7 @@ public:
     static /*inline*/ bool  IsMoney(CoinType theType);
 
 private:
+    void                    AddBouncyArrow();
     void                    CoinInitializeInternal(int theX, int theY, CoinType theCoinType, CoinMotion theCoinMotion, bool theNetPresentationOnly, const PottedPlant* thePottedPlantVisual);
 };
 

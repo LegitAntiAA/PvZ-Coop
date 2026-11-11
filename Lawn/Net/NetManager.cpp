@@ -1,4 +1,5 @@
 #include "NetManager.h"
+#include "NetBuildVersion.h"
 #include "../../LawnApp.h"
 #include "../Board.h"
 #include "../SeedPacket.h"
@@ -12,6 +13,10 @@
 #include "../../SexyAppFramework/DDInterface.h"
 #include "../../SexyAppFramework/WidgetManager.h"
 #include "../../GameConstants.h"
+#include "../Plant.h"
+#include "../../Resources.h"
+#include "../../Sexy.TodLib/TodCommon.h"
+#include "../../SexyAppFramework/Graphics.h"
 
 namespace
 {
@@ -46,7 +51,7 @@ bool NetValidMouseButton(int theButton)
 // coordinates.  This is intentionally presentation-free: it is used only to
 // attach a stable semantic identity to a raw click and to reject stale bank
 // positions before Board::MouseDown can select the wrong card.
-int NetSeedPacketAt(Board* theBoard, int theCanonicalX, int theCanonicalY)
+int NetSeedPacketAt(Board* theBoard, int theCanonicalX, int theCanonicalY, int theSlot)
 {
 	if (!theBoard || !theBoard->mSeedBank)
 		return -1;
@@ -59,6 +64,7 @@ int NetSeedPacketAt(Board* theBoard, int theCanonicalX, int theCanonicalY)
 	for (int i = 0; i < aBank->mNumPackets && i < SEEDBANK_CAPACITY; i++)
 	{
 		SeedPacket& aPacket = aBank->mSeedPackets[i];
+		if (!theBoard->IsSeedPacketVisibleToSlot(i, theSlot)) continue;
 		if (aPacket.mSlotMachineCountDown > 0 || aPacket.mPacketType == SeedType::SEED_NONE)
 			continue;
 		if (aBankX >= aPacket.mX + aPacket.mOffsetX &&
@@ -96,6 +102,7 @@ NetManager* gNetManager = nullptr;
 // -------------------------------------------------------------------------
 NetManager::NetManager() :
 	mMode(MODE_NONE),
+	mOnline(new NetOnline()),
 	mApp(nullptr),
 	mListenerSocket(INVALID_SOCKET),
 	mAcceptRunning(false),
@@ -116,6 +123,7 @@ NetManager::NetManager() :
 	mAdaptiveBadStreak(0),
 	mLastPingTick(0),
 	mLastStatsTick(0),
+	mDifficulty(1),
 	mChooserOpen(false),
 	mChooserPicksPerPlayer(0),
 	mChooserBankCount(0)
@@ -145,6 +153,8 @@ void NetManager::Init(LawnApp* theApp)
 {
 	mApp = theApp;
 	NetLoadConfig(mConfig);
+	mLocalZombatar = mConfig.mZombatar;
+	mPlayerZombatars[0] = mLocalZombatar;
 	mSnapshotHz = mConfig.mBaseSnapshotHz;
 	NetStartupWSA();
 }
@@ -210,6 +220,7 @@ bool NetManager::StartHost(uint16_t thePort)
 	mPlayers[0].Reset();
 	mPlayers[0].mActive = true;
 	mPlayers[0].mSlot = 0;
+	mPlayerZombatars[0] = mLocalZombatar;
 	strcpy_s(mPlayers[0].mNick, mConfig.mNick);
 
 	mAcceptRunning = true;
@@ -314,6 +325,8 @@ void NetManager::CancelConnect()
 
 void NetManager::Disconnect()
 {
+	if (mOnline) mOnline->Stop();
+	mOnlineIntent = 0; mOnlinePlaying = false;
 	if (mMode != MODE_NONE || mConnecting || mClientConnected)
 		NetTrace("disconnect begin mode=%d connecting=%d connected=%d players=%d", (int)mMode, mConnecting ? 1 : 0, mClientConnected ? 1 : 0, GetPlayerCount());
 	// Stop the retry loop before waiting for its worker.  An in-progress select
@@ -354,6 +367,7 @@ void NetManager::Disconnect()
 	mMode = MODE_NONE;
 	mMySlot = 0;
 	mActingPlayerSlot = -1;
+	mDisconnectReason.clear();
 	mInputEpoch = 1;
 	mNextInputSequence = 1;
 	mLastInputMoveTick = 0;
@@ -371,6 +385,7 @@ void NetManager::Disconnect()
 	mRemoteChooserStates.clear();
 	mPendingChooserStarts.clear();
 	mPendingBoardMsgs.clear();
+	mAnnotations.clear();
 	mChatLines.clear();
 	mChooserStateEchoRequested.store(false, std::memory_order_relaxed);
 	PurgePendingInputs("DISCONNECT");
@@ -384,6 +399,10 @@ void NetManager::Disconnect()
 		mRemoteHeatWaveQDown[i] = false;
 		mRemoteHeatWaveQDownTick[i] = 0;
 		mLastChatTick[i] = 0;
+		mLastAnnotationTick[i] = 0;
+		mLastDrawTick[i] = 0;
+		mPlayerZombatars[i] = {};
+		mKicked[i] = false;
 	}
 	for (int i = 0; i < NET_MAX_PLAYERS; i++)
 		mPlayers[i].Reset();
@@ -397,6 +416,10 @@ void NetManager::DropSession(int theSlot, bool theNotify)
 	NetSession& aSession = mSessions[theSlot];
 	if (!aSession.mAssigned)
 		return;
+	const std::string aDepartedNick = mPlayers[theSlot].mNick;
+	const bool aWasActive = mPlayers[theSlot].mActive;
+	const bool aWasKicked = mKicked[theSlot];
+	RedistributeSeeds(theSlot);
 	NetTrace("dropping peer slot=%d nick=%s notify=%d", theSlot, mPlayers[theSlot].mNick, theNotify ? 1 : 0);
 
 	// A disconnected player can no longer finish or cancel a held bank packet.
@@ -444,10 +467,15 @@ void NetManager::DropSession(int theSlot, bool theNotify)
 	ClearHeatWaveShoutKeys("PEER_DISCONNECT", theSlot);
 	NetTrace("drop peer slot=%d checkpoint=clear_keys_complete", theSlot);
 	mPlayers[theSlot].mActive = false;
+	mPlayers[theSlot].mReady = 0;
+	mPlayers[theSlot].mSpectator = false;
+	mPlayerZombatars[theSlot] = {};
+	mKicked[theSlot] = false;
 	mRemoteCursors[theSlot].Clear();
 	RequestChooserStateEcho("peer_disconnect", theSlot, -1);
 	if (theNotify)
 	{
+		if (aWasActive) SendSystemChat(aDepartedNick + (aWasKicked ? " was kicked by the host." : " left the game."));
 		NetTrace("drop peer slot=%d checkpoint=lobby_notify_begin", theSlot);
 		SendLobbyState();
 		NetTrace("drop peer slot=%d checkpoint=lobby_notify_complete", theSlot);
@@ -469,6 +497,7 @@ int NetManager::GetPlayerCount() const
 
 void NetManager::Update()
 {
+	UpdateOnline();
 	if (mMode == MODE_NONE)
 		return;
 	for (int i = 0; i < NET_MAX_PLAYERS; i++)
@@ -517,10 +546,7 @@ void NetManager::Update()
 						HandleMessageClient(aType, aPayload);
 					});
 					// say hello
-					NetBuffer aHello;
-					aHello.WriteU32(NET_PROTOCOL_VERSION);
-					aHello.WriteString(mConfig.mNick);
-					mHostConn->SendMessage(NETMSG_HELLO, aHello);
+					SendHello();
 					mClientConnected = true;
 					strcpy_s(mConnectStatus, "Connected, waiting for host...");
 				}
@@ -549,8 +575,6 @@ void NetManager::Update()
 			if (!aDropAfterPump[i])
 				continue;
 			DropSession(i, true);
-                        if (mApp && mApp->mBoard)
-                                mApp->mBoard->mPaused = true;
                 }
 
 		// CursorObject is the host-authoritative semantic state for every
@@ -709,6 +733,21 @@ void NetManager::HandleMessage(NetSession* theSession, uint8_t theMsgType, NetBu
 	case NETMSG_HELLO:
 		OnHello(theSession, thePayload);
 		break;
+	case NETMSG_READY:
+		if (thePayload.Remaining() == 1 && mPlayers[theSession->mSlot].mActive &&
+			!mPlayers[theSession->mSlot].mSpectator && mApp &&
+			(mChooserOpen || mApp->NetIsChoosingPvpTeams()))
+		{
+			const uint8_t aReady = thePayload.ReadU8Or();
+			if (aReady <= 1) { mPlayers[theSession->mSlot].mReady = aReady; SendLobbyState(); }
+		}
+		break;
+	case NETMSG_ANNOTATION:
+		OnAnnotation(theSession, thePayload);
+		break;
+	case NETMSG_ZOMBATAR:
+		OnZombatar(theSession, thePayload);
+		break;
 	case NETMSG_INPUT_MOUSE:
 		OnClientInput(theSession, thePayload);
 		break;
@@ -747,8 +786,10 @@ void NetManager::HandleMessage(NetSession* theSession, uint8_t theMsgType, NetBu
 void NetManager::OnHello(NetSession* theSession, NetBuffer& thePayload)
 {
 	uint32_t aVersion = thePayload.ReadU32Or();
+	char aBuild[64] = {};
+	const bool aBuildMatches = thePayload.ReadString(aBuild, sizeof(aBuild)) && strcmp(aBuild, NET_MOD_BUILD_STRING) == 0;
 	NetTrace("HELLO slot=%u protocol=%u expected=%u", theSession->mSlot, aVersion, NET_PROTOCOL_VERSION);
-	if (aVersion != NET_PROTOCOL_VERSION)
+	if (aVersion != NET_PROTOCOL_VERSION || !aBuildMatches)
 	{
 		theSession->mConn.SendMessage(NETMSG_VERSION_MISMATCH);
 		mDeferredDrop[theSession->mSlot] = true;
@@ -757,6 +798,8 @@ void NetManager::OnHello(NetSession* theSession, NetBuffer& thePayload)
 
 	NetPlayerInfo& aPlayer = mPlayers[theSession->mSlot];
 	aPlayer.mActive = true;
+	aPlayer.mSpectator = mApp && mApp->mBoard;
+	aPlayer.mReady = 0;
 	aPlayer.mSlot = theSession->mSlot;
 	aPlayer.mTeam = NETTEAM_NONE;
 	aPlayer.mPing = 0;
@@ -794,6 +837,9 @@ void NetManager::OnHello(NetSession* theSession, NetBuffer& thePayload)
 	}
 
 	SendLobbyState();
+	BroadcastZombatars();
+	SendSystemChat(std::string(aPlayer.mNick) + (aPlayer.mSpectator ? " joined as a spectator." : " joined the game."));
+	if (aPlayer.mSpectator) SendLateJoinState(theSession);
 }
 
 bool NetManager::ConsumeExpectedInputSequence(uint8_t theSlot, uint32_t theEpoch,
@@ -862,7 +908,7 @@ void NetManager::OnClientInput(NetSession* theSession, NetBuffer& thePayload)
 		thePayload.Remaining() == 0;
 	const int aButton = (int)(int8_t)aButtonWire;
 	if (!aDecoded || aSlot == 0 || aSlot >= NET_MAX_PLAYERS ||
-		!mPlayers[aSlot].mActive || !theSession->mAssigned)
+		!mPlayers[aSlot].mActive || mPlayers[aSlot].mSpectator || !theSession->mAssigned)
 	{
 		NetTrace("mouse reject slot=%u reason=decode_or_session", aSlot);
 		return;
@@ -909,7 +955,7 @@ void NetManager::OnClientInput(NetSession* theSession, NetBuffer& thePayload)
 		return;
 	}
 
-	int aHostSeedHit = NetSeedPacketAt(aBoard, aCanonicalX, aCanonicalY);
+	int aHostSeedHit = NetSeedPacketAt(aBoard, aCanonicalX, aCanonicalY, aSlot);
 	if (anAction == NETINPUT_MOUSE_DOWN && aHasSeedIdentity)
 	{
 		SeedBank* aHostBank = aBoard->mSeedBank;
@@ -1103,7 +1149,7 @@ void NetManager::OnClientCursor(NetSession* theSession, NetBuffer& thePayload)
 	// The connection owns the slot.  Never trust the slot claimed in a packet.
 	thePayload.ReadU8Or();
 	const uint8_t aSlot = theSession->mSlot;
-	if (aSlot >= NET_MAX_PLAYERS || !mPlayers[aSlot].mActive)
+	if (aSlot >= NET_MAX_PLAYERS || !mPlayers[aSlot].mActive || mPlayers[aSlot].mSpectator)
 		return;
 	NetRemoteCursor& aCursor = mRemoteCursors[aSlot];
 	int16_t aCanonicalX = thePayload.ReadI16Or();
@@ -1177,7 +1223,7 @@ void NetManager::OnClientSeedPick(NetSession* theSession, NetBuffer& thePayload,
 	const int aSlot = theSession ? theSession->mSlot : -1;
 	const bool aPvP = mApp && mApp->mGameMode == GameMode::GAMEMODE_COOP_PVP;
 	const bool anAuthenticatedPlayer = theSession && aSlot > 0 && aSlot < NET_MAX_PLAYERS &&
-		theSession->mAssigned && mPlayers[aSlot].mActive && mPlayers[aSlot].mSlot == aSlot;
+		theSession->mAssigned && mPlayers[aSlot].mActive && !mPlayers[aSlot].mSpectator && mPlayers[aSlot].mSlot == aSlot;
 	const bool anEligiblePlayer = anAuthenticatedPlayer &&
 		(!aPvP || mPlayers[aSlot].mTeam == NETTEAM_PLANTS);
 	const bool aChooserContext = mChooserOpen && mApp && mApp->mBoard &&
@@ -1335,9 +1381,33 @@ void NetManager::HandleMessageClient(uint8_t theMsgType, NetBuffer& thePayload)
 		break;
 	case NETMSG_VERSION_MISMATCH:
 		strcpy_s(mConnectStatus, "Version mismatch with host");
+		mDisconnectReason = "Different mod builds. Use the same build on every computer.";
 		break;
 	case NETMSG_LOBBY_STATE:
 		OnLobbyState(thePayload);
+		break;
+	case NETMSG_KICKED:
+		mDisconnectReason = "You were kicked by the host.";
+		break;
+	case NETMSG_ANNOTATION:
+		OnAnnotation(nullptr, thePayload);
+		break;
+	case NETMSG_ZOMBATAR:
+		OnZombatar(nullptr, thePayload);
+		break;
+	case NETMSG_SPECTATOR_START:
+		if (IsSpectator() && mApp && mApp->mBoard && thePayload.Remaining() == 9)
+		{
+			const uint8_t aScene = thePayload.ReadU8Or();
+			if (aScene != SCENE_LEVEL_INTRO && aScene != SCENE_PLAYING && aScene != SCENE_ZOMBIES_WON) break;
+			mApp->mBoard->NetDrainMessages();
+			if (!mApp->mBoard->NetApplyCameraBootstrap(thePayload)) break;
+			if (mApp->mSeedChooserScreen) mApp->KillSeedChooserScreen();
+			mChooserOpen = false;
+			if (mApp->mBoard->mCutScene) mApp->mBoard->mCutScene->mSeedChoosing = false;
+			if (aScene != SCENE_LEVEL_INTRO) mApp->StartPlaying();
+			NetTrace("late join spectator initialized scene=%u", aScene);
+		}
 		break;
 	case NETMSG_START_GAME:
 		OnStartGame(thePayload);
@@ -1378,6 +1448,7 @@ void NetManager::HandleMessageClient(uint8_t theMsgType, NetBuffer& thePayload)
 		if (mApp && mApp->mBoard && mApp->mGameScene == GameScenes::SCENE_LEVEL_INTRO)
 		{
 			NetTrace("client applying START_PLAYING scene=%d seedChooser=%p", (int)mApp->mGameScene, (void*)mApp->mSeedChooserScreen);
+			mApp->mBoard->NetDrainMessages();
 			if (!mPendingChooserStarts.empty() && mApp->mSeedChooserScreen)
 			{
 				NetBuffer aFinalBank = std::move(mPendingChooserStarts.back());
@@ -1456,7 +1527,7 @@ void NetManager::OnSceneCmd(NetBuffer& thePayload)
 		NetTrace("SCENE_CMD rejected: truncated or trailing payload");
 		return;
 	}
-	if (aCmd > SCENECMD_ADVENTURE_START_FX)
+	if (aCmd > SCENECMD_CLOSE_TEAM_SELECT)
 	{
 		NetTrace("SCENE_CMD rejected: command out of range cmd=%u", (unsigned)aCmd);
 		return;
@@ -1473,6 +1544,9 @@ void NetManager::OnSceneCmd(NetBuffer& thePayload)
 		break;
 	case SCENECMD_ADVENTURE_START_FX:
 		aParamValid = aParam != 0;
+		break;
+	case SCENECMD_STORE_PAGE:
+		aParamValid = aParam < (uint32_t)NUM_STORE_PAGES;
 		break;
 	default:
 		aParamValid = aParam == 0;
@@ -1521,6 +1595,9 @@ void NetManager::OnWelcome(NetBuffer& thePayload)
 	mPlayers[0].mActive = true;
 	mPlayers[0].mSlot = 0;
 	strcpy_s(mPlayers[0].mNick, aHostNick);
+	NetBuffer anAppearance;
+	if (NetEncodeZombatar(mLocalZombatar, anAppearance) && mHostConn)
+		mHostConn->SendMessage(NETMSG_ZOMBATAR, anAppearance);
 	NetTrace("WELCOME assignedSlot=%u hostNick=%s", mMySlot, aHostNick);
 }
 
@@ -1535,24 +1612,32 @@ void NetManager::EncodeLobbyState(NetBuffer& theBuffer)
 		theBuffer.WriteU16(aP.mPing);
 		theBuffer.WriteU8(aP.mTeam);
 		theBuffer.WriteU8(aP.mReady);
+		theBuffer.WriteU8(aP.mSpectator ? 1 : 0);
 	}
+	theBuffer.WriteU8((uint8_t)mDifficulty);
 }
 
 void NetManager::OnLobbyState(NetBuffer& thePayload)
 {
+	const size_t aStart = thePayload.mReadPos;
+	NetPlayerInfo aPlayers[NET_MAX_PLAYERS];
 	for (int i = 0; i < NET_MAX_PLAYERS; i++)
 	{
-		NetPlayerInfo& aP = mPlayers[i];
-		bool aWasActive = aP.mActive;
-		uint8_t aActive = thePayload.ReadU8Or();
-		uint8_t aSlot = thePayload.ReadU8Or();
-		aP.mActive = aActive != 0;
-		aP.mSlot = aSlot;
-		thePayload.ReadString(aP.mNick, NET_MAX_NICK + 1);
-		aP.mPing = thePayload.ReadU16Or();
-		aP.mTeam = thePayload.ReadU8Or();
-		aP.mReady = thePayload.ReadU8Or();
+		NetPlayerInfo& aP = aPlayers[i];
+		uint8_t active = 0, slot = 0, spectator = 0;
+		if (!thePayload.ReadU8(&active) || !thePayload.ReadU8(&slot) ||
+			!thePayload.ReadString(aP.mNick, sizeof(aP.mNick)) || !thePayload.ReadU16(&aP.mPing) ||
+			!thePayload.ReadU8(&aP.mTeam) || !thePayload.ReadU8(&aP.mReady) || !thePayload.ReadU8(&spectator) ||
+			active > 1 || slot != i || spectator > 1 || aP.mReady > 1 ||
+			(aP.mTeam > NETTEAM_ZOMBIES && aP.mTeam != NETTEAM_NONE))
+		{ thePayload.mReadPos = aStart; NetTrace("lobby state rejected: participant fields"); return; }
+		aP.mActive = active != 0; aP.mSlot = slot; aP.mSpectator = spectator != 0;
 	}
+	uint8_t difficulty = 0;
+	if (!thePayload.ReadU8(&difficulty) || difficulty < 1 || difficulty > 10 || thePayload.Remaining())
+	{ thePayload.mReadPos = aStart; NetTrace("lobby state rejected: difficulty/trailing bytes"); return; }
+	for (int i = 0; i < NET_MAX_PLAYERS; ++i) mPlayers[i] = aPlayers[i];
+	mDifficulty = difficulty;
 }
 
 void NetManager::OnStartGame(NetBuffer& thePayload)
@@ -2127,9 +2212,10 @@ void NetManager::OnChooserStart(NetBuffer& thePayload)
 // -------------------------------------------------------------------------
 void NetManager::AddChatLine(uint8_t theSlot, const std::string& theText)
 {
-	if (theSlot >= NET_MAX_PLAYERS || !mPlayers[theSlot].mActive)
+	if (theSlot != NET_SHARED_OWNER && (theSlot >= NET_MAX_PLAYERS || !mPlayers[theSlot].mActive))
 		return;
-	ChatLine aLine = { theSlot, theText, GetTickCount() };
+	ChatLine aLine = { theSlot, theText, GetTickCount(),
+		theSlot < NET_MAX_PLAYERS ? mPlayers[theSlot].mNick : "" };
 	mChatLines.push_back(aLine);
 	while (mChatLines.size() > 32)
 		mChatLines.pop_front();
@@ -2195,7 +2281,7 @@ void NetManager::OnChatBroadcast(NetBuffer& thePayload)
 	const uint8_t aSlot = thePayload.ReadU8Or();
 	char aRawText[256] = {};
 	std::string aText;
-	if (aSlot >= NET_MAX_PLAYERS || !thePayload.ReadString(aRawText, sizeof(aRawText)) ||
+	if ((aSlot >= NET_MAX_PLAYERS && aSlot != NET_SHARED_OWNER) || !thePayload.ReadString(aRawText, sizeof(aRawText)) ||
 		thePayload.Remaining() != 0 ||
 		!NetNormalizeUtf8(aRawText, NET_MAX_CHAT_BYTES, NET_MAX_CHAT_CHARS, true, aText) ||
 		aText != aRawText)
@@ -2263,63 +2349,18 @@ bool NetManager::ConsumeChooserStateEchoRequest()
 bool NetManager::ComputeChooserQuotas(int theBankCount, int theFixedHostCount,
 	bool thePvP, int theQuotas[NET_MAX_PLAYERS], int* theEligibleCount) const
 {
-	if (!theQuotas)
-		return false;
-	for (int i = 0; i < NET_MAX_PLAYERS; i++)
-		theQuotas[i] = 0;
-	if (theEligibleCount)
-		*theEligibleCount = 0;
-	if (theBankCount < 0 || theBankCount > SEEDBANK_CAPACITY ||
-		theFixedHostCount < 0 || theFixedHostCount > theBankCount)
-		return false;
-
+	bool aEligible[NET_MAX_PLAYERS] = {};
 	int anEligibleCount = 0;
 	for (int aSlot = 0; aSlot < NET_MAX_PLAYERS; aSlot++)
 	{
 		const NetPlayerInfo& aPlayer = mPlayers[aSlot];
-		if (aPlayer.mActive && (!thePvP || aPlayer.mTeam == NETTEAM_PLANTS))
-			anEligibleCount++;
+		aEligible[aSlot] = aPlayer.mActive && !aPlayer.mSpectator &&
+			(!thePvP || aPlayer.mTeam == NETTEAM_PLANTS);
+		if (aEligible[aSlot]) ++anEligibleCount;
 	}
-	if (theEligibleCount)
-		*theEligibleCount = anEligibleCount;
-	if (anEligibleCount <= 0)
-		return false;
-
-	// Fixed Dave/challenge cards are one global preselection.  Divide only the
-	// mutable capacity, then account for those fixed cards exactly once in the
-	// host's quota (the host serializes them in its slot).
-	const int aMutableCount = theBankCount - theFixedHostCount;
-	const int aBaseQuota = aMutableCount / anEligibleCount;
-	int aRemainder = aMutableCount % anEligibleCount;
-	for (int aSlot = 0; aSlot < NET_MAX_PLAYERS; aSlot++)
-	{
-		const NetPlayerInfo& aPlayer = mPlayers[aSlot];
-		if (!aPlayer.mActive || (thePvP && aPlayer.mTeam != NETTEAM_PLANTS))
-			continue;
-		theQuotas[aSlot] = aBaseQuota;
-		if (aRemainder > 0)
-		{
-			theQuotas[aSlot]++;
-			aRemainder--;
-		}
-	}
-
-	if (theFixedHostCount > 0)
-	{
-		const NetPlayerInfo& aHost = mPlayers[0];
-		if (!aHost.mActive || (thePvP && aHost.mTeam != NETTEAM_PLANTS))
-			return false;
-		theQuotas[0] += theFixedHostCount;
-	}
-
-	int aTotal = 0;
-	for (int i = 0; i < NET_MAX_PLAYERS; i++)
-	{
-		if (theQuotas[i] < 0 || theQuotas[i] > SEEDBANK_CAPACITY)
-			return false;
-		aTotal += theQuotas[i];
-	}
-	return aTotal == theBankCount;
+	if (theEligibleCount) *theEligibleCount = anEligibleCount;
+	return anEligibleCount > 0 && theBankCount <= SEEDBANK_CAPACITY &&
+		NetComputeSeedQuotas(theBankCount, theFixedHostCount, aEligible, theQuotas);
 }
 
 void NetManager::BroadcastMessage(uint8_t theMsgType, const NetBuffer& thePayload)
@@ -2482,7 +2523,7 @@ void NetManager::SendMouseInputAction(uint8_t theAction, int theButton, int theX
 	uint8_t anOwner = 255;
 	if (theAction == NETINPUT_MOUSE_DOWN)
 	{
-		const int aHitIndex = NetSeedPacketAt(aBoard, aCanonicalX, aCanonicalY);
+		const int aHitIndex = NetSeedPacketAt(aBoard, aCanonicalX, aCanonicalY, mMySlot);
 		if (aHitIndex >= 0 && aHitIndex < aBoard->mSeedBank->mNumPackets &&
 			aHitIndex < SEEDBANK_CAPACITY)
 		{

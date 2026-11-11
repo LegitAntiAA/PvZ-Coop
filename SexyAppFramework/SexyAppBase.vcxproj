@@ -534,6 +534,12 @@ EXIT /B 0</Command>
     <ClCompile Include="..\Lawn\Net\NetSmokeScenario.cpp" />
     <ClCompile Include="..\Lawn\Net\NetConnection.cpp" />
     <ClCompile Include="..\Lawn\Net\NetManager.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetInteractions.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetOnlineManager.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetOnline.cpp" />
+    <ClCompile Include="..\Lawn\Widget\NetOnlineDialog.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetZombatar.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetZombatarSync.cpp" />
     <ClCompile Include="..\Lawn\Net\NetBoardSync.cpp" />
     <ClCompile Include="..\Lawn\Net\NetLobbyPanel.cpp" />
     <ClCompile Include="..\Lawn\Challenge.cpp" />
@@ -1448,6 +1454,9 @@ EXIT /B 0</Command>
     <Image Include="..\main_icon.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Target Name="GenerateCoopBuildVersion" BeforeTargets="PrepareForBuild" Condition="'$(DesignTimeBuild)' != 'true'">
+    <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(ProjectDir)..\tools\BumpBuildVersion.ps1&quot; -OutputPath &quot;$(ProjectDir)..\Lawn\Net\NetBuildVersion.h&quot; -CounterPath &quot;$(ProjectDir)..\build\coop-build-number.txt&quot;" />
+  </Target>
   <Target Name="CopyNetworkCursor" AfterTargets="Build">
     <Copy SourceFiles="$(SolutionDir)Cursor13.bmp" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="$(SolutionDir)Cursor13.png" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />

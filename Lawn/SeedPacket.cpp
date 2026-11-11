@@ -1064,7 +1064,10 @@ bool SeedPacket::MouseHitTest(int theX, int theY, HitResult* theHitResult)
 		return false;
 	}
 
-	if (theX >= mX + mOffsetX && theX < mX + mOffsetX + mWidth && theY >= mY && theY < mY + mHeight)
+	const bool aCompactZombie = mBoard->IsPvPMode() && mBoard->mChallenge->IsZombieSeedType(mPacketType);
+	const int aHitWidth = aCompactZombie ? 36 : mWidth;
+	const int aHitHeight = aCompactZombie ? 51 : mHeight;
+	if (theX >= mX + mOffsetX && theX < mX + mOffsetX + aHitWidth && theY >= mY && theY < mY + aHitHeight)
 	{
 		theHitResult->mObject = this;
 		theHitResult->mObjectType = GameObjectType::OBJECT_TYPE_SEEDPACKET;
@@ -1101,7 +1104,20 @@ void SeedBank::Draw(Graphics* g)
 		g->mTransY -= mBoard->mY;
 	}
 
-	if (mApp->IsSlotMachineLevel())
+	const int aViewerSlot = mApp->mNetManager ? mApp->mNetManager->GetMySlot() : 0;
+	const bool aZombieView = mBoard->IsPvPMode() && mApp->mNetManager &&
+		mApp->mNetManager->GetMyTeam() == LawnNet::NETTEAM_ZOMBIES;
+	if (aZombieView)
+	{
+		// One compact top row leaves every lawn lane clear.  The opposing team
+		// has its own bank, so its cards and sun balance are never drawn here.
+		g->SetColor(Color(62, 45, 30));
+		g->FillRect(0, 0, 660, 80);
+		g->SetColor(Color(166, 121, 66));
+		g->DrawRect(0, 0, 659, 79);
+		TodDrawImageScaledF(g, IMAGE_BRAIN, 10.0f, 10.0f, 0.5f, 0.5f);
+	}
+	else if (mApp->IsSlotMachineLevel())
 	{
 		g->DrawImage(IMAGE_SUNBANK, 0, 0);
 	}
@@ -1117,23 +1133,23 @@ void SeedBank::Draw(Graphics* g)
 		Rect theSrcRect(IMAGE_SEEDBANK->mWidth - aExtraWidth - 12, 0, aExtraWidth + 12, IMAGE_SEEDBANK->mHeight);
 		g->DrawImage(IMAGE_SEEDBANK, 0, 0);
 		g->DrawImage(IMAGE_SEEDBANK, IMAGE_SEEDBANK->mWidth - 12, 0, theSrcRect);
-		if (mBoard->IsPvPMode())
-		{
-			// The shared zombie palette lives below the stock plant bank in two
-			// compact rows.  A separate backing keeps the cards readable over lawn.
-			g->SetColor(Color(62, 45, 30, 225));
-			g->FillRect(73, 74, 414, 150);
-			g->SetColor(Color(166, 121, 66, 255));
-			g->DrawRect(73, 74, 413, 149);
-		}
 	}
 
 	for (int i = 0; i < mNumPackets; i++)
 	{
 		SeedPacket* aSeedPacket = &mSeedPackets[i];
+		if (!mBoard->IsSeedPacketVisibleToSlot(i, aViewerSlot))
+			continue;
 		if (aSeedPacket->mPacketType != SeedType::SEED_NONE && aSeedPacket->BeginDraw(g))
 		{
+			g->PushState();
+			if (aZombieView)
+			{
+				g->mScaleX *= 0.72f;
+				g->mScaleY *= 0.72f;
+			}
 			aSeedPacket->Draw(g);
+			g->PopState();
 			aSeedPacket->EndDraw(g);
 		}
 	}
@@ -1146,7 +1162,7 @@ void SeedBank::Draw(Graphics* g)
 
 	if (!mBoard->HasConveyorBeltSeedBank())
 	{
-		SexyString aMoneyLabel = StrFormat(_S("%d"), max(mBoard->mSunMoney, 0));
+		SexyString aMoneyLabel = StrFormat(_S("%d"), max(aZombieView ? mBoard->mNetPvPBrains : mBoard->mSunMoney, 0));
 		Color aMoneyColor(0, 0, 0);
 		if (mBoard->mOutOfMoneyCounter > 0 && mBoard->mOutOfMoneyCounter % 20 < 10)
 		{
@@ -1166,11 +1182,13 @@ void SeedBank::Draw(Graphics* g)
 //0x489970
 bool SeedBank::MouseHitTest(int x, int y, HitResult* theHitResult)
 {
-	if (x - mX <= mWidth - 5 && mNumPackets > 0)
+	if (x >= mX && x - mX <= mWidth - 5 && y >= mY && y < mY + mHeight && mNumPackets > 0)
 	{
-		for (SeedPacket& aSeedPacket : mSeedPackets)
+		const int anActingSlot = mApp->mNetManager ? mApp->mNetManager->GetActingPlayerSlot() : 0;
+		for (int i = 0; i < mNumPackets; ++i)
 		{
-			if (aSeedPacket.MouseHitTest(x - mX, y - mY, theHitResult))
+			if (mBoard->IsSeedPacketVisibleToSlot(i, anActingSlot) &&
+				mSeedPackets[i].MouseHitTest(x - mX, y - mY, theHitResult))
 			{
 				return true;
 			}
@@ -1408,7 +1426,7 @@ void SeedBank::UpdateWidth()
 {
 	mNumPackets = mBoard->GetNumSeedsInBank();
 	mWidth = IMAGE_SEEDBANK->GetWidth() + mBoard->GetSeedBankExtraWidth();
-	mHeight = mBoard->IsPvPMode() ? 224 : IMAGE_SEEDBANK->GetHeight();
+	mHeight = mBoard->IsPvPMode() ? 80 : IMAGE_SEEDBANK->GetHeight();
 	for (int i = 0; i < mNumPackets; i++)
 	{
 		mSeedPackets[i].mX = mBoard->GetSeedPacketPositionX(i);

@@ -178,6 +178,10 @@ public:
 	uint32_t						mNetBoardSeed;			// shared board RNG seed for coop level creation
 	bool							mNetBlockProfileSave;	// client: never write host-synced profile to disk
 	PlayerInfo*					mNetLocalProfileBackup;	// complete local profile restored when the client session ends
+	uint32_t mNetLastProfileHash;
+	bool mNetHostUnlockAllMinigames;
+	int mNetPendingPvpLevel;
+	bool mNetPvpTeamsConfirmed;
 	bool							mNetCoopGameOverHandled;
 	Sexy::DDImage*				mNetCursorImage;
 	bool							mNetChatTyping;
@@ -217,7 +221,14 @@ public:
 	void							NetRestoreLocalProfile();
 	bool							NetOnSceneCmd(uint8_t theCmd, uint32_t theParam);
 	void							NetOnProfileSync(LawnNet::NetBuffer& thePayload);
-	void							NetBroadcastProfile();									// host: push profile to clients
+	void							NetBroadcastProfile(bool theForce = true);									// host: push profile to clients
+	bool NetUnlockAllMinigames() const;
+	void NetCloseTransientScreens();
+	bool NetIsChoosingPvpTeams() const;
+	void NetShowPvpTeamSelection(int theLevel = -1);
+	void NetClosePvpTeamSelection(bool theCancel);
+	void NetTickPvpTeamSelection();
+	void NetShowOnlineBrowser();
 	void							NetHandleRemoteInputs();
 	bool							CoopSmokeActive() const;
 	void							CoopSmokeStartLifecycle();
@@ -228,10 +239,16 @@ public:
 	void							CoopSmokeOnSnapshotRx(uint32_t theHash, size_t theBytes);
 	void							CoopSmokeOnSnapshotApplied(uint32_t theHash, size_t theBytes);
 	bool							CoopSmokeUpdateUnicodeChat();
+	bool                            CoopSmokeUpdateOnline();
+	bool							CoopSmokeUpdateInteractions();
 	void							NetDrawCursorOverlay();
 	void							NetDrawChatOverlay();
 	bool							NetHandleChatKey(int theKey);
 	bool							NetHandleChatText(const char* theUtf8Text);
+	bool NetHandlePointerInput(int theAction, int theButton, int theX, int theY);
+	bool mNetDrawing = false;
+	unsigned short mNetDrawingId = 0;
+	int mNetLastDrawX = 0, mNetLastDrawY = 0;
 	bool							IsCoopCustomMode();
 	static bool						IsCoopEndlessMode(GameMode theGameMode);
 	static bool						IsCoopEndlessRepick(GameMode theGameMode);								// host: apply queued remote inputs to the board

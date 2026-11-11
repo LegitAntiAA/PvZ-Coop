@@ -64,6 +64,7 @@ void Coin::CoinInitializeInternal(int theX, int theY, CoinType theCoinType, Coin
 	mNeedsBouncyArrow = false;
 	mHasBouncyArrow = false;
 	mHitGround = false;
+	mNetCollectionFxStarted = false;
 	mTimesDropped = 0;
 	if (theNetPresentationOnly)
 	{
@@ -575,6 +576,78 @@ void Coin::UpdateFade()
 }
 
 //0x430AC0
+void Coin::AddBouncyArrow()
+{
+    if (!mNeedsBouncyArrow || mHasBouncyArrow)
+        return;
+
+    float aParticleOffsetX = mWidth / 2;
+    float aParticleOffsetY = mHeight / 2 - 60;
+    if (mType == CoinType::COIN_TROPHY)
+        aParticleOffsetX += 2.0f;
+    else if (mType == CoinType::COIN_AWARD_MONEY_BAG || mType == CoinType::COIN_AWARD_BAG_DIAMOND)
+    {
+        aParticleOffsetX += 2.0f;
+        aParticleOffsetY -= 2.0f;
+    }
+    else if (mType == CoinType::COIN_AWARD_PRESENT || IsPresentWithAdvice())
+        aParticleOffsetY -= 20.0f;
+    else if (mType == CoinType::COIN_AWARD_SILVER_SUNFLOWER || mType == CoinType::COIN_AWARD_GOLD_SUNFLOWER)
+    {
+        aParticleOffsetX -= 6.0f;
+        aParticleOffsetY -= 40.0f;
+    }
+    else if (IsMoney())
+    {
+        aParticleOffsetX += 12.0f;
+        aParticleOffsetY += 21.0f;
+    }
+
+    const ParticleEffect aEffect = mType == CoinType::COIN_FINAL_SEED_PACKET ?
+        ParticleEffect::PARTICLE_SEED_PACKET : (IsMoney() ?
+            ParticleEffect::PARTICLE_COIN_PICKUP_ARROW : ParticleEffect::PARTICLE_AWARD_PICKUP_ARROW);
+    TodParticleSystem* aParticle = mApp->AddTodParticle(mPosX + aParticleOffsetX,
+        mPosY + aParticleOffsetY, 0, aEffect);
+    if (aParticle)
+    {
+        AttachParticle(mAttachmentID, aParticle, aParticleOffsetX, aParticleOffsetY);
+        mHasBouncyArrow = true;
+    }
+}
+
+void Coin::NetUpdatePresentation()
+{
+    if (!mNetGhost || mDead)
+        return;
+    if (!mIsBeingCollected)
+    {
+        if (mHitGround)
+            AddBouncyArrow();
+        return;
+    }
+    if (!IsLevelAward() || mNetCollectionFxStarted)
+        return;
+
+    // Collect() also changes profile, rewards and scene state.  Clients only
+    // reproduce its visual edge, once, whether an event or snapshot arrives first.
+    mNetCollectionFxStarted = true;
+    AttachmentDetachCrossFadeParticleType(mAttachmentID, ParticleEffect::PARTICLE_SEED_PACKET, nullptr);
+    AttachmentDetachCrossFadeParticleType(mAttachmentID, ParticleEffect::PARTICLE_AWARD_PICKUP_ARROW, nullptr);
+    AttachmentDetachCrossFadeParticleType(mAttachmentID, ParticleEffect::PARTICLE_COIN_PICKUP_ARROW, nullptr);
+    mApp->AddTodParticle(mPosX + 30.0f, mPosY + 30.0f, mRenderOrder + 1, ParticleEffect::PARTICLE_STARBURST);
+    if (mType != CoinType::COIN_NOTE && mApp->Is3DAccelerated() &&
+        !mApp->IsEndlessIZombie(mApp->mGameMode) && !mApp->IsEndlessScaryPotter(mApp->mGameMode))
+    {
+        const float aOffsetX = mWidth / 2;
+        const float aOffsetY = mHeight / 2;
+        TodParticleSystem* aParticle = mApp->AddTodParticle(mPosX + aOffsetX,
+            mPosY + aOffsetY, mRenderOrder - 1, ParticleEffect::PARTICLE_SEED_PACKET_PICKUP);
+        if (aParticle)
+            AttachParticle(mAttachmentID, aParticle, aOffsetX, aOffsetY);
+    }
+    LawnNet::NetTrace("coin collection presentation id=%u type=%d", mNetId, (int)mType);
+}
+
 void Coin::UpdateFall()
 {
     if (mCoinMotion == CoinMotion::COIN_MOTION_FROM_PRESENT)
@@ -614,52 +687,7 @@ void Coin::UpdateFall()
     }
     else
     {
-        if (mNeedsBouncyArrow && !mHasBouncyArrow)
-        {
-            float aParticleOffsetX = mWidth / 2;
-            float aParticleOffsetY = mHeight / 2 - 60;
-            if (mType == CoinType::COIN_TROPHY)
-            {
-                aParticleOffsetX += 2.0f;
-            }
-            else if (mType == CoinType::COIN_AWARD_MONEY_BAG || mType == CoinType::COIN_AWARD_BAG_DIAMOND)
-            {
-                aParticleOffsetX += 2.0f;
-                aParticleOffsetY -= 2.0f;
-            }
-            else if (mType == CoinType::COIN_AWARD_PRESENT || IsPresentWithAdvice())
-            {
-                aParticleOffsetY -= 20.0f;
-            }
-            else if (mType == CoinType::COIN_AWARD_SILVER_SUNFLOWER || mType == CoinType::COIN_AWARD_GOLD_SUNFLOWER)
-            {
-                aParticleOffsetX -= 6.0f;
-                aParticleOffsetY -= 40.0f;
-            }
-            else if (IsMoney())
-            {
-                aParticleOffsetX += 12.0f;
-                aParticleOffsetY += 21.0f;
-            }
-
-            ParticleEffect aEffect;
-            if (mType == CoinType::COIN_FINAL_SEED_PACKET)
-            {
-                aEffect = ParticleEffect::PARTICLE_SEED_PACKET;
-            }
-            else if (IsMoney())
-            {
-                aEffect = ParticleEffect::PARTICLE_COIN_PICKUP_ARROW;
-            }
-            else
-            {
-                aEffect = ParticleEffect::PARTICLE_AWARD_PICKUP_ARROW;
-            }
-
-            TodParticleSystem* aParticle = mApp->AddTodParticle(mPosX + aParticleOffsetX, mPosY + aParticleOffsetY, 0, aEffect);
-            AttachParticle(mAttachmentID, aParticle, aParticleOffsetX, aParticleOffsetY);
-            mHasBouncyArrow = true;
-        }
+        AddBouncyArrow();
 
         if (!mHitGround)
         {
