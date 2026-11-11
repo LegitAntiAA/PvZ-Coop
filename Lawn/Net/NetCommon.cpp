@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <ctime>
 #include <direct.h>
+#include <filesystem>
 #include <functional>
 #include <mutex>
 #include <process.h>
@@ -108,8 +109,22 @@ namespace
 {
 std::mutex gNetTraceMutex;
 FILE* gNetTraceFile = nullptr;
-std::string gNetConfigPath("coop.ini");
+std::filesystem::path gNetConfigPath;
 std::string gNetLogDirectory("coop_logs");
+
+const std::filesystem::path& NetConfigFilePath()
+{
+	if (gNetConfigPath.empty())
+	{
+		wchar_t aModulePath[32768] = {};
+		const DWORD aLength = GetModuleFileNameW(nullptr, aModulePath, 32768);
+		if (aLength && aLength < 32768)
+			gNetConfigPath = std::filesystem::path(aModulePath).parent_path() / L"coop.ini";
+		else
+			gNetConfigPath = std::filesystem::absolute(L"coop.ini");
+	}
+	return gNetConfigPath;
+}
 
 void NetTraceTimestamp(char* theBuffer, size_t theSize)
 {
@@ -667,7 +682,7 @@ uint32_t NetFnv1a32(const void* theData, size_t theSize)
 void NetSetRuntimePaths(const char* theConfigPath, const char* theLogDirectory)
 {
 	if (theConfigPath && theConfigPath[0])
-		gNetConfigPath = theConfigPath;
+		gNetConfigPath = std::filesystem::absolute(std::filesystem::u8path(theConfigPath));
 	if (theLogDirectory && theLogDirectory[0])
 		gNetLogDirectory = theLogDirectory;
 }
@@ -1009,7 +1024,7 @@ bool NetLoadSmokeManifest(const char* theAbsolutePath, NetSmokeManifest& theMani
 bool NetLoadConfig(NetConfig& theConfig)
 {
 	theConfig.Reset();
-	FILE* aFile = fopen(gNetConfigPath.c_str(), "rb");
+	FILE* aFile = _wfopen(NetConfigFilePath().c_str(), L"rb");
 	if (!aFile)
 		return false;
 
@@ -1051,10 +1066,6 @@ bool NetLoadConfig(NetConfig& theConfig)
 			theConfig.mHeldPlantOutlineAlpha = atoi(aValue.c_str());
 		else if (aKey == "zombatar")
 			NetDecodeZombatarHex(aValue, theConfig.mZombatar);
-		else if (aKey == "online_endpoint")
-			theConfig.mOnlineEndpoint = aValue;
-		else if (aKey == "stun_server")
-			theConfig.mStunServer = aValue;
 	}
 	fclose(aFile);
 
@@ -1068,7 +1079,7 @@ bool NetLoadConfig(NetConfig& theConfig)
 
 bool NetSaveConfig(const NetConfig& theConfig)
 {
-	FILE* aFile = fopen(gNetConfigPath.c_str(), "wb");
+	FILE* aFile = _wfopen(NetConfigFilePath().c_str(), L"wb");
 	if (!aFile)
 		return false;
 	fprintf(aFile, "# PvZ Co-op configuration\n");
@@ -1086,10 +1097,7 @@ bool NetSaveConfig(const NetConfig& theConfig)
 	fprintf(aFile, "hotbar_tint_alpha=%d\n", max(0, min(255, theConfig.mHotbarTintAlpha)));
 	fprintf(aFile, "held_plant_outline_alpha=%d\n", max(0, min(255, theConfig.mHeldPlantOutlineAlpha)));
 	fprintf(aFile, "zombatar=%s\n", NetZombatarHex(theConfig.mZombatar).c_str());
-	fprintf(aFile, "online_endpoint=%s\n", theConfig.mOnlineEndpoint.c_str());
-	fprintf(aFile, "stun_server=%s\n", theConfig.mStunServer.c_str());
-	fclose(aFile);
-	return true;
+	return fclose(aFile) == 0;
 }
 
 } // namespace LawnNet

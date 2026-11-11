@@ -1,7 +1,9 @@
 #include "NetManager.h"
 #include "../../LawnApp.h"
 #include "../Board.h"
+#include "../Challenge.h"
 #include "../SeedPacket.h"
+#include "../CursorObject.h"
 #include "../Plant.h"
 #include "../CutScene.h"
 #include "../Widget/SeedChooserScreen.h"
@@ -46,6 +48,60 @@ void NetManager::ResetReadyState()
 	bool changed = false;
 	for (auto& p : mPlayers) { changed |= p.mReady != 0; p.mReady = 0; }
 	if (changed) SendLobbyState();
+}
+
+void NetManager::PromoteSpectatorsAtLevelBoundary(const char* theReason)
+{
+	if (!IsHosting()) return;
+	bool changed = false;
+	for (const auto& player : mPlayers) changed |= player.mActive && player.mSpectator;
+	if (!changed) return;
+	// Reject input queued while the sender was still an observer. Seamless
+	// stages retain their current input phase rather than entering an intro.
+	AdvanceInputPhase(mInputPhase, "SPECTATOR_PROMOTION");
+	for (auto& player : mPlayers)
+	{
+		if (player.mActive) player.mSpectator = false;
+		player.mReady = 0;
+	}
+	Board* board = mApp ? mApp->mBoard : nullptr;
+	SeedBank* bank = board ? board->mSeedBank : nullptr;
+	if (bank)
+	{
+		int owned = 0, quotas[NET_MAX_PLAYERS] = {};
+		for (int i = 0; i < bank->mNumPackets; ++i)
+			if (bank->mSeedPackets[i].mPacketType != SeedType::SEED_NONE &&
+				bank->mSeedPackets[i].mNetOwnerSlot != NET_SHARED_OWNER) ++owned;
+		const int fixed = min(owned, SeedChooserScreen::CoopExpectedGlobalFixedPicks(mApp, board));
+		if (ComputeChooserQuotas(owned, fixed, board->IsPvPMode(), quotas))
+			for (int i = 0; i < bank->mNumPackets; ++i)
+			{
+				SeedPacket& packet = bank->mSeedPackets[i];
+				if (packet.mPacketType == SeedType::SEED_NONE || packet.mNetOwnerSlot == NET_SHARED_OWNER) continue;
+				int owner = packet.mNetOwnerSlot;
+				if (owner >= NET_MAX_PLAYERS || quotas[owner] == 0)
+				{
+					owner = 0;
+					for (int slot = 1; slot < NET_MAX_PLAYERS; ++slot)
+						if (quotas[slot] > quotas[owner]) owner = slot;
+					// A hand from the old stage must not keep using a reassigned card.
+					for (int slot = 0; slot < NET_MAX_PLAYERS; ++slot)
+					{
+						CursorObject* cursor = board->mNetPlayerCursors[slot];
+						if (!cursor || cursor->mCursorType != CursorType::CURSOR_TYPE_PLANT_FROM_BANK || cursor->mSeedBankIndex != i) continue;
+						packet.Activate();
+						cursor->mType = cursor->mImitaterType = SeedType::SEED_NONE;
+						cursor->mCursorType = CursorType::CURSOR_TYPE_NORMAL;
+						cursor->mSeedBankIndex = -1;
+					}
+					packet.mNetOwnerSlot = (uint8_t)owner;
+				}
+				--quotas[owner]; // identity and cooldown stay with the same card
+			}
+	}
+	SendLobbyState();
+	NetTrace("spectators promoted reason=%s eligible=%d", theReason ? theReason : "level boundary", GetReadyEligibleCount());
+	SendSystemChat("The level has ended. Spectators can now play.");
 }
 
 void NetManager::SetDifficulty(int theDifficulty)
@@ -113,13 +169,29 @@ void NetManager::SendLateJoinState(NetSession* theSession)
 {
 	if (!theSession || !mApp || !mApp->mBoard) return;
 	Board* board = mApp->mBoard;
-	NetBuffer start;
-	start.WriteU8((uint8_t)mApp->mGameMode);
-	start.WriteI32(board->mLevel);
-	start.WriteU8((uint8_t)GetPlayerCount());
-	start.WriteU32(mApp->mNetBoardSeed);
-	start.WriteU8((uint8_t)mStartTDPath.size());
-	for (uint8_t cell : mStartTDPath) start.WriteU8(cell);
+	// Custom modes can use an internal board level unrelated to their start
+	// descriptor. Reuse exactly what created this board, changing only roster.
+	NetBuffer start = mCurrentStart;
+	uint8_t mode = 0, previousCount = 0;
+	int32_t level = 0;
+	bool recorded = start.ReadU8(&mode) && start.ReadI32(&level);
+	const size_t rosterPosition = start.mReadPos;
+	recorded = recorded && start.ReadU8(&previousCount);
+	if (recorded)
+	{
+		start.mData[rosterPosition] = (uint8_t)GetPlayerCount();
+		start.mReadPos = 0;
+	}
+	else
+	{
+		start.Clear();
+		mode = (uint8_t)mApp->mGameMode; level = board->mLevel;
+		start.WriteU8(mode); start.WriteI32(level);
+		start.WriteU8((uint8_t)GetPlayerCount()); start.WriteU32(mApp->mNetBoardSeed);
+		start.WriteU8((uint8_t)mStartTDPath.size());
+		for (uint8_t cell : mStartTDPath) start.WriteU8(cell);
+	}
+	NetTrace("late join start descriptor mode=%u level=%d players=%d recorded=%d",mode,level,GetPlayerCount(),recorded?1:0);
 	theSession->mConn.SendMessage(NETMSG_START_GAME, start);
 	// Apply one complete authoritative bank while the new board is still in
 	// INTRO; only then cross the playing barrier. Existing peers never restart.
@@ -178,7 +250,15 @@ void NetManager::OnAnnotation(NetSession* theSession, NetBuffer& thePayload)
 		if (!seed) return;
 	}
 	const uint32_t now = GetTickCount();
-	const bool aVisibleHere = !mApp->mBoard->IsPvPMode() || mPlayers[slot].mTeam == GetMyTeam();
+	const auto canView = [&](int peer)
+	{
+		if (!mApp->mBoard->IsPvPMode() || mPlayers[peer].mSpectator) return true;
+		if (!mPlayers[slot].mSpectator) return mPlayers[peer].mTeam == mPlayers[slot].mTeam;
+		if (!seed) return true; // neutral observer pings and drawings are public
+		const uint8_t team = mApp->mBoard->mChallenge->IsZombieSeedType(seed->mPacketType) ? NETTEAM_ZOMBIES : NETTEAM_PLANTS;
+		return mPlayers[peer].mTeam == team;
+	};
+	const bool aVisibleHere = canView(mMySlot);
 	if (IsHosting())
 	{
 		uint32_t& last = kind == NETANNOTATION_PING || kind == NETANNOTATION_SEED ? mLastAnnotationTick[slot] : mLastDrawTick[slot];
@@ -187,7 +267,7 @@ void NetManager::OnAnnotation(NetSession* theSession, NetBuffer& thePayload)
 		last = now;
 		NetBuffer b; b.WriteU8(slot); b.WriteU32(epoch); b.WriteU8(kind); b.WriteI16(x); b.WriteI16(y); b.WriteU16(id);
 		for (int peer = 1; peer < NET_MAX_PLAYERS; ++peer)
-			if (mPlayers[peer].mActive && (!mApp->mBoard->IsPvPMode() || mPlayers[peer].mTeam == mPlayers[slot].mTeam))
+			if (mPlayers[peer].mActive && canView(peer))
 				mSessions[peer].mConn.SendMessage(NETMSG_ANNOTATION, b);
 		if (seed)
 		{
@@ -197,7 +277,7 @@ void NetManager::OnAnnotation(NetSession* theSession, NetBuffer& thePayload)
 			if (aVisibleHere) AddChatLine(slot, text);
 			NetBuffer chat; chat.WriteU8(slot); chat.WriteString(text.c_str());
 			for (int peer = 1; peer < NET_MAX_PLAYERS; ++peer)
-				if (mPlayers[peer].mActive && (!mApp->mBoard->IsPvPMode() || mPlayers[peer].mTeam == mPlayers[slot].mTeam))
+				if (mPlayers[peer].mActive && canView(peer))
 					mSessions[peer].mConn.SendMessage(NETMSG_CHAT_BROADCAST, chat);
 		}
 	}
@@ -230,7 +310,7 @@ void NetManager::DrawAnnotations(Sexy::Graphics* g)
 		for (int slot=0;slot<NET_MAX_PLAYERS;++slot) if (mPlayers[slot].mActive)
 		{
 			const int y = oy+194+slot*24;
-			TodDrawString(g,StringToSexyString(mPlayers[slot].mNick),ox+18,y,Sexy::FONT_BRIANNETOD12,Color(255,255,255),DS_ALIGN_LEFT);
+			Sexy::FONT_BRIANNETOD12->DrawString(g,ox+18,y,StringToSexyString(mPlayers[slot].mNick),Color(255,255,255),g->mClipRect);
 			if (slot) { g->SetColor(Color(140,45,35)); g->FillRect(ox+180,y-16,34,20); TodDrawString(g,_S("X"),ox+197,y,Sexy::FONT_BRIANNETOD12,Color(255,255,255),DS_ALIGN_CENTER); }
 		}
 	}
@@ -241,7 +321,6 @@ void NetManager::DrawAnnotations(Sexy::Graphics* g)
 	{ auto key = std::make_pair(a.mSlot,a.mId); ends[key] = a.mTick; ++counts[key]; }
 	for (const auto& a : mAnnotations)
 	{
-		if (mApp->mBoard->IsPvPMode() && mPlayers[a.mSlot].mTeam != GetMyTeam()) continue;
 		const auto color = GetRelativePlayerColor(mMySlot, a.mSlot);
 		const uint32_t age = now - a.mTick;
 		if (a.mKind == NETANNOTATION_PING && age < 2000U)

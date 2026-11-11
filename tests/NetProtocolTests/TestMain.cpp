@@ -727,6 +727,46 @@ void TestCoinEventPayloadSizesAreExact()
 	CHECK(!LawnNet::NetPayloadHasExactBytes(aCollected, LawnNet::NET_SUN_COLLECTED_PAYLOAD_BYTES));
 }
 
+void TestConfigDefaultPathIgnoresLaunchDirectory()
+{
+	ScopedTemporaryWorkingDirectory aWorkingDirectory;
+	if (!aWorkingDirectory.IsIsolated()) { Skip("could not isolate config launch probe"); return; }
+	const auto aRoot = std::filesystem::current_path();
+	const auto anExeDir = aRoot / "executable", aLaunchDir = aRoot / "launch";
+	std::filesystem::create_directory(anExeDir);
+	std::filesystem::create_directory(aLaunchDir);
+	wchar_t aModulePath[32768] = {};
+	const DWORD aLength = GetModuleFileNameW(nullptr, aModulePath, 32768);
+	CHECK(aLength && aLength < 32768);
+	const auto anExe = anExeDir / "config-probe.exe";
+	std::filesystem::copy_file(aModulePath, anExe);
+	CHECK(WriteSmokeTestFile(anExeDir / "coop.ini", "nickname=LaunchProbe\nunlock_all_minigames=1\nheld_plant_tint_alpha=201\n"));
+	CHECK(WriteSmokeTestFile(aLaunchDir / "coop.ini", "nickname=WrongDirectory\nheld_plant_tint_alpha=19\n"));
+	std::wstring aCommand = L"\"" + anExe.wstring() + L"\" --config-path-probe";
+	STARTUPINFOW aStartup = {}; aStartup.cb = sizeof(aStartup);
+	aStartup.dwFlags = STARTF_USESHOWWINDOW; aStartup.wShowWindow = SW_HIDE;
+	PROCESS_INFORMATION aProcess = {};
+	const bool aStarted = CreateProcessW(anExe.c_str(), &aCommand[0], nullptr, nullptr, FALSE,
+		CREATE_NO_WINDOW, nullptr, aLaunchDir.c_str(), &aStartup, &aProcess) != FALSE;
+	CHECK(aStarted);
+	if (aStarted)
+	{
+		const bool aFinished = WaitForSingleObject(aProcess.hProcess, 5000U) == WAIT_OBJECT_0;
+		CHECK(aFinished);
+		if (!aFinished) { TerminateProcess(aProcess.hProcess, 2); WaitForSingleObject(aProcess.hProcess, 1000U); }
+		DWORD anExitCode = 1; CHECK(GetExitCodeProcess(aProcess.hProcess, &anExitCode) && anExitCode == 0);
+		CloseHandle(aProcess.hThread); CloseHandle(aProcess.hProcess);
+	}
+	const auto aConfigPathUtf8 = (anExeDir / "coop.ini").u8string();
+	LawnNet::NetSetRuntimePaths(reinterpret_cast<const char*>(aConfigPathUtf8.c_str()), nullptr);
+	LawnNet::NetConfig aSaved;
+	CHECK(LawnNet::NetLoadConfig(aSaved) && aSaved.mHeldPlantTintAlpha == 77 && aSaved.mUnlockAllMinigames);
+	std::filesystem::remove(anExe);
+	std::filesystem::remove(anExeDir / "coop.ini");
+	std::filesystem::remove(aLaunchDir / "coop.ini");
+	std::filesystem::remove(anExeDir); std::filesystem::remove(aLaunchDir);
+}
+
 void TestConfigRoundTripInIsolatedDirectory()
 {
 	ScopedTemporaryWorkingDirectory aWorkingDirectory;
@@ -737,6 +777,7 @@ void TestConfigRoundTripInIsolatedDirectory()
 	}
 
 	LawnNet::NetConfig aSaved;
+	LawnNet::NetSetRuntimePaths("coop.ini", nullptr);
 	std::strcpy(aSaved.mNick, "UnitTester");
 	aSaved.mUnlockAllMinigames = true;
 	aSaved.mEnableCoop = false;
@@ -762,6 +803,19 @@ void TestConfigRoundTripInIsolatedDirectory()
         CHECK(aLoaded.mHeldPlantTintAlpha == 201);
         CHECK(aLoaded.mHotbarTintAlpha == 99);
         CHECK(aLoaded.mHeldPlantOutlineAlpha == 231);
+	{
+		ScopedTemporaryWorkingDirectory aDifferentLaunchDirectory;
+		CHECK(aDifferentLaunchDirectory.IsIsolated());
+		CHECK(!std::filesystem::exists("coop.ini"));
+		LawnNet::NetConfig aReloaded;
+		CHECK(LawnNet::NetLoadConfig(aReloaded));
+		CHECK(aReloaded.mUnlockAllMinigames && aReloaded.mHeldPlantTintAlpha == 201);
+		aReloaded.mHotbarTintAlpha = 77;
+		CHECK(LawnNet::NetSaveConfig(aReloaded));
+		CHECK(!std::filesystem::exists("coop.ini"));
+	}
+	CHECK(LawnNet::NetLoadConfig(aLoaded));
+	CHECK(aLoaded.mHotbarTintAlpha == 77);
 }
 
 } // namespace
@@ -798,8 +852,16 @@ void TestSpectatorAuthorityAndStrokeLifetime()
 	CHECK(LawnNet::NetStrokeAlpha(10000,4,5) == 0);
 }
 
-int main()
+int main(int argc, char** argv)
 {
+	if (argc == 2 && std::strcmp(argv[1], "--config-path-probe") == 0)
+	{
+		LawnNet::NetConfig aConfig;
+		if (!LawnNet::NetLoadConfig(aConfig) || std::strcmp(aConfig.mNick, "LaunchProbe") != 0 ||
+			!aConfig.mUnlockAllMinigames || aConfig.mHeldPlantTintAlpha != 201 || !SetCurrentDirectoryW(L"..")) return 2;
+		aConfig.mHeldPlantTintAlpha = 77;
+		return LawnNet::NetSaveConfig(aConfig) ? 0 : 3;
+	}
 	std::printf("PvZ NetProtocolTests (protocol %u)\n", LawnNet::NET_PROTOCOL_VERSION);
 
 	RunTest("NetBuffer.NumericRoundTrip", TestNetBufferNumericRoundTrip);
@@ -813,6 +875,7 @@ int main()
 	RunTest("Chooser.FixedCardsFairQuotas", TestFairFixedSeedQuotas);
 	RunTest("Spectator.AuthorityAndStrokeLifetime", TestSpectatorAuthorityAndStrokeLifetime);
 	RunTest("Config.Defaults", TestConfigDefaults);
+	RunTest("Config.ExecutablePathAcrossCwdChanges", TestConfigDefaultPathIgnoresLaunchDirectory);
 	RunTest("Config.IsolatedRoundTrip", TestConfigRoundTripInIsolatedDirectory);
 	RunTest("Smoke.ManifestAndHashValidation", TestSmokeManifestAndHashValidation);
 	RunTest("Presentation.Approach", TestPresentationApproachIsMonotonicAndConvergent);

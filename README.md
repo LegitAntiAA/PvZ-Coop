@@ -6,9 +6,9 @@ A host-authoritative online co-op fork of **Plants vs. Zombies / stabledecompile
 
 ## Playing together
 
-**Online rooms, without a VPN:** open **ONLINE ROOMS**, enter your signaling service URL, create a room or select one to join. Rooms support a name, optional password and a total capacity of 2–4 players. The directory shows the same mod build; the gameplay handshake also rejects a different build. A reliable, ordered WebRTC DataChannel carries gameplay directly between computers; Cloudflare handles discovery/signaling.
+**Online rooms, without a VPN:** open **ONLINE ROOMS** and create a room or select one to join. The browser connects to the mod's shared service automatically. Rooms support a name, optional password and a total capacity of 2–4 players. The directory shows the same mod build; the gameplay handshake also rejects a different build. A reliable, ordered WebRTC DataChannel carries gameplay directly between computers; Cloudflare handles discovery/signaling.
 
-Follow the [Cloudflare Free and WebRTC setup guide (Russian)](docs/ONLINE_SETUP_RU.md). The repository includes the Worker and reproducible native dependency build. No hosted public directory is preconfigured. STUN without TURN cannot connect every NAT/firewall combination; LAN/VPN remains available when direct connectivity fails. Free services have usage limits.
+Players use the ready-made archive. The mod owner operates one shared backend; its address and public STUN are built into the mod. The [operator guide (Russian)](docs/ONLINE_SETUP_RU.md) covers Free Cloudflare deployment and maintenance. STUN without TURN cannot connect every NAT/firewall combination; LAN/VPN remains available when direct connectivity fails. Free services have usage limits.
 
 **LAN / VPN:** enter a nickname and press **HOST GAME**. Other players enter the host's IPv4 address and port `27713`, then press **CONNECT**. For Radmin VPN, use the host's `26.x.x.x` address. The host starts games through the normal menu.
 
@@ -51,10 +51,6 @@ base_snapshot_rate=15
 window_width=0
 window_height=0
 borderless_fullscreen=1
-
-# Optional: your deployed Cloudflare signaling URL
-online_endpoint=
-stun_server=stun:stun.cloudflare.com:3478
 ```
 
 Default window size is 1066×600; set both dimensions for another size. The host's effective mini-game unlock setting is mirrored to clients. Tint settings and the saved personal Zombatar are also persisted by the game.
@@ -73,11 +69,11 @@ The 2026-11-11 play-test fixes are undergoing integration and background game ve
 - [x] Host-authoritative TCP, snapshots, ordered input and adaptive snapshot rate
 - [x] Shared seed selection, relative player colors, custom modes
 - [x] Native WebRTC transport and Cloudflare signaling source; native local integration tests
+- [ ] Current native PvZ room browser and mod UI/UX refresh — implementation and verification in progress
 - [ ] Complete the current play-test regression matrix and real-network NAT testing
 - [ ] Lua modding API — planned, not implemented
 - [ ] More custom mini-games — planned, not implemented
 - [ ] New custom Adventure modes — planned, not implemented
-- [ ] Update mod UI/UX — planned, not implemented
 
 ---
 
@@ -87,9 +83,9 @@ The 2026-11-11 play-test fixes are undergoing integration and background game ve
 
 ### Подключение
 
-**Без VPN:** нажмите **ONLINE ROOMS**, укажите URL своего сервиса сигналинга и создайте комнату либо подключитесь к существующей. Можно задать имя, пароль и вместимость 2–4 игрока. Каталог показывает комнаты той же сборки; версия также проверяется при игровом подключении. Игровые данные идут напрямую по WebRTC, Cloudflare обслуживает каталог и установку соединения.
+**Без VPN:** нажмите **ONLINE ROOMS** и создайте комнату либо подключитесь к существующей. Браузер автоматически соединяется с общим сервисом мода. Можно задать имя, пароль и вместимость 2–4 игрока. Каталог показывает комнаты той же сборки; версия также проверяется при игровом подключении. Игровые данные идут напрямую по WebRTC, Cloudflare обслуживает каталог и установку соединения.
 
-[Подробная настройка бесплатного Cloudflare Worker и WebRTC](docs/ONLINE_SETUP_RU.md). Готовый общий сервер в игре не задан: исходники сервиса входят в репозиторий. У бесплатного тарифа есть лимиты. Без TURN некоторые NAT/корпоративные сети не позволяют прямое соединение; в таком случае доступно подключение по LAN/VPN.
+Игрокам нужен готовый архив мода. Один общий сервер обслуживает владелец мода; его адрес и публичный STUN встроены в клиент. [Инструкция оператора](docs/ONLINE_SETUP_RU.md) описывает бесплатное развёртывание и обслуживание Cloudflare. У бесплатного тарифа есть лимиты. Без TURN некоторые NAT/корпоративные сети не позволяют прямое соединение; в таком случае доступно подключение по LAN/VPN.
 
 **LAN / VPN:** хост вводит ник и нажимает **HOST GAME**. Остальные вводят его IPv4 и порт `27713`, затем **CONNECT**. В Radmin VPN используется адрес хоста вида `26.x.x.x`. Режим запускает хост через обычное меню.
 
@@ -121,7 +117,7 @@ The 2026-11-11 play-test fixes are undergoing integration and background game ve
 
 [Доска текущих задач и фактических проверок](docs/agent/WORKBOARD.md). Набор исправлений плей-теста проходит интеграционные проверки; реализация и проверенное поведение отмечаются отдельно.
 
-Пока **не реализуются**, только запланированы: Lua modding API, дополнительные мини-игры, новые Adventure-режимы и обновление UI/UX мода.
+Нативный браузер комнат в стиле PvZ и обновление UI/UX мода находятся в текущей реализации и проверке. Пока **не реализуются**, только запланированы: Lua modding API, дополнительные мини-игры и новые Adventure-режимы.
 
 ---
 # DISCLAIMER

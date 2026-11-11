@@ -336,6 +336,7 @@ GameSelector::GameSelector(LawnApp* theApp)
 	mHandReanimID = ReanimationID::REANIMATIONID_NULL;
 	mSpotLightID = ReanimationID::REANIMATIONID_NULL;
 	mMinigamesLocked = false;
+	mLastUnlockAll = false;
 	mPuzzleLocked = false;
 	mSurvivalLocked = false;
 	mUnlockSelectorCheat = false;
@@ -694,7 +695,8 @@ void GameSelector::SyncProfile(bool theShowLoading)
 		}
 	}
 
-	if (mApp->NetUnlockAllMinigames())
+	mLastUnlockAll = mApp->NetUnlockAllMinigames();
+	if (mLastUnlockAll)
 	{
 		mMinigamesLocked = false;
 		mPuzzleLocked = false;
@@ -830,7 +832,7 @@ void GameSelector::Draw(Graphics* g)
 		SexyTransform2D aOffsetMatrix;
 		// @Patoke: add position so it moves when sliding to position
 		aOffsetMatrix.Translate(170.5f - (int)(aStringWidth * 0.5f) + mX + mApp->mDDInterface->mWideScreenOffsetX, 102.5f + mY + mApp->mDDInterface->mWideScreenOffsetY);
-		TodDrawStringMatrix(g, Sexy::FONT_BRIANNETOD16, aOverlayMatrix * aOffsetMatrix, aWelcomeStr, Color(255, 245, 200));
+		TodDrawStringMatrix(g, Sexy::FONT_BRIANNETOD16, aOverlayMatrix * aOffsetMatrix, aWelcomeStr, Color(255, 245, 200), true);
 	}
 
 	Graphics gAchievementButton(*g);
@@ -1243,6 +1245,8 @@ void GameSelector::UpdateTooltip()
 //0x44B2A0
 void GameSelector::Update()
 {
+	if (mLastUnlockAll != mApp->NetUnlockAllMinigames())
+		SyncProfile(false);
 	Widget::Update();
 	MarkDirty();
 	UpdateTooltip();
@@ -2098,6 +2102,8 @@ bool GameSelector::ShouldDoZenTuturialBeforeAdventure()
 //0x44C8C0
 void GameSelector::ButtonDepress(int theId)
 {
+	if (mLastUnlockAll != mApp->NetUnlockAllMinigames())
+		SyncProfile(false);
 	if (mSlideCounter > 0 || mStartingGame)
 		return;
 

@@ -236,12 +236,14 @@ private:
 	bool mPvpInitialBrainsVerified;
 	bool mPvpPassiveBrainsVerified;
 	bool mPvpCursorHiddenVerified;
+	bool mPvpCursorMotionIssued;
 	bool mPvpZombieEntryObserved;
 	bool mPvpHostPlantIssued;
 	bool mPvpHostPlantObserved;
 	uint16_t mPvpZombieId;
 	uint16_t mPvpBaselineMaxZombieId;
 	int mPvpBrainsAfterAction;
+	uint32_t mPvpInitialReadyTick;
 	int mPortalConveyorInitialCounter;
 	int mPortalZombieEntryRow;
 	uint32_t mPortalZombieEntryTick;
@@ -311,6 +313,7 @@ public:
 	void OnAuthoritativeWhackHit(uint16_t theZombieId);
 	void OnPortalHeldPacketEcho(uint16_t thePacketId, int thePacketIndex, int theCursorType);
 	void OnSlotMachineSound(bool theHost);
+	void ObservePvPCursorSuppressed(int theLocalSlot, int theRemoteSlot);
 	bool IsComplete(uint32_t theRequiredPostActionSnapshots) const;
 	bool HasIssuedAction() const { return mActionIssued; }
 	bool HasAppliedAction() const { return mActionApplied; }

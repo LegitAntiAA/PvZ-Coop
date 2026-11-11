@@ -4,10 +4,14 @@ param(
     [string]$GameExe = "",
     [string]$ArtifactsRoot = "",
     [ValidateSet('TowerDefenseClient', 'Adventure1')][string]$Scenario = 'TowerDefenseClient',
+    [ValidateSet('Kick', 'Promote')][string]$Variant = 'Kick',
     [ValidateRange(60, 600)][int]$TimeoutSeconds = 240
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+if ($Variant -eq 'Promote' -and $Scenario -ne 'TowerDefenseClient') {
+    throw 'The promotion variant requires the native TowerDefenseClient finish/next-chooser workflow.'
+}
 $repo = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..'))
 if (-not $GameExe) { $GameExe = Join-Path $repo 'build\ReleaseGOTY_Win32\bin\PlantsVsZombies.exe' }
 $GameExe = (Resolve-Path -LiteralPath $GameExe).Path
@@ -59,7 +63,10 @@ try {
         ' -GameExe ' + (Quote-Argument $GameExe) + ' -ArtifactsRoot ' + (Quote-Argument $pairRoot) +
         ' -Scenario ' + $Scenario + ' -SkipIntro ' + $(if ($Scenario -eq 'TowerDefenseClient') { '0' } else { '1' }) +
         ' -Background -TimeoutSeconds ' + $TimeoutSeconds
-    $pair = Start-Child 'powershell.exe' $arguments @{ PVZ_COOP_SMOKE_SPECTATOR = '1' } $repo
+    $pair = Start-Child 'powershell.exe' $arguments @{
+        PVZ_COOP_SMOKE_SPECTATOR = '1'
+        PVZ_COOP_SMOKE_SPECTATOR_PROMOTE = $(if ($Variant -eq 'Promote') { '1' } else { '0' })
+    } $repo
     $deadline = [DateTime]::UtcNow.AddSeconds($TimeoutSeconds + 30)
     while ([DateTime]::UtcNow -lt $deadline) {
         if ($pair.Process.HasExited) { throw ('Pair runner ended before spectator launch: ' + $pair.Output.Result + $pair.Error.Result) }
@@ -93,6 +100,7 @@ try {
     $environment = @{
         PVZ_COOP_SMOKE_RUN_ID = $runId; PVZ_COOP_SMOKE_ROLE = 'client'
         PVZ_COOP_SMOKE_SPECTATOR = '1'; PVZ_COOP_SMOKE_SPECTATOR_ROLE = 'spectator'
+        PVZ_COOP_SMOKE_SPECTATOR_PROMOTE = $(if ($Variant -eq 'Promote') { '1' } else { '0' })
         PVZ_COOP_SMOKE_BACKGROUND = '1'; PVZ_COOP_SMOKE_CAPTURE_DIR = $roleRoot
     }
     $spectator = Start-Child $GameExe ('-coop-smoke-manifest=' + (Quote-Argument $manifest)) $environment (Split-Path -Parent $GameExe)
@@ -112,10 +120,16 @@ try {
     [IO.File]::WriteAllText((Join-Path $root 'pair.stdout.log'), $pair.Output.Result, $utf8)
     [IO.File]::WriteAllText((Join-Path $root 'pair.stderr.log'), $pair.Error.Result, $utf8)
     if ($pair.Process.ExitCode -ne 0) { throw ('Base pair verification failed: ' + $pair.Output.Result) }
-    if (-not (Test-Path -LiteralPath $result)) { throw 'Expected host-kick proof is missing.' }
+    if (-not (Test-Path -LiteralPath $result)) { throw 'Expected third-process proof is missing.' }
     $proof = Get-Content -LiteralPath $result -Raw | ConvertFrom-Json
-    if ($proof.status -ne 'pass' -or $proof.test -ne 'late-spectator' -or -not $proof.readonly -or -not $proof.ping -or -not $proof.hostKick) {
-        throw 'Third-process proof does not satisfy late-join/kick criteria.'
+    if ($proof.status -ne 'pass' -or -not $proof.readonly) { throw 'Third-process read-only-phase proof failed.' }
+    if ($Variant -eq 'Kick' -and ($proof.test -ne 'late-spectator' -or -not $proof.ping -or -not $proof.chat -or
+        -not $proof.seedPing -or -not $proof.draw -or -not $proof.hostKick)) {
+        throw 'Third-process proof does not satisfy observer communication/kick criteria.'
+    }
+    if ($Variant -eq 'Promote' -and ($proof.test -ne 'late-spectator-promotion' -or -not $proof.signals -or
+        -not $proof.promoted -or $proof.players -ne 3 -or $proof.packet -le 0 -or $proof.plant -le 0)) {
+        throw 'Third-process proof does not satisfy promotion and accepted gameplay criteria.'
     }
     $hostText = Logs (Join-Path $run 'host\logs'); $clientText = Logs (Join-Path $run 'client\logs'); $thirdText = Logs $logRoot
     $hostShape = [regex]::Match($hostText, 'SMOKE_SPECTATOR_BOOTSTRAP role=host shape=([0-9A-F]{8})')
@@ -131,26 +145,76 @@ try {
     foreach ($text in @($hostText, $thirdText)) {
         if ($text -notmatch 'SMOKE_SPECTATOR_READONLY [^\r\n]*noPlantMutation=1 ping=1 input=SDL_queue') { throw 'Missing read-only SDL interaction evidence.' }
     }
-    if ($hostText -notmatch 'SMOKE_SPECTATOR_KICK role=host inactive=1 systemChat=1 pauseButton=1' -or
-        $clientText -notmatch 'SMOKE_SPECTATOR_KICK role=client inactive=1 systemChat=1 existingSession=1' -or
-        $thirdText -notmatch 'SMOKE_SPECTATOR_KICKED role=spectator reason=host_kick readonly=1 ping=1') {
-        throw 'Missing pause-button kick, peer system-chat, or actual disconnect-reason evidence.'
+    $signalPattern = 'SMOKE_SPECTATOR_COMMS role={0} chat=1 middle=1 seed=([1-9]\d*) draw=1 cursor={1} points=[4-9]\d* capture=1 input=SDL_queue'
+    $hostSignals = [regex]::Match($hostText, ($signalPattern -f 'host', 1))
+    $clientSignals = [regex]::Match($clientText, ($signalPattern -f 'client', 1))
+    $thirdSignals = [regex]::Match($thirdText, ($signalPattern -f 'spectator', 0))
+    if (-not $hostSignals.Success -or -not $clientSignals.Success -or -not $thirdSignals.Success -or
+        $hostSignals.Groups[1].Value -ne $clientSignals.Groups[1].Value -or
+        $hostSignals.Groups[1].Value -ne $thirdSignals.Groups[1].Value -or
+        $hostText -notmatch 'spectator mutation rejected slot=2 type=INPUT_MOUSE') {
+        throw 'Missing observer SDL chat/cursor/ping/semantic seed/drawing or authenticated raw-mutation rejection evidence.'
+    }
+    foreach ($directory in @((Join-Path $run 'host'), (Join-Path $run 'client'), $roleRoot)) {
+        if (-not (Test-Path -LiteralPath (Join-Path $directory 'spectator_communications.bmp') -PathType Leaf)) {
+            throw ('Missing observer communication render capture: ' + $directory)
+        }
+    }
+    if ($Variant -eq 'Kick') {
+        if ($hostText -notmatch 'SMOKE_SPECTATOR_KICK role=host inactive=1 systemChat=1 pauseButton=1' -or
+            $clientText -notmatch 'SMOKE_SPECTATOR_KICK role=client inactive=1 systemChat=1 existingSession=1' -or
+            $thirdText -notmatch 'SMOKE_SPECTATOR_KICKED role=spectator reason=host_kick readonly=1 ping=1') {
+            throw 'Missing pause-button kick, peer system-chat, or actual disconnect-reason evidence.'
+        }
+    }
+    else {
+        if ($hostText -notmatch 'spectators promoted reason=LEVEL_COMPLETE eligible=3') {
+            throw 'Observers were not promoted at the native completed-level boundary.'
+        }
+        $plantPattern = 'SMOKE_SPECTATOR_PROMOTED_PLANT role={0} packet=(\d+) plant=(\d+) cell=(\d+),(\d+) slot=2 picked=1 input=SDL_queue'
+        $hostPlant = [regex]::Match($hostText, ($plantPattern -f 'host'))
+        $clientPlant = [regex]::Match($clientText, ($plantPattern -f 'client'))
+        $thirdPlant = [regex]::Match($thirdText, ($plantPattern -f 'spectator'))
+        if (-not $hostPlant.Success -or -not $clientPlant.Success -or -not $thirdPlant.Success) {
+            throw 'Promoted slot 2 did not complete an acknowledged SDL seed pickup and authoritative planting.'
+        }
+        foreach ($group in 1..4) {
+            if ($hostPlant.Groups[$group].Value -ne $clientPlant.Groups[$group].Value -or
+                $hostPlant.Groups[$group].Value -ne $thirdPlant.Groups[$group].Value) {
+                throw 'Promoted packet/plant/cell identities differ between the three processes.'
+            }
+        }
+        foreach ($text in @($hostText, $clientText, $thirdText)) {
+            if ($text -notmatch 'SMOKE_SPECTATOR_PROMOTED role=\w+ players=3 eligible=3 spectator=0 source=stock_level_end' -or
+                $text -notmatch 'SMOKE_SPECTATOR_PROMOTION_QUOTA role=\w+ eligible=3 quotas=4,3,3' -or
+                $text -notmatch 'SMOKE_SPECTATOR_PROMOTION_COMPLETE role=\w+ players=3 picked=1 planted=1') {
+                throw 'Missing real level-end promotion, three-player next chooser or completed gameplay evidence.'
+            }
+        }
     }
     $passed = $true
-    Write-Host ('[SpectatorSmoke] PASS: 3 game processes; late join, read-only input, ping, pause kick and system chat. Artifacts: ' + $root)
+    Write-Host ('[SpectatorSmoke] PASS variant=' + $Variant + ': 3 hidden game processes; late join, read-only gameplay, SDL chat/cursor/pings/draw and variant completion. Artifacts: ' + $root)
 }
 finally {
     if ($null -ne $spectator) { Stop-Exact $spectator.Process }
     if ($null -ne $pair -and -not $pair.Process.HasExited) {
         # Only exact, start-time-verified game PIDs recorded by our owned runner.
         if ($run -and (Test-Path -LiteralPath (Join-Path $run 'pids.json'))) {
-            foreach ($entry in @(Get-Content -LiteralPath (Join-Path $run 'pids.json') -Raw | ConvertFrom-Json)) {
+            $recordedProcesses = Get-Content -LiteralPath (Join-Path $run 'pids.json') -Raw | ConvertFrom-Json
+            foreach ($entry in $recordedProcesses) {
                 $owned = Get-Process -Id $entry.pid -ErrorAction SilentlyContinue
-                if ($owned -and $owned.MainModule.FileName -eq $GameExe -and
-                    $owned.StartTime.ToUniversalTime().ToString('o') -eq $entry.started_utc) { Stop-Exact $owned }
+                $recordedStart = [DateTimeOffset]$entry.started_utc
+                if (-not $owned -or $owned.HasExited) { continue }
+                try {
+                    $module = $owned.MainModule
+                    $sameProcess = $module -and $module.FileName -eq $GameExe -and
+                        $owned.StartTime.ToUniversalTime().Ticks -eq $recordedStart.UtcDateTime.Ticks
+                }
+                catch { if ($owned.HasExited) { continue }; throw }
+                if ($sameProcess) { Stop-Exact $owned }
             }
         }
         Stop-Exact $pair.Process
     }
-    [IO.File]::WriteAllText((Join-Path $root 'summary.json'), (@{ passed = $passed; scope = 'late-spectator-ping-kick'; artifacts = $root } | ConvertTo-Json), $utf8)
+    [IO.File]::WriteAllText((Join-Path $root 'summary.json'), (@{ passed = $passed; scope = 'late-spectator'; variant = $Variant; artifacts = $root } | ConvertTo-Json), $utf8)
 }

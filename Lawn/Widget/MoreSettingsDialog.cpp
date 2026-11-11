@@ -8,6 +8,8 @@
 #include "../SeedPacket.h"
 #include "../Net/NetManager.h"
 #include "../../Sexy.TodLib/Reanimator.h"
+#include "../../SexyAppFramework/DDImage.h"
+#include "NetUi.h"
 
 using namespace Sexy;
 using namespace LawnNet;
@@ -30,9 +32,12 @@ MoreSettingsDialog::MoreSettingsDialog(LawnApp* theApp) :
 {
 	mApp = theApp;
 	mSavePending = false;
+	mSaveFailed = false;
+	mLastSaveAttemptTick = 0;
+	mPaperImage = mApp->GetImage(_S("images/Almanac_PlantCard"));
 	Plant::PreloadPlantResources(SEED_SUNFLOWER);
 	mPreviewReanim = new Reanimation();
-	mPreviewReanim->ReanimationInitializeType(365.0f, 278.0f, REANIM_SUNFLOWER);
+	mPreviewReanim->ReanimationInitializeType(365.0f, 292.0f, REANIM_SUNFLOWER);
 	mPreviewReanim->PlayReanim("anim_idle", REANIM_LOOP, 0, 12.0f);
 	mPreviewReanim->OverrideScale(0.85f, 0.85f);
 	mHeldPlantTintSlider = new Slider(IMAGE_OPTIONS_SLIDERSLOT, IMAGE_OPTIONS_SLIDERKNOB2, MoreSettingsDialog_HeldPlantTint, this);
@@ -45,7 +50,9 @@ MoreSettingsDialog::MoreSettingsDialog(LawnApp* theApp) :
 	mHotbarTintSlider->SetValue(SliderFromAlpha(aConfig.mHotbarTintAlpha));
 	mHeldPlantOutlineSlider->SetValue(SliderFromAlpha(aConfig.mHeldPlantOutlineAlpha));
 
-	Resize(0, 0, 600, 450);
+	const int aFrameHeight = DIALOG_HEADER_OFFSET + IMAGE_DIALOG_TOPLEFT->mHeight +
+		5 * IMAGE_DIALOG_CENTERLEFT->mHeight + IMAGE_DIALOG_BOTTOMLEFT->mHeight;
+	Resize(0, 0, 600, aFrameHeight);
 	LawnApp::CenterDialog(this, mWidth, mHeight);
 }
 
@@ -53,6 +60,7 @@ MoreSettingsDialog::~MoreSettingsDialog()
 {
 	SaveConfig();
 	delete mPreviewReanim;
+	delete mPaperImage;
 	delete mHeldPlantTintSlider;
 	delete mHotbarTintSlider;
 	delete mHeldPlantOutlineSlider;
@@ -85,7 +93,7 @@ void MoreSettingsDialog::Resize(int theX, int theY, int theWidth, int theHeight)
 void MoreSettingsDialog::Draw(Graphics* g)
 {
 	LawnDialog::Draw(g);
-	const Color aTextColor(107, 109, 145);
+	const Color aTextColor = NetUi::Cream();
 	const NetColor aPreviewColor = GetPlayerColorBySlot(1);
 	NetConfig aDefaults;
 	const NetConfig& aConfig = mApp->mNetManager ? mApp->mNetManager->mConfig : aDefaults;
@@ -101,6 +109,7 @@ void MoreSettingsDialog::Draw(Graphics* g)
 		FONT_DWARVENTODCRAFT18, aTextColor, DS_ALIGN_LEFT);
 
 	TodDrawString(g, _S("LIVE PREVIEW"), 300, 276, FONT_DWARVENTODCRAFT18, aTextColor, DS_ALIGN_CENTER);
+	NetUi::Paper(g, mPaperImage, Rect(130, 288, 340, 96));
 	DrawSeedPacket(g, 155.0f, 292.0f, SeedType::SEED_SUNFLOWER, SeedType::SEED_NONE,
 		0.0f, 255, false, false);
 	g->PushState();
@@ -123,6 +132,9 @@ void MoreSettingsDialog::Draw(Graphics* g)
 	mPreviewReanim->mColorOverride = Color(aPreviewColor.r, aPreviewColor.g,
 		aPreviewColor.b, aConfig.mHeldPlantTintAlpha);
 	mPreviewReanim->Draw(g);
+	TodDrawString(g, mSaveFailed ? _S("Could not save. Please try again.") :
+		mSavePending ? _S("Saving your changes...") : _S("Your changes are saved automatically."),
+		300, 419, FONT_BRIANNETOD12, mSaveFailed ? Color(255, 160, 140) : aTextColor, DS_ALIGN_CENTER);
 }
 
 void MoreSettingsDialog::SliderVal(int theId, double theVal)
@@ -146,6 +158,7 @@ void MoreSettingsDialog::SliderVal(int theId, double theVal)
 		return;
 	}
 	mSavePending = true;
+	mSaveFailed = false;
 	MarkDirty();
 }
 
@@ -153,13 +166,15 @@ void MoreSettingsDialog::SaveConfig()
 {
 	if (!mSavePending || !mApp || !mApp->mNetManager)
 		return;
-	NetSaveConfig(mApp->mNetManager->mConfig);
-	mSavePending = false;
+	mLastSaveAttemptTick = GetTickCount();
+	mSaveFailed = !NetSaveConfig(mApp->mNetManager->mConfig);
+	if (!mSaveFailed) mSavePending = false;
 }
 
 void MoreSettingsDialog::ButtonDepress(int theId)
 {
 	SaveConfig();
+	if (mSaveFailed) { MarkDirty(); return; }
 	LawnDialog::ButtonDepress(theId);
 }
 
@@ -169,7 +184,8 @@ void MoreSettingsDialog::Update()
 	mPreviewReanim->Update();
 	MarkDirty();
 	if (mSavePending && !mHeldPlantTintSlider->mDragging &&
-		!mHotbarTintSlider->mDragging && !mHeldPlantOutlineSlider->mDragging)
+		!mHotbarTintSlider->mDragging && !mHeldPlantOutlineSlider->mDragging &&
+		(!mSaveFailed || GetTickCount() - mLastSaveAttemptTick >= 1000U))
 	{
 		SaveConfig();
 	}

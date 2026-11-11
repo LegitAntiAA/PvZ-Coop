@@ -1,7 +1,9 @@
 #include "NetManager.h"
 #include "NetBuildVersion.h"
+#include "NetServiceConfig.h"
 #include "../../LawnApp.h"
 #include "../Board.h"
+#include <cstdlib>
 
 namespace LawnNet
 {
@@ -15,12 +17,16 @@ void NetManager::SendHello()
 	mHostConn->SendMessage(NETMSG_HELLO, hello);
 }
 
-bool NetManager::ConnectOnlineDirectory(const std::string& theEndpoint)
+bool NetManager::ConnectOnlineDirectory()
 {
 	if (IsActive() || (mApp && mApp->mBoard)) return false;
-	mConfig.mOnlineEndpoint = theEndpoint;
-	NetSaveConfig(mConfig);
-	return mOnline->Connect(theEndpoint, NET_MOD_BUILD_STRING, mConfig.mNick, mConfig.mStunServer);
+	const char* anEndpoint = NET_ONLINE_SERVICE_ENDPOINT;
+	if (mApp && mApp->CoopSmokeActive())
+	{
+		const char* aTestEndpoint = std::getenv("PVZ_COOP_SMOKE_ONLINE_ENDPOINT");
+		if (aTestEndpoint && aTestEndpoint[0]) anEndpoint = aTestEndpoint;
+	}
+	return mOnline->Connect(anEndpoint, NET_MOD_BUILD_STRING, mConfig.mNick, NET_ONLINE_STUN_SERVER);
 }
 
 bool NetManager::CreateOnlineRoom(const std::string& theName, const std::string& thePassword, int theMaxPlayers)

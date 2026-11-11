@@ -90,6 +90,7 @@ public:
     bool                        mAdventureLaunchAuthority;  //+0xC1, owns transition to PreNewGame
     int                         mStartingGameCounter;       //+0xC4
     bool                        mMinigamesLocked;           //+0xC8
+    bool                        mLastUnlockAll;
     bool                        mPuzzleLocked;              //+0xC9
     bool                        mSurvivalLocked;            //+0xCA
     bool                        mShowStartButton;           //+0xCB

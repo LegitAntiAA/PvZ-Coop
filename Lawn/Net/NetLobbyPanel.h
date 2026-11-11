@@ -10,6 +10,7 @@ namespace Sexy
 	class EditWidget;
 	class WidgetManager;
 	class Graphics;
+	class DDImage;
 }
 
 class LawnApp;
@@ -37,7 +38,7 @@ public:
 		BTN_DISCONNECT,
 		BTN_TEAM_PLANTS,
 		BTN_TEAM_ZOMBIES
-		, BTN_ONLINE, BTN_DIFFICULTY_DOWN, BTN_DIFFICULTY_UP, BTN_KICK_BASE = 1000
+		, BTN_ONLINE, BTN_DIFFICULTY_DOWN, BTN_DIFFICULTY_UP, BTN_LAN, BTN_KICK_BASE = 1000
 	};
 
 public:
@@ -76,6 +77,8 @@ private:
 	EditWidget* mNickEdit;
 	EditWidget* mIpEdit;
 	EditWidget* mPortEdit;
+	DDImage* mPaperImage;
+	bool mLanExpanded;
 	std::vector<UiButton> mButtons;
 	int mHoverButtonId;
 	int mPressedButtonId;

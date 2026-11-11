@@ -10,13 +10,15 @@ namespace Sexy
 {
 class EditWidget;
 class ListWidget;
+class DDImage;
 }
 
 class NetOnlineDialog : public LawnDialog, public Sexy::EditListener, public Sexy::ListListener
 {
-    enum { CONNECT = 101, JOIN, CREATE, CAPACITY, PREV, NEXT };
-    Sexy::EditWidget* mEndpoint;
+    enum { REFRESH = 101, JOIN, CREATE, CAPACITY, PREV, NEXT };
+    class RoomList;
     Sexy::EditWidget* mPassword;
+    Sexy::EditWidget* mCreatePassword;
     Sexy::EditWidget* mRoomName;
     Sexy::ListWidget* mRoomList;
     LawnStoneButton* mConnect;
@@ -28,12 +30,13 @@ class NetOnlineDialog : public LawnDialog, public Sexy::EditListener, public Sex
     std::vector<LawnNet::NetOnlineRoom> mRooms;
     std::string mRoomsStamp;
     std::string mSelectedRoom;
-    std::string mConnectedEndpoint;
+    Sexy::DDImage* mPaperImage;
     SexyString mError;
     int mPage;
     int mMaxPlayers;
     unsigned int mLastActionTick;
     bool mAttemptedRoom;
+    int mPendingAction;
 
     void RebuildRoomList();
     void SyncRooms();

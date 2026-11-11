@@ -685,6 +685,7 @@ void NetEnsureGridItemVisual(GridItem* theGridItem, GridItemState thePreviousSta
 			break;
 		case GridItemState::GRIDITEM_STINKY_SLEEPING:
 			aReanim->PlayReanim("anim_out", ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD, 0, 0.0f);
+			aReanim->mAnimRate = 0.0f;
 			break;
 		default:
 			break;

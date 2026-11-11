@@ -6,16 +6,16 @@ Source: `REQUEST.txt` (user's complete list). Root owns integration and evidence
 |---|---|---|---|
 | BASE-00 | Preserve initial four dirty files; ReleaseGOTY Win32 and existing protocol suite pass | Root | DONE |
 | SYNC-01 | Host presentation mirrored: limbs, jack explosion, intro entities/sod, reward rays, snail, tutorial, shovel/music; first entity positions authoritative | entity_sync | IN_PROGRESS |
-| UI-01 | Replace/close screens, correct reward/profile/name/unlocks, store tabs, settings preview/layout | ui_progression | IN_PROGRESS |
+| UI-01 | Replace/close screens, correct reward/profile/name/unlocks, store tabs; native PvZ browser/lobby; expanded preview; actual settings restart persistence | ui_progression + Root | IN_PROGRESS |
 | PICK-01 | Native top selected cards, fair total quotas with fixed cards, all-player ready and counts | ui_progression + Root | IN_PROGRESS |
 | MODES-01 | Team-private compact PvP HUD/input, brains, lane/cursor, 100-kill goal; real Endless night; hard TD | modes_pvp | IN_TESTING (source complete) |
-| NET-01 | Unicode draft/space/backspace, system join/leave/kick chat; host kick and fair seed reassignment; late spectators | Root | IN_PROGRESS |
+| NET-01 | Unicode draft/space/backspace, system join/leave/kick chat; host kick and fair seed reassignment; late spectators with all communication and level-boundary promotion | Root + entity_sync | IN_PROGRESS |
 | SIGNAL-01 | Middle-button ping with sound/500ms cooldown; Ctrl strokes fade after8s; Alt packet ping/name/cooldown; semantic packet-relative cursors | Root | IN_PROGRESS |
 | PVP-02 | Teams chosen after launching PvP, before loading board; all participants ready | ui_progression + Root | IN_PROGRESS |
 | DIFF-01 | Host lobby difficulty1..10; count/wave/type scaling, HP unchanged, default1 stock | modes_pvp + Root | IN_PROGRESS |
 | AVATAR-01 | Own/client Zombatars occasionally spawn and appearances mirror | entity_sync + Root | IN_PROGRESS |
 | ONLINE-01 | Native WebRTC/STUN, version-filtered rooms/name/password/capacity; free Cloudflare signaling and setup instructions | modes_pvp + Root | IN_PROGRESS |
-| DOC-01 | Accurate bilingual README/roadmap, GitHub link; Lua/more games/adventure/UI only planned | Root + ui_progression | READY |
+| DOC-01 | Accurate bilingual README/roadmap and operator-only Cloudflare guide; Lua/more games/adventure remain planned; UI/UX requested now | Root + modes_pvp | IN_PROGRESS |
 | VERIFY-01 | Integrated build, protocol regressions, background two-process game runs and game-only renderer captures; independent diff review | Root | IN_PROGRESS |
 
 ## Evidence
@@ -28,6 +28,20 @@ Source: `REQUEST.txt` (user's complete list). Root owns integration and evidence
 
 ### New implementation evidence
 
+- Integration5b and final leaf: Passed, build0.30.10-03f28d4130-1794426559827;665 protocol checks Passed. Includes NativeUI dedicated runtime fixture, larger native appearance window/browser, config path/default probe, stronger snail-pose assertion, corrected observer/PvP fixtures, and renderer-observed opponent-cursor suppression. Real UI/restart/public-browser run is beginning; no result claimed yet.
+- Integration5: Passed, build0.30.8-03f28d4130-1794425100752;665 protocol checks Passed. Presentation5 actualrun Passed9 stages/18 game-render frames; Root independently viewed head-loss, Jack blast, matching customized avatar and both snail frames. The visual review found an uncovered snail body-rate defect despite correct Zzz;5b adds explicit bodyRate0 plus assertion and requires rerun.
+- Kick5 whole run Failed because its Alt seed ping was sent250ms after middle ping, inside the intended shared500ms cooldown. Exact late START,5+5 bank identity1255F7D9, readonly server rejection, chat/neutral cursor/middle ping/draw were observed; fixture moved Alt to900ms and needs rebuild/retest. Do not count kick completion as passed.
+- PvP5 whole run Failed waiting for opponent cursor evidence: baseline never queued SDL motion. Actual initial100 brains and75→125 passive increment were observed; add real motion rather than weaken the guard. Complete tool/lane/100kill sequence still pending.
+- Public native22/22 and Worker9/9 Passed in5b source including actual pending-join failure, structured code, membership cleanup, and retry to a real RTC connection. Public game/UI fixture still pending.
+- Published main `03f28d4`: Build and Release, Unit Tests and Pages CI all Passed. Later changes below are uncommitted until the next checkpoint.
+- Fresh4d: Passed, protocol30/hash10083F67,29 markers and24 actual game-render captures per peer. Independent visual inspection exposed browser contrast/header and preview-center issues; native redesign and larger appearance panel now in progress. Settings restart persistence was not established by this earlier test.
+- TD4d: Passed, hashC1359D3E/eight common hashes. Difficulty10 changes40→100 waves and308→15854 wave points, includes Gargantuar/Football with stock HP. Semantic card19 maps hostindex5/clientindex0. Ordinary client disconnect redistributes all five owned cards: host10, orphaned0.
+- Spectator4d: Failed custom-mode start descriptor mismatch (board internallevel0 versus originallevel1). Exact recorded START descriptor fix implemented; next-build retest required.
+- PvP4d: Failed fixture race (client spent75 before host baseline read); initial100 was observed on client. Smoke baseline handshake fixed in source; complete shovel/lane/100-kill sequence remains pending.
+- User's shared Worker `https://pvz-coop-signaling.rostov20172017.workers.dev/health` returned200/service=pvz-coop-signaling/schema1. URL and STUN are compiled in NetServiceConfig.h; player configuration keys removed. Public WebRTC game test pending.
+- Config source defect: initial load preceded SexyApp's CWD change, while relative saves followed it. Default is now absolute executable-adjacent coop.ini; explicit smoke paths are resolved once. Protocol suite665/0 Passed, including a separate hidden copied test EXE launched from a directory with a decoy coop.ini, followed by another CWD change/save. Actual UI restart pending.
+- Public native20 diagnostic run: Passed20/0 using the owner's Worker, including password/version/capacity errors, real ICE/DTLS/SCTP, ordered max frames and kick/leave. Earlier public attempt Failed3/1 before room creation with partial WSS disconnects; cause not confirmed and timings unchanged. Node WSS ready/8s idle/normalclose1000 also Passed. Public game pair still pending.
+- Spectator source now allows neutral visible cursors, chat/pings/draw/packet annotations with PvP audience privacy; actual level-completion/new-game/retry hooks promote observers and balance retained owned cards without resetting IDs/cooldowns. Three-player communication/promotion runtime verification pending.
 - Integration4c/4d: Passed, Win32 ReleaseGOTY; current protocol tests checks650 failures0 skipped0. Source includes universal spectator message authority policy, packet-ID/semantic bank matching and the PvP client hand identity correction.
 
 - Integration builds1/2/3/4/4b: Passed, Win32 ReleaseGOTY. Local protocol suite on4b: checks633 failures0 skipped0.
@@ -50,6 +64,6 @@ Source: `REQUEST.txt` (user's complete list). Root owns integration and evidence
 
 - User steering: no Computer Use, no game-window activation, no desktop capture. Background smoke uses hidden SDL windows and captures only its own render target. No user keyboard/mouse injection.
 - Protocol30 groups shared wire changes; build identity is separate and changes each build. No silent mixed-version fallback.
-- NetBoardSync.cpp shared ownership: entity_sync owns before `bool Board::IsCoopEndless()`; modes_pvp owns custom-mode tail. Root owns NetManager/Common/Connection/Lobby, projects and integration.
-- WebRTC without TURN cannot guarantee connectivity through all NAT/firewalls. No external deployment or account creation has been performed.
+- NetBoardSync.cpp shared ownership: entity_sync owns before `bool Board::IsCoopEndless()`; modes_pvp owns custom-mode tail. Root owns NetManager/Common/Connection, projects and integration. ui_progression owns NetLobbyPanel and native dialogs during the redesign.
+- WebRTC without TURN cannot guarantee connectivity through all NAT/firewalls. The owner deployed the shared Worker and supplied its URL; no account credentials were requested or accessed.
 - Remaining acceptance tests and external setup steps stay explicit; do not mark the entire list complete on compilation alone.

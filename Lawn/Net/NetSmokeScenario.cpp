@@ -987,12 +987,14 @@ void NetSmokeScenarioRuntime::Reset(NetSmokeScenarioId theScenario)
 		mPvpInitialBrainsVerified = false;
 		mPvpPassiveBrainsVerified = false;
 		mPvpCursorHiddenVerified = false;
+		mPvpCursorMotionIssued = false;
 		mPvpZombieEntryObserved = false;
 		mPvpHostPlantIssued = false;
 		mPvpHostPlantObserved = false;
 		mPvpZombieId = 0;
 		mPvpBaselineMaxZombieId = 0;
 		mPvpBrainsAfterAction = -1;
+		mPvpInitialReadyTick = 0;
         mPortalConveyorInitialCounter = -1;
 	mPortalZombieEntryRow = -1;
 	mPortalZombieEntryTick = 0;
@@ -2166,21 +2168,31 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
 			NetTrace("SMOKE_PVP_BRAINS role=%s phase=initial brains=100 tick=%d",
 				theManifest.IsHost() ? "host" : "client",
 				theManifest.IsHost() ? aBoard->mNetPvPBrainTick : -1);
+			if (theManifest.IsHost()) mPvpInitialReadyTick = aNow;
 		}
-
-		if (!mPvpCursorHiddenVerified)
+		if (theManifest.IsHost() && mPvpInitialReadyTick && aNow - mPvpInitialReadyTick >= 800U)
 		{
-			const int anOtherSlot = theManifest.IsHost() ? 1 : 0;
-			if (aNet->mRemoteCursors[anOtherSlot].mValid)
-			{
-				mPvpCursorHiddenVerified = true;
-				NetTrace("SMOKE_PVP_CURSOR_HIDDEN role=%s remoteSlot=%d remoteValid=1 overlaySuppressed=1",
-					theManifest.IsHost() ? "host" : "client", anOtherSlot);
-			}
+			aNet->SendChat("smoke-pvp-initial-ready");
+			mPvpInitialReadyTick = 0;
 		}
 
+		if (!mPvpCursorMotionIssued)
+		{
+			SDL_Event aMotion{}; aMotion.type = SDL_EVENT_MOUSE_MOTION;
+			aMotion.motion.windowID = SDL_GetWindowID(theApp->mSDLWindow);
+			aMotion.motion.x = (float)(aBoard->GridToPixelX(4, 1) + 40);
+			aMotion.motion.y = (float)(aBoard->GridToPixelY(4, 1) + 45);
+			if (!SDL_PushEvent(&aMotion)) { theFailure = "PvP SDL cursor motion was rejected"; return false; }
+			mPvpCursorMotionIssued = true;
+			NetTrace("SMOKE_PVP_CURSOR_INPUT role=%s source=SDL row=1 col=4", theManifest.IsHost() ? "host" : "client");
+		}
+		// Snapshot baselines are reached independently. Let both peers inspect
+		// the initial balance before the client's real purchase changes it.
+		bool aHostInitialReady = theManifest.IsHost();
+		for (const auto& aLine : aNet->mChatLines)
+			if (aLine.mSlot == 0 && aLine.mText == "smoke-pvp-initial-ready") aHostInitialReady = true;
 		if (theManifest.IsClient() && !mActionIssued && mPvpRosterVerified &&
-			mPvpDeckVerified && mPvpInitialBrainsVerified)
+			mPvpDeckVerified && mPvpInitialBrainsVerified && aHostInitialReady)
 		{
 			SeedPacket& aPacket = aBoard->mSeedBank->mSeedPackets[PVP_PLANT_PACKET_COUNT];
 			if (aPacket.CanPickUp())
@@ -3255,6 +3267,17 @@ void NetSmokeScenarioRuntime::OnSlotMachineSound(bool theHost)
 	++mSlotMachineSoundCount;
 	NetTrace("SMOKE_SLOT_MACHINE_SOUND role=%s count=%d",
 		theHost ? "host" : "client", mSlotMachineSoundCount);
+}
+
+void NetSmokeScenarioRuntime::ObservePvPCursorSuppressed(int theLocalSlot, int theRemoteSlot)
+{
+	if (mScenario != NETSMOKE_SCENARIO_PVP_1V1 || mPvpCursorHiddenVerified ||
+		theLocalSlot < 0 || theLocalSlot >= NET_MAX_PLAYERS || theRemoteSlot < 0 ||
+		theRemoteSlot >= NET_MAX_PLAYERS || theLocalSlot == theRemoteSlot)
+		return;
+	mPvpCursorHiddenVerified = true;
+	NetTrace("SMOKE_PVP_CURSOR_HIDDEN role=%s remoteSlot=%d remoteValid=1 overlaySuppressed=1 renderer=1",
+		theLocalSlot == 0 ? "host" : "client", theRemoteSlot);
 }
 
 bool NetSmokeScenarioRuntime::IsComplete(uint32_t theRequiredPostActionSnapshots) const

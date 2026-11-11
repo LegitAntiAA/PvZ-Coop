@@ -9,6 +9,7 @@ class Reanimation;
 namespace Sexy
 {
 	class Slider;
+	class DDImage;
 };
 
 class MoreSettingsDialog : public LawnDialog, public Sexy::SliderListener
@@ -26,6 +27,9 @@ public:
 	Sexy::Slider*		mHotbarTintSlider;
 	Sexy::Slider*		mHeldPlantOutlineSlider;
 	bool				mSavePending;
+	bool                mSaveFailed;
+	unsigned int        mLastSaveAttemptTick;
+	Sexy::DDImage*      mPaperImage;
 	Reanimation*        mPreviewReanim;
 
 public:

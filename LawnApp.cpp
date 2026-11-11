@@ -68,6 +68,12 @@
 #include <windows.h>
 #include <windowsx.h>
 
+namespace LawnNet
+{
+	bool NetSpectatorSmokeRunBaseline(LawnApp* theApp);
+	bool NetSmokeUpdateNativeUi(LawnApp* theApp);
+}
+
 bool gIsPartnerBuild = false;
 
 namespace
@@ -1503,6 +1509,7 @@ void LawnApp::PreNewGame(GameMode theGameMode, bool theLookForSavedGame)
 		return;
 	}
 
+	if (NetIsHost()) mNetManager->PromoteSpectatorsAtLevelBoundary("PRE_NEW_GAME");
 	if (theGameMode == GAMEMODE_COOP_PVP && NetIsHost() && !mNetPvpTeamsConfirmed)
 	{
 		NetShowPvpTeamSelection();
@@ -1554,6 +1561,7 @@ void LawnApp::PreNewGame(GameMode theGameMode, bool theLookForSavedGame, int the
 		return;
 	}
 
+	if (NetIsHost()) mNetManager->PromoteSpectatorsAtLevelBoundary("PRE_NEW_GAME_LEVEL");
 	if (theGameMode == GAMEMODE_COOP_PVP && NetIsHost() && !mNetPvpTeamsConfirmed)
 	{
 		NetShowPvpTeamSelection(theLevel);
@@ -1995,6 +2003,7 @@ void LawnApp::KillSeedChooserScreen()
 
 void LawnApp::EndLevel()
 {
+	if (NetIsHost()) mNetManager->PromoteSpectatorsAtLevelBoundary("END_LEVEL");
 	KillBoard();
 	if (IsAdventureMode())
 	{
@@ -3143,6 +3152,7 @@ void LawnApp::CheckForGameEnd()
 	if (mBoard == nullptr || !mBoard->mLevelComplete)
 		return;
 
+	if (NetIsHost()) mNetManager->PromoteSpectatorsAtLevelBoundary("LEVEL_COMPLETE");
 	bool aUnlockedNewChallenge = UpdatePlayerProfileForFinishingLevel();
 
 	if (IsAdventureMode())
@@ -5824,13 +5834,29 @@ void LawnApp::CoopSmokeStartLifecycle()
 		return;
 	mCoopSmokeLifecycleStarted = true;
 	mCoopSmokeScenarioRuntime.Reset(mCoopSmokeManifest.mScenario);
+	const char* aReplayChooser = getenv("PVZ_COOP_SMOKE_REPLAY_CHOOSER");
+	if (aReplayChooser && strcmp(aReplayChooser, "1") == 0)
+	{
+		if (mCoopSmokeManifest.mScenario != LawnNet::NETSMOKE_SCENARIO_ADVENTURE_8_SOAK ||
+			mCoopSmokeManifest.mSkipIntro || !mPlayerInfo)
+		{ CoopSmokeFail("replay chooser fixture requires full-intro isolated Adventure8Soak"); return; }
+		// Native Adventure replay asks Dave to choose three locked cards.
+		mPlayerInfo->mFinishedAdventure = 1;
+	}
 
 	bool aStarted = false;
+	const char* aNativeUi = getenv("PVZ_COOP_SMOKE_NATIVE_UI");
 	const char* anOnlineEndpoint = getenv("PVZ_COOP_SMOKE_ONLINE_ENDPOINT");
-	if (anOnlineEndpoint && *anOnlineEndpoint)
+	if (aNativeUi && (strcmp(aNativeUi, "browser") == 0 || strcmp(aNativeUi, "browser-probe") == 0))
+	{
+		// The dedicated UI fixture enters online play through real menu widgets.
+		LawnNet::NetTraceOpen(mCoopSmokeManifest.IsHost() ? "host" : "client");
+		aStarted = true;
+	}
+	else if (anOnlineEndpoint && *anOnlineEndpoint)
 	{
 		LawnNet::NetTraceOpen(mCoopSmokeManifest.IsHost() ? "host" : "client");
-		aStarted = mNetManager->ConnectOnlineDirectory(anOnlineEndpoint);
+		aStarted = mNetManager->ConnectOnlineDirectory();
 		LawnNet::NetTrace("SMOKE_ONLINE_DIRECTORY_BEGIN role=%s accepted=%d",
 			mCoopSmokeManifest.IsHost() ? "host" : "client", aStarted ? 1 : 0);
 	}
@@ -5955,6 +5981,8 @@ void LawnApp::CoopSmokeUpdate()
 	}
 	if (!mCoopSmokeLifecycleStarted || !mNetManager)
 		return;
+	if (LawnNet::NetSmokeUpdateNativeUi(this))
+		return;
 	if (!CoopSmokeUpdateOnline())
 		return;
 	const char* aSpectatorRole = getenv("PVZ_COOP_SMOKE_SPECTATOR_ROLE");
@@ -5976,6 +6004,24 @@ void LawnApp::CoopSmokeUpdate()
 	{
 		CoopSmokeFail("resolved smoke scenario disappeared at runtime");
 		return;
+	}
+	if (getenv("PVZ_COOP_SMOKE_REPLAY_CHOOSER") &&
+		strcmp(getenv("PVZ_COOP_SMOKE_REPLAY_CHOOSER"), "1") == 0 &&
+		mSeedChooserScreen && mSeedChooserScreen->mMouseVisible && mSeedChooserScreen->mCoopChooserActive &&
+		mSeedChooserScreen->CoopGetLocalQuotaPickCount() == mSeedChooserScreen->mCoopPicksPerPlayer)
+	{
+		static bool aFixedQuotaLogged = false;
+		const int fixed = mSeedChooserScreen->CoopCountGlobalFixedPicks();
+		const int mutablePicks = mSeedChooserScreen->CoopGetLocalQuotaPickCount() - (NetIsHost() ? fixed : 0);
+		if (fixed != 3 || mNetManager->mChooserBankCount != 10 || mNetManager->mChooserPickQuota[0] != 5 ||
+			mNetManager->mChooserPickQuota[1] != 5 || mutablePicks != (NetIsHost() ? 2 : 5))
+		{ CoopSmokeFail("native three-fixed-card chooser did not produce fair 5+5 quotas"); return; }
+		if (!aFixedQuotaLogged)
+		{
+			aFixedQuotaLogged = true;
+			LawnNet::NetTrace("SMOKE_FIXED_QUOTA role=%s fixed=3 hostTotal=5 clientTotal=5 hostMutable=2 clientMutable=5 localMutable=%d",
+				NetIsHost() ? "host" : "client", mutablePicks);
+		}
 	}
 	if (mSeedChooserScreen && mSeedChooserScreen->mMouseVisible && mSeedChooserScreen->mCoopChooserActive &&
 		mBoard && mBoard->mCutScene && mBoard->mCutScene->mSeedChoosing &&
@@ -6047,7 +6093,8 @@ void LawnApp::CoopSmokeUpdate()
 		}
 
 		std::string aScenarioFailure;
-		if (CoopSmokeFirstAdventureRunBaseline() && !mCoopSmokeScenarioRuntime.Update(this, mCoopSmokeManifest,
+		if (CoopSmokeFirstAdventureRunBaseline() && LawnNet::NetSpectatorSmokeRunBaseline(this) &&
+			!mCoopSmokeScenarioRuntime.Update(this, mCoopSmokeManifest,
 			mCoopSmokeSnapshotsSent, aScenarioFailure))
 		{
 			CoopSmokeFail(aScenarioFailure.c_str());
@@ -6062,7 +6109,10 @@ void LawnApp::CoopSmokeUpdate()
                 if (mCoopSmokeGameStarted &&
                         (aSmokeVictoryScene || (mBoard &&
 			 (mGameScene == GameScenes::SCENE_PLAYING || aSmokeTerminalScene))) &&
-			mNetManager->GetPlayerCount() == 2 &&
+			(mNetManager->GetPlayerCount() == 2 || (mNetManager->GetPlayerCount() == 3 &&
+			 aSpectatorRun && std::string(aSpectatorRun) == "1" &&
+			 getenv("PVZ_COOP_SMOKE_SPECTATOR_PROMOTE") &&
+			 strcmp(getenv("PVZ_COOP_SMOKE_SPECTATOR_PROMOTE"), "1") == 0)) &&
 			mCoopSmokeSnapshotsSent >= mCoopSmokeManifest.mMinimumSnapshots &&
 			mCoopSmokeScenarioRuntime.IsComplete(mCoopSmokeManifest.mMinimumSnapshots) &&
 			aUnicodeChatReady && aInteractionsReady && aFirstAdventureReady && aSpectatorReady && aModesReady)
@@ -6089,7 +6139,8 @@ void LawnApp::CoopSmokeUpdate()
 		}
 
 		std::string aScenarioFailure;
-		if (CoopSmokeFirstAdventureRunBaseline() && !mCoopSmokeScenarioRuntime.Update(this, mCoopSmokeManifest,
+		if (CoopSmokeFirstAdventureRunBaseline() && LawnNet::NetSpectatorSmokeRunBaseline(this) &&
+			!mCoopSmokeScenarioRuntime.Update(this, mCoopSmokeManifest,
 			mCoopSmokeSnapshotsApplied, aScenarioFailure))
 		{
 			CoopSmokeFail(aScenarioFailure.c_str());
@@ -6226,8 +6277,10 @@ void LawnApp::NetOnStartGame(LawnNet::NetBuffer& thePayload)
                 aValid = aValid && aCheck.Remaining() == 0 &&
                         ((aMode == mCoopSmokeManifest.mGameMode && aLevel == mCoopSmokeManifest.mLevel) ||
 			 CoopSmokeFirstAdventureAllowsStart(aMode, aLevel)) && aSeed == mCoopSmokeManifest.mSeed &&
-			(aPlayerCount == 2 || (getenv("PVZ_COOP_SMOKE_SPECTATOR_ROLE") &&
-				strcmp(getenv("PVZ_COOP_SMOKE_SPECTATOR_ROLE"),"spectator") == 0 && aPlayerCount == 3)) && aPathShapeValid;
+			(aPlayerCount == 2 || (aPlayerCount == 3 &&
+				getenv("PVZ_COOP_SMOKE_SPECTATOR") && strcmp(getenv("PVZ_COOP_SMOKE_SPECTATOR"), "1") == 0 &&
+				((getenv("PVZ_COOP_SMOKE_SPECTATOR_ROLE") && strcmp(getenv("PVZ_COOP_SMOKE_SPECTATOR_ROLE"), "spectator") == 0) ||
+				 (getenv("PVZ_COOP_SMOKE_SPECTATOR_PROMOTE") && strcmp(getenv("PVZ_COOP_SMOKE_SPECTATOR_PROMOTE"), "1") == 0)))) && aPathShapeValid;
 		if (!aValid)
 		{
 			LawnNet::NetTrace("SMOKE START_GAME malformed/mismatch bytes=%zu mode=%u level=%d players=%u seed=%u path=%u trailing=%zu",
@@ -6873,6 +6926,8 @@ bool LawnApp::NetHandleChatText(const char* theUtf8Text)
 
 void LawnApp::NetDrawChatOverlay()
 {
+	const char* aHideControlChat = getenv("PVZ_COOP_SMOKE_HIDE_CONTROL_CHAT");
+	if (CoopSmokeActive() && aHideControlChat && strcmp(aHideControlChat, "1") == 0) return;
 	if (!mNetManager || !mNetManager->IsActive() || !mWidgetManager ||
 		!mWidgetManager->mImage || !Sexy::FONT_BRIANNETOD12)
 		return;
@@ -6956,12 +7011,6 @@ void LawnApp::NetDrawCursorOverlay()
 	Graphics anAnnotationLayer(mWidgetManager->mImage);
 	anAnnotationLayer.ClearClipRect();
 	mNetManager->DrawAnnotations(&anAnnotationLayer);
-	// PvP intentionally hides remote cursors over the game board.  Keep the
-	// lobby overlay interactive/visible even if an old board is still alive
-	// while returning from a match.
-	if (mBoard && mBoard->IsPvPMode() && (!mNetLobbyPanel || !mNetLobbyPanel->mVisible))
-		return;
-
         // Cursor13 is only the NORMAL/unsupported fallback.  Stock shovel,
         // hammer and other tool cursors must remain visible even if that
         // optional overlay asset is missing.
@@ -6976,6 +7025,13 @@ void LawnApp::NetDrawCursorOverlay()
 		const LawnNet::NetPlayerInfo& aPlayer = mNetManager->GetPlayer(i);
 		if (!aPlayer.mActive)
 			continue;
+		if (mBoard && mBoard->IsPvPMode() && !aPlayer.mSpectator &&
+			(!mNetLobbyPanel || !mNetLobbyPanel->mVisible))
+		{
+			if (CoopSmokeActive() && mGameScene == SCENE_PLAYING)
+				mCoopSmokeScenarioRuntime.ObservePvPCursorSuppressed(mNetManager->GetMySlot(), i);
+			continue;
+		}
 
 		const LawnNet::NetRemoteCursor& aCursor = mNetManager->mRemoteCursors[i];
 		int aCursorX = (int)aCursor.mRenderX;
@@ -7092,10 +7148,10 @@ void LawnApp::NetDrawCursorOverlay()
                 if (aPlayer.mNick[0] && Sexy::FONT_BRIANNETOD12)
 		{
 			SexyString aLabel = StringToSexyString(aPlayer.mNick) + _S(" ") + StrFormat(_S("%ums"), aPlayer.mPing);
-			TodDrawString(&g, aLabel, aCursorX + 18, aCursorY + 23, Sexy::FONT_BRIANNETOD12,
-				Color(0, 0, 0, 190), DrawStringJustification::DS_ALIGN_LEFT);
-			TodDrawString(&g, aLabel, aCursorX + 17, aCursorY + 22, Sexy::FONT_BRIANNETOD12,
-				Color(aColor.r, aColor.g, aColor.b), DrawStringJustification::DS_ALIGN_LEFT);
+			Sexy::FONT_BRIANNETOD12->DrawString(&g,aCursorX+18,aCursorY+23,aLabel,
+				Color(0,0,0,190),g.mClipRect);
+			Sexy::FONT_BRIANNETOD12->DrawString(&g,aCursorX+17,aCursorY+22,aLabel,
+				Color(aColor.r,aColor.g,aColor.b),g.mClipRect);
 		}
 	}
 }

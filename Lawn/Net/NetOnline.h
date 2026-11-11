@@ -58,10 +58,13 @@ public:
 	void KickPeer(const std::string& thePeerId);
 	void LeaveRoom();
 	void Stop();
+	// Pending directory connection/registration only; peer ICE has its own state.
+	bool IsConnecting() const;
 	bool IsConnected() const;
 	bool IsHostingRoom() const;
 	std::string GetRoomId() const;
 	std::string GetStatus() const;
+	std::string GetLastErrorCode() const;
 	std::vector<NetOnlineRoom> GetRooms() const;
 	std::vector<std::shared_ptr<NetOnlineChannel>> TakeOpenedChannels();
 

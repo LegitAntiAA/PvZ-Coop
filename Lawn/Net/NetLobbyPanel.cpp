@@ -8,6 +8,8 @@
 #include "../../Sexy.TodLib/TodCommon.h"
 #include "../../Resources.h"
 #include "../../GameConstants.h"
+#include "../../SexyAppFramework/DDImage.h"
+#include "../Widget/NetUi.h"
 
 using namespace LawnNet;
 
@@ -27,6 +29,8 @@ NetLobbyPanel::NetLobbyPanel(LawnApp* theApp) :
 	mLastMouseX(-1),
 	mLastMouseY(-1)
 {
+	mPaperImage = mApp->GetImage(_S("images/Almanac_PlantCard"));
+	mLanExpanded = false;
 	mNickEdit = new EditWidget(100, this);
 	mNickEdit->SetFont(Sexy::FONT_BRIANNETOD12);
 	mNickEdit->SetColors(gPanelEditColors, EditWidget::NUM_COLORS);
@@ -59,11 +63,12 @@ NetLobbyPanel::~NetLobbyPanel()
 	delete mNickEdit;
 	delete mIpEdit;
 	delete mPortEdit;
+	delete mPaperImage;
 }
 
 Rect NetLobbyPanel::GetPanelRect() const
 {
-	return Rect(8, 265, 290, 320);
+	return Rect(8, 282, 300, 306);
 }
 
 void NetLobbyPanel::LayoutButtons()
@@ -72,8 +77,7 @@ void NetLobbyPanel::LayoutButtons()
 		return;
 	mButtons.clear();
 	Rect aPanel = GetPanelRect();
-	int aX = aPanel.mX + 10;
-	int aY = aPanel.mY + 246;
+	int aX = aPanel.mX + 18;
 
 	NetManager* aNet = mApp->mNetManager;
 	if (!aNet)
@@ -81,26 +85,29 @@ void NetLobbyPanel::LayoutButtons()
 
 	if (!aNet->IsActive())
 	{
-		UiButton aHost = { BTN_HOST, Rect(aX, aY, 128, 30), _S("HOST GAME"), false, false };
-		UiButton aJoin = { BTN_CONNECT, Rect(aX + 142, aY, 128, 30), _S("CONNECT"), false, false };
-		mButtons.push_back(aHost);
-		mButtons.push_back(aJoin);
-		mButtons.push_back({BTN_ONLINE, Rect(aX, aY + 36, 270, 26), _S("ONLINE ROOMS"), false, false});
+		mButtons.push_back({BTN_ONLINE, Rect(aX, aPanel.mY + 94, 264, 42), _S("ONLINE PLAY"), false, false});
+		mButtons.push_back({BTN_LAN, Rect(aX, aPanel.mY + 146, 264, 30),
+			mLanExpanded ? _S("LOCAL NETWORK  -") : _S("LOCAL NETWORK  +"), false, false});
+		if (mLanExpanded)
+		{
+			mButtons.push_back({BTN_HOST, Rect(aX, aPanel.mY + 224, 124, 34), _S("HOST LAN"), false, false});
+			mButtons.push_back({BTN_CONNECT, Rect(aX + 140, aPanel.mY + 224, 124, 34), _S("JOIN LAN"), false, false});
+		}
 	}
 	else if (aNet->IsConnecting())
 	{
-		UiButton aCancel = { BTN_DISCONNECT, Rect(aX + 70, aY + 40, 128, 30), _S("CANCEL"), false, false };
+		UiButton aCancel = { BTN_DISCONNECT, Rect(aX, aPanel.mY + 262, 264, 34), _S("CANCEL"), false, false };
 		mButtons.push_back(aCancel);
 	}
 	else
 	{
-		UiButton aLeave = { BTN_DISCONNECT, Rect(aX, aY + 36, 128, 26), _S("DISCONNECT"), false, false };
+		UiButton aLeave = { BTN_DISCONNECT, Rect(aX, aPanel.mY + 262, 264, 34), _S("LEAVE GAME"), false, false };
 		mButtons.push_back(aLeave);
-		mButtons.push_back({BTN_DIFFICULTY_DOWN, Rect(aX + 200, aPanel.mY + 180, 30, 26), _S("-"), !aNet->IsHosting() || aNet->GetDifficulty() <= 1, false});
-		mButtons.push_back({BTN_DIFFICULTY_UP, Rect(aX + 240, aPanel.mY + 180, 30, 26), _S("+"), !aNet->IsHosting() || aNet->GetDifficulty() >= 10, false});
+		mButtons.push_back({BTN_DIFFICULTY_DOWN, Rect(aPanel.mX + 202, aPanel.mY + 205, 34, 30), _S("-"), !aNet->IsHosting() || aNet->GetDifficulty() <= 1, false});
+		mButtons.push_back({BTN_DIFFICULTY_UP, Rect(aPanel.mX + 248, aPanel.mY + 205, 34, 30), _S("+"), !aNet->IsHosting() || aNet->GetDifficulty() >= 10, false});
 		if (aNet->IsHosting()) for (int slot = 1; slot < NET_MAX_PLAYERS; ++slot)
 			if (aNet->IsPlayerActive(slot))
-				mButtons.push_back({BTN_KICK_BASE + slot, Rect(aPanel.mX + 246, aPanel.mY + 76 + slot*20, 34, 18), _S("X"), false, false});
+				mButtons.push_back({BTN_KICK_BASE + slot, Rect(aPanel.mX + 252, aPanel.mY + 65 + slot*32, 30, 26), _S("X"), false, false});
 	}
 
 	// restore hover state (LayoutButtons runs every frame and would otherwise
@@ -149,8 +156,12 @@ void NetLobbyPanel::Update()
 	// the connection form's edit widgets are hidden once connected/connecting
 	bool aShowEdits = aInMenu && !aNet->IsActive();
 	mNickEdit->mVisible = aShowEdits;
-	mIpEdit->mVisible = aShowEdits;
-	mPortEdit->mVisible = aShowEdits;
+	mIpEdit->mVisible = aShowEdits && mLanExpanded;
+	mPortEdit->mVisible = aShowEdits && mLanExpanded;
+	const Rect aPanel = GetPanelRect();
+	mNickEdit->Resize(aPanel.mX + 82, aPanel.mY + 48, 200, 28);
+	mIpEdit->Resize(aPanel.mX + 70, aPanel.mY + 184, 142, 26);
+	mPortEdit->Resize(aPanel.mX + 220, aPanel.mY + 184, 62, 26);
 
 	LayoutButtons();
 	MarkDirty();
@@ -173,126 +184,81 @@ bool NetLobbyPanel::IsPointVisible(int theX, int theY)
 
 void NetLobbyPanel::DrawButton(Graphics* g, const UiButton& theButton)
 {
-	bool isPressed = mPressedButtonId == theButton.mId && theButton.mMouseOver;
-	int aPressOffset = isPressed ? 2 : 0;
-	Color aFill = theButton.mDisabled ? Color(120, 120, 120) :
-		(isPressed ? Color(175, 135, 70) :
-		(theButton.mMouseOver ? Color(255, 235, 160) : Color(215, 180, 100)));
-	Color anOutline = isPressed ? Color(70, 45, 20) :
-		(theButton.mMouseOver ? Color(255, 250, 210) : Color(90, 60, 30));
-	g->SetColor(aFill);
-	g->FillRect(theButton.mRect.mX, theButton.mRect.mY + aPressOffset, theButton.mRect.mWidth, theButton.mRect.mHeight - aPressOffset);
-	g->SetColor(anOutline);
-	g->DrawRect(theButton.mRect.mX, theButton.mRect.mY + aPressOffset, theButton.mRect.mWidth - 1, theButton.mRect.mHeight - aPressOffset - 1);
-	g->SetColor(isPressed ? Color(40, 25, 10, 80) :
-		(theButton.mMouseOver ? Color(255, 255, 255, 90) : Color(255, 255, 255, 40)));
-	g->FillRect(theButton.mRect.mX + 2, theButton.mRect.mY + 2 + aPressOffset, theButton.mRect.mWidth - 4, 3);
-	TodDrawString(g, theButton.mLabel,
-		theButton.mRect.mX + theButton.mRect.mWidth / 2,
-		theButton.mRect.mY + theButton.mRect.mHeight / 2 + 4 + aPressOffset,
-		Sexy::FONT_BRIANNETOD12, Color(60, 35, 10), DrawStringJustification::DS_ALIGN_CENTER);
+    NetUi::StoneButton(g, theButton.mRect, theButton.mLabel,
+        mPressedButtonId == theButton.mId && theButton.mMouseOver,
+        theButton.mMouseOver, theButton.mDisabled);
 }
 
 void NetLobbyPanel::Draw(Graphics* g)
 {
-	NetManager* aNet = mApp->mNetManager;
-	if (!aNet || mApp->mBoard || mApp->mGameSelector == nullptr || !mApp->mLoadingThreadCompleted)
-		return;
-
-	// ---- panel background ----
-	Rect aPanel = GetPanelRect();
-	g->SetColor(Color(233, 209, 155, 235));
-	g->FillRect(aPanel.mX, aPanel.mY, aPanel.mWidth, aPanel.mHeight);
-	g->SetColor(Color(110, 80, 40));
-	g->DrawRect(aPanel.mX, aPanel.mY, aPanel.mWidth - 1, aPanel.mHeight - 1);
-	TodDrawString(g, _S("PvZ CO-OP"), aPanel.mX + aPanel.mWidth / 2, aPanel.mY + 20,
-		Sexy::FONT_BRIANNETOD16, Color(90, 55, 20), DrawStringJustification::DS_ALIGN_CENTER);
-
-	int aY = aPanel.mY + 40;
-
-	if (!aNet->IsActive())
-	{
-		// ---- connection form ----
-		TodDrawString(g, _S("Nickname:"), aPanel.mX + 10, aY + 10, Sexy::FONT_BRIANNETOD12, Color(90, 55, 20), DrawStringJustification::DS_ALIGN_LEFT);
-		mNickEdit->Resize(aPanel.mX + 80, aY, aPanel.mWidth - 95, 22);
-		aY += 36;
-
-		TodDrawString(g, _S("Host IP:"), aPanel.mX + 10, aY + 10, Sexy::FONT_BRIANNETOD12, Color(90, 55, 20), DrawStringJustification::DS_ALIGN_LEFT);
-		mIpEdit->Resize(aPanel.mX + 80, aY, aPanel.mWidth - 95, 22);
-		aY += 36;
-
-		TodDrawString(g, _S("Port:"), aPanel.mX + 10, aY + 10, Sexy::FONT_BRIANNETOD12, Color(90, 55, 20), DrawStringJustification::DS_ALIGN_LEFT);
-		mPortEdit->Resize(aPanel.mX + 80, aY, 100, 22);
-		aY += 40;
-
-		// last connection error (only when idle, not while retrying)
-		if (!aNet->IsConnecting() && !aNet->IsHosting() && aNet->GetMySlot() == 0)
-		{
-			SexyString aStatus = StringToSexyString(aNet->GetConnectStatus());
-			if (aStatus.length() > 0)
-				TodDrawString(g, aStatus, aPanel.mX + 10, aY - 6,
-					Sexy::FONT_BRIANNETOD12, Color(180, 60, 40), DrawStringJustification::DS_ALIGN_LEFT);
-		}
-	}
-	else if (aNet->IsConnecting())
-	{
-		// ---- connecting overlay ----
-		TodDrawString(g, _S("Connecting..."), aPanel.mX + aPanel.mWidth / 2, aPanel.mY + 130,
-			Sexy::FONT_BRIANNETOD16, Color(90, 55, 20), DrawStringJustification::DS_ALIGN_CENTER);
-		TodDrawString(g, StringToSexyString(aNet->GetConnectStatus()), aPanel.mX + aPanel.mWidth / 2, aPanel.mY + 155,
-			Sexy::FONT_BRIANNETOD12, Color(120, 80, 30), DrawStringJustification::DS_ALIGN_CENTER);
-	}
-	else
-	{
-		// ---- connected: player list ----
-		SexyString aStatus;
-		if (aNet->IsHosting())
-			aStatus = StrFormat(_S("Hosting  (%d/4)"), aNet->GetPlayerCount());
-		else
-			aStatus = _S("Connected to host");
-		TodDrawString(g, aStatus, aPanel.mX + 10, aY + 10, Sexy::FONT_BRIANNETOD12, Color(90, 55, 20), DrawStringJustification::DS_ALIGN_LEFT);
-		aY += 26;
-
-		TodDrawString(g, _S("Players in lobby:"), aPanel.mX + 10, aY + 10, Sexy::FONT_BRIANNETOD12, Color(120, 85, 35), DrawStringJustification::DS_ALIGN_LEFT);
-		aY += 24;
-
-		for (int i = 0; i < NET_MAX_PLAYERS; i++)
-		{
-			const NetPlayerInfo& aP = aNet->GetPlayer(i);
-			NetColor aColor = GetRelativePlayerColor(aNet->GetMySlot(), i);
-			if (!aP.mActive)
-			{
-				g->SetColor(Color(150, 130, 95, 120));
-				g->FillRect(aPanel.mX + 10, aY - 12, 12, 12);
-				TodDrawString(g, _S("- empty slot -"), aPanel.mX + 30, aY, Sexy::FONT_BRIANNETOD12, Color(150, 125, 85), DrawStringJustification::DS_ALIGN_LEFT);
-			}
-			else
-			{
-				g->SetColor(Color(aColor.r, aColor.g, aColor.b));
-				g->FillRect(aPanel.mX + 10, aY - 12, 12, 12);
-				SexyString aRow = StringToSexyString(aP.mNick);
-				if (i == 0)
-					aRow += _S(" [HOST]");
-				if (i == aNet->GetMySlot())
-					aRow += _S(" (you)");
-				SexyString aPing = StrFormat(_S("%ums"), aP.mPing);
-				TodDrawString(g, aRow, aPanel.mX + 30, aY, Sexy::FONT_BRIANNETOD12, Color(60, 35, 10), DrawStringJustification::DS_ALIGN_LEFT);
-				TodDrawString(g, aPing, aPanel.mX + (aNet->IsHosting() ? 238 : aPanel.mWidth - 14), aY, Sexy::FONT_BRIANNETOD12, Color(90, 55, 20), DrawStringJustification::DS_ALIGN_RIGHT);
-			}
-			aY += 20;
-		}
-
-		aY += 6;
-		TodDrawString(g, StrFormat(_S("Difficulty: %d/10"), aNet->GetDifficulty()), aPanel.mX + 10, aPanel.mY + 198,
-			Sexy::FONT_BRIANNETOD12, Color(90,55,20), DrawStringJustification::DS_ALIGN_LEFT);
-	}
-
-	// ---- buttons ----
-	for (size_t i = 0; i < mButtons.size(); i++)
-		DrawButton(g, mButtons[i]);
-
-	MarkDirty();
-	Widget::Draw(g);
+    NetManager* aNet = mApp->mNetManager;
+    if (!aNet || mApp->mBoard || !mApp->mGameSelector || !mApp->mLoadingThreadCompleted) return;
+    const Rect aPanel = GetPanelRect();
+    NetUi::Paper(g, mPaperImage, aPanel);
+    TodDrawString(g, _S("PLAY TOGETHER"), aPanel.mX + 150, aPanel.mY + 28,
+        FONT_BRIANNETOD16, NetUi::Ink(), DS_ALIGN_CENTER);
+    if (!aNet->IsActive())
+    {
+        TodDrawString(g, _S("NAME"), aPanel.mX + 18, aPanel.mY + 68,
+            FONT_BRIANNETOD12, NetUi::Ink(), DS_ALIGN_LEFT);
+        if (mLanExpanded)
+            TodDrawString(g, _S("LAN IP"), aPanel.mX + 18, aPanel.mY + 203,
+                FONT_BRIANNETOD12, NetUi::Ink(), DS_ALIGN_LEFT);
+        else
+        {
+            TodDrawString(g, _S("A lawn is better with friends."), aPanel.mX + 150, aPanel.mY + 211,
+                FONT_BRIANNETOD12, NetUi::MutedInk(), DS_ALIGN_CENTER);
+            TodDrawString(g, _S("Find a room and join the fun!"), aPanel.mX + 150, aPanel.mY + 237,
+                FONT_BRIANNETOD12, NetUi::MutedInk(), DS_ALIGN_CENTER);
+        }
+        NetUi::Literal(g, FONT_BRIANNETOD12,
+            NetUi::Fit(FONT_BRIANNETOD12, StringToSexyString(aNet->GetConnectStatus()), 264),
+            aPanel.mX + 18, aPanel.mY + 288, Color(160, 48, 32));
+    }
+    else if (aNet->IsConnecting())
+    {
+        TodDrawString(g, _S("JOINING YOUR FRIEND..."), aPanel.mX + 150, aPanel.mY + 126,
+            FONT_BRIANNETOD16, NetUi::Ink(), DS_ALIGN_CENTER);
+        NetUi::Literal(g, FONT_BRIANNETOD12,
+            NetUi::Fit(FONT_BRIANNETOD12, StringToSexyString(aNet->GetConnectStatus()), 264),
+            aPanel.mX + 150, aPanel.mY + 157, NetUi::MutedInk(), 0);
+    }
+    else
+    {
+        TodDrawString(g, aNet->IsHosting() ? StrFormat(_S("YOUR ROOM  %d / 4"), aNet->GetPlayerCount()) : _S("CONNECTED TO A FRIEND"),
+            aPanel.mX + 150, aPanel.mY + 50, FONT_BRIANNETOD12, NetUi::MutedInk(), DS_ALIGN_CENTER);
+        for (int i = 0; i < NET_MAX_PLAYERS; ++i)
+        {
+            const NetPlayerInfo& aPlayer = aNet->GetPlayer(i);
+            const int aY = aPanel.mY + 65 + i * 32;
+            g->SetColor(Color(145, 105, 58, 90));
+            g->FillRect(aPanel.mX + 18, aY + 31, 264, 1);
+            if (!aPlayer.mActive)
+            {
+                TodDrawString(g, _S("Open slot"), aPanel.mX + 38, aY + 20,
+                    FONT_BRIANNETOD12, NetUi::MutedInk(), DS_ALIGN_LEFT);
+                continue;
+            }
+            const NetColor aColor = GetRelativePlayerColor(aNet->GetMySlot(), i);
+            g->SetColor(Color(aColor.r, aColor.g, aColor.b));
+            g->FillRect(aPanel.mX + 18, aY + 4, 12, 12);
+            NetUi::Literal(g, FONT_BRIANNETOD12,
+                NetUi::Fit(FONT_BRIANNETOD12, StringToSexyString(aPlayer.mNick), 158),
+                aPanel.mX + 38, aY + 15, NetUi::Ink());
+            const SexyString aRole = aPlayer.mSpectator ? _S("WATCHING") : i == 0 ? _S("HOST") : _S("PLAYER");
+            TodDrawString(g, aRole + (i == aNet->GetMySlot() ? _S(" / YOU") : _S("")),
+                aPanel.mX + 38, aY + 29, FONT_BRIANNETOD12, NetUi::MutedInk(), DS_ALIGN_LEFT);
+            TodDrawString(g, StrFormat(_S("%ums"), aPlayer.mPing), aPanel.mX + 244, aY + 17,
+                FONT_BRIANNETOD12, NetUi::MutedInk(), DS_ALIGN_RIGHT);
+        }
+        TodDrawString(g, StrFormat(_S("DIFFICULTY  %d / 10"), aNet->GetDifficulty()),
+            aPanel.mX + 18, aPanel.mY + 225, FONT_BRIANNETOD12, NetUi::Ink(), DS_ALIGN_LEFT);
+        TodDrawString(g, aNet->IsHosting() ? _S("Choose a game to start.") : _S("The host chooses the game."),
+            aPanel.mX + 150, aPanel.mY + 252, FONT_BRIANNETOD12, NetUi::MutedInk(), DS_ALIGN_CENTER);
+    }
+    for (const UiButton& aButton : mButtons) DrawButton(g, aButton);
+    MarkDirty();
+    Widget::Draw(g);
 }
 
 void NetLobbyPanel::MouseMove(int x, int y)
@@ -390,6 +356,8 @@ void NetLobbyPanel::ActivateButton(int theButtonId)
 			break;
 		case BTN_ONLINE:
 			ApplyNick(); mApp->NetShowOnlineBrowser(); break;
+		case BTN_LAN:
+			mLanExpanded = !mLanExpanded; LayoutButtons(); break;
 		case BTN_DIFFICULTY_DOWN:
 			aNet->SetDifficulty(aNet->GetDifficulty() - 1); break;
 		case BTN_DIFFICULTY_UP:
@@ -412,7 +380,11 @@ void NetLobbyPanel::ApplyNick()
 	if (!NetNormalizeUtf8(SexyStringToStringFast(mNickEdit->mString), NET_MAX_NICK_BYTES,
 		NET_MAX_NICK_CHARS, true, aNick))
 		return;
-	strcpy_s(aNet->mConfig.mNick, aNick.c_str());
+	if (aNick != aNet->mConfig.mNick)
+	{
+		strcpy_s(aNet->mConfig.mNick, aNick.c_str());
+		NetSaveConfig(aNet->mConfig);
+	}
 	if (aNet->IsHosting() && aNet->GetPlayerCount() == 1)
 	{
 		strcpy_s(aNet->GetPlayerMutable(0).mNick, aNet->mConfig.mNick);

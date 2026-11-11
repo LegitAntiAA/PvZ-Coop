@@ -1,4 +1,5 @@
 #include "../../LawnApp.h"
+#include "../../Resources.h"
 #include "NetManager.h"
 #include "../Board.h"
 #include "../LawnCommon.h"
@@ -187,7 +188,7 @@ bool PreviewBounds(MoreSettingsDialog* theDialog, float& theCenterY)
     theCenterY = (aTop + aBottom) * 0.5f;
     return aVisibleTracks > 0 && aLeft >= 2.0f && aTop >= 2.0f &&
         aRight < theDialog->mWidth - 2 && aBottom < theDialog->mLawnYesButton->mY - 2 &&
-        fabsf(theCenterY - 327.0f) <= 24.0f;
+        fabsf(theCenterY - 327.0f) <= 2.0f;
 }
 
 int ParticleCount(LawnApp* theApp, ParticleEffect theType)
@@ -601,11 +602,15 @@ bool LawnApp::CoopSmokeUpdateFirstAdventure()
         NetOnlineDialog* aDialog = (NetOnlineDialog*)GetDialog(DIALOG_COOP_ONLINE);
         if (!aDialog) return false;
         NetOnline* anOnline = mNetManager->GetOnline();
+        const int aFrameEdges = IMAGE_DIALOG_TOPLEFT->mWidth + IMAGE_DIALOG_TOPRIGHT->mWidth;
         if (aDialog->mX < 0 || aDialog->mY < 0 || aDialog->mX + aDialog->mWidth > mWidth ||
-            aDialog->mY + aDialog->mHeight > mHeight || (anOnline && anOnline->IsConnected()))
+            aDialog->mY + aDialog->mHeight > mHeight ||
+            (aDialog->mWidth - aFrameEdges) % IMAGE_DIALOG_TOPMIDDLE->mWidth != 0 ||
+            (anOnline && anOnline->IsConnected()))
         { CoopSmokeFail("online browser bounds or empty-directory isolation failed"); return false; }
         if (Record(this, "online_browser"))
         {
+            NetTrace("SMOKE_FRESH_ONLINE role=%s frameFit=1 width=%d directoryConnected=0", aRole, aDialog->mWidth);
             s.mStage = 21;
             if (!PushDialogButton(this, aDialog, aDialog->mLawnYesButton))
                 CoopSmokeFail("native online browser close SDL click failed");

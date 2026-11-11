@@ -145,7 +145,7 @@ bool Observed(LawnApp* app)
 		Reanimation* body = g ? app->ReanimationTryToGet(g->mGridItemReanimID) : nullptr;
 		if (!g || g->mGridItemType != GRIDITEM_STINKY || g->mNetGhost != client ||
 			g->mGridItemState != GRIDITEM_STINKY_SLEEPING || !ReanimBounds(body) ||
-			body->mReanimationType != REANIM_STINKY || !body->TrackExists("shell")) return false;
+			body->mReanimationType != REANIM_STINKY || body->mAnimRate != 0.0f || !body->TrackExists("shell")) return false;
 		Reanimation* zz = FindReanimAttachment(body->GetTrackInstanceByName("shell")->mAttachmentID);
 		if (!ReanimBounds(zz) || zz->mReanimationType != REANIM_SLEEPING ||
 			zz->mAnimRate != 3.0f || zz->mLoopType != REANIM_LOOP) return false;
@@ -308,10 +308,10 @@ bool NetSmokeUpdatePresentation(LawnApp* app)
 				Reanimation* body = app->ReanimationTryToGet(g->mGridItemReanimID);
 				Reanimation* zz = FindReanimAttachment(body->GetTrackInstanceByName("shell")->mAttachmentID);
 				ghost = (int)g->mNetGhost;
-				NetTrace("SMOKE_PRESENTATION_SNAIL role=%s id=%u state=%d bodyReanim=%u sleepingReanim=%u sleepingRate=%.1f sleepingFrame=%d count=%d start=%.6f now=%.6f scope=grid_only",
+				NetTrace("SMOKE_PRESENTATION_SNAIL role=%s id=%u state=%d bodyReanim=%u sleepingReanim=%u sleepingRate=%.1f sleepingFrame=%d count=%d start=%.6f now=%.6f bodyRate=%.1f scope=grid_only",
 					role, g->mNetId, (int)g->mGridItemState, (unsigned)g->mGridItemReanimID,
 					(unsigned)app->ReanimationGetID(zz), zz->mAnimRate, zz->mFrameStart, zz->mFrameCount,
-					s.mSleepStart, zz->mAnimTime);
+					s.mSleepStart, zz->mAnimTime, body->mAnimRate);
 			}
 			NetTrace("SMOKE_PRESENTATION_OBSERVED role=%s stage=%s id=%u ghost=%d assetBounds=%d armParticles=%d headParticles=%d jackParticles=%d attempts=%d appearance=%s bytes=%zu arm=%d head=%d",
 				role, kNames[s.mStage], s.mEntity, ghost, s.mStage == REGISTRY ? 0 : 1, Particles(app, PARTICLE_ZOMBIE_ARM),

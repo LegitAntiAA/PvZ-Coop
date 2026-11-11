@@ -383,12 +383,12 @@ static RenderCommand* gRenderTail[256];
 static RenderCommand* gRenderHead[256];
 
 //0x511E50
-void TodDrawStringMatrix(Graphics* g, const Font* theFont, const SexyMatrix3& theMatrix, const SexyString& theString, const Color& theColor)
+void TodDrawStringMatrix(Graphics* g, const Font* theFont, const SexyMatrix3& theMatrix, const SexyString& theString, const Color& theColor, bool theLiteral)
 {
         if (!g || !theFont || theString.empty())
                 return;
 
-        SexyString aFinalString = TodStringTranslate(theString);
+        SexyString aFinalString = theLiteral ? theString : TodStringTranslate(theString);
 
         // Bitmap-font matrix drawing is byte-oriented.  Route UTF-8 text
         // through ImageFont::DrawString so its SDL/Unicode fallback decodes the

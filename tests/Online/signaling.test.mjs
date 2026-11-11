@@ -90,6 +90,20 @@ test("kick is host-only, frees capacity, and leaves the browser connected", () =
   assert.equal(host.last("rooms").rooms[0].players, 1);
 });
 
+test("client drop preserves the host room and allows the same client to retry", () => {
+  const { add, create, send } = setup();
+  const host = add("Host"), client = add("Client");
+  const room = create(host, { maxPlayers: 2 });
+  send(client, { kind: "join", room, proof: "" });
+  send(client, { kind: "drop", peer: "Host" });
+  assert.equal(client.state.roomId, ""); assert.ok(client.last("closed"));
+  assert.equal(host.state.roomId, room); assert.equal(host.state.hosting, true);
+  assert.equal(host.last("rooms").rooms[0].players, 1);
+  send(client, { kind: "join", room, proof: "" });
+  assert.equal(client.state.roomId, room);
+  assert.equal(host.last("rooms").rooms[0].players, 2);
+});
+
 test("hibernation reconstructs room data from live socket attachments", () => {
   const { ctx, add, create, send } = setup();
   const host = add("Host"), client = add("Client");

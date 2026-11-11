@@ -413,6 +413,7 @@ void NetManager::Disconnect()
 	mRemoteChooserStates.clear();
 	mPendingChooserStarts.clear();
 	mPendingBoardMsgs.clear();
+	mCurrentStart.Clear();
 	mAnnotations.clear();
 	mChatLines.clear();
 	mChooserStateEchoRequested.store(false, std::memory_order_relaxed);
@@ -1198,7 +1199,7 @@ void NetManager::OnClientCursor(NetSession* theSession, NetBuffer& thePayload)
 	// The connection owns the slot.  Never trust the slot claimed in a packet.
 	thePayload.ReadU8Or();
 	const uint8_t aSlot = theSession->mSlot;
-	if (aSlot >= NET_MAX_PLAYERS || !mPlayers[aSlot].mActive || mPlayers[aSlot].mSpectator)
+	if (aSlot >= NET_MAX_PLAYERS || !mPlayers[aSlot].mActive)
 		return;
 	NetRemoteCursor& aCursor = mRemoteCursors[aSlot];
 	int16_t aCanonicalX = thePayload.ReadI16Or();
@@ -1219,7 +1220,14 @@ void NetManager::OnClientCursor(NetSession* theSession, NetBuffer& thePayload)
 	// During a game the host's per-player cursor is authoritative.  Clients
 	// provide only pointer coordinates, never the plant/tool they claim to hold.
 	CursorObject* anAuthoritativeCursor = mApp && mApp->mBoard ? mApp->mBoard->mNetPlayerCursors[aSlot] : nullptr;
-        if (anAuthoritativeCursor)
+	if (mPlayers[aSlot].mSpectator)
+	{
+		aCursor.mCursorType = (uint8_t)CursorType::CURSOR_TYPE_NORMAL;
+		aCursor.mHeldSeed = aCursor.mHeldImitater = 255;
+		aCursor.mFlags = 0;
+		anAuthoritativeCursor = nullptr;
+	}
+        else if (anAuthoritativeCursor)
         {
 		aCursor.mCursorType = (uint8_t)anAuthoritativeCursor->mCursorType;
 		aCursor.mHeldSeed = (uint8_t)anAuthoritativeCursor->mType;
@@ -2452,8 +2460,8 @@ void NetManager::BroadcastSceneCmd(uint8_t theCmd, int theParam)
 {
 	if (theCmd == SCENECMD_SHOW_GAME_SELECTOR && IsHosting())
 	{
-		for (auto& player : mPlayers) { player.mSpectator = false; player.mReady = 0; }
-		SendLobbyState();
+		PromoteSpectatorsAtLevelBoundary("GAME_SELECTOR");
+		ResetReadyState();
 	}
 	NetBuffer aMsg;
 	aMsg.WriteU8(theCmd);
@@ -2500,6 +2508,7 @@ void NetManager::BroadcastStartGame(int theGameMode, int theLevel, uint32_t theB
 	aMsg.WriteU8((uint8_t)mStartTDPath.size());
 	for (uint8_t aCell : mStartTDPath)
 		aMsg.WriteU8(aCell);
+	mCurrentStart = aMsg;
 	BroadcastMessage(NETMSG_START_GAME, aMsg);
 }
 

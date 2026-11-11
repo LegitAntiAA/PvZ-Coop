@@ -172,6 +172,12 @@ bool LawnApp::CoopSmokeUpdateModes()
 					aCursor.mY < aTop || aCursor.mY >= aTop + aPacket.mHeight ||
 					std::abs(aCursor.mRenderX - aCursor.mX) > 1.0f || std::abs(aCursor.mRenderY - aCursor.mY) > 1.0f)
 					return false;
+				if (!s.mCursorIssued)
+				{
+					s.mCursorIssued = true; s.mGoalFrame = mCoopSmokeFrame;
+					return false;
+				}
+				if (mCoopSmokeFrame == s.mGoalFrame) return false;
 				if (!CoopSmokeCaptureFrame("modes_td_relative_cursor")) return false;
 				NetTrace("SMOKE_MODES_CURSOR role=host packetId=%u localIndex=%d remoteIndex=0 mapped=1 pointInside=1 renderSettled=1",
 					aPacket.mNetId, i);

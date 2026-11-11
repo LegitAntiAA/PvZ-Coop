@@ -205,20 +205,21 @@ struct NetOnline::Impl
 		int mPc = -1;
 		std::shared_ptr<NetOnlineChannel::State> mChannel;
 		bool mDelivered = false;
+		bool mDirectoryDeparted = false;
 		bool mRemoteDescription = false;
 		std::vector<std::pair<std::string, std::string>> mCandidates;
 		std::vector<int> mExtraDataChannels; // guarded by mChannel->mMutex
 		std::chrono::steady_clock::time_point mCreated = std::chrono::steady_clock::now();
 	};
 	std::shared_ptr<RtcApi> mApi;
-	std::atomic<bool> mRunning{false}, mRegistered{false};
+	std::atomic<bool> mRunning{false}, mRegistered{false}, mConnecting{false};
 	std::atomic<HINTERNET> mSocket{nullptr};
 	std::thread mReceiver, mSender;
 	std::mutex mSignalMutex;
 	std::condition_variable mSendCv;
 	std::deque<std::string> mOutgoing, mIncoming;
 	mutable std::mutex mViewMutex;
-	std::string mStatus, mBuild, mNickname, mStun, mRoomId, mPendingRoom, mPendingPassword;
+	std::string mStatus, mLastErrorCode, mBuild, mNickname, mStun, mRoomId, mPendingRoom, mPendingPassword;
 	std::vector<NetOnlineRoom> mRooms;
 	bool mHosting = false;
 	std::map<std::string, std::unique_ptr<Peer>> mPeers;
@@ -229,6 +230,11 @@ struct NetOnline::Impl
 	{
 		std::lock_guard<std::mutex> aLock(mViewMutex);
 		mStatus = theText;
+	}
+	void ErrorCode(const std::string& theCode)
+	{
+		std::lock_guard<std::mutex> aLock(mViewMutex);
+		mLastErrorCode = theCode;
 	}
 	bool Queue(const Json& theMessage)
 	{
@@ -247,7 +253,7 @@ struct NetOnline::Impl
 		aUrl.dwHostNameLength = aUrl.dwUrlPathLength = aUrl.dwExtraInfoLength = (DWORD)-1;
 		if (!WinHttpCrackUrl(theUrl.c_str(), 0, 0, &aUrl))
 		{
-			Status("Invalid signaling URL"); mRunning = false; return;
+			Status("Invalid signaling URL"); mRunning = false; mConnecting = false; return;
 		}
 		std::wstring aHost(aUrl.lpszHostName, aUrl.dwHostNameLength);
 		std::wstring aPath(aUrl.lpszUrlPath, aUrl.dwUrlPathLength);
@@ -256,24 +262,42 @@ struct NetOnline::Impl
 		HINTERNET aSession = WinHttpOpen(L"PvZ-Coop/Online", WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY,
 			WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
 		HINTERNET aConnection = nullptr, aRequest = nullptr;
+		DWORD aWinHttpError = 0, aHttpStatus = 0;
+		USHORT aCloseCode = 0;
+		const char* aFailureStage = "session";
+		auto Failed = [&](const char* theStage) { aFailureStage = theStage; aWinHttpError = GetLastError(); };
+		if (!aSession) Failed("session");
 		if (aSession)
 		{
 			WinHttpSetTimeouts(aSession, 3000, 5000, 5000, 5000);
 			aConnection = WinHttpConnect(aSession, aHost.c_str(), aUrl.nPort, 0);
+			if (!aConnection) Failed("connect");
 		}
 		if (aConnection)
+		{
 			aRequest = WinHttpOpenRequest(aConnection, L"GET", aPath.c_str(), nullptr,
 				WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, aUrl.nScheme == INTERNET_SCHEME_HTTPS ? WINHTTP_FLAG_SECURE : 0);
+			if (!aRequest) Failed("request");
+		}
 		HINTERNET aSocket = nullptr;
 		bool aInstalled = false;
-		if (aRequest && mRunning && WinHttpSetOption(aRequest, WINHTTP_OPTION_UPGRADE_TO_WEB_SOCKET, nullptr, 0) &&
-			WinHttpSendRequest(aRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0) &&
-			WinHttpReceiveResponse(aRequest, nullptr))
+		if (aRequest && mRunning)
 		{
-			DWORD aStatus = 0, aSize = sizeof(aStatus);
-			if (WinHttpQueryHeaders(aRequest, WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER,
-				WINHTTP_HEADER_NAME_BY_INDEX, &aStatus, &aSize, WINHTTP_NO_HEADER_INDEX) && aStatus == 101)
-				aSocket = WinHttpWebSocketCompleteUpgrade(aRequest, 0);
+			if (!WinHttpSetOption(aRequest, WINHTTP_OPTION_UPGRADE_TO_WEB_SOCKET, nullptr, 0)) Failed("upgrade_option");
+			else if (!WinHttpSendRequest(aRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) Failed("send_request");
+			else if (!WinHttpReceiveResponse(aRequest, nullptr)) Failed("receive_response");
+			else
+			{
+				DWORD aSize = sizeof(aHttpStatus);
+				if (!WinHttpQueryHeaders(aRequest, WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER,
+					WINHTTP_HEADER_NAME_BY_INDEX, &aHttpStatus, &aSize, WINHTTP_NO_HEADER_INDEX)) Failed("response_headers");
+				else if (aHttpStatus == 101)
+				{
+					aSocket = WinHttpWebSocketCompleteUpgrade(aRequest, 0);
+					if (!aSocket) Failed("complete_upgrade");
+				}
+				else aFailureStage = "http_status";
+			}
 		}
 		if (aRequest) WinHttpCloseHandle(aRequest);
 		if (aSocket && mRunning)
@@ -302,7 +326,13 @@ struct NetOnline::Impl
 				DWORD aRead = 0;
 				WINHTTP_WEB_SOCKET_BUFFER_TYPE aType;
 				const DWORD aError = WinHttpWebSocketReceive(aSocket, aBuffer, sizeof(aBuffer), &aRead, &aType);
-				if (aError != NO_ERROR || aType == WINHTTP_WEB_SOCKET_CLOSE_BUFFER_TYPE) break;
+				if (aError != NO_ERROR) { aWinHttpError = aError; aFailureStage = "receive"; break; }
+				if (aType == WINHTTP_WEB_SOCKET_CLOSE_BUFFER_TYPE)
+				{
+					char aReason[123]; DWORD aReasonBytes = 0;
+					aWinHttpError = WinHttpWebSocketQueryCloseStatus(aSocket, &aCloseCode, aReason, sizeof(aReason), &aReasonBytes);
+					aFailureStage = "close"; break;
+				}
 				if ((aType != WINHTTP_WEB_SOCKET_UTF8_MESSAGE_BUFFER_TYPE && aType != WINHTTP_WEB_SOCKET_UTF8_FRAGMENT_BUFFER_TYPE) ||
 					aMessage.size() + aRead > kMaxSignal) break;
 				aMessage.append(aBuffer, aRead);
@@ -314,8 +344,11 @@ struct NetOnline::Impl
 				}
 			}
 		}
-		if (mRunning) Status(aSocket ? "Signaling disconnected" : "Signaling connection failed (TLS/network/URL)");
+		if (mRunning) Status(std::string(aSocket ? "Signaling disconnected" : "Signaling connection failed") +
+			" (stage=" + aFailureStage + " error=" + std::to_string(aWinHttpError) +
+			" http=" + std::to_string(aHttpStatus) + " close=" + std::to_string(aCloseCode) + ")");
 		mRegistered = false;
+		mConnecting = false;
 		mRunning = false;
 		mSendCv.notify_all();
 		if (mSender.joinable()) mSender.join();
@@ -382,8 +415,14 @@ struct NetOnline::Impl
 	}
 	Peer* CreatePeer(const std::string& theId, bool theOffer)
 	{
-		if (theId.empty() || theId.size() > 64 || mPeers.size() >= 3) return nullptr;
-		if (auto aFound = mPeers.find(theId); aFound != mPeers.end()) return aFound->second.get();
+		if (theId.empty() || theId.size() > 64) return nullptr;
+		if (auto aFound = mPeers.find(theId); aFound != mPeers.end())
+		{
+			if (!aFound->second->mDirectoryDeparted && !aFound->second->mChannel->mCloseRequested)
+				return aFound->second.get();
+			DeletePeer(*aFound->second); mPeers.erase(aFound);
+		}
+		if (mPeers.size() >= 3) return nullptr;
 		auto aPeer = std::make_unique<Peer>();
 		aPeer->mOwner = this; aPeer->mId = theId;
 		aPeer->mChannel = std::make_shared<NetOnlineChannel::State>();
@@ -439,7 +478,7 @@ struct NetOnline::Impl
 		const std::string aKind = aMessage.value("kind", "");
 		if (aKind == "ready")
 		{
-			mRegistered = true; Status("Online browser connected");
+			mRegistered = true; mConnecting = false; Status("Online browser connected");
 			Queue({{"kind", "list"}});
 		}
 		else if (aKind == "rooms")
@@ -479,14 +518,30 @@ struct NetOnline::Impl
 		else if (aKind == "joined")
 		{
 			mRoomId = aMessage.value("room", ""); mHosting = false;
-			CreatePeer(aMessage.value("host", ""), false); Status("Connecting directly to host...");
+			if (CreatePeer(aMessage.value("host", ""), false)) Status("Connecting directly to host...");
+			else
+			{
+				ErrorCode("direct-connection-failed"); Status("WebRTC initialization failed");
+				Queue({{"kind", "leave"}}); mRoomId.clear(); mPendingRoom.clear();
+			}
 		}
 		else if (aKind == "peer-joined" && mHosting)
-			CreatePeer(aMessage.value("peer", ""), true);
+		{
+			const std::string aPeer = aMessage.value("peer", "");
+			if (!CreatePeer(aPeer, true))
+			{
+				ErrorCode("direct-connection-failed"); Status("WebRTC initialization failed");
+				Queue({{"kind", "drop"}, {"peer", aPeer}});
+			}
+		}
 		else if (aKind == "peer-left")
 		{
 			auto aPeer = mPeers.find(aMessage.value("peer", ""));
-			if (aPeer != mPeers.end()) aPeer->second->mChannel->mCloseRequested = true;
+			if (aPeer != mPeers.end())
+			{
+				aPeer->second->mDirectoryDeparted = true;
+				aPeer->second->mChannel->mCloseRequested = true;
+			}
 		}
 		else if (aKind == "signal")
 		{
@@ -514,12 +569,16 @@ struct NetOnline::Impl
 		}
 		else if (aKind == "closed" || aKind == "kicked")
 		{
+			for (const auto& aPeer : mPeers)
+				if (!aPeer.second->mDelivered) { ErrorCode("direct-connection-failed"); break; }
 			ClearPeers(); mRoomId.clear(); mHosting = false;
 			Status(aKind == "kicked" ? "Host kicked you from the room" : "Host closed the room");
 		}
 		else if (aKind == "error")
 		{
+			mConnecting = false;
 			std::string aCode = aMessage.value("code", "error");
+			ErrorCode(aCode.substr(0, 120));
 			Status("Online: " + aCode.substr(0, 120));
 			std::fill(mPendingPassword.begin(), mPendingPassword.end(), '\0'); mPendingPassword.clear();
 		}
@@ -547,7 +606,8 @@ bool NetOnline::Connect(const std::string& theEndpoint, const std::string& theBu
 	mImpl->mApi = LoadRtc();
 	if (!mImpl->mApi) { mImpl->Status("WebRTC runtime missing: build/package datachannel.dll beside the game"); return false; }
 	mImpl->mBuild = theBuild; mImpl->mNickname = theNickname; mImpl->mStun = theStun;
-	mImpl->mRunning = true; mImpl->Status("Connecting to online browser...");
+	mImpl->ErrorCode("");
+	mImpl->mRunning = true; mImpl->mConnecting = true; mImpl->Status("Connecting to online browser...");
 	mImpl->Queue({{"kind", "hello"}, {"build", theBuild}, {"nickname", theNickname}});
 	mImpl->mReceiver = std::thread([this, aUrl] { mImpl->RunSignal(Wide(aUrl)); });
 	return true;
@@ -566,19 +626,30 @@ void NetOnline::Update()
 			const Json aJson = Json::parse(aText, nullptr, false);
 			if (aJson.is_object()) mImpl->Handle(aJson);
 		}
-		catch (const Json::exception&) { mImpl->Status("Invalid signaling response"); }
+		catch (const Json::exception&) { mImpl->mConnecting = false; mImpl->Status("Invalid signaling response"); }
 	}
 	for (auto aIt = mImpl->mPeers.begin(); aIt != mImpl->mPeers.end(); )
 	{
 		auto& aPeer = *aIt->second;
-		if (!aPeer.mChannel->mOpen && std::chrono::steady_clock::now() - aPeer.mCreated > std::chrono::seconds(45))
-		{
+		if (!aPeer.mDelivered && !aPeer.mChannel->mOpen &&
+			std::chrono::steady_clock::now() - aPeer.mCreated > std::chrono::seconds(45))
 			aPeer.mChannel->mCloseRequested = true;
-			mImpl->Status("Direct connection failed: NAT/firewall may require VPN (no TURN)");
-		}
 		if (aPeer.mChannel->mCloseRequested)
 		{
-			mImpl->Queue({{"kind", "drop"}, {"peer", aPeer.mId}});
+			if (!aPeer.mDelivered && !aPeer.mDirectoryDeparted)
+			{
+				mImpl->ErrorCode("direct-connection-failed");
+				mImpl->Status("Direct connection failed: NAT/firewall may require VPN (no TURN)");
+			}
+			if (!aPeer.mDirectoryDeparted)
+			{
+				if (mImpl->mHosting) mImpl->Queue({{"kind", "drop"}, {"peer", aPeer.mId}});
+				else
+				{
+					mImpl->Queue({{"kind", "leave"}});
+					mImpl->mRoomId.clear(); mImpl->mPendingRoom.clear();
+				}
+			}
 			mImpl->DeletePeer(aPeer); aIt = mImpl->mPeers.erase(aIt); continue;
 		}
 		if (aPeer.mChannel->mOpen && !aPeer.mDelivered)
@@ -603,26 +674,31 @@ bool NetOnline::CreateRoom(const std::string& theName, const std::string& thePas
 	if (BCryptGenRandom(nullptr, aSalt, sizeof(aSalt), BCRYPT_USE_SYSTEM_PREFERRED_RNG) < 0) return false;
 	std::string aSaltHex = Hex(aSalt, sizeof(aSalt)), aProof;
 	if (!thePassword.empty() && !PasswordProof(thePassword, aSaltHex, aProof)) return false;
-	return mImpl->Queue({{"kind", "create"}, {"name", theName}, {"maxPlayers", theMaxPlayers},
+	const bool aQueued = mImpl->Queue({{"kind", "create"}, {"name", theName}, {"maxPlayers", theMaxPlayers},
 		{"salt", thePassword.empty() ? "" : aSaltHex}, {"proof", aProof}});
+	if (aQueued) mImpl->ErrorCode("");
+	return aQueued;
 }
 bool NetOnline::JoinRoom(const std::string& theRoomId, const std::string& thePassword)
 {
 	if (!mImpl->mRunning || theRoomId.empty() || theRoomId.size() > 64 || thePassword.size() > 256) return false;
 	mImpl->mPendingRoom = theRoomId; mImpl->mPendingPassword = thePassword;
-	return mImpl->Queue({{"kind", "challenge"}, {"room", theRoomId}});
+	const bool aQueued = mImpl->Queue({{"kind", "challenge"}, {"room", theRoomId}});
+	if (aQueued) mImpl->ErrorCode("");
+	return aQueued;
 }
 void NetOnline::SetPlaying(bool thePlaying) { mImpl->Queue({{"kind", "playing"}, {"playing", thePlaying}}); }
 void NetOnline::KickPeer(const std::string& thePeerId) { mImpl->Queue({{"kind", "kick"}, {"peer", thePeerId}}); }
 void NetOnline::LeaveRoom()
 {
+	mImpl->ErrorCode("");
 	mImpl->Queue({{"kind", "leave"}});
 	mImpl->ClearPeers(); mImpl->mRoomId.clear(); mImpl->mHosting = false;
 }
 void NetOnline::Stop()
 {
 	if (!mImpl) return;
-	mImpl->mRunning = false; mImpl->mRegistered = false; mImpl->mSendCv.notify_all();
+	mImpl->mRunning = false; mImpl->mRegistered = false; mImpl->mConnecting = false; mImpl->mSendCv.notify_all();
 	if (HINTERNET aSocket = mImpl->mSocket.exchange(nullptr)) WinHttpCloseHandle(aSocket);
 	if (mImpl->mReceiver.joinable()) mImpl->mReceiver.join();
 	mImpl->ClearPeers();
@@ -632,12 +708,14 @@ void NetOnline::Stop()
 	}
 	mImpl->mRoomId.clear(); mImpl->mHosting = false;
 	std::fill(mImpl->mPendingPassword.begin(), mImpl->mPendingPassword.end(), '\0'); mImpl->mPendingPassword.clear();
-	std::lock_guard<std::mutex> aLock(mImpl->mViewMutex); mImpl->mRooms.clear();
+	std::lock_guard<std::mutex> aLock(mImpl->mViewMutex); mImpl->mRooms.clear(); mImpl->mLastErrorCode.clear();
 }
+bool NetOnline::IsConnecting() const { return mImpl->mConnecting; }
 bool NetOnline::IsConnected() const { return mImpl->mRegistered; }
 bool NetOnline::IsHostingRoom() const { return mImpl->mHosting; }
 std::string NetOnline::GetRoomId() const { return mImpl->mRoomId; }
 std::string NetOnline::GetStatus() const { std::lock_guard<std::mutex> aLock(mImpl->mViewMutex); return mImpl->mStatus; }
+std::string NetOnline::GetLastErrorCode() const { std::lock_guard<std::mutex> aLock(mImpl->mViewMutex); return mImpl->mLastErrorCode; }
 std::vector<NetOnlineRoom> NetOnline::GetRooms() const { std::lock_guard<std::mutex> aLock(mImpl->mViewMutex); return mImpl->mRooms; }
 std::vector<std::shared_ptr<NetOnlineChannel>> NetOnline::TakeOpenedChannels()
 {

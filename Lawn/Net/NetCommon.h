@@ -604,8 +604,6 @@ struct NetConfig
 	int  mHotbarTintAlpha;
 	int  mHeldPlantOutlineAlpha;
 	NetZombatarAppearance mZombatar;
-	std::string mOnlineEndpoint;
-	std::string mStunServer;
 
 	NetConfig() { Reset(); }
 	void Reset()
@@ -621,12 +619,10 @@ struct NetConfig
 		mHotbarTintAlpha = 110;
 		mHeldPlantOutlineAlpha = 180;
 		mZombatar = {};
-		mOnlineEndpoint.clear();
-		mStunServer = "stun:stun.cloudflare.com:3478";
 	}
 };
 
-bool NetLoadConfig(NetConfig& theConfig);		// reads coop.ini next to the exe / userdata
+bool NetLoadConfig(NetConfig& theConfig);		// reads coop.ini next to the executable
 bool NetSaveConfig(const NetConfig& theConfig);
 bool NetComputeSeedQuotas(int theBankCount, int theFixedHostCount,
 	const bool theEligible[NET_MAX_PLAYERS], int theQuotas[NET_MAX_PLAYERS]);

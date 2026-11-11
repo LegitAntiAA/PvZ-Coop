@@ -7,32 +7,74 @@
 #include "../../SexyAppFramework/ListWidget.h"
 #include "../../SexyAppFramework/WidgetManager.h"
 #include "../../SexyAppFramework/Font.h"
+#include "../../SexyAppFramework/DDImage.h"
 #include "../../Sexy.TodLib/TodStringFile.h"
+#include "NetUi.h"
 
 using namespace LawnNet;
 
 namespace
 {
 SexyString FitOnlineText(const SexyString& theText, int theWidth)
+{ return NetUi::Fit(FONT_BRIANNETOD12, theText, theWidth); }
+
+SexyString RoomError(const std::string& theCode)
 {
-    if (FONT_BRIANNETOD12->StringWidth(theText) <= theWidth)
-        return theText;
-    SexyString aText = theText;
-    while (!aText.empty() && FONT_BRIANNETOD12->StringWidth(aText + _S("...")) > theWidth)
-        aText.pop_back();
-    return aText + _S("...");
+    if (theCode == "wrong-password") return _S("That password is incorrect. Please try again.");
+    if (theCode == "room-full") return _S("This room is full. Choose another room or refresh.");
+    if (theCode == "room-not-found") return _S("This room has closed. Refresh to find another.");
+    if (theCode == "version-mismatch") return _S("This room uses a different mod version.");
+    if (theCode == "rate-limit" || theCode == "password-retry-later") return _S("Please wait a moment before trying again.");
+    if (theCode == "directory-full") return _S("Online rooms are busy. Please try again shortly.");
+    if (theCode == "direct-connection-failed") return _S("Could not reach this room. Try again or another network.");
+    return _S("The room could not be opened. Please try again.");
 }
 }
+
+class NetOnlineDialog::RoomList : public ListWidget
+{
+    NetOnlineDialog* mOwner;
+public:
+    explicit RoomList(NetOnlineDialog* theOwner) : ListWidget(204, FONT_BRIANNETOD12, theOwner), mOwner(theOwner) {}
+    void Draw(Graphics* g) override
+    {
+        for (int i = 0; i < GetLineCount(); ++i)
+        {
+            const NetOnlineRoom& aRoom = mOwner->mRooms[mOwner->mPage * 6 + i];
+            const Rect aRect(0, i * mItemHeight, mWidth, mItemHeight - 4);
+            NetUi::Paper(g, mOwner->mPaperImage, aRect);
+            if (i == mSelectIdx || i == mHiliteIdx)
+            {
+                g->SetColor(i == mSelectIdx ? Color(80, 125, 42) : Color(183, 124, 40));
+                g->DrawRect(2, aRect.mY + 2, mWidth - 5, aRect.mHeight - 5);
+                if (i == mSelectIdx) g->DrawRect(3, aRect.mY + 3, mWidth - 7, aRect.mHeight - 7);
+            }
+            NetUi::Literal(g, FONT_BRIANNETOD16,
+                NetUi::Fit(FONT_BRIANNETOD16, StringToSexyString(aRoom.mName), mWidth - 120),
+                13, aRect.mY + 18, NetUi::Ink());
+            TodDrawString(g, StrFormat(_S("%d / %d"), aRoom.mPlayers, aRoom.mMaxPlayers),
+                mWidth - 13, aRect.mY + 18, FONT_BRIANNETOD16, NetUi::Ink(), DS_ALIGN_RIGHT);
+            const SexyString aHost = _S("Host: ") + StringToSexyString(aRoom.mHost);
+            TodDrawString(g, FitOnlineText(aHost, mWidth - 175), 13, aRect.mY + 34,
+                FONT_BRIANNETOD12, NetUi::MutedInk(), DS_ALIGN_LEFT);
+            const SexyString aState = aRoom.mPlayers >= aRoom.mMaxPlayers ? _S("FULL") :
+                aRoom.mPlaying ? _S("PLAYING") : aRoom.mHasPassword ? _S("PASSWORD") : _S("OPEN LOBBY");
+            TodDrawString(g, aState, mWidth - 13, aRect.mY + 34,
+                FONT_BRIANNETOD12, NetUi::MutedInk(), DS_ALIGN_RIGHT);
+        }
+    }
+};
 
 NetOnlineDialog::NetOnlineDialog(LawnApp* theApp) :
     LawnDialog(theApp, Dialogs::DIALOG_COOP_ONLINE, true, _S("ONLINE ROOMS"),
         _S(""), _S("CLOSE"), Dialog::BUTTONS_FOOTER),
-    mPage(0), mMaxPlayers(4), mLastActionTick(0), mAttemptedRoom(false)
+    mPage(0), mMaxPlayers(4), mLastActionTick(0), mAttemptedRoom(false), mPendingAction(0)
 {
-    mEndpoint = new EditWidget(201, this);
     mPassword = new EditWidget(202, this);
+    mCreatePassword = new EditWidget(205, this);
     mRoomName = new EditWidget(203, this);
-    for (EditWidget* anEdit : { mEndpoint, mPassword, mRoomName })
+    mPaperImage = mApp->GetImage(_S("images/Almanac_PlantCard"));
+    for (EditWidget* anEdit : { mPassword, mCreatePassword, mRoomName })
     {
         anEdit->SetFont(FONT_BRIANNETOD12);
         anEdit->SetColor(EditWidget::COLOR_BKG, Color(248, 243, 219));
@@ -40,55 +82,53 @@ NetOnlineDialog::NetOnlineDialog(LawnApp* theApp) :
         anEdit->SetColor(EditWidget::COLOR_TEXT, Color(35, 30, 20));
         anEdit->mBlinkDelay = 14;
     }
-    mEndpoint->mMaxChars = 255;
     mPassword->mMaxChars = 64;
     mPassword->mPasswordChar = '*';
+    mCreatePassword->mMaxChars = 64;
+    mCreatePassword->mPasswordChar = '*';
     mRoomName->mMaxChars = 32;
-    mEndpoint->SetText(StringToSexyString(theApp->mNetManager->mConfig.mOnlineEndpoint));
     mRoomName->SetText(StringToSexyString(theApp->mNetManager->mConfig.mNick) + _S("'s room"));
 
-    mRoomList = new ListWidget(204, FONT_BRIANNETOD12, this);
+    mRoomList = new RoomList(this);
     static int aListColors[][3] = {
         { 248, 243, 219 }, { 95, 80, 50 }, { 35, 30, 20 },
         { 225, 218, 180 }, { 85, 110, 60 }, { 255, 255, 235 }
     };
     mRoomList->SetColors(aListColors, 6);
-    mRoomList->mItemHeight = 24;
+    mRoomList->mItemHeight = 44;
     mRoomList->mDrawSelectWhenHilited = true;
 
-    mConnect = MakeButton(CONNECT, this, _S("CONNECT"));
+    mConnect = MakeButton(REFRESH, this, _S("REFRESH"));
     mJoin = MakeButton(JOIN, this, _S("JOIN ROOM"));
     mCreate = MakeButton(CREATE, this, _S("CREATE"));
     mCapacity = MakeButton(CAPACITY, this, _S("4 PLAYERS"));
     mPrevious = MakeButton(PREV, this, _S("PREV"));
     mNext = MakeButton(NEXT, this, _S("NEXT"));
 
-    Resize(0, 0, 760, 560);
+    const int aFrameEdges = IMAGE_DIALOG_TOPLEFT->mWidth + IMAGE_DIALOG_TOPRIGHT->mWidth;
+    const int aFrameTile = IMAGE_DIALOG_TOPMIDDLE->mWidth;
+    const int aFrameWidth = aFrameEdges + ((760 - aFrameEdges + aFrameTile - 1) / aFrameTile) * aFrameTile;
+    const int aFrameHeight = DIALOG_HEADER_OFFSET + IMAGE_DIALOG_TOPLEFT->mHeight +
+        6 * IMAGE_DIALOG_CENTERLEFT->mHeight + IMAGE_DIALOG_BOTTOMLEFT->mHeight;
+    Resize(0, 0, aFrameWidth, aFrameHeight);
     LawnApp::CenterDialog(this, mWidth, mHeight);
-    mEndpoint->Resize(165, 100, 410, 28);
-    mConnect->Resize(590, 96, 130, 34);
-    mRoomList->Resize(40, 177, 680, 152);
-    mPrevious->Resize(40, 335, 90, 30);
-    mNext->Resize(135, 335, 90, 30);
-    mPassword->Resize(170, 378, 250, 28);
-    mJoin->Resize(480, 374, 240, 34);
-    mRoomName->Resize(170, 423, 250, 28);
-    mCapacity->Resize(435, 419, 130, 34);
-    mCreate->Resize(575, 419, 145, 34);
-
-    if (NetOnline* anOnline = theApp->mNetManager->GetOnline(); anOnline && anOnline->IsConnected())
-    {
-        mConnectedEndpoint = theApp->mNetManager->mConfig.mOnlineEndpoint;
-        anOnline->RefreshRooms();
-    }
-    else if (!theApp->mNetManager->mConfig.mOnlineEndpoint.empty() && !theApp->mNetManager->IsActive())
-        ButtonDepress(CONNECT);
+    mConnect->Resize(mWidth - 170, 118, 130, 34);
+    mRoomList->Resize(40, 172, 445, 264);
+    mPrevious->Resize(318, 142, 76, 26);
+    mNext->Resize(406, 142, 76, 26);
+    mPassword->Resize(145, 447, 180, 28);
+    mJoin->Resize(345, 443, 140, 36);
+    mRoomName->Resize(520, 212, 205, 30);
+    mCreatePassword->Resize(520, 279, 205, 30);
+    mCapacity->Resize(520, 326, 205, 34);
+    mCreate->Resize(520, 380, 205, 40);
+    if (!mApp->mNetManager->IsActive()) ButtonDepress(REFRESH);
 }
 
 NetOnlineDialog::~NetOnlineDialog()
 {
-    delete mEndpoint;
     delete mPassword;
+    delete mCreatePassword;
     delete mRoomName;
     delete mRoomList;
     delete mConnect;
@@ -97,12 +137,13 @@ NetOnlineDialog::~NetOnlineDialog()
     delete mCapacity;
     delete mPrevious;
     delete mNext;
+    delete mPaperImage;
 }
 
 void NetOnlineDialog::AddedToManager(WidgetManager* theManager)
 {
     LawnDialog::AddedToManager(theManager);
-    Widget* aWidgets[] = { mEndpoint, mPassword, mRoomName, mRoomList,
+    Widget* aWidgets[] = { mPassword, mCreatePassword, mRoomName, mRoomList,
         mConnect, mJoin, mCreate, mCapacity, mPrevious, mNext };
     for (Widget* aWidget : aWidgets)
         AddWidget(aWidget);
@@ -110,7 +151,7 @@ void NetOnlineDialog::AddedToManager(WidgetManager* theManager)
 
 void NetOnlineDialog::RemovedFromManager(WidgetManager* theManager)
 {
-    Widget* aWidgets[] = { mEndpoint, mPassword, mRoomName, mRoomList,
+    Widget* aWidgets[] = { mPassword, mCreatePassword, mRoomName, mRoomList,
         mConnect, mJoin, mCreate, mCapacity, mPrevious, mNext };
     for (Widget* aWidget : aWidgets)
         RemoveWidget(aWidget);
@@ -122,6 +163,7 @@ void NetOnlineDialog::RebuildRoomList()
     const int aPageCount = max(1, ((int)mRooms.size() + 5) / 6);
     mPage = max(0, min(mPage, aPageCount - 1));
     mRoomList->RemoveAll();
+    mRoomList->SetVisible(!mRooms.empty());
     int aSelection = -1;
     for (int i = mPage * 6; i < (int)mRooms.size() && i < mPage * 6 + 6; i++)
     {
@@ -141,6 +183,8 @@ void NetOnlineDialog::RebuildRoomList()
     mSelectedRoom = aSelection >= 0 && aGlobalIndex < (int)mRooms.size() ? mRooms[aGlobalIndex].mId : "";
     mPrevious->SetDisabled(mPage <= 0);
     mNext->SetDisabled(mPage >= aPageCount - 1);
+    mPrevious->SetVisible(aPageCount > 1);
+    mNext->SetVisible(aPageCount > 1);
 }
 
 void NetOnlineDialog::SyncRooms()
@@ -167,6 +211,16 @@ void NetOnlineDialog::Update()
     LawnDialog::Update();
     NetManager* aNet = mApp->mNetManager;
     NetOnline* anOnline = aNet->GetOnline();
+    if (mPendingAction && anOnline && !anOnline->GetLastErrorCode().empty())
+    {
+        mError = RoomError(anOnline->GetLastErrorCode());
+        mPendingAction = 0;
+    }
+    if (mPendingAction && (!anOnline || (!anOnline->IsConnected() && !anOnline->IsConnecting())))
+    {
+        mError = _S("The connection was interrupted. Please try Refresh.");
+        mPendingAction = 0;
+    }
     if (mAttemptedRoom && ((anOnline && anOnline->IsHostingRoom() && !anOnline->GetRoomId().empty()) ||
         aNet->IsConnectedToHost()))
     {
@@ -174,11 +228,17 @@ void NetOnlineDialog::Update()
         return;
     }
     SyncRooms();
-    const bool aCanAct = anOnline && anOnline->IsConnected() && !aNet->IsActive();
-    mConnect->SetLabel(anOnline && anOnline->IsConnected() ? _S("REFRESH") : _S("CONNECT"));
-    mConnect->SetDisabled(aNet->IsActive());
+    const bool aCanAct = anOnline && anOnline->IsConnected() && !aNet->IsActive() && !mPendingAction;
+    mConnect->SetLabel(anOnline && anOnline->IsConnecting() ? _S("SEARCHING...") : _S("REFRESH"));
+    mConnect->SetDisabled(aNet->IsActive() || (anOnline && anOnline->IsConnecting()));
     mCreate->SetDisabled(!aCanAct);
-    mJoin->SetDisabled(!aCanAct || mSelectedRoom.empty());
+    mCapacity->SetDisabled(!aCanAct);
+    mCreate->SetLabel(mPendingAction == CREATE ? _S("CREATING...") : _S("CREATE"));
+    const int aSelectedIndex = mPage * 6 + mRoomList->mSelectIdx;
+    const NetOnlineRoom* aSelected = aSelectedIndex >= 0 && aSelectedIndex < (int)mRooms.size() ? &mRooms[aSelectedIndex] : nullptr;
+    mJoin->SetDisabled(!aCanAct || !aSelected || aSelected->mPlayers >= aSelected->mMaxPlayers);
+    mJoin->SetLabel(mPendingAction == JOIN ? _S("JOINING...") :
+        aSelected && aSelected->mPlaying ? _S("WATCH GAME") : _S("JOIN ROOM"));
     mCapacity->SetLabel(StrFormat(_S("%d PLAYERS"), mMaxPlayers));
     MarkDirty();
 }
@@ -186,31 +246,39 @@ void NetOnlineDialog::Update()
 void NetOnlineDialog::Draw(Graphics* g)
 {
     LawnDialog::Draw(g);
-    const Color aText(80, 75, 95);
-    TodDrawString(g, _S("DIRECTORY URL"), 40, 121, FONT_BRIANNETOD12, aText, DS_ALIGN_LEFT);
-    TodDrawString(g, _S("Rooms for your game version"), 40, 168, FONT_BRIANNETOD12, aText, DS_ALIGN_LEFT);
-    TodDrawString(g, _S("PASSWORD"), 40, 399, FONT_BRIANNETOD12, aText, DS_ALIGN_LEFT);
-    TodDrawString(g, _S("ROOM NAME"), 40, 444, FONT_BRIANNETOD12, aText, DS_ALIGN_LEFT);
-    TodDrawString(g, StrFormat(_S("Page %d/%d"), mPage + 1, max(1, ((int)mRooms.size() + 5) / 6)),
-        255, 356, FONT_BRIANNETOD12, aText, DS_ALIGN_LEFT);
+    const Color aText(240, 228, 190);
+    NetUi::Paper(g, mPaperImage, Rect(500, 172, 245, 264));
+    TodDrawString(g, StrFormat(_S("ROOMS  %d"), (int)mRooms.size()), 40, 161,
+        FONT_BRIANNETOD16, aText, DS_ALIGN_LEFT);
+    TodDrawString(g, _S("CREATE A ROOM"), 622, 161, FONT_BRIANNETOD16, aText, DS_ALIGN_CENTER);
+    TodDrawString(g, _S("ROOM NAME"), 518, 202, FONT_BRIANNETOD12, NetUi::Ink(), DS_ALIGN_LEFT);
+    TodDrawString(g, _S("PASSWORD (OPTIONAL)"), 518, 269, FONT_BRIANNETOD12, NetUi::Ink(), DS_ALIGN_LEFT);
+    TodDrawString(g, _S("PASSWORD"), 40, 468, FONT_BRIANNETOD12, aText, DS_ALIGN_LEFT);
     NetOnline* anOnline = mApp->mNetManager->GetOnline();
-    const SexyString aStatus = anOnline ? StringToSexyString(anOnline->GetStatus()) :
-        _S("Enter your directory URL and connect.");
-    TodDrawString(g, FitOnlineText(aStatus, 680), 40, 151, FONT_BRIANNETOD12, aText, DS_ALIGN_LEFT);
+    const SexyString aStatus = mApp->mNetManager->IsActive() ? _S("Leave your current game to join another room.") :
+        mPendingAction == CREATE ? _S("Opening your new room...") :
+        mPendingAction == JOIN ? _S("Joining your friend...") :
+        anOnline && anOnline->IsConnecting() ? _S("Looking for online rooms...") :
+        anOnline && anOnline->IsConnected() ? _S("Choose a room, or invite friends to a new one.") :
+        _S("Online play is unavailable. Refresh to try again.");
+    TodDrawString(g, FitOnlineText(mError.empty() ? aStatus : mError, 550), 40, 139,
+        FONT_BRIANNETOD12, mError.empty() ? aText : Color(255, 150, 130), DS_ALIGN_LEFT);
     if (mRooms.empty())
-        TodDrawString(g, _S("No rooms yet. Refresh or create one below."), 380, 250,
-            FONT_BRIANNETOD12, aText, DS_ALIGN_CENTER);
-    if (!mError.empty())
-        TodDrawString(g, FitOnlineText(mError, 680), 40, 480,
-            FONT_BRIANNETOD12, Color(170, 45, 35), DS_ALIGN_LEFT);
+    {
+        const Rect aListRect(mRoomList->mX, mRoomList->mY, mRoomList->mWidth, mRoomList->mHeight);
+        NetUi::Paper(g, mPaperImage, aListRect);
+        TodDrawString(g, anOnline && anOnline->IsConnecting() ? _S("FINDING YOUR NEIGHBORS...") : _S("NO ROOMS YET"),
+            aListRect.mX + aListRect.mWidth / 2, 285, FONT_BRIANNETOD16, NetUi::Ink(), DS_ALIGN_CENTER);
+        TodDrawString(g, _S("Create the first room and invite a friend!"),
+            aListRect.mX + aListRect.mWidth / 2, 316, FONT_BRIANNETOD12, NetUi::MutedInk(), DS_ALIGN_CENTER);
+    }
 }
 
 void NetOnlineDialog::CloseBrowser()
 {
     NetManager* aNet = mApp->mNetManager;
     if (mAttemptedRoom && !aNet->IsActive())
-        if (NetOnline* anOnline = aNet->GetOnline(); anOnline && !anOnline->IsHostingRoom())
-            anOnline->LeaveRoom();
+        aNet->Disconnect();
     mApp->KillDialog(Dialogs::DIALOG_COOP_ONLINE);
 }
 
@@ -240,35 +308,25 @@ void NetOnlineDialog::ButtonDepress(int theId)
     mError.clear();
     NetManager* aNet = mApp->mNetManager;
     NetOnline* anOnline = aNet->GetOnline();
-    if (theId == CONNECT)
+    if (theId == REFRESH)
     {
-        const std::string anEndpoint = SexyStringToStringFast(mEndpoint->mString);
-        if (anEndpoint.empty())
-        {
-            mError = _S("Enter the directory URL from your setup guide.");
-            return;
-        }
-        if (anOnline && anOnline->IsConnected() && anEndpoint == mConnectedEndpoint)
+        if (aNet->IsActive()) return;
+        if (anOnline && anOnline->IsConnected())
             anOnline->RefreshRooms();
-        else if (aNet->ConnectOnlineDirectory(anEndpoint))
-        {
-            mConnectedEndpoint = anEndpoint;
-            aNet->mConfig.mOnlineEndpoint = anEndpoint;
-            NetSaveConfig(aNet->mConfig);
-        }
-        else
-            mError = _S("Could not connect. Check the directory URL and connection status.");
+        else if (!aNet->ConnectOnlineDirectory())
+            mError = _S("Online play is unavailable. Please try again.");
         return;
     }
     if (!anOnline || !anOnline->IsConnected())
     {
-        mError = _S("Connect to the room directory first.");
+        mError = _S("Online play is unavailable. Please try Refresh.");
         return;
     }
-    const std::string aPassword = SexyStringToStringFast(mPassword->mString);
+    if (mPendingAction || aNet->IsActive()) return;
+    const std::string aPassword = SexyStringToStringFast(theId == CREATE ? mCreatePassword->mString : mPassword->mString);
     if (aPassword.size() > 64)
     {
-        mError = _S("Password must fit in 64 UTF-8 bytes.");
+        mError = _S("That password is too long. Please shorten it.");
         return;
     }
     if (theId == CREATE)
@@ -280,12 +338,14 @@ void NetOnlineDialog::ButtonDepress(int theId)
             return;
         }
         mAttemptedRoom = aNet->CreateOnlineRoom(aName, aPassword, mMaxPlayers);
+        if (mAttemptedRoom) mPendingAction = CREATE;
         if (!mAttemptedRoom)
-            mError = _S("Could not create the room. Check the connection status.");
+            mError = _S("Could not create the room. Please try again.");
     }
     else if (theId == JOIN && !mSelectedRoom.empty())
     {
         mAttemptedRoom = aNet->JoinOnlineRoom(mSelectedRoom, aPassword);
+        if (mAttemptedRoom) mPendingAction = JOIN;
         if (!mAttemptedRoom)
             mError = _S("Could not join the room. Check password, capacity and status.");
     }
@@ -304,11 +364,9 @@ void NetOnlineDialog::ListClicked(int, int theIndex, int theClickCount)
 
 void NetOnlineDialog::EditWidgetText(int theId, const SexyString&)
 {
-    if (theId == 201)
-        ButtonDepress(CONNECT);
-    else if (theId == 202)
+    if (theId == 202)
         ButtonDepress(JOIN);
-    else if (theId == 203)
+    else if (theId == 203 || theId == 205)
         ButtonDepress(CREATE);
 }
 

@@ -36,7 +36,8 @@ param(
     [switch]$VerifyModes,
     [switch]$VerifyFirstAdventure,
     [switch]$Background,
-    [switch]$CleanupOnSuccess
+    [switch]$CleanupOnSuccess,
+    [switch]$FunctionsOnly
 )
 
 Set-StrictMode -Version Latest
@@ -304,6 +305,8 @@ function Start-SmokeProcess {
     $childEnvironment["PVZ_COOP_SMOKE_PRESENTATION"] = $(if ($VerifyPresentation) { "1" } else { "0" })
     $childEnvironment["PVZ_COOP_SMOKE_MODES"] = $(if ($VerifyModes) { "1" } else { "0" })
     $childEnvironment["PVZ_COOP_SMOKE_FIRST_ADVENTURE"] = $(if ($VerifyFirstAdventure) { "1" } else { "0" })
+    $nativeUiWorkflow = $env:PVZ_COOP_SMOKE_NATIVE_UI -in @("appearance", "appearance-restart", "browser", "browser-probe")
+    $childEnvironment["PVZ_COOP_SMOKE_HIDE_CONTROL_CHAT"] = $(if ($VerifyFirstAdventure -or $nativeUiWorkflow) { "1" } else { "0" })
     $childEnvironment["PVZ_COOP_SMOKE_BACKGROUND"] = $(if ($Background) { "1" } else { "0" })
     $childEnvironment["PVZ_COOP_SMOKE_ONLINE_ENDPOINT"] = $OnlineEndpoint
     if ($Background) {
@@ -743,6 +746,8 @@ function Test-SafeRunRoot {
         ([System.IO.Path]::GetFileName($resolvedRunRoot) -eq $expectedLeaf)
 }
 
+if ($FunctionsOnly) { return }
+
 $scriptRoot = Split-Path -Parent $PSCommandPath
 $repoRoot = Get-NormalizedPath -Path (Join-Path $scriptRoot "..\..")
 if ([string]::IsNullOrWhiteSpace($GameExe)) {
@@ -1105,7 +1110,8 @@ try {
             @{ Label = "complete long UTF-8 tutorial label"; Pattern = '(?im)\bSMOKE_FRESH_LABEL\b[^\r\n]*\bbytes=[1-9]\d{2,} utf8=1 complete=1\b' },
             @{ Label = "loaded native GitHub menu icon"; Pattern = '(?im)\bSMOKE_FRESH_GITHUB\b[^\r\n]*\bloaded=1\b' },
             @{ Label = "native CO-OP options below controls"; Pattern = '(?im)\bSMOKE_FRESH_OPTIONS\b[^\r\n]*\bbelow=1 bounds=1\b' },
-            @{ Label = "animated aligned unclipped sunflower preview"; Pattern = '(?im)\bSMOKE_FRESH_PREVIEW\b[^\r\n]*\bsample=2\b[^\r\n]*\baligned=1 unclipped=1 advanced=1\b' }
+            @{ Label = "animated aligned unclipped sunflower preview"; Pattern = '(?im)\bSMOKE_FRESH_PREVIEW\b[^\r\n]*\bsample=2\b[^\r\n]*\baligned=1 unclipped=1 advanced=1\b' },
+            @{ Label = "native online dialog frame contains its controls"; Pattern = '(?im)\bSMOKE_FRESH_ONLINE\b[^\r\n]*\bframeFit=1\b[^\r\n]*\bdirectoryConnected=0\b' }
         )
         foreach ($firstStep in @("flash", "baseline_flash_off", "award_idle_rays", "award_pickup_rays",
             "award_sunflower", "next_level_clean", "menu_unlocks", "profile_switched", "challenge_open",

@@ -132,12 +132,13 @@ public:
 	int GetReadyEligibleCount() const;
 	bool AreAllPlayersReady() const;
 	void ResetReadyState();
+	void PromoteSpectatorsAtLevelBoundary(const char* theReason);
 	int GetDifficulty() const { return mDifficulty; }
 	void SetDifficulty(int theDifficulty);
 	void KickPlayer(int theSlot);
 	bool IsSpectator() const { return mPlayers[mMySlot].mSpectator; }
 	NetOnline* GetOnline() { return mOnline.get(); }
-	bool ConnectOnlineDirectory(const std::string& theEndpoint);
+	bool ConnectOnlineDirectory();
 	bool CreateOnlineRoom(const std::string& theName, const std::string& thePassword, int theMaxPlayers);
 	bool JoinOnlineRoom(const std::string& theRoomId, const std::string& thePassword);
 	void SendSystemChat(const std::string& theText);
@@ -277,6 +278,7 @@ private:
 	std::unique_ptr<NetOnline> mOnline;
 	uint8_t mOnlineIntent = 0;
 	bool mOnlinePlaying = false;
+	NetBuffer mCurrentStart;
 	LawnApp* mApp;
 
 	// host state
