@@ -101,12 +101,13 @@ public:
     int                     CoopCountGlobalFixedPicks() const;
     static int              CoopExpectedGlobalFixedPicks(LawnApp* theApp, Board* theBoard);
     int                     CoopGetLocalQuotaPickCount() const;
+    bool                    CoopCanReady() const;
     bool                    CoopAllPicksComplete() const;
     void                    CoopToggleReady();
     void                    CoopRefreshStartButton();
     void                    CoopDrawRemotePicks(Graphics* g);
     void                    CoopBroadcastChooserState(bool theForce = false);
-    void                    CoopBroadcastChooserStart();
+    bool                    CoopBroadcastChooserStart();
     void                    CoopBuildBankFromLocalState();
     bool                    CoopBuildBankFromPayload(LawnNet::NetBuffer& thePayload);
     bool                    CoopApplyChooserState(LawnNet::NetBuffer& thePayload);
@@ -138,7 +139,7 @@ public:
     void                    PickRandomSeeds();
     virtual void            ButtonDepress(int theId);
     SeedType                SeedHitTest(int x, int y);
-    SeedType                FindSeedInBank(int theIndexInBank);
+    SeedType                FindSeedInBank(int theIndexInBank) const;
     /*inline*/ void         EnableStartButton(bool theEnabled);
     void                    ClickedSeedInBank(ChosenSeed& theChosenSeed);
     void                    ClickedSeedInChooser(ChosenSeed& theChosenSeed);

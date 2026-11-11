@@ -125,13 +125,17 @@ try {
     Stop-NativeRole $nativeClient
     Stop-NativeRole $nativeHost
     $steps = @("override_menu", "override_minigames_open", "override_minigames_closed", "options",
-        "appearance_before", "appearance_changed", "appearance_closed", "appearance_reopened", "appearance_complete")
+        "appearance_before", "appearance_changed", "appearance_closed", "appearance_reopened", "appearance_complete",
+        "zen_lobby_expanded", "zen_lobby_collapsed", "zen_garden_open")
     foreach ($role in @($nativeHost, $nativeClient)) { Require-NativeProof $role $steps }
     $expected = @{}
     foreach ($role in @($nativeHost, $nativeClient)) {
         $log = Get-CombinedLogText $role.Logs
         $match = [regex]::Match($log, 'SMOKE_NATIVE_SAVED[^\r\n]*held=(\d+) hotbar=(\d+) outline=(\d+) sdl=1 saved=1 animated=1')
         if (-not $match.Success) { throw "Native slider changes were not saved through the UI." }
+        if ($log -notmatch 'SMOKE_NATIVE_GARDEN[^\r\n]*accessible=1 hit=1 sdl=[01]') {
+            throw "Native lobby collapse did not restore the garden control hit target."
+        }
         $expected[$role.Role] = "{0},{1},{2}" -f $match.Groups[1].Value, $match.Groups[2].Value, $match.Groups[3].Value
     }
     $nativeCases.Add(@{ workflow = "appearance"; status = "pass"; expected = $expected })

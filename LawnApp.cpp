@@ -72,6 +72,9 @@ namespace LawnNet
 {
 	bool NetSpectatorSmokeRunBaseline(LawnApp* theApp);
 	bool NetSmokeUpdateNativeUi(LawnApp* theApp);
+	bool NetSmokeNativeUiAllowsStart(LawnApp* theApp, uint8_t theMode, int32_t theLevel);
+	bool NetSmokeUpdateAvatarEditor(LawnApp* theApp);
+	bool NetSmokeAvatarBeforeConnect(LawnApp* theApp);
 }
 
 bool gIsPartnerBuild = false;
@@ -1827,6 +1830,8 @@ void LawnApp::KillCreditScreen()
 //0x44FC30
 void LawnApp::ShowChallengeScreen(ChallengePage thePage)
 {
+	// Challenge pages replace gameplay on every local or network entry path.
+	KillBoard();
 	KillAwardScreen();
 	KillChallengeScreen();
 	// co-op host: mirror the challenge screen on clients
@@ -1906,7 +1911,6 @@ void LawnApp::ShowSeedChooserScreen()
 		if (mNetManager->IsHosting())
 		{
 			mNetManager->mRemotePicks.clear();
-			mNetManager->mRemoteUnpicks.clear();
 		}
 
 		int aBankCount = mBoard ? mBoard->GetNumSeedsInBank() : 10;
@@ -5834,6 +5838,7 @@ void LawnApp::CoopSmokeStartLifecycle()
 		return;
 	mCoopSmokeLifecycleStarted = true;
 	mCoopSmokeScenarioRuntime.Reset(mCoopSmokeManifest.mScenario);
+	if (!LawnNet::NetSmokeAvatarBeforeConnect(this)) return;
 	const char* aReplayChooser = getenv("PVZ_COOP_SMOKE_REPLAY_CHOOSER");
 	if (aReplayChooser && strcmp(aReplayChooser, "1") == 0)
 	{
@@ -5846,10 +5851,12 @@ void LawnApp::CoopSmokeStartLifecycle()
 
 	bool aStarted = false;
 	const char* aNativeUi = getenv("PVZ_COOP_SMOKE_NATIVE_UI");
+	const char* anAvatarEditor = getenv("PVZ_COOP_SMOKE_AVATAR_EDITOR");
 	const char* anOnlineEndpoint = getenv("PVZ_COOP_SMOKE_ONLINE_ENDPOINT");
-	if (aNativeUi && (strcmp(aNativeUi, "browser") == 0 || strcmp(aNativeUi, "browser-probe") == 0))
+	if ((aNativeUi && (strcmp(aNativeUi, "browser") == 0 || strcmp(aNativeUi, "browser-probe") == 0)) ||
+		(anAvatarEditor && strcmp(anAvatarEditor, "1") == 0))
 	{
-		// The dedicated UI fixture enters online play through real menu widgets.
+		// Dedicated menu fixtures control their own connection timing.
 		LawnNet::NetTraceOpen(mCoopSmokeManifest.IsHost() ? "host" : "client");
 		aStarted = true;
 	}
@@ -5980,6 +5987,8 @@ void LawnApp::CoopSmokeUpdate()
 		return;
 	}
 	if (!mCoopSmokeLifecycleStarted || !mNetManager)
+		return;
+	if (LawnNet::NetSmokeUpdateAvatarEditor(this))
 		return;
 	if (LawnNet::NetSmokeUpdateNativeUi(this))
 		return;
@@ -6276,7 +6285,8 @@ void LawnApp::NetOnStartGame(LawnNet::NetBuffer& thePayload)
 			(aPathLength == 0);
                 aValid = aValid && aCheck.Remaining() == 0 &&
                         ((aMode == mCoopSmokeManifest.mGameMode && aLevel == mCoopSmokeManifest.mLevel) ||
-			 CoopSmokeFirstAdventureAllowsStart(aMode, aLevel)) && aSeed == mCoopSmokeManifest.mSeed &&
+			 CoopSmokeFirstAdventureAllowsStart(aMode, aLevel) ||
+			 LawnNet::NetSmokeNativeUiAllowsStart(this, aMode, aLevel)) && aSeed == mCoopSmokeManifest.mSeed &&
 			(aPlayerCount == 2 || (aPlayerCount == 3 &&
 				getenv("PVZ_COOP_SMOKE_SPECTATOR") && strcmp(getenv("PVZ_COOP_SMOKE_SPECTATOR"), "1") == 0 &&
 				((getenv("PVZ_COOP_SMOKE_SPECTATOR_ROLE") && strcmp(getenv("PVZ_COOP_SMOKE_SPECTATOR_ROLE"), "spectator") == 0) ||

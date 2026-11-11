@@ -1,6 +1,8 @@
 #include "../../LawnApp.h"
 #include "NetManager.h"
 #include "NetOnline.h"
+#include "NetLobbyPanel.h"
+#include "../Board.h"
 #include "../Widget/GameSelector.h"
 #include "../Widget/ChallengeScreen.h"
 #include "../Widget/NewOptionsDialog.h"
@@ -12,6 +14,7 @@
 #include "../../SexyAppFramework/ListWidget.h"
 #include "../../SexyAppFramework/Slider.h"
 #include "../../SexyAppFramework/Image.h"
+#include "../../SexyAppFramework/WidgetManager.h"
 #include "../../Sexy.TodLib/Reanimator.h"
 #include <cstdlib>
 #include <cmath>
@@ -240,7 +243,60 @@ bool Appearance(LawnApp* app, bool restart)
     }
     else if (s.mStage == 9 && !appearance && !options)
     {
-        if (Record(app, "appearance_complete", true)) return Finish(app);
+        if (Record(app, "appearance_complete", true))
+        {
+            ++s.mStage;
+            if (host)
+            {
+                app->mPlayerInfo->SetLevel(45);
+                app->mPlayerInfo->mFinishedAdventure = 1;
+                app->mGameSelector->SyncProfile(false);
+                app->NetBroadcastProfile();
+            }
+        }
+    }
+    else if (s.mStage == 10)
+    {
+        if (!app->mGameSelector || !app->mNetLobbyPanel ||
+            app->mPlayerInfo->mLevel != 45 || app->mPlayerInfo->mFinishedAdventure != 1) return true;
+        NewLawnButton* garden = app->mGameSelector->mZenGardenButton;
+        const Rect panel = app->mNetLobbyPanel->GetPanelRect();
+        if (!garden->mVisible || garden->mDisabled || !garden->mMouseVisible || panel.mWidth != 300)
+        { app->CoopSmokeFail("native garden fixture requires the unlocked menu and expanded roster"); return true; }
+        if (Record(app, "zen_lobby_expanded", true))
+        {
+            ++s.mStage;
+            if (!Mouse(app, true, panel.mX + 268, panel.mY + 20) ||
+                !Mouse(app, false, panel.mX + 268, panel.mY + 20))
+                app->CoopSmokeFail("native lobby collapse SDL click failed");
+        }
+    }
+    else if (s.mStage == 11)
+    {
+        if (!app->mGameSelector || !app->mNetLobbyPanel) return true;
+        const Rect panel = app->mNetLobbyPanel->GetPanelRect();
+        if (panel.mWidth != 180 || panel.mHeight != 36) return true;
+        NewLawnButton* garden = app->mGameSelector->mZenGardenButton;
+        const int x = garden->mX + garden->mWidth / 2, y = garden->mY + garden->mHeight / 2;
+        if (app->mNetLobbyPanel->IsPointVisible(x, y) ||
+            app->mWidgetManager->GetWidgetAt(x, y, nullptr, nullptr) != garden)
+        { app->CoopSmokeFail("collapsed lobby still intercepts the native garden button"); return true; }
+        if (Record(app, "zen_lobby_collapsed", true))
+        {
+            ++s.mStage;
+            NetTrace("SMOKE_NATIVE_GARDEN role=%s accessible=1 hit=1 sdl=%d", host ? "host" : "client", host ? 1 : 0);
+            if (host && !Click(app, garden)) app->CoopSmokeFail("native Zen Garden SDL click failed");
+        }
+    }
+    else if (s.mStage == 12)
+    {
+        if (!app->mBoard || app->mGameMode != GAMEMODE_CHALLENGE_ZEN_GARDEN ||
+            app->mGameScene != SCENE_PLAYING) return true;
+        if (app->mGameSelector || app->mBoard->mBackground != BACKGROUND_GREENHOUSE ||
+            app->mPlayerInfo->mLevel != 45 || app->mPlayerInfo->mFinishedAdventure != 1 ||
+            (app->mNetLobbyPanel && app->mNetLobbyPanel->mVisible))
+        { app->CoopSmokeFail("native garden SDL transition retained the menu or wrong profile/background"); return true; }
+        if (Record(app, "zen_garden_open", true)) return Finish(app);
     }
     return true;
 }
@@ -338,14 +394,25 @@ bool Browser(LawnApp* app, bool probe)
 
 namespace LawnNet
 {
+bool NetSmokeNativeUiAllowsStart(LawnApp* app, uint8_t mode, int32_t level)
+{
+    const char* workflow = getenv("PVZ_COOP_SMOKE_NATIVE_UI");
+    return app && app->CoopSmokeActive() && !app->mCoopSmokeResultWritten &&
+        workflow && strcmp(workflow, "appearance") == 0 && s.mStage == 12 &&
+        mode == (uint8_t)GAMEMODE_CHALLENGE_ZEN_GARDEN && level == 45 &&
+        app->mPlayerInfo && app->mPlayerInfo->mLevel == 45 && app->mPlayerInfo->mFinishedAdventure == 1;
+}
+
 bool NetSmokeUpdateNativeUi(LawnApp* app)
 {
     const char* mode = getenv("PVZ_COOP_SMOKE_NATIVE_UI");
     if (!app->CoopSmokeActive() || !mode || !*mode) return false;
     if (app->mCoopSmokeResultWritten) return true;
     if (!app->mLoadingThreadCompleted || !app->mNetManager || !app->mPlayerInfo) return true;
-    if (app->mWidth != 800 || app->mHeight != 600 || app->mBoard)
-    { app->CoopSmokeFail("native UI smoke requires isolated menu-only 800x600 peers"); return true; }
+    const bool garden = strcmp(mode, "appearance") == 0 && s.mStage == 12 &&
+        app->mGameMode == GAMEMODE_CHALLENGE_ZEN_GARDEN;
+    if (app->mWidth != 800 || app->mHeight != 600 || (app->mBoard && !garden))
+    { app->CoopSmokeFail("native UI smoke requires isolated 800x600 menus or the bounded garden transition"); return true; }
     const std::string workflow(mode);
     if (workflow == "appearance" || workflow == "appearance-restart")
         return Appearance(app, workflow == "appearance-restart");

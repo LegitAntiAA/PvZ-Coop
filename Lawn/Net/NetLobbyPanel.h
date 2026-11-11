@@ -38,7 +38,7 @@ public:
 		BTN_DISCONNECT,
 		BTN_TEAM_PLANTS,
 		BTN_TEAM_ZOMBIES
-		, BTN_ONLINE, BTN_DIFFICULTY_DOWN, BTN_DIFFICULTY_UP, BTN_LAN, BTN_KICK_BASE = 1000
+		, BTN_ONLINE, BTN_DIFFICULTY_DOWN, BTN_DIFFICULTY_UP, BTN_LAN, BTN_TOGGLE, BTN_KICK_BASE = 1000
 	};
 
 public:
@@ -57,6 +57,7 @@ public:
 
 	// called by LawnApp on edit results
 	void ApplyNick();
+	Rect GetPanelRect() const;
 
 private:
 	struct UiButton
@@ -71,7 +72,7 @@ private:
 	void LayoutButtons();
 	void DrawButton(Graphics* g, const UiButton& theButton);
 	void ActivateButton(int theButtonId);
-	Rect GetPanelRect() const;
+	bool IsOnMainSelector() const;
 
 	LawnApp* mApp;
 	EditWidget* mNickEdit;
@@ -79,6 +80,8 @@ private:
 	EditWidget* mPortEdit;
 	DDImage* mPaperImage;
 	bool mLanExpanded;
+	bool mCollapsed;
+	bool mWasActive;
 	std::vector<UiButton> mButtons;
 	int mHoverButtonId;
 	int mPressedButtonId;

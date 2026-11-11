@@ -31,9 +31,11 @@ struct SpectatorSmokeState
 	uint16_t mPacket = 0;
 	int mPromotionStage = 0, mPlantCol = -1, mPlantRow = -1;
 	uint32_t mFixtureTick = 0, mBoundaryTick = 0, mChooseTick = 0, mPlantTick = 0, mCaptureTick = 0;
+	uint32_t mBankEntered = 0, mBankHash = 0, mLastBankMessage = 0;
 	uint16_t mFixture = 0, mPlantPacket = 0, mPlant = 0;
 	bool mFixtureKilled = false, mBoundaryLogged = false, mRoundStarted = false, mQuotaLogged = false;
 	bool mPickIssued = false, mPickObserved = false, mPlantIssued = false, mPlantCaptured = false;
+	bool mBankVerified = false;
 };
 SpectatorSmokeState s;
 
@@ -170,6 +172,60 @@ bool HasSystemLine(LawnNet::NetManager* net, const char* text)
 	return false;
 }
 
+bool VerifyCommittedBank(LawnApp* app, const char* role, uint32_t now)
+{
+	if (s.mBankVerified) return true;
+	if (!s.mBankEntered) s.mBankEntered = now;
+	if (now - s.mBankEntered > 10000U)
+	{ app->CoopSmokeFail("promoted committed bank identity/three-peer barrier timed out"); return false; }
+	LawnNet::NetManager* net = app->mNetManager;
+	SeedBank* bank = app->mBoard->mSeedBank;
+	const int quotas[LawnNet::NET_MAX_PLAYERS] = {4, 3, 3, 0};
+	const int slot = net->GetMySlot();
+	if (!bank || bank->mNumPackets != 10 || slot < 0 || slot > 2)
+	{ app->CoopSmokeFail("promoted committed bank must contain all 10 chosen cards"); return false; }
+	std::vector<std::vector<uint8_t>> records;
+	int index = 0;
+	for (int offset = 0; offset < LawnNet::NET_MAX_PLAYERS; ++offset)
+	{
+		const int owner = (slot + offset) % LawnNet::NET_MAX_PLAYERS;
+		for (int count = 0; count < quotas[owner]; ++count, ++index)
+		{
+			const SeedPacket& packet = bank->mSeedPackets[index];
+			if (packet.mNetOwnerSlot != owner || packet.mPacketType < SEED_PEASHOOTER ||
+				packet.mPacketType >= NUM_SEEDS_IN_CHOOSER)
+			{
+				LawnNet::NetTrace("SMOKE_SPECTATOR_BANK_REJECT role=%s index=%d owner=%u expected=%d type=%d",
+					role, index, packet.mNetOwnerSlot, owner, (int)packet.mPacketType);
+				app->CoopSmokeFail("promoted committed bank lost viewer-relative owner order"); return false;
+			}
+			if (!packet.mNetId) return false; // Wait for the first authoritative post-commit snapshot.
+			for (int previous = 0; previous < index; ++previous)
+				if (bank->mSeedPackets[previous].mNetId == packet.mNetId)
+				{ app->CoopSmokeFail("promoted committed bank contains duplicate packet identities"); return false; }
+			LawnNet::NetBuffer record;
+			record.WriteU16(packet.mNetId); record.WriteU8((uint8_t)packet.mPacketType);
+			record.WriteU8((uint8_t)packet.mImitaterType); record.WriteU8(packet.mNetOwnerSlot);
+			records.push_back(record.mData);
+		}
+	}
+	std::sort(records.begin(), records.end());
+	LawnNet::NetBuffer identity;
+	for (const auto& record : records) identity.WriteBytes(record.data(), record.size());
+	s.mBankHash = LawnNet::NetFnv1a32(identity.Data(), identity.Size());
+	const std::string notice = "PROMOTE_BANK " + std::to_string(s.mBankHash);
+	if (!HasChat(net, slot, notice.c_str()) && (!s.mLastBankMessage || now - s.mLastBankMessage >= 800U))
+	{ net->SendChat(notice); s.mLastBankMessage = GetTickCount(); }
+	for (int peer = 0; peer < 3; ++peer)
+		if (!HasChat(net, peer, notice.c_str())) return false;
+	if (!app->CoopSmokeCaptureFrame("spectator_committed_bank"))
+	{ app->CoopSmokeFail("promoted committed bank renderer capture failed"); return false; }
+	s.mBankVerified = true;
+	LawnNet::NetTrace("SMOKE_SPECTATOR_COMMITTED_BANK role=%s packets=10 owners=4,3,3 ownPrefix=%d hash=%08X peers=3 capture=1 source=after_START_PLAYING",
+		role, quotas[slot], s.mBankHash);
+	return true;
+}
+
 bool UpdatePromotion(LawnApp* app, const char* role, uint32_t now)
 {
 	LawnNet::NetManager* net = app->mNetManager;
@@ -249,7 +305,8 @@ bool UpdatePromotion(LawnApp* app, const char* role, uint32_t now)
 		{
 			for (int offset = 0; offset < 32; ++offset)
 			{
-				const int index = (slot * 5 + offset) % 32;
+				// Slot 2 needs a stock affordable card at the normal 50-sun start.
+				const int index = ((slot == 2 ? (int)SEED_PUFFSHROOM : slot * 5) + offset) % 32;
 				ChosenSeed& seed = chooser->mChosenSeeds[index];
 				if (seed.mSeedState != SEED_IN_CHOOSER || !app->SeedTypeAvailable(seed.mSeedType) ||
 					chooser->SeedNotAllowedToPick(seed.mSeedType) || chooser->SeedNotAllowedDuringTrial(seed.mSeedType) ||
@@ -273,13 +330,14 @@ bool UpdatePromotion(LawnApp* app, const char* role, uint32_t now)
 		return false;
 	}
 	if (!s.mRoundStarted || app->mGameScene != SCENE_PLAYING || !s.mQuotaLogged) return false;
+	if (!VerifyCommittedBank(app, role, now)) return false;
 	SeedPacket* selected = nullptr;
 	for (int i = 0; app->mBoard->mSeedBank && i < app->mBoard->mSeedBank->mNumPackets; ++i)
 	{
 		SeedPacket& packet = app->mBoard->mSeedBank->mSeedPackets[i];
 		if (packet.mNetId == s.mPlantPacket) selected = &packet;
 	}
-	if (observer && !s.mPickIssued)
+	if (observer && !s.mPickIssued && GetTickCount() - s.mLastBankMessage >= 800U)
 	{
 		for (int i = 0; app->mBoard->mSeedBank && !s.mPickIssued && i < app->mBoard->mSeedBank->mNumPackets; ++i)
 		{
@@ -310,6 +368,9 @@ bool UpdatePromotion(LawnApp* app, const char* role, uint32_t now)
 	{
 		const auto& cursor = net->mRemoteCursors[2];
 		if (cursor.mHeldPacketId == s.mPlantPacket) s.mPickObserved = true;
+		if (observer && selected && app->mBoard->mCursorObject &&
+			app->mBoard->mCursorObject->mCursorType == CURSOR_TYPE_PLANT_FROM_BANK &&
+			app->mBoard->mCursorObject->mSeedBankIndex == (int)(selected - app->mBoard->mSeedBank->mSeedPackets)) s.mPickObserved = true;
 		if (host && app->mBoard->mNetPlayerCursors[2] &&
 			app->mBoard->mNetPlayerCursors[2]->mCursorType == CURSOR_TYPE_PLANT_FROM_BANK) s.mPickObserved = true;
 	}
@@ -343,7 +404,8 @@ bool UpdatePromotion(LawnApp* app, const char* role, uint32_t now)
 	{
 		const std::string temporary = app->mCoopSmokeManifest.mResultPath + ".promotion.tmp";
 		std::ofstream result(temporary, std::ios::binary | std::ios::trunc);
-		result << "{\"status\":\"pass\",\"test\":\"late-spectator-promotion\",\"readonly\":true,\"signals\":true,\"promoted\":true,\"players\":3,\"packet\":"
+		result << "{\"status\":\"pass\",\"test\":\"late-spectator-promotion\",\"readonly\":true,\"signals\":true,\"promoted\":true,\"players\":3,\"bankVerified\":true,\"bankPackets\":10,\"bankHash\":"
+			<< s.mBankHash << ",\"packet\":"
 			<< s.mPlantPacket << ",\"plant\":" << s.mPlant << "}\n";
 		result.close();
 		if (!result || !MoveFileExA(temporary.c_str(), app->mCoopSmokeManifest.mResultPath.c_str(), MOVEFILE_WRITE_THROUGH))

@@ -65,6 +65,22 @@ public:
     }
 };
 
+namespace
+{
+class OnlineButton : public LawnStoneButton
+{
+public:
+    OnlineButton(int id, ButtonListener* listener, const SexyString& label) : LawnStoneButton(nullptr, id, listener)
+    { SetLabel(label); mHasAlpha = true; mHasTransparencies = true; }
+    void Draw(Graphics* g) override
+    {
+        if (!mBtnNoDraw)
+            NetUi::StoneButton(g, Rect(0, 0, mWidth, mHeight), mLabel,
+                mIsDown && mIsOver && !mDisabled, mIsOver && !mDisabled, mDisabled);
+    }
+};
+}
+
 NetOnlineDialog::NetOnlineDialog(LawnApp* theApp) :
     LawnDialog(theApp, Dialogs::DIALOG_COOP_ONLINE, true, _S("ONLINE ROOMS"),
         _S(""), _S("CLOSE"), Dialog::BUTTONS_FOOTER),
@@ -98,12 +114,12 @@ NetOnlineDialog::NetOnlineDialog(LawnApp* theApp) :
     mRoomList->mItemHeight = 44;
     mRoomList->mDrawSelectWhenHilited = true;
 
-    mConnect = MakeButton(REFRESH, this, _S("REFRESH"));
-    mJoin = MakeButton(JOIN, this, _S("JOIN ROOM"));
-    mCreate = MakeButton(CREATE, this, _S("CREATE"));
-    mCapacity = MakeButton(CAPACITY, this, _S("4 PLAYERS"));
-    mPrevious = MakeButton(PREV, this, _S("PREV"));
-    mNext = MakeButton(NEXT, this, _S("NEXT"));
+    mConnect = new OnlineButton(REFRESH, this, _S("REFRESH"));
+    mJoin = new OnlineButton(JOIN, this, _S("JOIN ROOM"));
+    mCreate = new OnlineButton(CREATE, this, _S("CREATE"));
+    mCapacity = new OnlineButton(CAPACITY, this, _S("4 PLAYERS"));
+    mPrevious = new OnlineButton(PREV, this, _S("PREV"));
+    mNext = new OnlineButton(NEXT, this, _S("NEXT"));
 
     const int aFrameEdges = IMAGE_DIALOG_TOPLEFT->mWidth + IMAGE_DIALOG_TOPRIGHT->mWidth;
     const int aFrameTile = IMAGE_DIALOG_TOPMIDDLE->mWidth;
@@ -112,7 +128,7 @@ NetOnlineDialog::NetOnlineDialog(LawnApp* theApp) :
         6 * IMAGE_DIALOG_CENTERLEFT->mHeight + IMAGE_DIALOG_BOTTOMLEFT->mHeight;
     Resize(0, 0, aFrameWidth, aFrameHeight);
     LawnApp::CenterDialog(this, mWidth, mHeight);
-    mConnect->Resize(mWidth - 170, 118, 130, 34);
+    mConnect->Resize(mWidth - 170, 104, 130, 30);
     mRoomList->Resize(40, 172, 445, 264);
     mPrevious->Resize(318, 142, 76, 26);
     mNext->Resize(406, 142, 76, 26);

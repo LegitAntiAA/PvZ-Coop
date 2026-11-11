@@ -824,6 +824,8 @@ bool SeedChooserScreen::CheckSeedUpgrade(SeedType theSeedTypeTo, SeedType theSee
 //0x485600
 void SeedChooserScreen::OnStartButton()
 {
+	if (mSeedsInFlight != 0)
+		return;
 	if (mCoopChooserActive && mApp->mNetManager)
 	{
 		// The widget stays alive during the stock slide-out. Starting it again
@@ -966,7 +968,8 @@ void SeedChooserScreen::OnStartButton()
 
 	if (mCoopChooserActive && mApp->mNetManager && mApp->mNetManager->IsHosting())
 	{
-		CoopBroadcastChooserStart();
+		if (!CoopBroadcastChooserStart())
+			return;
 		CoopBuildBankFromLocalState();
 		mBoard->mCutScene->EndSeedChooser();
 		return;
@@ -1091,13 +1094,13 @@ SeedType SeedChooserScreen::SeedHitTest(int x, int y)
 }
 
 //0x485E20
-SeedType SeedChooserScreen::FindSeedInBank(int theIndexInBank)
+SeedType SeedChooserScreen::FindSeedInBank(int theIndexInBank) const
 {
 	for (SeedType aSeedType = SEED_PEASHOOTER; aSeedType < NUM_SEEDS_IN_CHOOSER; aSeedType = (SeedType)(aSeedType + 1))
 	{
 		if (mApp->SeedTypeAvailable(aSeedType))
 		{
-			ChosenSeed& aChosenSeed = mChosenSeeds[aSeedType];
+			const ChosenSeed& aChosenSeed = mChosenSeeds[aSeedType];
 			if (aChosenSeed.mSeedState == SEED_IN_BANK && aChosenSeed.mSeedIndexInBank == theIndexInBank) return aSeedType;
 		}
 	}
@@ -1148,10 +1151,26 @@ int SeedChooserScreen::CoopGetLocalQuotaPickCount() const
 	return max(0, aCount);
 }
 
+bool SeedChooserScreen::CoopCanReady() const
+{
+    const NetManager* aNet = mApp ? mApp->mNetManager : nullptr;
+    if (!aNet || !aNet->IsActive() || aNet->IsSpectator() || !mCoopChooserActive ||
+        !mBoard || !mBoard->mSeedBank || !mBoard->mCutScene || !mMouseVisible ||
+        !mBoard->mCutScene->mSeedChoosing || mSeedsInFlight != 0 ||
+        mSeedsInBank < 0 || mSeedsInBank > min(mBoard->mSeedBank->mNumPackets, 12) ||
+        CoopGetLocalQuotaPickCount() != mCoopPicksPerPlayer)
+        return false;
+    // mSeedsInBank reserves a slot before the card's flight has finished.
+    // Ready uses the same settled, contiguous cards as the final serializer.
+    for (int i = 0; i < mSeedsInBank; ++i)
+        if (FindSeedInBank(i) == SEED_NONE) return false;
+    return true;
+}
+
 bool SeedChooserScreen::CoopAllPicksComplete() const
 {
     const NetManager* aNet = mApp ? mApp->mNetManager : nullptr;
-    if (!aNet || !mCoopChooserActive)
+    if (!CoopCanReady())
         return false;
     int aTotal = 0;
     for (int aSlot = 0; aSlot < NET_MAX_PLAYERS; aSlot++)
@@ -1174,7 +1193,7 @@ void SeedChooserScreen::CoopToggleReady()
     NetManager* aNet = mApp ? mApp->mNetManager : nullptr;
     if (!aNet || !mCoopChooserActive || aNet->IsSpectator())
         return;
-    if (CoopGetLocalQuotaPickCount() != mCoopPicksPerPlayer)
+    if (!CoopCanReady())
     {
         mApp->PlaySample(SOUND_BUZZER);
         return;
@@ -1188,8 +1207,7 @@ void SeedChooserScreen::CoopRefreshStartButton()
     NetManager* aNet = mApp ? mApp->mNetManager : nullptr;
     if (!mCoopChooserActive || !aNet || !aNet->IsActive())
         return;
-    const bool aCanReady = !aNet->IsSpectator() &&
-        CoopGetLocalQuotaPickCount() == mCoopPicksPerPlayer;
+    const bool aCanReady = CoopCanReady();
     EnableStartButton(aCanReady);
     const bool aReady = aNet->IsMyReady();
     mStartButton->SetLabel(StrFormat(_S("%d/%d ready"),
@@ -1759,7 +1777,8 @@ void SeedChooserScreen::CoopSendPick(int theSeedType, int theImitater, bool theU
 void SeedChooserScreen::CoopBroadcastChooserState(bool theForce)
 {
 	LawnNet::NetManager* aNet = mApp->mNetManager;
-	if (!aNet || !aNet->IsHosting() || !mApp->mSeedChooserScreen)
+	if (!aNet || !aNet->IsHosting() || !mApp->mSeedChooserScreen ||
+		!mMouseVisible || !mBoard->mCutScene->mSeedChoosing)
 		return;
 
 	LawnNet::NetBuffer aMsg;
@@ -1849,15 +1868,17 @@ void SeedChooserScreen::CoopDrawRemotePicks(Graphics* g)
 // --------------------------------------------------------------------------
 // Host: broadcast the final combined pick list and start the game
 // --------------------------------------------------------------------------
-void SeedChooserScreen::CoopBroadcastChooserStart()
+bool SeedChooserScreen::CoopBroadcastChooserStart()
 {
 	LawnNet::NetManager* aNet = mApp->mNetManager;
-	if (!aNet || !aNet->IsHosting())
-		return;
+	if (!aNet || !aNet->IsHosting() || !CoopAllPicksComplete())
+		return false;
 
 	LawnNet::NetBuffer aMsg;
 	aMsg.WriteU8((uint8_t)mCoopPicksPerPlayer);
 	aMsg.WriteU8(4);
+	int aCounts[NET_MAX_PLAYERS] = {};
+	int aTotal = 0;
 	for (int i = 0; i < 4; i++)
 	{
 		SeedType aSeeds[12];
@@ -1889,6 +1910,15 @@ void SeedChooserScreen::CoopBroadcastChooserStart()
 				}
 			}
 		}
+		if (aValidCount != aNet->mChooserPickQuota[i])
+		{
+			LawnNet::NetTrace("chooser commit blocked serialized slot=%d count=%d quota=%d flight=%d",
+				i, aValidCount, aNet->mChooserPickQuota[i], mSeedsInFlight);
+			if (mApp->CoopSmokeActive()) mApp->CoopSmokeFail("chooser serialized slot count differs from its quota");
+			return false;
+		}
+		aCounts[i] = aValidCount;
+		aTotal += aValidCount;
 		aMsg.WriteU8((uint8_t)aValidCount);
 		for (int j = 0; j < aValidCount; j++)
 		{
@@ -1896,7 +1926,29 @@ void SeedChooserScreen::CoopBroadcastChooserStart()
 			aMsg.WriteU8((uint8_t)anImitaters[j]);
 		}
 	}
+	if (aTotal != aNet->mChooserBankCount)
+	{
+		LawnNet::NetTrace("chooser commit blocked serialized total=%d bank=%d", aTotal, aNet->mChooserBankCount);
+		if (mApp->CoopSmokeActive()) mApp->CoopSmokeFail("chooser serialized total differs from the shared bank");
+		return false;
+	}
+	// Stock warning dialogs pump the network. The host deliberately unreadies
+	// before showing them; every other player must still consent at commit.
+	for (int i = 0; i < NET_MAX_PLAYERS; ++i)
+	{
+		const NetPlayerInfo& aPlayer = aNet->GetPlayer(i);
+		if (i != aNet->GetMySlot() && aPlayer.mActive && !aPlayer.mSpectator && !aPlayer.mReady)
+		{
+			LawnNet::NetTrace("chooser commit blocked readiness slot=%d", i);
+			return false;
+		}
+	}
+	// The final full state precedes START on the same ordered connection.
+	CoopBroadcastChooserState(true);
+	LawnNet::NetTrace("CHOOSER_COMMIT counts=[%d,%d,%d,%d] total=%d bank=%d flight=%d bytes=%zu",
+		aCounts[0], aCounts[1], aCounts[2], aCounts[3], aTotal, aNet->mChooserBankCount, mSeedsInFlight, aMsg.Size());
 	aNet->BroadcastMessage(LawnNet::NETMSG_CHOOSER_START, aMsg);
+	return true;
 }
 
 // --------------------------------------------------------------------------
@@ -2241,7 +2293,7 @@ void SeedChooserScreen::CoopPollNetwork()
 			aForceStateEcho = true;
 			aRefreshNeeded = true;
 		}
-		// apply client picks queued by the network layer
+		// Apply picks and unpicks in their shared network arrival order.
 		while (!aNet->mRemotePicks.empty())
 		{
 			aRefreshNeeded = true;
@@ -2251,6 +2303,19 @@ void SeedChooserScreen::CoopPollNetwork()
 			const bool aCanPick = aValidSlot && aNet->GetPlayer(aPick.mSlot).mActive &&
 				(mApp->mGameMode != GAMEMODE_COOP_PVP ||
 					aNet->GetPlayer(aPick.mSlot).mTeam == NETTEAM_PLANTS);
+			if (aPick.mUnpick)
+			{
+				const bool anApplied = mCoopChooserActive && aCanPick &&
+					CoopRecordRemotePick(aPick.mSlot, aPick.mSeedType, SEED_NONE, true);
+				if (!anApplied)
+				{
+					aForceStateEcho = true;
+					LawnNet::NetTrace("chooser unpick rejected at apply slot=%d seed=%u active=%d eligible=%d",
+						aPick.mSlot, aPick.mSeedType, mCoopChooserActive ? 1 : 0,
+						aCanPick ? 1 : 0);
+				}
+				continue;
+			}
 			const int aSlotQuota = aValidSlot ? aNet->mChooserPickQuota[aPick.mSlot] : 0;
 			const bool aDuplicate = CoopIsPickedByOthers(aPick.mSeedType);
 			const bool aHasQuota = aValidSlot &&
@@ -2266,25 +2331,6 @@ void SeedChooserScreen::CoopPollNetwork()
 					aCanPick ? 1 : 0,
 					aValidSlot ? mCoopRemotePickCount[aPick.mSlot] : -1,
 					aSlotQuota, aDuplicate ? 1 : 0);
-			}
-		}
-		while (!aNet->mRemoteUnpicks.empty())
-		{
-			aRefreshNeeded = true;
-			LawnNet::NetManager::ChooserPick aPick = aNet->mRemoteUnpicks.front();
-			aNet->mRemoteUnpicks.pop_front();
-			const bool aValidSlot = aPick.mSlot >= 0 && aPick.mSlot < NET_MAX_PLAYERS;
-			const bool aCanUnpick = aValidSlot && aNet->GetPlayer(aPick.mSlot).mActive &&
-				(mApp->mGameMode != GAMEMODE_COOP_PVP ||
-					aNet->GetPlayer(aPick.mSlot).mTeam == NETTEAM_PLANTS);
-			const bool anApplied = mCoopChooserActive && aCanUnpick &&
-				CoopRecordRemotePick(aPick.mSlot, aPick.mSeedType, SEED_NONE, true);
-			if (!anApplied)
-			{
-				aForceStateEcho = true;
-				LawnNet::NetTrace("chooser unpick rejected at apply slot=%d seed=%u active=%d eligible=%d",
-					aPick.mSlot, aPick.mSeedType, mCoopChooserActive ? 1 : 0,
-					aCanUnpick ? 1 : 0);
 			}
 		}
 		if (aRefreshNeeded)

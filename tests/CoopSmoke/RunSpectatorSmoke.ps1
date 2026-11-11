@@ -128,7 +128,8 @@ try {
         throw 'Third-process proof does not satisfy observer communication/kick criteria.'
     }
     if ($Variant -eq 'Promote' -and ($proof.test -ne 'late-spectator-promotion' -or -not $proof.signals -or
-        -not $proof.promoted -or $proof.players -ne 3 -or $proof.packet -le 0 -or $proof.plant -le 0)) {
+        -not $proof.promoted -or $proof.players -ne 3 -or -not $proof.bankVerified -or $proof.bankPackets -ne 10 -or
+        $proof.packet -le 0 -or $proof.plant -le 0)) {
         throw 'Third-process proof does not satisfy promotion and accepted gameplay criteria.'
     }
     $hostText = Logs (Join-Path $run 'host\logs'); $clientText = Logs (Join-Path $run 'client\logs'); $thirdText = Logs $logRoot
@@ -170,6 +171,21 @@ try {
     else {
         if ($hostText -notmatch 'spectators promoted reason=LEVEL_COMPLETE eligible=3') {
             throw 'Observers were not promoted at the native completed-level boundary.'
+        }
+        $bankPattern = 'SMOKE_SPECTATOR_COMMITTED_BANK role={0} packets=10 owners=4,3,3 ownPrefix={1} hash=([0-9A-F]{{8}}) peers=3 capture=1 source=after_START_PLAYING'
+        $hostBank = [regex]::Match($hostText, ($bankPattern -f 'host', 4))
+        $clientBank = [regex]::Match($clientText, ($bankPattern -f 'client', 3))
+        $thirdBank = [regex]::Match($thirdText, ($bankPattern -f 'spectator', 3))
+        if (-not $hostBank.Success -or -not $clientBank.Success -or -not $thirdBank.Success -or
+            $hostBank.Groups[1].Value -ne $clientBank.Groups[1].Value -or
+            $hostBank.Groups[1].Value -ne $thirdBank.Groups[1].Value -or
+            [Convert]::ToUInt32($hostBank.Groups[1].Value, 16) -ne [uint32]$proof.bankHash) {
+            throw 'Committed bank count, viewer-relative ownership or semantic packet identities differ across the three peers.'
+        }
+        foreach ($directory in @((Join-Path $run 'host'), (Join-Path $run 'client'), $roleRoot)) {
+            if (-not (Test-Path -LiteralPath (Join-Path $directory 'spectator_committed_bank.bmp') -PathType Leaf)) {
+                throw ('Missing committed 10-card bank render capture: ' + $directory)
+            }
         }
         $plantPattern = 'SMOKE_SPECTATOR_PROMOTED_PLANT role={0} packet=(\d+) plant=(\d+) cell=(\d+),(\d+) slot=2 picked=1 input=SDL_queue'
         $hostPlant = [regex]::Match($hostText, ($plantPattern -f 'host'))

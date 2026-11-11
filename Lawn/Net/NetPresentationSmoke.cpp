@@ -14,6 +14,8 @@
 #include <sstream>
 #include <string>
 
+namespace LawnNet { bool NetSmokeUpdateSavedAvatars(LawnApp* theApp); }
+
 namespace
 {
 enum PresentationStage { NORMAL = 1, ARM, HEAD, JACK_POP, JACK_BLAST, SNAIL, REGISTRY, AVATAR, RETAINED, COMPLETE };
@@ -243,6 +245,8 @@ namespace LawnNet
 {
 bool NetSmokeUpdatePresentation(LawnApp* app)
 {
+	const char* saved = getenv("PVZ_COOP_SMOKE_SAVED_AVATARS");
+	if (saved && std::string(saved) == "1") return NetSmokeUpdateSavedAvatars(app);
 	if (!app->CoopSmokeActive() || !app->mNetManager || !app->mBoard || app->mGameScene != SCENE_PLAYING ||
 		!app->mCoopSmokeScenarioRuntime.IsComplete(app->mCoopSmokeManifest.mMinimumSnapshots)) return false;
 	const uint32_t now = GetTickCount();
@@ -319,10 +323,16 @@ bool NetSmokeUpdatePresentation(LawnApp* app)
 				hex.c_str(), encoded.Size(), z ? z->mHasArm : -1, z ? z->mHasHead : -1);
 		}
 	}
-	if (!host && s.mCaptured && !s.mAcked && (!s.mLastAck || now - s.mLastAck >= 800U))
+	if (!host && s.mCaptured && !s.mAcked)
 	{
-		app->mNetManager->SendChat(Message("ACK_PRESENT", s.mStage, s.mEntity));
-		s.mAcked = true; s.mLastAck = now;
+		const std::string ack = Message("ACK_PRESENT", s.mStage, s.mEntity);
+		s.mAcked = HasChat(app->mNetManager, 1, ack);
+		const uint32_t ackNow = GetTickCount();
+		if (!s.mAcked && (!s.mLastAck || ackNow - s.mLastAck >= 800U))
+		{
+			app->mNetManager->SendChat(ack);
+			s.mLastAck = GetTickCount();
+		}
 	}
 	if (host && s.mCaptured && now - s.mEntered >= 800U &&
 		HasChat(app->mNetManager, 1, Message("ACK_PRESENT", s.mStage, s.mEntity)))

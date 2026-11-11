@@ -10,6 +10,7 @@
 #include "../../GameConstants.h"
 #include "../../SexyAppFramework/DDImage.h"
 #include "../Widget/NetUi.h"
+#include "../Widget/GameSelector.h"
 
 using namespace LawnNet;
 
@@ -31,6 +32,8 @@ NetLobbyPanel::NetLobbyPanel(LawnApp* theApp) :
 {
 	mPaperImage = mApp->GetImage(_S("images/Almanac_PlantCard"));
 	mLanExpanded = false;
+	mCollapsed = true;
+	mWasActive = false;
 	mNickEdit = new EditWidget(100, this);
 	mNickEdit->SetFont(Sexy::FONT_BRIANNETOD12);
 	mNickEdit->SetColors(gPanelEditColors, EditWidget::NUM_COLORS);
@@ -68,7 +71,15 @@ NetLobbyPanel::~NetLobbyPanel()
 
 Rect NetLobbyPanel::GetPanelRect() const
 {
-	return Rect(8, 282, 300, 306);
+	return mCollapsed ? Rect(8, mApp->mHeight - 52, 180, 36) : Rect(8, mApp->mHeight - 318, 300, 306);
+}
+
+bool NetLobbyPanel::IsOnMainSelector() const
+{
+	const GameSelector* aSelector = mApp->mGameSelector;
+	return mApp->mLoadingThreadCompleted && !mApp->mBoard && aSelector &&
+		aSelector->mSelectorState == SELECTOR_IDLE && aSelector->mSlideCounter == 0 &&
+		aSelector->mX == 0 && aSelector->mY == 0 && aSelector->mDestX == 0 && aSelector->mDestY == 0;
 }
 
 void NetLobbyPanel::LayoutButtons()
@@ -82,6 +93,13 @@ void NetLobbyPanel::LayoutButtons()
 	NetManager* aNet = mApp->mNetManager;
 	if (!aNet)
 		return;
+	if (mCollapsed)
+	{
+		mButtons.push_back({BTN_TOGGLE, aPanel, _S("PLAY TOGETHER +"), false,
+			mHoverButtonId == BTN_TOGGLE && aPanel.Contains(mLastMouseX, mLastMouseY)});
+		return;
+	}
+	mButtons.push_back({BTN_TOGGLE, Rect(aPanel.mX + 254, aPanel.mY + 7, 28, 26), _S("-"), false, false});
 
 	if (!aNet->IsActive())
 	{
@@ -149,12 +167,15 @@ void NetLobbyPanel::Update()
 	// this full-screen widget before creating a board and restores it on return
 	// to the selector; never move it to a huge negative coordinate as a proxy
 	// for visibility because it remains in the draw/clip chain.
-	bool aInMenu = mApp->mBoard == nullptr && mApp->mGameSelector != nullptr;
+	bool aInMenu = IsOnMainSelector();
+	const bool aActive = aNet->IsActive();
+	if (aActive != mWasActive) mCollapsed = !aActive;
+	mWasActive = aActive;
 	if (aInMenu)
 		Resize(0, 0, mApp->mWidth, mApp->mHeight);
 
 	// the connection form's edit widgets are hidden once connected/connecting
-	bool aShowEdits = aInMenu && !aNet->IsActive();
+	bool aShowEdits = aInMenu && !aNet->IsActive() && !mCollapsed;
 	mNickEdit->mVisible = aShowEdits;
 	mIpEdit->mVisible = aShowEdits && mLanExpanded;
 	mPortEdit->mVisible = aShowEdits && mLanExpanded;
@@ -177,7 +198,7 @@ bool NetLobbyPanel::IsPointVisible(int theX, int theY)
 	// swallow clicks, so require the widget to actually sit at the origin
 	if (mX != 0 || mY != 0)
 		return false;
-	if (mApp->mBoard != nullptr || mApp->mGameSelector == nullptr || !mApp->mLoadingThreadCompleted)
+	if (!IsOnMainSelector())
 		return false;
 	return GetPanelRect().Contains(theX, theY);
 }
@@ -192,7 +213,13 @@ void NetLobbyPanel::DrawButton(Graphics* g, const UiButton& theButton)
 void NetLobbyPanel::Draw(Graphics* g)
 {
     NetManager* aNet = mApp->mNetManager;
-    if (!aNet || mApp->mBoard || !mApp->mGameSelector || !mApp->mLoadingThreadCompleted) return;
+    if (!aNet || !IsOnMainSelector()) return;
+    if (mCollapsed)
+    {
+        for (const UiButton& aButton : mButtons) DrawButton(g, aButton);
+        Widget::Draw(g);
+        return;
+    }
     const Rect aPanel = GetPanelRect();
     NetUi::Paper(g, mPaperImage, aPanel);
     TodDrawString(g, _S("PLAY TOGETHER"), aPanel.mX + 150, aPanel.mY + 28,
@@ -358,6 +385,8 @@ void NetLobbyPanel::ActivateButton(int theButtonId)
 			ApplyNick(); mApp->NetShowOnlineBrowser(); break;
 		case BTN_LAN:
 			mLanExpanded = !mLanExpanded; LayoutButtons(); break;
+		case BTN_TOGGLE:
+			mCollapsed = !mCollapsed; LayoutButtons(); break;
 		case BTN_DIFFICULTY_DOWN:
 			aNet->SetDifficulty(aNet->GetDifficulty() - 1); break;
 		case BTN_DIFFICULTY_UP:

@@ -6,7 +6,7 @@ A host-authoritative online co-op fork of **Plants vs. Zombies / stabledecompile
 
 ## Playing together
 
-**Online rooms, without a VPN:** open **ONLINE ROOMS** and create a room or select one to join. The browser connects to the mod's shared service automatically. Rooms support a name, optional password and a total capacity of 2–4 players. The directory shows the same mod build; the gameplay handshake also rejects a different build. A reliable, ordered WebRTC DataChannel carries gameplay directly between computers; Cloudflare handles discovery/signaling.
+**Online rooms, without a VPN:** open **ONLINE ROOMS** and create a room or select one to join. The native PvZ browser connects to the mod's shared service automatically and provides refresh, password entry, room status and connection feedback. Rooms support a name, optional password and a total capacity of 2–4 players. The directory shows the same mod build; the gameplay handshake also rejects a different build. A reliable, ordered WebRTC DataChannel carries gameplay directly between computers; Cloudflare handles discovery/signaling.
 
 Players use the ready-made archive. The mod owner operates one shared backend; its address and public STUN are built into the mod. The [operator guide (Russian)](docs/ONLINE_SETUP_RU.md) covers Free Cloudflare deployment and maintenance. STUN without TURN cannot connect every NAT/firewall combination; LAN/VPN remains available when direct connectivity fails. Free services have usage limits.
 
@@ -25,11 +25,11 @@ Distribute the **same compiled build** to everyone. Each game build generates a 
 | Seed selection | Picks appear in the native top bank, tinted by player; fixed cards count toward the host's total quota |
 | Start after picking | Every participant presses the ready button; it shows ready/total and red/green state |
 | Difficulty | Host chooses 1–10 in the lobby; 1 preserves the standard game, higher settings add zombies, waves and types without increasing HP |
-| Join an ongoing game | Read-only spectator: watch, ping and draw; no planting or other gameplay input |
+| Join an ongoing game | Read-only spectator: chat, middle-button ping, Alt packet ping and Ctrl drawing; the spectator's cursor is visible to others. Becomes a participant after the current level ends |
 | Kick | Host uses the player-row button in the lobby or the player list while paused; an active departing player's packets are reassigned fairly |
-| Personal Zombatar | Save it in the native editor; participating players' custom heads can occasionally appear on zombies |
+| Personal Zombatar | Each player saves their own native-editor appearance. It uploads automatically to the host on joining; active host/client appearances can occasionally appear on zombies |
 
-Sun, progression, store purchases and profile name belong to the host. Other players' packets are visible but cannot be used. Chat includes join/leave/kick messages. The GitHub icon in the top-left menu opens this repository.
+Sun, progression, store purchases and profile name belong to the host. Your personal Zombatar and visual settings remain your own. Other players' packets are visible but cannot be used. Spectators cannot plant or perform gameplay actions. Chat includes join/leave/kick messages. The GitHub icon in the top-left menu opens this repository.
 
 ### Custom modes
 
@@ -53,7 +53,7 @@ window_height=0
 borderless_fullscreen=1
 ```
 
-Default window size is 1066×600; set both dimensions for another size. The host's effective mini-game unlock setting is mirrored to clients. Tint settings and the saved personal Zombatar are also persisted by the game.
+Default window size is 1066×600; set both dimensions for another size. The default configuration is resolved beside the EXE, independently of the launcher's working folder. The host's effective mini-game unlock setting is mirrored to clients. Window settings, co-op colors/tints and the personal Zombatar persist across restarts; the expanded settings dialog includes a live preview.
 
 ## Building
 
@@ -64,12 +64,12 @@ Default window size is 1066×600; set both dimensions for another size. The host
 
 ## Verification and roadmap
 
-The 2026-11-11 play-test fixes are undergoing integration and background game verification. The [delivery board](docs/agent/WORKBOARD.md) records implementation separately from executed tests. [Smoke documentation](tests/CoopSmoke/README.md) describes deterministic two-process tests; `-Background` keeps windows hidden and captures only the game's own renderer.
+The [delivery board](docs/agent/WORKBOARD.md) records the remaining regression checks. Native transport checks passed 22/22 and signaling checks passed 9/9. A two-process game through the public Cloudflare service passed on one PC; connectivity between different external networks remains unverified. [Smoke documentation](tests/CoopSmoke/README.md) describes the test tools.
 
 - [x] Host-authoritative TCP, snapshots, ordered input and adaptive snapshot rate
 - [x] Shared seed selection, relative player colors, custom modes
-- [x] Native WebRTC transport and Cloudflare signaling source; native local integration tests
-- [ ] Current native PvZ room browser and mod UI/UX refresh — implementation and verification in progress
+- [x] Native WebRTC transport and the shared Cloudflare service
+- [x] Native PvZ room browser, refreshed mod UI and settings previews
 - [ ] Complete the current play-test regression matrix and real-network NAT testing
 - [ ] Lua modding API — planned, not implemented
 - [ ] More custom mini-games — planned, not implemented
@@ -83,7 +83,7 @@ The 2026-11-11 play-test fixes are undergoing integration and background game ve
 
 ### Подключение
 
-**Без VPN:** нажмите **ONLINE ROOMS** и создайте комнату либо подключитесь к существующей. Браузер автоматически соединяется с общим сервисом мода. Можно задать имя, пароль и вместимость 2–4 игрока. Каталог показывает комнаты той же сборки; версия также проверяется при игровом подключении. Игровые данные идут напрямую по WebRTC, Cloudflare обслуживает каталог и установку соединения.
+**Без VPN:** нажмите **ONLINE ROOMS** и создайте комнату либо подключитесь к существующей. Нативный браузер в стиле PvZ автоматически соединяется с общим сервисом мода; в нём есть обновление списка, ввод пароля, состояние комнат и понятные сообщения подключения. Можно задать имя, пароль и вместимость 2–4 игрока. Каталог показывает комнаты той же сборки; версия также проверяется при игровом подключении. Игровые данные идут напрямую по WebRTC, Cloudflare обслуживает каталог и установку соединения.
 
 Игрокам нужен готовый архив мода. Один общий сервер обслуживает владелец мода; его адрес и публичный STUN встроены в клиент. [Инструкция оператора](docs/ONLINE_SETUP_RU.md) описывает бесплатное развёртывание и обслуживание Cloudflare. У бесплатного тарифа есть лимиты. Без TURN некоторые NAT/корпоративные сети не позволяют прямое соединение; в таком случае доступно подключение по LAN/VPN.
 
@@ -99,11 +99,11 @@ The 2026-11-11 play-test fixes are undergoing integration and background game ve
 - **Alt + ЛКМ по пакету растения** — подсветить именно этот пакет у всех, отправить его название и оставшийся кулдаун в чат. Указатель над банком также привязан к пакету, независимо от его позиции у другого игрока.
 - При выборе растения переходят в штатный верхний банк и окрашиваются цветом владельца. Обязательные карты входят в общую квоту хоста. Для старта **все участники нажимают готовность**; кнопка показывает число готовых и меняет цвет.
 - Хост выбирает **сложность 1–10** в лобби. На 1 сохраняется стандартная игра, выше увеличиваются количество/типы зомби и волны, а не их HP.
-- Подключившийся во время игры становится **наблюдателем**: смотрит, пингует и рисует, но не управляет игрой.
+- Подключившийся во время игры становится **наблюдателем**: доступен чат, пинг колёсиком, Alt-пинг пакета и рисование через Ctrl; его курсор виден остальным. Посадка и другие игровые действия недоступны. После завершения текущего уровня он становится участником.
 - Хост может кикнуть игрока кнопкой возле имени в лобби или в списке слева во время паузы. Пакеты ушедшего активного игрока распределяются между оставшимися участниками.
-- Сохранённые в редакторе **зомботары игроков** иногда появляются на зомби. Игровой ресурс поддерживает собственную голову; одежда сохраняется для портрета редактора, а игровая форма зомби остаётся штатной.
+- Каждый игрок сохраняет собственный **зомботар** в штатном редакторе. При входе он автоматически отправляется хосту; на зомби иногда появляются головы активных хоста и клиентов. Внешность клиента не заменяется внешностью хоста. Одежда сохраняется для портрета редактора, а игровая форма зомби остаётся штатной.
 
-Прогресс, магазин, имя профиля и общая валюта принадлежат хосту. Чужие пакеты видны, но недоступны для использования. В чате есть сообщения о входе, выходе и кике. Значок GitHub в левом верхнем углу меню открывает репозиторий.
+Прогресс, магазин, имя профиля и общая валюта принадлежат хосту. Личная внешность и настройки отображения остаются собственными у каждого игрока. Чужие пакеты видны, но недоступны для использования. В чате есть сообщения о входе, выходе и кике. Значок GitHub в левом верхнем углу меню открывает репозиторий.
 
 ### Дополнительные режимы
 
@@ -111,13 +111,13 @@ The 2026-11-11 play-test fixes are undergoing integration and background game ve
 - **Tower Defense:** движение по случайной дороге; усиленный состав врагов, включая гаргантюа.
 - **PvP:** команда выбирается после открытия режима, перед загрузкой уровня. Зомби видят мозги и компактную панель зомби; пакеты растений и количество солнца противника скрыты. Инструменты растений недоступны команде зомби. Цель растений — 100 убийств, цель зомби — добраться до дома.
 
-Параметры `coop.ini` приведены выше. `unlock_all_minigames=1` открывает мини-игры, дополнительные режимы и кнопки меню; эффективная настройка хоста передаётся клиентам. Инструкция сборки и расположение результата также приведены выше.
+Параметры `coop.ini` приведены выше. По умолчанию файл находится рядом с EXE, независимо от рабочей папки запуска. Размер окна, цвета/тонировка кооператива и личный зомботар сохраняются после перезапуска; увеличенное окно настроек показывает предпросмотр. `unlock_all_minigames=1` открывает мини-игры, дополнительные режимы и кнопки меню; эффективная настройка хоста передаётся клиентам. Инструкция сборки и расположение результата также приведены выше.
 
 ### Проверки и планы
 
-[Доска текущих задач и фактических проверок](docs/agent/WORKBOARD.md). Набор исправлений плей-теста проходит интеграционные проверки; реализация и проверенное поведение отмечаются отдельно.
+[Доска оставшихся задач и фактических проверок](docs/agent/WORKBOARD.md). Нативные проверки транспорта прошли 22/22, проверки сигналинга — 9/9. Двухпроцессная игра через публичный Cloudflare-сервис проверена на одном ПК; соединение между разными внешними сетями ещё не проверялось.
 
-Нативный браузер комнат в стиле PvZ и обновление UI/UX мода находятся в текущей реализации и проверке. Пока **не реализуются**, только запланированы: Lua modding API, дополнительные мини-игры и новые Adventure-режимы.
+Нативный браузер комнат в стиле PvZ, обновлённый интерфейс мода и предпросмотр настроек уже реализованы. Пока **не реализуются**, только запланированы: Lua modding API, дополнительные мини-игры и новые Adventure-режимы.
 
 ---
 # DISCLAIMER

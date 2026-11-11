@@ -5,6 +5,8 @@ param(
     [string]$GameExe = "",
     [string]$OnlineEndpoint = "",
     [string]$ArtifactsRoot = "",
+    [string]$HostConfigSource = "",
+    [string]$ClientConfigSource = "",
     [ValidateRange(10, 3600)]
     [int]$TimeoutSeconds = 120,
     [ValidateRange(5, 300)]
@@ -33,6 +35,7 @@ param(
     [switch]$VerifyUnicodeChat,
     [switch]$VerifyInteractions,
     [switch]$VerifyPresentation,
+    [switch]$VerifySavedAvatars,
     [switch]$VerifyModes,
     [switch]$VerifyFirstAdventure,
     [switch]$Background,
@@ -302,7 +305,9 @@ function Start-SmokeProcess {
     }
     $childEnvironment["PVZ_COOP_SMOKE_UNICODE_CHAT"] = $(if ($EnableUnicodeChat) { "1" } else { "0" })
     $childEnvironment["PVZ_COOP_SMOKE_INTERACTIONS"] = $(if ($VerifyInteractions) { "1" } else { "0" })
-    $childEnvironment["PVZ_COOP_SMOKE_PRESENTATION"] = $(if ($VerifyPresentation) { "1" } else { "0" })
+    $childEnvironment["PVZ_COOP_SMOKE_PRESENTATION"] = $(if ($VerifyPresentation -or $VerifySavedAvatars) { "1" } else { "0" })
+    $childEnvironment["PVZ_COOP_SMOKE_SAVED_AVATARS"] = $(if ($VerifySavedAvatars) { "1" } else { "0" })
+    $childEnvironment["PVZ_COOP_SMOKE_AVATAR_EDITOR"] = "0"
     $childEnvironment["PVZ_COOP_SMOKE_MODES"] = $(if ($VerifyModes) { "1" } else { "0" })
     $childEnvironment["PVZ_COOP_SMOKE_FIRST_ADVENTURE"] = $(if ($VerifyFirstAdventure) { "1" } else { "0" })
     $nativeUiWorkflow = $env:PVZ_COOP_SMOKE_NATIVE_UI -in @("appearance", "appearance-restart", "browser", "browser-probe")
@@ -779,6 +784,17 @@ $scenarioSpec = switch ($Scenario) {
     default { throw ("Unsupported smoke scenario: {0}" -f $Scenario) }
 }
 
+if (($HostConfigSource -or $ClientConfigSource) -and -not $VerifySavedAvatars) {
+    throw "Personal config sources are restricted to the isolated saved-avatar workflow."
+}
+if ($VerifySavedAvatars -and (-not $HostConfigSource -or -not $ClientConfigSource -or
+    -not $Background -or $Scenario -ne "Adventure1" -or $SkipIntro -ne 0 -or $VerifyPresentation -or
+    $VerifyInteractions -or $VerifyModes -or $VerifyFirstAdventure -or $VerifyUnicodeChat -or $OnlineEndpoint -or
+    $env:PVZ_COOP_SMOKE_SPECTATOR -eq "1" -or
+    $HostWindowWidth -ne 800 -or $HostWindowHeight -ne 600 -or
+    $ClientWindowWidth -ne 800 -or $ClientWindowHeight -ne 600)) {
+    throw "VerifySavedAvatars requires both editor-produced config sources and isolated Background Adventure1 SkipIntro0 at 800x600."
+}
 if ($VerifyPresentation -and (-not $Background -or $Scenario -ne "Adventure1" -or $SkipIntro -ne 0 -or
     $VerifyInteractions -or $VerifyModes -or $VerifyFirstAdventure -or $VerifyUnicodeChat -or $OnlineEndpoint -or
     $env:PVZ_COOP_SMOKE_SPECTATOR -eq "1" -or
@@ -878,6 +894,26 @@ try {
         -WindowWidth $HostWindowWidth -WindowHeight $HostWindowHeight
     Write-CoopConfig -Path $clientConfigPath -Nickname $clientNickname `
         -WindowWidth $ClientWindowWidth -WindowHeight $ClientWindowHeight
+    if ($VerifySavedAvatars) {
+        foreach ($role in @('host', 'client')) {
+            $source = if ($role -eq 'host') { $HostConfigSource } else { $ClientConfigSource }
+            $destination = if ($role -eq 'host') { $hostConfigPath } else { $clientConfigPath }
+            $source = (Resolve-Path -LiteralPath $source).Path
+            $editorProof = Get-Content -LiteralPath (Join-Path (Split-Path -Parent $source) 'result.json') -Raw | ConvertFrom-Json
+            if ($editorProof.status -ne 'pass' -or $editorProof.test -ne 'avatar-editor' -or
+                $editorProof.input -ne 'SDL_queue' -or $editorProof.bytes -ne 13 -or
+                $editorProof.appearance -notmatch '^[A-F0-9]{26}$' -or
+                [IO.File]::ReadAllText($source) -notmatch ('(?m)^zombatar=' + [regex]::Escape($editorProof.appearance) + '\r?$')) {
+                throw 'A personal config source was not produced by the isolated native SDL avatar editor fixture.'
+            }
+            Copy-Item -LiteralPath $source -Destination $destination -Force
+            if ((Get-FileHash -LiteralPath $source -Algorithm SHA256).Hash -ne
+                (Get-FileHash -LiteralPath $destination -Algorithm SHA256).Hash) { throw 'Saved personal INI copy changed bytes.' }
+            if ($role -eq 'host') { $hostSavedAppearance = [string]$editorProof.appearance }
+            else { $clientSavedAppearance = [string]$editorProof.appearance }
+        }
+        if ($hostSavedAppearance -eq $clientSavedAppearance) { throw 'Saved personal appearances must be distinct.' }
+    }
     Write-SmokeManifest -Path $hostManifestPath -Role "host" -Nickname $hostNickname `
         -AppDataDirectory $hostAppDataDirectory -ConfigPath $hostConfigPath `
         -LogDirectory $hostLogDirectory -ResultPath $hostResultPath -SelectedPort $Port `
@@ -925,6 +961,12 @@ try {
         -TimeoutSeconds $TimeoutSeconds)
     $hostResult = $results[0]
     $clientResult = $results[1]
+
+    if ($Background -and $OnlineEndpoint) {
+        # The renderer refreshes scene BMPs every two seconds. Keep the
+        # successful game alive long enough to capture its applied action.
+        Start-Sleep -Milliseconds 2200
+    }
 
     # Close the client first so normal host shutdown cannot be misreported by the
     # client as a lost-host failure. Both exact Process objects remain PID-scoped.
@@ -1026,6 +1068,11 @@ try {
         $complete = @{ Label = 'presentation workflow complete'; Pattern = '(?im)SMOKE_PRESENTATION_COMPLETE[^\r\n]*limbs=2 jack=1 snail=1 clientAvatar=1 stableAppearance=1' }
         $hostPositivePatterns += $complete
         $clientPositivePatterns += $complete
+    }
+    if ($VerifySavedAvatars) {
+        $savedPattern = @{ Label = 'natural union of personal avatars loaded before joining'; Pattern = '(?im)SMOKE_SAVED_AVATARS[^\r\n]*hostZombie=[1-9]\d* clientZombie=[1-9]\d*[^\r\n]*bytes=13[^\r\n]*source=natural_init' }
+        $hostPositivePatterns += $savedPattern
+        $clientPositivePatterns += $savedPattern
     }
     if ($VerifyModes -and $Scenario -eq "PvP1v1") {
         $hostPositivePatterns += @{ Label = "PvP server shovel authorization"; Pattern = '(?im)SMOKE_MODES_SHOVEL role=host sdl=blocked raw=blocked forgedCursor=blocked plantTool=working' }
@@ -1472,6 +1519,30 @@ try {
 
     Assert-PositivePatterns -Role "host" -Text $hostLog -Patterns $hostPositivePatterns
     Assert-PositivePatterns -Role "client" -Text $clientLog -Patterns $clientPositivePatterns
+    if ($VerifySavedAvatars) {
+        $pattern = 'SMOKE_SAVED_AVATARS role={0} hostZombie=(\d+) clientZombie=(\d+) hostAppearance=([A-F0-9]{{26}}) clientAppearance=([A-F0-9]{{26}}) bytes=13 attempts=(\d+) source=natural_init'
+        $hostUnion = [regex]::Match($hostLog, ($pattern -f 'host'))
+        $clientUnion = [regex]::Match($clientLog, ($pattern -f 'client'))
+        if (-not $hostUnion.Success -or -not $clientUnion.Success) { throw 'Missing native saved-avatar union evidence.' }
+        foreach ($group in 1..4) {
+            if ($hostUnion.Groups[$group].Value -ne $clientUnion.Groups[$group].Value) { throw 'Personal avatar IDs/13-byte appearances differ across peers.' }
+        }
+        if ($hostUnion.Groups[3].Value -ne $hostSavedAppearance -or $hostUnion.Groups[4].Value -ne $clientSavedAppearance -or
+            [int]$hostUnion.Groups[5].Value -lt 2 -or [int]$hostUnion.Groups[5].Value -gt 128) {
+            throw 'Natural initialization did not select both editor-produced personal appearances within its bounded fixture.'
+        }
+        foreach ($role in @('host', 'client')) {
+            $roleRoot = if ($role -eq 'host') { $hostRoot } else { $clientRoot }
+            $expected = if ($role -eq 'host') { $hostSavedAppearance } else { $clientSavedAppearance }
+            $proof = Get-Content -LiteralPath (Join-Path $roleRoot 'avatar_before_join.json') -Raw | ConvertFrom-Json
+            if ($proof.status -ne 'pass' -or $proof.active -ne $false -or $proof.bytes -ne 13 -or $proof.appearance -ne $expected) {
+                throw 'The restarted process did not load its personal appearance before connecting.'
+            }
+            if (-not (Test-Path -LiteralPath (Join-Path $roleRoot 'avatar_saved_union.bmp') -PathType Leaf)) {
+                throw 'Missing saved-avatar union renderer capture.'
+            }
+        }
+    }
     if ($VerifyInteractions) {
         $packetPattern = '(?im)\bSMOKE_INTERACTIONS_SEED\b[^\r\n]*\bid=([1-9]\d*)\b'
         $hostPacket = [regex]::Match($hostLog, $packetPattern)

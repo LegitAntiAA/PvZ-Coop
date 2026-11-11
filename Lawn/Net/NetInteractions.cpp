@@ -18,6 +18,8 @@ namespace LawnNet
 void NetManager::SetMyReady(bool theReady)
 {
 	if (!IsActive() || IsSpectator() || !mApp || (!mChooserOpen && !mApp->NetIsChoosingPvpTeams())) return;
+	if (theReady && mChooserOpen &&
+		(!mApp->mSeedChooserScreen || !mApp->mSeedChooserScreen->CoopCanReady())) return;
 	if (IsMyReady() == theReady) return;
 	if (IsHosting()) { mPlayers[mMySlot].mReady = theReady; SendLobbyState(); }
 	else if (mHostConn) { NetBuffer b; b.WriteU8(theReady); mHostConn->SendMessage(NETMSG_READY, b); }

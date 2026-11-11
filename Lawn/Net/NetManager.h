@@ -263,9 +263,8 @@ public:
 	void BroadcastMessage(uint8_t theMsgType, const NetBuffer& thePayload);
 
 	// chooser state shared between players (mirrored from host authority)
-	struct ChooserPick { uint8_t mSeedType; uint8_t mImitater; int mSlot; };
-	std::deque<ChooserPick> mRemotePicks;		// client: picks from others to display
-	std::deque<ChooserPick> mRemoteUnpicks;		// client: unpicks from others
+	struct ChooserPick { uint8_t mSeedType; uint8_t mImitater; int mSlot; bool mUnpick = false; };
+	std::deque<ChooserPick> mRemotePicks;		// host: validated pick/unpick actions in arrival order
 	std::deque<NetBuffer> mPendingChooserStarts;	// client: final seed list
 	std::deque<NetBuffer> mRemoteChooserStates;		// client: authoritative chooser pick state
 	bool mChooserOpen;							// client: chooser should be open

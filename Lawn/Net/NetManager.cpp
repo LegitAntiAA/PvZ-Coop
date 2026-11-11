@@ -409,7 +409,6 @@ void NetManager::Disconnect()
 	mLastPingTick = 0;
 	mLastStatsTick = 0;
 	mRemotePicks.clear();
-	mRemoteUnpicks.clear();
 	mRemoteChooserStates.clear();
 	mPendingChooserStarts.clear();
 	mPendingBoardMsgs.clear();
@@ -1348,10 +1347,8 @@ void NetManager::OnClientSeedPick(NetSession* theSession, NetBuffer& thePayload,
 	aPick.mSeedType = aSeedType;
 	aPick.mImitater = anImitater;
 	aPick.mSlot = aSlot;
-	if (theUnpick)
-		mRemoteUnpicks.push_back(aPick);
-	else
-		mRemotePicks.push_back(aPick);
+	aPick.mUnpick = theUnpick;
+	mRemotePicks.push_back(aPick);
 }
 
 void NetManager::OnClientTeamSelect(NetSession* theSession, NetBuffer& thePayload)
@@ -2243,7 +2240,6 @@ void NetManager::OnChooserOpen(NetBuffer& thePayload)
 	// traffic belonging to the preceding generation; later STATE/START packets
 	// on this TCP stream remain ordered behind this message.
 	mRemotePicks.clear();
-	mRemoteUnpicks.clear();
 	mRemoteChooserStates.clear();
 	mPendingChooserStarts.clear();
 	mChooserOpen = true;
@@ -2277,6 +2273,7 @@ void NetManager::OnChooserOpen(NetBuffer& thePayload)
 
 void NetManager::OnChooserState(NetBuffer& thePayload)
 {
+	if (!mChooserOpen) return;
 	mRemoteChooserStates.push_back(std::move(thePayload));
 	if (mRemoteChooserStates.size() > 32)
 		mRemoteChooserStates.pop_front();
@@ -2284,6 +2281,12 @@ void NetManager::OnChooserState(NetBuffer& thePayload)
 
 void NetManager::OnChooserStart(NetBuffer& thePayload)
 {
+	if (!mChooserOpen || !mApp || !mApp->mBoard) return;
+	// Earlier snapshots describe the provisional intro bank. Apply them before
+	// the ordered final list, so they cannot overwrite its viewer-relative order.
+	mApp->mBoard->NetDrainMessages();
+	mRemoteChooserStates.clear();
+	mChooserOpen = false;
 	mPendingChooserStarts.push_back(std::move(thePayload));
 }
 
