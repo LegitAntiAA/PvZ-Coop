@@ -15,6 +15,7 @@
 SeedPacket::SeedPacket()
 {
 	mNetOwnerSlot = 0;
+	mRandomDiscountLevel = 0;
 	mSlotMachiningPosition = 0.0f;
 	mPacketType = SeedType::SEED_NONE;
 	mImitaterType = SeedType::SEED_NONE;
@@ -113,6 +114,7 @@ void SeedPacket::FlashIfReady()
 
 void SeedPacket::Activate()
 {
+	if (IsMysteryPending()) return;
 	TOD_ASSERT(mPacketType != SeedType::SEED_NONE);
 	mActive = true;
 }
@@ -622,8 +624,35 @@ void DrawSeedPacket(Graphics* g, float x, float y, SeedType theSeedType, SeedTyp
 }
 
 //0x488220
+void DrawMysterySeedPacket(Graphics* g, float x, float y, int theGrayness)
+{
+	g->PushState();
+	g->SetColor(Color(theGrayness, theGrayness, theGrayness));
+	g->SetColorizeImages(true);
+	TodDrawImageScaledF(g, IMAGE_SEEDPACKET_LARGER, x, y, g->mScaleX * 0.5f, g->mScaleY * 0.5f);
+	g->SetColorizeImages(false);
+	g->SetFont(FONT_BRIANNETOD16);
+	g->SetColor(Color(35, 55, 30));
+	g->DrawString(_S("?"), (int)x + 25 - FONT_BRIANNETOD16->StringWidth(_S("?")) / 2, (int)y + 43);
+	g->PopState();
+}
+
 void SeedPacket::Draw(Graphics* g)
 {
+	if (IsMysteryPending())
+	{
+		DrawMysterySeedPacket(g, (float)mOffsetX, 0.0f, mBoard->mSeedBank->mCutSceneDarken);
+		if (mApp->NetActive() && mNetOwnerSlot < LawnNet::NET_MAX_PLAYERS && mNetOwnerSlot != mApp->mNetManager->GetMySlot())
+		{
+			g->PushState();
+			const LawnNet::NetColor color = LawnNet::GetRelativePlayerColor(mApp->mNetManager->GetMySlot(), mNetOwnerSlot);
+			g->SetColor(Color(color.r, color.g, color.b, mApp->mNetManager->mConfig.mHotbarTintAlpha));
+			g->FillRect(mOffsetX + 2, 2, mWidth - 4, mHeight - 4);
+			g->PopState();
+		}
+		return;
+	}
+	if (mPacketType == SeedType::SEED_NONE) return;
 	float aPercentDark = 0.0f;
 	if (!mActive)
 	{
@@ -660,10 +689,8 @@ void SeedPacket::Draw(Graphics* g)
 		{
 			aDrawCost = false;
 		}
-		int aCost = mBoard->GetCurrentPlantCost(mPacketType, mImitaterType);
+		int aCost = mBoard->GetSeedPacketCost(*this);
 		bool isPvPZombiePacket = mBoard->IsPvPMode() && mBoard->mChallenge->IsZombieSeedType(mPacketType);
-		if (isPvPZombiePacket)
-			aCost /= 2;
 
 		int aGrayness = 255;
 		if ((mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_BEGHOULED && !mActive) ||
@@ -718,11 +745,6 @@ void SeedPacket::Draw(Graphics* g)
 		
 		if (aDrawCost)
 		{
-			SeedType aSeedType = mPacketType;
-			if (aSeedType == SeedType::SEED_IMITATER && mImitaterType != SeedType::SEED_NONE)
-			{
-				aSeedType = mImitaterType;
-			}
 			if (aGrayness != 255)
 			{
 				g->SetColor(Color(aGrayness, aGrayness, aGrayness));
@@ -734,19 +756,7 @@ void SeedPacket::Draw(Graphics* g)
 				g->SetColorizeImages(true);
 			}
 
-			SexyString aCostStr;
-			if (isPvPZombiePacket)
-			{
-				aCostStr = StrFormat(_S("%d"), aCost);
-			}
-			else if (gLawnApp->mBoard && gLawnApp->mBoard->PlantUsesAcceleratedPricing(aSeedType) && !gLawnApp->GetDialog(Dialogs::DIALOG_ALMANAC))
-			{
-				aCostStr = StrFormat(_S("%d"), gLawnApp->mBoard->GetCurrentPlantCost(mPacketType, mImitaterType));
-			}
-			else
-			{
-				aCostStr = StrFormat(_S("%d"), Plant::GetCost(mPacketType, mImitaterType));
-			}
+			const SexyString aCostStr = StrFormat(_S("%d"), aCost);
 
 			Font* aTextFont = Sexy::FONT_PICO129;
 			int aTextOffsetX = 32 - aTextFont->StringWidth(aCostStr);
@@ -798,10 +808,8 @@ bool SeedPacket::CanPickUp()
 			return false;
 		}
 
-		int aCost = mBoard->GetCurrentPlantCost(mPacketType, mImitaterType);
+		int aCost = mBoard->GetSeedPacketCost(*this);
 		bool isPvPZombiePacket = mBoard->IsPvPMode() && mBoard->mChallenge->IsZombieSeedType(mPacketType);
-		if (isPvPZombiePacket)
-			aCost /= 2;
 		if (((isPvPZombiePacket && !mBoard->CanTakeBrains(aCost)) ||
 			(!isPvPZombiePacket && !mBoard->CanTakeSunMoney(aCost))) && !mBoard->HasConveyorBeltSeedBank())
 		{
@@ -887,7 +895,7 @@ void SeedPacket::MouseDown(int x, int y, int theClickCount)
 			return;
 		}
 
-		int aCost = mBoard->GetCurrentPlantCost(mPacketType, mImitaterType);
+		int aCost = mBoard->GetSeedPacketCost(*this);
 		if (!mBoard->CanTakeSunMoney(aCost) && !mBoard->HasConveyorBeltSeedBank())
 		{
 			mApp->PlaySample(SOUND_BUZZER);
@@ -951,7 +959,7 @@ void SeedPacket::MouseDown(int x, int y, int theClickCount)
 			mApp->PlaySample(SOUND_BUZZER);
 			return;
 		}
-		int aBrainCost = mBoard->GetCurrentPlantCost(mPacketType, mImitaterType) / 2;
+		int aBrainCost = mBoard->GetSeedPacketCost(*this);
 		if (!mBoard->CanTakeBrains(aBrainCost))
 		{
 			mApp->PlaySample(SOUND_BUZZER);
@@ -1115,7 +1123,10 @@ void SeedBank::Draw(Graphics* g)
 		g->FillRect(0, 0, 660, 80);
 		g->SetColor(Color(166, 121, 66));
 		g->DrawRect(0, 0, 659, 79);
-		TodDrawImageScaledF(g, IMAGE_BRAIN, 10.0f, 10.0f, 0.5f, 0.5f);
+		const float aBrainScale = min(52.0f / IMAGE_BRAIN->GetWidth(), 42.0f / IMAGE_BRAIN->GetHeight());
+		const float aBrainX = 34.0f - IMAGE_BRAIN->GetWidth() * aBrainScale / 2.0f;
+		const float aBrainY = 10.0f + (42.0f - IMAGE_BRAIN->GetHeight() * aBrainScale) / 2.0f;
+		TodDrawImageScaledF(g, IMAGE_BRAIN, aBrainX, aBrainY, aBrainScale, aBrainScale);
 	}
 	else if (mApp->IsSlotMachineLevel())
 	{
@@ -1140,7 +1151,7 @@ void SeedBank::Draw(Graphics* g)
 		SeedPacket* aSeedPacket = &mSeedPackets[i];
 		if (!mBoard->IsSeedPacketVisibleToSlot(i, aViewerSlot))
 			continue;
-		if (aSeedPacket->mPacketType != SeedType::SEED_NONE && aSeedPacket->BeginDraw(g))
+		if ((aSeedPacket->mPacketType != SeedType::SEED_NONE || aSeedPacket->IsMysteryPending()) && aSeedPacket->BeginDraw(g))
 		{
 			g->PushState();
 			if (aZombieView)
@@ -1223,6 +1234,7 @@ void SeedBank::AddSeed(SeedType theSeedType, bool thePlaceOnLeft)
 	// The host assigns a fresh stable packet id in the next snapshot.
 	aSeedPacket->mNetId = 0;
 	aSeedPacket->mNetGhost = false;
+	aSeedPacket->mRandomDiscountLevel = 0;
 	aSeedPacket->mPacketType = theSeedType;
 	aSeedPacket->mImitaterType = SeedType::SEED_NONE;
 	aSeedPacket->mRefreshCounter = 0;
@@ -1280,6 +1292,7 @@ void SeedBank::RemoveSeed(int theIndex)
 			aSeedPacket->mPacketType = SeedType::SEED_NONE;
 			aSeedPacket->mImitaterType = SeedType::SEED_NONE;
 			aSeedPacket->mNetId = 0;
+			aSeedPacket->mRandomDiscountLevel = 0;
 			aSeedPacket->mOffsetX = 0;
 		}
 		else
@@ -1289,6 +1302,7 @@ void SeedBank::RemoveSeed(int theIndex)
 			aSeedPacket->mImitaterType = aNextPacket->mImitaterType;
 			aSeedPacket->mNetOwnerSlot = aNextPacket->mNetOwnerSlot;
 			aSeedPacket->mNetId = aNextPacket->mNetId;
+			aSeedPacket->mRandomDiscountLevel = aNextPacket->mRandomDiscountLevel;
 			aSeedPacket->mOffsetX = aNextPacket->mOffsetX + SEED_PACKET_WIDTH + 1;
 		}
 
@@ -1349,12 +1363,14 @@ int SeedBank::CountOfTypeOnConveyorBelt(SeedType theSeedType)
 //0x489B50
 void SeedPacket::SetPacketType(SeedType theSeedType, SeedType theImitaterType)
 {
+	mRandomDiscountLevel = 0;
 	mPacketType = theSeedType;
 	mImitaterType = theImitaterType;
 	mRefreshCounter = 0;
 	mRefreshTime = 0;
 	mRefreshing = false;
 	mActive = true;
+	if (theSeedType == SeedType::SEED_NONE) return;
 
 	SeedType aUseSeedType = theSeedType;
 	if (theSeedType == SeedType::SEED_IMITATER && theImitaterType != SeedType::SEED_NONE)
@@ -1385,6 +1401,17 @@ void SeedPacket::SetPacketType(SeedType theSeedType, SeedType theImitaterType)
 		mRefreshing = true;
 		mActive = false;
 	}
+}
+
+void SeedPacket::SetMysteryPlaceholder(uint8_t theLevel)
+{
+	SetPacketType(SeedType::SEED_NONE);
+	mRandomDiscountLevel = theLevel >= 1 && theLevel <= 10 ? theLevel : 0;
+	mActive = false;
+	mSlotMachineCountDown = 0;
+	mSlotMachiningNextSeed = SeedType::SEED_NONE;
+	mSlotMachiningPosition = 0.0f;
+	mTimesUsed = 0;
 }
 
 //0x489C70

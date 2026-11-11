@@ -13,6 +13,7 @@
 #include "LawnMower.h"
 #include "GridItem.h"
 #include "Net/NetCommon.h"
+#include "Net/NetGameplayPolicy.h"
 
 #include "../SexyAppFramework/DDInterface.h"
 #include "../SexyAppFramework/SexyMatrix.h"
@@ -36,6 +37,7 @@ class CursorPreview;
 class GameButton;
 class MessageWidget;
 class SeedBank;
+class SeedPacket;
 class ToolTipWidget;
 class CutScene;
 class Challenge;
@@ -149,6 +151,8 @@ public:
 	SexyTransform2D					mCameraTranform;
 	Color							mCameraColor;
 	Rect							mCameraClipRect;
+	LawnNet::PvPBalanceState         mNetPvPBalance; // outside the native mPaused..mBoardRandSeed save block
+	std::vector<uint16_t>			mNetMysteryRevealIds;
 	bool							mDrawOnlyCamera;
 	bool							mPaused;												//+0x164
 	ReanimationID					mBushesID[6];
@@ -396,7 +400,7 @@ public:
 	bool							IterateParticles(TodParticleSystem*& theParticle);
 	bool							IterateReanimations(Reanimation*& theReanimation);
 	bool							IterateGridItems(GridItem*& theGridItem);
-	/*inline*/ Zombie*				AddZombieInRow(ZombieType theZombieType, int theRow, int theFromWave);
+	/*inline*/ Zombie*				AddZombieInRow(ZombieType theZombieType, int theRow, int theFromWave, int theBungeeTargetCol = -1);
 	/*inline*/ bool					IsPoolSquare(int theGridX, int theGridY);
 	void							PickZombieWaves();
 	void							StopAllZombieSounds();
@@ -618,6 +622,15 @@ public:
 	bool                            IsSeedPacketVisibleToSlot(int theIndex, int theSlot) const;
 	bool                            CanUsePlantTools(int theSlot) const;
 	int                             GetCoopDifficulty();
+	int                             GetModeDifficulty() const;
+	LawnNet::DifficultyFamily        GetDifficultyFamily() const;
+	int                             GetSeedPacketCost(const SeedPacket& thePacket) const;
+	bool                            ResolveMysteryPackets();
+	int                             GetMysteryPoolCapacity() const;
+	int                             GetPvPSupportStrength(int theSide) const;
+	int                             GetPvPPlantInterval(int theStockInterval) const;
+	float                           GetPvPZombieSpeedMultiplier() const;
+	void                            ApplyPvPZombieSpawnHealth(Zombie* theZombie) const;
 	void							AssignPvPSeedOwners();
 	bool							CanTakeBrains(int theAmount);
 	void							TakeBrains(int theAmount);
@@ -632,6 +645,8 @@ public:
 	void							NetEncodeSnapshot(LawnNet::NetBuffer& theBuffer);
 	void							NetEncodeCameraBootstrap(LawnNet::NetBuffer& theBuffer);
 	bool							NetApplyCameraBootstrap(LawnNet::NetBuffer& theBuffer);
+	void							NetEncodeStartPlaying(LawnNet::NetBuffer& theBuffer);
+	bool							NetApplyStartPlaying(LawnNet::NetBuffer& theBuffer);
 	void							NetEncodeIntroState(LawnNet::NetBuffer& theBuffer);
 	void							NetApplyIntroState(LawnNet::NetBuffer& theBuffer);
 	void							NetUpdateIntroPresentation(bool theSnap);

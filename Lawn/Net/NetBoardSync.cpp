@@ -22,6 +22,7 @@
 #include "../../SexyAppFramework/WidgetManager.h"
 #include "../../SexyAppFramework/DDInterface.h"
 #include "NetManager.h"
+#include "NetMystery.h"
 #include "NetPresentation.h"
 #include "NetZombatar.h"
 #include "../System/Music.h"
@@ -76,8 +77,9 @@ const NetDaveAnimSpec gNetDaveAnimSpecs[NET_DAVE_ANIM_COUNT] =
 
 static const size_t NET_DAVE_STATE_BYTES = 12;
 // Seed packet: stable id, type, imitater, cooldown, owner, active, signed
-// horizontal offset, slot-machine countdown, next card and scroll phase.
-static const size_t NET_SEED_PACKET_WIRE_BYTES = 16;
+// horizontal offset, slot-machine countdown/next card/phase, intrinsic origin,
+// and authoritative refresh duration/flag (including late join after a use).
+static const size_t NET_SEED_PACKET_WIRE_BYTES = NET_MYSTERY_SEED_SNAPSHOT_BYTES;
 // Plant: base state (20), three exact presentation counters, and every bounded
 // reanimation channel owned directly by Plant (8 * 11).  Child attachments and
 // particles remain local presentation resources, never raw network pointers.
@@ -924,7 +926,7 @@ uint16_t Board::NetAllocId()
 			for (int i = 0; i < mSeedBank->mNumPackets && i < SEEDBANK_CAPACITY; i++)
 			{
 				const SeedPacket& aPacket = mSeedBank->mSeedPackets[i];
-				if (aPacket.mPacketType != SeedType::SEED_NONE && aPacket.mNetId == theId)
+				if ((aPacket.mPacketType != SeedType::SEED_NONE || aPacket.IsMysteryPending()) && aPacket.mNetId == theId)
 					return true;
 			}
 		}
@@ -1097,6 +1099,8 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 	// pvp / td
 	b.WriteU8((uint8_t)min(255, mNetPvPBrainScore));
 	b.WriteU8((uint8_t)min(255, mNetPvPKillScore));
+	b.WriteU8(IsPvPMode() ? (uint8_t)mNetPvPBalance.mBeneficiary : 0);
+	b.WriteU16(IsPvPMode() ? (uint16_t)max(0, min(1000, mNetPvPBalance.mStrength)) : 0);
 	b.WriteI32(mNetPvPBrains);
 	b.WriteU8((uint8_t)max(0, mNetTDLives));
 
@@ -1116,27 +1120,33 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 	for (int i = 0; i < mSeedBank->mNumPackets; i++)
 	{
 		SeedPacket& aPacket = mSeedBank->mSeedPackets[i];
-		if (aPacket.mPacketType == SeedType::SEED_NONE)
+		const bool aPending = aPacket.IsMysteryPending();
+		if (aPacket.mPacketType == SeedType::SEED_NONE && !aPending)
 			aPacket.mNetId = 0;
 		else if (aPacket.mNetId == 0)
 			aPacket.mNetId = NetAllocId();
 		b.WriteU16(aPacket.mNetId);
 		b.WriteU8((uint8_t)aPacket.mPacketType);
-		b.WriteU8((uint8_t)aPacket.mImitaterType);
+		b.WriteU8(aPending ? 255 : (uint8_t)aPacket.mImitaterType);
 		uint8_t aCooldown = 255;
-		if (aPacket.mRefreshTime > 0)
+		if (!aPending && aPacket.mRefreshTime > 0)
 			aCooldown = (uint8_t)(aPacket.mRefreshCounter * 255 / aPacket.mRefreshTime);
 		b.WriteU8(aCooldown);
 		b.WriteU8(aPacket.mNetOwnerSlot);
-		b.WriteU8(aPacket.mActive ? 1 : 0);
+		b.WriteU8(!aPending && aPacket.mActive ? 1 : 0);
 		b.WriteI16((int16_t)max(0, min(1024, aPacket.mOffsetX)));
-		b.WriteU16((uint16_t)max(0, min(SLOT_MACHINE_TIME, aPacket.mSlotMachineCountDown)));
+		b.WriteU16(aPending ? 0 : (uint16_t)max(0, min(SLOT_MACHINE_TIME, aPacket.mSlotMachineCountDown)));
 		uint8_t aNextSlotSeed = (uint8_t)aPacket.mSlotMachiningNextSeed;
-		b.WriteU8(NetIsValidSlotMachineSeed(aNextSlotSeed) ? aNextSlotSeed : 255);
-		float aSlotPosition = aPacket.mSlotMachiningPosition;
+		b.WriteU8(!aPending && NetIsValidSlotMachineSeed(aNextSlotSeed) ? aNextSlotSeed : 255);
+		float aSlotPosition = aPending ? 0.0f : aPacket.mSlotMachiningPosition;
 		if (!_finite(aSlotPosition) || aSlotPosition < 0.0f || aSlotPosition > 1.0f)
 			aSlotPosition = 0.0f;
 		b.WriteF32(aSlotPosition);
+		b.WriteU8(aPacket.mRandomDiscountLevel);
+		const uint16_t aRefreshTime = aPending || aPacket.mPacketType == SEED_NONE ? 0 :
+			(uint16_t)max(0, min(60000, aPacket.mRefreshTime));
+		b.WriteU16(aRefreshTime);
+		b.WriteU8(NetSeedRefreshWireFlag(aRefreshTime, aPacket.mRefreshing));
 	}
 
 	// ---- plants ----
@@ -2161,8 +2171,15 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	mNetFogTimer = aNetFogTimer;
 	mNetStormTimer = aNetStormTimer;
 
+	if (b.Remaining() < 10) { NetTrace("snapshot PvP/balance fields truncated bytes=%zu", b.Remaining()); return; }
 	mNetPvPBrainScore = b.ReadU8Or();
 	mNetPvPKillScore = b.ReadU8Or();
+	const uint8_t aBalanceSide = b.ReadU8Or();
+	const uint16_t aBalanceStrength = b.ReadU16Or();
+	if (!PvPBalanceWireValid(aBalanceSide, aBalanceStrength, IsPvPMode()))
+	{ NetTrace("snapshot PvP balance rejected side=%u strength=%u", aBalanceSide, aBalanceStrength); return; }
+	mNetPvPBalance.mBeneficiary = aBalanceSide;
+	mNetPvPBalance.mStrength = aBalanceStrength;
 	mNetPvPBrains = b.ReadI32Or();
 	mNetTDLives = b.ReadU8Or();
 
@@ -2210,37 +2227,21 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		return;
 	}
 
-	struct NetSeedPacketWire
-	{
-		uint16_t mId;
-		uint8_t mType;
-		uint8_t mImitater;
-		uint8_t mCooldown;
-		uint8_t mOwner;
-		uint8_t mActive;
-		int16_t mOffsetX;
-		uint16_t mSlotCountdown;
-		uint8_t mSlotNextSeed;
-		float mSlotPosition;
-	};
+	using NetSeedPacketWire = NetMysterySeedSnapshot;
+	const NetMysteryLimits aMysteryLimits = {(uint8_t)NUM_SEEDS_IN_CHOOSER, (uint8_t)SEED_IMITATER, (uint8_t)SEED_GATLINGPEA};
+	static_assert(SLOT_MACHINE_TIME == 400 && NET_MAX_PLAYERS == 4, "Mystery snapshot codec bounds must match gameplay");
 	std::vector<NetSeedPacketWire> aSeedPackets;
 	aSeedPackets.reserve(aNumPackets);
 	for (int i = 0; i < aNumPackets; i++)
 	{
 		NetSeedPacketWire aWire = {};
-		aWire.mId = b.ReadU16Or();
-		aWire.mType = b.ReadU8Or();
-		aWire.mImitater = b.ReadU8Or();
-		aWire.mCooldown = b.ReadU8Or();
-		aWire.mOwner = b.ReadU8Or();
-		aWire.mActive = b.ReadU8Or();
-		aWire.mOffsetX = b.ReadI16Or();
-		aWire.mSlotCountdown = b.ReadU16Or();
-		aWire.mSlotNextSeed = b.ReadU8Or();
-		aWire.mSlotPosition = b.ReadF32Or();
-
-		bool aTypeValid = NetIsValidSeedPacketType(aWire.mType);
-		bool anIdValid = aWire.mType == 255 ? aWire.mId == 0 : aWire.mId != 0;
+		if (!NetDecodeMysterySeedSnapshot(b, aWire, aMysteryLimits, (uint8_t)NUM_SEED_TYPES,
+			NetIsValidSeedPacketType, NetIsValidSlotMachineSeed))
+		{
+			NetTrace("snapshot seed rejected index=%d remaining=%zu", i, b.Remaining());
+			return;
+		}
+		bool anIdValid = true;
 		if (anIdValid && aWire.mId != 0)
 		{
 			for (const NetSeedPacketWire& anExisting : aSeedPackets)
@@ -2252,16 +2253,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 				}
 			}
 		}
-		bool anImitaterValid = aWire.mImitater == 255 ||
-			aWire.mImitater < (uint8_t)SeedType::NUM_SEED_TYPES;
-		bool anOwnerValid = aWire.mOwner == LawnNet::NET_SHARED_OWNER ||
-			aWire.mOwner < LawnNet::NET_MAX_PLAYERS;
-		if (!aTypeValid || !anIdValid || !anImitaterValid || !anOwnerValid ||
-			aWire.mActive > 1 || aWire.mOffsetX < 0 || aWire.mOffsetX > 1024 ||
-			aWire.mSlotCountdown > SLOT_MACHINE_TIME ||
-			!NetIsValidSlotMachineSeed(aWire.mSlotNextSeed) ||
-			!_finite(aWire.mSlotPosition) ||
-			aWire.mSlotPosition < 0.0f || aWire.mSlotPosition > 1.0f)
+		if (!anIdValid)
 		{
 			NetTrace("snapshot seed rejected index=%d id=%u type=%u imitater=%u owner=%u active=%u offset=%d slot=(%u,%u,%.3f)",
 				i, aWire.mId, aWire.mType, aWire.mImitater, aWire.mOwner, aWire.mActive,
@@ -2285,6 +2277,10 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	bool anIdentityMultisetMatch = aLocalPacketCount >= 0 &&
 		aLocalPacketCount <= SEEDBANK_CAPACITY && aLocalPacketCount == aNumPackets;
 	int aMismatchLocalIndex = -1;
+	for (int local = 0; local < aLocalPacketCount && local < SEEDBANK_CAPACITY; ++local)
+		for (const NetSeedPacketWire& wire : aSeedPackets)
+			if (mSeedBank->mSeedPackets[local].IsMysteryPending() && mSeedBank->mSeedPackets[local].mNetId == wire.mId && wire.mType != 255)
+			{ NetTrace("snapshot mystery reveal rejected outside START_PLAYING id=%u", wire.mId); return; }
 	if (anIdentityMultisetMatch)
 	{
 		for (int aLocalIndex = 0; aLocalIndex < aLocalPacketCount; aLocalIndex++)
@@ -2299,7 +2295,8 @@ void Board::NetApplySnapshot(NetBuffer& b)
 					if (!aWireUsed[aWireIndex] &&
 						aSeedPackets[aWireIndex].mId == aLocalPacket.mNetId &&
 						aSeedPackets[aWireIndex].mType == aLocalType &&
-						aSeedPackets[aWireIndex].mImitater == aLocalImitater)
+						aSeedPackets[aWireIndex].mImitater == aLocalImitater &&
+						aSeedPackets[aWireIndex].mOriginLevel == aLocalPacket.mRandomDiscountLevel)
 					{
 						aWireUsed[aWireIndex] = true;
 						aWireForLocal[aLocalIndex] = aWireIndex;
@@ -2314,6 +2311,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 				const NetSeedPacketWire& aWire = aSeedPackets[aWireIndex];
 				if (!aWireUsed[aWireIndex] && aWire.mType == aLocalType &&
 					aWire.mImitater == aLocalImitater &&
+					aWire.mOriginLevel == aLocalPacket.mRandomDiscountLevel &&
 					aWire.mOwner == aLocalPacket.mNetOwnerSlot)
 				{
 					aWireUsed[aWireIndex] = true;
@@ -2399,7 +2397,11 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		{
 			SeedType aType = theWire.mType == 255 ? SeedType::SEED_NONE : (SeedType)theWire.mType;
 			SeedType anImitater = theWire.mImitater == 255 ? SeedType::SEED_NONE : (SeedType)theWire.mImitater;
-			if (thePacket.mPacketType != aType || thePacket.mImitaterType != anImitater ||
+			if (theWire.mType == 255 && theWire.mOriginLevel > 0)
+			{
+				thePacket.SetMysteryPlaceholder(theWire.mOriginLevel);
+			}
+			else if (thePacket.mPacketType != aType || thePacket.mImitaterType != anImitater ||
 				(HasConveyorBeltSeedBank() && anIdentityChanged))
 			{
 				// SetPacketType queries plant definitions.  Empty and challenge-only
@@ -2420,9 +2422,11 @@ void Board::NetApplySnapshot(NetBuffer& b)
 				}
 			}
 		}
-		if (thePacket.mRefreshTime > 0)
-			thePacket.mRefreshCounter = theWire.mCooldown * thePacket.mRefreshTime / 255;
+		thePacket.mRefreshTime = theWire.mRefreshTime;
+		thePacket.mRefreshCounter = theWire.mRefreshTime > 0 ? theWire.mCooldown * theWire.mRefreshTime / 255 : 0;
+		thePacket.mRefreshing = theWire.mRefreshing != 0;
 		thePacket.mNetOwnerSlot = theWire.mOwner;
+		thePacket.mRandomDiscountLevel = theWire.mOriginLevel;
 		thePacket.mActive = theWire.mActive != 0;
 		thePacket.mOffsetX = theWire.mOffsetX;
 		thePacket.mSlotMachineCountDown = theWire.mSlotCountdown;
@@ -3912,6 +3916,100 @@ bool Board::NetApplyCameraBootstrap(NetBuffer& b)
 	return true;
 }
 
+void Board::NetEncodeStartPlaying(NetBuffer& b)
+{
+	const NetMysteryLimits limits = {(uint8_t)NUM_SEEDS_IN_CHOOSER, (uint8_t)SEED_IMITATER, (uint8_t)SEED_GATLINGPEA};
+	NetMysteryStart state;
+	state.mBoardX = (int16_t)max(-2048, min(2048, mX));
+	state.mBoardY = (int16_t)max(-1024, min(1024, mY));
+	state.mTreeX = (int16_t)max(-4096, min(4096, mTreeX));
+	state.mPoleX = (int16_t)max(-4096, min(4096, mPoleX));
+	if (!mSeedBank || mSeedBank->mNumPackets < 0 || mSeedBank->mNumPackets > SEEDBANK_CAPACITY ||
+		mNetMysteryRevealIds.size() > NET_MYSTERY_MAX_CARDS)
+	{ NetTrace("START_PLAYING encode rejected invalid bank/reveal count"); return; }
+	for (int i = 0; i < mSeedBank->mNumPackets; ++i)
+		if (mSeedBank->mSeedPackets[i].IsMysteryPending())
+		{ NetTrace("START_PLAYING encode rejected unresolved packet id=%u", mSeedBank->mSeedPackets[i].mNetId); return; }
+	for (uint16_t id : mNetMysteryRevealIds)
+	{
+		const SeedPacket* found = nullptr;
+		for (int i = 0; i < mSeedBank->mNumPackets; ++i)
+			if (mSeedBank->mSeedPackets[i].mNetId == id)
+			{
+				if (found) { NetTrace("START_PLAYING encode rejected duplicate bank id=%u", id); return; }
+				found = &mSeedBank->mSeedPackets[i];
+			}
+		if (!found || !found->mRandomDiscountLevel || found->mRandomDiscountLevel > 10)
+		{ NetTrace("START_PLAYING encode rejected missing mystery identity id=%u", id); return; }
+		NetMysteryReveal reveal;
+		reveal.mId = id; reveal.mType = (uint8_t)found->mPacketType; reveal.mImitater = (uint8_t)found->mImitaterType;
+		state.mReveals.push_back(reveal);
+	}
+	if (!NetEncodeMysteryStart(state, b, limits))
+	{ NetTrace("START_PLAYING encode rejected invalid reveal state"); return; }
+	NetTrace("camera bootstrap encoded board=(%d,%d) tree=%d pole=%d",
+		state.mBoardX, state.mBoardY, state.mTreeX, state.mPoleX);
+	NetTrace("START_PLAYING encoded mysteryReveals=%zu bytes=%zu", state.mReveals.size(), b.Size());
+}
+
+bool Board::NetApplyStartPlaying(NetBuffer& b)
+{
+	const size_t start = b.mReadPos;
+	const NetMysteryLimits limits = {(uint8_t)NUM_SEEDS_IN_CHOOSER, (uint8_t)SEED_IMITATER, (uint8_t)SEED_GATLINGPEA};
+	NetMysteryStart state;
+	if (!NetDecodeMysteryStart(b, state, limits) || !mSeedBank ||
+		mSeedBank->mNumPackets < 0 || mSeedBank->mNumPackets > SEEDBANK_CAPACITY)
+	{ b.mReadPos = start; NetTrace("START_PLAYING rejected malformed reveal/camera"); return false; }
+	std::vector<uint16_t> pending;
+	for (int i = 0; i < mSeedBank->mNumPackets; ++i)
+		if (mSeedBank->mSeedPackets[i].IsMysteryPending()) pending.push_back(mSeedBank->mSeedPackets[i].mNetId);
+	if (!NetMysteryRevealIdsMatch(pending, state.mReveals))
+	{ b.mReadPos = start; NetTrace("START_PLAYING rejected pending identity set pending=%zu reveals=%zu", pending.size(), state.mReveals.size()); return false; }
+	std::vector<SeedPacket*> packets;
+	SeedChooserScreen* chooser = mApp->mSeedChooserScreen;
+	for (const NetMysteryReveal& reveal : state.mReveals)
+	{
+		SeedPacket* packet = nullptr;
+		for (int i = 0; i < mSeedBank->mNumPackets; ++i)
+			if (mSeedBank->mSeedPackets[i].mNetId == reveal.mId)
+			{
+				if (packet) { b.mReadPos = start; return false; }
+				packet = &mSeedBank->mSeedPackets[i];
+			}
+		const auto available = [&](SeedType type)
+		{
+			return mApp->SeedTypeAvailable(type) && (!chooser ||
+				(!chooser->SeedNotAllowedToPick(type) && !chooser->SeedNotAllowedDuringTrial(type)));
+		};
+		if (!packet || packet->mRandomDiscountLevel > 10 || packet->mNetOwnerSlot >= NET_MAX_PLAYERS ||
+			!available((SeedType)reveal.mType) ||
+			(reveal.mType == (uint8_t)SEED_IMITATER && !available((SeedType)reveal.mImitater)))
+		{ b.mReadPos = start; NetTrace("START_PLAYING rejected unavailable reveal id=%u type=%u", reveal.mId, reveal.mType); return false; }
+		for (int i = 0; i < mSeedBank->mNumPackets; ++i)
+		{
+			const SeedPacket& other = mSeedBank->mSeedPackets[i];
+			if (other.mNetOwnerSlot == packet->mNetOwnerSlot && !other.IsMysteryPending() && (uint8_t)other.mPacketType == reveal.mType)
+			{ b.mReadPos = start; NetTrace("START_PLAYING rejected own fixed-card duplicate id=%u", reveal.mId); return false; }
+		}
+		for (size_t i = 0; i < packets.size(); ++i)
+			if (packets[i]->mNetOwnerSlot == packet->mNetOwnerSlot && state.mReveals[i].mType == reveal.mType)
+			{ b.mReadPos = start; NetTrace("START_PLAYING rejected own mystery duplicate id=%u", reveal.mId); return false; }
+		packets.push_back(packet);
+	}
+	NetBuffer camera;
+	camera.WriteI16(state.mBoardX); camera.WriteI16(state.mBoardY); camera.WriteI16(state.mTreeX); camera.WriteI16(state.mPoleX);
+	if (!NetApplyCameraBootstrap(camera)) { b.mReadPos = start; return false; }
+	for (size_t i = 0; i < packets.size(); ++i)
+	{
+		SeedPacket& packet = *packets[i];
+		const uint8_t origin = packet.mRandomDiscountLevel;
+		packet.SetPacketType((SeedType)state.mReveals[i].mType, state.mReveals[i].mImitater == 255 ? SEED_NONE : (SeedType)state.mReveals[i].mImitater);
+		packet.mRandomDiscountLevel = origin;
+	}
+	NetTrace("START_PLAYING applied mysteryReveals=%zu identitiesPreserved=1", state.mReveals.size());
+	return true;
+}
+
 void Board::NetEncodeIntroState(NetBuffer& b)
 {
 	const int aWideX = mApp->mDDInterface ? mApp->mDDInterface->mWideScreenOffsetX : 0;
@@ -4537,16 +4635,18 @@ void Board::UpdateTowerDefenseGame()
 
 void Board::UpdatePvP()
 {
-	if (!IsPvPMode() || mApp->NetIsClient() || mBoardFadeOutCounter >= 0 ||
+	if (!IsPvPMode() || mApp->NetIsClient() || mPaused || mBoardFadeOutCounter >= 0 ||
 		mApp->mGameScene != GameScenes::SCENE_PLAYING)
 		return;
+	UpdatePvPBalance(mNetPvPBalance, mNetPvPKillScore, mNetPvPBrainScore, GetModeDifficulty(),
+		!mPaused && !mLevelComplete && !mLevelAwardSpawned && mNetPvPKillScore < 100 && mNetPvPBrainScore < 5);
 
-	// brains trickle: +50 every ~10 seconds, shared by the zombie team
+	// Brains trickle: one basic zombie every ~10 seconds, shared by the team.
 	mNetPvPBrainTick++;
 	if (mNetPvPBrainTick >= 1000)
 	{
 		mNetPvPBrainTick = 0;
-		mNetPvPBrains += 50;
+		mNetPvPBrains += 25;
 	}
 
 	// win checks
@@ -4568,7 +4668,7 @@ void Board::NetPvPZombieKilled(Zombie* theZombie)
 {
 	if (!IsPvPMode() || mApp->NetIsClient() || !theZombie || theZombie->mNetKillCounted ||
 		!theZombie->IsOnBoard() || mApp->mGameScene != GameScenes::SCENE_PLAYING ||
-		mBoardFadeOutCounter >= 0 || mLevelComplete)
+		mBoardFadeOutCounter >= 0 || mLevelComplete || mNetPvPKillScore >= 100 || mNetPvPBrainScore >= 5)
 		return;
 	theZombie->mNetKillCounted = true;
 	++mNetPvPKillScore;
@@ -4577,7 +4677,11 @@ void Board::NetPvPZombieKilled(Zombie* theZombie)
 // A zombie crossed into the house: brain for the zombie team.
 void Board::NetPvPZombieScored(Zombie* theZombie)
 {
-	if (!IsPvPMode() || mApp->NetIsClient())
+	if (!IsPvPMode() || mApp->NetIsClient() || !theZombie || theZombie->mBoard != this ||
+		theZombie->mNetKillCounted || theZombie->IsDeadOrDying() || !theZombie->IsOnBoard() ||
+		!theZombie->mHasHead || theZombie->IsWalkingBackwards() ||
+		mApp->mGameScene != GameScenes::SCENE_PLAYING || mBoardFadeOutCounter >= 0 ||
+		mLevelComplete || mNetPvPKillScore >= 100 || mNetPvPBrainScore >= 5)
 		return;
 	mNetPvPBrainScore++;
 	// Reaching the house is a score for the invading team, not a plant kill.

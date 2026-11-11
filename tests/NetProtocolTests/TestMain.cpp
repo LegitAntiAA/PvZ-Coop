@@ -5,6 +5,8 @@
 #include "NetMowerSnapshotTests.h"
 #include "NetZombieAnimTests.h"
 #include "NetZombatarTests.h"
+#include "NetGameplayPolicyTests.h"
+#include "NetMysteryTests.h"
 
 #include <chrono>
 #include <cstdio>
@@ -840,6 +842,7 @@ void TestSpectatorAuthorityAndStrokeLifetime()
 {
 	const uint8_t mutations[] = {LawnNet::NETMSG_INPUT_MOUSE,LawnNet::NETMSG_INPUT_KEY,
 		LawnNet::NETMSG_STORE_ACTION,LawnNet::NETMSG_SEED_PICK,LawnNet::NETMSG_SEED_UNPICK,
+		LawnNet::NETMSG_CHOOSER_MYSTERY,
 		LawnNet::NETMSG_TEAM_SELECT,LawnNet::NETMSG_READY,LawnNet::NETMSG_START_GAME,255};
 	for (uint8_t type : mutations) CHECK(!LawnNet::NetSpectatorMaySend(type));
 	CHECK(LawnNet::NetSpectatorMaySend(LawnNet::NETMSG_CHAT_SEND));
@@ -902,6 +905,12 @@ int main(int argc, char** argv)
 	const auto aZombatarResult = RunNetZombatarTests();
 	gChecks += aZombatarResult.mChecks;
 	gFailures += aZombatarResult.mFailures;
+	const auto aGameplayResult = RunNetGameplayPolicyTests();
+	gChecks += aGameplayResult.mChecks;
+	gFailures += aGameplayResult.mFailures;
+	const auto aMysteryResult = RunNetMysteryTests();
+	gChecks += aMysteryResult.mChecks;
+	gFailures += aMysteryResult.mFailures;
 
 	std::printf("\nchecks=%d failures=%d skipped=%d\n", gChecks, gFailures, gSkipped);
 	return gFailures == 0 ? 0 : 1;

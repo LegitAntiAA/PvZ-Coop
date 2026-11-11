@@ -278,6 +278,8 @@ void Plant::PlantInitialize(int theGridX, int theGridY, SeedType theSeedType, Se
         {
             mLaunchCounter = RandRangeInt(0, mLaunchRate);
         }
+        if (mBoard && (MakesSun() || aPlantDef.mSubClass == PlantSubClass::SUBCLASS_SHOOTER))
+            mLaunchCounter = mBoard->GetPvPPlantInterval(mLaunchCounter);
     }
     else
     {
@@ -1298,6 +1300,9 @@ void Plant::UpdateShooter()
     if (mLaunchCounter <= 0)
     {
         mLaunchCounter = mLaunchRate - Sexy::Rand(15);
+        if (mBoard) mLaunchCounter = mBoard->GetPvPPlantInterval(mLaunchCounter);
+        if (mBoard && mApp->IsIZombieLevel())
+            mLaunchCounter = LawnNet::DifficultyInterval(mLaunchCounter, mBoard->GetModeDifficulty(), 150);
 #ifdef _MOBILE_MINIGAMES
         if (mState == PlantState::STATE_HEAT_WAVE_POWERED)
             mLaunchCounter = 26;
@@ -1390,6 +1395,7 @@ void Plant::UpdateProductionPlant()
     if (mLaunchCounter <= 0)
     {
         mLaunchCounter = RandRangeInt(mLaunchRate - 150, mLaunchRate);
+        if (MakesSun()) mLaunchCounter = mBoard->GetPvPPlantInterval(mLaunchCounter);
         mApp->PlayFoley(FoleyType::FOLEY_SPAWN_SUN);
 
         if (mSeedType == SeedType::SEED_SUNSHROOM)

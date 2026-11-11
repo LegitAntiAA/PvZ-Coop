@@ -72,14 +72,14 @@ void NetManager::PromoteSpectatorsAtLevelBoundary(const char* theReason)
 	{
 		int owned = 0, quotas[NET_MAX_PLAYERS] = {};
 		for (int i = 0; i < bank->mNumPackets; ++i)
-			if (bank->mSeedPackets[i].mPacketType != SeedType::SEED_NONE &&
+			if ((bank->mSeedPackets[i].mPacketType != SeedType::SEED_NONE || bank->mSeedPackets[i].IsMysteryPending()) &&
 				bank->mSeedPackets[i].mNetOwnerSlot != NET_SHARED_OWNER) ++owned;
 		const int fixed = min(owned, SeedChooserScreen::CoopExpectedGlobalFixedPicks(mApp, board));
 		if (ComputeChooserQuotas(owned, fixed, board->IsPvPMode(), quotas))
 			for (int i = 0; i < bank->mNumPackets; ++i)
 			{
 				SeedPacket& packet = bank->mSeedPackets[i];
-				if (packet.mPacketType == SeedType::SEED_NONE || packet.mNetOwnerSlot == NET_SHARED_OWNER) continue;
+				if ((packet.mPacketType == SeedType::SEED_NONE && !packet.IsMysteryPending()) || packet.mNetOwnerSlot == NET_SHARED_OWNER) continue;
 				int owner = packet.mNetOwnerSlot;
 				if (owner >= NET_MAX_PLAYERS || quotas[owner] == 0)
 				{
@@ -159,7 +159,7 @@ void NetManager::RedistributeSeeds(int theDepartedSlot)
 	for (int i=0;i<bank->mNumPackets;++i)
 	{
 		const auto& packet = bank->mSeedPackets[i];
-		if (packet.mPacketType == SeedType::SEED_NONE) continue;
+		if (packet.mPacketType == SeedType::SEED_NONE && !packet.IsMysteryPending()) continue;
 		if (packet.mNetOwnerSlot < NET_MAX_PLAYERS) ++owners[packet.mNetOwnerSlot];
 		if (packet.mNetOwnerSlot == theDepartedSlot) ++orphaned;
 	}

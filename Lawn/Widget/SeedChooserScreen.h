@@ -95,6 +95,14 @@ public:
     int                     mCoopRemotePickCount[4];
     int                     mCoopMyImitater;                    // imitater copy for our pending pick
     unsigned int            mCoopLastStateHash;                 // suppress identical per-frame network states
+    bool                    mCoopMysteryRequestPending;
+    Image*                  mCoopWaitingPaper;
+    bool                    CoopIsPvpZombieWaiting() const;
+    void                    CoopDrawPvpWaiting(Graphics* g);
+    int                     CoopGetMysteryCount(int theSlot) const;
+    void                    CoopClearLocalMutablePicks();
+    bool                    CoopApplyMysteryRequest(int theSlot, bool theEnabled);
+    bool                    CoopMysteryHitTest(int x, int y, int& theSlot);
     void                    CoopSendPick(int theSeedType, int theImitater, bool theUnpick);
     bool                    CoopIsPickedByOthers(int theSeedType) const;
     bool                    CoopRecordRemotePick(int theSlot, int theSeedType, int theImitater, bool theUnpick);
@@ -109,6 +117,7 @@ public:
     void                    CoopBroadcastChooserState(bool theForce = false);
     bool                    CoopBroadcastChooserStart();
     void                    CoopBuildBankFromLocalState();
+    bool                    CoopValidateBankPayload(const LawnNet::NetBuffer& thePayload);
     bool                    CoopBuildBankFromPayload(LawnNet::NetBuffer& thePayload);
     bool                    CoopApplyChooserState(LawnNet::NetBuffer& thePayload);
     void                    CoopPollNetwork();

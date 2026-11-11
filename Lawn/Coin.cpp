@@ -1680,6 +1680,9 @@ int Coin::GetDisappearTime()
         aTime = 1500;
     }
 
+    if (mBoard && mApp->IsScaryPotterLevel() && mType == CoinType::COIN_USABLE_SEED_PACKET)
+        aTime = LawnNet::DifficultyInterval(aTime, mBoard->GetModeDifficulty(), 400, 600);
+
     if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN)
     {
         aTime = 6000;

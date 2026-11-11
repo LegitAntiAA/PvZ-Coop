@@ -921,6 +921,18 @@ void Challenge::BeghouledClearCrater(int theCount)
 	}
 }
 
+int Challenge::GetDifficultyGoal() const
+{
+	const int aDifficulty = mBoard->GetModeDifficulty();
+	if (mApp->mGameMode == GAMEMODE_CHALLENGE_BEGHOULED || mApp->mGameMode == GAMEMODE_CHALLENGE_BEGHOULED_TWIST)
+		return LawnNet::DifficultyCount(BEGHOULED_WINNING_SCORE, aDifficulty, 45);
+	if (mApp->mGameMode == GAMEMODE_CHALLENGE_ZOMBIQUARIUM)
+		return LawnNet::DifficultyCount(ZOMBIQUARIUM_WINNING_SCORE, aDifficulty, 250);
+	if (mApp->IsSquirrelLevel())
+		return LawnNet::DifficultyCount(MAX_SQUIRRELS, aDifficulty, 5);
+	return 0;
+}
+
 //0x420EF0
 void Challenge::BeghouledScore(int theGridX, int theGridY, int theNumPlants, bool theIsHorizontal)
 {
@@ -958,18 +970,18 @@ void Challenge::BeghouledScore(int theGridX, int theGridY, int theNumPlants, boo
 	{
 		if (!mBoard->mAdvice->IsBeingDisplayed())
 		{
-			SexyString aMsg = TodReplaceNumberString(_S("[ADVICE_BEGHOULED_MATCH_3]"), _S("{SCORE}"), BEGHOULED_WINNING_SCORE);
+			SexyString aMsg = TodReplaceNumberString(_S("[ADVICE_BEGHOULED_MATCH_3]"), _S("{SCORE}"), GetDifficultyGoal());
 			mBoard->DisplayAdvice(aMsg, MESSAGE_STYLE_HINT_FAST, ADVICE_BEGHOULED_MATCH_3);
 		}
-		if (mChallengeScore >= BEGHOULED_WINNING_SCORE - 5)
+		if (mChallengeScore >= GetDifficultyGoal() - 5)
 		{
 			mBoard->DisplayAdvice(_S("[ADVICE_BEGHOULED_ALMOST_THERE]"), MESSAGE_STYLE_HINT_FAST, ADVICE_ALMOST_THERE);
 		}
 	}
 
-	if (mChallengeScore >= BEGHOULED_WINNING_SCORE)
+	if (mChallengeScore >= GetDifficultyGoal())
 	{
-		mChallengeScore = BEGHOULED_WINNING_SCORE;
+		mChallengeScore = GetDifficultyGoal();
 		SpawnLevelAward(theGridX, theGridY);
 		mBoard->ClearAdvice(ADVICE_NONE);
 	}
@@ -1654,7 +1666,7 @@ void Challenge::BeghouledFlashAMatch()
 //0x4229F0
 void Challenge::UpdateBeghouled()
 {
-	mBoard->mProgressMeterWidth = TodAnimateCurve(0, BEGHOULED_WINNING_SCORE, mChallengeScore, 0, PROGRESS_METER_COUNTER, CURVE_LINEAR);
+	mBoard->mProgressMeterWidth = TodAnimateCurve(0, GetDifficultyGoal(), mChallengeScore, 0, PROGRESS_METER_COUNTER, CURVE_LINEAR);
 
 	bool aMovingPlant = false;
 	Plant* aPlant = nullptr;
@@ -3189,7 +3201,7 @@ void Challenge::WhackAZombieSpawning()
 	}
 	if (mBoard->mZombieCountDown == 0)
 	{
-		mBoard->mZombieCountDown = 2000;
+		mBoard->mZombieCountDown = LawnNet::DifficultyInterval(2000, mBoard->GetModeDifficulty(), 350, 500);
 		mBoard->mZombieCountDownStart = mBoard->mZombieCountDown;
 		mBoard->mCurrentWave++;
 		mChallengeStateCounter = mBoard->mCurrentWave == mBoard->mNumWaves ? 300 : 1;
@@ -3231,6 +3243,8 @@ void Challenge::WhackAZombieSpawning()
 		{
 			aZombieCount = 2;
 		}
+		if (!aIsFinalWave)
+			aZombieCount = LawnNet::DifficultyCount(aZombieCount, mBoard->GetModeDifficulty(), 2);
 
 		// 确定僵尸类型
 		if (aTypeHit < aPailChance[aPhase] && aZombieCount < 3)
@@ -3290,6 +3304,7 @@ void Challenge::WhackAZombieSpawning()
 		int aStateCounterMin = TodAnimateCurve(1, 12, mBoard->mCurrentWave, 100, 30, CURVE_LINEAR);
 		int aStateCounterMax = TodAnimateCurve(1, 12, mBoard->mCurrentWave, 200, 60, CURVE_LINEAR);
 		mChallengeStateCounter = RandRangeInt(aStateCounterMin, aStateCounterMax);
+		mChallengeStateCounter = LawnNet::DifficultyInterval(mChallengeStateCounter, mBoard->GetModeDifficulty(), 350, 15);
 		if (aIsFinalWave)
 		{
 			mBoard->mZombieCountDown = 0;
@@ -3945,7 +3960,7 @@ void Challenge::BeghouledPacketClicked(SeedPacket* theSeedPacket)
 	}
 	*/
 
-	int aPacketCost = mBoard->GetCurrentPlantCost(theSeedPacket->mPacketType, SEED_NONE);
+	int aPacketCost = mBoard->GetSeedPacketCost(*theSeedPacket);
 	if (!mBoard->CanTakeSunMoney(aPacketCost))
 		return;
 
@@ -4063,7 +4078,7 @@ Zombie* Challenge::ZombiquariumSpawnSnorkle()
 //0x427DD0
 void Challenge::ZombiquariumPacketClicked(SeedPacket* theSeedPacket)
 {
-	int aCost = mBoard->GetCurrentPlantCost(theSeedPacket->mPacketType, SEED_NONE);
+	int aCost = mBoard->GetSeedPacketCost(*theSeedPacket);
 	if (mBoard->CanTakeSunMoney(aCost))
 	{
 		if (theSeedPacket->mPacketType == SEED_ZOMBIQUARIUM_SNORKLE)
@@ -4138,13 +4153,13 @@ void Challenge::ZombiquariumUpdate()
 	}
 	if (!mBoard->mAdvice->IsBeingDisplayed() && !mBoard->mHelpDisplayed[ADVICE_ZOMBIQUARIUM_COLLECT_SUN])
 	{
-		SexyString aMsg = TodReplaceNumberString(_S("[ADVICE_ZOMBIQUARIUM_COLLECT_SUN]"), _S("{SCORE}"), ZOMBIQUARIUM_WINNING_SCORE);
+		SexyString aMsg = TodReplaceNumberString(_S("[ADVICE_ZOMBIQUARIUM_COLLECT_SUN]"), _S("{SCORE}"), GetDifficultyGoal());
 		mBoard->DisplayAdvice(aMsg, MESSAGE_STYLE_HINT_TALL_FAST, ADVICE_ZOMBIQUARIUM_COLLECT_SUN);
 	}
 
-	int aScore = ClampInt(mBoard->mSunMoney, 0, ZOMBIQUARIUM_WINNING_SCORE);
-	mBoard->mProgressMeterWidth = TodAnimateCurve(0, ZOMBIQUARIUM_WINNING_SCORE, aScore, 0, PROGRESS_METER_COUNTER, CURVE_LINEAR);
-	if (aScore >= ZOMBIQUARIUM_WINNING_SCORE - 100)
+	int aScore = ClampInt(mBoard->mSunMoney, 0, GetDifficultyGoal());
+	mBoard->mProgressMeterWidth = TodAnimateCurve(0, GetDifficultyGoal(), aScore, 0, PROGRESS_METER_COUNTER, CURVE_LINEAR);
+	if (aScore >= GetDifficultyGoal() - 100)
 	{
 		mBoard->DisplayAdvice(_S("[ADVICE_ALMOST_THERE]"), MESSAGE_STYLE_HINT_TALL_FAST, ADVICE_ALMOST_THERE);
 	}
@@ -4162,7 +4177,7 @@ void Challenge::ZombiquariumUpdate()
 		mBoard->ClearAdvice(ADVICE_ZOMBIQUARIUM_BUY_SNORKEL);
 		mBoard->mTutorialState = TUTORIAL_OFF;
 	}
-	if (aScore >= ZOMBIQUARIUM_WINNING_SCORE && mBoard->mTutorialState == TUTORIAL_ZOMBIQUARIUM_BOUGHT_SNORKEL)
+	if (aScore >= GetDifficultyGoal() && mBoard->mTutorialState == TUTORIAL_ZOMBIQUARIUM_BOUGHT_SNORKEL)
 	{
 		mBoard->mTutorialState = TUTORIAL_ZOMBIQUARIUM_CLICK_TROPHY;
 		float aPosX = mBoard->mSeedBank->mX + mBoard->mSeedBank->mSeedPackets[1].mX;
@@ -4170,7 +4185,7 @@ void Challenge::ZombiquariumUpdate()
 		mBoard->TutorialArrowShow(aPosX, aPosY);
 		mBoard->DisplayAdvice(_S("[ADVICE_ZOMBIQUARIUM_CLICK_TROPHY]"), MESSAGE_STYLE_HINT_TALL_FAST, ADVICE_ZOMBIQUARIUM_CLICK_TROPHY);
 	}
-	else if (aScore < ZOMBIQUARIUM_WINNING_SCORE && mBoard->mTutorialState == TUTORIAL_ZOMBIQUARIUM_CLICK_TROPHY)
+	else if (aScore < GetDifficultyGoal() && mBoard->mTutorialState == TUTORIAL_ZOMBIQUARIUM_CLICK_TROPHY)
 	{
 		mBoard->TutorialArrowRemove();
 		mBoard->ClearAdvice(ADVICE_ZOMBIQUARIUM_CLICK_TROPHY);
@@ -4578,6 +4593,25 @@ void Challenge::ScaryPotterPopulate()
 		}
 	}
 
+	// Keep the authored finite puzzle and its resources intact. Harder settings
+	// remove some free plant hints; they do not inject an uncounterable enemy.
+	const int aDifficulty = mBoard->GetModeDifficulty();
+	if (aDifficulty > 1)
+	{
+		int aLeafCount = 0;
+		GridItem* aPot = nullptr;
+		while (mBoard->IterateGridItems(aPot))
+			if (aPot->mGridItemType == GRIDITEM_SCARY_POT && aPot->mGridItemState == GRIDITEM_STATE_SCARY_POT_LEAF)
+				++aLeafCount;
+		int aHideCount = LawnNet::GameplayCeilRatio(aLeafCount, aDifficulty - 1, 9);
+		aPot = nullptr;
+		while (aHideCount > 0 && mBoard->IterateGridItems(aPot))
+			if (aPot->mGridItemType == GRIDITEM_SCARY_POT && aPot->mGridItemState == GRIDITEM_STATE_SCARY_POT_LEAF)
+			{
+				aPot->mGridItemState = GRIDITEM_STATE_SCARY_POT_QUESTION;
+				--aHideCount;
+			}
+	}
 	mScaryPotterPots = ScaryPotterCountPots();
 }
 
@@ -4924,7 +4958,9 @@ void Challenge::IZombieMouseDownWithZombie(int theX, int theY, int theClickCount
 		{
 			if (CanPlantAt(aGridX, aGridY, aSeedType) == PLANTING_OK)
 			{
-				if (mApp->mEasyPlantingCheat || mBoard->TakeSunMoney(mBoard->GetCurrentPlantCost(aSeedType, SEED_NONE)))
+				const int anIndex = mBoard->mCursorObject->mSeedBankIndex;
+				if (anIndex < 0 || anIndex >= mBoard->mSeedBank->mNumPackets) return;
+				if (mApp->mEasyPlantingCheat || mBoard->TakeSunMoney(mBoard->GetSeedPacketCost(mBoard->mSeedBank->mSeedPackets[anIndex])))
 				{
 					mBoard->ClearAdvice(ADVICE_I_ZOMBIE_LEFT_OF_LINE);
 					mBoard->ClearAdvice(ADVICE_I_ZOMBIE_NOT_PASSED_LINE);
@@ -5566,7 +5602,7 @@ void Challenge::SquirrelStart()
 		}
 	}
 	
-	for (int aCount = MAX_SQUIRRELS; aCount > 0; aCount--)
+	for (int aCount = GetDifficultyGoal(); aCount > 0; aCount--)
 	{
 		TodWeightedGridArray* aGrid = TodPickFromWeightedGridArray(aPicks, 45);
 		aGrid->mWeight = 0;
@@ -5576,7 +5612,7 @@ void Challenge::SquirrelStart()
 		aSquirrel->mGridItemState = GRIDITEM_STATE_SQUIRREL_WAITING;
 		aSquirrel->mGridX = aGrid->mX;
 		aSquirrel->mGridY = aGrid->mY;
-		aSquirrel->mGridItemCounter = RandRangeInt(100, 400);
+		aSquirrel->mGridItemCounter = LawnNet::DifficultyInterval(RandRangeInt(100, 400), mBoard->GetModeDifficulty(), 250);
 		aSquirrel->mRenderOrder = mBoard->MakeRenderOrder(RENDER_LAYER_GRAVE_STONE, aSquirrel->mGridY, 1);
 	}
 
@@ -5600,7 +5636,7 @@ void Challenge::SquirrelStart()
 //0x42BCB0
 void Challenge::SquirrelChew(GridItem* theSquirrel)
 {
-	theSquirrel->mGridItemCounter = RandRangeInt(100, 400);
+	theSquirrel->mGridItemCounter = LawnNet::DifficultyInterval(RandRangeInt(100, 400), mBoard->GetModeDifficulty(), 250);
 
 	Plant* aPlant = mBoard->GetTopPlantAt(theSquirrel->mGridX, theSquirrel->mGridY, TOPPLANT_EATING_ORDER);
 	if (aPlant)
@@ -5616,7 +5652,7 @@ void Challenge::SquirrelChew(GridItem* theSquirrel)
 
 void Challenge::SquirrelPeek(GridItem* theSquirrel)
 {
-	theSquirrel->mGridItemCounter = 50;
+	theSquirrel->mGridItemCounter = LawnNet::DifficultyInterval(50, mBoard->GetModeDifficulty(), 250);
 	theSquirrel->mGridItemState = GRIDITEM_STATE_SQUIRREL_PEEKING;
 }
 
@@ -5738,8 +5774,8 @@ void Challenge::SquirrelUpdate()
 		}
 	}
 
-	mChallengeScore = MAX_SQUIRRELS - SquirrelCountUncaught();
-	mBoard->mProgressMeterWidth = TodAnimateCurve(0, MAX_SQUIRRELS, mChallengeScore, 0, PROGRESS_METER_COUNTER, CURVE_LINEAR);
+	mChallengeScore = GetDifficultyGoal() - SquirrelCountUncaught();
+	mBoard->mProgressMeterWidth = TodAnimateCurve(0, GetDifficultyGoal(), mChallengeScore, 0, PROGRESS_METER_COUNTER, CURVE_LINEAR);
 }
 
 //0x42C340
@@ -6560,9 +6596,15 @@ void Challenge::PvPMouseDownWithZombie(int theX, int theY, int theClickCount)
 	{
 		SeedType aSeedType = mBoard->mCursorObject->mType;
 		int aGridY = mBoard->PlantingPixelToGridY(theX, theY, aSeedType);
+		const int aGridX = mBoard->PlantingPixelToGridX(theX, theY, aSeedType);
+		if (aSeedType == SEED_ZOMBIE_BUNGEE && (aGridX < 0 || aGridX >= MAX_GRID_SIZE_X)) return;
 		if (aGridY != -1 && theClickCount)
 		{
-			int aCost = mBoard->GetCurrentPlantCost(aSeedType, SEED_NONE) / 2;
+			const int anIndex = mBoard->mCursorObject->mSeedBankIndex;
+			if (anIndex < 0 || anIndex >= mBoard->mSeedBank->mNumPackets) return;
+			SeedPacket& aPacket = mBoard->mSeedBank->mSeedPackets[anIndex];
+			if (aPacket.mPacketType != aSeedType || aPacket.IsMysteryPending()) return;
+			int aCost = mBoard->GetSeedPacketCost(aPacket);
 			if (mApp->mEasyPlantingCheat || mBoard->CanTakeBrains(aCost))
 			{
 				if (mBoard->mZombies.mSize >= PVP_ZOMBIE_LIMIT)
@@ -6573,7 +6615,8 @@ void Challenge::PvPMouseDownWithZombie(int theX, int theY, int theClickCount)
 				}
 
 				ZombieType aZombieType = IZombieSeedTypeToZombieType(aSeedType);
-				Zombie* aZombie = mBoard->AddZombieInRow(aZombieType, aGridY, 0);
+				Zombie* aZombie = mBoard->AddZombieInRow(aZombieType, aGridY, 0,
+					aZombieType == ZOMBIE_BUNGEE ? aGridX : -1);
 				if (!aZombie)
 				{
 					mApp->PlaySample(SOUND_BUZZER);

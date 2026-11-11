@@ -29,10 +29,12 @@ class NetOnlineDialog : public LawnDialog, public Sexy::EditListener, public Sex
     LawnStoneButton* mNext;
     std::vector<LawnNet::NetOnlineRoom> mRooms;
     std::string mRoomsStamp;
+    std::string mOnlineErrorStamp;
     std::string mSelectedRoom;
     Sexy::DDImage* mPaperImage;
     SexyString mError;
     int mPage;
+    int mRowsPerPage;
     int mMaxPlayers;
     unsigned int mLastActionTick;
     bool mAttemptedRoom;

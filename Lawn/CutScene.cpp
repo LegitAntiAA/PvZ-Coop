@@ -1625,6 +1625,21 @@ void CutScene::StartSeedChooser()
 		(void*)mApp->mWidgetManager->mFocusWidget);
 }
 
+void CutScene::RestartSeedChooser()
+{
+	// A deferred mystery roll can fail without changing any card. Return to a
+	// fresh authoritative chooser generation rather than leaving a closed UI.
+	mCutsceneTime = TimeSeedChoserSlideOnEnd + mCrazyDaveTime;
+	mPlacedZombies = false;
+	mBoard->mShowShovel = false;
+	mBoard->mMenuButton->mBtnNoDraw = true;
+	mApp->KillSeedChooserScreen();
+	mApp->ShowSeedChooserScreen();
+	StartSeedChooser();
+	if (mApp->mSeedChooserScreen)
+		mApp->mSeedChooserScreen->CoopBroadcastChooserState(true);
+}
+
 void CutScene::EndSeedChooser()
 {
 	mApp->mSeedChooserScreen->mMouseVisible = false;

@@ -53,7 +53,7 @@ foreach ($scenario in "Adventure8Soak", "Adventure8Victory", "SlotMachineClient"
 
 The Slot Machine, Tower Defense, Portal Combat, and EndlessST scenarios deliberately run the stock intro. Slot Machine waits for the seed bank and handle to finish their normal slide-on lifecycle; Tower Defense waits for path generation and the client-side plant action; EndlessST also exercises the second chooser after its ten-wave stage transition. `TowerDefenseClient`, `EndlessST`, `Adventure8Soak`, and `Adventure8Victory` reject `-SkipIntro 1` instead of silently weakening their coverage.
 
-`-SkipIntro` accepts `0` or `1`. With `0`, the smoke controller waits for the normal intro to enter `SCENE_PLAYING`; it never injects a gameplay action during cutscene, chooser, dialog, or pause state. Host and client dimensions may differ to exercise coordinate canonicalization; both windows are always visible and placed side by side.
+`-SkipIntro` accepts `0` or `1`. With `0`, the smoke controller waits for the normal intro to enter `SCENE_PLAYING`; it never injects a gameplay action during cutscene, chooser, dialog, or pause state. Host and client dimensions may differ to exercise coordinate canonicalization. Use `-Background` to keep SDL windows hidden and capture only their own renderer; this does not capture the desktop or inject global input. Without that switch the original visible side-by-side workflow remains available.
 
 Artifacts are retained by default under `%TEMP%\PvZ-Coop-Smoke\run_<GUID>`. Failed runs are always retained. `-CleanupOnSuccess` removes only the validated GUID run directory after both owned processes have stopped; the runner never uses `taskkill /IM` or kills unrelated PvZ processes.
 
@@ -68,5 +68,18 @@ The client uses the same fields with `"role":"client"` and a non-zero `snapshots
 The Adventure 5 and Whack cursor assertions require the stock shovel/hammer draw path, player tint, darker outline, and `fallback=0`; receiving only a cursor type cannot pass them. `CURSOR_TYPE_PLANT_FROM_GLOVE` and `CURSOR_TYPE_PLANT_FROM_WHEEL_BARROW` deliberately remain on the generic pointer fallback because their plant/potted-plant object identity is not yet part of the cursor protocol. Hammer shape/tint is covered, but its transient swing animation phase is not serialized by this harness.
 
 Each GUID artifact tree preserves generated configs/manifests, role logs, atomic result JSON, a PID ledger, and `summary.json`. Failed runs are never cleaned automatically.
+
+Every launch also writes `owned-process.json` beside its manifest with the PID, absolute EXE path and UTC start time. Graceful close and forced cleanup verify all three against a fresh process lookup before acting; an unknown process is never closed by name. Account for a player's own running copies when scheduling multi-process tests.
+
+Additional hidden native-game workflows:
+
+| Runner | Coverage |
+|---|---|
+| `RunMysterySmoke.ps1` | Real SDL mystery toggle/cancel, fixed/mixed picks, secret INTRO, atomic reveal, actual discounted purchase and mirrored recharge at difficulty1 or10 |
+| `RunMysteryObserverSmoke.ps1` | Late INTRO/PLAYING observer, secret/revealed metadata, native pause/kick, reassigned cards and purchase; requires three owned game processes |
+| `RunDifficultySmoke.ps1 -FamiliesOnly` | Eighteen native D1/D10 cases across nine difficulty families; selected objectives/timers/resources rather than complete campaigns |
+| `RunDifficultySmoke.ps1 -PvPOnly` | Controlled history through native balance logic, real SDL purchases and mirrored effects, no healing/compounding, pause/terminal freeze; rejects snapshot decoder failures |
+| `RunGameOverSmoke.ps1` | Full stock loss cutscene, host Retry/Menu clicks and client dialog cleanup/new start |
+| `RunGameOverSmoke.ps1 -InputMethod keyboard` | Real SDL Enter/Escape, ignored client actions and host Retry/Menu through native modal focus |
 
 The game must run in an interactive Windows desktop session; this is process automation, not a headless renderer. This tranche proves launch/lifecycle, coordinate handling, representative host/client actions, and post-action state convergence for its audited scenarios. It is not a complete scripted playthrough or a substitute for the broader mini-game regression matrix.

@@ -211,6 +211,7 @@ const char* NetMessageName(uint8_t theMsgType)
 	case NETMSG_CHOOSER_OPEN: return "CHOOSER_OPEN"; case NETMSG_SEED_PICK: return "SEED_PICK";
 	case NETMSG_SEED_UNPICK: return "SEED_UNPICK"; case NETMSG_CHOOSER_STATE: return "CHOOSER_STATE";
 	case NETMSG_CHOOSER_START: return "CHOOSER_START"; case NETMSG_PROFILE_SYNC: return "PROFILE_SYNC";
+	case NETMSG_CHOOSER_MYSTERY: return "CHOOSER_MYSTERY";
 	case NETMSG_STORE_ACTION: return "STORE_ACTION"; case NETMSG_STORE_SYNC: return "STORE_SYNC";
 	case NETMSG_STATS: return "STATS"; case NETMSG_RATE: return "RATE";
 	case NETMSG_DEBUG_TEXT: return "DEBUG_TEXT"; default: return "UNKNOWN";

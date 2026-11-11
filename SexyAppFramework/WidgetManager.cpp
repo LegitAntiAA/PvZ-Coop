@@ -18,6 +18,8 @@ WidgetManager::WidgetManager(SexyAppBase* theApp)
 	mMinDeferredOverlayPriority = 0x7FFFFFFF;
 	mWidgetManager = this;	
 	mMouseIn = false;
+	mLastMouseX = -1;
+	mLastMouseY = -1;
 	mDefaultTab = NULL;
 	mImage = NULL;
 	mLastHadTransients = false;

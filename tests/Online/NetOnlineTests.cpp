@@ -19,6 +19,13 @@ int main(int argc, char** argv)
 		std::printf("%s %s\n", ok ? "PASS" : "FAIL", label); std::fflush(stdout);
 		if (ok) ++aPassed; else ++aFailed;
 	};
+	auto ReadableError = [](const NetOnline& peer) {
+		const std::string text = peer.GetLastErrorMessage();
+		return !text.empty() && text.size() <= 512 && (uint8_t)text[0] >= 0xC0 &&
+			text.find("://") == std::string::npos && text.find("stage=") == std::string::npos &&
+			text.find("error=") == std::string::npos && text.find("candidate") == std::string::npos &&
+			text.find("password-123") == std::string::npos;
+	};
 	auto Wait = [&](const std::function<bool()>& predicate, int seconds = 15) {
 		const auto aUntil = std::chrono::steady_clock::now() + std::chrono::seconds(seconds);
 		do {
@@ -29,8 +36,19 @@ int main(int argc, char** argv)
 		return false;
 	};
 	Check(!aHost.Connect("http://example.com", "test", "Host"), "reject insecure remote signaling");
+	Check(aHost.GetLastErrorCode() == "insecure-endpoint" && ReadableError(aHost),
+		"insecure signaling has a safe Russian reason");
+	Check(!aHost.Connect("https://fixture-secret@example.com", "test", "Host") &&
+		aHost.GetLastErrorCode() == "invalid-endpoint" && ReadableError(aHost) &&
+		aHost.GetLastErrorMessage().find("fixture-secret") == std::string::npos,
+		"invalid endpoint never echoes its credentials");
+	Check(!aHost.Connect("https://example.com", "", "Host") &&
+		aHost.GetLastErrorCode() == "invalid-settings" && ReadableError(aHost),
+		"invalid online settings expose a bounded localized reason");
 	Check(!aHost.IsConnecting() && !aHost.IsConnected(), "rejected directory attempt clears pending state");
 	const bool aHostAccepted = aHost.Connect(aEndpoint, aBuild, "Host");
+	Check(aHostAccepted && aHost.GetLastErrorCode().empty() && aHost.GetLastErrorMessage().empty(),
+		"new directory attempt clears the previous error message");
 	Check(aHostAccepted && aHost.IsConnecting() && !aHost.IsConnected(), "directory pending before registration is pumped");
 	if (!aHostAccepted ||
 		!aClient.Connect(aEndpoint, aBuild, "Client") ||
@@ -72,7 +90,8 @@ int main(int argc, char** argv)
 	}
 	aHost.LeaveRoom();
 	Check(aPendingJoin && Wait([&] { return aClient.GetLastErrorCode() == "direct-connection-failed"; }) &&
-		aClient.GetRoomId().empty() && aClient.IsConnected(), "pending join host loss returns a retryable directory error");
+		aClient.GetRoomId().empty() && aClient.IsConnected() && ReadableError(aClient),
+		"pending join host loss returns a retryable localized directory error");
 	Check(aHost.CreateRoom("Native test " + aRun, "password-123", 2) && Wait([&] { return !aHost.GetRoomId().empty(); }), "create password room");
 	const std::string aRoomId = aHost.GetRoomId();
 	aClient.RefreshRooms(); aWrongBuild.RefreshRooms();
@@ -80,10 +99,13 @@ int main(int argc, char** argv)
 	Check(aWrongBuild.GetRooms().empty(), "hide other-build rooms");
 	aWrongBuild.JoinRoom(aRoomId, "password-123");
 	const bool aMismatch = Wait([&] { return aWrongBuild.GetLastErrorCode() == "version-mismatch"; });
+	Check(aMismatch && ReadableError(aWrongBuild), "different-build rejection has a safe Russian reason");
 	aWrongBuild.LeaveRoom();
-	Check(aMismatch && aWrongBuild.GetLastErrorCode().empty(), "reject direct different-build join and clear leave error");
+	Check(aMismatch && aWrongBuild.GetLastErrorCode().empty() && aWrongBuild.GetLastErrorMessage().empty(),
+		"reject direct different-build join and clear leave error");
 	aObserver.JoinRoom(aRoomId, "wrong-password");
 	Check(Wait([&] { return aObserver.GetLastErrorCode() == "wrong-password"; }), "native PBKDF2 structured wrong-password rejection");
+	Check(ReadableError(aObserver), "wrong-password rejection shows a localized reason without password material");
 	const bool aRetryQueued = aClient.JoinRoom(aRoomId, "password-123") && aClient.GetLastErrorCode().empty();
 	std::shared_ptr<NetOnlineChannel> aHostChannel, aClientChannel;
 	const bool aConnected = aRetryQueued && Wait([&] {
@@ -92,6 +114,8 @@ int main(int argc, char** argv)
 		return aHostChannel && aClientChannel && aHostChannel->IsOpen() && aClientChannel->IsOpen();
 	}, 45);
 	Check(aConnected, "real local ICE + DTLS + SCTP ordered DataChannel");
+	Check(aConnected && aHost.GetLastErrorMessage().empty() && aClient.GetLastErrorMessage().empty(),
+		"successful channel adoption clears connection errors");
 	if (!aConnected)
 	{
 		std::printf("HOST %s CLIENT %s\n", aHost.GetStatus().c_str(), aClient.GetStatus().c_str());
@@ -110,22 +134,26 @@ int main(int argc, char** argv)
 	aHost.SetPlaying(true); aObserver.RefreshRooms();
 	Check(Wait([&] { auto rooms = aObserver.GetRooms(); return rooms.size() == 1 && rooms[0].mPlaying && rooms[0].mPlayers == 2; }), "active-game room occupancy published");
 	const bool aJoinQueued = aObserver.JoinRoom(aRoomId, "password-123") && aObserver.GetLastErrorCode().empty();
-	Check(aJoinQueued && Wait([&] { return aObserver.GetLastErrorCode() == "room-full"; }), "full room rejected before ICE after clearing prior error");
+	Check(aJoinQueued && aObserver.GetLastErrorMessage().empty(), "room retry clears its previous localized error");
+	Check(aJoinQueued && Wait([&] { return aObserver.GetLastErrorCode() == "room-full"; }) && ReadableError(aObserver),
+		"full room rejected with a localized reason before ICE");
 	aHost.KickPeer(aHostChannel->GetPeerId());
-	Check(Wait([&] { return !aClientChannel->IsOpen() && aClient.GetStatus().find("kicked") != std::string::npos; }), "host kick closes adopted transport");
+	Check(Wait([&] { return !aClientChannel->IsOpen() && aClient.GetLastErrorCode() == "host-kicked"; }) &&
+		ReadableError(aClient), "host kick closes adopted transport with a localized reason");
 	aHost.LeaveRoom(); aObserver.RefreshRooms();
 	Check(Wait([&] { return aObserver.GetRooms().empty(); }), "leave removes directory room");
 	const auto aBeforeStop = std::chrono::steady_clock::now();
 	for (auto* aPeer : aPeers) aPeer->Stop();
 	Check(std::chrono::steady_clock::now() - aBeforeStop < std::chrono::seconds(10), "stop joins signaling threads");
 	Check(!aHost.IsConnecting() && !aHost.IsConnected() && !aClient.IsConnecting() && !aClient.IsConnected() &&
-		aWrongBuild.GetLastErrorCode().empty() && aObserver.GetLastErrorCode().empty(),
+		aWrongBuild.GetLastErrorCode().empty() && aObserver.GetLastErrorCode().empty() &&
+		aClient.GetLastErrorMessage().empty() && aObserver.GetLastErrorMessage().empty(),
 		"stopped directories clear connected and pending states");
 	NetOnline aUnavailable;
 	Check(aUnavailable.Connect("http://127.0.0.1:1", aBuild, "Unavailable") &&
 		Wait([&] { return !aUnavailable.IsConnecting(); }) && !aUnavailable.IsConnected() &&
-		aUnavailable.GetStatus().find("Signaling connection failed") != std::string::npos,
-		"failed directory connection clears pending state");
+		aUnavailable.GetLastErrorCode().find("signaling-") == 0 && ReadableError(aUnavailable),
+		"failed directory connection clears pending state and explains the failed network stage");
 	aUnavailable.Stop();
 	std::printf("ONLINE_TESTS passed=%d failed=%d\n", aPassed, aFailed);
 	return aFailed ? 1 : 0;

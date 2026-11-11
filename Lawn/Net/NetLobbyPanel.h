@@ -82,6 +82,7 @@ private:
 	bool mLanExpanded;
 	bool mCollapsed;
 	bool mWasActive;
+	std::string mLastOnlineError;
 	std::vector<UiButton> mButtons;
 	int mHoverButtonId;
 	int mPressedButtonId;

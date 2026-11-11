@@ -16,6 +16,7 @@
 #include "../../Sexy.TodLib/EffectSystem.h"
 #include "../../GameConstants.h"
 #include "../Net/NetCommon.h"
+#include "../Net/NetMystery.h"
 
 #include <memory>
 
@@ -29,7 +30,7 @@ static const char* FILE_COMPILE_TIME_STRING = "Feb 16 200923:03:38";
 // "Jul  2 201011:47:03"; // OLD GOTY
 // "Dec 10 201014:56:46"; // GOTY Steam
 static const unsigned int SAVE_FILE_MAGIC_NUMBER = 0xFEEDDEAD;
-static const unsigned int SAVE_FILE_VERSION = 2U;
+static const unsigned int SAVE_FILE_VERSION = 3U;
 static unsigned int SAVE_FILE_DATE = crc32(0, (Bytef*)FILE_COMPILE_TIME_STRING, strlen(FILE_COMPILE_TIME_STRING));  //[0x6AA7EC]
 #ifdef _GOTY
 static unsigned int SAVE_FILE_DATE2 = crc32(0, (Bytef*)FILE_COMPILE_TIME_STRING2, strlen(FILE_COMPILE_TIME_STRING2));
@@ -523,7 +524,8 @@ bool LawnLoadGame(Board* theBoard, const SexyString& theFilePath)
 
 	SaveFileHeader aHeader;
 	aContext.SyncBytes(&aHeader, sizeof(aHeader));
-	if (aHeader.mMagicNumber != SAVE_FILE_MAGIC_NUMBER || aHeader.mBuildVersion != SAVE_FILE_VERSION || aHeader.mBuildDate != SAVE_FILE_DATE
+	if (aHeader.mMagicNumber != SAVE_FILE_MAGIC_NUMBER ||
+		(aHeader.mBuildVersion != 2U && aHeader.mBuildVersion != SAVE_FILE_VERSION) || aHeader.mBuildDate != SAVE_FILE_DATE
 #ifdef GOTY
 		&& aHeader.mBuildDate != SAVE_FILE_DATE2
 #endif
@@ -537,6 +539,14 @@ bool LawnLoadGame(Board* theBoard, const SexyString& theFilePath)
 	{
 		return false;
 	}
+	// Version 2 stored uninitialized tail padding here; it never granted a
+	// mystery discount. Version 3 gives that byte a defined, validated meaning.
+	for (int i = 0; i < SEEDBANK_CAPACITY; ++i)
+	{
+		SeedPacket& packet = theBoard->mSeedBank->mSeedPackets[i];
+		if (!LawnNet::NetMigrateMysteryOrigin(aHeader.mBuildVersion, packet.mRandomDiscountLevel) || packet.IsMysteryPending())
+			return false;
+	}
 
 	TodTrace("Loaded save game");
 	FixBoardAfterLoad(theBoard);
@@ -547,6 +557,11 @@ bool LawnLoadGame(Board* theBoard, const SexyString& theFilePath)
 //0x4820D0
 bool LawnSaveGame(Board* theBoard, const SexyString& theFilePath)
 {
+	if (theBoard && theBoard->mSeedBank)
+		for (int i = 0; i < SEEDBANK_CAPACITY; ++i)
+			if (theBoard->mSeedBank->mSeedPackets[i].mRandomDiscountLevel > 10 ||
+				theBoard->mSeedBank->mSeedPackets[i].IsMysteryPending())
+				return false; // Do not replace a valid save with an unresolved chooser.
 	if (theBoard && theBoard->mApp && theBoard->mApp->mNetBlockProfileSave)
 	{
 		LawnNet::NetTrace("save game blocked entry=LawnSaveGame level=%d mode=%d",

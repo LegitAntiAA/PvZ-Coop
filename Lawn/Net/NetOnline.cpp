@@ -18,6 +18,7 @@
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
+#include <cstring>
 #include <deque>
 #include <map>
 #include <mutex>
@@ -34,6 +35,32 @@ using Json = nlohmann::json;
 constexpr size_t kMaxFrame = 65538;
 constexpr size_t kMaxSignal = 65536;
 constexpr size_t kMaxQueuedBytes = 4 * 1024 * 1024;
+
+// u8 literals are char in C++17 and char8_t in C++20; both store UTF-8 bytes.
+template <class Char> std::string OnlineText(const Char* text)
+{
+	return reinterpret_cast<const char*>(text);
+}
+
+std::string ServiceErrorText(const std::string& code)
+{
+	if (code == "wrong-password") return OnlineText(u8"\u041d\u0435\u0432\u0435\u0440\u043d\u044b\u0439 \u043f\u0430\u0440\u043e\u043b\u044c \u043a\u043e\u043c\u043d\u0430\u0442\u044b. \u041f\u0440\u043e\u0432\u0435\u0440\u044c\u0442\u0435 \u043f\u0430\u0440\u043e\u043b\u044c \u0438 \u043f\u043e\u043f\u0440\u043e\u0431\u0443\u0439\u0442\u0435 \u0441\u043d\u043e\u0432\u0430.");
+	if (code == "room-full") return OnlineText(u8"\u041a\u043e\u043c\u043d\u0430\u0442\u0430 \u0437\u0430\u043f\u043e\u043b\u043d\u0435\u043d\u0430. \u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0434\u0440\u0443\u0433\u0443\u044e \u043a\u043e\u043c\u043d\u0430\u0442\u0443 \u0438\u043b\u0438 \u043e\u0431\u043d\u043e\u0432\u0438\u0442\u0435 \u0441\u043f\u0438\u0441\u043e\u043a.");
+	if (code == "room-not-found") return OnlineText(u8"\u041a\u043e\u043c\u043d\u0430\u0442\u0430 \u0443\u0436\u0435 \u0437\u0430\u043a\u0440\u044b\u0442\u0430. \u041e\u0431\u043d\u043e\u0432\u0438\u0442\u0435 \u0441\u043f\u0438\u0441\u043e\u043a \u043a\u043e\u043c\u043d\u0430\u0442.");
+	if (code == "version-mismatch") return OnlineText(u8"\u0412\u0435\u0440\u0441\u0438\u0438 \u0438\u0433\u0440\u044b \u0440\u0430\u0437\u043b\u0438\u0447\u0430\u044e\u0442\u0441\u044f. \u0423\u0441\u0442\u0430\u043d\u043e\u0432\u0438\u0442\u0435 \u043e\u0434\u0438\u043d\u0430\u043a\u043e\u0432\u0443\u044e \u0441\u0431\u043e\u0440\u043a\u0443 \u0441 \u0445\u043e\u0437\u044f\u0438\u043d\u043e\u043c \u043a\u043e\u043c\u043d\u0430\u0442\u044b.");
+	if (code == "rate-limit" || code == "password-retry-later")
+		return OnlineText(u8"\u0421\u043b\u0438\u0448\u043a\u043e\u043c \u043c\u043d\u043e\u0433\u043e \u043f\u043e\u043f\u044b\u0442\u043e\u043a. \u041d\u0435\u043c\u043d\u043e\u0433\u043e \u043f\u043e\u0434\u043e\u0436\u0434\u0438\u0442\u0435 \u0438 \u043f\u043e\u043f\u0440\u043e\u0431\u0443\u0439\u0442\u0435 \u0441\u043d\u043e\u0432\u0430.");
+	if (code == "directory-full") return OnlineText(u8"\u0421\u0435\u0440\u0432\u0438\u0441 \u043a\u043e\u043c\u043d\u0430\u0442 \u043f\u0435\u0440\u0435\u0433\u0440\u0443\u0436\u0435\u043d. \u041f\u043e\u043f\u0440\u043e\u0431\u0443\u0439\u0442\u0435 \u043f\u043e\u0434\u043a\u043b\u044e\u0447\u0438\u0442\u044c\u0441\u044f \u043f\u043e\u0437\u0436\u0435.");
+	if (code == "already-in-room") return OnlineText(u8"\u0412\u044b \u0443\u0436\u0435 \u043f\u043e\u0434\u043a\u043b\u044e\u0447\u0435\u043d\u044b \u043a \u043a\u043e\u043c\u043d\u0430\u0442\u0435. \u0421\u043d\u0430\u0447\u0430\u043b\u0430 \u0432\u044b\u0439\u0434\u0438\u0442\u0435 \u0438\u0437 \u043d\u0435\u0451.");
+	if (code == "invalid-room") return OnlineText(u8"\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0441\u043e\u0437\u0434\u0430\u0442\u044c \u043a\u043e\u043c\u043d\u0430\u0442\u0443. \u041f\u0440\u043e\u0432\u0435\u0440\u044c\u0442\u0435 \u0435\u0451 \u043d\u0430\u0437\u0432\u0430\u043d\u0438\u0435 \u0438 \u0447\u0438\u0441\u043b\u043e \u0438\u0433\u0440\u043e\u043a\u043e\u0432.");
+	if (code == "hello-required" || code == "invalid-hello")
+		return OnlineText(u8"\u0421\u0435\u0440\u0432\u0438\u0441 \u043d\u0435 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u043b \u043f\u043e\u0434\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u0435 \u0438\u0433\u0440\u044b. \u041e\u0431\u043d\u043e\u0432\u0438\u0442\u0435 \u0441\u043f\u0438\u0441\u043e\u043a \u043a\u043e\u043c\u043d\u0430\u0442 \u0438 \u043f\u043e\u0432\u0442\u043e\u0440\u0438\u0442\u0435 \u043f\u043e\u043f\u044b\u0442\u043a\u0443.");
+	if (code == "host-only") return OnlineText(u8"\u042d\u0442\u043e \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0435 \u0434\u043e\u0441\u0442\u0443\u043f\u043d\u043e \u0442\u043e\u043b\u044c\u043a\u043e \u0445\u043e\u0437\u044f\u0438\u043d\u0443 \u043a\u043e\u043c\u043d\u0430\u0442\u044b.");
+	if (code == "invalid-peer") return OnlineText(u8"\u0418\u0433\u0440\u043e\u043a \u0443\u0436\u0435 \u043e\u0442\u043a\u043b\u044e\u0447\u0438\u043b\u0441\u044f \u0438\u043b\u0438 \u043d\u0435\u0434\u043e\u0441\u0442\u0443\u043f\u0435\u043d. \u041e\u0431\u043d\u043e\u0432\u0438\u0442\u0435 \u0441\u043f\u0438\u0441\u043e\u043a \u043a\u043e\u043c\u043d\u0430\u0442.");
+	if (code == "invalid-signal" || code == "invalid-message" || code == "invalid-json" || code == "unknown-message")
+		return OnlineText(u8"\u0421\u0435\u0440\u0432\u0438\u0441 \u043e\u0442\u043a\u043b\u043e\u043d\u0438\u043b \u0437\u0430\u043f\u0440\u043e\u0441 \u0438\u0433\u0440\u044b. \u041e\u0431\u043d\u043e\u0432\u0438\u0442\u0435 \u0438\u0433\u0440\u0443 \u0438 \u043f\u043e\u0432\u0442\u043e\u0440\u0438\u0442\u0435 \u043f\u043e\u043f\u044b\u0442\u043a\u0443.");
+	return {};
+}
 
 // Load only the packaged DLL beside this executable.  LAN/offline sessions do
 // not depend on WebRTC being installed and no global DLL search path is changed.
@@ -198,6 +225,7 @@ std::string NetOnlineChannel::GetPeerId() const { return mState->mPeerId; }
 
 struct NetOnline::Impl
 {
+	enum class PeerFailure { None, Initialization, Ice, Closed, Timeout, InvalidSignal, InvalidData };
 	struct Peer
 	{
 		Impl* mOwner;
@@ -207,6 +235,7 @@ struct NetOnline::Impl
 		bool mDelivered = false;
 		bool mDirectoryDeparted = false;
 		bool mRemoteDescription = false;
+		std::atomic<PeerFailure> mFailure{PeerFailure::None};
 		std::vector<std::pair<std::string, std::string>> mCandidates;
 		std::vector<int> mExtraDataChannels; // guarded by mChannel->mMutex
 		std::chrono::steady_clock::time_point mCreated = std::chrono::steady_clock::now();
@@ -219,7 +248,7 @@ struct NetOnline::Impl
 	std::condition_variable mSendCv;
 	std::deque<std::string> mOutgoing, mIncoming;
 	mutable std::mutex mViewMutex;
-	std::string mStatus, mLastErrorCode, mBuild, mNickname, mStun, mRoomId, mPendingRoom, mPendingPassword;
+	std::string mStatus, mLastErrorCode, mLastErrorMessage, mBuild, mNickname, mStun, mRoomId, mPendingRoom, mPendingPassword;
 	std::vector<NetOnlineRoom> mRooms;
 	bool mHosting = false;
 	std::map<std::string, std::unique_ptr<Peer>> mPeers;
@@ -235,6 +264,65 @@ struct NetOnline::Impl
 	{
 		std::lock_guard<std::mutex> aLock(mViewMutex);
 		mLastErrorCode = theCode;
+		if (theCode.empty()) mLastErrorMessage.clear();
+	}
+	void Error(const std::string& theCode, const std::string& theMessage)
+	{
+		std::lock_guard<std::mutex> aLock(mViewMutex);
+		mLastErrorCode = theCode; mLastErrorMessage = theMessage; mStatus = theMessage;
+	}
+	void Success(const std::string& theStatus)
+	{
+		std::lock_guard<std::mutex> aLock(mViewMutex);
+		mLastErrorCode.clear(); mLastErrorMessage.clear(); mStatus = theStatus;
+	}
+	void SignalError(const char* stage, DWORD error, DWORD http, USHORT close, bool connected)
+	{
+		if (error == ERROR_WINHTTP_NAME_NOT_RESOLVED)
+			Error("signaling-dns", OnlineText(u8"\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u043d\u0430\u0439\u0442\u0438 \u0441\u0435\u0440\u0432\u0435\u0440 \u043a\u043e\u043c\u043d\u0430\u0442. \u041f\u0440\u043e\u0432\u0435\u0440\u044c\u0442\u0435 \u043f\u043e\u0434\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u0435 \u043a \u0438\u043d\u0442\u0435\u0440\u043d\u0435\u0442\u0443 \u0438 DNS."));
+		else if (error == ERROR_WINHTTP_TIMEOUT)
+			Error("signaling-timeout", OnlineText(u8"\u0421\u0435\u0440\u0432\u0435\u0440 \u043a\u043e\u043c\u043d\u0430\u0442 \u043d\u0435 \u043e\u0442\u0432\u0435\u0442\u0438\u043b \u0432\u043e\u0432\u0440\u0435\u043c\u044f. \u041f\u0440\u043e\u0432\u0435\u0440\u044c\u0442\u0435 \u0441\u0435\u0442\u044c \u0438 \u043f\u043e\u0432\u0442\u043e\u0440\u0438\u0442\u0435 \u043f\u043e\u043f\u044b\u0442\u043a\u0443."));
+		else if (error == ERROR_WINHTTP_CANNOT_CONNECT || error == ERROR_WINHTTP_CONNECTION_ERROR)
+			Error("signaling-connect", OnlineText(u8"\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0441\u0432\u044f\u0437\u0430\u0442\u044c\u0441\u044f \u0441 \u0441\u0435\u0440\u0432\u0435\u0440\u043e\u043c \u043a\u043e\u043c\u043d\u0430\u0442. \u041f\u0440\u043e\u0432\u0435\u0440\u044c\u0442\u0435 \u0438\u043d\u0442\u0435\u0440\u043d\u0435\u0442, VPN \u0438 \u0431\u0440\u0430\u043d\u0434\u043c\u0430\u0443\u044d\u0440."));
+		else if (http == 407 || error == ERROR_WINHTTP_LOGIN_FAILURE)
+			Error("signaling-proxy-auth", OnlineText(u8"\u041f\u0440\u043e\u043a\u0441\u0438-\u0441\u0435\u0440\u0432\u0435\u0440 \u0442\u0440\u0435\u0431\u0443\u0435\u0442 \u0430\u0432\u0442\u043e\u0440\u0438\u0437\u0430\u0446\u0438\u044e \u0438\u043b\u0438 \u043e\u0442\u043a\u043b\u043e\u043d\u0438\u043b \u043f\u043e\u0434\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u0435. \u041f\u0440\u043e\u0432\u0435\u0440\u044c\u0442\u0435 \u043d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0441\u0435\u0442\u0438."));
+		else if (error == ERROR_WINHTTP_CLIENT_AUTH_CERT_NEEDED)
+			Error("signaling-access-denied", OnlineText(u8"\u0421\u0435\u0440\u0432\u0438\u0441 \u0437\u0430\u043f\u0440\u043e\u0441\u0438\u043b \u0441\u0435\u0440\u0442\u0438\u0444\u0438\u043a\u0430\u0442 \u0434\u043e\u0441\u0442\u0443\u043f\u0430. \u041f\u0440\u043e\u0432\u0435\u0440\u044c\u0442\u0435 \u043d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0441\u0435\u0442\u0438 \u0438\u043b\u0438 \u043f\u043e\u043f\u0440\u043e\u0431\u0443\u0439\u0442\u0435 \u0434\u0440\u0443\u0433\u0443\u044e \u0441\u0435\u0442\u044c."));
+		else if (error == ERROR_WINHTTP_SECURE_FAILURE || error == ERROR_WINHTTP_SECURE_CERT_DATE_INVALID ||
+			error == ERROR_WINHTTP_SECURE_CERT_CN_INVALID || error == ERROR_WINHTTP_SECURE_INVALID_CA ||
+			error == ERROR_WINHTTP_SECURE_INVALID_CERT || error == ERROR_WINHTTP_SECURE_CERT_REVOKED ||
+			error == ERROR_WINHTTP_SECURE_CHANNEL_ERROR || error == ERROR_WINHTTP_SECURE_CERT_REV_FAILED ||
+			error == ERROR_WINHTTP_SECURE_CERT_WRONG_USAGE)
+			Error("signaling-tls", OnlineText(u8"\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0443\u0441\u0442\u0430\u043d\u043e\u0432\u0438\u0442\u044c \u0437\u0430\u0449\u0438\u0449\u0451\u043d\u043d\u043e\u0435 \u0441\u043e\u0435\u0434\u0438\u043d\u0435\u043d\u0438\u0435 \u0441 \u0441\u0435\u0440\u0432\u0438\u0441\u043e\u043c. \u041f\u0440\u043e\u0432\u0435\u0440\u044c\u0442\u0435 \u0434\u0430\u0442\u0443 \u043a\u043e\u043c\u043f\u044c\u044e\u0442\u0435\u0440\u0430 \u0438 \u043d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u0441\u0435\u0442\u0438."));
+		else if (http == 401 || http == 403 || close == 1008)
+			Error("signaling-access-denied", OnlineText(u8"\u0421\u0435\u0440\u0432\u0435\u0440 \u043e\u0442\u043a\u043b\u043e\u043d\u0438\u043b \u0434\u043e\u0441\u0442\u0443\u043f \u043a \u043e\u043d\u043b\u0430\u0439\u043d-\u043a\u043e\u043c\u043d\u0430\u0442\u0430\u043c. \u041f\u043e\u043f\u0440\u043e\u0431\u0443\u0439\u0442\u0435 \u043f\u043e\u0437\u0436\u0435 \u0438\u043b\u0438 \u0434\u0440\u0443\u0433\u0443\u044e \u0441\u0435\u0442\u044c."));
+		else if (http == 429)
+			Error("rate-limit", ServiceErrorText("rate-limit"));
+		else if (http >= 500)
+			Error("signaling-unavailable", OnlineText(u8"\u0421\u0435\u0440\u0432\u0438\u0441 \u043a\u043e\u043c\u043d\u0430\u0442 \u0432\u0440\u0435\u043c\u0435\u043d\u043d\u043e \u043d\u0435\u0434\u043e\u0441\u0442\u0443\u043f\u0435\u043d. \u041f\u043e\u043f\u0440\u043e\u0431\u0443\u0439\u0442\u0435 \u043f\u043e\u0437\u0436\u0435."));
+		else if (http && http != 101)
+			Error("signaling-handshake", OnlineText(u8"\u0421\u0435\u0440\u0432\u0438\u0441 \u043d\u0435 \u043f\u0440\u0438\u043d\u044f\u043b \u043f\u043e\u0434\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u0435 \u043a \u043a\u043e\u043c\u043d\u0430\u0442\u0430\u043c. \u041e\u0431\u043d\u043e\u0432\u0438\u0442\u0435 \u0438\u0433\u0440\u0443 \u0438 \u043f\u043e\u0432\u0442\u043e\u0440\u0438\u0442\u0435 \u043f\u043e\u043f\u044b\u0442\u043a\u0443."));
+		else if (!strcmp(stage, "protocol"))
+			Error("signaling-protocol", OnlineText(u8"\u0421\u0435\u0440\u0432\u0438\u0441 \u043a\u043e\u043c\u043d\u0430\u0442 \u043f\u0440\u0438\u0441\u043b\u0430\u043b \u043d\u0435\u043a\u043e\u0440\u0440\u0435\u043a\u0442\u043d\u044b\u0439 \u043e\u0442\u0432\u0435\u0442. \u041f\u043e\u0432\u0442\u043e\u0440\u0438\u0442\u0435 \u043f\u043e\u0434\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u0435."));
+		else if (connected)
+			Error("signaling-disconnected", OnlineText(u8"\u0421\u0432\u044f\u0437\u044c \u0441 \u0441\u0435\u0440\u0432\u0438\u0441\u043e\u043c \u043a\u043e\u043c\u043d\u0430\u0442 \u043f\u0440\u0435\u0440\u0432\u0430\u043b\u0430\u0441\u044c. \u041e\u0431\u043d\u043e\u0432\u0438\u0442\u0435 \u0441\u043f\u0438\u0441\u043e\u043a \u0438 \u043f\u043e\u0434\u043a\u043b\u044e\u0447\u0438\u0442\u0435\u0441\u044c \u0441\u043d\u043e\u0432\u0430."));
+		else
+			Error("signaling-connection-failed", OnlineText(u8"\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u043f\u043e\u0434\u043a\u043b\u044e\u0447\u0438\u0442\u044c\u0441\u044f \u043a \u0441\u0435\u0440\u0432\u0438\u0441\u0443 \u043a\u043e\u043c\u043d\u0430\u0442. \u041f\u0440\u043e\u0432\u0435\u0440\u044c\u0442\u0435 \u0441\u0435\u0442\u044c \u0438 \u043f\u043e\u0432\u0442\u043e\u0440\u0438\u0442\u0435 \u043f\u043e\u043f\u044b\u0442\u043a\u0443."));
+	}
+	void PeerError(PeerFailure failure, bool opened)
+	{
+		if (opened)
+			Error("peer-disconnected", OnlineText(u8"\u0421\u0432\u044f\u0437\u044c \u0441 \u0438\u0433\u0440\u043e\u043a\u043e\u043c \u043f\u0440\u0435\u0440\u0432\u0430\u043b\u0430\u0441\u044c. \u041f\u0440\u043e\u0432\u0435\u0440\u044c\u0442\u0435 \u0441\u0435\u0442\u044c \u0438 \u043f\u043e\u0434\u043a\u043b\u044e\u0447\u0438\u0442\u0435\u0441\u044c \u043a \u043a\u043e\u043c\u043d\u0430\u0442\u0435 \u0441\u043d\u043e\u0432\u0430."));
+		else if (failure == PeerFailure::Initialization)
+			Error("direct-connection-failed", OnlineText(u8"\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u043f\u043e\u0434\u0433\u043e\u0442\u043e\u0432\u0438\u0442\u044c \u043f\u0440\u044f\u043c\u043e\u0435 \u0441\u043e\u0435\u0434\u0438\u043d\u0435\u043d\u0438\u0435. \u041f\u0435\u0440\u0435\u0437\u0430\u043f\u0443\u0441\u0442\u0438\u0442\u0435 \u0438\u0433\u0440\u0443 \u0438 \u043f\u043e\u0432\u0442\u043e\u0440\u0438\u0442\u0435 \u043f\u043e\u043f\u044b\u0442\u043a\u0443."));
+		else if (failure == PeerFailure::Timeout)
+			Error("direct-connection-failed", OnlineText(u8"\u0418\u0441\u0442\u0435\u043a\u043b\u043e \u0432\u0440\u0435\u043c\u044f \u043e\u0436\u0438\u0434\u0430\u043d\u0438\u044f \u043f\u0440\u044f\u043c\u043e\u0433\u043e \u0441\u043e\u0435\u0434\u0438\u043d\u0435\u043d\u0438\u044f. \u0412\u043e\u0437\u043c\u043e\u0436\u043d\u043e, NAT \u0438\u043b\u0438 \u0431\u0440\u0430\u043d\u0434\u043c\u0430\u0443\u044d\u0440 \u0431\u043b\u043e\u043a\u0438\u0440\u0443\u0435\u0442 \u0441\u0432\u044f\u0437\u044c. \u041f\u043e\u043f\u0440\u043e\u0431\u0443\u0439\u0442\u0435 \u0434\u0440\u0443\u0433\u0443\u044e \u0441\u0435\u0442\u044c."));
+		else if (failure == PeerFailure::InvalidSignal || failure == PeerFailure::InvalidData)
+			Error("direct-connection-failed", OnlineText(u8"\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0441\u043e\u0433\u043b\u0430\u0441\u043e\u0432\u0430\u0442\u044c \u0441\u043e\u0435\u0434\u0438\u043d\u0435\u043d\u0438\u0435 \u0441 \u0438\u0433\u0440\u043e\u043a\u043e\u043c. \u041e\u0431\u043d\u043e\u0432\u0438\u0442\u0435 \u0438\u0433\u0440\u0443 \u0438 \u043f\u043e\u0432\u0442\u043e\u0440\u0438\u0442\u0435 \u043f\u043e\u043f\u044b\u0442\u043a\u0443."));
+		else if (failure == PeerFailure::Closed)
+			Error("direct-connection-failed", OnlineText(u8"\u0421\u043e\u0435\u0434\u0438\u043d\u0435\u043d\u0438\u0435 \u0441 \u0438\u0433\u0440\u043e\u043a\u043e\u043c \u0437\u0430\u043a\u0440\u044b\u043b\u043e\u0441\u044c \u0434\u043e \u0437\u0430\u0432\u0435\u0440\u0448\u0435\u043d\u0438\u044f \u043f\u043e\u0434\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u044f. \u041f\u043e\u043f\u0440\u043e\u0431\u0443\u0439\u0442\u0435 \u0441\u043d\u043e\u0432\u0430."));
+		else
+			Error("direct-connection-failed", OnlineText(u8"\u041f\u0440\u044f\u043c\u043e\u0435 \u0441\u043e\u0435\u0434\u0438\u043d\u0435\u043d\u0438\u0435 \u043d\u0435 \u0443\u0441\u0442\u0430\u043d\u043e\u0432\u043b\u0435\u043d\u043e. \u0412\u043e\u0437\u043c\u043e\u0436\u043d\u044b \u043e\u0433\u0440\u0430\u043d\u0438\u0447\u0435\u043d\u0438\u044f NAT \u0438\u043b\u0438 \u0431\u0440\u0430\u043d\u0434\u043c\u0430\u0443\u044d\u0440\u0430. \u041f\u043e\u043f\u0440\u043e\u0431\u0443\u0439\u0442\u0435 \u0434\u0440\u0443\u0433\u0443\u044e \u0441\u0435\u0442\u044c."));
 	}
 	bool Queue(const Json& theMessage)
 	{
@@ -253,7 +341,8 @@ struct NetOnline::Impl
 		aUrl.dwHostNameLength = aUrl.dwUrlPathLength = aUrl.dwExtraInfoLength = (DWORD)-1;
 		if (!WinHttpCrackUrl(theUrl.c_str(), 0, 0, &aUrl))
 		{
-			Status("Invalid signaling URL"); mRunning = false; mConnecting = false; return;
+			Error("invalid-endpoint", OnlineText(u8"\u041d\u0435\u0432\u0435\u0440\u043d\u044b\u0439 \u0430\u0434\u0440\u0435\u0441 \u0441\u0435\u0440\u0432\u0438\u0441\u0430 \u043a\u043e\u043c\u043d\u0430\u0442. \u0412\u043e\u0441\u0441\u0442\u0430\u043d\u043e\u0432\u0438\u0442\u0435 \u043d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u043f\u043e\u0434\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u044f."));
+			mRunning = false; mConnecting = false; return;
 		}
 		std::wstring aHost(aUrl.lpszHostName, aUrl.dwHostNameLength);
 		std::wstring aPath(aUrl.lpszUrlPath, aUrl.dwUrlPathLength);
@@ -315,8 +404,9 @@ struct NetOnline::Impl
 						if (!mRunning) break;
 						aText = std::move(mOutgoing.front()); mOutgoing.pop_front();
 					}
-					if (WinHttpWebSocketSend(aSocket, WINHTTP_WEB_SOCKET_UTF8_MESSAGE_BUFFER_TYPE,
-						aText.data(), (DWORD)aText.size()) != NO_ERROR) break;
+					const DWORD error = WinHttpWebSocketSend(aSocket, WINHTTP_WEB_SOCKET_UTF8_MESSAGE_BUFFER_TYPE,
+						aText.data(), (DWORD)aText.size());
+					if (error != NO_ERROR) { if (mRunning) SignalError("send", error, 0, 0, true); break; }
 				}
 			});
 			char aBuffer[8192];
@@ -334,19 +424,17 @@ struct NetOnline::Impl
 					aFailureStage = "close"; break;
 				}
 				if ((aType != WINHTTP_WEB_SOCKET_UTF8_MESSAGE_BUFFER_TYPE && aType != WINHTTP_WEB_SOCKET_UTF8_FRAGMENT_BUFFER_TYPE) ||
-					aMessage.size() + aRead > kMaxSignal) break;
+					aMessage.size() + aRead > kMaxSignal) { aFailureStage = "protocol"; break; }
 				aMessage.append(aBuffer, aRead);
 				if (aType == WINHTTP_WEB_SOCKET_UTF8_MESSAGE_BUFFER_TYPE)
 				{
 					std::lock_guard<std::mutex> aLock(mSignalMutex);
-					if (mIncoming.size() >= 256) break;
+					if (mIncoming.size() >= 256) { aFailureStage = "protocol"; break; }
 					mIncoming.push_back(std::move(aMessage)); aMessage.clear();
 				}
 			}
 		}
-		if (mRunning) Status(std::string(aSocket ? "Signaling disconnected" : "Signaling connection failed") +
-			" (stage=" + aFailureStage + " error=" + std::to_string(aWinHttpError) +
-			" http=" + std::to_string(aHttpStatus) + " close=" + std::to_string(aCloseCode) + ")");
+		if (mRunning) SignalError(aFailureStage, aWinHttpError, aHttpStatus, aCloseCode, aInstalled);
 		mRegistered = false;
 		mConnecting = false;
 		mRunning = false;
@@ -371,23 +459,32 @@ struct NetOnline::Impl
 	static void RTC_API ConnectionState(int, rtcState state, void* ptr)
 	{
 		auto* aPeer = (Peer*)ptr;
-		if (state == RTC_FAILED || state == RTC_CLOSED) aPeer->mChannel->mCloseRequested = true;
+		if (state == RTC_FAILED || state == RTC_CLOSED)
+		{
+			PeerFailure expected = PeerFailure::None;
+			aPeer->mFailure.compare_exchange_strong(expected, state == RTC_FAILED ? PeerFailure::Ice : PeerFailure::Closed);
+			aPeer->mChannel->mCloseRequested = true;
+		}
 	}
 	static void RTC_API Open(int, void* ptr) { ((Peer*)ptr)->mChannel->mOpen = true; }
 	static void RTC_API Closed(int, void* ptr)
 	{
 		auto* aPeer = (Peer*)ptr;
+		PeerFailure expected = PeerFailure::None;
+		aPeer->mFailure.compare_exchange_strong(expected, PeerFailure::Closed);
 		aPeer->mChannel->mOpen = false;
 		aPeer->mChannel->mCloseRequested = true;
 	}
 	static void RTC_API Message(int, const char* data, int size, void* ptr)
 	{
-		auto aState = ((Peer*)ptr)->mChannel;
-		if (size <= 0 || (size_t)size > kMaxFrame) { aState->mCloseRequested = true; return; }
+		auto* aPeer = (Peer*)ptr;
+		auto aState = aPeer->mChannel;
+		if (size <= 0 || (size_t)size > kMaxFrame)
+		{ aPeer->mFailure = PeerFailure::InvalidData; aState->mCloseRequested = true; return; }
 		std::lock_guard<std::mutex> aLock(aState->mMutex);
 		if (aState->mIncoming.size() >= 512 || aState->mIncomingBytes + size > kMaxQueuedBytes)
 		{
-			aState->mCloseRequested = true; return;
+			aPeer->mFailure = PeerFailure::InvalidData; aState->mCloseRequested = true; return;
 		}
 		aState->mIncoming.emplace_back((const uint8_t*)data, (const uint8_t*)data + size);
 		aState->mIncomingBytes += size;
@@ -403,6 +500,7 @@ struct NetOnline::Impl
 				// Deferring deletion also avoids waiting on callbacks from inside a
 				// callback.  The game thread tears down this malformed peer.
 				aPeer->mExtraDataChannels.push_back(dc);
+				aPeer->mFailure = PeerFailure::InvalidData;
 				aPeer->mChannel->mCloseRequested = true;
 				return;
 			}
@@ -432,7 +530,7 @@ struct NetOnline::Impl
 		aConfig.iceServers = &aServer; aConfig.iceServersCount = 1;
 		aConfig.maxMessageSize = 262144;
 		aPeer->mPc = mApi->rtcCreatePeerConnection(&aConfig);
-		if (aPeer->mPc < 0) { Status("WebRTC initialization failed"); return nullptr; }
+		if (aPeer->mPc < 0) return nullptr;
 		Peer* aRaw = aPeer.get();
 		mPeers.emplace(theId, std::move(aPeer));
 		mApi->rtcSetUserPointer(aRaw->mPc, aRaw);
@@ -443,7 +541,7 @@ struct NetOnline::Impl
 		if (theOffer)
 		{
 			int aDc = mApi->rtcCreateDataChannel(aRaw->mPc, "pvz-coop-v1");
-			if (aDc < 0) aRaw->mChannel->mCloseRequested = true;
+			if (aDc < 0) { aRaw->mFailure = PeerFailure::Initialization; aRaw->mChannel->mCloseRequested = true; }
 			else DataChannel(aRaw->mPc, aDc, aRaw);
 		}
 		return aRaw;
@@ -478,7 +576,8 @@ struct NetOnline::Impl
 		const std::string aKind = aMessage.value("kind", "");
 		if (aKind == "ready")
 		{
-			mRegistered = true; mConnecting = false; Status("Online browser connected");
+			if (!mRunning) return; // A queued reply cannot revive a failed directory connection.
+			mRegistered = true; mConnecting = false; Success("Online browser connected");
 			Queue({{"kind", "list"}});
 		}
 		else if (aKind == "rooms")
@@ -501,7 +600,7 @@ struct NetOnline::Impl
 		}
 		else if (aKind == "created")
 		{
-			mRoomId = aMessage.value("room", ""); mHosting = true; Status("Room created");
+			mRoomId = aMessage.value("room", ""); mHosting = true; Success("Room created");
 		}
 		else if (aKind == "challenge")
 		{
@@ -510,7 +609,9 @@ struct NetOnline::Impl
 			if (aMessage.value("password", false) &&
 				!PasswordProof(mPendingPassword, aMessage.value("salt", ""), aProof))
 			{
-				Status("Invalid room password challenge"); return;
+				Error("invalid-password-challenge", OnlineText(u8"\u0421\u0435\u0440\u0432\u0438\u0441 \u043f\u0440\u0438\u0441\u043b\u0430\u043b \u043d\u0435\u043a\u043e\u0440\u0440\u0435\u043a\u0442\u043d\u044b\u0439 \u0437\u0430\u043f\u0440\u043e\u0441 \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0438 \u043f\u0430\u0440\u043e\u043b\u044f. \u041e\u0431\u043d\u043e\u0432\u0438\u0442\u0435 \u0441\u043f\u0438\u0441\u043e\u043a \u043a\u043e\u043c\u043d\u0430\u0442."));
+				std::fill(mPendingPassword.begin(), mPendingPassword.end(), '\0'); mPendingPassword.clear();
+				return;
 			}
 			Queue({{"kind", "join"}, {"room", mPendingRoom}, {"proof", aProof}});
 			std::fill(mPendingPassword.begin(), mPendingPassword.end(), '\0'); mPendingPassword.clear();
@@ -521,7 +622,7 @@ struct NetOnline::Impl
 			if (CreatePeer(aMessage.value("host", ""), false)) Status("Connecting directly to host...");
 			else
 			{
-				ErrorCode("direct-connection-failed"); Status("WebRTC initialization failed");
+				PeerError(PeerFailure::Initialization, false);
 				Queue({{"kind", "leave"}}); mRoomId.clear(); mPendingRoom.clear();
 			}
 		}
@@ -530,7 +631,7 @@ struct NetOnline::Impl
 			const std::string aPeer = aMessage.value("peer", "");
 			if (!CreatePeer(aPeer, true))
 			{
-				ErrorCode("direct-connection-failed"); Status("WebRTC initialization failed");
+				PeerError(PeerFailure::Initialization, false);
 				Queue({{"kind", "drop"}, {"peer", aPeer}});
 			}
 		}
@@ -553,7 +654,7 @@ struct NetOnline::Impl
 				std::string aSdp = aMessage.value("sdp", ""), aType = aMessage.value("sdpType", "");
 				if (aSdp.empty() || aSdp.size() > 32768 || (aType != "offer" && aType != "answer") ||
 					mApi->rtcSetRemoteDescription(aPeer.mPc, aSdp.c_str(), aType.c_str()) < 0)
-					{ aPeer.mChannel->mCloseRequested = true; return; }
+					{ aPeer.mFailure = PeerFailure::InvalidSignal; aPeer.mChannel->mCloseRequested = true; return; }
 				aPeer.mRemoteDescription = true;
 				for (auto& aCandidate : aPeer.mCandidates)
 					mApi->rtcAddRemoteCandidate(aPeer.mPc, aCandidate.first.c_str(), aCandidate.second.c_str());
@@ -569,17 +670,23 @@ struct NetOnline::Impl
 		}
 		else if (aKind == "closed" || aKind == "kicked")
 		{
+			bool pending = false;
 			for (const auto& aPeer : mPeers)
-				if (!aPeer.second->mDelivered) { ErrorCode("direct-connection-failed"); break; }
+				pending |= !aPeer.second->mDelivered;
 			ClearPeers(); mRoomId.clear(); mHosting = false;
-			Status(aKind == "kicked" ? "Host kicked you from the room" : "Host closed the room");
+			if (aKind == "kicked")
+				Error("host-kicked", OnlineText(u8"\u0425\u043e\u0437\u044f\u0438\u043d \u0438\u0441\u043a\u043b\u044e\u0447\u0438\u043b \u0432\u0430\u0441 \u0438\u0437 \u043a\u043e\u043c\u043d\u0430\u0442\u044b. \u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0434\u0440\u0443\u0433\u0443\u044e \u043a\u043e\u043c\u043d\u0430\u0442\u0443."));
+			else
+				Error(pending ? "direct-connection-failed" : "room-closed",
+					OnlineText(u8"\u0425\u043e\u0437\u044f\u0438\u043d \u0437\u0430\u043a\u0440\u044b\u043b \u043a\u043e\u043c\u043d\u0430\u0442\u0443. \u041e\u0431\u043d\u043e\u0432\u0438\u0442\u0435 \u0441\u043f\u0438\u0441\u043e\u043a \u0438 \u0432\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0434\u0440\u0443\u0433\u0443\u044e."));
 		}
 		else if (aKind == "error")
 		{
 			mConnecting = false;
 			std::string aCode = aMessage.value("code", "error");
-			ErrorCode(aCode.substr(0, 120));
-			Status("Online: " + aCode.substr(0, 120));
+			const std::string message = ServiceErrorText(aCode);
+			Error(message.empty() ? "service-error" : aCode, message.empty() ?
+				OnlineText(u8"\u0421\u0435\u0440\u0432\u0438\u0441 \u0432\u0435\u0440\u043d\u0443\u043b \u043d\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043d\u0443\u044e \u043e\u0448\u0438\u0431\u043a\u0443. \u041f\u043e\u0432\u0442\u043e\u0440\u0438\u0442\u0435 \u043f\u043e\u0434\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u0435.") : message);
 			std::fill(mPendingPassword.begin(), mPendingPassword.end(), '\0'); mPendingPassword.clear();
 		}
 	}
@@ -595,16 +702,17 @@ bool NetOnline::Connect(const std::string& theEndpoint, const std::string& theBu
 	if (theEndpoint.size() > 2048 || theBuild.empty() || theBuild.size() > 128 ||
 		theNickname.empty() || theNickname.size() > 64 || theStun.size() > 256 ||
 		(theStun.rfind("stun:", 0) != 0 && theStun.rfind("stun://", 0) != 0))
-		{ mImpl->Status("Invalid online settings"); return false; }
+		{ mImpl->Error("invalid-settings", OnlineText(u8"\u041d\u0435\u0432\u0435\u0440\u043d\u044b\u0435 \u043d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u043e\u043d\u043b\u0430\u0439\u043d-\u0438\u0433\u0440\u044b. \u0412\u043e\u0441\u0441\u0442\u0430\u043d\u043e\u0432\u0438\u0442\u0435 \u043d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u043f\u043e\u0434\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u044f.")); return false; }
 	std::string aUrl = theEndpoint;
 	if (aUrl.rfind("wss://", 0) == 0) aUrl.replace(0, 6, "https://");
 	else if (aUrl.rfind("ws://", 0) == 0) aUrl.replace(0, 5, "http://");
 	if (aUrl.rfind("https://", 0) != 0 && aUrl.rfind("http://127.0.0.1:", 0) != 0 && aUrl.rfind("http://localhost:", 0) != 0)
-		{ mImpl->Status("Signaling requires HTTPS (local loopback may use HTTP)"); return false; }
+		{ mImpl->Error("insecure-endpoint", OnlineText(u8"\u0421\u0435\u0440\u0432\u0438\u0441 \u043a\u043e\u043c\u043d\u0430\u0442 \u0442\u0440\u0435\u0431\u0443\u0435\u0442 \u0437\u0430\u0449\u0438\u0449\u0451\u043d\u043d\u044b\u0439 \u0430\u0434\u0440\u0435\u0441 HTTPS. \u0412\u043e\u0441\u0441\u0442\u0430\u043d\u043e\u0432\u0438\u0442\u0435 \u043d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u043f\u043e\u0434\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u044f.")); return false; }
 	if (aUrl.find('@') != std::string::npos || aUrl.find('#') != std::string::npos || Wide(aUrl).empty())
-		{ mImpl->Status("Invalid signaling URL"); return false; }
+		{ mImpl->Error("invalid-endpoint", OnlineText(u8"\u041d\u0435\u0432\u0435\u0440\u043d\u044b\u0439 \u0430\u0434\u0440\u0435\u0441 \u0441\u0435\u0440\u0432\u0438\u0441\u0430 \u043a\u043e\u043c\u043d\u0430\u0442. \u0412\u043e\u0441\u0441\u0442\u0430\u043d\u043e\u0432\u0438\u0442\u0435 \u043d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u043f\u043e\u0434\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u044f.")); return false; }
 	mImpl->mApi = LoadRtc();
-	if (!mImpl->mApi) { mImpl->Status("WebRTC runtime missing: build/package datachannel.dll beside the game"); return false; }
+	if (!mImpl->mApi)
+	{ mImpl->Error("runtime-missing", OnlineText(u8"\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044c \u0441\u0435\u0442\u0435\u0432\u043e\u0439 \u043c\u043e\u0434\u0443\u043b\u044c. \u041f\u0435\u0440\u0435\u0443\u0441\u0442\u0430\u043d\u043e\u0432\u0438\u0442\u0435 \u043f\u043e\u043b\u043d\u0443\u044e \u0441\u0431\u043e\u0440\u043a\u0443 \u0438\u0433\u0440\u044b.")); return false; }
 	mImpl->mBuild = theBuild; mImpl->mNickname = theNickname; mImpl->mStun = theStun;
 	mImpl->ErrorCode("");
 	mImpl->mRunning = true; mImpl->mConnecting = true; mImpl->Status("Connecting to online browser...");
@@ -625,22 +733,28 @@ void NetOnline::Update()
 		{
 			const Json aJson = Json::parse(aText, nullptr, false);
 			if (aJson.is_object()) mImpl->Handle(aJson);
+			else
+			{ mImpl->mConnecting = false; mImpl->Error("signaling-protocol", OnlineText(u8"\u0421\u0435\u0440\u0432\u0438\u0441 \u043a\u043e\u043c\u043d\u0430\u0442 \u043f\u0440\u0438\u0441\u043b\u0430\u043b \u043d\u0435\u043a\u043e\u0440\u0440\u0435\u043a\u0442\u043d\u044b\u0439 \u043e\u0442\u0432\u0435\u0442. \u041f\u043e\u0432\u0442\u043e\u0440\u0438\u0442\u0435 \u043f\u043e\u0434\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u0435.")); }
 		}
-		catch (const Json::exception&) { mImpl->mConnecting = false; mImpl->Status("Invalid signaling response"); }
+		catch (const Json::exception&)
+		{ mImpl->mConnecting = false; mImpl->Error("signaling-protocol", OnlineText(u8"\u0421\u0435\u0440\u0432\u0438\u0441 \u043a\u043e\u043c\u043d\u0430\u0442 \u043f\u0440\u0438\u0441\u043b\u0430\u043b \u043d\u0435\u043a\u043e\u0440\u0440\u0435\u043a\u0442\u043d\u044b\u0439 \u043e\u0442\u0432\u0435\u0442. \u041f\u043e\u0432\u0442\u043e\u0440\u0438\u0442\u0435 \u043f\u043e\u0434\u043a\u043b\u044e\u0447\u0435\u043d\u0438\u0435.")); }
 	}
 	for (auto aIt = mImpl->mPeers.begin(); aIt != mImpl->mPeers.end(); )
 	{
 		auto& aPeer = *aIt->second;
 		if (!aPeer.mDelivered && !aPeer.mChannel->mOpen &&
 			std::chrono::steady_clock::now() - aPeer.mCreated > std::chrono::seconds(45))
+		{
+			Impl::PeerFailure expected = Impl::PeerFailure::None;
+			aPeer.mFailure.compare_exchange_strong(expected, Impl::PeerFailure::Timeout);
 			aPeer.mChannel->mCloseRequested = true;
+		}
 		if (aPeer.mChannel->mCloseRequested)
 		{
 			if (!aPeer.mDelivered && !aPeer.mDirectoryDeparted)
-			{
-				mImpl->ErrorCode("direct-connection-failed");
-				mImpl->Status("Direct connection failed: NAT/firewall may require VPN (no TURN)");
-			}
+				mImpl->PeerError(aPeer.mFailure, false);
+			else if (aPeer.mDelivered && !aPeer.mDirectoryDeparted && aPeer.mFailure != Impl::PeerFailure::None)
+				mImpl->PeerError(aPeer.mFailure, true);
 			if (!aPeer.mDirectoryDeparted)
 			{
 				if (mImpl->mHosting) mImpl->Queue({{"kind", "drop"}, {"peer", aPeer.mId}});
@@ -656,7 +770,7 @@ void NetOnline::Update()
 		{
 			aPeer.mDelivered = true;
 			mImpl->mOpened.push_back(std::make_shared<NetOnlineChannel>(aPeer.mChannel));
-			mImpl->Status("WebRTC connected directly");
+			mImpl->Success("WebRTC connected directly");
 		}
 		++aIt;
 	}
@@ -665,7 +779,10 @@ void NetOnline::Update()
 		mImpl->Queue({{"kind", "keepalive"}}); mImpl->mLastKeepalive = std::chrono::steady_clock::now();
 	}
 }
-void NetOnline::RefreshRooms() { mImpl->Queue({{"kind", "list"}}); }
+void NetOnline::RefreshRooms()
+{
+	if (mImpl->Queue({{"kind", "list"}})) mImpl->Success("Refreshing online rooms...");
+}
 bool NetOnline::CreateRoom(const std::string& theName, const std::string& thePassword, int theMaxPlayers)
 {
 	if (!mImpl->mRunning || theName.empty() || theName.size() > 192 || theMaxPlayers < 2 || theMaxPlayers > 4 || thePassword.size() > 256)
@@ -676,7 +793,7 @@ bool NetOnline::CreateRoom(const std::string& theName, const std::string& thePas
 	if (!thePassword.empty() && !PasswordProof(thePassword, aSaltHex, aProof)) return false;
 	const bool aQueued = mImpl->Queue({{"kind", "create"}, {"name", theName}, {"maxPlayers", theMaxPlayers},
 		{"salt", thePassword.empty() ? "" : aSaltHex}, {"proof", aProof}});
-	if (aQueued) mImpl->ErrorCode("");
+	if (aQueued) mImpl->Success("Creating room...");
 	return aQueued;
 }
 bool NetOnline::JoinRoom(const std::string& theRoomId, const std::string& thePassword)
@@ -684,7 +801,7 @@ bool NetOnline::JoinRoom(const std::string& theRoomId, const std::string& thePas
 	if (!mImpl->mRunning || theRoomId.empty() || theRoomId.size() > 64 || thePassword.size() > 256) return false;
 	mImpl->mPendingRoom = theRoomId; mImpl->mPendingPassword = thePassword;
 	const bool aQueued = mImpl->Queue({{"kind", "challenge"}, {"room", theRoomId}});
-	if (aQueued) mImpl->ErrorCode("");
+	if (aQueued) mImpl->Success("Joining room...");
 	return aQueued;
 }
 void NetOnline::SetPlaying(bool thePlaying) { mImpl->Queue({{"kind", "playing"}, {"playing", thePlaying}}); }
@@ -708,7 +825,8 @@ void NetOnline::Stop()
 	}
 	mImpl->mRoomId.clear(); mImpl->mHosting = false;
 	std::fill(mImpl->mPendingPassword.begin(), mImpl->mPendingPassword.end(), '\0'); mImpl->mPendingPassword.clear();
-	std::lock_guard<std::mutex> aLock(mImpl->mViewMutex); mImpl->mRooms.clear(); mImpl->mLastErrorCode.clear();
+	std::lock_guard<std::mutex> aLock(mImpl->mViewMutex);
+	mImpl->mRooms.clear(); mImpl->mLastErrorCode.clear(); mImpl->mLastErrorMessage.clear();
 }
 bool NetOnline::IsConnecting() const { return mImpl->mConnecting; }
 bool NetOnline::IsConnected() const { return mImpl->mRegistered; }
@@ -716,6 +834,7 @@ bool NetOnline::IsHostingRoom() const { return mImpl->mHosting; }
 std::string NetOnline::GetRoomId() const { return mImpl->mRoomId; }
 std::string NetOnline::GetStatus() const { std::lock_guard<std::mutex> aLock(mImpl->mViewMutex); return mImpl->mStatus; }
 std::string NetOnline::GetLastErrorCode() const { std::lock_guard<std::mutex> aLock(mImpl->mViewMutex); return mImpl->mLastErrorCode; }
+std::string NetOnline::GetLastErrorMessage() const { std::lock_guard<std::mutex> aLock(mImpl->mViewMutex); return mImpl->mLastErrorMessage; }
 std::vector<NetOnlineRoom> NetOnline::GetRooms() const { std::lock_guard<std::mutex> aLock(mImpl->mViewMutex); return mImpl->mRooms; }
 std::vector<std::shared_ptr<NetOnlineChannel>> NetOnline::TakeOpenedChannels()
 {

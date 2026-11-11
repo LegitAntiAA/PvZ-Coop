@@ -832,6 +832,11 @@ bool IssueClientWhackAction(LawnApp* theApp, uint16_t& theTargetId)
 bool IssueClientSlotMachineAction(LawnApp* theApp)
 {
 	Board* aBoard = theApp ? theApp->mBoard : nullptr;
+	bool aHostBaselineReady = false;
+	if (theApp && theApp->mNetManager)
+		for (const auto& aLine : theApp->mNetManager->mChatLines)
+			if (aLine.mSlot == 0 && aLine.mText == "SMOKE_SLOT_BASELINE") aHostBaselineReady = true;
+	if (!aHostBaselineReady) return false;
 	if (!aBoard || !aBoard->mChallenge || !aBoard->mSeedBank ||
 		!theApp->IsSlotMachineLevel() || aBoard->mSunMoney < 25 ||
 		aBoard->mChallenge->mChallengeState != ChallengeState::STATECHALLENGE_NORMAL ||
@@ -1855,11 +1860,19 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
 				theManifest.IsHost() ? "host" : "client");
 		if (!theManifest.mSkipIntro)
 		{
-			if (!mIntroObserved || !mIntroProgressObserved)
+			// Native non-scrolling modes without Dave call CancelIntro during
+			// StartLevelIntro. Their last20ms can finish before the first network
+			// presentation sample; they still must cross the reliable camera barrier.
+			const bool aNativeInstantIntro = aBoard->mCutScene &&
+				aBoard->mCutScene->IsNonScrollingCutscene() && aBoard->mCutScene->mCrazyDaveTime == 0;
+			if (!mIntroObserved || (!mIntroProgressObserved && !aNativeInstantIntro))
 			{
 				theFailure = "gameplay began without observing synchronized real intro progress";
 				return false;
 			}
+			if (!mIntroProgressObserved)
+				NetTrace("SMOKE_NATIVE_INSTANT_INTRO role=%s mode=%d source=non_scrolling_no_dave",
+					theManifest.IsHost() ? "host" : "client", (int)theApp->mGameMode);
 			if (NetIsBowlingSmokeScenario(mScenario) && !mIntroSawDave)
 			{
 				theFailure = "Adventure 5 gameplay began without observing synchronized Dave presentation";
@@ -1921,11 +1934,28 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
 			return true;
 		}
                 mBaselineCaptured = true;
+		if (mScenario == NETSMOKE_SCENARIO_ADVENTURE_15_WHACK_CLIENT)
+		{
+			// This scenario verifies the other player's rendered stock hammer.
+			// Give each hidden window a real local SDL pointer position first.
+			SDL_Event aMotion{};
+			aMotion.type = SDL_EVENT_MOUSE_MOTION;
+			aMotion.motion.windowID = SDL_GetWindowID(theApp->mSDLWindow);
+			aMotion.motion.x = (float)SmokeLocalX(theApp, 350);
+			aMotion.motion.y = (float)SmokeLocalY(theApp, 300);
+			if (!SDL_PushEvent(&aMotion))
+			{
+				theFailure = "Whack SDL cursor motion was rejected";
+				return false;
+			}
+		}
                 mActionTick = GetTickCount();
                 mSoakLastActionTick = mActionTick;
                 NetTrace("SMOKE_CHECKPOINT role=%s scenario=%s step=BASELINE plants=%d pots=%d zombies=%d snapshots=%u",
                         theManifest.IsHost() ? "host" : "client", aDefinition->mName,
                         mBaselinePlants, mBaselinePots, aBoard->mZombies.mSize, theGameplaySnapshots);
+		if (mScenario == NETSMOKE_SCENARIO_SLOT_MACHINE_CLIENT && theManifest.IsHost())
+			theApp->mNetManager->SendChat("SMOKE_SLOT_BASELINE");
 	}
 
 	if (mScenario == NETSMOKE_SCENARIO_ENDLESS_OVERFLOW)
@@ -2155,7 +2185,7 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
 
 		if (!mPvpInitialBrainsVerified)
 		{
-			if (aBoard->mNetPvPBrains != 100 ||
+            if (aBoard->mNetPvPBrains != 25 ||
 				(theManifest.IsHost() && (aBoard->mNetPvPBrainTick < 0 || aBoard->mNetPvPBrainTick >= 1000)))
 			{
 				NetTrace("SMOKE_PVP_BRAINS_INVALID role=%s phase=initial brains=%d tick=%d",
@@ -2165,7 +2195,7 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
 				return false;
 			}
 			mPvpInitialBrainsVerified = true;
-			NetTrace("SMOKE_PVP_BRAINS role=%s phase=initial brains=100 tick=%d",
+			NetTrace("SMOKE_PVP_BRAINS role=%s phase=initial brains=25 tick=%d",
 				theManifest.IsHost() ? "host" : "client",
 				theManifest.IsHost() ? aBoard->mNetPvPBrainTick : -1);
 			if (theManifest.IsHost()) mPvpInitialReadyTick = aNow;
@@ -2266,27 +2296,27 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
 			mPvpBrainsAfterAction >= 0 && aBoard->mNetPvPBrains != mPvpBrainsAfterAction)
 		{
 			const int aDelta = aBoard->mNetPvPBrains - mPvpBrainsAfterAction;
-			if (aDelta == 50)
+			if (aDelta == 25)
 			{
 				mPvpPassiveBrainsVerified = true;
 				NetTrace("SMOKE_PVP_BRAINS role=%s phase=passive before=%d after=%d delta=%d",
 					theManifest.IsHost() ? "host" : "client", mPvpBrainsAfterAction,
 					aBoard->mNetPvPBrains, aDelta);
 			}
-			else if (aDelta > 50)
+			else if (aDelta > 25)
 			{
 				NetTrace("SMOKE_PVP_BRAINS_INVALID role=%s phase=passive before=%d after=%d",
 					theManifest.IsHost() ? "host" : "client", mPvpBrainsAfterAction,
 					aBoard->mNetPvPBrains);
-				theFailure = "PvP passive brain award skipped the exact +50 authoritative state";
+				theFailure = "PvP passive brain award skipped the exact +25 authoritative state";
 				return false;
 			}
 			else
 			{
-				// A client can receive the zombie cost (-25) and the first +50
+				// A client can receive the zombie cost (-25) and the first +25
 				// award in one authoritative snapshot.  Preserve that combined
 				// transition as the new baseline; the next positive transition
-				// must still prove the exact +50 cadence on both peers.
+				// must still prove the exact +25 cadence on both peers.
 				NetTrace("SMOKE_PVP_BRAINS_REBASE role=%s before=%d after=%d delta=%d",
 					theManifest.IsHost() ? "host" : "client", mPvpBrainsAfterAction,
 					aBoard->mNetPvPBrains, aDelta);

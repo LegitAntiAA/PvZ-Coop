@@ -39,6 +39,7 @@ public:
     void                        Update();
     void                        AnimateBoard();
     /*inline*/ void             StartSeedChooser();
+    void                        RestartSeedChooser();
     /*inline*/ void             EndSeedChooser();
     /*inline*/ int              CalcPosition(int theTimeStart, int theTimeEnd, int thePositionStart, int thePositionEnd);
     void                        PlaceStreetZombies();

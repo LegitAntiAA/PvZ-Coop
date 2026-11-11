@@ -3,6 +3,7 @@
 
 #include "GameObject.h"
 #include "../GameConstants.h"
+#include <cstdint>
 
 constexpr const int SLOT_MACHINE_TIME = 400;
 constexpr const int CONVEYOR_SPEED = 4;
@@ -24,9 +25,12 @@ public:
     bool                mRefreshing;                                //+0x49
     int                 mTimesUsed;                                 //+0x4C
     unsigned char       mNetOwnerSlot;                              // co-op owner slot, or NET_SHARED_OWNER
+    uint8_t             mRandomDiscountLevel;                      // 0 ordinary, 1..10 intrinsic mystery origin
 
 public:
     SeedPacket();
+    bool                IsMysteryPending() const { return mRandomDiscountLevel > 0 && mPacketType == SeedType::SEED_NONE; }
+    void                SetMysteryPlaceholder(uint8_t theLevel);
 
     void                Update();
     void                Draw(Graphics* g);
@@ -42,6 +46,8 @@ public:
     bool                CanPickUp();
     void                SetPacketType(SeedType theSeedType, SeedType theImitaterType = SeedType::SEED_NONE);
 };
+
+static_assert(sizeof(SeedPacket) == sizeof(GameObject) + 48, "Mystery metadata must use existing SeedPacket tail padding");
 
 class SeedBank : public GameObject
 {
@@ -69,6 +75,7 @@ public:
 
 void				    SeedPacketDrawSeed(Graphics* g, float x, float y, SeedType theSeedType, SeedType theImitaterType, float theOffsetX, float theOffsetY, float theScale);
 void				    DrawSeedPacket(Graphics* g, float x, float y, SeedType theSeedType, SeedType theImitaterType, float thePercentDark, int theGrayness, bool theDrawCost, bool theUseCurrentCost);
+void                    DrawMysterySeedPacket(Graphics* g, float x, float y, int theGrayness = 255);
 
 
 #endif

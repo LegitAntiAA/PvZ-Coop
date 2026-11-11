@@ -275,7 +275,8 @@ function Start-SmokeProcess {
         [Parameter(Mandatory = $true)][string]$ManifestPath,
         [Parameter(Mandatory = $true)][string]$Role,
         [Parameter(Mandatory = $true)][string]$RunId,
-        [Parameter(Mandatory = $true)][bool]$EnableUnicodeChat
+        [Parameter(Mandatory = $true)][bool]$EnableUnicodeChat,
+        [ValidateSet("", "host", "client", "spectator")][string]$SpectatorRole = ""
     )
 
     if ($ManifestPath.Contains('"')) {
@@ -287,7 +288,8 @@ function Start-SmokeProcess {
     $startInfo.WorkingDirectory = $WorkingDirectory
     $startInfo.Arguments = '-coop-smoke-manifest="' + $ManifestPath + '"'
     $startInfo.UseShellExecute = $false
-    $startInfo.CreateNoWindow = $false
+    $startInfo.CreateNoWindow = [bool]$Background
+    if ($Background) { $startInfo.WindowStyle = [System.Diagnostics.ProcessWindowStyle]::Hidden }
     # Newer Windows PowerShell/.NET combinations can expose the legacy
     # EnvironmentVariables property as null while the IDictionary Environment
     # view remains valid.  Use the latter so the role guard is always inherited.
@@ -301,7 +303,7 @@ function Start-SmokeProcess {
     $childEnvironment["PVZ_COOP_SMOKE_RUN_ID"] = $RunId
     $childEnvironment["PVZ_COOP_SMOKE_ROLE"] = $Role
     if ($env:PVZ_COOP_SMOKE_SPECTATOR -eq "1") {
-        $childEnvironment["PVZ_COOP_SMOKE_SPECTATOR_ROLE"] = $Role
+        $childEnvironment["PVZ_COOP_SMOKE_SPECTATOR_ROLE"] = $(if ($SpectatorRole) { $SpectatorRole } else { $Role })
     }
     $childEnvironment["PVZ_COOP_SMOKE_UNICODE_CHAT"] = $(if ($EnableUnicodeChat) { "1" } else { "0" })
     $childEnvironment["PVZ_COOP_SMOKE_INTERACTIONS"] = $(if ($VerifyInteractions) { "1" } else { "0" })
@@ -311,7 +313,7 @@ function Start-SmokeProcess {
     $childEnvironment["PVZ_COOP_SMOKE_MODES"] = $(if ($VerifyModes) { "1" } else { "0" })
     $childEnvironment["PVZ_COOP_SMOKE_FIRST_ADVENTURE"] = $(if ($VerifyFirstAdventure) { "1" } else { "0" })
     $nativeUiWorkflow = $env:PVZ_COOP_SMOKE_NATIVE_UI -in @("appearance", "appearance-restart", "browser", "browser-probe")
-    $childEnvironment["PVZ_COOP_SMOKE_HIDE_CONTROL_CHAT"] = $(if ($VerifyFirstAdventure -or $nativeUiWorkflow) { "1" } else { "0" })
+    $childEnvironment["PVZ_COOP_SMOKE_HIDE_CONTROL_CHAT"] = $(if ($VerifyFirstAdventure -or $nativeUiWorkflow -or $env:PVZ_COOP_SMOKE_MYSTERY -eq "1" -or $env:PVZ_COOP_SMOKE_GAME_OVER -in @("retry", "close")) { "1" } else { "0" })
     $childEnvironment["PVZ_COOP_SMOKE_BACKGROUND"] = $(if ($Background) { "1" } else { "0" })
     $childEnvironment["PVZ_COOP_SMOKE_ONLINE_ENDPOINT"] = $OnlineEndpoint
     if ($Background) {
@@ -323,6 +325,22 @@ function Start-SmokeProcess {
     if (-not $process.Start()) {
         throw ("Failed to start the {0} process." -f $Role)
     }
+
+    # Keep ownership on the original Process object and on disk for recovery.
+    # Every close checks all three values, including against PID reuse.
+    $ownedExecutable = Get-NormalizedPath $Executable
+    $ownedStartedUtc = $process.StartTime.ToUniversalTime()
+    $process | Add-Member -NotePropertyName SmokeExecutable -NotePropertyValue $ownedExecutable
+    $process | Add-Member -NotePropertyName SmokeStartedUtcTicks -NotePropertyValue $ownedStartedUtc.Ticks
+    $ownedRecord = [ordered]@{
+        role = $Role
+        run_id = $RunId
+        pid = $process.Id
+        executable = $ownedExecutable
+        started_utc = $ownedStartedUtc.ToString("o")
+    }
+    Write-Utf8NoBom -Path (Join-Path (Split-Path -Parent $ManifestPath) "owned-process.json") `
+        -Text ((ConvertTo-Json $ownedRecord) + [Environment]::NewLine)
 
     return $process
 }
@@ -681,6 +699,29 @@ function Wait-ForCleanProcessExit {
     }
 }
 
+function Test-OwnedProcessIdentity {
+    param([Parameter(Mandatory = $true)][System.Diagnostics.Process]$Process)
+
+    if ($null -eq $Process.PSObject.Properties["SmokeExecutable"] -or
+        $null -eq $Process.PSObject.Properties["SmokeStartedUtcTicks"]) {
+        Write-Warning "Refusing to close a process without a smoke ownership record."
+        return $false
+    }
+    try {
+        $live = [System.Diagnostics.Process]::GetProcessById($Process.Id)
+        try {
+            return $live.StartTime.ToUniversalTime().Ticks -eq $Process.SmokeStartedUtcTicks -and
+                [string]::Equals((Get-NormalizedPath $live.MainModule.FileName),
+                    $Process.SmokeExecutable, [StringComparison]::OrdinalIgnoreCase)
+        }
+        finally { $live.Dispose() }
+    }
+    catch {
+        Write-Warning ("Could not verify smoke process identity for PID {0}: {1}" -f $Process.Id, $_.Exception.Message)
+        return $false
+    }
+}
+
 function Request-OwnedProcessClose {
     param(
         [Parameter(Mandatory = $true)][System.Diagnostics.Process]$Process,
@@ -689,6 +730,9 @@ function Request-OwnedProcessClose {
 
     if ($Process.HasExited) {
         return
+    }
+    if (-not (Test-OwnedProcessIdentity $Process)) {
+        throw ("Refusing to close {0}: PID/path/start time do not match the owned launch." -f $Role)
     }
     Write-SmokeStatus ("Closing owned {0} PID {1} after both results arrived." -f $Role, $Process.Id)
     # Process.MainWindowHandle is cached.  PvZ can recreate its top-level HWND
@@ -718,12 +762,17 @@ function Stop-OwnedProcess {
         if ($Process.HasExited) {
             return $true
         }
+        if (-not (Test-OwnedProcessIdentity $Process)) {
+            Write-Warning ("Refusing to close {0}: PID/path/start time do not match the owned launch." -f $Role)
+            return $false
+        }
 
         Write-SmokeStatus ("Requesting graceful close of {0} PID {1}." -f $Role, $Process.Id)
         $Process.Refresh()
         if ($Background) { [void][CoopSmokeNativeWindow]::CloseOwnedWindow($Process.Id) }
         else { [void]$Process.CloseMainWindow() }
         if (-not $Process.WaitForExit(5000)) {
+            if (-not (Test-OwnedProcessIdentity $Process)) { return $false }
             Write-SmokeStatus ("Force-closing owned {0} PID {1}." -f $Role, $Process.Id)
             $Process.Kill()
             [void]$Process.WaitForExit(5000)
@@ -1397,20 +1446,20 @@ try {
         $hostPositivePatterns += @(
             @{ Label = "host PvP 1v1 roster"; Pattern = '(?im)\bSMOKE_PVP_ROSTER\b[^\r\n]*\brole=host\b[^\r\n]*\bplayers=2\b[^\r\n]*\bhostTeam=plants\b[^\r\n]*\bclientTeam=zombies\b[^\r\n]*\blocalSlot=0\b[^\r\n]*\blocalTeam=plants\b' },
             @{ Label = "host PvP deck"; Pattern = '(?im)\bSMOKE_PVP_DECK\b[^\r\n]*\brole=host\b[^\r\n]*\bplants=10\b[^\r\n]*\bzombies=16\b[^\r\n]*\bshared=16\b[^\r\n]*\btotal=26\b' },
-            @{ Label = "host PvP initial brains"; Pattern = '(?im)\bSMOKE_PVP_BRAINS\b[^\r\n]*\brole=host\b[^\r\n]*\bphase=initial\b[^\r\n]*\bbrains=100\b' },
+            @{ Label = "host PvP initial brains"; Pattern = '(?im)\bSMOKE_PVP_BRAINS\b[^\r\n]*\brole=host\b[^\r\n]*\bphase=initial\b[^\r\n]*\bbrains=25\b' },
             @{ Label = "host PvP offscreen client zombie"; Pattern = '(?im)\bSMOKE_PVP_ZOMBIE_ENTRY\b[^\r\n]*\brole=host\b[^\r\n]*\bid=[1-9]\d*\b[^\r\n]*\bx=(?:8\d\d|9\d\d|[1-9]\d{3,})\.\d{2}\b[^\r\n]*\bghost=0\b' },
             @{ Label = "host PvP plant action"; Pattern = '(?im)\bSMOKE_PVP_HOST_PLANT\b[^\r\n]*\brole=host\b' },
-            @{ Label = "host PvP passive brains"; Pattern = '(?im)\bSMOKE_PVP_BRAINS\b[^\r\n]*\brole=host\b[^\r\n]*\bphase=passive\b[^\r\n]*\bdelta=50\b' },
+            @{ Label = "host PvP passive brains"; Pattern = '(?im)\bSMOKE_PVP_BRAINS\b[^\r\n]*\brole=host\b[^\r\n]*\bphase=passive\b[^\r\n]*\bdelta=25\b' },
             @{ Label = "host PvP remote cursor hidden"; Pattern = '(?im)\bSMOKE_PVP_CURSOR_HIDDEN\b[^\r\n]*\brole=host\b[^\r\n]*\boverlaySuppressed=1\b' }
         )
         $clientPositivePatterns += @(
             @{ Label = "client PvP 1v1 roster"; Pattern = '(?im)\bSMOKE_PVP_ROSTER\b[^\r\n]*\brole=client\b[^\r\n]*\bplayers=2\b[^\r\n]*\blocalSlot=1\b[^\r\n]*\blocalTeam=zombies\b' },
             @{ Label = "client PvP deck"; Pattern = '(?im)\bSMOKE_PVP_DECK\b[^\r\n]*\brole=client\b[^\r\n]*\bplants=10\b[^\r\n]*\bzombies=16\b[^\r\n]*\bshared=16\b[^\r\n]*\btotal=26\b' },
-            @{ Label = "client PvP initial brains"; Pattern = '(?im)\bSMOKE_PVP_BRAINS\b[^\r\n]*\brole=client\b[^\r\n]*\bphase=initial\b[^\r\n]*\bbrains=100\b' },
-            @{ Label = "client PvP zombie input"; Pattern = '(?im)\bSMOKE_PVP_CLIENT_ZOMBIE_INPUT\b[^\r\n]*\bindex=10\b[^\r\n]*\bowner=255\b[^\r\n]*\bbrains=100\b' },
+            @{ Label = "client PvP initial brains"; Pattern = '(?im)\bSMOKE_PVP_BRAINS\b[^\r\n]*\brole=client\b[^\r\n]*\bphase=initial\b[^\r\n]*\bbrains=25\b' },
+            @{ Label = "client PvP zombie input"; Pattern = '(?im)\bSMOKE_PVP_CLIENT_ZOMBIE_INPUT\b[^\r\n]*\bindex=10\b[^\r\n]*\bowner=255\b[^\r\n]*\bbrains=25\b' },
             @{ Label = "client PvP offscreen zombie ghost"; Pattern = '(?im)\bSMOKE_PVP_ZOMBIE_ENTRY\b[^\r\n]*\brole=client\b[^\r\n]*\bid=[1-9]\d*\b[^\r\n]*\bx=(?:8\d\d|9\d\d|[1-9]\d{3,})\.\d{2}\b[^\r\n]*\bghost=1\b' },
             @{ Label = "client sees host PvP plant"; Pattern = '(?im)\bSMOKE_PVP_HOST_PLANT\b[^\r\n]*\brole=client\b' },
-            @{ Label = "client PvP passive brains"; Pattern = '(?im)\bSMOKE_PVP_BRAINS\b[^\r\n]*\brole=client\b[^\r\n]*\bphase=passive\b[^\r\n]*\bdelta=50\b' },
+            @{ Label = "client PvP passive brains"; Pattern = '(?im)\bSMOKE_PVP_BRAINS\b[^\r\n]*\brole=client\b[^\r\n]*\bphase=passive\b[^\r\n]*\bdelta=25\b' },
             @{ Label = "client PvP remote cursor hidden"; Pattern = '(?im)\bSMOKE_PVP_CURSOR_HIDDEN\b[^\r\n]*\brole=client\b[^\r\n]*\boverlaySuppressed=1\b' }
         )
     }

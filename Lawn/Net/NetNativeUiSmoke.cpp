@@ -1,4 +1,5 @@
 #include "../../LawnApp.h"
+#include "../../Resources.h"
 #include "NetManager.h"
 #include "NetOnline.h"
 #include "NetLobbyPanel.h"
@@ -16,6 +17,7 @@
 #include "../../SexyAppFramework/Image.h"
 #include "../../SexyAppFramework/WidgetManager.h"
 #include "../../Sexy.TodLib/Reanimator.h"
+#include "../../Sexy.TodLib/TodStringFile.h"
 #include <cstdlib>
 #include <cmath>
 
@@ -367,8 +369,20 @@ bool Browser(LawnApp* app, bool probe)
     {
         const std::string code = online->GetLastErrorCode();
         if (code != (probe ? "room-full" : "wrong-password")) return true;
+        if (s.mObserved != s.mStage) { s.mObserved = s.mStage; s.mObservedTick = GetTickCount(); }
+        const SexyString detail = StringToSexyString(online->GetLastErrorMessage());
+        ListWidget* list = dynamic_cast<ListWidget*>(Child(browser, 204));
+        Graphics measure;
+        const int required = TodDrawStringWrappedHelper(&measure, detail, Rect(0, 0, 421, 600),
+            FONT_BRIANNETOD12, Color::Black, DS_ALIGN_LEFT, false);
+        const int available = list ? 436 - list->mY - list->mHeight - 26 : 0;
+        if (detail.empty() || !list || required > available)
+        {
+            if (GetTickCount() - s.mObservedTick < 2000U) return true;
+            app->CoopSmokeFail("native online error cause is absent or does not fit its wrapped notice area"); return true;
+        }
         if (!Record(app, probe ? "browser_room_full" : "browser_wrong_password", false)) return true;
-        NetTrace("SMOKE_NATIVE_BROWSER_ERROR code=%s retry=1", code.c_str());
+        NetTrace("SMOKE_NATIVE_BROWSER_ERROR code=%s retry=1 wrapped=1 height=%d available=%d", code.c_str(), required, available);
         ++s.mStage; s.mActionTick = GetTickCount();
         if (probe && !Click(app, browser->mLawnYesButton, browser)) app->CoopSmokeFail("native browser cancel SDL failed");
     }

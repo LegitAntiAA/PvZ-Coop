@@ -20,8 +20,11 @@
 #include "../../SexyAppFramework/MTRand.h"
 #include "../../Sexy.TodLib/TodStringFile.h"
 #include "../../SexyAppFramework/WidgetManager.h"
+#include "../../SexyAppFramework/DDImage.h"
 #include "../Net/NetManager.h"
 #include "../Challenge.h"
+#include "../Net/NetMystery.h"
+#include "NetUi.h"
 
 using namespace LawnNet;
 //0x483380
@@ -31,6 +34,8 @@ SeedChooserScreen::SeedChooserScreen()
 	mCoopPicksPerPlayer = 0;
 	mCoopMyImitater = SEED_NONE;
 	mCoopLastStateHash = 0xFFFFFFFFu;
+	mCoopMysteryRequestPending = false;
+	mCoopWaitingPaper = nullptr;
 	for (int i = 0; i < 4; i++)
 	{
 		mCoopRemotePickCount[i] = 0;
@@ -263,6 +268,11 @@ SeedChooserScreen::SeedChooserScreen()
 	if (mApp->IsAdventureMode() && (!mApp->IsFirstTimeAdventureMode() || mApp->mPlayerLevelRef > 4 && mBoard->mLevel < mApp->mPlayerLevelRef))
 		CrazyDavePickSeeds();
 	UpdateImitaterButton();
+	if (CoopIsPvpZombieWaiting())
+	{
+		mCoopWaitingPaper = mApp->GetImage(_S("images/Almanac_PlantCard"));
+		CoopRefreshStartButton();
+	}
 }
 
 template <typename T>
@@ -397,6 +407,7 @@ SeedChooserScreen::~SeedChooserScreen()
 	if (mToolTip) delete mToolTip;
 	if (mMenuButton) delete mMenuButton;
 	if (mScrollbar) delete mScrollbar;
+	delete mCoopWaitingPaper;
 }
 
 //0x4845E0
@@ -421,11 +432,48 @@ bool SeedChooserScreen::SeedNotAllowedDuringTrial(SeedType theSeedType)
 	return mApp->IsTrialStageLocked() && (theSeedType == SEED_SQUASH || theSeedType == SEED_THREEPEATER);
 }
 
+bool SeedChooserScreen::CoopIsPvpZombieWaiting() const
+{
+	const NetManager* aNet = mApp ? mApp->mNetManager : nullptr;
+	return mApp && mApp->mGameMode == GAMEMODE_COOP_PVP &&
+		mApp->mGameScene == SCENE_LEVEL_INTRO && aNet && aNet->IsActive() &&
+		aNet->GetMyTeam() == NETTEAM_ZOMBIES;
+}
+
+void SeedChooserScreen::CoopDrawPvpWaiting(Graphics* g)
+{
+	// Anchor the waiting panel to the window while the stock chooser slides.
+	Graphics aScreenG(*g);
+	aScreenG.mTransX -= mX;
+	aScreenG.mTransY -= mY;
+	const int aCenter = mApp->mWidth / 2;
+	NetUi::Paper(&aScreenG, mCoopWaitingPaper, Rect(aCenter - 230, 215, 460, 172));
+	TodDrawString(&aScreenG, _S("WAITING FOR PLANTS"), aCenter, 257,
+		FONT_DWARVENTODCRAFT15, NetUi::Ink(), DS_ALIGN_CENTER);
+	TodDrawString(&aScreenG, _S("The plant team is choosing its seeds."), aCenter, 300,
+		FONT_BRIANNETOD16, NetUi::Ink(), DS_ALIGN_CENTER);
+	TodDrawString(&aScreenG, _S("Press ready when you are prepared."), aCenter, 342,
+		FONT_BRIANNETOD12, NetUi::MutedInk(), DS_ALIGN_CENTER);
+	if (mCoopChooserActive)
+	{
+		mStartButton->Draw(&aScreenG);
+		aScreenG.SetColor(mApp->mNetManager->IsMyReady() ? Color(40, 195, 45, 48) : Color(235, 45, 30, 48));
+		aScreenG.FillRect(mStartButton->mX + 3, mStartButton->mY + 3,
+			mStartButton->mWidth - 6, mStartButton->mHeight - 6);
+	}
+	mMenuButton->Draw(&aScreenG);
+}
+
 //0x484690
 void SeedChooserScreen::Draw(Graphics* g)
 {
 	if (mApp->GetDialog(DIALOG_STORE) || mApp->GetDialog(DIALOG_ALMANAC))
 		return;
+	if (CoopIsPvpZombieWaiting())
+	{
+		CoopDrawPvpWaiting(g);
+		return;
+	}
 
 	g->SetLinearBlend(true);
 	if (!mBoard->ChooseSeedsOnCurrentLevel() || (mBoard->mCutScene && mBoard->mCutScene->IsBeforePreloading()))
@@ -591,7 +639,11 @@ void SeedChooserScreen::Draw(Graphics* g)
 			mStartButton->mWidth - 6, mStartButton->mHeight - 6);
 		g->PopState();
 	}
-	mRandomButton->Draw(g);
+	if (mCoopChooserActive)
+		NetUi::StoneButton(g, Rect(mRandomButton->mX, mRandomButton->mY, mRandomButton->mWidth, mRandomButton->mHeight),
+			mRandomButton->mLabel, mRandomButton->mIsDown && mRandomButton->IsMouseOver(),
+			mRandomButton->IsMouseOver(), mRandomButton->mDisabled);
+	else mRandomButton->Draw(g);
 	g->PopState();
 	mViewLawnButton->Draw(g);
 	mAlmanacButton->Draw(g);
@@ -675,6 +727,11 @@ void SeedChooserScreen::UpdateCursor()
 	if (mApp->GetDialogCount() || mBoard->mCutScene->IsInShovelTutorial() || mApp->mGameMode == GAMEMODE_UPSELL || !mApp->mWidgetManager->mOverWidget) return;
 
 	mApp->mWidgetManager->SetFocus(this);
+	if (CoopIsPvpZombieWaiting())
+	{
+		mApp->SetCursor(mMouseVisible && (mMenuButton->IsMouseOver() || mStartButton->IsMouseOver()) ? CURSOR_HAND : CURSOR_POINTER);
+		return;
+	}
 	
 	SeedType aMouseSeedType = SeedHitTest(mLastMouseX, mLastMouseY);
 	if (aMouseSeedType != SEED_NONE)
@@ -891,7 +948,8 @@ void SeedChooserScreen::OnStartButton()
 			return;
 		}
 	}
-	if (!PickedPlantType(SEED_SUNFLOWER) && !PickedPlantType(SEED_TWINSUNFLOWER) && !PickedPlantType(SEED_SUNSHROOM) &&
+	if (!(mCoopChooserActive && mApp->mNetManager && mApp->mNetManager->HasActiveMysteryDeck()) &&
+		!PickedPlantType(SEED_SUNFLOWER) && !PickedPlantType(SEED_TWINSUNFLOWER) && !PickedPlantType(SEED_SUNSHROOM) &&
 		!mBoard->mCutScene->IsSurvivalRepick() && !mApp->IsLastStand())
 	{
 		if (mApp->IsFirstTimeAdventureMode() && mBoard->mLevel == 11)
@@ -970,7 +1028,6 @@ void SeedChooserScreen::OnStartButton()
 	{
 		if (!CoopBroadcastChooserStart())
 			return;
-		CoopBuildBankFromLocalState();
 		mBoard->mCutScene->EndSeedChooser();
 		return;
 	}
@@ -981,6 +1038,8 @@ void SeedChooserScreen::OnStartButton()
 //0x4859B0
 void SeedChooserScreen::PickRandomSeeds()
 {
+	// Co-op random selection is an authenticated Mystery request, never a local close.
+	if (mCoopChooserActive) return;
 	// The host owns the final chooser result.  In particular, a client must not
 	// use the debug/random shortcut to replace its local mirror of mandatory
 	// cards and close the chooser before the authoritative start arrives.
@@ -1010,6 +1069,8 @@ void SeedChooserScreen::PickRandomSeeds()
 //0x485BB0
 void SeedChooserScreen::ButtonDepress(int theId)
 {
+	if (CoopIsPvpZombieWaiting() && theId != SeedChooserScreen_Start && theId != SeedChooserScreen_Menu)
+		return;
 	if (mSeedsInFlight > 0 || mChooseState == CHOOSE_VIEW_LAWN || !mMouseVisible)
 		return;
 
@@ -1043,6 +1104,13 @@ void SeedChooserScreen::ButtonDepress(int theId)
 		UpdateCursor();
 		mApp->DoNewOptions(false);
 	}
+	else if (mCoopChooserActive && theId == SeedChooserScreen::SeedChooserScreen_Random)
+	{
+		if (!mRandomButton->mDisabled && !mCoopMysteryRequestPending)
+			mCoopMysteryRequestPending = mApp->mNetManager->RequestChooserMystery(
+				!mApp->mNetManager->IsChooserMystery(mApp->mNetManager->GetMySlot()));
+		CoopRefreshStartButton();
+	}
 	else if (mCoopChooserActive && theId == SeedChooserScreen::SeedChooserScreen_Start)
 	{
 		CoopToggleReady();
@@ -1064,6 +1132,7 @@ void SeedChooserScreen::ButtonDepress(int theId)
 //0x485D80
 SeedType SeedChooserScreen::SeedHitTest(int x, int y)
 {
+	if (CoopIsPvpZombieWaiting()) return SEED_NONE;
 	x -= mApp->mDDInterface->mWideScreenOffsetX;
 	y -= mApp->mDDInterface->mWideScreenOffsetY;
 
@@ -1148,7 +1217,66 @@ int SeedChooserScreen::CoopGetLocalQuotaPickCount() const
 	// serializes/owns them.  Client quotas therefore count mutable picks only.
 	if (mApp && mApp->NetIsClient())
 		aCount -= CoopCountGlobalFixedPicks();
-	return max(0, aCount);
+	return max(0, aCount) + (mApp && mApp->mNetManager ? CoopGetMysteryCount(mApp->mNetManager->GetMySlot()) : 0);
+}
+
+int SeedChooserScreen::CoopGetMysteryCount(int theSlot) const
+{
+    const NetManager* aNet = mApp ? mApp->mNetManager : nullptr;
+    if (!aNet || theSlot < 0 || theSlot >= NET_MAX_PLAYERS || !aNet->IsChooserMystery(theSlot)) return 0;
+    return max(0, aNet->mChooserPickQuota[theSlot] - (theSlot == 0 ? CoopCountGlobalFixedPicks() : 0));
+}
+
+void SeedChooserScreen::CoopClearLocalMutablePicks()
+{
+    for (int i = 0; i < NUM_SEEDS_IN_CHOOSER; ++i)
+    {
+        ChosenSeed& aSeed = mChosenSeeds[i];
+        if (aSeed.mCrazyDavePicked) continue;
+        GetSeedPositionInChooser(i, aSeed.mX, aSeed.mY);
+        aSeed.mStartX = aSeed.mEndX = aSeed.mX;
+        aSeed.mStartY = aSeed.mEndY = aSeed.mY;
+        aSeed.mTimeStartMotion = aSeed.mTimeEndMotion = 0;
+        aSeed.mSeedIndexInBank = 0;
+        aSeed.mSeedState = i == SEED_IMITATER ? SEED_PACKET_HIDDEN : SEED_IN_CHOOSER;
+        aSeed.mImitaterType = SEED_NONE;
+    }
+    mSeedsInBank = CoopCountGlobalFixedPicks();
+    mSeedsInFlight = 0;
+    mCoopMyImitater = SEED_NONE;
+    RemoveToolTip();
+    UpdateImitaterButton();
+}
+
+bool SeedChooserScreen::CoopApplyMysteryRequest(int theSlot, bool theEnabled)
+{
+    NetManager* aNet = mApp ? mApp->mNetManager : nullptr;
+    if (!aNet || !aNet->IsHosting() || !mCoopChooserActive || !mMouseVisible ||
+        !mBoard->mCutScene->mSeedChoosing || theSlot < 0 || theSlot >= NET_MAX_PLAYERS) return false;
+    const NetPlayerInfo& aPlayer = aNet->GetPlayer(theSlot);
+    const int aMutable = aNet->mChooserPickQuota[theSlot] - (theSlot == 0 ? CoopCountGlobalFixedPicks() : 0);
+    if (!aPlayer.mActive || aPlayer.mSpectator || aMutable <= 0 ||
+        (mApp->mGameMode == GAMEMODE_COOP_PVP && aPlayer.mTeam != NETTEAM_PLANTS)) return false;
+    if (theSlot == aNet->GetMySlot()) mCoopMysteryRequestPending = false;
+    if (aNet->IsChooserMystery(theSlot) == theEnabled) return false;
+    if (theEnabled && aMutable > mBoard->GetMysteryPoolCapacity())
+    {
+        NetTrace("chooser mystery rejected capacity slot=%d need=%d capacity=%d", theSlot, aMutable, mBoard->GetMysteryPoolCapacity());
+        return false;
+    }
+    if (theSlot == aNet->GetMySlot()) CoopClearLocalMutablePicks();
+    mCoopRemotePickCount[theSlot] = theEnabled ? aMutable : 0;
+    for (int j = 0; j < 12; ++j)
+    {
+        mCoopRemotePicks[theSlot][j] = theEnabled && j < aMutable ? 255 : SEED_NONE;
+        mCoopRemoteImitaters[theSlot][j] = SEED_NONE;
+    }
+    if (theEnabled) aNet->mChooserMysteryMask |= (uint8_t)(1U << theSlot);
+    else aNet->mChooserMysteryMask &= (uint8_t)~(1U << theSlot);
+    aNet->ResetReadyState();
+    CoopRefreshStartButton();
+    MarkDirty();
+    return true;
 }
 
 bool SeedChooserScreen::CoopCanReady() const
@@ -1156,7 +1284,7 @@ bool SeedChooserScreen::CoopCanReady() const
     const NetManager* aNet = mApp ? mApp->mNetManager : nullptr;
     if (!aNet || !aNet->IsActive() || aNet->IsSpectator() || !mCoopChooserActive ||
         !mBoard || !mBoard->mSeedBank || !mBoard->mCutScene || !mMouseVisible ||
-        !mBoard->mCutScene->mSeedChoosing || mSeedsInFlight != 0 ||
+        !mBoard->mCutScene->mSeedChoosing || mSeedsInFlight != 0 || mCoopMysteryRequestPending ||
         mSeedsInBank < 0 || mSeedsInBank > min(mBoard->mSeedBank->mNumPackets, 12) ||
         CoopGetLocalQuotaPickCount() != mCoopPicksPerPlayer)
         return false;
@@ -1205,6 +1333,16 @@ void SeedChooserScreen::CoopToggleReady()
 void SeedChooserScreen::CoopRefreshStartButton()
 {
     NetManager* aNet = mApp ? mApp->mNetManager : nullptr;
+    if (CoopIsPvpZombieWaiting())
+    {
+        mStartButton->Resize((mApp->mWidth - 156) / 2, 401, 156, 42);
+        for (GameButton* aButton : {mRandomButton, mViewLawnButton, mAlmanacButton, mStoreButton, mImitaterButton})
+        { aButton->mBtnNoDraw = true; aButton->SetDisabled(true); }
+        mScrollbar->SetVisible(false);
+        mScrollbar->SetDisabled(true);
+        mScrollAmount = 0.0f;
+        RemoveToolTip();
+    }
     if (!mCoopChooserActive || !aNet || !aNet->IsActive())
         return;
     const bool aCanReady = CoopCanReady();
@@ -1216,11 +1354,23 @@ void SeedChooserScreen::CoopRefreshStartButton()
     const Color aColor = aReady ? Color(115, 255, 110) : Color(255, 110, 95);
     mStartButton->mColors[GameButton::COLOR_LABEL] = aColor;
     mStartButton->mColors[GameButton::COLOR_LABEL_HILITE] = aColor;
+    const int aSlot = aNet->GetMySlot();
+    mRandomButton->mBtnNoDraw = CoopIsPvpZombieWaiting();
+    mRandomButton->Resize(332 + mApp->mDDInterface->mWideScreenOffsetX, 545 + mApp->mDDInterface->mWideScreenOffsetY, 100, 42);
+    mRandomButton->SetLabel(mCoopMysteryRequestPending ? _S("WAIT...") : aNet->IsChooserMystery(aSlot) ? _S("MANUAL") : _S("MYSTERY ?"));
+    mRandomButton->SetDisabled(mCoopMysteryRequestPending || aNet->IsSpectator() || !mMouseVisible ||
+        !mBoard->mCutScene->mSeedChoosing || mSeedsInFlight != 0 ||
+        aNet->mChooserPickQuota[aSlot] <= (aSlot == 0 ? CoopCountGlobalFixedPicks() : 0) ||
+        (mApp->mGameMode == GAMEMODE_COOP_PVP && aNet->GetMyTeam() != NETTEAM_PLANTS) ||
+        (!aNet->IsChooserMystery(aSlot) && aNet->mChooserPickQuota[aSlot] -
+            (aSlot == 0 ? CoopCountGlobalFixedPicks() : 0) > mBoard->GetMysteryPoolCapacity()));
 }
 
 //0x485E90
 void SeedChooserScreen::ClickedSeedInBank(ChosenSeed& theChosenSeed)
 {
+	if (mCoopChooserActive && mApp->mNetManager &&
+		(mCoopMysteryRequestPending || mApp->mNetManager->IsChooserMystery(mApp->mNetManager->GetMySlot()))) return;
 	if (mApp->NetIsClient() && !mCoopChooserActive)
 	{
 		mApp->PlaySample(Sexy::SOUND_BUZZER);
@@ -1273,6 +1423,12 @@ void SeedChooserScreen::ClickedSeedInBank(ChosenSeed& theChosenSeed)
 //0x486030
 void SeedChooserScreen::ClickedSeedInChooser(ChosenSeed& theChosenSeed)
 {
+	if (mCoopChooserActive && mApp->mNetManager &&
+		(mCoopMysteryRequestPending || mApp->mNetManager->IsChooserMystery(mApp->mNetManager->GetMySlot())))
+	{
+		mApp->PlaySample(SOUND_BUZZER);
+		return;
+	}
 	if (mApp->NetIsClient() && !mCoopChooserActive)
 	{
 		mApp->PlaySample(Sexy::SOUND_BUZZER);
@@ -1328,6 +1484,31 @@ void SeedChooserScreen::ClickedSeedInChooser(ChosenSeed& theChosenSeed)
 //0x486150
 void SeedChooserScreen::ShowToolTip()
 {
+	if (CoopIsPvpZombieWaiting()) { RemoveToolTip(); return; }
+	int aMysterySlot = 0;
+	if (mCoopChooserActive && mMouseVisible && mApp->GetDialogCount() == 0 &&
+		((!mRandomButton->mBtnNoDraw && Rect(mRandomButton->mX, mRandomButton->mY,
+			mRandomButton->mWidth, mRandomButton->mHeight).Contains(mLastMouseX, mLastMouseY)) ||
+			CoopMysteryHitTest(mLastMouseX, mLastMouseY, aMysterySlot)))
+	{
+		mToolTip->SetTitle(_S("Mystery seeds"));
+		const int aSlot = mApp->mNetManager->GetMySlot();
+		const bool aTooFew = !mApp->mNetManager->IsChooserMystery(aSlot) &&
+			mApp->mNetManager->mChooserPickQuota[aSlot] - (aSlot == 0 ? CoopCountGlobalFixedPicks() : 0) > mBoard->GetMysteryPoolCapacity();
+		mToolTip->SetLabel(aTooFew ? _S("Not enough unlocked plants. Choose your seeds manually.") :
+			_S("Revealed when play begins. Random cards cost 5-25% less, depending on difficulty. Press MANUAL to clear them and choose your own."));
+		mToolTip->SetWarningText(_S(""));
+		const int aPadding = 8;
+		const bool aOverButton = Rect(mRandomButton->mX, mRandomButton->mY,
+			mRandomButton->mWidth, mRandomButton->mHeight).Contains(mLastMouseX, mLastMouseY);
+		int aTop = (aOverButton ? mRandomButton->mY : mLastMouseY) - mToolTip->mHeight - aPadding;
+		if (aTop < aPadding) aTop = mLastMouseY + 35;
+		mToolTip->mX = ClampInt(mLastMouseX - mToolTip->mWidth / 2, aPadding, max(aPadding, mApp->mWidth - mToolTip->mWidth - aPadding));
+		mToolTip->mY = ClampInt(aTop, aPadding, max(aPadding, mApp->mHeight - mToolTip->mHeight - aPadding));
+		mToolTip->mVisible = true;
+		mToolTipSeed = SEED_NONE;
+		return;
+	}
 	if (!mApp->mWidgetManager->mMouseIn || !mApp->mActive || mApp->GetDialogCount() > 0 || mChooseState == CHOOSE_VIEW_LAWN)
 	{
 		RemoveToolTip();
@@ -1448,6 +1629,18 @@ void SeedChooserScreen::MouseMove(int theX, int theY)
 //0x4866E0
 void SeedChooserScreen::UpdateImitaterButton()
 {
+	if (CoopIsPvpZombieWaiting())
+	{
+		mImitaterButton->mBtnNoDraw = true;
+		mImitaterButton->SetDisabled(true);
+		return;
+	}
+	if (mCoopChooserActive && mApp->mNetManager &&
+		(mCoopMysteryRequestPending || mApp->mNetManager->IsChooserMystery(mApp->mNetManager->GetMySlot())))
+	{
+		mImitaterButton->SetDisabled(true);
+		return;
+	}
 	if (!mApp->SeedTypeAvailable(SEED_IMITATER))
 	{
 		mImitaterButton->mBtnNoDraw = true;
@@ -1464,6 +1657,11 @@ void SeedChooserScreen::UpdateImitaterButton()
 void SeedChooserScreen::MouseDown(int x, int y, int theClickCount)
 {
 	Widget::MouseDown(x, y, theClickCount);
+	if (CoopIsPvpZombieWaiting())
+	{
+		if (mMenuButton->IsMouseOver() || mStartButton->IsMouseOver()) mApp->PlaySample(SOUND_TAP);
+		return;
+	}
 
 	if (mSeedsInFlight > 0)
 	{
@@ -1655,6 +1853,7 @@ void SeedChooserScreen::KeyDown(KeyCode theKey)
 //0x486EA0
 void SeedChooserScreen::KeyChar(SexyChar theChar)
 {
+	if (CoopIsPvpZombieWaiting()) return;
 	if (mChooseState == CHOOSE_VIEW_LAWN && mViewLawnTime > 251 && (theChar == ' ' || theChar == '\r' || theChar == '\u001B'))
 		CancelLawnView();
 	else if (mApp->mTodCheatKeys && theChar == '\u001B' && mBoard->mCutScene->mSeedChoosing)
@@ -1684,6 +1883,7 @@ void SeedChooserScreen::UpdateAfterPurchase()
 
 void SeedChooserScreen::MouseWheel(int theDelta)
 {
+	if (CoopIsPvpZombieWaiting()) return;
 	Widget::MouseWheel(theDelta);
 
 	mScrollAmount -= theDelta;
@@ -1774,6 +1974,47 @@ void SeedChooserScreen::CoopSendPick(int theSeedType, int theImitater, bool theU
 	}
 }
 
+static bool CoopCollectChoices(const SeedChooserScreen* theChooser, int thePicks[4][12],
+    SeedType theImitaters[4][12], int theCounts[4])
+{
+    const NetManager* aNet = theChooser->mApp->mNetManager;
+    for (int slot = 0; slot < NET_MAX_PLAYERS; ++slot)
+    {
+        theCounts[slot] = 0;
+        if (slot == aNet->GetMySlot())
+        {
+            if (theChooser->mSeedsInBank < 0 || theChooser->mSeedsInBank > 12) return false;
+            for (int j = 0; j < theChooser->mSeedsInBank; ++j)
+            {
+                const SeedType aSeed = theChooser->FindSeedInBank(j);
+                if (aSeed == SEED_NONE) continue; // provisional STATE may omit flying cards
+                const int n = theCounts[slot]++;
+                thePicks[slot][n] = aSeed;
+                theImitaters[slot][n] = aSeed == SEED_IMITATER ? theChooser->mChosenSeeds[aSeed].mImitaterType : SEED_NONE;
+            }
+            const int aPending = theChooser->CoopGetMysteryCount(slot);
+            if (theCounts[slot] + aPending > 12) return false;
+            for (int j = 0; j < aPending; ++j)
+            {
+                const int n = theCounts[slot]++;
+                thePicks[slot][n] = 255; theImitaters[slot][n] = SEED_NONE;
+            }
+        }
+        else
+        {
+            const int n = theChooser->mCoopRemotePickCount[slot];
+            if (n < 0 || n > 12) return false;
+            theCounts[slot] = n;
+            for (int j = 0; j < n; ++j)
+            {
+                thePicks[slot][j] = theChooser->mCoopRemotePicks[slot][j];
+                theImitaters[slot][j] = (SeedType)theChooser->mCoopRemoteImitaters[slot][j];
+            }
+        }
+    }
+    return true;
+}
+
 void SeedChooserScreen::CoopBroadcastChooserState(bool theForce)
 {
 	LawnNet::NetManager* aNet = mApp->mNetManager;
@@ -1783,43 +2024,17 @@ void SeedChooserScreen::CoopBroadcastChooserState(bool theForce)
 
 	LawnNet::NetBuffer aMsg;
 	aMsg.WriteU8(4); // slots
+	aMsg.WriteU8(aNet->mChooserMysteryMask);
+	int aPicks[4][12] = {}, aCounts[4] = {};
+	SeedType anImitaters[4][12] = {};
+	if (!CoopCollectChoices(this, aPicks, anImitaters, aCounts)) return;
 	for (int i = 0; i < 4; i++)
 	{
-		SeedType aSeeds[12];
-		SeedType anImitaters[12];
-		int aValidCount = 0;
-		if (i == aNet->GetMySlot())
+		aMsg.WriteU8((uint8_t)aCounts[i]);
+		for (int j = 0; j < aCounts[i]; j++)
 		{
-			// our own picks, in bank order
-			for (int anIndex = 0; anIndex < mBoard->mSeedBank->mNumPackets && anIndex < mSeedsInBank; anIndex++)
-			{
-				SeedType aSeedType = FindSeedInBank(anIndex);
-				if ((int)aSeedType >= 0 && aSeedType < SeedType::NUM_SEED_TYPES && aValidCount < 12)
-				{
-					aSeeds[aValidCount] = aSeedType;
-					anImitaters[aValidCount] = aSeedType == SEED_IMITATER ? mChosenSeeds[aSeedType].mImitaterType : SEED_NONE;
-					aValidCount++;
-				}
-			}
-		}
-		else
-		{
-			for (int j = 0; j < mCoopRemotePickCount[i] && j < 12; j++)
-			{
-				int aSeed = mCoopRemotePicks[i][j];
-				if (aSeed >= 0 && aSeed < (int)SeedType::NUM_SEED_TYPES)
-				{
-					aSeeds[aValidCount] = (SeedType)aSeed;
-					anImitaters[aValidCount] = (SeedType)mCoopRemoteImitaters[i][j];
-					aValidCount++;
-				}
-			}
-		}
-		aMsg.WriteU8((uint8_t)aValidCount);
-		for (int j = 0; j < aValidCount; j++)
-		{
-			aMsg.WriteU8((uint8_t)aSeeds[j]);
-			aMsg.WriteU8((uint8_t)anImitaters[j]);
+			aMsg.WriteU8((uint8_t)aPicks[i][j]);
+			aMsg.WriteU8((uint8_t)anImitaters[i][j]);
 		}
 	}
 	// CoopPollNetwork runs every chooser frame. Send only when the serialized
@@ -1839,9 +2054,23 @@ void SeedChooserScreen::CoopBroadcastChooserState(bool theForce)
 void SeedChooserScreen::CoopDrawRemotePicks(Graphics* g)
 {
     NetManager* aNet = mApp->mNetManager;
-    if (!aNet || !aNet->IsActive() || !mCoopChooserActive)
+    if (!aNet || !aNet->IsActive() || !mCoopChooserActive || CoopIsPvpZombieWaiting())
         return;
+    auto DrawMystery = [&](int theIndex, int theOwner)
+    {
+        int x, y; GetSeedPositionInBank(theIndex, x, y);
+        Graphics aPacketGraphics(*g);
+        DrawMysterySeedPacket(&aPacketGraphics, (float)x, (float)y);
+        if (theOwner != aNet->GetMySlot())
+        {
+            const NetColor aColor = GetRelativePlayerColor(aNet->GetMySlot(), theOwner);
+            aPacketGraphics.SetColor(Color(aColor.r, aColor.g, aColor.b, 70));
+            aPacketGraphics.FillRect(x + 1, y + 1, SEED_PACKET_WIDTH - 2, SEED_PACKET_HEIGHT - 2);
+        }
+    };
     int anIndex = mSeedsInBank;
+    for (int j = 0; j < CoopGetMysteryCount(aNet->GetMySlot()) && anIndex < mBoard->mSeedBank->mNumPackets; ++j)
+        DrawMystery(anIndex++, aNet->GetMySlot());
     for (int aSlot = 0; aSlot < NET_MAX_PLAYERS; aSlot++)
     {
         if (aSlot == aNet->GetMySlot())
@@ -1849,6 +2078,11 @@ void SeedChooserScreen::CoopDrawRemotePicks(Graphics* g)
         for (int j = 0; j < mCoopRemotePickCount[aSlot] && j < 12; j++)
         {
             const SeedType aSeed = (SeedType)mCoopRemotePicks[aSlot][j];
+            if ((int)aSeed == 255)
+            {
+                if (anIndex < mBoard->mSeedBank->mNumPackets) DrawMystery(anIndex++, aSlot);
+                continue;
+            }
             if (aSeed < SEED_PEASHOOTER || aSeed >= NUM_SEEDS_IN_CHOOSER ||
                 mChosenSeeds[aSeed].mCrazyDavePicked || anIndex >= mBoard->mSeedBank->mNumPackets)
                 continue;
@@ -1865,90 +2099,94 @@ void SeedChooserScreen::CoopDrawRemotePicks(Graphics* g)
     }
 }
 
+bool SeedChooserScreen::CoopMysteryHitTest(int x, int y, int& theSlot)
+{
+    NetManager* aNet = mApp ? mApp->mNetManager : nullptr;
+    if (!aNet || !mCoopChooserActive || CoopIsPvpZombieWaiting()) return false;
+    auto Hit = [&](int theIndex, int theOwner)
+    {
+        int aX, aY; GetSeedPositionInBank(theIndex, aX, aY);
+        if (!Rect(aX, aY, SEED_PACKET_WIDTH, SEED_PACKET_HEIGHT).Contains(x, y)) return false;
+        theSlot = theOwner; return true;
+    };
+    int anIndex = mSeedsInBank;
+    for (int j = 0; j < CoopGetMysteryCount(aNet->GetMySlot()); ++j)
+        if (Hit(anIndex++, aNet->GetMySlot())) return true;
+    for (int slot = 0; slot < NET_MAX_PLAYERS; ++slot)
+    {
+        if (slot == aNet->GetMySlot()) continue;
+        for (int j = 0; j < mCoopRemotePickCount[slot] && j < 12; ++j)
+        {
+            const int aSeed = mCoopRemotePicks[slot][j];
+            if (aSeed >= 0 && aSeed < NUM_SEEDS_IN_CHOOSER && mChosenSeeds[aSeed].mCrazyDavePicked) continue;
+            if (aSeed == 255 && Hit(anIndex, slot)) return true;
+            ++anIndex;
+        }
+    }
+    return false;
+}
+
 // --------------------------------------------------------------------------
 // Host: broadcast the final combined pick list and start the game
 // --------------------------------------------------------------------------
 bool SeedChooserScreen::CoopBroadcastChooserStart()
 {
-	LawnNet::NetManager* aNet = mApp->mNetManager;
-	if (!aNet || !aNet->IsHosting() || !CoopAllPicksComplete())
-		return false;
+    NetManager* aNet = mApp->mNetManager;
+    if (!aNet || !aNet->IsHosting() || !CoopAllPicksComplete()) return false;
+    int aPicks[4][12] = {}, aCounts[4] = {}, aTotal = 0;
+    SeedType anImitaters[4][12] = {};
+    if (!CoopCollectChoices(this, aPicks, anImitaters, aCounts)) return false;
+    for (int slot = 0; slot < NET_MAX_PLAYERS; ++slot)
+    {
+        if (aCounts[slot] != aNet->mChooserPickQuota[slot]) return false;
+        aTotal += aCounts[slot];
+        const NetPlayerInfo& aPlayer = aNet->GetPlayer(slot);
+        // Stock warnings pump networking; the host deliberately unreadies.
+        if (slot != aNet->GetMySlot() && aPlayer.mActive && !aPlayer.mSpectator && !aPlayer.mReady)
+        { NetTrace("chooser commit blocked readiness slot=%d", slot); return false; }
+    }
+    if (aTotal != aNet->mChooserBankCount) return false;
 
-	LawnNet::NetBuffer aMsg;
-	aMsg.WriteU8((uint8_t)mCoopPicksPerPlayer);
-	aMsg.WriteU8(4);
-	int aCounts[NET_MAX_PLAYERS] = {};
-	int aTotal = 0;
-	for (int i = 0; i < 4; i++)
-	{
-		SeedType aSeeds[12];
-		SeedType anImitaters[12];
-		int aValidCount = 0;
-		if (i == aNet->GetMySlot())
-		{
-			for (int anIndex = 0; anIndex < mBoard->mSeedBank->mNumPackets && anIndex < mSeedsInBank; anIndex++)
-			{
-				SeedType aSeedType = FindSeedInBank(anIndex);
-				if ((int)aSeedType >= 0 && aSeedType < SeedType::NUM_SEED_TYPES && aValidCount < 12)
-				{
-					aSeeds[aValidCount] = aSeedType;
-					anImitaters[aValidCount] = aSeedType == SEED_IMITATER ? mChosenSeeds[aSeedType].mImitaterType : SEED_NONE;
-					aValidCount++;
-				}
-			}
-		}
-		else
-		{
-			for (int j = 0; j < mCoopRemotePickCount[i] && j < 12; j++)
-			{
-				int aSeed = mCoopRemotePicks[i][j];
-				if (aSeed >= 0 && aSeed < (int)SeedType::NUM_SEED_TYPES)
-				{
-					aSeeds[aValidCount] = (SeedType)aSeed;
-					anImitaters[aValidCount] = (SeedType)mCoopRemoteImitaters[i][j];
-					aValidCount++;
-				}
-			}
-		}
-		if (aValidCount != aNet->mChooserPickQuota[i])
-		{
-			LawnNet::NetTrace("chooser commit blocked serialized slot=%d count=%d quota=%d flight=%d",
-				i, aValidCount, aNet->mChooserPickQuota[i], mSeedsInFlight);
-			if (mApp->CoopSmokeActive()) mApp->CoopSmokeFail("chooser serialized slot count differs from its quota");
-			return false;
-		}
-		aCounts[i] = aValidCount;
-		aTotal += aValidCount;
-		aMsg.WriteU8((uint8_t)aValidCount);
-		for (int j = 0; j < aValidCount; j++)
-		{
-			aMsg.WriteU8((uint8_t)aSeeds[j]);
-			aMsg.WriteU8((uint8_t)anImitaters[j]);
-		}
-	}
-	if (aTotal != aNet->mChooserBankCount)
-	{
-		LawnNet::NetTrace("chooser commit blocked serialized total=%d bank=%d", aTotal, aNet->mChooserBankCount);
-		if (mApp->CoopSmokeActive()) mApp->CoopSmokeFail("chooser serialized total differs from the shared bank");
-		return false;
-	}
-	// Stock warning dialogs pump the network. The host deliberately unreadies
-	// before showing them; every other player must still consent at commit.
-	for (int i = 0; i < NET_MAX_PLAYERS; ++i)
-	{
-		const NetPlayerInfo& aPlayer = aNet->GetPlayer(i);
-		if (i != aNet->GetMySlot() && aPlayer.mActive && !aPlayer.mSpectator && !aPlayer.mReady)
-		{
-			LawnNet::NetTrace("chooser commit blocked readiness slot=%d", i);
-			return false;
-		}
-	}
-	// The final full state precedes START on the same ordered connection.
-	CoopBroadcastChooserState(true);
-	LawnNet::NetTrace("CHOOSER_COMMIT counts=[%d,%d,%d,%d] total=%d bank=%d flight=%d bytes=%zu",
-		aCounts[0], aCounts[1], aCounts[2], aCounts[3], aTotal, aNet->mChooserBankCount, mSeedsInFlight, aMsg.Size());
-	aNet->BroadcastMessage(LawnNet::NETMSG_CHOOSER_START, aMsg);
-	return true;
+    CoopBroadcastChooserState(true);
+    CoopBuildBankFromLocalState();
+    SeedBank* aBank = mBoard->mSeedBank;
+    const int aPlantCount = mApp->mGameMode == GAMEMODE_COOP_PVP ? PVP_PLANT_PACKET_COUNT : aBank->mNumPackets;
+    if (aPlantCount != aTotal)
+    { if (mApp->CoopSmokeActive()) mApp->CoopSmokeFail("committed chooser bank count mismatch"); return false; }
+    for (int i = 0; i < aPlantCount; ++i)
+    {
+        SeedPacket& aPacket = aBank->mSeedPackets[i];
+        if (!aPacket.mNetId) aPacket.mNetId = mBoard->NetAllocId();
+        if (!aPacket.mNetId) return false;
+    }
+    NetBuffer aMsg;
+    aMsg.WriteU8((uint8_t)aNet->mChooserPickQuota[0]);
+    aMsg.WriteU8(NET_MAX_PLAYERS);
+    aMsg.WriteU8(aNet->mChooserMysteryMask);
+    const NetMysteryLimits aLimits{NUM_SEEDS_IN_CHOOSER, SEED_IMITATER, SEED_GATLINGPEA};
+    for (int slot = 0; slot < NET_MAX_PLAYERS; ++slot)
+    {
+        aMsg.WriteU8((uint8_t)aCounts[slot]);
+        int aSerialized = 0;
+        for (int i = 0; i < aPlantCount; ++i)
+        {
+            const SeedPacket& aPacket = aBank->mSeedPackets[i];
+            if (aPacket.mNetOwnerSlot != slot) continue;
+            NetMysteryCard aCard;
+            aCard.mType = (uint8_t)aPacket.mPacketType;
+            aCard.mImitater = (uint8_t)aPacket.mImitaterType;
+            aCard.mId = aPacket.mNetId;
+            aCard.mOriginLevel = aPacket.mRandomDiscountLevel;
+            if (!NetEncodeMysteryCard(aCard, aMsg, aLimits)) return false;
+            ++aSerialized;
+        }
+        if (aSerialized != aCounts[slot]) return false;
+    }
+    NetTrace("CHOOSER_COMMIT counts=[%d,%d,%d,%d] total=%d bank=%d flight=%d bytes=%zu mystery=%u",
+        aCounts[0], aCounts[1], aCounts[2], aCounts[3], aTotal, aNet->mChooserBankCount,
+        mSeedsInFlight, aMsg.Size(), aNet->mChooserMysteryMask);
+    aNet->BroadcastMessage(NETMSG_CHOOSER_START, aMsg);
+    return true;
 }
 
 // --------------------------------------------------------------------------
@@ -1956,7 +2194,8 @@ bool SeedChooserScreen::CoopBroadcastChooserStart()
 // viewer-relative slot order), each packet tagged with its owner's slot.
 // --------------------------------------------------------------------------
 static void CoopBuildBankInternal(SeedBank* theBank, int theMySlot,
-	const int thePicks[4][12], const int theCounts[4], const SeedType theImitaters[4][12])
+	const int thePicks[4][12], const int theCounts[4], const SeedType theImitaters[4][12],
+    const uint16_t theIds[4][12] = nullptr, const uint8_t theOrigins[4][12] = nullptr)
 {
 	LawnNet::NetManager* aNet = gLawnApp ? gLawnApp->mNetManager : nullptr;
 	const bool aPvP = gLawnApp && gLawnApp->mGameMode == GameMode::GAMEMODE_COOP_PVP;
@@ -1982,15 +2221,17 @@ static void CoopBuildBankInternal(SeedBank* theBank, int theMySlot,
 		for (int j = 0; j < theCounts[aSlot] && j < 12 && aPos < aTotal; j++)
 		{
 			SeedType aSeedType = (SeedType)thePicks[aSlot][j];
-			if (aSeedType == SEED_NONE)
-				continue;
+			const bool aPending = (int)aSeedType == 255;
 			SeedPacket& aPacket = theBank->mSeedPackets[aPos];
+			const uint8_t anOrigin = theOrigins ? theOrigins[aSlot][j] : aPending ? (uint8_t)aNet->GetDifficulty() : 0;
 			// Packet IDs belong to card identity, not to a viewer-relative index.
-			if (aPacket.mPacketType != aSeedType || aPacket.mImitaterType != theImitaters[aSlot][j] ||
-				aPacket.mNetOwnerSlot != (unsigned char)aSlot)
+			if (aPacket.mPacketType != (aPending ? SEED_NONE : aSeedType) || aPacket.mImitaterType != theImitaters[aSlot][j] ||
+				aPacket.mNetOwnerSlot != (unsigned char)aSlot || aPacket.mRandomDiscountLevel != anOrigin)
 				aPacket.mNetId = 0;
-			aPacket.SetPacketType(aSeedType, theImitaters[aSlot][j]);
+			if (aPending) aPacket.SetMysteryPlaceholder(anOrigin);
+			else aPacket.SetPacketType(aSeedType, theImitaters[aSlot][j]);
 			aPacket.mNetOwnerSlot = (unsigned char)aSlot;
+			if (theIds) aPacket.mNetId = theIds[aSlot][j];
 			aPos++;
 		}
 	}
@@ -2034,223 +2275,149 @@ void SeedChooserScreen::CoopBuildBankFromLocalState()
 	SeedType anImitaters[4][12] = {};
 
 	int aMySlot = aNet->GetMySlot();
-	for (int anIndex = 0; anIndex < mBoard->mSeedBank->mNumPackets && anIndex < mSeedsInBank && anIndex < 12; anIndex++)
-	{
-		SeedType aSeedType = FindSeedInBank(anIndex);
-		if (aSeedType == SEED_NONE)
-			continue;
-		aPicks[aMySlot][aCounts[aMySlot]] = aSeedType;
-		anImitaters[aMySlot][aCounts[aMySlot]] = (aSeedType == SEED_IMITATER) ? mChosenSeeds[aSeedType].mImitaterType : SEED_NONE;
-		aCounts[aMySlot]++;
-	}
-	for (int i = 0; i < 4; i++)
-	{
-		if (i == aMySlot)
-			continue;
-		for (int j = 0; j < mCoopRemotePickCount[i] && j < 12; j++)
-		{
-			aPicks[i][j] = mCoopRemotePicks[i][j];
-			anImitaters[i][j] = (SeedType)mCoopRemoteImitaters[i][j];
-			aCounts[i] = mCoopRemotePickCount[i];
-		}
-	}
+	if (!CoopCollectChoices(this, aPicks, anImitaters, aCounts)) return;
 	CoopBuildBankInternal(mBoard->mSeedBank, aMySlot, aPicks, aCounts, anImitaters);
 }
 
-bool SeedChooserScreen::CoopBuildBankFromPayload(LawnNet::NetBuffer& thePayload)
+namespace
 {
-        if (!mBoard || thePayload.Remaining() < 2)
-                return false;
+struct CoopDecodedChoices
+{
+    int mPicks[4][12] = {}, mCounts[4] = {};
+    SeedType mImitaters[4][12] = {};
+    uint16_t mIds[4][12] = {};
+    uint8_t mOrigins[4][12] = {}, mMask = 0;
+};
 
-        LawnNet::NetManager* aNet = mApp->mNetManager;
-        int aMySlot = aNet ? aNet->GetMySlot() : 0;
-
-        uint8_t aPicksPerPlayer = thePayload.ReadU8Or();
-        uint8_t aSlotCount = thePayload.ReadU8Or();
-        if (aPicksPerPlayer > 12 || aSlotCount != LawnNet::NET_MAX_PLAYERS)
-                return false;
-
-        int aPicks[4][12] = {};
-        int aCounts[4] = {};
-        SeedType anImitaters[4][12] = {};
-        for (int i = 0; i < 4; i++)
+bool CoopDecodeChoices(SeedChooserScreen* chooser, const NetBuffer& payload, bool start, CoopDecodedChoices& out)
+{
+    NetManager* net = chooser->mApp->mNetManager;
+    if (!net || !chooser->mBoard) return false;
+    NetBuffer c = payload;
+    uint8_t slots = 0, hostQuota = 0;
+    if (start && (!c.ReadU8(&hostQuota) || hostQuota != net->mChooserPickQuota[0])) return false;
+    if (!c.ReadU8(&slots) || slots != NET_MAX_PLAYERS || !c.ReadU8(&out.mMask) || (out.mMask & 0xF0U)) return false;
+    const int fixed = chooser->CoopCountGlobalFixedPicks();
+    const bool pvp = chooser->mApp->mGameMode == GAMEMODE_COOP_PVP;
+    bool seen[NUM_SEEDS_IN_CHOOSER] = {};
+    uint16_t ids[NET_MYSTERY_MAX_CARDS] = {};
+    int idCount = 0, total = 0, fixedSeen = 0;
+    const NetMysteryLimits limits{NUM_SEEDS_IN_CHOOSER, SEED_IMITATER, SEED_GATLINGPEA};
+    for (int slot = 0; slot < NET_MAX_PLAYERS; ++slot)
+    {
+        uint8_t count = 0;
+        const NetPlayerInfo& player = net->GetPlayer(slot);
+        const bool eligible = player.mActive && !player.mSpectator && (!pvp || player.mTeam == NETTEAM_PLANTS);
+        const bool mystery = (out.mMask & (1U << slot)) != 0;
+        const int prefix = slot == 0 ? fixed : 0;
+        const int quota = net->mChooserPickQuota[slot];
+        if (!c.ReadU8(&count) || count > 12 || count > quota || (!eligible && count) ||
+            (start && count != quota) || (mystery && (!eligible || quota <= prefix || count != quota))) return false;
+        out.mCounts[slot] = count;
+        total += count;
+        for (int j = 0; j < count; ++j)
         {
-                if (thePayload.Remaining() < 1)
-                        return false;
-                uint8_t aCount = thePayload.ReadU8Or();
-                if (aCount > 12 || thePayload.Remaining() < (size_t)aCount * 2)
-                        return false;
-                aCounts[i] = aCount;
-                for (int j = 0; j < aCounts[i]; j++)
-                {
-                        uint8_t aSeed = thePayload.ReadU8Or();
-                        uint8_t anImitater = thePayload.ReadU8Or();
-                        if (aSeed >= (uint8_t)SeedType::NUM_SEED_TYPES ||
-                                (anImitater != 255 && anImitater >= (uint8_t)SeedType::NUM_SEED_TYPES))
-                                return false;
-                        aPicks[i][j] = aSeed;
-                        anImitaters[i][j] = anImitater == 255 ? SEED_NONE : (SeedType)anImitater;
-                }
+            NetMysteryCard card;
+            if (start)
+            {
+                if (!NetDecodeMysteryCard(c, card, limits) || idCount >= (int)NET_MYSTERY_MAX_CARDS) return false;
+                for (int k = 0; k < idCount; ++k) if (ids[k] == card.mId) return false;
+                ids[idCount++] = card.mId;
+            }
+            else if (!c.ReadU8(&card.mType) || !c.ReadU8(&card.mImitater)) return false;
+            out.mPicks[slot][j] = card.mType;
+            out.mImitaters[slot][j] = card.mImitater == 255 ? SEED_NONE : (SeedType)card.mImitater;
+            out.mIds[slot][j] = card.mId;
+            out.mOrigins[slot][j] = card.mOriginLevel;
+            if (card.mType == 255)
+            {
+                if (!mystery || j < prefix || card.mImitater != 255) return false;
+                continue;
+            }
+            if (card.mType >= NUM_SEEDS_IN_CHOOSER || seen[card.mType] || (mystery && j >= prefix)) return false;
+            const SeedType seed = (SeedType)card.mType;
+            if (!NetMysteryPlantValid(card.mType, card.mImitater, limits) ||
+                !chooser->mApp->SeedTypeAvailable(seed) || chooser->SeedNotAllowedToPick(seed) ||
+                chooser->SeedNotAllowedDuringTrial(seed) ||
+                (seed == SEED_IMITATER && (!chooser->mApp->SeedTypeAvailable((SeedType)card.mImitater) ||
+                    chooser->SeedNotAllowedToPick((SeedType)card.mImitater) ||
+                    chooser->SeedNotAllowedDuringTrial((SeedType)card.mImitater)))) return false;
+            const ChosenSeed& chosen = chooser->mChosenSeeds[seed];
+            if (j < prefix)
+            {
+                if (!chosen.mCrazyDavePicked || chosen.mSeedState != SEED_IN_BANK || chosen.mSeedIndexInBank != j) return false;
+                ++fixedSeen;
+            }
+            else if (chosen.mCrazyDavePicked) return false;
+            seen[card.mType] = true;
         }
-        if (thePayload.Remaining() != 0)
-                return false;
-        CoopBuildBankInternal(mBoard->mSeedBank, aMySlot, aPicks, aCounts, anImitaters);
-        return true;
+    }
+    return !c.Remaining() && fixedSeen == fixed && total <= net->mChooserBankCount &&
+        (!start || total == net->mChooserBankCount);
+}
 }
 
-// --------------------------------------------------------------------------
-// Client: apply the host's authoritative chooser state
-// --------------------------------------------------------------------------
-bool SeedChooserScreen::CoopApplyChooserState(LawnNet::NetBuffer& thePayload)
+bool SeedChooserScreen::CoopValidateBankPayload(const NetBuffer& thePayload)
 {
-	LawnNet::NetManager* aNet = mApp ? mApp->mNetManager : nullptr;
-	if (!aNet || !aNet->IsClient() || !mCoopChooserActive || !mBoard ||
-		thePayload.Remaining() < 1)
-		return false;
+    CoopDecodedChoices aState;
+    return CoopDecodeChoices(this, thePayload, true, aState);
+}
 
-	uint8_t aSlots = 0;
-	if (!thePayload.ReadU8(&aSlots) || aSlots != NET_MAX_PLAYERS)
-		return false;
+bool SeedChooserScreen::CoopBuildBankFromPayload(NetBuffer& thePayload)
+{
+    CoopDecodedChoices aState;
+    if (!CoopDecodeChoices(this, thePayload, true, aState)) return false;
+    NetManager* aNet = mApp->mNetManager;
+    aNet->mChooserMysteryMask = aState.mMask;
+    mCoopMysteryRequestPending = false;
+    CoopBuildBankInternal(mBoard->mSeedBank, aNet->GetMySlot(), aState.mPicks, aState.mCounts,
+        aState.mImitaters, aState.mIds, aState.mOrigins);
+    thePayload.mReadPos = thePayload.mData.size();
+    return true;
+}
 
-	int aPicks[NET_MAX_PLAYERS][12];
-	SeedType anImitaters[NET_MAX_PLAYERS][12];
-	int aCounts[NET_MAX_PLAYERS] = {};
-	bool aSeenSeed[NUM_SEEDS_IN_CHOOSER] = {};
-	for (int i = 0; i < NET_MAX_PLAYERS; i++)
-		for (int j = 0; j < 12; j++)
-		{
-			aPicks[i][j] = SEED_NONE;
-			anImitaters[i][j] = SEED_NONE;
-		}
-
-	const bool aPvP = mApp->mGameMode == GAMEMODE_COOP_PVP;
-	const int aFixedCount = CoopCountGlobalFixedPicks();
-	int aFixedSeen = 0;
-	int aTotalCount = 0;
-	for (int i = 0; i < NET_MAX_PLAYERS; i++)
-	{
-		uint8_t aCount = 0;
-		if (!thePayload.ReadU8(&aCount) || aCount > 12 ||
-			aCount > aNet->mChooserPickQuota[i] ||
-			(!aNet->GetPlayer(i).mActive && aCount != 0) ||
-			(aPvP && aNet->GetPlayer(i).mTeam != NETTEAM_PLANTS && aCount != 0) ||
-			thePayload.Remaining() < (size_t)aCount * 2)
-			return false;
-		aCounts[i] = aCount;
-		aTotalCount += aCount;
-		for (int j = 0; j < aCount; j++)
-		{
-			uint8_t aSeedWire = 0;
-			uint8_t anImitaterWire = 0;
-			if (!thePayload.ReadU8(&aSeedWire) || !thePayload.ReadU8(&anImitaterWire) ||
-				aSeedWire >= (uint8_t)NUM_SEEDS_IN_CHOOSER || aSeenSeed[aSeedWire])
-				return false;
-			const SeedType aSeed = (SeedType)aSeedWire;
-			SeedType anImitater = SEED_NONE;
-			if (aSeed == SEED_IMITATER)
-			{
-				if (anImitaterWire >= (uint8_t)SEED_GATLINGPEA ||
-					!mApp->SeedTypeAvailable((SeedType)anImitaterWire))
-					return false;
-				anImitater = (SeedType)anImitaterWire;
-			}
-			else if (anImitaterWire != 0xFF)
-				return false;
-			if (!mApp->SeedTypeAvailable(aSeed) ||
-				SeedNotAllowedToPick(aSeed) || SeedNotAllowedDuringTrial(aSeed))
-				return false;
-
-			const bool aFixed = mChosenSeeds[aSeed].mCrazyDavePicked;
-			if (aFixed)
-			{
-				if (i != 0)
-					return false;
-				aFixedSeen++;
-			}
-			aSeenSeed[aSeedWire] = true;
-			aPicks[i][j] = aSeed;
-			anImitaters[i][j] = anImitater;
-		}
-	}
-	if (thePayload.Remaining() != 0 || aFixedSeen != aFixedCount ||
-		aTotalCount > aNet->mChooserBankCount)
-		return false;
-
-	const int aMySlot = aNet->GetMySlot();
-	if (aMySlot <= 0 || aMySlot >= NET_MAX_PLAYERS ||
-		aFixedCount + aCounts[aMySlot] > mBoard->mSeedBank->mNumPackets)
-		return false;
-
-	// Fixed cards must occupy the stable prefix established by the constructor.
-	// Validate that prefix before replacing any optimistic local state.
-	bool aFixedIndexSeen[12] = {};
-	for (int i = 0; i < NUM_SEEDS_IN_CHOOSER; i++)
-	{
-		const ChosenSeed& aSeed = mChosenSeeds[i];
-		if (!aSeed.mCrazyDavePicked || aSeed.mSeedState != SEED_IN_BANK)
-			continue;
-		if (aSeed.mSeedIndexInBank < 0 || aSeed.mSeedIndexInBank >= aFixedCount ||
-			aSeed.mSeedIndexInBank >= 12 || aFixedIndexSeen[aSeed.mSeedIndexInBank])
-			return false;
-		aFixedIndexSeen[aSeed.mSeedIndexInBank] = true;
-	}
-
-	// Rebuild only the mutable part of our local chooser from the host echo.
-	// This removes optimistic picks rejected by a simultaneous duplicate race,
-	// resets any in-flight animation safely, and assigns contiguous bank indices.
-	for (int i = 0; i < NUM_SEEDS_IN_CHOOSER; i++)
-	{
-		ChosenSeed& aSeed = mChosenSeeds[i];
-		if (aSeed.mCrazyDavePicked)
-			continue;
-		GetSeedPositionInChooser(i, aSeed.mX, aSeed.mY);
-		aSeed.mStartX = aSeed.mEndX = aSeed.mX;
-		aSeed.mStartY = aSeed.mEndY = aSeed.mY;
-		aSeed.mTimeStartMotion = 0;
-		aSeed.mTimeEndMotion = 0;
-		aSeed.mSeedIndexInBank = 0;
-		aSeed.mSeedState = i == SEED_IMITATER ? SEED_PACKET_HIDDEN : SEED_IN_CHOOSER;
-		if (i == SEED_IMITATER)
-			aSeed.mImitaterType = SEED_NONE;
-	}
-	for (int j = 0; j < aCounts[aMySlot]; j++)
-	{
-		ChosenSeed& aSeed = mChosenSeeds[aPicks[aMySlot][j]];
-		const int aBankIndex = aFixedCount + j;
-		GetSeedPositionInBank(aBankIndex, aSeed.mX, aSeed.mY);
-		aSeed.mStartX = aSeed.mEndX = aSeed.mX;
-		aSeed.mStartY = aSeed.mEndY = aSeed.mY;
-		aSeed.mSeedState = SEED_IN_BANK;
-		aSeed.mSeedIndexInBank = aBankIndex;
-		aSeed.mImitaterType = anImitaters[aMySlot][j];
-	}
-	mSeedsInBank = aFixedCount + aCounts[aMySlot];
-	mSeedsInFlight = 0;
-
-	for (int i = 0; i < NET_MAX_PLAYERS; i++)
-	{
-		mCoopRemotePickCount[i] = 0;
-		for (int j = 0; j < 12; j++)
-		{
-			mCoopRemotePicks[i][j] = SEED_NONE;
-			mCoopRemoteImitaters[i][j] = SEED_NONE;
-		}
-		if (i == aMySlot)
-			continue;
-		mCoopRemotePickCount[i] = aCounts[i];
-		for (int j = 0; j < aCounts[i]; j++)
-		{
-			mCoopRemotePicks[i][j] = aPicks[i][j];
-			mCoopRemoteImitaters[i][j] = anImitaters[i][j];
-		}
-	}
-	UpdateImitaterButton();
-	CoopRefreshStartButton();
-	if (mApp->mWidgetManager)
-		mApp->mWidgetManager->MarkAllDirty();
-	LawnNet::NetTrace("chooser state reconciled slot=%d mutable=%d fixed=%d total=%d",
-		aMySlot, aCounts[aMySlot], aFixedCount, aTotalCount);
-	return true;
+// Client state is committed only after the entire candidate has validated.
+bool SeedChooserScreen::CoopApplyChooserState(NetBuffer& thePayload)
+{
+    NetManager* aNet = mApp ? mApp->mNetManager : nullptr;
+    if (!aNet || !aNet->IsClient() || !mCoopChooserActive || !mBoard) return false;
+    CoopDecodedChoices aState;
+    if (!CoopDecodeChoices(this, thePayload, false, aState)) return false;
+    const int aMySlot = aNet->GetMySlot(), aFixedCount = CoopCountGlobalFixedPicks();
+    if (aMySlot <= 0 || aMySlot >= NET_MAX_PLAYERS ||
+        aFixedCount + aState.mCounts[aMySlot] > mBoard->mSeedBank->mNumPackets) return false;
+    aNet->mChooserMysteryMask = aState.mMask;
+    mCoopMysteryRequestPending = false;
+    CoopClearLocalMutablePicks();
+    for (int j = 0; j < aState.mCounts[aMySlot]; ++j)
+    {
+        const int aType = aState.mPicks[aMySlot][j];
+        if (aType == 255) continue;
+        ChosenSeed& aSeed = mChosenSeeds[aType];
+        const int aBankIndex = mSeedsInBank++;
+        GetSeedPositionInBank(aBankIndex, aSeed.mX, aSeed.mY);
+        aSeed.mStartX = aSeed.mEndX = aSeed.mX;
+        aSeed.mStartY = aSeed.mEndY = aSeed.mY;
+        aSeed.mSeedState = SEED_IN_BANK;
+        aSeed.mSeedIndexInBank = aBankIndex;
+        aSeed.mImitaterType = aState.mImitaters[aMySlot][j];
+    }
+    for (int slot = 0; slot < NET_MAX_PLAYERS; ++slot)
+    {
+        mCoopRemotePickCount[slot] = slot == aMySlot ? 0 : aState.mCounts[slot];
+        for (int j = 0; j < 12; ++j)
+        {
+            mCoopRemotePicks[slot][j] = j < mCoopRemotePickCount[slot] ? aState.mPicks[slot][j] : SEED_NONE;
+            mCoopRemoteImitaters[slot][j] = j < mCoopRemotePickCount[slot] ? aState.mImitaters[slot][j] : SEED_NONE;
+        }
+    }
+    UpdateImitaterButton();
+    CoopRefreshStartButton();
+    if (mApp->mWidgetManager) mApp->mWidgetManager->MarkAllDirty();
+    thePayload.mReadPos = thePayload.mData.size();
+    NetTrace("chooser state reconciled slot=%d mutable=%d fixed=%d mystery=%u",
+        aMySlot, aState.mCounts[aMySlot], aFixedCount, aState.mMask);
+    return true;
 }
 
 // --------------------------------------------------------------------------
@@ -2299,7 +2466,17 @@ void SeedChooserScreen::CoopPollNetwork()
 			aRefreshNeeded = true;
 			LawnNet::NetManager::ChooserPick aPick = aNet->mRemotePicks.front();
 			aNet->mRemotePicks.pop_front();
+			if (aPick.mMysteryToggle)
+			{
+				if (!CoopApplyMysteryRequest(aPick.mSlot, aPick.mMysteryEnabled)) aForceStateEcho = true;
+				continue;
+			}
 			const bool aValidSlot = aPick.mSlot >= 0 && aPick.mSlot < NET_MAX_PLAYERS;
+			if (aValidSlot && aNet->IsChooserMystery(aPick.mSlot))
+			{
+				aForceStateEcho = true;
+				continue;
+			}
 			const bool aCanPick = aValidSlot && aNet->GetPlayer(aPick.mSlot).mActive &&
 				(mApp->mGameMode != GAMEMODE_COOP_PVP ||
 					aNet->GetPlayer(aPick.mSlot).mTeam == NETTEAM_PLANTS);

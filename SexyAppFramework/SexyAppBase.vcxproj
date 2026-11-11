@@ -541,6 +541,10 @@ EXIT /B 0</Command>
     <ClCompile Include="..\Lawn\Net\NetInteractionSmoke.cpp" />
     <ClCompile Include="..\Lawn\Net\NetFirstAdventureSmoke.cpp" />
     <ClCompile Include="..\Lawn\Net\NetNativeUiSmoke.cpp" />
+	<ClCompile Include="..\Lawn\Net\NetMysterySmoke.cpp" />
+	<ClCompile Include="..\Lawn\Net\NetDifficultySmoke.cpp" />
+	<ClCompile Include="..\Lawn\Net\NetMysteryObserverSmoke.cpp" />
+	<ClCompile Include="..\Lawn\Net\NetGameOverSmoke.cpp" />
     <ClCompile Include="..\Lawn\Net\NetAvatarEditorSmoke.cpp" />
     <ClCompile Include="..\Lawn\Net\NetSpectatorSmoke.cpp" />
     <ClCompile Include="..\Lawn\Net\NetPresentationSmoke.cpp" />

@@ -89,6 +89,7 @@ public:
     Challenge();
 
     void                    StartLevel();
+    int                     GetDifficultyGoal() const;
     void                    BeghouledPopulateBoard();
     void                    LoadBeghouledBoardState(BeghouledBoardState* theState);
     SeedType                BeghouledPickSeed(int theGridX, int theGridY, BeghouledBoardState* theBoardState, bool theAllowMatches);

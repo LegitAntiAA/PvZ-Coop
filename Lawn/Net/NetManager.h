@@ -125,6 +125,10 @@ public:
 		int theQuotas[NET_MAX_PLAYERS], int* theEligibleCount = nullptr) const;
 	void RequestChooserStateEcho(const char* theReason, int theSlot, int theSeedType);
 	bool ConsumeChooserStateEchoRequest();
+	bool RequestChooserMystery(bool theEnabled);
+	bool IsChooserMystery(int theSlot) const;
+	bool HasActiveMysteryDeck() const;
+	uint8_t GetChooserMysteryMask() const { return mChooserMysteryMask; }
 	void SendLobbyState();						// host: broadcast lobby
 	void SetMyReady(bool theReady);
 	bool IsMyReady() const { return mPlayers[mMySlot].mReady != 0; }
@@ -223,6 +227,8 @@ private:
 	void ClearHeatWaveShoutKeys(const char* theReason, int theSlot = -1);
 	void OnClientCursor(NetSession* theSession, NetBuffer& thePayload);
 	void OnClientSeedPick(NetSession* theSession, NetBuffer& thePayload, bool theUnpick);
+	void OnClientChooserMystery(NetSession* theSession, NetBuffer& thePayload);
+	bool QueueChooserMystery(int theSlot, bool theEnabled);
 	void OnClientTeamSelect(NetSession* theSession, NetBuffer& thePayload);
 	void OnClientStats(NetSession* theSession, NetBuffer& thePayload);
 	void OnStoreAction(NetSession* theSession, NetBuffer& thePayload);
@@ -263,7 +269,15 @@ public:
 	void BroadcastMessage(uint8_t theMsgType, const NetBuffer& thePayload);
 
 	// chooser state shared between players (mirrored from host authority)
-	struct ChooserPick { uint8_t mSeedType; uint8_t mImitater; int mSlot; bool mUnpick = false; };
+	struct ChooserPick
+	{
+		uint8_t mSeedType = 255;
+		uint8_t mImitater = 255;
+		int mSlot = -1;
+		bool mUnpick = false;
+		bool mMysteryToggle = false;
+		bool mMysteryEnabled = false;
+	};
 	std::deque<ChooserPick> mRemotePicks;		// host: validated pick/unpick actions in arrival order
 	std::deque<NetBuffer> mPendingChooserStarts;	// client: final seed list
 	std::deque<NetBuffer> mRemoteChooserStates;		// client: authoritative chooser pick state
@@ -271,6 +285,7 @@ public:
 	int mChooserPicksPerPlayer;					// from host
 	int mChooserBankCount;
 	int mChooserPickQuota[NET_MAX_PLAYERS];		// authoritative quota for every slot
+	uint8_t mChooserMysteryMask = 0;
 
 private:
 	Mode mMode;

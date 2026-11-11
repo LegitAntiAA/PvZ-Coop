@@ -418,6 +418,7 @@ void NetManager::Disconnect()
 	mChooserStateEchoRequested.store(false, std::memory_order_relaxed);
 	PurgePendingInputs("DISCONNECT");
 	mChooserOpen = false;
+	mChooserMysteryMask = 0;
 	for (int i = 0; i < NET_MAX_PLAYERS; i++)
 	{
 		mRemoteCursors[i].Clear();
@@ -500,6 +501,7 @@ void NetManager::DropSession(int theSlot, bool theNotify)
 	mPlayers[theSlot].mActive = false;
 	mPlayers[theSlot].mReady = 0;
 	mPlayers[theSlot].mSpectator = false;
+	mChooserMysteryMask &= (uint8_t)~(1U << theSlot);
 	mPlayerZombatars[theSlot] = {};
 	mKicked[theSlot] = false;
 	mRemoteCursors[theSlot].Clear();
@@ -625,7 +627,7 @@ void NetManager::Update()
 		{
 			for (int aSlot = 1; aSlot < NET_MAX_PLAYERS; ++aSlot)
 			{
-				if (!mPlayers[aSlot].mActive || !mRemoteCursors[aSlot].mValid)
+				if (!mPlayers[aSlot].mActive)
 					continue;
 				CursorObject* anAuthoritative = mApp->mBoard->mNetPlayerCursors[aSlot];
 				if (!anAuthoritative)
@@ -665,9 +667,14 @@ void NetManager::Update()
 				aRelay.WriteU8(0);
 				aRelay.WriteU16(aHeldPacketId);
 				aRelay.WriteU16(aHoverId);
-				BroadcastMessage(NETMSG_CURSOR, aRelay);
-				NetTrace("cursor authority publish slot=%d type=%u seed=%u imitater=%u",
-					aSlot, aType, aSeed, anImitater);
+				if (aPublished.mValid)
+					BroadcastMessage(NETMSG_CURSOR, aRelay);
+				else if (mSessions[aSlot].mAssigned)
+					// A hidden/stalled window may never have supplied a pointer.
+					// Its own semantic held-card echo still must be delivered.
+					mSessions[aSlot].mConn.SendMessage(NETMSG_CURSOR, aRelay);
+				NetTrace("cursor authority publish slot=%d type=%u seed=%u imitater=%u pointer=%d",
+					aSlot, aType, aSeed, anImitater, aPublished.mValid ? 1 : 0);
 			}
 		}
         }
@@ -811,6 +818,9 @@ void NetManager::HandleMessage(NetSession* theSession, uint8_t theMsgType, NetBu
 		break;
 	case NETMSG_SEED_UNPICK:
 		OnClientSeedPick(theSession, thePayload, true);
+		break;
+	case NETMSG_CHOOSER_MYSTERY:
+		OnClientChooserMystery(theSession, thePayload);
 		break;
 	case NETMSG_TEAM_SELECT:
 		OnClientTeamSelect(theSession, thePayload);
@@ -1351,6 +1361,71 @@ void NetManager::OnClientSeedPick(NetSession* theSession, NetBuffer& thePayload,
 	mRemotePicks.push_back(aPick);
 }
 
+bool NetManager::IsChooserMystery(int theSlot) const
+{
+	return theSlot >= 0 && theSlot < NET_MAX_PLAYERS &&
+		(mChooserMysteryMask & (1U << theSlot)) != 0;
+}
+
+bool NetManager::HasActiveMysteryDeck() const
+{
+	for (int i = 0; i < NET_MAX_PLAYERS; ++i)
+		if (IsChooserMystery(i) && mPlayers[i].mActive && !mPlayers[i].mSpectator &&
+			mChooserPickQuota[i] > 0 &&
+			(!mApp || mApp->mGameMode != GAMEMODE_COOP_PVP || mPlayers[i].mTeam == NETTEAM_PLANTS))
+			return true;
+	return false;
+}
+
+bool NetManager::QueueChooserMystery(int theSlot, bool theEnabled)
+{
+	const bool anEligible = theSlot >= 0 && theSlot < NET_MAX_PLAYERS &&
+		mPlayers[theSlot].mActive && !mPlayers[theSlot].mSpectator &&
+		mChooserPickQuota[theSlot] > 0 && mApp &&
+		(mApp->mGameMode != GAMEMODE_COOP_PVP || mPlayers[theSlot].mTeam == NETTEAM_PLANTS);
+	const bool aLiveChooser = mChooserOpen && mApp && mApp->mBoard &&
+		mApp->mGameScene == SCENE_LEVEL_INTRO && mApp->mSeedChooserScreen &&
+		mApp->mSeedChooserScreen->mMouseVisible && mApp->mBoard->mCutScene &&
+		mApp->mBoard->mCutScene->mSeedChoosing;
+	if (!IsHosting() || !anEligible || !aLiveChooser || mRemotePicks.size() >= 64)
+	{
+		RequestChooserStateEcho("mystery_context", theSlot, -1);
+		return false;
+	}
+	ChooserPick anAction;
+	anAction.mSlot = theSlot;
+	anAction.mMysteryToggle = true;
+	anAction.mMysteryEnabled = theEnabled;
+	mRemotePicks.push_back(anAction);
+	return true;
+}
+
+bool NetManager::RequestChooserMystery(bool theEnabled)
+{
+	if (!IsActive() || IsSpectator() || !mChooserOpen || !mApp || !mApp->mSeedChooserScreen ||
+		mChooserPickQuota[mMySlot] <= 0 ||
+		(mApp->mGameMode == GAMEMODE_COOP_PVP && GetMyTeam() != NETTEAM_PLANTS))
+		return false;
+	if (IsHosting()) return QueueChooserMystery(mMySlot, theEnabled);
+	if (!mHostConn || !mClientConnected) return false;
+	NetBuffer aRequest;
+	aRequest.WriteU8(theEnabled ? 1 : 0);
+	mHostConn->SendMessage(NETMSG_CHOOSER_MYSTERY, aRequest);
+	return true;
+}
+
+void NetManager::OnClientChooserMystery(NetSession* theSession, NetBuffer& thePayload)
+{
+	if (!theSession || thePayload.Remaining() != 1)
+	{
+		RequestChooserStateEcho("mystery_payload", theSession ? theSession->mSlot : -1, -1);
+		return;
+	}
+	const uint8_t anEnabled = thePayload.ReadU8Or();
+	if (anEnabled > 1 || !QueueChooserMystery(theSession->mSlot, anEnabled != 0))
+		RequestChooserStateEcho("mystery_rejected", theSession->mSlot, -1);
+}
+
 void NetManager::OnClientTeamSelect(NetSession* theSession, NetBuffer& thePayload)
 {
 	uint8_t aTeam = thePayload.ReadU8Or();
@@ -1527,9 +1602,9 @@ void NetManager::HandleMessageClient(uint8_t theMsgType, NetBuffer& thePayload)
 				NetTrace("START_PLAYING deferred: chooser level has no final bank payload");
 				break;
 			}
-			if (!mApp->mBoard->NetApplyCameraBootstrap(thePayload))
+			if (!mApp->mBoard->NetApplyStartPlaying(thePayload))
 			{
-				NetTrace("START_PLAYING rejected: malformed camera bootstrap");
+				NetTrace("START_PLAYING rejected: malformed camera or mystery reveal");
 				break;
 			}
 			mPendingChooserStarts.clear();
@@ -2243,6 +2318,7 @@ void NetManager::OnChooserOpen(NetBuffer& thePayload)
 	mRemoteChooserStates.clear();
 	mPendingChooserStarts.clear();
 	mChooserOpen = true;
+	mChooserMysteryMask = 0;
 	mChooserBankCount = aBankCount;
 	for (int i = 0; i < NET_MAX_PLAYERS; i++)
 		mChooserPickQuota[i] = aQuotas[i];
@@ -2282,6 +2358,11 @@ void NetManager::OnChooserState(NetBuffer& thePayload)
 void NetManager::OnChooserStart(NetBuffer& thePayload)
 {
 	if (!mChooserOpen || !mApp || !mApp->mBoard) return;
+	if (!mApp->mSeedChooserScreen || !mApp->mSeedChooserScreen->CoopValidateBankPayload(thePayload))
+	{
+		NetTrace("CHOOSER_START rejected before generation commit: malformed final bank");
+		return;
+	}
 	// Earlier snapshots describe the provisional intro bank. Apply them before
 	// the ordered final list, so they cannot overwrite its viewer-relative order.
 	mApp->mBoard->NetDrainMessages();

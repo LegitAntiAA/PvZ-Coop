@@ -1,11 +1,13 @@
 #include "NetLobbyPanel.h"
 #include "NetManager.h"
+#include "NetOnline.h"
 #include "../../LawnApp.h"
 #include "../../SexyAppFramework/Graphics.h"
 #include "../../SexyAppFramework/WidgetManager.h"
 #include "../../SexyAppFramework/EditWidget.h"
 #include "../../SexyAppFramework/ImageFont.h"
 #include "../../Sexy.TodLib/TodCommon.h"
+#include "../../Sexy.TodLib/TodStringFile.h"
 #include "../../Resources.h"
 #include "../../GameConstants.h"
 #include "../../SexyAppFramework/DDImage.h"
@@ -13,6 +15,15 @@
 #include "../Widget/GameSelector.h"
 
 using namespace LawnNet;
+
+namespace
+{
+SexyString OnlineFailureText(NetManager* theNet)
+{
+	NetOnline* anOnline = theNet ? theNet->GetOnline() : nullptr;
+	return anOnline ? StringToSexyString(anOnline->GetLastErrorMessage()) : SexyString();
+}
+}
 
 static int gPanelEditColors[][4] =
 {
@@ -71,7 +82,19 @@ NetLobbyPanel::~NetLobbyPanel()
 
 Rect NetLobbyPanel::GetPanelRect() const
 {
-	return mCollapsed ? Rect(8, mApp->mHeight - 52, 180, 36) : Rect(8, mApp->mHeight - 318, 300, 306);
+	if (mCollapsed) return Rect(8, mApp->mHeight - 52, 180, 36);
+	NetManager* aNet = mApp->mNetManager;
+	const SexyString anError = OnlineFailureText(aNet);
+	int aHeight = 306;
+	if (!anError.empty())
+	{
+		Graphics aMeasure;
+		const int aTextHeight = TodDrawStringWrappedHelper(&aMeasure, anError, Rect(0, 0, 264, 600),
+			FONT_BRIANNETOD12, NetUi::Ink(), DS_ALIGN_LEFT, false);
+		const int aTop = !aNet->IsActive() ? (mLanExpanded ? 270 : 186) : 302;
+		aHeight = max(aHeight, aTop + aTextHeight + 18);
+	}
+	return Rect(8, mApp->mHeight - aHeight - 12, 300, aHeight);
 }
 
 bool NetLobbyPanel::IsOnMainSelector() const
@@ -171,6 +194,12 @@ void NetLobbyPanel::Update()
 	const bool aActive = aNet->IsActive();
 	if (aActive != mWasActive) mCollapsed = !aActive;
 	mWasActive = aActive;
+	const std::string anOnlineError = SexyStringToStringFast(OnlineFailureText(aNet));
+	if (anOnlineError != mLastOnlineError)
+	{
+		mLastOnlineError = anOnlineError;
+		if (!anOnlineError.empty()) mCollapsed = false;
+	}
 	if (aInMenu)
 		Resize(0, 0, mApp->mWidth, mApp->mHeight);
 
@@ -221,6 +250,7 @@ void NetLobbyPanel::Draw(Graphics* g)
         return;
     }
     const Rect aPanel = GetPanelRect();
+    const SexyString anOnlineError = OnlineFailureText(aNet);
     NetUi::Paper(g, mPaperImage, aPanel);
     TodDrawString(g, _S("PLAY TOGETHER"), aPanel.mX + 150, aPanel.mY + 28,
         FONT_BRIANNETOD16, NetUi::Ink(), DS_ALIGN_CENTER);
@@ -231,24 +261,26 @@ void NetLobbyPanel::Draw(Graphics* g)
         if (mLanExpanded)
             TodDrawString(g, _S("LAN IP"), aPanel.mX + 18, aPanel.mY + 203,
                 FONT_BRIANNETOD12, NetUi::Ink(), DS_ALIGN_LEFT);
-        else
+        else if (anOnlineError.empty())
         {
             TodDrawString(g, _S("A lawn is better with friends."), aPanel.mX + 150, aPanel.mY + 211,
                 FONT_BRIANNETOD12, NetUi::MutedInk(), DS_ALIGN_CENTER);
             TodDrawString(g, _S("Find a room and join the fun!"), aPanel.mX + 150, aPanel.mY + 237,
                 FONT_BRIANNETOD12, NetUi::MutedInk(), DS_ALIGN_CENTER);
         }
-        NetUi::Literal(g, FONT_BRIANNETOD12,
-            NetUi::Fit(FONT_BRIANNETOD12, StringToSexyString(aNet->GetConnectStatus()), 264),
-            aPanel.mX + 18, aPanel.mY + 288, Color(160, 48, 32));
+        if (anOnlineError.empty())
+            NetUi::Literal(g, FONT_BRIANNETOD12,
+                NetUi::Fit(FONT_BRIANNETOD12, StringToSexyString(aNet->GetConnectStatus()), 264),
+                aPanel.mX + 18, aPanel.mY + 288, Color(160, 48, 32));
     }
     else if (aNet->IsConnecting())
     {
-        TodDrawString(g, _S("JOINING YOUR FRIEND..."), aPanel.mX + 150, aPanel.mY + 126,
+        TodDrawString(g, anOnlineError.empty() ? _S("JOINING YOUR FRIEND...") : _S("CONNECTION NOTICE"), aPanel.mX + 150, aPanel.mY + 126,
             FONT_BRIANNETOD16, NetUi::Ink(), DS_ALIGN_CENTER);
-        NetUi::Literal(g, FONT_BRIANNETOD12,
-            NetUi::Fit(FONT_BRIANNETOD12, StringToSexyString(aNet->GetConnectStatus()), 264),
-            aPanel.mX + 150, aPanel.mY + 157, NetUi::MutedInk(), 0);
+        if (anOnlineError.empty())
+            NetUi::Literal(g, FONT_BRIANNETOD12,
+                NetUi::Fit(FONT_BRIANNETOD12, StringToSexyString(aNet->GetConnectStatus()), 264),
+                aPanel.mX + 150, aPanel.mY + 157, NetUi::MutedInk(), 0);
     }
     else
     {
@@ -282,6 +314,12 @@ void NetLobbyPanel::Draw(Graphics* g)
             aPanel.mX + 18, aPanel.mY + 225, FONT_BRIANNETOD12, NetUi::Ink(), DS_ALIGN_LEFT);
         TodDrawString(g, aNet->IsHosting() ? _S("Choose a game to start.") : _S("The host chooses the game."),
             aPanel.mX + 150, aPanel.mY + 252, FONT_BRIANNETOD12, NetUi::MutedInk(), DS_ALIGN_CENTER);
+    }
+    if (!anOnlineError.empty())
+    {
+        const int aTop = !aNet->IsActive() ? (mLanExpanded ? 270 : 186) : 302;
+        TodDrawStringWrappedHelper(g, anOnlineError, Rect(aPanel.mX + 18, aPanel.mY + aTop, 264, aPanel.mHeight - aTop - 12),
+            FONT_BRIANNETOD12, Color(145, 45, 27), DS_ALIGN_LEFT, true);
     }
     for (const UiButton& aButton : mButtons) DrawButton(g, aButton);
     MarkDirty();

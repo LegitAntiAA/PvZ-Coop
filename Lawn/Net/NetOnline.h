@@ -65,6 +65,7 @@ public:
 	std::string GetRoomId() const;
 	std::string GetStatus() const;
 	std::string GetLastErrorCode() const;
+	std::string GetLastErrorMessage() const;
 	std::vector<NetOnlineRoom> GetRooms() const;
 	std::vector<std::shared_ptr<NetOnlineChannel>> TakeOpenedChannels();
 

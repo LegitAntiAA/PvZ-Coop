@@ -10,11 +10,10 @@ bool LawnApp::CoopSmokeUpdateOnline()
 	if (!mNetManager || !mCoopSmokeLifecycleStarted) return false;
 	LawnNet::NetOnline* anOnline = mNetManager->GetOnline();
 	if (!anOnline) { CoopSmokeFail("online smoke has no directory client"); return false; }
-	const std::string aStatus = anOnline->GetStatus();
-	if (aStatus.rfind("Online:", 0) == 0 || aStatus.rfind("Signaling connection failed", 0) == 0 ||
-		aStatus.rfind("Signaling disconnected", 0) == 0 || aStatus.rfind("Direct connection failed", 0) == 0)
+	if (!anOnline->GetLastErrorCode().empty())
 	{
-		CoopSmokeFail(aStatus.c_str()); return false;
+		const std::string aReason = anOnline->GetLastErrorMessage();
+		CoopSmokeFail(aReason.c_str()); return false;
 	}
 	if (!anOnline->IsConnected()) return false;
 

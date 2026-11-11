@@ -98,7 +98,7 @@ Zombie::Zombie()
 }
 
 //0x522580
-void Zombie::ZombieInitialize(int theRow, ZombieType theType, bool theVariant, Zombie* theParentZombie, int theFromWave)
+void Zombie::ZombieInitialize(int theRow, ZombieType theType, bool theVariant, Zombie* theParentZombie, int theFromWave, int theBungeeTargetCol)
 {
     TOD_ASSERT(theType >= 0 && theType <= ZombieType::NUM_ZOMBIE_TYPES);
 
@@ -290,11 +290,22 @@ void Zombie::ZombieInitialize(int theRow, ZombieType theType, bool theVariant, Z
 
         if (IsOnBoard())
         {
-            PickBungeeZombieTarget(-1);
-            
-            if (mDead)
+            // Player-placed bungees bind their cell before the spawn event.
+            // An empty cell is intentional and must not trigger a random pick.
+            if (mBoard->IsPvPMode() && theBungeeTargetCol >= 0 && theBungeeTargetCol < MAX_GRID_SIZE_X)
             {
-                return;
+                mTargetCol = theBungeeTargetCol;
+                SetRow(theRow);
+                mPosX = mBoard->GridToPixelX(mTargetCol, mRow);
+                mPosY = GetPosYBasedOnRow(mRow);
+            }
+            else
+            {
+                PickBungeeZombieTarget(-1);
+                if (mDead)
+                {
+                    return;
+                }
             }
 
             mZombiePhase = ZombiePhase::PHASE_BUNGEE_DIVING;
@@ -950,6 +961,7 @@ void Zombie::ZombieInitialize(int theRow, ZombieType theType, bool theVariant, Z
         ReanimShowPrefix("anim_tongue", RENDER_GROUP_NORMAL);
     }
 
+    if (mBoard && IsOnBoard()) mBoard->ApplyPvPZombieSpawnHealth(this);
     mBodyMaxHealth = mBodyHealth;
     mHelmMaxHealth = mHelmHealth;
     mShieldMaxHealth = mShieldHealth;
@@ -1638,6 +1650,7 @@ void Zombie::UpdateZombieBungee()
         mAltitude += 8.0f;
         if (mAltitude >= 600.0f)
         {
+            if (mBoard && mBoard->IsPvPMode()) mNetKillCounted = true;
             DieNoLoot();
         }
     }
@@ -3799,10 +3812,11 @@ void Zombie::UpdateZombiquarium()
                 mApp->PlayFoley(FoleyType::FOLEY_SPAWN_SUN);
                 mBoard->AddCoin(mX + 50, mY + 40, CoinType::COIN_SUN, CoinMotion::COIN_MOTION_FROM_PLANT);
                 mSummonCounter = RandRangeInt(1000, 1500);
+                mSummonCounter = LawnNet::DifficultyCount(mSummonCounter, mBoard->GetModeDifficulty(), mSummonCounter / 5);
             }
         }
 
-        if (mZombieAge % 100 == 0)
+        if (mZombieAge % LawnNet::DifficultyInterval(100, mBoard->GetModeDifficulty(), 300) == 0)
         {
             TakeDamage(10, 8U);
             if (IsDeadOrDying())
@@ -4575,6 +4589,7 @@ void Zombie::UpdateDamageStates(unsigned int theDamageFlags)
 float Zombie::ZombieTargetLeadX(float theTime)
 {
     float aSpeed = mVelX;
+    if (mBoard && !mMindControlled) aSpeed *= mBoard->GetPvPZombieSpeedMultiplier();
     if (mChilledCounter > 0)
     {
         aSpeed *= CHILLED_SPEED_FACTOR;
@@ -4900,6 +4915,7 @@ void Zombie::UpdateZombieWalking()
             }
         }
 
+        if (mBoard && !mMindControlled) aSpeed *= mBoard->GetPvPZombieSpeedMultiplier();
         if (IsWalkingBackwards() || mZombiePhase == ZombiePhase::PHASE_DANCER_DANCING_IN)
         {
             mPosX += aSpeed;
@@ -4966,6 +4982,7 @@ void Zombie::UpdateZombieWalking()
         if (doWalk)
         {
             float aSpeed = mVelX;
+            if (mBoard && !mMindControlled) aSpeed *= mBoard->GetPvPZombieSpeedMultiplier();
             if (IsMovingAtChilledSpeed())
             {
                 aSpeed *= CHILLED_SPEED_FACTOR;
@@ -5093,15 +5110,6 @@ void Zombie::UpdateBurn()
 void Zombie::Update()
 {
     TOD_ASSERT(!mDead);
-
-    // co-op pvp: zombie reaching the house scores a brain for the zombie team
-	if (mBoard && mBoard->IsPvPMode() && mFromWave >= 0 && mPosX < 30.0f)
-	{
-		// Reaching the house is a zombie-team score, not a plant-team kill.
-		mNetKillCounted = true;
-		mBoard->NetPvPZombieScored(this);
-		return;
-	}
 
     mZombieAge++;
     bool doUpdate = false;
@@ -5411,6 +5419,9 @@ void Zombie::CheckForBoardEdge()
 {
     if (IsWalkingBackwards() && mPosX > 850.0f)
     {
+        // Leaving the opposite edge is a noncombat despawn (Digger/Yeti or a
+        // hypnotized zombie), not a plant-team kill in PvP.
+        if (mBoard && mBoard->IsPvPMode()) mNetKillCounted = true;
         DieNoLoot();
         return;
     }
@@ -5435,6 +5446,18 @@ void Zombie::CheckForBoardEdge()
 
     if (mX <= aEdgeX && mHasHead)
     {
+        if (mBoard->IsPvPMode())
+        {
+            // Use the native house boundary after actions/movement. A tunneling
+            // Digger must reach its emergence point and turn, not score merely
+            // because its underground sprite passed the first lawn column.
+            if (!IsWalkingBackwards() && mZombiePhase != PHASE_DIGGER_TUNNELING &&
+                mZombiePhase != PHASE_DIGGER_TUNNELING_PAUSE_WITHOUT_AXE &&
+                mZombiePhase != PHASE_DIGGER_RISING && mZombiePhase != PHASE_DIGGER_RISE_WITHOUT_AXE &&
+                mZombiePhase != PHASE_DIGGER_STUNNED)
+                mBoard->NetPvPZombieScored(this);
+            return;
+        }
         if (mApp->IsIZombieLevel())
         {
             DieNoLoot();
@@ -11944,7 +11967,7 @@ void Zombie::BossRVAttack()
 {
     RemoveColdEffects();
     mZombiePhase = ZombiePhase::PHASE_BOSS_DROP_RV;
-    mBossBungeeCounter = RandRangeInt(4000, 5000);
+    mBossBungeeCounter = LawnNet::DifficultyInterval(RandRangeInt(4000, 5000), mBoard->GetModeDifficulty(), 350);
     mTargetRow = RandRangeInt(0, mBoard->StageHas6Rows() ? 4 : 3);  // 泳池僵王兼容
     mTargetCol = RandRangeInt(0, 2);
 
@@ -11973,15 +11996,15 @@ void Zombie::BossRVLanding()
     Reanimation* aBodyReanim = mApp->ReanimationGet(mBodyReanimID);
     aBodyReanim->SetImageOverride("Boss_RV", IMAGE_REANIM_ZOMBIE_BOSS_RV2);
    
-    mSummonCounter = 500;
+    mSummonCounter = LawnNet::DifficultyInterval(500, mBoard->GetModeDifficulty(), 350);
     // mBossHeadCounter = 5000;
     if (mBossMode >= 1 && mBossStompCounter == -1)
     {
-        mBossStompCounter = 4000;
+        mBossStompCounter = LawnNet::DifficultyInterval(4000, mBoard->GetModeDifficulty(), 350);
     }
     if (mBossMode >= 2)
     {
-        mBossBungeeCounter = 6500;
+        mBossBungeeCounter = LawnNet::DifficultyInterval(6500, mBoard->GetModeDifficulty(), 350);
     }
 }
 
@@ -12002,6 +12025,7 @@ void Zombie::BossSpawnAttack()
     {
         mSummonCounter = RandRangeInt(150, 250);
     }
+    mSummonCounter = LawnNet::DifficultyInterval(mSummonCounter, mBoard->GetModeDifficulty(), 350);
 
     mTargetRow = mBoard->PickRowForNewZombie(ZombieType::ZOMBIE_NORMAL, mFromWave);
 
@@ -12023,16 +12047,18 @@ void Zombie::BossSpawnAttack()
 //0x534DC0
 void Zombie::BossSpawnContact()
 {
+    const int aDifficulty = mBoard->GetModeDifficulty();
+    const int aThreatAge = LawnNet::DifficultyCount(mZombieAge, aDifficulty, mZombieAge);
     ZombieType aZombieType;
-    if (mZombieAge < 3500)
+    if (aThreatAge < 3500)
     {
         aZombieType = ZombieType::ZOMBIE_NORMAL;
     }
-    else if (mZombieAge < 8000)
+    else if (aThreatAge < 8000)
     {
         aZombieType = ZombieType::ZOMBIE_TRAFFIC_CONE;
     }
-    else if (mZombieAge < 12500)
+    else if (aThreatAge < 12500)
     {
         aZombieType = ZombieType::ZOMBIE_PAIL;
     }
@@ -12048,8 +12074,12 @@ void Zombie::BossSpawnContact()
         aZombieType = (ZombieType)TodPickFromArray(gBossZombieList, aZombieTypeCount);
     }
 
-    Zombie* aZombie = mBoard->AddZombieInRow(aZombieType, mTargetRow, 0);
-    aZombie->mPosX = 600.0f;
+    const int aSpawnCount = aDifficulty >= 7 ? 2 : 1;
+    for (int i = 0; i < aSpawnCount; ++i)
+    {
+        Zombie* aZombie = mBoard->AddZombieInRow(aZombieType, mTargetRow, 0);
+        if (aZombie) aZombie->mPosX = 600.0f + i * 45.0f;
+    }
 }
 
 bool Zombie::BossIsAbleToStomp()
@@ -12087,7 +12117,7 @@ void Zombie::BossStompAttack()
 
     RemoveColdEffects();
     mZombiePhase = ZombiePhase::PHASE_BOSS_STOMPING;
-    mBossStompCounter = RandRangeInt(5500, 6500);
+    mBossStompCounter = LawnNet::DifficultyInterval(RandRangeInt(5500, 6500), mBoard->GetModeDifficulty(), 350);
 
     mTargetRow = TodPickFromArray(aRowArray, aRowsCount);
 
@@ -12139,7 +12169,7 @@ void Zombie::BossBungeeAttack()
 {
     RemoveColdEffects();
     mZombiePhase = ZombiePhase::PHASE_BOSS_BUNGEES_ENTER;
-    mBossBungeeCounter = RandRangeInt(4000, 5000);
+    mBossBungeeCounter = LawnNet::DifficultyInterval(RandRangeInt(4000, 5000), mBoard->GetModeDifficulty(), 350);
     mTargetCol = RandRangeInt(0, 2);
 
     PlayZombieReanim("anim_bungee_1_enter", ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD, 20, 12.0f);

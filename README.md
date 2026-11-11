@@ -23,13 +23,18 @@ Distribute the **same compiled build** to everyone. Each game build generates a 
 | Draw | Hold Ctrl and move the mouse; the stroke starts fading from its end after 8 seconds |
 | Plant packet ping | Alt + left click; flashes the same packet for everyone and announces its name / remaining recharge time |
 | Seed selection | Picks appear in the native top bank, tinted by player; fixed cards count toward the host's total quota |
+| Mystery plants | The rectangular **?** button fills your available slots with hidden random plants; press it again to clear the set and return to manual picking |
 | Start after picking | Every participant presses the ready button; it shows ready/total and red/green state |
-| Difficulty | Host chooses 1–10 in the lobby; 1 preserves the standard game, higher settings add zombies, waves and types without increasing HP |
+| Difficulty | Host chooses 1–10 in the lobby. PvE increases wave pressure or the mini-game's own objectives/timers, with stock zombie HP; Endless retains its native health progression. PvP uses gradual comeback assistance from difficulty2 |
 | Join an ongoing game | Read-only spectator: chat, middle-button ping, Alt packet ping and Ctrl drawing; the spectator's cursor is visible to others. Becomes a participant after the current level ends |
 | Kick | Host uses the player-row button in the lobby or the player list while paused; an active departing player's packets are reassigned fairly |
 | Personal Zombatar | Each player saves their own native-editor appearance. It uploads automatically to the host on joining; active host/client appearances can occasionally appear on zombies |
 
 Sun, progression, store purchases and profile name belong to the host. Your personal Zombatar and visual settings remain your own. Other players' packets are visible but cannot be used. Spectators cannot plant or perform gameplay actions. Chat includes join/leave/kick messages. The GitHub icon in the top-left menu opens this repository.
+
+Mystery cards stay locked and appear as **?** to everyone until gameplay starts, including their owner. They do not mark ordinary picker plants as taken or restrict anyone else's manual picks. Ordinary plants do not repeat within one random set; an Imitator may copy one of them. Fixed Crazy Dave cards remain visible. If anyone uses mystery plants, the usual missing-sunflower warning is skipped. Random cards cost 5% less at difficulty 1, rising linearly to 25% at 10; the discount stays with the card if its owner leaves.
+
+Difficulty also applies to playable mini-games and custom modes: wave-based games gain more/faster waves, while puzzles and other families adjust their own goals, resources or timers. Finite-ammo modes keep their native ammunition budget. In PvP, difficulty 1 has no comeback bonuses. Higher settings gradually help the trailing side: plants receive lower prices and faster firing/sun production; zombies receive lower prices, movement speed and extra health on newly spawned units. Existing zombies are never healed by a balance change. Combined mystery/comeback discounts are capped at 35%.
 
 ### Custom modes
 
@@ -98,12 +103,17 @@ The [delivery board](docs/agent/WORKBOARD.md) records the remaining regression c
 - **Зажать Ctrl и двигать мышью** — рисовать. Через 8 секунд линия начинает исчезать от конца к началу.
 - **Alt + ЛКМ по пакету растения** — подсветить именно этот пакет у всех, отправить его название и оставшийся кулдаун в чат. Указатель над банком также привязан к пакету, независимо от его позиции у другого игрока.
 - При выборе растения переходят в штатный верхний банк и окрашиваются цветом владельца. Обязательные карты входят в общую квоту хоста. Для старта **все участники нажимают готовность**; кнопка показывает число готовых и меняет цвет.
-- Хост выбирает **сложность 1–10** в лобби. На 1 сохраняется стандартная игра, выше увеличиваются количество/типы зомби и волны, а не их HP.
+- Прямоугольная кнопка **?** заполняет свободные личные слоты случайными скрытыми растениями. Повторное нажатие очищает набор и возвращает ручной выбор.
+- Хост выбирает **сложность 1–10** в лобби. В PvE растут давление волн либо собственные цели/таймеры мини-игры; обычное HP зомби сохраняется, у Endless остаётся его штатное усиление здоровья. В PvP со сложности2 появляется плавная помощь отстающей стороне.
 - Подключившийся во время игры становится **наблюдателем**: доступен чат, пинг колёсиком, Alt-пинг пакета и рисование через Ctrl; его курсор виден остальным. Посадка и другие игровые действия недоступны. После завершения текущего уровня он становится участником.
 - Хост может кикнуть игрока кнопкой возле имени в лобби или в списке слева во время паузы. Пакеты ушедшего активного игрока распределяются между оставшимися участниками.
 - Каждый игрок сохраняет собственный **зомботар** в штатном редакторе. При входе он автоматически отправляется хосту; на зомби иногда появляются головы активных хоста и клиентов. Внешность клиента не заменяется внешностью хоста. Одежда сохраняется для портрета редактора, а игровая форма зомби остаётся штатной.
 
 Прогресс, магазин, имя профиля и общая валюта принадлежат хосту. Личная внешность и настройки отображения остаются собственными у каждого игрока. Чужие пакеты видны, но недоступны для использования. В чате есть сообщения о входе, выходе и кике. Значок GitHub в левом верхнем углу меню открывает репозиторий.
+
+Случайный набор заблокирован и скрыт **знаками вопроса для всех**, включая владельца, до начала игры. Он не помечает растения в обычном выборе как занятые и не мешает другим выбирать их вручную. Обычные растения внутри набора не повторяются; Имитатор может скопировать уже выпавшее растение. Обязательные карты Дейва остаются видимыми. Если хотя бы один участник выбрал случайный набор, предупреждение об отсутствии подсолнуха пропускается. Скидка на случайные карты линейно растёт с 5% на сложности 1 до 25% на 10 и сохраняется при передаче карт ушедшего игрока.
+
+Сложность действует и в доступных мини-играх и дополнительных режимах: волновые получают больше волн и более быстрый темп, остальные семейства меняют собственные цели, ресурсы или таймеры. В режимах с ограниченными боеприпасами их штатный запас сохраняется. В PvP на сложности 1 усилений нет; со 2 помощь отстающей команде нарастает плавно. У растений снижаются цены, ускоряются стрельба и выдача солнца; у зомби снижаются цены, растут скорость и здоровье новых зомби. Уже появившиеся зомби от пересчёта не лечатся. Общая скидка со случайным набором ограничена 35%.
 
 ### Дополнительные режимы
 

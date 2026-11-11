@@ -1,5 +1,6 @@
 #include <time.h>
 #include <limits.h>
+#include <stdexcept>
 #include "ZenGarden.h"
 #include "BoardInclude.h"
 #include "System/Music.h"
@@ -824,7 +825,8 @@ void Board::PickZombieWaves()
 	int aBasePointTotal = 0, aScaledPointTotal = 0;
 	const int aDifficulty = GetCoopDifficulty();
 	if (aDifficulty > 1 && mNumWaves > 0)
-		mNumWaves = min(MAX_ZOMBIE_WAVES, mNumWaves + (mNumWaves * (aDifficulty - 1) + 4) / 5);
+		mNumWaves = GetDifficultyFamily() == DifficultyFamily::FiniteAmmo ? mNumWaves :
+			DifficultyWaveCount(mNumWaves, aDifficulty, MAX_ZOMBIE_WAVES);
 
 	// ====================================================================================================
 	// ▲ 一些准备工作
@@ -940,7 +942,8 @@ void Board::PickZombieWaves()
 		// ------------------------------------------------------------------------------------------------
 		const int aBasePoints = aZombiePoints;
 		if (aDifficulty > 1)
-			aZombiePoints += (aZombiePoints * (aDifficulty - 1) * 35 + 99) / 100;
+			aZombiePoints = GetDifficultyFamily() == DifficultyFamily::FiniteAmmo ? aZombiePoints :
+				DifficultyWavePoints(aZombiePoints, aDifficulty);
 		if (IsTowerDefense())
 		{
 			aZombiePoints *= 2;
@@ -1641,7 +1644,13 @@ void Board::InitZombieWaves()
 		mChallenge->InitZombieWaves();
 	}
 	const int aDifficulty = GetCoopDifficulty();
-	if (aDifficulty > 1)
+	// Conveyor/tool/finite-ammo challenges have authored counter availability.
+	// Their existing stronger types remain eligible; never inject an archetype
+	// the given cards cannot defeat (for example Balloon into Wall-nut Bowling).
+	const bool aCanExpandRoster = ChooseSeedsOnCurrentLevel() && !HasConveyorBeltSeedBank() && !mApp->IsWhackAZombieLevel() &&
+		!mApp->IsWallnutBowlingLevel() && GetDifficultyFamily() != DifficultyFamily::FiniteAmmo &&
+		mApp->mGameMode != GAMEMODE_CHALLENGE_AIR_RAID;
+	if (aDifficulty > 1 && aCanExpandRoster)
 	{
 		for (int aType = ZOMBIE_NORMAL; aType < NUM_ZOMBIE_TYPES; ++aType)
 		{
@@ -1656,6 +1665,9 @@ void Board::InitZombieWaves()
 				(IsZombieTypePoolOnly(aZombieType) && !StageHasPool()) ||
 				(StageHasRoof() && !Zombie::ZombieTypeCanGoOnHighGround(aZombieType)) ||
 				(aZombieType == ZOMBIE_ZAMBONI && StageHasGraveStones()))
+				continue;
+			if (aZombieType == ZOMBIE_BALLOON && !mApp->SeedTypeAvailable(SEED_CACTUS) &&
+				!mApp->SeedTypeAvailable(SEED_BLOVER) && !mApp->SeedTypeAvailable(SEED_CATTAIL))
 				continue;
 			if (IsTowerDefense() && (aZombieType == ZOMBIE_ZAMBONI || aZombieType == ZOMBIE_BALLOON ||
 				aZombieType == ZOMBIE_BUNGEE || aZombieType == ZOMBIE_DIGGER || aZombieType == ZOMBIE_CATAPULT))
@@ -1694,6 +1706,7 @@ void Board::InitZombieWaves()
 #endif
 	}
 
+	mZombieCountDown = DifficultyInterval(mZombieCountDown, aDifficulty, 350, 100);
 	mZombieHealthWaveStart = 0;
 	mLastBungeeWave = 0;
 	mProgressMeterWidth = 0;
@@ -2266,7 +2279,7 @@ void Board::InitLevel()
 		for (int i = 0; i < PVP_ZOMBIE_PACKET_COUNT; i++)
 			mSeedBank->mSeedPackets[PVP_PLANT_PACKET_COUNT + i].SetPacketType(Challenge::GetPvPZombieSeed(i));
 		AssignPvPSeedOwners();
-		mNetPvPBrains = 100; // starting brains (host authority, snapshot-synced)
+		mNetPvPBrains = 25; // shared opening budget (host authority, snapshot-synced)
 	}
 
 	// 将所有子控件标记为已变动
@@ -3682,7 +3695,7 @@ bool Board::CanAddBobSled()
 }
 
 //0x40DDC0
-Zombie* Board::AddZombieInRow(ZombieType theZombieType, int theRow, int theFromWave)
+Zombie* Board::AddZombieInRow(ZombieType theZombieType, int theRow, int theFromWave, int theBungeeTargetCol)
 {
 	if (mZombies.mSize >= mZombies.mMaxSize - 1)
 	{
@@ -3703,8 +3716,8 @@ Zombie* Board::AddZombieInRow(ZombieType theZombieType, int theRow, int theFromW
 
 	bool aVariant = !Rand(5);
 	Zombie* aZombie = mZombies.DataArrayAlloc();
-	aZombie->ZombieInitialize(theRow, theZombieType, aVariant, nullptr, theFromWave);
-	if (IsPvPMode())
+	aZombie->ZombieInitialize(theRow, theZombieType, aVariant, nullptr, theFromWave, theBungeeTargetCol);
+	if (IsPvPMode() && theZombieType != ZombieType::ZOMBIE_BUNGEE)
 	{
 		// PvP placement chooses a lane, not an on-screen position.  Always enter
 		// from beyond the right edge just like a regular wave zombie.
@@ -4592,6 +4605,11 @@ void Board::UpdateToolTip()
 	}
 
 	SeedPacket* aSeedPacket = (SeedPacket*)aHitResult.mObject;
+	if (aSeedPacket->IsMysteryPending())
+	{
+		mToolTip->mVisible = false;
+		return;
+	}
 	SeedType aUseSeedType = aSeedPacket->mPacketType;
 	if (aSeedPacket->mPacketType == SeedType::SEED_IMITATER && aSeedPacket->mImitaterType != SeedType::SEED_NONE)
 	{
@@ -4709,7 +4727,7 @@ void Board::UpdateToolTip()
 		mToolTip->SetLabel(Plant::GetNameString(aUseSeedType));
 	}
 
-	int aPlantCost = GetCurrentPlantCost(aSeedPacket->mPacketType, aSeedPacket->mImitaterType);
+	int aPlantCost = GetSeedPacketCost(*aSeedPacket);
 	if (mApp->mEasyPlantingCheat)
 	{
 		mToolTip->SetWarningText(_S("[FREE_PLANTING_CHEAT]"));
@@ -4820,6 +4838,13 @@ void Board::MouseDownCobcannonFire(int x, int y, int theClickCount)
 //0x40FD30
 void Board::MouseDownWithPlant(int x, int y, int theClickCount)
 {
+	if (mCursorObject->mCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_BANK &&
+		mCursorObject->mSeedBankIndex >= 0 && mCursorObject->mSeedBankIndex < mSeedBank->mNumPackets &&
+		mSeedBank->mSeedPackets[mCursorObject->mSeedBankIndex].IsMysteryPending())
+	{
+		ClearCursor();
+		return;
+	}
 	// 右击鼠标：放下卡牌
 	if (theClickCount < 0)
 	{
@@ -5023,7 +5048,14 @@ void Board::MouseDownWithPlant(int x, int y, int theClickCount)
 	// 无免费种植、非传送带关卡的卡槽植物，判断阳光是否充足：充足则扣除阳光，不足则退出
 	if (!mApp->mEasyPlantingCheat && (mCursorObject->mCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_BANK || mCursorObject->mCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_DUPLICATOR) && !HasConveyorBeltSeedBank())
 	{
-		if (!TakeSunMoney(GetCurrentPlantCost(aPlantingSeedType, SeedType::SEED_NONE)))
+		int aCost = GetCurrentPlantCost(aPlantingSeedType, SeedType::SEED_NONE);
+		if (mCursorObject->mCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_BANK)
+		{
+			const int anIndex = mCursorObject->mSeedBankIndex;
+			if (anIndex < 0 || anIndex >= mSeedBank->mNumPackets) return;
+			aCost = GetSeedPacketCost(mSeedBank->mSeedPackets[anIndex]);
+		}
+		if (!TakeSunMoney(aCost))
 		{
 			return;
 		}
@@ -6736,6 +6768,7 @@ void Board::UpdateSunSpawning()
 
 	mNumSunsFallen++;
 	mSunCountDown = min(SUN_COUNTDOWN_MAX, SUN_COUNTDOWN + mNumSunsFallen * 10) + Rand(SUN_COUNTDOWN_RANGE);
+	mSunCountDown = GetPvPPlantInterval(mSunCountDown);
 	CoinType aSunType = mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_SUNNY_DAY ? CoinType::COIN_LARGESUN : CoinType::COIN_SUN;
 	AddCoin(RandRangeInt(100, 649), 60, aSunType, CoinMotion::COIN_MOTION_FROM_SKY);
 }
@@ -6924,6 +6957,10 @@ void Board::UpdateZombieSpawning()
 				mZombieCountDown = ZOMBIE_COUNTDOWN + Rand(ZOMBIE_COUNTDOWN_RANGE);
 			}
 		}
+		// Repick/final-stage transitions retain their stock lifecycle delay.
+		if (!(mCurrentWave == mNumWaves && mApp->IsSurvivalMode()) &&
+			!(IsFlagWave(mCurrentWave) && mApp->IsLastStandEndless(mApp->mGameMode)))
+			mZombieCountDown = DifficultyInterval(mZombieCountDown, GetCoopDifficulty(), 350, 200);
 		mZombieCountDownStart = mZombieCountDown;
 	}
 }
@@ -7228,12 +7265,196 @@ bool Board::IsEndlessT()
 
 int Board::GetCoopDifficulty()
 {
-	// Only modes using the wave spawner inherit the lobby difficulty.  Puzzle,
-	// garden, boss and player-authored PvP spawns keep their own rules.
-	if (!mApp->mNetManager || IsPvPMode() || !StageHasZombieWalkInFromRight() ||
-		mApp->mGameMode == GameMode::GAMEMODE_INTRO || mApp->mGameMode == GameMode::GAMEMODE_UPSELL)
+	const DifficultyFamily aFamily = GetDifficultyFamily();
+	return aFamily == DifficultyFamily::Waves || aFamily == DifficultyFamily::FiniteAmmo ||
+		aFamily == DifficultyFamily::MatchThree || aFamily == DifficultyFamily::Whack ? GetModeDifficulty() : 1;
+}
+
+DifficultyFamily Board::GetDifficultyFamily() const
+{
+	if (mApp->IsWhackAZombieLevel()) return DifficultyFamily::Whack;
+	if (mApp->IsFinalBossLevel()) return DifficultyFamily::Boss;
+	if (mApp->IsScaryPotterLevel()) return DifficultyFamily::Vases;
+	if (mApp->IsIZombieLevel()) return DifficultyFamily::IZombie;
+	if (mApp->IsSquirrelLevel()) return DifficultyFamily::Squirrel;
+	switch (mApp->mGameMode)
+	{
+	case GAMEMODE_CHALLENGE_ZEN_GARDEN:
+	case GAMEMODE_TREE_OF_WISDOM:
+	case GAMEMODE_UPSELL:
+	case GAMEMODE_INTRO: return DifficultyFamily::NonCombat;
+	case GAMEMODE_COOP_PVP: return DifficultyFamily::PvP;
+	case GAMEMODE_CHALLENGE_BEGHOULED:
+	case GAMEMODE_CHALLENGE_BEGHOULED_TWIST: return DifficultyFamily::MatchThree;
+	case GAMEMODE_CHALLENGE_ZOMBIQUARIUM: return DifficultyFamily::Aquarium;
+	case GAMEMODE_CHALLENGE_ICE: return DifficultyFamily::Scripted;
+#ifdef _DS_MINIGAMES
+	case GAMEMODE_CHALLENGE_BOMB_ALL_TOGETHER: return DifficultyFamily::FiniteAmmo;
+#endif
+	default: return DifficultyFamily::Waves;
+	}
+}
+
+int Board::GetModeDifficulty() const
+{
+	if (!mApp->mNetManager || mApp->mGameMode == GAMEMODE_CHALLENGE_ZEN_GARDEN ||
+		mApp->mGameMode == GAMEMODE_TREE_OF_WISDOM || mApp->mGameMode == GAMEMODE_INTRO ||
+		mApp->mGameMode == GAMEMODE_UPSELL)
 		return 1;
 	return ClampInt(mApp->mNetManager->GetDifficulty(), 1, 10);
+}
+
+int Board::GetSeedPacketCost(const SeedPacket& thePacket) const
+{
+	if (thePacket.IsMysteryPending() || thePacket.mPacketType == SEED_NONE)
+		return INT_MAX;
+	int aBase = const_cast<Board*>(this)->GetCurrentPlantCost(thePacket.mPacketType, thePacket.mImitaterType);
+	const bool aPvP = mApp->mGameMode == GAMEMODE_COOP_PVP;
+	const bool aZombiePacket = mChallenge->IsZombieSeedType(thePacket.mPacketType);
+	if (aPvP && aZombiePacket) aBase /= 2;
+	const int aSide = aZombiePacket ? PVP_SUPPORT_ZOMBIES : PVP_SUPPORT_PLANTS;
+	const int aDiscount = GetPvPSupportStrength(aSide) * 200 / 1000;
+	return DiscountedPacketCost(aBase, thePacket.mRandomDiscountLevel, aDiscount);
+}
+
+static bool BuildMysteryPool(const Board* theBoard, std::vector<int>& theOrdinary,
+	std::vector<int>& theTargets, bool& theAllowImitater)
+{
+	LawnApp* anApp = theBoard->mApp;
+	SeedChooserScreen* aChooser = anApp->mSeedChooserScreen;
+	if (!aChooser) return false;
+	for (int i = SEED_PEASHOOTER; i < NUM_SEEDS_IN_CHOOSER; ++i)
+	{
+		const SeedType aType = static_cast<SeedType>(i);
+		if (aType == SEED_IMITATER || !anApp->SeedTypeAvailable(aType) ||
+			aChooser->SeedNotAllowedToPick(aType) || aChooser->SeedNotAllowedDuringTrial(aType))
+			continue;
+		if (!aChooser->mChosenSeeds[i].mCrazyDavePicked) theOrdinary.push_back(i);
+		if (aType < SEED_GATLINGPEA) theTargets.push_back(i);
+	}
+	theAllowImitater = anApp->SeedTypeAvailable(SEED_IMITATER) && !theTargets.empty() &&
+		!aChooser->SeedNotAllowedToPick(SEED_IMITATER) && !aChooser->SeedNotAllowedDuringTrial(SEED_IMITATER) &&
+		!aChooser->mChosenSeeds[SEED_IMITATER].mCrazyDavePicked;
+	// A bounded smoke pool exercises overlap without exposing or seeding the
+	// production RNG. Both preflight and the actual roll use this same builder.
+	const char* aMysterySmoke = getenv("PVZ_COOP_SMOKE_MYSTERY");
+	if (anApp->CoopSmokeActive() && anApp->mCoopSmokeManifest.mScenario == NETSMOKE_SCENARIO_ADVENTURE_8_SOAK &&
+		aMysterySmoke && strcmp(aMysterySmoke, "1") == 0 && theOrdinary.size() >= 4)
+	{
+		theOrdinary.resize(4);
+		theTargets = theOrdinary;
+	}
+	return true;
+}
+
+int Board::GetMysteryPoolCapacity() const
+{
+	std::vector<int> anOrdinary;
+	std::vector<int> aTargets;
+	bool anImitater = false;
+	if (!BuildMysteryPool(this, anOrdinary, aTargets, anImitater)) return 0;
+	return static_cast<int>(anOrdinary.size()) + (anImitater ? 1 : 0);
+}
+
+bool Board::ResolveMysteryPackets()
+{
+	mNetMysteryRevealIds.clear();
+	if (mApp->NetIsClient() || mApp->mGameScene != SCENE_PLAYING)
+		return false;
+	std::vector<int> aPending[NET_MAX_PLAYERS];
+	for (int i = 0; i < mSeedBank->mNumPackets; ++i)
+	{
+		const SeedPacket& aPacket = mSeedBank->mSeedPackets[i];
+		if (!aPacket.IsMysteryPending()) continue;
+		if (aPacket.mNetOwnerSlot >= NET_MAX_PLAYERS || aPacket.mNetId == 0)
+			return false;
+		aPending[aPacket.mNetOwnerSlot].push_back(i);
+	}
+	bool aHasPending = false;
+	for (int i = 0; i < NET_MAX_PLAYERS; ++i) aHasPending |= !aPending[i].empty();
+	if (!aHasPending) return true;
+	SeedChooserScreen* aChooser = mApp->mSeedChooserScreen;
+	if (!aChooser) return false;
+
+	std::vector<int> anOrdinaryPool;
+	std::vector<int> anImitaterTargets;
+	bool anAllowImitater = false;
+	if (!BuildMysteryPool(this, anOrdinaryPool, anImitaterTargets, anAllowImitater)) return false;
+	// This engine is deliberately unrelated to the public board RNG/seed. It is
+	// not created until PLAYING, so there is no hidden roll during the intro.
+	std::vector<MysteryRoll> aRolls[NET_MAX_PLAYERS];
+	try
+	{
+		static bool aSmokeRngFaultConsumed = false;
+		const char* aMysterySmoke = getenv("PVZ_COOP_SMOKE_MYSTERY");
+		const char* aMysteryFault = getenv("PVZ_COOP_SMOKE_MYSTERY_FAULT");
+		if (!aSmokeRngFaultConsumed && mApp->CoopSmokeActive() &&
+			mApp->mCoopSmokeManifest.mScenario == NETSMOKE_SCENARIO_ADVENTURE_8_SOAK &&
+			aMysterySmoke && strcmp(aMysterySmoke, "1") == 0 &&
+			aMysteryFault && strcmp(aMysteryFault, "RngFailure") == 0)
+		{
+			aSmokeRngFaultConsumed = true;
+			throw std::runtime_error("isolated mystery RNG smoke fault");
+		}
+		std::random_device aDevice;
+		std::seed_seq aSeed{ aDevice(), aDevice(), aDevice(), aDevice(), aDevice(), aDevice() };
+		std::mt19937 anEngine(aSeed);
+		for (int aSlot = 0; aSlot < NET_MAX_PLAYERS; ++aSlot)
+			if (!RollMysteryDeck(anOrdinaryPool, anImitaterTargets, static_cast<int>(aPending[aSlot].size()),
+				anAllowImitater, SEED_IMITATER, anEngine, aRolls[aSlot]))
+				return false;
+	}
+	catch (const std::exception&)
+	{
+		NetTrace("mystery private RNG unavailable; no packets committed");
+		return false;
+	}
+
+	// Commit only after every owner's pool has been validated and sampled.
+	for (int aSlot = 0; aSlot < NET_MAX_PLAYERS; ++aSlot)
+	{
+		for (size_t j = 0; j < aPending[aSlot].size(); ++j)
+		{
+			SeedPacket& aPacket = mSeedBank->mSeedPackets[aPending[aSlot][j]];
+			const uint8_t anOrigin = aPacket.mRandomDiscountLevel;
+			aPacket.SetPacketType(static_cast<SeedType>(aRolls[aSlot][j].mType),
+				static_cast<SeedType>(aRolls[aSlot][j].mImitater));
+			aPacket.mRandomDiscountLevel = anOrigin;
+			mNetMysteryRevealIds.push_back(aPacket.mNetId);
+		}
+	}
+	NetTrace("mystery resolved scene=%d packets=%zu", static_cast<int>(mApp->mGameScene), mNetMysteryRevealIds.size());
+	return true;
+}
+
+int Board::GetPvPSupportStrength(int theSide) const
+{
+	if (mApp->mGameMode != GAMEMODE_COOP_PVP || GetModeDifficulty() <= 1 ||
+		mNetPvPBalance.mBeneficiary != theSide || mApp->mGameScene != SCENE_PLAYING ||
+		mBoardFadeOutCounter >= 0 || mLevelComplete || mLevelAwardSpawned)
+		return 0;
+	return GameplayClamp(mNetPvPBalance.mStrength, 0, 1000);
+}
+
+int Board::GetPvPPlantInterval(int theStockInterval) const
+{
+	return PvPSupportedInterval(theStockInterval, GetPvPSupportStrength(PVP_SUPPORT_PLANTS));
+}
+
+float Board::GetPvPZombieSpeedMultiplier() const
+{
+	return 1.0f + GetPvPSupportStrength(PVP_SUPPORT_ZOMBIES) * 0.00015f;
+}
+
+void Board::ApplyPvPZombieSpawnHealth(Zombie* theZombie) const
+{
+	if (!theZombie || mApp->NetIsClient()) return;
+	const int aStrength = GetPvPSupportStrength(PVP_SUPPORT_ZOMBIES);
+	if (!aStrength) return;
+	theZombie->mBodyHealth = PvPSpawnHealth(theZombie->mBodyHealth, aStrength);
+	theZombie->mHelmHealth = PvPSpawnHealth(theZombie->mHelmHealth, aStrength);
+	theZombie->mShieldHealth = PvPSpawnHealth(theZombie->mShieldHealth, aStrength);
+	theZombie->mFlyingHealth = PvPSpawnHealth(theZombie->mFlyingHealth, aStrength);
 }
 
 void Board::UpdateEndlessWeather()
@@ -8496,12 +8717,12 @@ void Board::DrawProgressMeter(Graphics* g)
 	// @Patoke: updated these
 	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_BEGHOULED || mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_BEGHOULED_TWIST)
 	{
-		SexyString aMatchStr = StrFormat(_S("%d/%d %s"), mChallenge->mChallengeScore, 75, TodStringTranslate(_S("[MATCHES]")).c_str());
+		SexyString aMatchStr = StrFormat(_S("%d/%d %s"), mChallenge->mChallengeScore, mChallenge->GetDifficultyGoal(), TodStringTranslate(_S("[MATCHES]")).c_str());
 		TodDrawString(g, aMatchStr, aPosX, 589, Sexy::FONT_DWARVENTODCRAFT12, aColor, DrawStringJustification::DS_ALIGN_CENTER);
 	}
 	else if (mApp->IsSquirrelLevel())
 	{
-		SexyString aMatchStr = StrFormat(_S("%d/%d %s"), mChallenge->mChallengeScore, 7, TodStringTranslate(_S("[SQUIRRELS]")).c_str());
+		SexyString aMatchStr = StrFormat(_S("%d/%d %s"), mChallenge->mChallengeScore, mChallenge->GetDifficultyGoal(), TodStringTranslate(_S("[SQUIRRELS]")).c_str());
 		TodDrawString(g, aMatchStr, aPosX, 589, Sexy::FONT_DWARVENTODCRAFT12, aColor, DrawStringJustification::DS_ALIGN_CENTER);
 	}
 	else if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_SLOT_MACHINE)
@@ -8512,8 +8733,8 @@ void Board::DrawProgressMeter(Graphics* g)
 	}
 	else if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZOMBIQUARIUM)
 	{
-		int aSunMoney = ClampInt(mSunMoney, 0, 1000);
-		SexyString aMatchStr = StrFormat(_S("%d/%d %s"), aSunMoney, 1000, TodStringTranslate(_S("[SUN]")).c_str());
+		int aSunMoney = ClampInt(mSunMoney, 0, mChallenge->GetDifficultyGoal());
+		SexyString aMatchStr = StrFormat(_S("%d/%d %s"), aSunMoney, mChallenge->GetDifficultyGoal(), TodStringTranslate(_S("[SUN]")).c_str());
 		TodDrawString(g, aMatchStr, aPosX, 589, Sexy::FONT_DWARVENTODCRAFT12, aColor, DrawStringJustification::DS_ALIGN_CENTER);
 	}
 #ifdef _DS_MINIGAMES
@@ -12669,6 +12890,8 @@ bool Board::PlantUsesAcceleratedPricing(SeedType theSeedType)
 int Board::GetCurrentPlantCost(SeedType theSeedType, SeedType theImitaterType)
 {
 	int aCost = Plant::GetCost(theSeedType, theImitaterType);
+	if (theSeedType == SEED_ZOMBIQUARIUM_TROPHY && mApp->mGameMode == GAMEMODE_CHALLENGE_ZOMBIQUARIUM)
+		aCost = mChallenge->GetDifficultyGoal();
 	if (PlantUsesAcceleratedPricing(theSeedType))
 	{
 		aCost += CountPlantByType(theSeedType) * 50;

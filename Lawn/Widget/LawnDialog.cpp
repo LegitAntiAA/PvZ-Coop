@@ -2,6 +2,7 @@
 #include "LawnDialog.h"
 #include "GameButton.h"
 #include "../../LawnApp.h"
+#include "../../SexyAppFramework/WidgetManager.h"
 #include "../LawnCommon.h"
 #include "../../Resources.h"
 #include "ChallengeScreen.h"
@@ -490,6 +491,24 @@ GameOverDialog::GameOverDialog(const SexyString& theMessage, bool theShowChallen
 GameOverDialog::~GameOverDialog()
 {
     delete mMenuButton;
+}
+
+void GameOverDialog::Update()
+{
+	LawnDialog::Update();
+	if (mWidgetManager && mWidgetManager->mBaseModalWidget == this && mWidgetManager->mFocusWidget != this)
+		mWidgetManager->SetFocus(this);
+}
+
+void GameOverDialog::KeyDown(KeyCode theKey)
+{
+	if (mApp->NetIsClient()) return;
+	if (theKey == KEYCODE_RETURN || theKey == KEYCODE_SPACE || theKey == 'y' || theKey == 'Y')
+	{
+		if (mLawnYesButton && !mLawnYesButton->mDisabled) ButtonDepress(Dialog::ID_FOOTER);
+	}
+	else if (theKey == KEYCODE_ESCAPE && mMenuButton && !mMenuButton->mDisabled)
+		ButtonDepress(1);
 }
 
 //0x457E50

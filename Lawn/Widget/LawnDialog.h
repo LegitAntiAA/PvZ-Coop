@@ -82,6 +82,8 @@ public:
 	GameOverDialog(const SexyString& theMessage, bool theShowChallengeName);
 	virtual ~GameOverDialog();
 
+	virtual void			Update() override;
+	virtual void			KeyDown(KeyCode theKey) override;
 	virtual void			ButtonDepress(int theId);
 	virtual void			AddedToManager(WidgetManager* theWidgetManager);
 	virtual void			RemovedFromManager(WidgetManager* theWidgetManager);

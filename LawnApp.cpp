@@ -72,6 +72,11 @@ namespace LawnNet
 {
 	bool NetSpectatorSmokeRunBaseline(LawnApp* theApp);
 	bool NetSmokeUpdateNativeUi(LawnApp* theApp);
+	bool NetSmokeUpdateMystery(LawnApp* theApp);
+	bool NetSmokeUpdateDifficulty(LawnApp* theApp);
+	bool NetSmokeUpdateMysteryObserver(LawnApp* theApp);
+	bool NetSmokeMysteryObserverHostLost(LawnApp* theApp, const std::string& theReason);
+	bool NetSmokeUpdateGameOver(LawnApp* theApp);
 	bool NetSmokeNativeUiAllowsStart(LawnApp* theApp, uint8_t theMode, int32_t theLevel);
 	bool NetSmokeUpdateAvatarEditor(LawnApp* theApp);
 	bool NetSmokeAvatarBeforeConnect(LawnApp* theApp);
@@ -1400,6 +1405,7 @@ void LawnApp::KillBoard()
 	}
 
 	FinishModelessDialogs();
+	KillDialog(Dialogs::DIALOG_GAME_OVER);
 	KillSeedChooserScreen();
 	if (mBoard)
 	{
@@ -1649,6 +1655,21 @@ void LawnApp::StartPlaying()
 {
 	if (NetIsClient() && mBoard)
 		mBoard->NetUpdateIntroPresentation(true);
+	if (mNetManager && mNetManager->IsHosting() && mBoard)
+	{
+		// No hidden plant type exists during picking or the intro. Resolve only
+		// at this gameplay boundary while the chooser's eligibility rules live.
+		mGameScene = GameScenes::SCENE_PLAYING;
+		if (!mBoard->ResolveMysteryPackets())
+		{
+			mGameScene = GameScenes::SCENE_LEVEL_INTRO;
+			mNetManager->ResetReadyState();
+			if (mBoard->mCutScene) mBoard->mCutScene->RestartSeedChooser();
+			mNetManager->SendSystemChat("Random plants could not be prepared. Please choose again.");
+			LawnNet::NetTrace("mystery resolution blocked: insufficient eligible cards");
+			return;
+		}
+	}
 	KillSeedChooserScreen();
 	if (NetIsClient())
 	{
@@ -1664,7 +1685,7 @@ void LawnApp::StartPlaying()
 		LawnNet::NetTrace("host entering gameplay; broadcasting barrier mode=%d level=%d", (int)mGameMode, mBoard ? mBoard->mLevel : -1);
 		mNetManager->AdvanceInputPhase(LawnNet::NETINPUT_PLAYING, "START_PLAYING");
 		LawnNet::NetBuffer aCameraBootstrap;
-		mBoard->NetEncodeCameraBootstrap(aCameraBootstrap);
+		mBoard->NetEncodeStartPlaying(aCameraBootstrap);
 		mNetManager->BroadcastMessage(LawnNet::NETMSG_START_PLAYING, aCameraBootstrap);
 		mBoard->StartLevel();
 	}
@@ -1911,6 +1932,7 @@ void LawnApp::ShowSeedChooserScreen()
 		if (mNetManager->IsHosting())
 		{
 			mNetManager->mRemotePicks.clear();
+			mNetManager->mChooserMysteryMask = 0;
 		}
 
 		int aBankCount = mBoard ? mBoard->GetNumSeedsInBank() : 10;
@@ -2007,21 +2029,17 @@ void LawnApp::KillSeedChooserScreen()
 
 void LawnApp::EndLevel()
 {
-	if (NetIsHost()) mNetManager->PromoteSpectatorsAtLevelBoundary("END_LEVEL");
+	if (NetIsClient()) return;
+
+	// Retry uses the same authoritative start as every other level boundary.
+	// Capture the actual replay level before NewGame disposes the old board.
+	const GameMode aMode = mGameMode;
+	const int aLevel = mBoard ? mBoard->mLevel : (mPlayerInfo ? mPlayerInfo->mLevel : 1);
 	KillBoard();
-	if (IsAdventureMode())
-	{
-		NewGame();
-	}
-
-	mFirstTimeGameSelector = true;
-
-	MakeNewBoard();
-	mBoard->InitLevel();
-	mBoardResult = BoardResult::BOARDRESULT_NONE;
-	mGameScene = GameScenes::SCENE_LEVEL_INTRO;
-	ShowSeedChooserScreen();
-	mBoard->mCutScene->StartLevelIntro();
+	if (aMode == GAMEMODE_ADVENTURE)
+		PreNewGame(aMode, false, aLevel);
+	else
+		PreNewGame(aMode, false);
 }
 
 //0x44FEB0
@@ -5847,6 +5865,7 @@ void LawnApp::CoopSmokeStartLifecycle()
 		{ CoopSmokeFail("replay chooser fixture requires full-intro isolated Adventure8Soak"); return; }
 		// Native Adventure replay asks Dave to choose three locked cards.
 		mPlayerInfo->mFinishedAdventure = 1;
+		mPlayerInfo->mPurchases[StoreItem::STORE_ITEM_PACKET_UPGRADE] = 4;
 	}
 
 	bool aStarted = false;
@@ -5989,6 +6008,14 @@ void LawnApp::CoopSmokeUpdate()
 	if (!mCoopSmokeLifecycleStarted || !mNetManager)
 		return;
 	if (LawnNet::NetSmokeUpdateAvatarEditor(this))
+		return;
+	if (LawnNet::NetSmokeUpdateDifficulty(this))
+		return;
+	if (LawnNet::NetSmokeUpdateMysteryObserver(this))
+		return;
+	if (LawnNet::NetSmokeUpdateGameOver(this))
+		return;
+	if (LawnNet::NetSmokeUpdateMystery(this))
 		return;
 	if (LawnNet::NetSmokeUpdateNativeUi(this))
 		return;
@@ -6349,7 +6376,8 @@ void LawnApp::NetOnHostLost()
 	if (!mNetManager)
 		return;
 	const std::string aDisconnectReason = mNetManager->GetDisconnectReason();
-	if (CoopSmokeActive() && !CoopSmokeExpectedSpectatorKick(aDisconnectReason))
+	const bool aMysteryKickExpected = LawnNet::NetSmokeMysteryObserverHostLost(this, aDisconnectReason);
+	if (CoopSmokeActive() && !aMysteryKickExpected && !CoopSmokeExpectedSpectatorKick(aDisconnectReason))
 		CoopSmokeFail("connection to smoke host was lost");
 
 	// Tear down the board while NetIsClient() and the profile-save guard still
@@ -6449,8 +6477,11 @@ void LawnApp::NetShowOnlineBrowser()
 
 void LawnApp::NetShowPvpTeamSelection(int theLevel)
 {
-	if (!mNetManager || !mNetManager->IsActive() || NetIsChoosingPvpTeams() || mBoard)
+	if (!mNetManager || !mNetManager->IsActive() || NetIsChoosingPvpTeams())
 		return;
+	// A rematch can enter here directly from a lost board on either peer.
+	KillBoard();
+	mGameScene = GameScenes::SCENE_MENU;
 	mNetPendingPvpLevel = theLevel;
 	if (NetIsHost())
 	{
@@ -6875,6 +6906,9 @@ bool LawnApp::NetHandleChatKey(int theKey)
 	}
 	if (!mNetChatTyping)
 	{
+		// Native modal actions take keyboard priority over opening chat.
+		if (mWidgetManager && mWidgetManager->mBaseModalWidget)
+			return false;
 		if (theKey != KeyCode::KEYCODE_RETURN)
 			return false;
 		mNetChatTyping = true;
