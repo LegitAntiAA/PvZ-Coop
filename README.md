@@ -40,7 +40,7 @@ Difficulty also applies to playable mini-games and custom modes: wave-based game
 
 - **Endless / Endless T / Endless S / Endless ST:** endless stages; T adds actual day/night gameplay and weather, S adds seed repicking every ten waves. Endless retains its own progressive zombie-health scaling.
 - **Tower Defense:** zombies follow a generated road; the roster includes strong enemies and Gargantuars.
-- **PvP:** select plants or zombies after opening the mode, before the level loads. Every participant confirms readiness. Zombies use brains and a compact zombie palette; the opposing plant packets and sun balance are hidden. Plant tools are restricted to the plant team. Plants win at 100 zombie kills; zombies win by reaching the house objective.
+- **PvP:** select plants or zombies after opening the mode, before the level loads. Every participant confirms readiness. Zombies see a waiting screen during plant selection, then their own compact zombie palette and brain balance. They start with 25 shared brains and receive 25 every 10 seconds; plants retain the native 50 starting sun. Plant tools are restricted to the plant team. Bungees target the clicked cell, and Diggers surface and walk back without scoring a house entry. Plants win at 100 zombie kills; zombies win by reaching the house objective.
 
 ## Configuration
 
@@ -69,7 +69,7 @@ Default window size is 1066×600; set both dimensions for another size. The defa
 
 ## Verification and roadmap
 
-The [delivery board](docs/agent/WORKBOARD.md) records the remaining regression checks. Native transport checks passed 22/22 and signaling checks passed 9/9. A two-process game through the public Cloudflare service passed on one PC; connectivity between different external networks remains unverified. [Smoke documentation](tests/CoopSmoke/README.md) describes the test tools.
+The [delivery board](docs/agent/WORKBOARD.md) records the checks and remaining work. Native transport checks passed 30/30 and signaling checks passed 9/9. A two-process game through the public Cloudflare service passed on one PC; connectivity between different external networks remains unverified. Connection errors explain the failed stage and known cause, with possible NAT/firewall restrictions identified as possibilities. [Smoke documentation](tests/CoopSmoke/README.md) describes the test tools.
 
 - [x] Host-authoritative TCP, snapshots, ordered input and adaptive snapshot rate
 - [x] Shared seed selection, relative player colors, custom modes
@@ -119,13 +119,13 @@ The [delivery board](docs/agent/WORKBOARD.md) records the remaining regression c
 
 - **Endless / Endless T / Endless S / Endless ST:** бесконечные этапы; T — настоящая смена дня/ночи и погода, S — перевыбор растений каждые десять волн. У Endless сохраняется собственное постепенное усиление HP зомби.
 - **Tower Defense:** движение по случайной дороге; усиленный состав врагов, включая гаргантюа.
-- **PvP:** команда выбирается после открытия режима, перед загрузкой уровня. Зомби видят мозги и компактную панель зомби; пакеты растений и количество солнца противника скрыты. Инструменты растений недоступны команде зомби. Цель растений — 100 убийств, цель зомби — добраться до дома.
+- **PvP:** команда выбирается после открытия режима, перед загрузкой уровня. Во время выбора растений зомби видят экран ожидания, затем — только собственную панель и мозги. Старт — 25 общих мозгов, пассивный доход — 25 каждые 10 секунд; у растений остаётся штатный старт с 50 солнца. Инструменты растений недоступны зомби. Тарзанка выбирает нажатую клетку, шахтёр вылезает и идёт обратно без ложного прохода в дом. Цель растений — 100 убийств, цель зомби — добраться до дома.
 
 Параметры `coop.ini` приведены выше. По умолчанию файл находится рядом с EXE, независимо от рабочей папки запуска. Размер окна, цвета/тонировка кооператива и личный зомботар сохраняются после перезапуска; увеличенное окно настроек показывает предпросмотр. `unlock_all_minigames=1` открывает мини-игры, дополнительные режимы и кнопки меню; эффективная настройка хоста передаётся клиентам. Инструкция сборки и расположение результата также приведены выше.
 
 ### Проверки и планы
 
-[Доска оставшихся задач и фактических проверок](docs/agent/WORKBOARD.md). Нативные проверки транспорта прошли 22/22, проверки сигналинга — 9/9. Двухпроцессная игра через публичный Cloudflare-сервис проверена на одном ПК; соединение между разными внешними сетями ещё не проверялось.
+[Доска задач и фактических проверок](docs/agent/WORKBOARD.md). Нативные проверки транспорта прошли 30/30, проверки сигналинга — 9/9. Двухпроцессная игра через публичный Cloudflare-сервис проверена на одном ПК; соединение между разными внешними сетями ещё не проверялось. Ошибки подключения объясняют этап и известную причину; ограничения NAT или брандмауэра обозначаются как возможная причина, если точный диагноз недоступен.
 
 Нативный браузер комнат в стиле PvZ, обновлённый интерфейс мода и предпросмотр настроек уже реализованы. Пока **не реализуются**, только запланированы: Lua modding API, дополнительные мини-игры и новые Adventure-режимы.
 
