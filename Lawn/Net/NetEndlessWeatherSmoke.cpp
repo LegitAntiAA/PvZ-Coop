@@ -16,6 +16,7 @@
 #include "../../SexyAppFramework/BassMusicInterface.h"
 #include "../../SexyAppFramework/BassLoader.h"
 #include "../../Resources.h"
+#include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <sstream>
@@ -26,8 +27,10 @@ namespace
 struct WeatherSmoke
 {
     int stage = 0, picked = 0, plantStep = 0, plantType = -1, sampleBucket = -1;
+    int diagnosticPicked = -1;
     bool prepared = false, setup = false, captured = false, frozen = false, resumeProbed = false;
     uint32_t lastSend = 0, observed = 0, stable = 0, plantTick = 0, frozenHash = 0;
+    uint32_t diagnosticTick = 0, stageDiagnosticTick = 0, chooserProgressTick = 0, plantDiagnosticTick = 0, plantStarted = 0;
     double userVolume = 0;
     std::shared_ptr<SDL_Surface> frame;
 };
@@ -95,7 +98,7 @@ bool PlantWithSDL(LawnApp* a, SeedType type, int col, int row)
     Board* b = a->mBoard;
     if (At(b, type, col, row))
     { if (s.plantType == (int)type) { s.plantType = -1; s.plantStep = 0; } return true; }
-    if (s.plantType != (int)type) { s.plantType = (int)type; s.plantStep = 0; }
+    if (s.plantType != (int)type) { s.plantType = (int)type; s.plantStep = 0; s.plantStarted = GetTickCount(); }
     SeedPacket* packet = nullptr;
     for (int i = 0; i < b->mSeedBank->mNumPackets; ++i)
         if (b->mSeedBank->mSeedPackets[i].mPacketType == type) packet = &b->mSeedBank->mSeedPackets[i];
@@ -104,13 +107,35 @@ bool PlantWithSDL(LawnApp* a, SeedType type, int col, int row)
     const int px = ox + b->mSeedBank->mX + packet->mX + packet->mOffsetX + packet->mWidth / 2;
     const int py = oy + b->mSeedBank->mY + packet->mY + packet->mHeight / 2;
     const int lx = ox + b->GridToPixelX(col, row) + 40, ly = oy + b->GridToPixelY(col, row) + 45;
+    if (!s.plantDiagnosticTick || GetTickCount() - s.plantDiagnosticTick >= 1000U)
+    {
+        s.plantDiagnosticTick = GetTickCount();
+        Widget* top = a->mWidgetManager->GetWidgetAt(px, py, nullptr, nullptr);
+        NetTrace("SMOKE_WEATHER_PLANT stage=%d type=%d step=%d packet=%u owner=%u active=%d refreshing=%d refresh=%d/%d canPick=%d paused=%d remotePaused=%d dialogs=%d sun=%d cursor=%d:%d index=%d card=(%d,%d) lawn=(%d,%d) mouse=(%d,%d) topCardBoard=%d",
+            s.stage, (int)type, s.plantStep, packet->mNetId, packet->mNetOwnerSlot, packet->mActive ? 1 : 0,
+            packet->mRefreshing ? 1 : 0, packet->mRefreshCounter, packet->mRefreshTime, packet->CanPickUp() ? 1 : 0,
+            b->mPaused ? 1 : 0, a->mNetManager->mRemotePaused ? 1 : 0, a->GetDialogCount(), b->mSunMoney,
+            (int)b->mCursorObject->mCursorType, (int)b->mCursorObject->mType, b->mCursorObject->mSeedBankIndex,
+            px, py, lx, ly, a->mWidgetManager->mLastMouseX, a->mWidgetManager->mLastMouseY,
+            top == b ? 1 : 0);
+    }
+    if (GetTickCount() - s.plantStarted >= 20000U)
+    {
+        a->CoopSmokeCaptureFrame("weather_plant_stall");
+        a->CoopSmokeFail("weather SDL plant made no progress for 20 seconds; inspect plant diagnostics"); return false;
+    }
+    // Initial stock refresh is longer for Plantern. A rejected inactive-card
+    // click must not turn into an infinite wait for a held cursor.
+    if (s.plantStep == 0 && !packet->CanPickUp()) return false;
     if (s.plantStep == 0) { Motion(a, px, py); s.plantTick = GetTickCount(); s.plantStep = 1; }
     else if (s.plantStep == 1 && GetTickCount() - s.plantTick >= 150U)
-    { if (Click(a, px, py)) s.plantStep = 2; }
+    { if (packet->CanPickUp() && Click(a, px, py)) { s.plantStep = 2; s.plantTick = GetTickCount(); } }
     else if (s.plantStep == 2 && b->mCursorObject->mCursorType == CURSOR_TYPE_PLANT_FROM_BANK && b->mCursorObject->mType == type)
     { Motion(a, lx, ly); s.plantTick = GetTickCount(); s.plantStep = 3; }
     else if (s.plantStep == 3 && GetTickCount() - s.plantTick >= 150U)
     { if (Click(a, lx, ly)) s.plantStep = 4; }
+    else if (s.plantStep == 2 && b->mCursorObject->mCursorType == CURSOR_TYPE_NORMAL &&
+        packet->CanPickUp() && GetTickCount() - s.plantTick >= 2000U) s.plantStep = 0;
     return false;
 }
 
@@ -174,11 +199,46 @@ bool MusicProbe(LawnApp* a)
 int Luma(LawnApp* a)
 {
     if (!a->mCoopSmokeFrame) return -1;
-    Uint8 r = 0, g = 0, b = 0, alpha = 0;
-    const int x = a->mDDInterface->mWideScreenOffsetX + 550;
-    const int y = a->mDDInterface->mWideScreenOffsetY + 150;
-    if (!SDL_ReadSurfacePixel(a->mCoopSmokeFrame.get(), x, y, &r, &g, &b, &alpha)) return -1;
-    return ((int)r + g + b) / 3;
+    // Suns remain visible above native storm darkness. A single bright coin
+    // cannot prove that the underlying field has entered a flash window.
+    int samples[9], index = 0;
+    for (int x : {450, 550, 650})
+        for (int y : {130, 230, 480})
+        {
+            Uint8 r = 0, g = 0, b = 0, alpha = 0;
+            if (!SDL_ReadSurfacePixel(a->mCoopSmokeFrame.get(), x + a->mDDInterface->mWideScreenOffsetX,
+                y + a->mDDInterface->mWideScreenOffsetY, &r, &g, &b, &alpha)) return -1;
+            samples[index++] = ((int)r + g + b) / 3;
+        }
+    std::sort(samples, samples + 9);
+    return samples[4];
+}
+
+bool FlashWindow(Board* b)
+{
+    return b->mNetStormTimer &&
+        (((b->mNetStormFlashKind == 1 || b->mNetStormFlashKind == 2) && b->mNetStormFlashCounter < 300) ||
+            (b->mNetStormFlashKind == 3 && b->mNetStormFlashCounter < 150));
+}
+
+int PlanternArea(Board* b)
+{
+    int count = 0;
+    for (int x = 5; x <= 7; ++x)
+        for (int y = 1; y <= 4; ++y)
+            if (b->mGridCelFog[x][y] == 0) ++count;
+    return count;
+}
+
+int OutsideFog(Board* b)
+{
+    int count = 0;
+    for (int x = 5; x <= 7; ++x)
+        for (int y : {0, 5})
+            if (b->mGridCelFog[x][y] >= 200) ++count;
+    for (int y = 1; y <= 4; ++y)
+        if (b->mGridCelFog[8][y] >= 200) ++count;
+    return count;
 }
 
 bool Checkpoint(LawnApp* a, const char* name, bool hostReady)
@@ -205,18 +265,21 @@ bool Checkpoint(LawnApp* a, const char* name, bool hostReady)
         }
         if (!s.frozenHash || !b->mPaused || WeatherHash(b) != s.frozenHash) return false;
     }
+    if ((std::string(name) == "plantern" || std::string(name) == "fog_return") &&
+        !Check(a, PlanternArea(b) == 12 && OutsideFog(b) == 10, "Plantern did not clear its logical 3x3 lawn area while preserving exterior fog")) return false;
     if (!s.observed) { s.observed = GetTickCount(); s.frame = a->mCoopSmokeFrame; return false; }
     if (GetTickCount() - s.observed < 250U || a->mCoopSmokeFrame == s.frame) return false;
     if (!s.captured)
     {
         if (!MusicProbe(a) || !Check(a, a->CoopSmokeCaptureFrame((std::string("weather_") + name).c_str()), "weather renderer capture failed")) return false;
         if (std::string(name) == "storm_dark" && !Check(a, Luma(a) >= 0 && Luma(a) <= 3, "native storm did not black out the actual field")) return false;
-        if (std::string(name) == "storm_flash" && !Check(a, Luma(a) > 15, "native storm flash did not reveal the actual field")) return false;
+        if (std::string(name) == "storm_flash" && !Check(a, FlashWindow(b) && Luma(a) > 15, "native storm flash did not reveal the actual field")) return false;
         s.captured = true;
-        NetTrace("SMOKE_WEATHER_CHECK role=%s step=%s hash=%u blend=%u visual=%.1f fog=%u storm=%u hole=%d far=%d wind=%d offset=%.2f luma=%d capture=1 native=1",
+        NetTrace("SMOKE_WEATHER_CHECK role=%s step=%s hash=%u blend=%u visual=%.1f fog=%u storm=%u kind=%u counter=%u hole=%d far=%d lawnArea=3x3 clearFogSamples=%d outsideFog=%d wind=%d offset=%.2f luma=%d probe=median9 mute=%d capture=1 native=1",
             host ? "host" : "client", name, s.frozenHash, b->mNetNightBlend, b->mNetVisualNightBlend,
-            b->mNetFogTimer, b->mNetStormTimer, b->mGridCelFog[6][2], b->mGridCelFog[8][5],
-            b->mFogBlownCountDown, b->mFogOffset, Luma(a));
+            b->mNetFogTimer, b->mNetStormTimer, b->mNetStormFlashKind, b->mNetStormFlashCounter,
+            b->mGridCelFog[6][2], b->mGridCelFog[8][5], PlanternArea(b), OutsideFog(b),
+            b->mFogBlownCountDown, b->mFogOffset, Luma(a), a->mMuteSoundsForCutscene ? 1 : 0);
     }
     if (host)
     {
@@ -254,10 +317,22 @@ bool NetSmokeUpdateEndlessWeather(LawnApp* a)
     if (a->mCoopSmokeResultWritten) return true;
     const bool st = !strcmp(mode, "ST"), host = a->mCoopSmokeManifest.IsHost();
     if (!Check(a, st || !strcmp(mode, "T"), "unknown weather smoke mode")) return true;
+    if (!Check(a, a->mCoopSmokeManifest.mScenario == (st ? NETSMOKE_SCENARIO_ENDLESS_ST : NETSMOKE_SCENARIO_ENDLESS_T) &&
+        !a->mCoopSmokeManifest.mSkipIntro, "weather fixture requires the matching full-intro deterministic T/ST manifest")) return true;
     if (!a->mNetManager || !a->mPlayerInfo || a->mNetManager->GetPlayerCount() != 2) return true;
+    if (!s.stageDiagnosticTick || GetTickCount() - s.stageDiagnosticTick >= 1000U)
+    {
+        s.stageDiagnosticTick = GetTickCount();
+        SeedChooserScreen* c = a->mSeedChooserScreen;
+        NetTrace("SMOKE_WEATHER_STAGE role=%s stage=%d prepared=%d scene=%d board=%p selector=%p chooser=%p mouse=%d local=%d quota=%d flight=%d ready=%d",
+            host ? "host" : "client", s.stage, s.prepared ? 1 : 0, (int)a->mGameScene,
+            (void*)a->mBoard, (void*)a->mGameSelector, (void*)c, c && c->mMouseVisible ? 1 : 0,
+            c ? c->CoopGetLocalQuotaPickCount() : -1, c ? c->mCoopPicksPerPlayer : -1,
+            c ? c->mSeedsInFlight : -1, a->mNetManager->IsMyReady() ? 1 : 0);
+    }
     if (s.stage == 0)
     {
-        if (!a->mGameSelector || a->mGameSelector->mSelectorState != SELECTOR_IDLE) return true;
+        if (host && (!a->mGameSelector || a->mGameSelector->mSelectorState != SELECTOR_IDLE)) return true;
         if (host && !s.prepared)
         {
             a->mPlayerInfo->SetLevel(50); a->mPlayerInfo->mFinishedAdventure = 1;
@@ -266,8 +341,8 @@ bool NetSmokeUpdateEndlessWeather(LawnApp* a)
         }
         if (a->mPlayerInfo->mLevel != 50 || a->mPlayerInfo->mFinishedAdventure != 1 ||
             a->mPlayerInfo->mPurchases[STORE_ITEM_PACKET_UPGRADE] != 4) return true;
-        if (!host) Send(a, "WEATHER_PROFILE_READY");
-        if (!Chat(a, "WEATHER_PROFILE_READY", 1)) return true;
+        if (!host) { s.prepared = true; Send(a, "WEATHER_PROFILE_READY"); }
+        if (host && !Chat(a, "WEATHER_PROFILE_READY", 1)) return true;
         a->mCoopSmokeGameStarted = true; a->mCoopSmokePeerReady = true; s.userVolume = a->mMusicVolume;
         Next();
         if (host) { a->KillGameSelector(); a->PreNewGame(st ? GAMEMODE_COOP_ENDLESS_ST : GAMEMODE_COOP_ENDLESS_T, false, 1); }
@@ -278,8 +353,33 @@ bool NetSmokeUpdateEndlessWeather(LawnApp* a)
     if (s.stage == 1)
     {
         SeedChooserScreen* c = a->mSeedChooserScreen;
+        if (!host && !a->mBoard && !c) Send(a, "WEATHER_PROFILE_READY");
         if (c && c->mMouseVisible)
         {
+            if (s.diagnosticPicked != s.picked)
+            { s.diagnosticPicked = s.picked; s.chooserProgressTick = GetTickCount(); }
+            if (s.picked < 5 && (!s.diagnosticTick || GetTickCount() - s.diagnosticTick >= 1000U))
+            {
+                s.diagnosticTick = GetTickCount();
+                const ChosenSeed& seed = c->mChosenSeeds[desired[host ? 0 : 1][s.picked]];
+                const int x = c->mX + seed.mX + 25, y = c->mY + seed.mY + 35;
+                const Point origin = c->GetAbsPos();
+                Widget* top = a->mWidgetManager->GetWidgetAt(x, y, nullptr, nullptr);
+                const int hit = c->SeedHitTest(x - origin.mX + a->mDDInterface->mWideScreenOffsetX,
+                    y - origin.mY + a->mDDInterface->mWideScreenOffsetY);
+                NetTrace("SMOKE_WEATHER_CHOOSER role=%s picked=%d desired=%d state=%d flight=%d bank=%d packets=%d local=%d quota=%d canReady=%d chooser=(%d,%d) origin=(%d,%d) seed=(%d,%d) target=(%d,%d) mouse=(%d,%d) hit=%d topChooser=%d overChooser=%d down=%d rows7=%d scroll=%d",
+                    host ? "host" : "client", s.picked, (int)seed.mSeedType, (int)seed.mSeedState, c->mSeedsInFlight,
+                    c->mSeedsInBank, a->mBoard->mSeedBank->mNumPackets, c->CoopGetLocalQuotaPickCount(), c->mCoopPicksPerPlayer,
+                    c->CoopCanReady() ? 1 : 0, c->mX, c->mY, origin.mX, origin.mY, seed.mX, seed.mY, x, y,
+                    a->mWidgetManager->mLastMouseX, a->mWidgetManager->mLastMouseY, hit, top == c ? 1 : 0,
+                    a->mWidgetManager->mOverWidget == c ? 1 : 0, a->mWidgetManager->mDownButtons,
+                    c->Has7Rows() ? 1 : 0, c->mScrollbar->mScrollValue);
+            }
+            if (s.picked < 5 && GetTickCount() - s.chooserProgressTick >= 20000U)
+            {
+                a->CoopSmokeCaptureFrame("weather_chooser_stall");
+                a->CoopSmokeFail("weather SDL chooser made no pick progress for 20 seconds; inspect chooser diagnostics"); return true;
+            }
             if (s.picked < 5)
             {
                 ChosenSeed& seed = c->mChosenSeeds[desired[host ? 0 : 1][s.picked]];
@@ -300,6 +400,9 @@ bool NetSmokeUpdateEndlessWeather(LawnApp* a)
         NetTrace("SMOKE_WEATHER_MODE role=%s actual=%s sdlChooser=1 quota=5 native=1", host ? "host" : "client", mode);
         Next();
     }
+    // The host's ordered menu action can remove the client board in the same
+    // receive batch as its final acknowledgment echo. Commit that proof first.
+    if (!host && s.stage == 12 && s.captured && Chat(a, "WA_storm_flash", 1)) Next();
     if (s.stage == 13)
     {
         if (!s.setup) { a->KillBoard(); a->ShowGameSelector(); s.setup = true; s.observed = GetTickCount(); return true; }
@@ -368,7 +471,7 @@ bool NetSmokeUpdateEndlessWeather(LawnApp* a)
     else if (s.stage == 8)
     {
         name = "plantern";
-        if (host) ready = PlantWithSDL(a, SEED_PLANTERN, 6, 2) && b->mGridCelFog[6][2] == 0 && b->mGridCelFog[8][5] >= 200;
+        if (host) ready = PlantWithSDL(a, SEED_PLANTERN, 6, 2) && PlanternArea(b) == 12 && OutsideFog(b) == 10;
     }
     else if (s.stage == 9)
     {
@@ -387,7 +490,7 @@ bool NetSmokeUpdateEndlessWeather(LawnApp* a)
             if (!s.setup) { b->mNetFogTimer = 0; b->mFogBlownCountDown = 2; s.setup = true; return true; }
             if (b->mFogBlownCountDown || b->mFogOffset != 0) return true;
             if (!b->mNetFogTimer) { b->mNetFogTimer = 3000; NetTrace("SMOKE_WEATHER_WIND inactiveExpiry=1 countdownSetup=2 offset=0 native=1"); }
-            ready = b->mGridCelFog[8][5] >= 200 && b->mGridCelFog[6][2] == 0;
+            ready = PlanternArea(b) == 12 && OutsideFog(b) == 10;
         }
     }
     else if (s.stage == 11)
@@ -417,7 +520,7 @@ bool NetSmokeUpdateEndlessWeather(LawnApp* a)
                     "native nonzero-kind/zero-counter boundary did not schedule the next bounded flash")) return true;
                 NetTrace("SMOKE_WEATHER_FLASH_BOUNDARY counterSetup=0 kindNonzero=1 nativeRescheduled=1");
             }
-            ready = Stable(Luma(a) > 15 && b->mNetStormFlashCounter < 300);
+            ready = Stable(FlashWindow(b) && Luma(a) > 15);
         }
     }
     if (*name && Checkpoint(a, name, ready)) Next();

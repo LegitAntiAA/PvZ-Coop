@@ -5,18 +5,19 @@ Source: `REQUEST.txt` (user's complete list). Root owns integration and evidence
 | ID | Scope and acceptance | Owner | Status |
 |---|---|---|---|
 | BASE-00 | Preserve initial four dirty files; ReleaseGOTY Win32 and existing protocol suite pass | Root | DONE |
-| SYNC-01 | Host presentation mirrored: limbs, jack explosion, intro entities/sod, reward rays, snail, tutorial, shovel/music; first entity positions authoritative | entity_sync | IN_PROGRESS |
-| UI-01 | Replace/close screens, correct reward/profile/name/unlocks, store tabs; native PvZ browser/lobby; expanded preview; actual settings restart persistence | ui_progression + Root | IN_PROGRESS |
-| PICK-01 | Native top selected cards, fair total quotas with fixed cards, all-player ready and counts | ui_progression + Root | IN_PROGRESS |
-| MODES-01 | Team-private compact PvP HUD/input, brains, lane/cursor, 100-kill goal; real Endless night; hard TD | modes_pvp | IN_TESTING (source complete) |
-| NET-01 | Unicode draft/space/backspace, system join/leave/kick chat; host kick and fair seed reassignment; late spectators with all communication and level-boundary promotion | Root + entity_sync | IN_PROGRESS |
-| SIGNAL-01 | Middle-button ping with sound/500ms cooldown; Ctrl strokes fade after8s; Alt packet ping/name/cooldown; semantic packet-relative cursors | Root | IN_PROGRESS |
-| PVP-02 | Teams chosen after launching PvP, before loading board; all participants ready | ui_progression + Root | IN_PROGRESS |
-| DIFF-01 | Host lobby difficulty1..10; count/wave/type scaling, HP unchanged, default1 stock | modes_pvp + Root | IN_PROGRESS |
-| AVATAR-01 | Own/client Zombatars occasionally spawn and appearances mirror | entity_sync + Root | IN_PROGRESS |
-| ONLINE-01 | Native WebRTC/STUN, version-filtered rooms/name/password/capacity; free Cloudflare signaling and setup instructions | modes_pvp + Root | IN_PROGRESS |
-| DOC-01 | Accurate bilingual README/roadmap and operator-only Cloudflare guide; Lua/more games/adventure remain planned; UI/UX requested now | Root + modes_pvp | IN_PROGRESS |
-| VERIFY-01 | Integrated build, protocol regressions, background two-process game runs and game-only renderer captures; independent diff review | Root | IN_PROGRESS |
+| SYNC-01 | Host presentation mirrored: limbs, jack explosion, intro entities/sod, reward rays, snail, tutorial, shovel/music; first entity positions authoritative | entity_sync | DONE (core8b acceptance below) |
+| UI-01 | Replace/close screens, correct reward/profile/name/unlocks, store tabs; native PvZ browser/lobby; expanded preview; actual settings restart persistence | ui_progression + Root | DONE (core8b acceptance below) |
+| PICK-01 | Native top selected cards, fair total quotas with fixed cards, all-player ready and counts | ui_progression + Root | DONE (core8b acceptance below) |
+| MODES-01 | Team-private compact PvP HUD/input, brains, lane/cursor, 100-kill goal; real Endless night; hard TD | modes_pvp | DONE (core8b acceptance below) |
+| NET-01 | Unicode draft/space/backspace, system join/leave/kick chat; host kick and fair seed reassignment; late spectators with all communication and level-boundary promotion | Root + entity_sync | DONE (core8b acceptance below) |
+| SIGNAL-01 | Middle-button ping with sound/500ms cooldown; Ctrl strokes fade after8s; Alt packet ping/name/cooldown; semantic packet-relative cursors | Root | DONE (core8b acceptance below) |
+| PVP-02 | Teams chosen after launching PvP, before loading board; all participants ready | ui_progression + Root | DONE (core8b acceptance below) |
+| DIFF-01 | Host lobby difficulty1..10; count/wave/type scaling, HP unchanged, default1 stock | modes_pvp + Root | DONE (core8b acceptance below) |
+| AVATAR-01 | Own/client Zombatars occasionally spawn and appearances mirror | entity_sync + Root | DONE (core8b acceptance below) |
+| ONLINE-01 | Native WebRTC/STUN, version-filtered rooms/name/password/capacity; free Cloudflare signaling and setup instructions | modes_pvp + Root | DONE (core8b acceptance below) |
+| DOC-01 | Accurate bilingual README/roadmap and operator-only Cloudflare guide; Lua/more games/adventure remain planned; UI/UX requested now | Root + modes_pvp | DONE |
+| VERIFY-01 | Integrated build, protocol regressions, background two-process game runs and game-only renderer captures; independent diff review | Root | DONE (local acceptance; publication/CI tracked in GitHub) |
+| WEATHER-16 | T/ST smooth day/night + music fade; independent native fog/storm; Plantern 3×3 actual lawn cells; host/client parity | Root + modes_pvp; UI/entity review | DONE (acceptance23) |
 
 ## Evidence
 
@@ -120,3 +121,13 @@ Core implementation checkpoint0a5eb9f is complete; the follow-up acceptance comm
 - NativeUI15d FULLPassed appearance/close/reopen/processrestart64,128,191, menuoverride/Zenlobby plus actual public browser wrongpassword→RTC retry and roomfull. Both localized native messages measured wrappedheight17/available18 and Root visually reviewed them. work/native-ui15d/run_fc97d13dac77485485bf740c65ddea79. Earlier15b failure was fixture scene sequencing (BACK_TO_MENU preceded finalselector rebuild), corrected without changing product UI authority.
 - Original Portal final13b fullPassed32/hash4D2FD258; MysteryD1/D10 and2fault14 fullPassed. Earlier historical failed attempts remain evidence, not current release failures.
 - Root next: push core main using existinggh-auth, verifyCI; merge that acceptance into weather branch after weather commit, then integrate/testWeather33. No forced history, no release tag. Cross-network NAT and full campaigns/statistical balance remain unverified.
+
+## Weather acceptance23 — 04:17 Moscow
+
+- Main integrates weather checkpoint `eea88db` and core `8b932e8` at `048ba60`, with final Plantern/QA corrections ready for the delivery commit. Old isolated worktree is frozen.
+- Build23 ReleaseGOTY Win32 Passed; production unit22 checks1647/failures0/skipped0 Passed (23 changes only final QA ACK ordering).
+- Whole hidden T/ST23 Passed:11 checkpoints per mode,429/460 common full snapshot hashes, zero decoder rejects/runtime failures. Artifact `work/endless-weather23/run_5fffe1e8e4394a56a44bbe0235b22f5e/summary.json`.
+- Actual SDL picker5+5 and planting; day→mid→night→reverse→day; native sky-sun/mushroom sleep and sunflower production; native Plantern/Blover/return; independent overlapping fog/storm, actual field black/brief native flash/rain; one thunder event per peer; native BASS layer gain/play/pause/resume and menu gain1/user volume unchanged. Timers are explicitly compressed; no full natural60s cycle or heard-audio claim.
+- Plantern now maps sprite centers into the actual3×3 lawn rectangle:5row lawn uses100px rows, native fog85px. At(6,2),12 native fog samples inside and10 exterior samples are asserted on both peers, also after Blover return. Root/UI independently viewed the actual game captures; lower adjacent row is visible, exterior fog and soft cloud edges remain. Entity review found no P1/P2 bounds/resource regression. Torchwood path is unchanged.
+- Failed historical weather fixtures remain evidence:16 wrong T manifest;17 startup-ready echo;18 unavailable stock Plantern card;19 diagnostic compile type;19b ST coin mistaken for lightning;22 final ACK blocked by host menu teardown. They were corrected without weakening deterministic START, native cooldowns, median9 native flash/thunder checks or transactional decoder guards; whole23 supersedes their incomplete acceptance.
+- All four23 owned games stopped with exact PID/path/UTC-start validation; inventory0. Root repeated Adventure1 and legacyEndlessST on the same23 binary: both Passed full intro, hashes8991842D/83E5A97D; artifacts `work/weather-regression23/aggregate.json`. All four own regression processes stopped, inventory0 confirmed04:18. Final publication/CI uses existing gh credentials and main; GitHub Actions is the live source for the final commit CI status. No desktop/Computer Use/global input used.

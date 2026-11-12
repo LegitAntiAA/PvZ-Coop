@@ -38,7 +38,7 @@ Difficulty also applies to playable mini-games and custom modes: wave-based game
 
 ### Custom modes
 
-- **Endless / Endless T / Endless S / Endless ST:** endless stages; T adds actual day/night gameplay and weather, S adds seed repicking every ten waves. Endless retains its own progressive zombie-health scaling.
+- **Endless / Endless T / Endless S / Endless ST:** endless stages; T smoothly blends day/night backgrounds and music, with real night plant/sun rules. Fog responds to Plantern (a 3×3 area) and Blover; independently occurring storms black out the field between brief lightning flashes and can overlap fog. S adds seed repicking every ten waves. Endless retains its own progressive zombie-health scaling.
 - **Tower Defense:** zombies follow a generated road; the roster includes strong enemies and Gargantuars.
 - **PvP:** select plants or zombies after opening the mode, before the level loads. Every participant confirms readiness. Zombies see a waiting screen during plant selection, then their own compact zombie palette and brain balance. They start with 25 shared brains and receive 25 every 10 seconds; plants retain the native 50 starting sun. Plant tools are restricted to the plant team. Bungees target the clicked cell, and Diggers surface and walk back without scoring a house entry. Plants win at 100 zombie kills; zombies win by reaching the house objective.
 
@@ -117,7 +117,7 @@ The [delivery board](docs/agent/WORKBOARD.md) records the checks and remaining w
 
 ### Дополнительные режимы
 
-- **Endless / Endless T / Endless S / Endless ST:** бесконечные этапы; T — настоящая смена дня/ночи и погода, S — перевыбор растений каждые десять волн. У Endless сохраняется собственное постепенное усиление HP зомби.
+- **Endless / Endless T / Endless S / Endless ST:** бесконечные этапы; T — плавная смена фона и музыки дня/ночи с настоящими ночными правилами растений и солнца. Фонарь рассеивает туман в области 3×3, клевер сдувает его; независимая гроза закрывает обзор между короткими вспышками молний и может идти вместе с туманом. S — перевыбор растений каждые десять волн. У Endless сохраняется собственное постепенное усиление HP зомби.
 - **Tower Defense:** движение по случайной дороге; усиленный состав врагов, включая гаргантюа.
 - **PvP:** команда выбирается после открытия режима, перед загрузкой уровня. Во время выбора растений зомби видят экран ожидания, затем — только собственную панель и мозги. Старт — 25 общих мозгов, пассивный доход — 25 каждые 10 секунд; у растений остаётся штатный старт с 50 солнца. Инструменты растений недоступны зомби. Тарзанка выбирает нажатую клетку, шахтёр вылезает и идёт обратно без ложного прохода в дом. Цель растений — 100 убийств, цель зомби — добраться до дома.
 

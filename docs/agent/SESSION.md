@@ -1,14 +1,26 @@
-# Active delivery — 2026-11-12
+# Delivery checkpoint — 2026-11-12, 04:19 Moscow
 
-Root owns REQUEST.txt plus the user's new mystery-plant and all-mode difficulty/PvP additions. This is a continuing task; do not duplicate start reporting.
+Requested core changes, Endless T/ST weather, and the final Plantern3×3 correction are implemented and locally accepted. Root publishes the final main checkpoint after this record; use actual Git/GitHub state to confirm published HEAD and CI, rather than historical hashes below. No active implementation remains at this checkpoint.
 
 ## Constraints and repository
 
-- NO Computer Use, foreground activation or desktop screenshots. Hidden game processes and game-renderer captures only, maximum three concurrent games. Check exact owned PIDs before rebuild/stop.
-- Routine Russian chat/Telegram reports and commits/pushes to main via existing gh-auth are authorized. No force-push. Root owns integration/reporting.
-- Repo C:\PvZ\stabledecompile-master, latest published main f1ca23d74fda3efae3f2326e6483f330d4167caf. Explicit-repo gh CI Build/Unit/Pages all Passed, remote fetched01:49 Moscow and no newer main commits. Initial dirty work preserved in a991342; do not discard. New mystery/difficulty/GameOver sources remain uncommitted.
-- Current completed build13b: Win32 ReleaseGOTY, protocol32, unit checks1392 failures0 skipped0 Passed. Initial13 Failed missing WidgetManager include; Root added it and13b Passed. MSBuild VS18 BuildTools, PlantsVsZombies.sln. User's separate copy PID24464 from bin — копия, started2026-11-12T01:00:15 local, is playing with a friend: NEVER close or capture it. Every new owned smoke launch writes PID/path/UTC start into owned-process.json; cleanup verifies all3. Max3 total includes the user's copy.
-- Shared Worker embedded: https://pvz-coop-signaling.rostov20172017.workers.dev. Player endpoint/STUN options removed, operator-only guide supplied. No cross-external-NAT proof or TURN.
+- NO Computer Use, foreground activation, global input or desktop screenshots. Only hidden owned games and SDL-renderer captures were used; maximum three total games. Every launch ledger records PID/exactEXE/UTC-start; cleanup verifies all3. User explicitly closed ownPID24464 at02:07; we never stopped/captured it. Final inventory0 at04:18.
+- Repo C:/PvZ/stabledecompile-master, main. Core8b932e82474931d572d4844fb76978b3a279a010 was published and all3 CI Passed at03:14. Weather checkpointeea88db merged core8b at048ba60; final geometry/fixture/docs corrections follow that merge. Old C:/PvZ/weather16-agent worktree is frozen. Original dirty work is preserved ina991342.
+- Routine Russian Telegram/chat reporting and commits/pushes main via existing gh-auth are authorized. No force/history rewrite/release tag. ALWAYS use explicit `--repo LegitAntiAA/PvZ-Coop` for gh because its default repo differs.
+- Shared Worker compiled in: https://pvz-coop-signaling.rostov20172017.workers.dev. Players do not configure endpoints/STUN; operator guide `docs/ONLINE_SETUP_RU.md`. External cross-NAT connectivity was not verified; no TURN claim.
+
+## Final verification
+
+- Build23 Win32 ReleaseGOTY Passed; production unit22 checks1647/failures0/skipped0 Passed.23 only corrects test final-ACK ordering. Pre-existing compiler warnings remain.
+- Whole weather23 T/ST Passed11 checkpoints each/common429/460: `work/endless-weather23/run_5fffe1e8e4394a56a44bbe0235b22f5e/summary.json`. Actual SDL chooser/planting, day/night forward+reverse with sun/sleep behavior, real Plantern/Blover/return, storm black/brief native flash/rain with fog overlap, exactlyone thunder per peer, actual native BASS channel gain/play/pause/resume/menuGain1 and unchanged user volume. Explicit timer compression; no full natural60s or heard-audio claim.
+- Plantern maps native fog sprite centers into3×3 real lawn cells (85px fog versus100px lawn rows). At(6,2),12 fog samples cleared and10 exterior samples retained on both peers, also after Blover return. Root/UI independently viewed actual frames, including lower neighbor; Entity bounds/resource review Passed. Native soft edges/fade and Torchwood preserved. User-facing actual SDL proof: Documents/Codex/2026-11-11/new-chat/outputs/pvz-plantern-3x3.png.
+- Final same-binary controls Adventure1 and legacyEndlessST full-intro Passed, hashes8991842D/83E5A97D: `work/weather-regression23/aggregate.json`. All own games stopped.
+- Historical incomplete/failed weather fixtures:16wrongTmanifest,17startupACK,18stockPlanterncooldown,19diagnosticcompiletype,19bcoinfalseflash,22finalACKaftermenu. Corrected; whole23 cleanly supersedes them without weakening native checks or snapshot validation.
+- Core runtime acceptance is recorded below and in WORKBOARD/BUGS. Core15d appearance/public browser, PvP15b Digger/Bungee/economy/privacy, GameOver mouse+keyboard/rematch, mystery/faults/observer ownership, nativeOnline30 checks all Passed within their stated scopes. Full campaigns/statisticalPvPbalance and external NAT were not exercised.
+
+## Publication and resumption
+
+Root's final step is normal commit/push main and all3 GitHub CI checks. GitHub Actions for final HEAD is the live publication result. Do not reopen completed tasks solely because older historical entries below say pending. New bug reports should start from current Git state; preserve owned-process/privacy rules. Memory citation remains MEMORY.md58–63/rollout01a1a74a-4292-7871-92d4-fea246cbe755; no memory edits authorized.
 
 ## Verified evidence
 

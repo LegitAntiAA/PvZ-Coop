@@ -9893,6 +9893,31 @@ void Board::ClearFogAroundPlant(Plant* thePlant, int theSize)
 		aFogFadeOutSpeed = 40;
 	}
 
+	if (theSize == 4)
+	{
+		// Fog tiles overlap and use an 85px row pitch even on a 100px lawn.
+		// Map their centers to the Plantern's three actual lawn columns/rows.
+		const bool aSoftware = !mApp->Is3DAccelerated();
+		Image* aFogImage = aSoftware ? Sexy::IMAGE_FOG_SOFTWARE : Sexy::IMAGE_FOG;
+		const int aRowHeight = StageHas6Rows() ? 85 : 100;
+		const int aLeft = GridToPixelX(thePlant->mPlantCol, thePlant->mRow) - 80;
+		const int aTop = GridToPixelY(thePlant->mPlantCol, thePlant->mRow) - aRowHeight;
+		for (int x = LeftFogColumn(); x < MAX_GRID_SIZE_X + 4; x++)
+		{
+			for (int y = 0; y < MAX_GRID_SIZE_Y + 1; y++)
+			{
+				const float aCenterX = x * 80 + mFogOffset - 15 + (aSoftware ? 10 : 0) + aFogImage->GetCelWidth() * 0.5f;
+				const float aCenterY = y * 85 + 20 + (aSoftware ? 3 : 0) + aFogImage->GetCelHeight() * 0.5f;
+				if (aCenterX >= aLeft && aCenterX < aLeft + 240 &&
+					aCenterY >= aTop && aCenterY < aTop + aRowHeight * 3)
+				{
+					mGridCelFog[x][y] = max(mGridCelFog[x][y] - aFogFadeOutSpeed, 0);
+				}
+			}
+		}
+		return;
+	}
+
 	int aLeft = LeftFogColumn();
 	int aFogOffsetX = (mFogOffset + 50) / 100;
 	int aStartX = thePlant->mPlantCol - theSize - aFogOffsetX;
@@ -9911,18 +9936,7 @@ void Board::ClearFogAroundPlant(Plant* thePlant, int theSize)
 		{
 			int aDistX = abs(x + aFogOffsetX - thePlant->mPlantCol);
 			int aDistY = abs(y - thePlant->mRow);
-			if (theSize == 4)
-			{
-				if (aDistX > 3 || aDistY > 1 && y < MAX_GRID_SIZE_Y)
-				{
-					continue;
-				}
-				//if (aDistX + aDistY == 5)
-				//{
-				//	continue;
-				//}
-			}
-			else if (aDistX + aDistY >= theSize)
+			if (aDistX + aDistY >= theSize)
 			{
 				continue;
 			}

@@ -3477,7 +3477,7 @@ void Challenge::DrawRain(Graphics* g)
 		return;
 	const char* aWeatherSmoke = getenv("PVZ_COOP_SMOKE_WEATHER");
 	if (!mBoard->mNetWeatherRainDrawLogged && mApp->CoopSmokeActive() && mBoard->IsEndlessT() &&
-		aWeatherSmoke && strcmp(aWeatherSmoke, "1") == 0)
+		aWeatherSmoke && (strcmp(aWeatherSmoke, "T") == 0 || strcmp(aWeatherSmoke, "ST") == 0))
 	{
 		mBoard->mNetWeatherRainDrawLogged = true;
 		LawnNet::NetTrace("SMOKE_WEATHER_RAIN_RENDER role=%s native=1", mApp->NetIsClient() ? "client" : "host");

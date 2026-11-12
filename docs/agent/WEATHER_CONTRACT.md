@@ -1,12 +1,12 @@
 # Endless T/ST weather — approved contract
 
-Work only in `C:\PvZ\weather16-agent`, branch `codex/endless-weather-20261112` from core checkpoint `0a5eb9f`. Main remains frozen for core15b runtime/publication. No game/build/commit/push without Root coordination; never activate windows or capture desktop.
+Implementation was isolated in `C:\PvZ\weather16-agent`, branch `codex/endless-weather-20261112` from core checkpoint `0a5eb9f`. It is now integrated in main at `048ba60`; the old worktree is frozen. Final acceptance corrections belong to main under Root coordination. Never activate windows or capture desktop.
 
 ## Behavior and authority
 
 - Applies to `IsEndlessT()` (T and ST); other native modes keep their behavior. Host advances weather only while playing, unpaused and nonterminal.
 - Existing `mNetDayPhase` is the target0/1. New `mNetNightBlend`0..1000 approaches it by4 per tick (2.5s full transition). `StageIsNight()` changes at midpoint500; nocturnal sleep changes on that edge. Initial day is blend0. Phase interval remains6000.
-- Fog and storm use two independent random rolls at phase edge (25% fog,20% storm), durations3000/2000. Overlap is valid. No exclusive reset/validator. Native fog must provide Plantern/Blover behavior; check wind countdown also expires correctly while fog inactive.
+- Fog and storm use two independent random rolls at phase edge (25% fog,20% storm), durations3000/2000. Overlap is valid. No exclusive reset/validator. Native fog must provide Plantern/Blover behavior; check wind countdown also expires correctly while fog inactive. User correction: Plantern clears its cell and eight adjacent cells (3×3), with no horizontal stretching or extra bottom-row clearing; Torchwood behavior is unchanged.
 - Storm uses separate new kind0..3/counter0..900, preserving native three flash patterns/schedule without borrowing `Challenge::mChallengeState`. Outside native flash windows the field is opaque black; native UI remains usable. Rain and fog are below storm. One thunder emission per actual edge, no duplicate host+client playback or latejoin replay.
 - New authoritative fields are already declared before `mDrawOnlyCamera`/`mPaused`; preserve that adjacency and native save range. UI-only presentation fields also belong before that pair and do not need saving.
 

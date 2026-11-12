@@ -32,7 +32,8 @@ enum NetSmokeScenarioId : uint8_t
 	NETSMOKE_SCENARIO_PORTAL_COMBAT_CLIENT = 11,
 	NETSMOKE_SCENARIO_ENDLESS_ST = 12,
 	NETSMOKE_SCENARIO_PVP_1V1 = 13,
-	NETSMOKE_SCENARIO_ENDLESS_OVERFLOW = 14
+	NETSMOKE_SCENARIO_ENDLESS_OVERFLOW = 14,
+	NETSMOKE_SCENARIO_ENDLESS_T = 15
 };
 
 // Runtime-only smoke setup.  Manifest/protocol tests never call this function,
@@ -45,6 +46,7 @@ inline bool NetIsInteractiveChooserSmokeScenario(NetSmokeScenarioId theScenario)
 		theScenario == NETSMOKE_SCENARIO_ADVENTURE_8_VICTORY ||
                 theScenario == NETSMOKE_SCENARIO_TOWER_DEFENSE_CLIENT ||
                 theScenario == NETSMOKE_SCENARIO_ENDLESS_ST ||
+		theScenario == NETSMOKE_SCENARIO_ENDLESS_T ||
 		theScenario == NETSMOKE_SCENARIO_ENDLESS_OVERFLOW;
 }
 
@@ -102,6 +104,9 @@ inline const NetSmokeScenarioDefinition* NetSmokeScenarioTable(size_t& theCount)
 		{ NETSMOKE_SCENARIO_ENDLESS_ST,
 			"endless_st", "endless_st", 1,
 			(uint8_t)GameMode::GAMEMODE_COOP_ENDLESS_ST, false },
+		{ NETSMOKE_SCENARIO_ENDLESS_T,
+			"endless_t", "endless_t", 1,
+			(uint8_t)GameMode::GAMEMODE_COOP_ENDLESS_T, false },
 		{ NETSMOKE_SCENARIO_ENDLESS_OVERFLOW,
 			"endless_overflow", "endless_overflow", 1,
 			(uint8_t)GameMode::GAMEMODE_COOP_ENDLESS_ST, false },
@@ -140,7 +145,7 @@ inline bool NetResolveSmokeScenario(const std::string& theMode, int theLevel,
 	theError = "unsupported smoke scenario; allowed pairs are adventure/1, adventure/5, "
                 "adventure_bowling_client/5, adventure_whack_client/15, slot_machine_client/1, "
 		"adventure_soak/8, adventure_victory/8, tower_defense_client/1, "
-		"portal_combat_client/1, endless_st/1, endless_overflow/1, pvp_1v1/1, "
+		"portal_combat_client/1, endless_st/1, endless_t/1, endless_overflow/1, pvp_1v1/1, "
 		"vasebreaker/1, beghouled/1";
 	return false;
 }

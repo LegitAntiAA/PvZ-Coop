@@ -40,11 +40,12 @@ function Start-WeatherRole {
     $nick = if ($Role -eq "host") { "[Weather H]" } else { "[Weather C]" }
     $width = if ($Role -eq "client") { 1066 } else { 800 }
     Write-CoopConfig -Path $config -Nickname $nick -WindowWidth $width -WindowHeight 600
-    # A valid legacy manifest supplies lifecycle/isolation only. The helper
-    # starts and asserts the requested actual native T or ST mode on both peers.
+    # Match the actual requested native mode so the normal deterministic
+    # START_GAME guard stays strict for each isolated T/ST workflow.
+    $manifestMode = if ($Mode -eq "T") { "endless_t" } else { "endless_st" }
     Write-SmokeManifest -Path $manifest -Role $Role -Nickname $nick -AppDataDirectory $appData `
         -ConfigPath $config -LogDirectory $state.Logs -ResultPath $state.Result -SelectedPort $Port `
-        -SelectedMode "endless_st" -SelectedLevel 1 -SelectedSeed 424242 `
+        -SelectedMode $manifestMode -SelectedLevel 1 -SelectedSeed 424242 `
         -SelectedTimeoutMs ($weatherTimeout * 1000) -RequiredSnapshots 3 -SelectedSkipIntro 0
     $oldWeather = $env:PVZ_COOP_SMOKE_WEATHER
     $oldMystery = $env:PVZ_COOP_SMOKE_MYSTERY
@@ -73,6 +74,17 @@ function Wait-WeatherRole {
     param([hashtable]$State)
     $deadline = [DateTime]::UtcNow.AddSeconds($weatherTimeout)
     while ([DateTime]::UtcNow -lt $deadline) {
+        foreach ($peer in $weatherOwned) {
+            if ($peer.Mode -ne $State.Mode) { continue }
+            $peerLog = Get-CombinedLogText $peer.Logs
+            if ($peerLog -match 'SMOKE_FAIL|Access Violation|unhandled exception|assertion failed|snapshot[^\r\n]*rejected') {
+                throw "Weather peer runtime failed: $($peer.Logs)"
+            }
+            $peerResult = Read-JsonIfComplete $peer.Result
+            if ($null -ne $peerResult -and $peerResult.status -ne "pass") {
+                throw "Weather peer reported failure: $($peer.Result)"
+            }
+        }
         $log = Get-CombinedLogText $State.Logs
         if ($log -match 'SMOKE_FAIL|Access Violation|unhandled exception|assertion failed|snapshot[^\r\n]*rejected') {
             throw "Weather runtime failed: $($State.Logs)"
@@ -119,8 +131,16 @@ try {
                     throw "Missing native playing/paused audio-channel evidence: $mode/$($state.Role)/$paused"
                 }
             }
+            if ($log -notmatch 'SMOKE_WEATHER_CHECK[^\r\n]*step=storm_flash\b[^\r\n]*probe=median9') {
+                throw "Missing native flash-window/multipoint field evidence: $mode/$($state.Role)"
+            }
+            foreach ($maskStep in @("plantern","fog_return")) {
+                if ($log -notmatch ('SMOKE_WEATHER_CHECK[^\r\n]*step='+$maskStep+'\b[^\r\n]*lawnArea=3x3 clearFogSamples=12 outsideFog=10\b')) {
+                    throw "Missing exact native 3x3 Plantern/exterior fog proof: $mode/$($state.Role)/$maskStep"
+                }
+            }
             $thunder = @([regex]::Matches($log,'WEATHER_THUNDER[^\r\n]*local=1'))
-            if ($thunder.Count -lt 1 -or $thunder.Count -gt 2) { throw "Missing or duplicated native weather thunder: $mode/$($state.Role)" }
+            if ($thunder.Count -ne 1) { throw "Missing or duplicated native weather thunder: $mode/$($state.Role)" }
         }
         $hostLog = Get-CombinedLogText $hostRole.Logs
         $clientLog = Get-CombinedLogText $clientRole.Logs
