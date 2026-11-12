@@ -152,6 +152,17 @@ public:
 	Color							mCameraColor;
 	Rect							mCameraClipRect;
 	LawnNet::PvPBalanceState         mNetPvPBalance; // outside the native mPaused..mBoardRandSeed save block
+	// Endless T/ST weather authority; keep outside the native save block.
+	uint16_t                        mNetNightBlend = 0; // 0..1000
+	uint8_t                         mNetStormFlashKind = 0; // 0..3
+	uint16_t                        mNetStormFlashCounter = 0; // 0..900
+	// Local presentation; excluded from the native mPaused..mBoardRandSeed save range.
+	bool                            mNetWeatherSnapshotReady = false;
+	bool                            mNetWeatherPresentationInitialized = false;
+	bool                            mNetWeatherRainDrawLogged = false;
+	float                           mNetVisualNightBlend = 0.0f;
+	uint8_t                         mNetWeatherLastStormKind = 0;
+	uint16_t                        mNetWeatherLastStormCounter = 0;
 	std::vector<uint16_t>			mNetMysteryRevealIds;
 	bool							mDrawOnlyCamera;
 	bool							mPaused;												//+0x164
@@ -615,7 +626,7 @@ public:
 	uint8_t							mNetDaveAppliedAnimKey;		// client: edge-triggered Dave animation
 	int								mNetDaveAppliedMessageIndex;	// client: edge-triggered Dave dialog
 	void							UpdateEndlessWeather();
-	void							DrawEndlessWeather(Graphics* g);
+	void                            UpdateEndlessWeatherPresentation();
 	bool							IsEndlessT();
 	bool							IsTowerDefense();
 	bool							IsPvPMode();

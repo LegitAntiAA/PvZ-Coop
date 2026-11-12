@@ -74,6 +74,7 @@ namespace LawnNet
 	bool NetSmokeUpdateNativeUi(LawnApp* theApp);
 	bool NetSmokeUpdateMystery(LawnApp* theApp);
 	bool NetSmokeUpdateDifficulty(LawnApp* theApp);
+	bool NetSmokeUpdateEndlessWeather(LawnApp* theApp);
 	bool NetSmokeUpdateMysteryObserver(LawnApp* theApp);
 	bool NetSmokeMysteryObserverHostLost(LawnApp* theApp, const std::string& theReason);
 	bool NetSmokeUpdateGameOver(LawnApp* theApp);
@@ -6010,6 +6011,8 @@ void LawnApp::CoopSmokeUpdate()
 	if (LawnNet::NetSmokeUpdateAvatarEditor(this))
 		return;
 	if (LawnNet::NetSmokeUpdateDifficulty(this))
+		return;
+	if (LawnNet::NetSmokeUpdateEndlessWeather(this))
 		return;
 	if (LawnNet::NetSmokeUpdateMysteryObserver(this))
 		return;

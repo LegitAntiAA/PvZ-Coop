@@ -32,6 +32,7 @@
 #include "../SexyAppFramework/WidgetManager.h"
 #include "Widget/AchievementsScreen.h"
 #include <random>
+#include <cstdlib>
 
 #include "../Sexy.TodLib/Attachment.h"
 #include "../Sexy.TodLib/EffectSystem.h"
@@ -3438,7 +3439,12 @@ void Challenge::SpawnZombieWave()
 //0x426A20
 void Challenge::DrawStormFlash(Graphics* g, int theTime, int theMaxAmount)
 {
-	MTRand aDrawRand = MTRand(mBoard->mMainCounter / 6);
+	DrawStormFlash(g, theTime, theMaxAmount, mBoard->mMainCounter / 6);
+}
+
+void Challenge::DrawStormFlash(Graphics* g, int theTime, int theMaxAmount, unsigned int theSeed)
+{
+	MTRand aDrawRand = MTRand(theSeed);
 	int aDarkness = TodAnimateCurve(150, 0, theTime, 255 - theMaxAmount, 255, CURVE_LINEAR) + aDrawRand.NextNoAssert((unsigned long)64) - 32;
 	// 设置暴风雨阴暗的颜色
 	g->SetColor(Color(0, 0, 0, ClampInt(aDarkness, 0, 255)));
@@ -3454,10 +3460,13 @@ void Challenge::DrawStormFlash(Graphics* g, int theTime, int theMaxAmount)
 //0x426B20
 void Challenge::DrawWeather(Graphics* g)
 {
-	if (mApp->IsStormyNightLevel() || mApp->mGameMode == GAMEMODE_CHALLENGE_RAINING_SEEDS)
+	const bool anEndlessStorm = mBoard->IsEndlessT() && mBoard->mNetStormTimer > 0;
+	if (anEndlessStorm || mApp->IsStormyNightLevel() || mApp->mGameMode == GAMEMODE_CHALLENGE_RAINING_SEEDS)
 		DrawRain(g);
 
-	if (mApp->IsStormyNightLevel())
+	if (anEndlessStorm)
+		DrawStormNight(g, mBoard->mNetStormFlashKind, mBoard->mNetStormFlashCounter);
+	else if (mApp->IsStormyNightLevel())
 		DrawStormNight(g);
 }
 
@@ -3466,6 +3475,13 @@ void Challenge::DrawRain(Graphics* g)
 {
 	if (mBoard->mCutScene->IsBeforePreloading() || !mApp->Is3DAccelerated())
 		return;
+	const char* aWeatherSmoke = getenv("PVZ_COOP_SMOKE_WEATHER");
+	if (!mBoard->mNetWeatherRainDrawLogged && mApp->CoopSmokeActive() && mBoard->IsEndlessT() &&
+		aWeatherSmoke && strcmp(aWeatherSmoke, "1") == 0)
+	{
+		mBoard->mNetWeatherRainDrawLogged = true;
+		LawnNet::NetTrace("SMOKE_WEATHER_RAIN_RENDER role=%s native=1", mApp->NetIsClient() ? "client" : "host");
+	}
 
 	int aBoardOffsetX;
 	if (mBoard->mX > 0)
@@ -3510,24 +3526,33 @@ void Challenge::DrawRain(Graphics* g)
 //0x426E90
 void Challenge::DrawStormNight(Graphics* g)
 {
-	if (mChallengeState == STATECHALLENGE_STORM_FLASH_1 && mChallengeStateCounter < 300)
+	const int aKind = mChallengeState == STATECHALLENGE_STORM_FLASH_1 ? 1 :
+		mChallengeState == STATECHALLENGE_STORM_FLASH_2 ? 2 : mChallengeState == STATECHALLENGE_STORM_FLASH_3 ? 3 : 0;
+	DrawStormNight(g, aKind, mChallengeStateCounter);
+}
+
+void Challenge::DrawStormNight(Graphics* g, int theKind, int theCounter)
+{
+	const unsigned int aSeed = mBoard->IsEndlessT() ?
+		((unsigned int)theKind << 16) | (unsigned int)(theCounter / 6) : mBoard->mMainCounter / 6;
+	if (theKind == 1 && theCounter < 300)
 	{
-		if (mChallengeStateCounter > STORM_FLASH_TIME)
+		if (theCounter > STORM_FLASH_TIME)
 		{
-			DrawStormFlash(g, mChallengeStateCounter - STORM_FLASH_TIME, 255);
+			DrawStormFlash(g, theCounter - STORM_FLASH_TIME, 255, aSeed);
 		}
 		else
 		{
-			DrawStormFlash(g, mChallengeStateCounter, 92);
+			DrawStormFlash(g, theCounter, 92, aSeed);
 		}
 	}
-	else if (mChallengeState == STATECHALLENGE_STORM_FLASH_2 && mChallengeStateCounter < 300)
+	else if (theKind == 2 && theCounter < 300)
 	{
-		DrawStormFlash(g, mChallengeStateCounter / 2, 255);
+		DrawStormFlash(g, theCounter / 2, 255, aSeed);
 	}
-	else if (mChallengeState == STATECHALLENGE_STORM_FLASH_3 && mChallengeStateCounter < 150)
+	else if (theKind == 3 && theCounter < 150)
 	{
-		DrawStormFlash(g, mChallengeStateCounter, 255);
+		DrawStormFlash(g, theCounter, 255, aSeed);
 	}
 	else
 	{

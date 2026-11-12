@@ -2355,16 +2355,18 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
                 }
 
                 if (!mEndlessTimeChanged &&
-                        aBoard->mNetDayPhase != mEndlessInitialPhase)
+                        aBoard->mNetDayPhase != mEndlessInitialPhase &&
+                        aBoard->mNetNightBlend == (aBoard->mNetDayPhase ? 1000 : 0))
                 {
                         mEndlessTimeChanged = true;
-                        NetTrace("SMOKE_ENDLESS_ST_TIME role=%s from=%u to=%u weatherTimer=%u fog=%u storm=%u visible=1",
+                        NetTrace("SMOKE_ENDLESS_ST_TIME role=%s from=%u to=%u weatherTimer=%u fog=%u storm=%u blend=%u visible=1",
                                 theManifest.IsHost() ? "host" : "client",
                                 (unsigned)mEndlessInitialPhase,
                                 (unsigned)aBoard->mNetDayPhase,
                                 (unsigned)aBoard->mNetWeatherTimer,
                                 (unsigned)aBoard->mNetFogTimer,
-                                (unsigned)aBoard->mNetStormTimer);
+                                (unsigned)aBoard->mNetStormTimer,
+                                (unsigned)aBoard->mNetNightBlend);
                 }
 
                 if (!mEndlessRepickOpened &&

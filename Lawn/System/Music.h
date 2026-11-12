@@ -93,8 +93,13 @@ public:
 	int							mFadeOutCounter;					//+0x44
 	int							mFadeOutDuration;					//+0x48
 
+	float                           mWeatherGain = 1.0f;
+	double                          mLayerVolumes[MusicFile::NUM_MUSIC_FILES] = {}; // before weather gain
+
 public:
 	Music();
+	void                            SetWeatherGain(float theGain);
+	void                            SetLayerVolume(MusicFile theMusicFile, double theVolume);
 
 	void						MusicInit();
 	void						MusicDispose() { ; }

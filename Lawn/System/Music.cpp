@@ -7,6 +7,7 @@
 #include "../../Sexy.TodLib/TodCommon.h"
 #include "../../SexyAppFramework/BassLoader.h"
 #include "../../SexyAppFramework/BassMusicInterface.h"
+#include <cmath>
 
 using namespace Sexy;
 
@@ -296,7 +297,8 @@ void Music::PlayFromOffset(MusicFile theMusicFile, int theOffset, double theVolu
 	{
 		bool aNoLoop = theMusicFile == MusicFile::MUSIC_FILE_CREDITS_ZOMBIES_ON_YOUR_LAWN;  // MV 音乐不循环
 		double oldCap = aMusicInfo->mVolumeCap;
-		aMusicInfo->mVolumeCap = theVolume;
+		mLayerVolumes[theMusicFile] = theVolume;
+		aMusicInfo->mVolumeCap = theVolume * mWeatherGain;
 		mMusicInterface->PlayMusic(theMusicFile, theOffset, aNoLoop);
 		aMusicInfo->mVolumeCap = oldCap;
 	}
@@ -305,7 +307,8 @@ void Music::PlayFromOffset(MusicFile theMusicFile, int theOffset, double theVolu
 		gBass->BASS_ChannelStop(aMusicInfo->mHMusic);  // 先停止正在播放的音乐
 		SetupMusicFileForTune(theMusicFile, mCurMusicTune);  // 调整每条轨道的静音与否
 		aMusicInfo->mStopOnFade = false;
-		aMusicInfo->mVolume = aMusicInfo->mVolumeCap * theVolume;
+		mLayerVolumes[theMusicFile] = aMusicInfo->mVolumeCap * theVolume;
+		aMusicInfo->mVolume = mLayerVolumes[theMusicFile] * mWeatherGain;
 		aMusicInfo->mVolumeAdd = 0.0;
 
 		gBass->BASS_ChannelSetAttribute(aMusicInfo->mHMusic, BASS_ATTRIB_VOL, aMusicInfo->mVolume);
@@ -320,6 +323,9 @@ void Music::PlayMusic(MusicTune theMusicTune, int theOffset, int theDrumsOffset)
 {
 	if (mMusicDisabled)
 		return;
+	if (!mApp->mBoard || !mApp->mBoard->IsEndlessT() ||
+		(theMusicTune != MUSIC_TUNE_DAY_GRASSWALK && theMusicTune != MUSIC_TUNE_NIGHT_MOONGRAINS))
+		SetWeatherGain(1.0f);
 
 	mCurMusicTune = theMusicTune;
 	mCurMusicFileMain = MusicFile::MUSIC_FILE_NONE;
@@ -722,21 +728,40 @@ void Music::UpdateMusicBurst()
 
 	if (aBurstScheme == 1)
 	{
-		mMusicInterface->SetSongVolume(mCurMusicFileHihats, aFadeTrackVolume);
-		mMusicInterface->SetSongVolume(mCurMusicFileDrums, aDrumsVolume);
+		SetLayerVolume(mCurMusicFileHihats, aFadeTrackVolume);
+		SetLayerVolume(mCurMusicFileDrums, aDrumsVolume);
 	}
 	else if (aBurstScheme == 2)
 	{
-		mMusicInterface->SetSongVolume(mCurMusicFileMain, aMainTrackVolume);
-		mMusicInterface->SetSongVolume(mCurMusicFileDrums, aDrumsVolume);
+		SetLayerVolume(mCurMusicFileMain, aMainTrackVolume);
+		SetLayerVolume(mCurMusicFileDrums, aDrumsVolume);
 		if (aDrumsJumpOrder != -1)
 			gBass->BASS_ChannelSetPosition(GetBassMusicHandle(mCurMusicFileDrums), LOWORD(aDrumsJumpOrder) /*| 0x80000000*/, BASS_POS_MUSIC_ORDER);
 	}
 }
 
+void Music::SetLayerVolume(MusicFile theMusicFile, double theVolume)
+{
+	if (theMusicFile <= MUSIC_FILE_NONE || theMusicFile >= NUM_MUSIC_FILES) return;
+	mLayerVolumes[theMusicFile] = theVolume;
+	if (mMusicInterface) mMusicInterface->SetSongVolume(theMusicFile, theVolume * mWeatherGain);
+}
+
+void Music::SetWeatherGain(float theGain)
+{
+	theGain = max(0.0f, min(1.0f, theGain));
+	if (mWeatherGain == theGain) return;
+	mWeatherGain = theGain;
+	if (!mMusicInterface) return;
+	for (MusicFile aFile : {mCurMusicFileMain, mCurMusicFileDrums, mCurMusicFileHihats})
+		if (aFile > MUSIC_FILE_NONE && aFile < NUM_MUSIC_FILES)
+			mMusicInterface->SetSongVolume(aFile, mLayerVolumes[aFile] * mWeatherGain);
+}
+
 //0x45B670
 void Music::MusicUpdate()
 {
+	if (!mApp || !mApp->mBoard || !mApp->mBoard->IsEndlessT()) SetWeatherGain(1.0f);
 	if (mFadeOutCounter > 0)
 	{
 		mFadeOutCounter--;
@@ -747,7 +772,7 @@ void Music::MusicUpdate()
 		else if (mMusicInterface && mCurMusicFileMain)
 		{
 			float aFadeLevel = TodAnimateCurveFloat(mFadeOutDuration, 0, mFadeOutCounter, 1.0f, 0.0f, TodCurves::CURVE_LINEAR);
-			mMusicInterface->SetSongVolume(mCurMusicFileMain, aFadeLevel);
+			SetLayerVolume(mCurMusicFileMain, aFadeLevel);
 		}
 	}
 
@@ -772,6 +797,20 @@ void Music::MakeSureMusicIsPlaying(MusicTune theMusicTune)
 void Music::StartGameMusic()
 {
 	TOD_ASSERT(mApp->mBoard);
+	if (mApp->mBoard->IsEndlessT())
+	{
+		const float aBlend = mApp->mBoard->mNetWeatherPresentationInitialized ?
+			mApp->mBoard->mNetVisualNightBlend : mApp->mBoard->mNetNightBlend;
+		SetWeatherGain(fabsf(2.0f * aBlend / 1000.0f - 1.0f));
+		if (mApp->mBoard->mPaused)
+		{
+			GameMusicPause(true);
+			return;
+		}
+		MakeSureMusicIsPlaying(aBlend >= 500.0f ? MUSIC_TUNE_NIGHT_MOONGRAINS : MUSIC_TUNE_DAY_GRASSWALK);
+		return;
+	}
+	SetWeatherGain(1.0f);
 
 	MusicTune mTune = MusicTune::MUSIC_TUNE_DAY_GRASSWALK;
 
@@ -882,6 +921,18 @@ void Music::GameMusicPause(bool thePause)
 	}
 	else if (mPaused)
 	{
+		if (mApp->mBoard && mApp->mBoard->IsEndlessT() && mApp->mGameScene == SCENE_PLAYING)
+		{
+			const float aBlend = mApp->mBoard->mNetWeatherPresentationInitialized ?
+				mApp->mBoard->mNetVisualNightBlend : mApp->mBoard->mNetNightBlend;
+			const MusicTune aTune = aBlend >= 500.0f ? MUSIC_TUNE_NIGHT_MOONGRAINS : MUSIC_TUNE_DAY_GRASSWALK;
+			const bool aSameTune = mCurMusicTune == aTune;
+			mPaused = false;
+			SetWeatherGain(fabsf(2.0f * aBlend / 1000.0f - 1.0f));
+			if (!aSameTune) StopAllMusic();
+			PlayMusic(aTune, aSameTune ? mPauseOffset : -1, aSameTune ? mPauseOffsetDrums : -1);
+			return;
+		}
 		if (mCurMusicTune != MusicTune::MUSIC_TUNE_NONE)
 			PlayMusic(mCurMusicTune, mPauseOffset, mPauseOffsetDrums);
 		mPaused = false;

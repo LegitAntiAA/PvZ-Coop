@@ -58,6 +58,7 @@
     <ClCompile Include="NetZombatarTests.cpp" />
 	<ClCompile Include="NetGameplayPolicyTests.cpp" />
 	<ClCompile Include="NetMysteryTests.cpp" />
+	<ClCompile Include="NetEndlessWeatherTests.cpp" />
     <ClCompile Include="..\..\Lawn\Net\NetZombatar.cpp" />
     <ClCompile Include="..\..\Lawn\Net\NetCommon.cpp" />
     <ClCompile Include="..\..\PakLib\PakInterface.cpp" />
@@ -66,6 +67,7 @@
     <ClInclude Include="LocalizedTextTests.h" />
 	<ClInclude Include="NetGameplayPolicyTests.h" />
 	<ClInclude Include="NetMysteryTests.h" />
+	<ClInclude Include="NetEndlessWeatherTests.h" />
      <ClInclude Include="NetChallengeRuntimeTests.h" />
      <ClInclude Include="NetEndlessWireTests.h" />
 	<ClInclude Include="NetMowerSnapshotTests.h" />

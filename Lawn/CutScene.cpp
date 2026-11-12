@@ -446,7 +446,7 @@ void CutScene::PreloadResources()
 	{
 		ReanimatorEnsureDefinitionLoaded(ReanimationType::REANIM_HAMMER, true);
 	}
-	if (mApp->IsStormyNightLevel() || mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_RAINING_SEEDS)
+	if (mApp->IsStormyNightLevel() || mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_RAINING_SEEDS || mBoard->IsEndlessT())
 	{
 		ReanimatorEnsureDefinitionLoaded(ReanimationType::REANIM_RAIN_CIRCLE, true);
 		ReanimatorEnsureDefinitionLoaded(ReanimationType::REANIM_RAIN_SPLASH, true);

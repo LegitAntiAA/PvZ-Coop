@@ -135,6 +135,7 @@ public:
     void                    BeghouledClearCrater(int theCount);
     void                    MouseDownWhackAZombie(int theX, int theY);
     void                    DrawStormNight(Graphics* g);
+    void                    DrawStormNight(Graphics* g, int theKind, int theCounter);
     void                    UpdateStormyNight();
     void                    InitLevel();
     void                    SpawnZombieWave();
@@ -143,6 +144,7 @@ public:
     void                    SpawnLevelAward(int theGridX, int theGridY);
     void                    BeghouledScore(int theGridX, int theGridY, int theNumPlants, bool theIsHorizontal);
     void                    DrawStormFlash(Graphics* g, int theTime, int theMaxAmount);
+    void                    DrawStormFlash(Graphics* g, int theTime, int theMaxAmount, unsigned int theSeed);
     void                    UpdateRainingSeeds();
     /*inline*/ void         PlayBossEnter();
     void                    UpdateConveyorBelt();

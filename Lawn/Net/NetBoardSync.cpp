@@ -23,6 +23,7 @@
 #include "../../SexyAppFramework/DDInterface.h"
 #include "NetManager.h"
 #include "NetMystery.h"
+#include "NetEndlessWeather.h"
 #include "NetPresentation.h"
 #include "NetZombatar.h"
 #include "../System/Music.h"
@@ -76,6 +77,10 @@ const NetDaveAnimSpec gNetDaveAnimSpecs[NET_DAVE_ANIM_COUNT] =
 };
 
 static const size_t NET_DAVE_STATE_BYTES = 12;
+static_assert(MAX_GRID_SIZE_X + 4 == NET_ENDLESS_FOG_COLUMNS &&
+	MAX_GRID_SIZE_Y + 1 == NET_ENDLESS_FOG_ROWS, "Weather wire must cover the native fog dimensions");
+static_assert(sizeof(((Board*)nullptr)->mGridCelFog) / sizeof(int) == NET_ENDLESS_FOG_CELLS,
+	"Weather wire must include every native fog alpha cell");
 // Seed packet: stable id, type, imitater, cooldown, owner, active, signed
 // horizontal offset, slot-machine countdown/next card/phase, intrinsic origin,
 // and authoritative refresh duration/flag (including late join after a use).
@@ -1090,11 +1095,30 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 		NetEncodeChallengeRuntimeState(aChallengeRuntime, b);
 	}
 
-	// weather (endless T)
-	b.WriteU8(mNetDayPhase);
-	b.WriteU16(mNetWeatherTimer);
-	b.WriteU16(mNetFogTimer);
-	b.WriteU16(mNetStormTimer);
+	// Native fog alphas are authoritative in ordinary fog levels and T/ST alike.
+	NetEndlessWeatherState aWeather;
+	const bool aEndlessT = IsEndlessT();
+	if (aEndlessT)
+	{
+		aWeather.mDayPhase = mNetDayPhase;
+		aWeather.mWeatherTimer = mNetWeatherTimer;
+		aWeather.mFogTimer = mNetFogTimer;
+		aWeather.mStormTimer = mNetStormTimer;
+		aWeather.mNightBlend = mNetNightBlend;
+		aWeather.mStormFlashKind = mNetStormFlashKind;
+		aWeather.mStormFlashCounter = mNetStormFlashCounter;
+	}
+	for (size_t x = 0; x < NET_ENDLESS_FOG_COLUMNS; ++x)
+		for (size_t y = 0; y < NET_ENDLESS_FOG_ROWS; ++y)
+			aWeather.mFogGrid[x * NET_ENDLESS_FOG_ROWS + y] = (uint8_t)max(0, min(255, mGridCelFog[x][y]));
+	const bool aWeatherWritten = NetEncodeEndlessWeather(aWeather, b, aEndlessT);
+	TOD_ASSERT(aWeatherWritten);
+	if (!aWeatherWritten)
+	{
+		NetTrace("snapshot weather host state invalid; encoding neutral state");
+		aWeather = NetEndlessWeatherState();
+		NetEncodeEndlessWeather(aWeather, b, aEndlessT);
+	}
 
 	// pvp / td
 	b.WriteU8((uint8_t)min(255, mNetPvPBrainScore));
@@ -2020,7 +2044,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	// Fixed core through the seed-packet count.  Validate it before touching
 	// board/profile state so a truncated datagram cannot partially apply.
 	static const size_t NET_SNAPSHOT_CORE_BYTES =
-		88 + NET_CHALLENGE_RUNTIME_WIRE_BYTES;
+		88 + NET_CHALLENGE_RUNTIME_WIRE_BYTES + NET_ENDLESS_WEATHER_WIRE_BYTES - 7;
 	if (b.Remaining() < NET_SNAPSHOT_CORE_BYTES)
 	{
 		NetTrace("snapshot core rejected: bytes=%zu expected-at-least=%zu", b.Remaining(), NET_SNAPSHOT_CORE_BYTES);
@@ -2054,8 +2078,8 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	mZombieCountDown = b.ReadU16Or();
 	mBoardFadeOutCounter = (int)b.ReadU16Or() - 1;
 	mNextSurvivalStageCounter = b.ReadU16Or();
-	mFogOffset = b.ReadU16Or() / 2.0f;
-	mFogBlownCountDown = b.ReadU16Or();
+	const int aFogOffset2 = b.ReadU16Or();
+	const int aFogBlownCountDown = b.ReadU16Or();
 	mLevel = b.ReadU8Or();
 	mTutorialState = (TutorialState)b.ReadU8Or();
 	const int aTutorialTimer = b.ReadI32Or();
@@ -2154,22 +2178,12 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		}
 	}
 
-	const uint8_t aNetDayPhase = b.ReadU8Or();
-	const uint16_t aNetWeatherTimer = b.ReadU16Or();
-	const uint16_t aNetFogTimer = b.ReadU16Or();
-	const uint16_t aNetStormTimer = b.ReadU16Or();
-	if (aNetDayPhase > 1 || aNetWeatherTimer > 6000 ||
-		aNetFogTimer > 3000 || aNetStormTimer > 2000 ||
-		(aNetFogTimer != 0 && aNetStormTimer != 0))
+	NetEndlessWeatherState aWeather;
+	if (!NetDecodeEndlessWeather(b, aWeather, IsEndlessT()))
 	{
-		NetTrace("snapshot weather rejected: phase=%u switch=%u fog=%u storm=%u",
-			aNetDayPhase, aNetWeatherTimer, aNetFogTimer, aNetStormTimer);
+		NetTrace("snapshot weather rejected: remaining=%zu", b.Remaining());
 		return;
 	}
-	mNetDayPhase = aNetDayPhase;
-	mNetWeatherTimer = aNetWeatherTimer;
-	mNetFogTimer = aNetFogTimer;
-	mNetStormTimer = aNetStormTimer;
 
 	if (b.Remaining() < 10) { NetTrace("snapshot PvP/balance fields truncated bytes=%zu", b.Remaining()); return; }
 	mNetPvPBrainScore = b.ReadU8Or();
@@ -3600,14 +3614,33 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		NetTrace("snapshot ignored trailing bytes=%zu", b.Remaining());
 		return;
 	}
+	// Commit the fog cache and weather together only after the complete snapshot
+	// validates. Drawing consumes this native grid directly; no local fog warmup.
+	mNetDayPhase = aWeather.mDayPhase;
+	mNetWeatherTimer = aWeather.mWeatherTimer;
+	mNetFogTimer = aWeather.mFogTimer;
+	mNetStormTimer = aWeather.mStormTimer;
+	mNetNightBlend = aWeather.mNightBlend;
+	mNetStormFlashKind = aWeather.mStormFlashKind;
+	mNetStormFlashCounter = aWeather.mStormFlashCounter;
+	mFogOffset = aFogOffset2 / 2.0f;
+	mFogBlownCountDown = aFogBlownCountDown;
+	for (size_t x = 0; x < NET_ENDLESS_FOG_COLUMNS; ++x)
+		for (size_t y = 0; y < NET_ENDLESS_FOG_ROWS; ++y)
+			mGridCelFog[x][y] = aWeather.mFogGrid[x * NET_ENDLESS_FOG_ROWS + y];
+	mNetWeatherSnapshotReady = true;
 	mTutorialTimer = aTutorialTimer;
 	mShowShovel = aShowShovel != 0;
 	if (mApp->mMusic)
 	{
-		if (aMusicTune == MusicTune::MUSIC_TUNE_NONE)
-			mApp->mMusic->StopAllMusic();
-		else
-			mApp->mMusic->MakeSureMusicIsPlaying((MusicTune)aMusicTune);
+		// T/ST chooses the new tune at its local silent visual midpoint.
+		if (!(IsEndlessT() && (mApp->mGameScene == GameScenes::SCENE_PLAYING || mPaused)))
+		{
+			if (aMusicTune == MusicTune::MUSIC_TUNE_NONE)
+				mApp->mMusic->StopAllMusic();
+			else
+				mApp->mMusic->MakeSureMusicIsPlaying((MusicTune)aMusicTune);
+		}
 		if (mApp->mMusic->mPaused != (aMusicPaused != 0))
 			mApp->mMusic->GameMusicPause(aMusicPaused != 0);
 	}
@@ -4494,38 +4527,6 @@ void Board::NetDrawTowerDefensePath(Graphics* g)
 		{
 			NetTrace("TD_ROAD_DRAW_COMPLETE role=%s board=%p cells=%zu image=%dx%d",
 				aRole, (void*)this, aCellCount, anImageWidth, anImageHeight);
-		}
-	}
-}
-
-// ==========================================================================
-// Endless T weather rendering (darkness at night, fog, storm flashes)
-// ==========================================================================
-
-void Board::DrawEndlessWeather(Graphics* g)
-{
-	if (!IsEndlessT())
-		return;
-
-	// fog roll from the right
-	if (mNetFogTimer > 0)
-	{
-		g->SetColor(Color(210, 215, 225, 120));
-		g->FillRect(400, 0, BOARD_WIDTH - 400, BOARD_HEIGHT);
-		g->SetColor(Color(190, 195, 210, 70));
-		g->FillRect(300, 0, 100, BOARD_HEIGHT);
-	}
-
-	// storm: lightning flash
-	if (mNetStormTimer > 0)
-	{
-		// The storm timer is authoritative and snapshot-synchronized.  Using the
-		// local mMainCounter made lightning flash on different frames per peer.
-		int aFlash = mNetStormTimer % 180;
-		if (aFlash < 6)
-		{
-			g->SetColor(Color(255, 255, 255, 130 - aFlash * 15));
-			g->FillRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
 		}
 	}
 }

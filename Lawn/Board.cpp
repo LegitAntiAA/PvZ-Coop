@@ -93,9 +93,12 @@ Board::Board(LawnApp* theApp)
 	mNetDaveAppliedMessageIndex = INT_MIN;
 	mTDPath.clear();
 	mNetDayPhase = 0;
+	mNetNightBlend = 0;
 	mNetWeatherTimer = 6000;
 	mNetFogTimer = 0;
 	mNetStormTimer = 0;
+	mNetStormFlashKind = 0;
+	mNetStormFlashCounter = 0;
 	mNetTDLives = 5;
 	mCoinBankFadeCount = 0;
 	mLevel = 0;
@@ -1104,8 +1107,6 @@ void Board::LoadBackgroundImages()
 	{
 	case BackgroundType::BACKGROUND_1_DAY:
 		TodLoadResources("DelayLoad_Background1");
-		if (IsEndlessT())
-			TodLoadResources("DelayLoad_Background2");
 		if ((mApp->IsAdventureMode() && mLevel <= 4) ||
 			mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_RESODDED ||
 			mApp->mGameMode == GameMode::GAMEMODE_COOP_TOWER_DEFENSE)
@@ -1156,6 +1157,14 @@ void Board::LoadBackgroundImages()
 	default:
 		TOD_ASSERT();
 		break;
+	}
+	if (IsEndlessT())
+	{
+		// Weather can change after the chooser, so both backdrops and native
+		// accelerated/software fog must already be available on every peer.
+		TodLoadResources("DelayLoad_Background1");
+		TodLoadResources("DelayLoad_Background2");
+		TodLoadResources("DelayLoad_Background4");
 	}
 	LawnNet::NetTrace("LoadBackgroundImages complete board=%p background=%d day=%p unsodded=%p night=%p pool=%p fog=%p roof=%p",
 		(void*)this, (int)mBackground, (void*)Sexy::IMAGE_BACKGROUND1,
@@ -7459,41 +7468,76 @@ void Board::ApplyPvPZombieSpawnHealth(Zombie* theZombie) const
 
 void Board::UpdateEndlessWeather()
 {
-	if (!IsEndlessT() || mApp->NetIsClient())
+	if (!IsEndlessT() || mApp->NetIsClient() || mPaused ||
+		mApp->mGameScene != SCENE_PLAYING || mBoardFadeOutCounter >= 0 ||
+		mLevelComplete || mLevelAwardSpawned)
 		return;
 
+	const bool aWasNight = StageIsNight();
+	if (mNetFogTimer > 0) --mNetFogTimer;
+	if (mNetStormTimer > 0) --mNetStormTimer;
 	if (mNetWeatherTimer > 0)
-		mNetWeatherTimer--;
-	else
+		--mNetWeatherTimer;
+	if (mNetWeatherTimer == 0)
 	{
-		// switch phase every ~60 seconds
+		// Target changes every minute; the native night rules follow the
+		// midpoint of the 250-tick visual transition below.
 		mNetDayPhase = mNetDayPhase ? 0 : 1;
 		mNetWeatherTimer = 6000;
-		Plant* aPlant = nullptr;
-		while (IteratePlants(aPlant))
+		if (Rand(100) < 25)
 		{
-			if (Plant::IsNocturnal(aPlant->mSeedType))
-				aPlant->SetSleeping(!StageIsNight());
+			if (mNetFogTimer == 0)
+				memset(mGridCelFog, 0, sizeof(mGridCelFog));
+			mNetFogTimer = 3000;
 		}
-		mApp->mMusic->StartGameMusic();
-
-		// Weather choices are exclusive.  Explicitly clear the previous effect
-		// before rolling so delayed/custom timer values cannot overlap fog and
-		// storm on the next phase.
-		mNetFogTimer = 0;
-		mNetStormTimer = 0;
-		// random weather after each switch
-		int aRoll = Rand(100);
-		if (aRoll < 25)
-			mNetFogTimer = 3000;       // ~30 s of fog
-		else if (aRoll < 45)
-			mNetStormTimer = 2000;     // ~20 s of storm
+		// The second independent roll permits simultaneous fog and storm.
+		if (Rand(100) < 20)
+		{
+			if (mNetStormTimer == 0)
+			{
+				mNetStormFlashKind = 0;
+				mNetStormFlashCounter = 0;
+			}
+			mNetStormTimer = 2000;
+		}
 	}
 
-	if (mNetFogTimer > 0)
-		mNetFogTimer--;
-	if (mNetStormTimer > 0)
-		mNetStormTimer--;
+	if (mNetDayPhase)
+		mNetNightBlend = (uint16_t)min(1000, mNetNightBlend + 4);
+	else
+		mNetNightBlend = (uint16_t)max(0, mNetNightBlend - 4);
+	if (aWasNight != StageIsNight())
+	{
+		Plant* aPlant = nullptr;
+		while (IteratePlants(aPlant))
+			if (Plant::IsNocturnal(aPlant->mSeedType))
+				aPlant->SetSleeping(!StageIsNight());
+	}
+
+	if (mNetStormTimer == 0)
+	{
+		mNetStormFlashKind = 0;
+		mNetStormFlashCounter = 0;
+	}
+	else
+	{
+		if (mNetStormFlashCounter > 0) --mNetStormFlashCounter;
+		if (mNetStormFlashCounter == 0)
+		{
+			// Preserve the native Stormy Night flash patterns/schedule in an
+			// independent state, leaving survival/repick Challenge state intact.
+			if (CountZombieByType(ZOMBIE_YETI))
+				mNetStormFlashCounter = STORM_FLASH_TIME + RandRangeInt(200, 300);
+			else
+			{
+				const int aMaxDuration = Rand(2) ? 400 : 750;
+				mNetStormFlashCounter = STORM_FLASH_TIME + RandRangeInt(300, aMaxDuration);
+			}
+			mNetStormFlashKind = (uint8_t)RandRangeInt(1, 3);
+		}
+	}
+	// Thunder is emitted once by the local presentation edge handler. The
+	// host simulation never plays it in addition to that handler.
 }
 
 void Board::UpdateGame()
@@ -7501,7 +7545,7 @@ void Board::UpdateGame()
 	UpdateEndlessWeather();
 	UpdatePvP();
 	UpdateGameObjects();
-	if (StageHasFog() && mFogBlownCountDown > 0)
+	if ((StageHasFog() || IsEndlessT()) && mFogBlownCountDown > 0)
 	{
 		float aMaxFogOffset = 1065.0f + 170 - LeftFogColumn() * 80.0f;
 		if (mApp->mGameScene == GameScenes::SCENE_LEVEL_INTRO)
@@ -7516,6 +7560,12 @@ void Board::UpdateGame()
 		{
 			mFogOffset = TodAnimateCurveFloat(-5, aMaxFogOffset, mFogOffset * 1.1f, 0, aMaxFogOffset, TodCurves::CURVE_LINEAR);
 		}
+	}
+	else if (IsEndlessT() && mFogBlownCountDown == 0)
+	{
+		// Blover's wind also expires between fog episodes. A stale offscreen
+		// offset must not hide the next episode indefinitely.
+		mFogOffset = 0.0f;
 	}
 
 	if (mApp->mGameScene != GameScenes::SCENE_PLAYING && !mCutScene->ShouldRunUpsellBoard())
@@ -7579,6 +7629,7 @@ void Board::Update()
 		mCutScene->Update();
 		UpdateMousePosition();
 		NetClientTick();
+		UpdateEndlessWeatherPresentation();
 		if (mApp->IsLastStand())
 		{
 			// The client does not run Challenge::Update.  Rebuild this one
@@ -7885,6 +7936,7 @@ void Board::Update()
 		mChallenge->Update();
 		UpdateLevelEndSequence();
 	}
+	UpdateEndlessWeatherPresentation();
 	mCursorPreview->Update();
 	mCursorObject->Update();
 	mPrevMouseX = mApp->mWidgetManager->mLastMouseX;
@@ -7976,8 +8028,8 @@ void Board::DrawBackdrop(Graphics* g)
 	case BackgroundType::BACKGROUND_6:					aBgImage = Sexy::IMAGE_BACKGROUND6;						break;
 	default:											TOD_ASSERT();											break;
 	}
-	if (IsEndlessT() && StageIsNight())
-		aBgImage = Sexy::IMAGE_BACKGROUND2;
+	if (IsEndlessT())
+		aBgImage = Sexy::IMAGE_BACKGROUND1;
 	static Board* aLastTracedBoard = nullptr;
 	static int aBackdropTraceCount = 0;
 	if (aLastTracedBoard != this)
@@ -8030,6 +8082,15 @@ void Board::DrawBackdrop(Graphics* g)
 		else
 		{
 			g->DrawImageF(aBgImage, -BOARD_OFFSET + WIDESCREEN_OFFSETX, WIDESCREEN_OFFSETY);
+			if (IsEndlessT() && Sexy::IMAGE_BACKGROUND2)
+			{
+				const float aBlend = mNetWeatherPresentationInitialized ? mNetVisualNightBlend : mNetNightBlend;
+				g->PushState();
+				g->SetColorizeImages(true);
+				g->SetColor(Color(255, 255, 255, ClampInt((int)(aBlend * 255.0f / 1000.0f + 0.5f), 0, 255)));
+				g->DrawImageF(Sexy::IMAGE_BACKGROUND2, -BOARD_OFFSET + WIDESCREEN_OFFSETX, WIDESCREEN_OFFSETY);
+				g->PopState();
+			}
 		}
 	}
 
@@ -8418,7 +8479,8 @@ void Board::DrawGameObjects(Graphics* g)
 	{
 		AddUIRenderItem(aRenderList, aRenderItemCount, RenderObjectType::RENDER_ITEM_FOG, MakeRenderOrder(RenderLayer::RENDER_LAYER_FOG, 0, 0));
 	}
-	if (mApp->IsStormyNightLevel() || mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_RAINING_SEEDS)
+	if (mApp->IsStormyNightLevel() || mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_RAINING_SEEDS ||
+		(IsEndlessT() && mNetStormTimer > 0))
 	{
 		AddUIRenderItem(aRenderList, aRenderItemCount, RenderObjectType::RENDER_ITEM_STORM, MakeRenderOrder(RenderLayer::RENDER_LAYER_FOG, 0, 3));
 	}
@@ -10575,7 +10637,6 @@ void Board::Draw(Graphics* g)
 	DrawGameObjects(g);
 
 	// Co-op cursors are drawn by LawnApp after every widget and dialog.
-	DrawEndlessWeather(g);
 	if (mApp->NetIsClient() && mPaused)
 	{
 		// DrawGameObjects uses the centered 800x600 board transform.  The pause
@@ -11839,7 +11900,7 @@ int Board::GetNumSeedsInBank()
 bool Board::StageIsNight()
 {
 	if (IsEndlessT())
-		return mNetDayPhase == 1;
+		return mNetNightBlend >= 500;
 	return 
 		mBackground == BackgroundType::BACKGROUND_2_NIGHT || 
 		mBackground == BackgroundType::BACKGROUND_4_FOG || 
@@ -11906,6 +11967,7 @@ bool Board::StageHasZombieWalkInFromRight()
 //0x41C170
 bool Board::StageHasFog()
 {
+	if (IsEndlessT()) return mNetFogTimer > 0;
 	return !mApp->IsStormyNightLevel() && mApp->mGameMode != GameMode::GAMEMODE_CHALLENGE_INVISIGHOUL && mBackground == BackgroundType::BACKGROUND_4_FOG;
 }
 
@@ -12479,7 +12541,7 @@ unsigned int Board::SeedNotRecommendedForLevel(SeedType theSeedType)
 	{
 		SetBit(aNotRec, NotRecommend::NOT_RECOMMENDED_NEEDS_GRAVES, true);
 	}
-	if (theSeedType == SeedType::SEED_PLANTERN && !StageHasFog())
+	if (theSeedType == SeedType::SEED_PLANTERN && !StageHasFog() && !IsEndlessT())
 	{
 		SetBit(aNotRec, NotRecommend::NOT_RECOMMENDED_NEEDS_FOG, true);
 	}

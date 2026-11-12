@@ -7,6 +7,7 @@
 #include "NetZombatarTests.h"
 #include "NetGameplayPolicyTests.h"
 #include "NetMysteryTests.h"
+#include "NetEndlessWeatherTests.h"
 
 #include <chrono>
 #include <cstdio>
@@ -911,6 +912,9 @@ int main(int argc, char** argv)
 	const auto aMysteryResult = RunNetMysteryTests();
 	gChecks += aMysteryResult.mChecks;
 	gFailures += aMysteryResult.mFailures;
+	const auto aWeatherResult = RunNetEndlessWeatherTests();
+	gChecks += aWeatherResult.mChecks;
+	gFailures += aWeatherResult.mFailures;
 
 	std::printf("\nchecks=%d failures=%d skipped=%d\n", gChecks, gFailures, gSkipped);
 	return gFailures == 0 ? 0 : 1;
