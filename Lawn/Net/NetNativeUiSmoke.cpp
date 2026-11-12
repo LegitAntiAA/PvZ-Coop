@@ -62,7 +62,9 @@ bool Click(LawnApp* app, Widget* w, Dialog* d = nullptr)
     if (!w || !w->mVisible || w->mDisabled) return false;
     const float x = (d ? d->mX : 0) + w->mX + w->mWidth / 2.0f;
     const float y = (d ? d->mY : 0) + w->mY + w->mHeight / 2.0f;
-    return Mouse(app, true, x, y) && Mouse(app, false, x, y);
+    SDL_Event motion{}; motion.type = SDL_EVENT_MOUSE_MOTION;
+    motion.motion.windowID = SDL_GetWindowID(app->mSDLWindow); motion.motion.x = x; motion.motion.y = y;
+    return SDL_PushEvent(&motion) && Mouse(app, true, x, y) && Mouse(app, false, x, y);
 }
 
 bool Drag(LawnApp* app, Dialog* d, Slider* slider, double value)
@@ -76,7 +78,9 @@ bool Drag(LawnApp* app, Dialog* d, Slider* slider, double value)
     e.type = SDL_EVENT_MOUSE_MOTION;
     e.motion.windowID = SDL_GetWindowID(app->mSDLWindow);
     e.motion.state = SDL_BUTTON_LMASK; e.motion.x = target; e.motion.y = y;
-    return Mouse(app, true, start, y) && SDL_PushEvent(&e) && Mouse(app, false, target, y);
+    SDL_Event startMotion{}; startMotion.type = SDL_EVENT_MOUSE_MOTION;
+    startMotion.motion.windowID = SDL_GetWindowID(app->mSDLWindow); startMotion.motion.x = start; startMotion.motion.y = y;
+    return SDL_PushEvent(&startMotion) && Mouse(app, true, start, y) && SDL_PushEvent(&e) && Mouse(app, false, target, y);
 }
 
 void Values(const NetConfig& c, int out[3])
@@ -181,7 +185,17 @@ bool Appearance(LawnApp* app, bool restart)
     }
     else if (s.mStage == 3)
     {
-        if (!options) return true;
+        if (!options)
+        {
+            // BACK_TO_MENU can expose an idle selector before the host's later
+            // SHOW_GAME_SELECTOR rebuild closes the provisional local dialog.
+            if (app->mGameSelector && app->mGameSelector->mSelectorState == SELECTOR_IDLE && !app->mChallengeScreen)
+            {
+                app->DoNewOptions(true); s.mObserved = s.mCaptured = -1;
+                NetTrace("SMOKE_NATIVE_OPTIONS_RECOVERY role=%s sceneSettled=1", host ? "host" : "client");
+            }
+            return true;
+        }
         if (Record(app, "options", true))
         {
             ++s.mStage;
