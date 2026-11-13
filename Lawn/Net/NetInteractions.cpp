@@ -15,6 +15,8 @@
 
 namespace LawnNet
 {
+void NetSmokeObserveChooserPing(LawnApp* app, int seed);
+
 void NetManager::SetMyReady(bool theReady)
 {
 	if (!IsActive() || IsSpectator() || !mApp || (!mChooserOpen && !mApp->NetIsChoosingPvpTeams())) return;
@@ -213,6 +215,14 @@ void NetManager::SendAnnotation(uint8_t theKind, int theX, int theY, uint16_t th
 	const int ox = mApp->mDDInterface ? mApp->mDDInterface->mWideScreenOffsetX : 0;
 	const int oy = mApp->mDDInterface ? mApp->mDDInterface->mWideScreenOffsetY : 0;
 	int x = theX - ox, y = theY - oy;
+	if (theKind == NETANNOTATION_CHOOSER_SEED && theId == 0)
+	{
+		SeedChooserScreen* chooser = mApp->mSeedChooserScreen;
+		NetCursorTarget target; int16_t offsetX = 0, offsetY = 0;
+		if (mInputPhase != NETINPUT_CHOOSER || !chooser ||
+			!chooser->CoopCursorTargetAt(x,y,target,offsetX,offsetY) || !chooser->CoopCanPingSeed(target.mSeed)) return;
+		theId = (uint16_t)target.mSeed + 1;
+	}
 	if (theKind == NETANNOTATION_SEED && theId == 0 && mApp->mBoard->mSeedBank)
 	{
 		SeedBank* bank = mApp->mBoard->mSeedBank;
@@ -234,15 +244,23 @@ void NetManager::SendAnnotation(uint8_t theKind, int theX, int theY, uint16_t th
 
 void NetManager::OnAnnotation(NetSession* theSession, NetBuffer& thePayload)
 {
-	if (!mApp || !mApp->mBoard || mApp->mGameScene != SCENE_PLAYING || thePayload.Remaining() != 12) return;
+	if (!mApp || !mApp->mBoard || thePayload.Remaining() != 12) return;
 	uint8_t slot = thePayload.ReadU8Or();
 	const uint32_t epoch = thePayload.ReadU32Or();
 	const uint8_t kind = thePayload.ReadU8Or();
 	const int16_t x = thePayload.ReadI16Or(), y = thePayload.ReadI16Or();
 	const uint16_t id = thePayload.ReadU16Or();
 	if (IsHosting()) slot = theSession ? theSession->mSlot : mMySlot;
-	if (slot >= NET_MAX_PLAYERS || !mPlayers[slot].mActive || epoch != mInputEpoch || kind > NETANNOTATION_SEED ||
+	if (slot >= NET_MAX_PLAYERS || !mPlayers[slot].mActive || epoch != mInputEpoch || kind > NETANNOTATION_CHOOSER_SEED ||
 		x < 0 || x > 800 || y < 0 || y > 600) return;
+	const bool chooserPing = kind == NETANNOTATION_CHOOSER_SEED;
+	if (chooserPing)
+	{
+		if (mInputPhase != NETINPUT_CHOOSER || !mChooserOpen || !mApp->mSeedChooserScreen ||
+			!id || id > NUM_SEEDS_IN_CHOOSER || !mApp->mSeedChooserScreen->CoopCanPingSeed(id - 1) ||
+			(mApp->mBoard->IsPvPMode() && !mPlayers[slot].mSpectator && mPlayers[slot].mTeam != NETTEAM_PLANTS)) return;
+	}
+	else if (mInputPhase != NETINPUT_PLAYING || mApp->mGameScene != SCENE_PLAYING) return;
 	SeedPacket* seed = nullptr;
 	if (kind == NETANNOTATION_SEED)
 	{
@@ -255,6 +273,7 @@ void NetManager::OnAnnotation(NetSession* theSession, NetBuffer& thePayload)
 	const auto canView = [&](int peer)
 	{
 		if (!mApp->mBoard->IsPvPMode() || mPlayers[peer].mSpectator) return true;
+		if (chooserPing) return mPlayers[peer].mTeam == NETTEAM_PLANTS;
 		if (!mPlayers[slot].mSpectator) return mPlayers[peer].mTeam == mPlayers[slot].mTeam;
 		if (!seed) return true; // neutral observer pings and drawings are public
 		const uint8_t team = mApp->mBoard->mChallenge->IsZombieSeedType(seed->mPacketType) ? NETTEAM_ZOMBIES : NETTEAM_PLANTS;
@@ -263,19 +282,25 @@ void NetManager::OnAnnotation(NetSession* theSession, NetBuffer& thePayload)
 	const bool aVisibleHere = canView(mMySlot);
 	if (IsHosting())
 	{
-		uint32_t& last = kind == NETANNOTATION_PING || kind == NETANNOTATION_SEED ? mLastAnnotationTick[slot] : mLastDrawTick[slot];
-		const uint32_t cooldown = kind == NETANNOTATION_PING || kind == NETANNOTATION_SEED ? 500U : 40U;
+		const bool ping = kind == NETANNOTATION_PING || kind == NETANNOTATION_SEED || chooserPing;
+		uint32_t& last = ping ? mLastAnnotationTick[slot] : mLastDrawTick[slot];
+		const uint32_t cooldown = ping ? 500U : 40U;
 		if (last && now - last < cooldown && kind != NETANNOTATION_DRAW_END) return;
 		last = now;
 		NetBuffer b; b.WriteU8(slot); b.WriteU32(epoch); b.WriteU8(kind); b.WriteI16(x); b.WriteI16(y); b.WriteU16(id);
 		for (int peer = 1; peer < NET_MAX_PLAYERS; ++peer)
 			if (mPlayers[peer].mActive && canView(peer))
 				mSessions[peer].mConn.SendMessage(NETMSG_ANNOTATION, b);
-		if (seed)
+		if (seed || chooserPing)
 		{
-			const int seconds = seed->mRefreshing ? max(0, seed->mRefreshTime - seed->mRefreshCounter + 99) / 100 : 0;
-			const std::string text = SexyStringToString(Plant::GetNameString(seed->mPacketType, seed->mImitaterType)) +
-				" (" + std::to_string(seconds) + "s)";
+			std::string text;
+			if (chooserPing) text = SexyStringToString(Plant::GetNameString((SeedType)(id - 1),SEED_NONE));
+			else
+			{
+				const int seconds = seed->mRefreshing ? max(0, seed->mRefreshTime - seed->mRefreshCounter + 99) / 100 : 0;
+				text = SexyStringToString(Plant::GetNameString(seed->mPacketType, seed->mImitaterType)) +
+					" (" + std::to_string(seconds) + "s)";
+			}
 			if (aVisibleHere) AddChatLine(slot, text);
 			NetBuffer chat; chat.WriteU8(slot); chat.WriteString(text.c_str());
 			for (int peer = 1; peer < NET_MAX_PLAYERS; ++peer)
@@ -289,7 +314,7 @@ void NetManager::OnAnnotation(NetSession* theSession, NetBuffer& thePayload)
 void NetManager::ApplyAnnotation(uint8_t theSlot, uint8_t theKind, int16_t theX, int16_t theY, uint16_t theId)
 {
 	NetTrace("annotation accepted slot=%u kind=%u id=%u x=%d y=%d", theSlot,theKind,theId,theX,theY);
-	if (theKind == NETANNOTATION_PING || theKind == NETANNOTATION_SEED)
+	if (theKind == NETANNOTATION_PING || theKind == NETANNOTATION_SEED || theKind == NETANNOTATION_CHOOSER_SEED)
 	{
 		mApp->SexyAppBase::PlaySample(Sexy::SOUND_TAP); // local playback; annotation is already relayed
 		NetTrace("annotation playback slot=%u kind=%u", theSlot,theKind);
@@ -340,6 +365,35 @@ void NetManager::DrawAnnotations(Sexy::Graphics* g)
 				if (bank->mSeedPackets[i].mNetId == a.mId && mApp->mBoard->IsSeedPacketVisibleToSlot(i,mMySlot))
 				{ const auto& p = bank->mSeedPackets[i]; g->SetColor(Color(255,255,255,125)); g->FillRect(ox+bank->mX+p.mX+p.mOffsetX,oy+bank->mY+p.mY,p.mWidth,p.mHeight); }
 		}
+		else if (a.mKind == NETANNOTATION_CHOOSER_SEED && age < 2500U && (age/140U)%2 == 0 &&
+			mInputPhase == NETINPUT_CHOOSER && mApp->mSeedChooserScreen && a.mId > 0 && a.mId <= NUM_SEEDS_IN_CHOOSER)
+		{
+			SeedChooserScreen* chooser = mApp->mSeedChooserScreen;
+			NetCursorTarget target; target.mKind = NETCURSOR_CHOOSER_CATALOG; target.mSeed = (uint8_t)(a.mId - 1);
+			auto Highlight = [&]()
+			{
+				Rect rect;
+				if (!chooser->CoopCursorTargetRect(target,rect)) return;
+				g->SetColor(Color(color.r,color.g,color.b,120));
+				g->FillRect(ox+rect.mX,oy+rect.mY,rect.mWidth,rect.mHeight);
+				g->SetColor(Color(color.r,color.g,color.b));
+				g->DrawRect(ox+rect.mX,oy+rect.mY,rect.mWidth-1,rect.mHeight-1);
+				NetSmokeObserveChooserPing(mApp,target.mSeed);
+			};
+			Highlight();
+			target.mKind = NETCURSOR_CHOOSER_BANK;
+			for (int slot = 0; slot < NET_MAX_PLAYERS; ++slot)
+			{
+				target.mOwner = (uint8_t)slot;
+				target.mImitater = target.mSeed == SEED_IMITATER ?
+					(uint8_t)chooser->mChosenSeeds[SEED_IMITATER].mImitaterType : 255;
+				if (slot != mMySlot && target.mSeed == SEED_IMITATER)
+					for (int j=0;j<chooser->mCoopRemotePickCount[slot] && j<12;++j)
+						if (chooser->mCoopRemotePicks[slot][j] == SEED_IMITATER)
+							target.mImitater = (uint8_t)chooser->mCoopRemoteImitaters[slot][j];
+				Highlight();
+			}
+		}
 		else if (a.mKind >= NETANNOTATION_DRAW_BEGIN && a.mKind <= NETANNOTATION_DRAW_END)
 		{
 			auto key = std::make_pair(a.mSlot,a.mId);
@@ -368,10 +422,18 @@ bool NetManager::HandlePausePlayerClick(int theX, int theY)
 bool LawnApp::NetHandlePointerInput(int theAction, int theButton, int theX, int theY)
 {
 	using namespace LawnNet;
-	if (!mNetManager || !mNetManager->IsActive() || !mBoard || mGameScene != SCENE_PLAYING || mNetChatTyping) return false;
+	if (!mNetManager || !mNetManager->IsActive() || !mBoard || mNetChatTyping) return false;
+	const SDL_Keymod mods = SDL_GetModState();
+	if (mNetManager->GetInputPhase() == NETINPUT_CHOOSER && mSeedChooserScreen &&
+		theButton == -1 && (mods & SDL_KMOD_ALT) && GetDialogCount() == 0)
+	{
+		if (theAction == NETINPUT_MOUSE_DOWN)
+			mNetManager->SendAnnotation(NETANNOTATION_CHOOSER_SEED,theX,theY);
+		return true;
+	}
+	if (mGameScene != SCENE_PLAYING) return false;
 	if (theAction == NETINPUT_MOUSE_DOWN && theButton == 1 && mNetManager->HandlePausePlayerClick(theX,theY)) return true;
 	if (mBoard->mPaused || GetDialogCount() != 0) return false;
-	const SDL_Keymod mods = SDL_GetModState();
 	if (mNetDrawing && (theAction == NETINPUT_MOUSE_UP || !(mods & SDL_KMOD_CTRL)))
 	{
 		mNetManager->SendAnnotation(NETANNOTATION_DRAW_END,mNetLastDrawX,mNetLastDrawY,mNetDrawingId);

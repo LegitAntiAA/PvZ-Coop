@@ -209,6 +209,11 @@ void LawnDialog::CheckboxChecked(int theId, bool theChecked)
 //0x457340
 void LawnDialog::KeyDown(KeyCode theKey)
 {
+    if (mId == DIALOG_OPENURL_WAIT && theKey == KEYCODE_ESCAPE)
+    {
+        Dialog::ButtonDepress(Dialog::ID_YES);
+        return;
+    }
     if (mId == DIALOG_PAUSED && mApp->mBoard)
     {
         mApp->mBoard->DoTypingCheck(theKey);

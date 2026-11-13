@@ -64,6 +64,7 @@
 
 #include "Lawn/Widget/MoreSettingsDialog.h"
 #include "Lawn/Widget/NetOnlineDialog.h"
+#include "Lawn/Widget/CoopHelpDialog.h"
 
 #include <windows.h>
 #include <windowsx.h>
@@ -72,6 +73,11 @@ namespace LawnNet
 {
 	bool NetSpectatorSmokeRunBaseline(LawnApp* theApp);
 	bool NetSmokeUpdateNativeUi(LawnApp* theApp);
+	bool NetSmokeUpdateHelp(LawnApp* theApp);
+	bool NetSmokeUpdateCommunications(LawnApp* theApp);
+	bool NetSmokeControlsComplete(LawnApp* theApp);
+	bool NetSmokeUpdateZenGarden(LawnApp* theApp);
+	bool NetSmokeZenGardenAllowsStart(LawnApp* theApp, uint8_t theMode, int32_t theLevel);
 	bool NetSmokeUpdateMystery(LawnApp* theApp);
 	bool NetSmokeUpdateDifficulty(LawnApp* theApp);
 	bool NetSmokeUpdateEndlessWeather(LawnApp* theApp);
@@ -590,8 +596,11 @@ void LawnApp::Redraw(Rect* theClipRect)
 		ImGui_ImplSDLRenderer3_RenderDrawData(drawData, mSDLRenderer);
 	}
 	// Co-op overlays are the final visual layer, above widgets and dialogs.
-	NetDrawChatOverlay();
-	NetDrawCursorOverlay();
+	if (!GetDialog(DIALOG_COOP_HELP))
+	{
+		NetDrawChatOverlay();
+		NetDrawCursorOverlay();
+	}
 	// Read this SDL renderer's actual backbuffer before Present invalidates it.
 	// The widget image is only a drawing facade, not a rendered texture.
 	const char* aCaptureDir = CoopSmokeActive() ? getenv("PVZ_COOP_SMOKE_CAPTURE_DIR") : nullptr;
@@ -831,6 +840,8 @@ bool LawnApp::UpdateAppStep(bool* updated)
 					{
 						mLastUserInputTick = mLastTimerTime;
 						if (NetHandleChatKey(GetKeyCodeFromCodeSDL(event.key.key)))
+							break;
+						if (mBoard && mBoard->HandleHotbarKey(GetKeyCodeFromCodeSDL(event.key.key), event.key.repeat))
 							break;
 						if (NetIsClient() && mNetManager && event.key.key == SDLK_Q)
 							mNetManager->SendHeatWaveShoutKey(true);
@@ -1622,6 +1633,7 @@ void LawnApp::PreNewGame(GameMode theGameMode, bool theLookForSavedGame, int the
 //0x44F5F0
 void LawnApp::MakeNewBoard()
 {
+	if (auto* aHelp = dynamic_cast<CoopHelpDialog*>(GetDialog(DIALOG_COOP_HELP))) aHelp->Close();
 	LawnNet::NetTrace("MakeNewBoard begin mode=%d scene=%d size=%dx%d oldBoard=%p lobby=%p",
 		(int)mGameMode, (int)mGameScene, mWidth, mHeight, (void*)mBoard, (void*)mNetLobbyPanel);
 	KillBoard();
@@ -1788,6 +1800,7 @@ void LawnApp::ShowGameSelector()
 //0x44F9E0
 void LawnApp::KillGameSelector()
 {
+	if (auto* aHelp = dynamic_cast<CoopHelpDialog*>(GetDialog(DIALOG_COOP_HELP))) aHelp->Close();
 	if (mGameSelector)
 	{
 		mWidgetManager->RemoveWidget(mGameSelector);
@@ -2934,7 +2947,8 @@ void LawnApp::Init()
 	if (!(CoopSmokeActive() && getenv("PVZ_COOP_SMOKE_BACKGROUND") &&
 		strcmp(getenv("PVZ_COOP_SMOKE_BACKGROUND"), "1") == 0))
 		SDL_RaiseWindow(LawnApp::mSDLWindow);
-	if (!IsScreenSaver() && !IsParticleEditor() && !CoopSmokeActive())
+	if (!IsScreenSaver() && !IsParticleEditor() && !CoopSmokeActive() &&
+		!(mNetManager && mNetManager->mConfig.mSkipIntro))
 		PlayVideo(StrFormat("%svideos/intro.mp4", SDL_GetBasePath()).c_str(), true);
 }
 
@@ -3682,14 +3696,14 @@ void LawnApp::URLOpenFailed(const std::string& theURL)
 {
 	SexyAppBase::URLOpenFailed(theURL);
 	KillDialog(Dialogs::DIALOG_OPENURL_WAIT);
-	CopyToClipboard(theURL);
+	if (!CoopSmokeActive()) CopyToClipboard(theURL);
 
 	std::string aString = 
 		"Please open the following URL in your browser\n\n" + 
 		theURL + 
 		"\n\nFor your convenience, this URL has already been copied to your clipboard.";
 
-	DoDialog(Dialogs::DIALOG_OPENURL_WAIT, true, _S("Open Browser"), _S("OK"), StringToSexyStringFast(aString), Dialog::BUTTONS_FOOTER);
+	DoDialog(Dialogs::DIALOG_OPENURL_WAIT, true, _S("Open Browser"), StringToSexyStringFast(aString), _S("OK"), Dialog::BUTTONS_FOOTER);
 }
 
 //0x452EE0
@@ -3707,13 +3721,18 @@ bool LawnApp::OpenURL(const std::string& theURL, bool shutdownOnOpen)
 		true, 
 		_S("Opening Browser"), 
 		StringToSexyString(theURL),
-		_S(""), 
-		Dialog::BUTTONS_NONE
+		_S("CLOSE"),
+		Dialog::BUTTONS_FOOTER
 	);
 
 	DrawDirtyStuff();
 
-	return SexyAppBase::OpenURL(theURL, shutdownOnOpen);
+	const bool aOpened = SexyAppBase::OpenURL(theURL, shutdownOnOpen);
+	// SDL owns the event loop; the legacy Win32 focus/timeout completion loop
+	// is not pumped here. ShellExecute has already accepted or rejected the URL.
+	if (aOpened)
+		URLOpenSucceeded(theURL);
+	return aOpened;
 }
 
 //0x453040
@@ -6008,6 +6027,12 @@ void LawnApp::CoopSmokeUpdate()
 	}
 	if (!mCoopSmokeLifecycleStarted || !mNetManager)
 		return;
+	if (LawnNet::NetSmokeUpdateHelp(this))
+		return;
+	if (LawnNet::NetSmokeUpdateZenGarden(this))
+		return;
+	if (LawnNet::NetSmokeUpdateCommunications(this))
+		return;
 	if (LawnNet::NetSmokeUpdateAvatarEditor(this))
 		return;
 	if (LawnNet::NetSmokeUpdateDifficulty(this))
@@ -6033,6 +6058,7 @@ void LawnApp::CoopSmokeUpdate()
 	const bool aSpectatorReady = CoopSmokeUpdateSpectator();
 	const bool aFirstAdventureReady = CoopSmokeUpdateFirstAdventure();
 	const bool aInteractionsReady = CoopSmokeUpdateInteractions();
+	const bool aControlsReady = LawnNet::NetSmokeControlsComplete(this);
 	const bool aModesReady = CoopSmokeUpdateModes();
 	const bool aUnicodeChatReady = CoopSmokeUpdateUnicodeChat();
 	if (mCoopSmokeResultWritten)
@@ -6154,7 +6180,7 @@ void LawnApp::CoopSmokeUpdate()
 			 strcmp(getenv("PVZ_COOP_SMOKE_SPECTATOR_PROMOTE"), "1") == 0)) &&
 			mCoopSmokeSnapshotsSent >= mCoopSmokeManifest.mMinimumSnapshots &&
 			mCoopSmokeScenarioRuntime.IsComplete(mCoopSmokeManifest.mMinimumSnapshots) &&
-			aUnicodeChatReady && aInteractionsReady && aFirstAdventureReady && aSpectatorReady && aModesReady)
+			aUnicodeChatReady && aInteractionsReady && aControlsReady && aFirstAdventureReady && aSpectatorReady && aModesReady)
 		{
 			bool aPublished = CoopSmokeWriteResult(true, nullptr);
 			if (!aPublished || mCoopSmokeManifest.mCloseOnResult)
@@ -6195,7 +6221,7 @@ void LawnApp::CoopSmokeUpdate()
 			(mGameScene == GameScenes::SCENE_PLAYING || aSmokeTerminalScene))) &&
 			mCoopSmokeSnapshotsApplied >= mCoopSmokeManifest.mMinimumSnapshots &&
 			mCoopSmokeScenarioRuntime.IsComplete(mCoopSmokeManifest.mMinimumSnapshots) &&
-			aUnicodeChatReady && aInteractionsReady && aFirstAdventureReady && aSpectatorReady && aModesReady)
+			aUnicodeChatReady && aInteractionsReady && aControlsReady && aFirstAdventureReady && aSpectatorReady && aModesReady)
 		{
 			bool aPublished = CoopSmokeWriteResult(true, nullptr);
 			if (!aPublished || mCoopSmokeManifest.mCloseOnResult)
@@ -6316,7 +6342,8 @@ void LawnApp::NetOnStartGame(LawnNet::NetBuffer& thePayload)
                 aValid = aValid && aCheck.Remaining() == 0 &&
                         ((aMode == mCoopSmokeManifest.mGameMode && aLevel == mCoopSmokeManifest.mLevel) ||
 			 CoopSmokeFirstAdventureAllowsStart(aMode, aLevel) ||
-			 LawnNet::NetSmokeNativeUiAllowsStart(this, aMode, aLevel)) && aSeed == mCoopSmokeManifest.mSeed &&
+			 LawnNet::NetSmokeNativeUiAllowsStart(this, aMode, aLevel) ||
+			 LawnNet::NetSmokeZenGardenAllowsStart(this, aMode, aLevel)) && aSeed == mCoopSmokeManifest.mSeed &&
 			(aPlayerCount == 2 || (aPlayerCount == 3 &&
 				getenv("PVZ_COOP_SMOKE_SPECTATOR") && strcmp(getenv("PVZ_COOP_SMOKE_SPECTATOR"), "1") == 0 &&
 				((getenv("PVZ_COOP_SMOKE_SPECTATOR_ROLE") && strcmp(getenv("PVZ_COOP_SMOKE_SPECTATOR_ROLE"), "spectator") == 0) ||
@@ -6536,6 +6563,7 @@ void LawnApp::NetTickPvpTeamSelection()
 
 void LawnApp::NetCloseTransientScreens()
 {
+	if (auto* aHelp = dynamic_cast<CoopHelpDialog*>(GetDialog(DIALOG_COOP_HELP))) aHelp->Close();
 	KillDialog(Dialogs::DIALOG_COOP_TEAMS);
 	KillAwardScreen();
 	KillChallengeScreen();
@@ -6547,6 +6575,7 @@ void LawnApp::NetCloseTransientScreens()
 
 bool LawnApp::NetOnSceneCmd(uint8_t aCmd, uint32_t aParam)
 {
+	if (auto* aHelp = dynamic_cast<CoopHelpDialog*>(GetDialog(DIALOG_COOP_HELP))) aHelp->Close();
 	switch (aCmd)
 	{
 	case LawnNet::SCENECMD_SHOW_GAME_SELECTOR:

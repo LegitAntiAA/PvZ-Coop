@@ -55,6 +55,8 @@
 	<ClCompile Include="NetMowerSnapshotTests.cpp" />
 	<ClCompile Include="NetZombieAnimTests.cpp" />
     <ClCompile Include="TestMain.cpp" />
+    <ClCompile Include="NetCursorTargetTests.cpp" />
+    <ClCompile Include="NetZenGardenTests.cpp" />
     <ClCompile Include="NetZombatarTests.cpp" />
 	<ClCompile Include="NetGameplayPolicyTests.cpp" />
 	<ClCompile Include="NetMysteryTests.cpp" />

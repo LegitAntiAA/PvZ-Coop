@@ -61,6 +61,8 @@ private:
 public:
     LawnApp*                    mApp;                       //+0x8C
     Sexy::DDImage*              mGithubImage;
+    Sexy::Widget*               mGithubIconHitbox;
+    Sexy::Widget*               mCoopHelpIconHitbox;
     NewLawnButton*              mAdventureButton;           //+0x90
     NewLawnButton*              mMinigameButton;            //+0x94
     NewLawnButton*              mPuzzleButton;              //+0x98
@@ -137,6 +139,9 @@ public:
     virtual void                Draw(Graphics* g);
     virtual void                DrawOverlay(Graphics* g);
     Rect                        GetGithubIconRect() const { return Rect(8, 8, 32, 32); }
+    Rect                        GetCoopHelpIconRect() const { return Rect(48, 8, 32, 32); }
+    bool                        MainMenuIconsVisible() const
+    { return mVisible && !mStartingGame && mSelectorState == SELECTOR_IDLE && mSlideCounter == 0 && mX == 0 && mY == 0 && mDestX == 0 && mDestY == 0; }
     virtual void                Update();
     virtual void                AddedToManager(WidgetManager* theWidgetManager);
     virtual void                RemovedFromManager(WidgetManager* theWidgetManager);

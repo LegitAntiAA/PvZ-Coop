@@ -1,4 +1,34 @@
-# Play-test delivery — 2026-11-11
+# UI, input and shared Zen Garden delivery — 2026-11-13
+
+Ten requested changes and the expanded shared Zen Garden are implemented and locally accepted. Root owns integration and publication to main through the user's gh authentication. Initial clean baseline5e8963a built and passed1647/0/0. Two unrelated later remote assets commits were fast-forwarded and preserved. Current protocol34 requires the same compiled build on all peers.
+
+| ID | Acceptance | Owner | Result / evidence |
+|---|---|---|---|
+| URL-01 | GitHub wait can close; fallback has working OK/Escape | Root | DONE; Help7 actual SDL fallback on both peers, success callback source-reviewed; external browser launch not performed |
+| BAL-02 | Convex D1=7%, D5=20%, D10=55%, no clipping of intrinsic discount | engineer_controls | DONE; unit curve/price checks and real D1/D5/D10 purchases47/40/45 from base50/50/100 |
+| CTRL-03 | 1..9,0 and Q; regular/conveyor, ordered network input and visible stable packet | engineer_controls + net_communications | DONE; controls5b normal/conveyor, offclip negative case and visible packet24 planting |
+| CURSOR-04 | Same plant across viewer ordering and conveyor movement | net_communications | DONE; chooser7, conveyor5b packet18, TD5b packet19 client0→host5; actual rendered pointers inspected |
+| COLOR-05 | Readable shared blue and stable relative colors | net_communications | DONE; RGB105/175/255, unit assertions and actual chooser/chat frames |
+| PICKPING-06 | Alt+RMB chooser ping uses actual plant identity | net_communications | DONE; chooser7 actual SDL and rendered flash on both peers |
+| BROWSER-07 | Refresh/create remain inside the stone frame at800/1066 | Root | DONE; Help7 native geometry and frames |
+| INTRO-08 | skipIntro=1 skips startup video, default0 persists | Root | DONE; config default/reset/0/1 roundtrip tests and startup-only guard review |
+| ZEN-09 | Shared care/move/coins/snail/resources, visible needs and host authority | engineer_zen | DONE; Zen5b17 checkpoints plus4active-tool frames per peer, no private potted-save copy or snapshot rejects |
+| HELP-10 | Animated ordinary zombie bottom-right, seamless pastel AA bubble, clean font, typewriter/sound, actual spotlights and animated previews | engineer_controls + Root | DONE; Help7 seven steps at800/1066, fresh partial-text ink, quiet ticks, Space reveal, Back/Close/Escape and live scene teardown |
+| ACCEPT-11 | Integrated build/unit, targeted native pairs, independent review and docs | Root | DONE locally; build7 Passed,1871/0/0 Passed, all selected native suites Passed; publication and CI are tracked by GitHub for the pushed HEAD |
+
+## Current acceptance evidence
+
+- Build7: `work/ui-controls-build7.log`; unit1871/0/0: `work/ui-controls-unit7-tests.log`. Source stayed frozen throughout the final build and Help7/chooser7; later edits are delivery documentation only.
+- Help7: `work/ui-help7/run_be20ccfc1ae34efaa2f10154ad882481`, whole Passed. Root inspected the actual renderer image; body/tail join and AA coverage passed pixel probes. TrebuchetMS body14/headerBold17; fill249/247/242. Native partial-text frame and sound state checked; no heard-audio claim. Client tutorial/browser cleanly close during an actual Adventure1 start.
+- Chooser7: `work/communications7/chooser/run_785f73d399c743398dfda549cb56936d`, whole Passed. Both peers actually render the ping; own-first Sunflower/Pea order differs while the remote pointer stays on Pea. Root independently viewed the final host image.
+- Zen5b: `work/zen-ui-controls5b/run_b5dca220f52442dfbc78d711f0f9a033`, whole Passed17 checkpoints and4active-tool frames/peer. Exact coin23 client input629,178 applied as slot1, disappeared after Score, shared currency0→6. Care, move/wheelbarrow, wake/feed Stinky and three gardens Passed; protected client potted records unchanged. Purchases/sale confirmations remain host-owned with feedback. Cosmetic snail stars/trail are not mirrored exactly.
+- Controls5b: Adventure1 `run_17c0d1f98fcc476db7c3e1b274c8c3ff` hash5335094A; Bowling `run_a85fc1cd1e8c47129f34888266bb25c4` hash7745C3DA. Includes offclip rejection, packet24→rollingWallnut25, Q/cancel/chat/pause/repeat. Conveyor hover `work/communications5b/conveyor/run_8360dffed6e843879c346e796e54ef64` Passed.
+- TD5b: `work/td-ui5b/run_d4f9246ca5a34665a88e8e89fbaef7e1`, hash8B2B4F8E; regular-bank reorder packet19 client0→host5. EndlessST5b: `work/endless-ui5b/run_0118fec8f9fd4882b625c33ab1c5b674`, hash60AEA133; full intro, repick/day-night/HP270→302, resumed animation/music. Both whole Passed with native images inspected.
+- Mystery D1: `work/mystery-ui3-d1/run_3aed7dcfa24346b3a645139fec44dc06`; D5: `work/mystery-ui5b-d5/run_ff878c1a2fdf49d29a9ed67bc1e3ee83`; D10: `work/mystery-ui3-d10/run_9a3ccfff0e4c4a05bc8459a9dbe9d61c`. All whole Passed, actual discount anchors and mirrored spend/recharge. Later gameplay source unchanged.
+- Earlier failures were not accepted: Windows min macro compile failure, icon hit interception, unsupported polygon fill, deferred zombie lifetime, clipped conveyor input and test-only chat/scene/coin/frame races. Targeted corrections and accepted runs above supersede them. Full campaigns, external NAT and statistical balance were not exercised.
+- All owned game processes closed against their PID/exactEXE/UTC-start ledgers; final inventory0. Only hidden owned SDL games/renderer BMPs were used, no foreground/global input/desktop capture. Three specialists completed their assignments and independent reviews; no active source edits or outstanding local blocker.
+
+## Historical accepted delivery — 2026-11-11
 
 Source: `REQUEST.txt` (user's complete list). Root owns integration and evidence.
 

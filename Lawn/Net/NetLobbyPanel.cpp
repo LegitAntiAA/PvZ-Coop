@@ -91,7 +91,7 @@ Rect NetLobbyPanel::GetPanelRect() const
 		Graphics aMeasure;
 		const int aTextHeight = TodDrawStringWrappedHelper(&aMeasure, anError, Rect(0, 0, 264, 600),
 			FONT_BRIANNETOD12, NetUi::Ink(), DS_ALIGN_LEFT, false);
-		const int aTop = !aNet->IsActive() ? (mLanExpanded ? 270 : 186) : 302;
+		const int aTop = !aNet->IsActive() || mTutorialPreview ? (mLanExpanded ? 270 : 186) : 302;
 		aHeight = max(aHeight, aTop + aTextHeight + 18);
 	}
 	return Rect(8, mApp->mHeight - aHeight - 12, 300, aHeight);
@@ -103,6 +103,22 @@ bool NetLobbyPanel::IsOnMainSelector() const
 	return mApp->mLoadingThreadCompleted && !mApp->mBoard && aSelector &&
 		aSelector->mSelectorState == SELECTOR_IDLE && aSelector->mSlideCounter == 0 &&
 		aSelector->mX == 0 && aSelector->mY == 0 && aSelector->mDestX == 0 && aSelector->mDestY == 0;
+}
+
+Rect NetLobbyPanel::GetButtonRect(int theId) const
+{
+	for (const UiButton& aButton : mButtons)
+		if (aButton.mId == theId) return aButton.mRect;
+	return Rect();
+}
+
+void NetLobbyPanel::SetTutorialLayout(bool theCollapsed, bool theLanExpanded, bool thePreview)
+{
+	mCollapsed = theCollapsed;
+	mLanExpanded = theLanExpanded;
+	mTutorialPreview = thePreview;
+	LayoutButtons();
+	MarkDirty();
 }
 
 void NetLobbyPanel::LayoutButtons()
@@ -124,7 +140,7 @@ void NetLobbyPanel::LayoutButtons()
 	}
 	mButtons.push_back({BTN_TOGGLE, Rect(aPanel.mX + 254, aPanel.mY + 7, 28, 26), _S("-"), false, false});
 
-	if (!aNet->IsActive())
+	if (!aNet->IsActive() || mTutorialPreview)
 	{
 		mButtons.push_back({BTN_ONLINE, Rect(aX, aPanel.mY + 94, 264, 42), _S("ONLINE PLAY"), false, false});
 		mButtons.push_back({BTN_LAN, Rect(aX, aPanel.mY + 146, 264, 30),
@@ -192,19 +208,19 @@ void NetLobbyPanel::Update()
 	// for visibility because it remains in the draw/clip chain.
 	bool aInMenu = IsOnMainSelector();
 	const bool aActive = aNet->IsActive();
-	if (aActive != mWasActive) mCollapsed = !aActive;
+	if (aActive != mWasActive && !mTutorialPreview) mCollapsed = !aActive;
 	mWasActive = aActive;
 	const std::string anOnlineError = SexyStringToStringFast(OnlineFailureText(aNet));
 	if (anOnlineError != mLastOnlineError)
 	{
 		mLastOnlineError = anOnlineError;
-		if (!anOnlineError.empty()) mCollapsed = false;
+		if (!anOnlineError.empty() && !mTutorialPreview) mCollapsed = false;
 	}
 	if (aInMenu)
 		Resize(0, 0, mApp->mWidth, mApp->mHeight);
 
 	// the connection form's edit widgets are hidden once connected/connecting
-	bool aShowEdits = aInMenu && !aNet->IsActive() && !mCollapsed;
+	bool aShowEdits = aInMenu && (!aNet->IsActive() || mTutorialPreview) && !mCollapsed;
 	mNickEdit->mVisible = aShowEdits;
 	mIpEdit->mVisible = aShowEdits && mLanExpanded;
 	mPortEdit->mVisible = aShowEdits && mLanExpanded;
@@ -254,7 +270,7 @@ void NetLobbyPanel::Draw(Graphics* g)
     NetUi::Paper(g, mPaperImage, aPanel);
     TodDrawString(g, _S("PLAY TOGETHER"), aPanel.mX + 150, aPanel.mY + 28,
         FONT_BRIANNETOD16, NetUi::Ink(), DS_ALIGN_CENTER);
-    if (!aNet->IsActive())
+    if (!aNet->IsActive() || mTutorialPreview)
     {
         TodDrawString(g, _S("NAME"), aPanel.mX + 18, aPanel.mY + 68,
             FONT_BRIANNETOD12, NetUi::Ink(), DS_ALIGN_LEFT);
@@ -317,7 +333,7 @@ void NetLobbyPanel::Draw(Graphics* g)
     }
     if (!anOnlineError.empty())
     {
-        const int aTop = !aNet->IsActive() ? (mLanExpanded ? 270 : 186) : 302;
+        const int aTop = !aNet->IsActive() || mTutorialPreview ? (mLanExpanded ? 270 : 186) : 302;
         TodDrawStringWrappedHelper(g, anOnlineError, Rect(aPanel.mX + 18, aPanel.mY + aTop, 264, aPanel.mHeight - aTop - 12),
             FONT_BRIANNETOD12, Color(145, 45, 27), DS_ALIGN_LEFT, true);
     }

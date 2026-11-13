@@ -7,6 +7,7 @@
 #include "../LawnMower.h"
 #include "../GridItem.h"
 #include "../SeedPacket.h"
+#include "../ZenGarden.h"
 #include "../CursorObject.h"
 #include "../Challenge.h"
 #include "../Cutscene.h"
@@ -24,6 +25,7 @@
 #include "NetManager.h"
 #include "NetMystery.h"
 #include "NetEndlessWeather.h"
+#include "NetZenGarden.h"
 #include "NetPresentation.h"
 #include "NetZombatar.h"
 #include "../System/Music.h"
@@ -85,11 +87,12 @@ static_assert(sizeof(((Board*)nullptr)->mGridCelFog) / sizeof(int) == NET_ENDLES
 // horizontal offset, slot-machine countdown/next card/phase, intrinsic origin,
 // and authoritative refresh duration/flag (including late join after a use).
 static const size_t NET_SEED_PACKET_WIRE_BYTES = NET_MYSTERY_SEED_SNAPSHOT_BYTES;
-// Plant: base state (20), three exact presentation counters, and every bounded
+// Plant: base state (20), three exact presentation counters, Zen display state,
+// and every bounded
 // reanimation channel owned directly by Plant (8 * 11).  Child attachments and
 // particles remain local presentation resources, never raw network pointers.
 static const int NET_PLANT_REANIM_ROLES = 8;
-static const size_t NET_PLANT_WIRE_BYTES = 23 +
+static const size_t NET_PLANT_WIRE_BYTES = 23 + NET_ZEN_PLANT_WIRE_BYTES +
         NET_PLANT_REANIM_ROLES * NET_ZOMBIE_ANIM_WIRE_BYTES;
 // Zombie: id/type/row/position(8), eight U32 health pools(32), phase/visual state(10),
 // velocity/altitude/original animation rate(12), and exact body animation(11).
@@ -622,6 +625,46 @@ void NetEnsureGridItemVisual(GridItem* theGridItem, GridItemState thePreviousSta
 {
 	Reanimation* aReanim = theGridItem->mApp->ReanimationTryToGet(theGridItem->mGridItemReanimID);
 	bool aCreatedVisual = false;
+	if (theGridItem->mGridItemType == GridItemType::GRIDITEM_ZEN_TOOL)
+	{
+		ReanimationType type = ReanimationType::REANIM_ZENGARDEN_WATERINGCAN;
+		float x = theGridItem->mPosX - 8.0f, y = theGridItem->mPosY - 40.0f;
+		switch (theGridItem->mGridItemState)
+		{
+		case GRIDITEM_STATE_ZEN_TOOL_GOLD_WATERING_CAN: x = theGridItem->mPosX; y = theGridItem->mPosY; break;
+		case GRIDITEM_STATE_ZEN_TOOL_WATERING_CAN: break;
+		case GRIDITEM_STATE_ZEN_TOOL_FERTILIZER:
+			type = ReanimationType::REANIM_ZENGARDEN_FERTILIZER; x -= 32.0f; break;
+		case GRIDITEM_STATE_ZEN_TOOL_BUG_SPRAY:
+			type = ReanimationType::REANIM_ZENGARDEN_BUGSPRAY; x += 22.0f; break;
+		case GRIDITEM_STATE_ZEN_TOOL_PHONOGRAPH:
+			type = ReanimationType::REANIM_ZENGARDEN_PHONOGRAPH; x -= 12.0f; y += 34.0f; break;
+		default: return;
+		}
+		if (aReanim && (aReanim->mDead || aReanim->mReanimationType != type))
+		{
+			aReanim->ReanimationDie(); aReanim = nullptr;
+		}
+		if (!aReanim)
+		{
+			ReanimatorEnsureDefinitionLoaded(type, true);
+			aReanim = theGridItem->mApp->AddReanimation(x, y, 0, type);
+			if (!aReanim) return;
+			theGridItem->mGridItemReanimID = theGridItem->mApp->ReanimationGetID(aReanim);
+			if (theGridItem->mGridItemState == GRIDITEM_STATE_ZEN_TOOL_WATERING_CAN)
+				aReanim->PlayReanim("anim_water", ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD, 0, 0.0f);
+			else if (theGridItem->mGridItemState == GRIDITEM_STATE_ZEN_TOOL_GOLD_WATERING_CAN)
+				aReanim->PlayReanim("anim_water_area", ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD, 0, 8.0f);
+			else
+			{
+				aReanim->mLoopType = theGridItem->mGridItemState == GRIDITEM_STATE_ZEN_TOOL_PHONOGRAPH ?
+					ReanimLoopType::REANIM_LOOP : ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD;
+				if (theGridItem->mGridItemState == GRIDITEM_STATE_ZEN_TOOL_PHONOGRAPH) aReanim->mAnimRate = 20.0f;
+			}
+		}
+		aReanim->SetPosition(x, y);
+		return;
+	}
 
 	if (theGridItem->mGridItemType == GridItemType::GRIDITEM_PORTAL_CIRCLE ||
 		theGridItem->mGridItemType == GridItemType::GRIDITEM_PORTAL_SQUARE)
@@ -1120,6 +1163,34 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 		NetEncodeEndlessWeather(aWeather, b, aEndlessT);
 	}
 
+	const bool aZenMode = mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN;
+	NetZenGardenState aZenState;
+	if (aZenMode && mApp->mZenGarden && mApp->mPlayerInfo)
+	{
+		aZenState.mGarden = (uint8_t)mApp->mZenGarden->mGardenType;
+		aZenState.mStinkyChocolate = mApp->mZenGarden->IsStinkyHighOnChocolate();
+		const StoreItem supplies[] = { STORE_ITEM_FERTILIZER, STORE_ITEM_BUG_SPRAY, STORE_ITEM_CHOCOLATE };
+		for (int i = 0; i < 3; ++i)
+			aZenState.mSupplies[i] = (uint16_t)max(0, min(2000, mApp->mPlayerInfo->mPurchases[supplies[i]]));
+		if (PottedPlant* potted = mApp->mZenGarden->GetPottedPlantInWheelbarrow())
+		{
+			aZenState.mWheelbarrow.mSeedType = (uint8_t)potted->mSeedType;
+			aZenState.mWheelbarrow.mAge = (uint8_t)potted->mPlantAge;
+			aZenState.mWheelbarrow.mFacing = (uint8_t)potted->mFacing;
+			aZenState.mWheelbarrow.mVariation = (uint8_t)potted->mDrawVariation;
+		}
+	}
+	const bool aZenWritten = NetEncodeZenGarden(aZenState, b, aZenMode,
+		(uint8_t)SeedType::NUM_SEED_TYPES, (uint8_t)DrawVariation::NUM_VARIATIONS);
+	TOD_ASSERT(aZenWritten);
+	if (!aZenWritten)
+	{
+		aZenState = NetZenGardenState();
+		if (aZenMode) aZenState.mGarden = 0;
+		NetEncodeZenGarden(aZenState, b, aZenMode,
+			(uint8_t)SeedType::NUM_SEED_TYPES, (uint8_t)DrawVariation::NUM_VARIATIONS);
+	}
+
 	// pvp / td
 	b.WriteU8((uint8_t)min(255, mNetPvPBrainScore));
 	b.WriteU8((uint8_t)min(255, mNetPvPKillScore));
@@ -1201,6 +1272,14 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
                 aBody.WriteU8((uint8_t)max(0, min(255, aPlant->mRecentlyEatenCountdown)));
                 aBody.WriteU8((uint8_t)max(0, min(255, aPlant->mEatenFlashCountdown)));
                 aBody.WriteU8((uint8_t)max(0, min(255, aPlant->mBeghouledFlashCountdown)));
+                NetZenPlantState aZenPlant = mApp->mZenGarden ?
+                    mApp->mZenGarden->GetNetPlantState(aPlant) : NetZenPlantState();
+                const bool aZenPlantWritten = NetEncodeZenPlant(aZenPlant, aBody, aZenMode,
+                    (uint8_t)SeedType::NUM_SEED_TYPES, (uint8_t)DrawVariation::NUM_VARIATIONS);
+                TOD_ASSERT(aZenPlantWritten);
+                if (!aZenPlantWritten)
+                    NetEncodeZenPlant(NetZenPlantState(), aBody, aZenMode,
+                        (uint8_t)SeedType::NUM_SEED_TYPES, (uint8_t)DrawVariation::NUM_VARIATIONS);
                 for (int aRole = 0; aRole < NET_PLANT_REANIM_ROLES; aRole++)
                 {
                         NetZombieAnimState anAnimState;
@@ -2044,7 +2123,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	// Fixed core through the seed-packet count.  Validate it before touching
 	// board/profile state so a truncated datagram cannot partially apply.
 	static const size_t NET_SNAPSHOT_CORE_BYTES =
-		88 + NET_CHALLENGE_RUNTIME_WIRE_BYTES + NET_ENDLESS_WEATHER_WIRE_BYTES - 7;
+		88 + NET_CHALLENGE_RUNTIME_WIRE_BYTES + NET_ENDLESS_WEATHER_WIRE_BYTES + NET_ZEN_GARDEN_WIRE_BYTES - 7;
 	if (b.Remaining() < NET_SNAPSHOT_CORE_BYTES)
 	{
 		NetTrace("snapshot core rejected: bytes=%zu expected-at-least=%zu", b.Remaining(), NET_SNAPSHOT_CORE_BYTES);
@@ -2182,6 +2261,14 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	if (!NetDecodeEndlessWeather(b, aWeather, IsEndlessT()))
 	{
 		NetTrace("snapshot weather rejected: remaining=%zu", b.Remaining());
+		return;
+	}
+	NetZenGardenState aZenState;
+	if (!NetDecodeZenGarden(b, aZenState,
+		mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN,
+		(uint8_t)SeedType::NUM_SEED_TYPES, (uint8_t)DrawVariation::NUM_VARIATIONS))
+	{
+		NetTrace("snapshot Zen garden rejected: remaining=%zu", b.Remaining());
 		return;
 	}
 
@@ -2508,6 +2595,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
                 uint8_t mRecentlyEaten;
                 uint8_t mEatenFlash;
                 uint8_t mBeghouledFlash;
+                NetZenPlantState mZen;
                 NetZombieAnimState mReanim[NET_PLANT_REANIM_ROLES];
 	};
 	std::vector<NetPlantWire> aPlantWires;
@@ -2531,6 +2619,13 @@ void Board::NetApplySnapshot(NetBuffer& b)
                 aWire.mRecentlyEaten = b.ReadU8Or();
                 aWire.mEatenFlash = b.ReadU8Or();
                 aWire.mBeghouledFlash = b.ReadU8Or();
+                if (!NetDecodeZenPlant(b, aWire.mZen,
+                    mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN,
+                    (uint8_t)SeedType::NUM_SEED_TYPES, (uint8_t)DrawVariation::NUM_VARIATIONS))
+                {
+                    NetTrace("snapshot plant section rejected invalid Zen need index=%d id=%u", i, aWire.mId);
+                    return;
+                }
                 for (int aRole = 0; aRole < NET_PLANT_REANIM_ROLES; aRole++)
                 {
                         if (!NetDecodeZombieAnimState(b, aWire.mReanim[aRole]))
@@ -2597,6 +2692,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 
 	// The complete variable-length section is valid before any plant is created,
 	// adopted, moved, updated, or deleted.
+	std::map<unsigned short, NetZenPlantState> aZenPlantStates;
 	for (const NetPlantWire& aWire : aPlantWires)
 	{
 		SeedType anImitaterType = aWire.mImitater == 255 ? SeedType::SEED_NONE : (SeedType)aWire.mImitater;
@@ -2646,6 +2742,8 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		}
 		aPlant->mNetId = aWire.mId;
 		aPlant->mNetGhost = true;
+		if (aWire.mZen.mSeedType != 255)
+			aZenPlantStates[aWire.mId] = aWire.mZen;
 		aPlant->mRow = aWire.mRow;
 		aPlant->mPlantCol = aWire.mCol;
 		aPlant->mNetTargetX = (float)aWire.mPosX;
@@ -3613,6 +3711,38 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	{
 		NetTrace("snapshot ignored trailing bytes=%zu", b.Remaining());
 		return;
+	}
+	// The new shared Zen view is committed as one unit only after the entire
+	// snapshot has passed validation, including every later entity section.
+	if (mApp->mZenGarden)
+	{
+		mApp->mZenGarden->ApplyNetGardenState(aZenState);
+		mApp->mZenGarden->mNetPlantStates.swap(aZenPlantStates);
+		if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN)
+		{
+			Plant* plant = nullptr;
+			while (mPlants.IterateNext(plant))
+			{
+				if (plant->mDead || mApp->mZenGarden->mNetPlantStates.find(plant->mNetId) == mApp->mZenGarden->mNetPlantStates.end())
+					continue;
+				Plant* pot = GetTopPlantAt(plant->mPlantCol, plant->mRow, PlantPriority::TOPPLANT_ONLY_UNDER_PLANT);
+				const bool darkPot = plant->mState == PlantState::STATE_ZEN_GARDEN_WATERED ||
+					plant->mState == PlantState::STATE_ZEN_GARDEN_NEEDY || plant->mState == PlantState::STATE_ZEN_GARDEN_HAPPY;
+				if (pot && !Plant::IsAquatic(plant->mSeedType))
+					if (Reanimation* body = mApp->ReanimationTryToGet(pot->mBodyReanimID))
+						body->SetImageOverride("Pot_top", darkPot ? IMAGE_REANIM_POT_TOP_DARK : nullptr);
+				Plant* source = pot ? pot : plant;
+				TodParticleSystem* particle = mApp->ParticleTryToGet(source->mParticleID);
+				const bool glow = particle && !particle->mDead &&
+					(particle->mEffectType == ParticleEffect::PARTICLE_POTTED_ZEN_GLOW ||
+					 particle->mEffectType == ParticleEffect::PARTICLE_POTTED_PLANT_GLOW ||
+					 particle->mEffectType == ParticleEffect::PARTICLE_POTTED_WATER_PLANT_GLOW);
+				if (plant->mState == PlantState::STATE_ZEN_GARDEN_HAPPY && !glow)
+					mApp->mZenGarden->AddHappyEffect(plant);
+				else if (plant->mState != PlantState::STATE_ZEN_GARDEN_HAPPY && glow)
+					particle->ParticleSystemDie();
+			}
+		}
 	}
 	// Commit the fog cache and weather together only after the complete snapshot
 	// validates. Drawing consumes this native grid directly; no local fog warmup.

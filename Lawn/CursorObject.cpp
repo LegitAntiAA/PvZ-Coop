@@ -207,8 +207,10 @@ bool CursorObject::DrawContent(Graphics* g, CursorType theCursorType,
     {
         if (mApp->mGameMode == GAMEMODE_CHALLENGE_ZEN_GARDEN)
         {
-            Plant* aPlant = mBoard->mPlants.DataArrayGet((unsigned int)mGlovePlantID);
-            PottedPlant* aPottedPlant = &mApp->mPlayerInfo->mPottedPlant[aPlant->mPottedPlantIndex];
+            Plant* aPlant = mBoard->mPlants.DataArrayTryToGet((unsigned int)mGlovePlantID);
+            PottedPlant aDisplayPlant;
+            if (!mApp->mZenGarden->GetPottedPlantForDisplay(aPlant, aDisplayPlant)) break;
+            PottedPlant* aPottedPlant = &aDisplayPlant;
             if (mBoard->mBackground == BackgroundType::BACKGROUND_MUSHROOM_GARDEN || mBoard->mBackground == BackgroundType::BACKGROUND_ZOMBIQUARIUM)
             {
                 mApp->mZenGarden->DrawPottedPlant(g, -10.0f, -10.0f, aPottedPlant, 1.0f, false);
@@ -222,7 +224,7 @@ bool CursorObject::DrawContent(Graphics* g, CursorType theCursorType,
         else if (mApp->mGameMode == GAMEMODE_CHALLENGE_HEAT_WAVE) {
             if (mGlovePlantID != PLANTID_NULL)
             {
-                Plant* aPlant = mBoard->mPlants.DataArrayGet((unsigned int)mGlovePlantID);
+                Plant* aPlant = mBoard->mPlants.DataArrayTryToGet((unsigned int)mGlovePlantID);
                 if (aPlant)
                     Plant::DrawSeedType(g, aPlant->mSeedType, SeedType::SEED_NONE, DrawVariation::VARIATION_NORMAL, -22.0f, 0);
             }
@@ -235,6 +237,7 @@ bool CursorObject::DrawContent(Graphics* g, CursorType theCursorType,
     case CursorType::CURSOR_TYPE_PLANT_FROM_WHEEL_BARROW:
     {
         PottedPlant* aPottedPlant = mApp->mZenGarden->GetPottedPlantInWheelbarrow();
+        if (!aPottedPlant) break;
         if (mBoard->mBackground == BackgroundType::BACKGROUND_MUSHROOM_GARDEN || mBoard->mBackground == BackgroundType::BACKGROUND_ZOMBIQUARIUM)
         {
             mApp->mZenGarden->DrawPottedPlant(g, -10.0f, -10.0f, aPottedPlant, 1.0f, false);
@@ -392,6 +395,7 @@ void CursorPreview::Draw(Graphics* g)
     g->SetColor(Color(255, 255, 255, 100));
 
     PottedPlant* aPottedPlant = nullptr;
+    PottedPlant aDisplayPlant;
 
     if (mApp->mGameMode == GAMEMODE_CHALLENGE_ZEN_GARDEN) 
     {
@@ -401,7 +405,8 @@ void CursorPreview::Draw(Graphics* g)
         }
         else if (mBoard->mCursorObject->mCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_GLOVE)
         {
-            aPottedPlant = &mApp->mPlayerInfo->mPottedPlant[mBoard->mPlants.DataArrayGet((unsigned int)mBoard->mCursorObject->mGlovePlantID)->mPottedPlantIndex];
+            Plant* aPlant = mBoard->mPlants.DataArrayTryToGet((unsigned int)mBoard->mCursorObject->mGlovePlantID);
+            if (mApp->mZenGarden->GetPottedPlantForDisplay(aPlant, aDisplayPlant)) aPottedPlant = &aDisplayPlant;
         }
 
         if (aPottedPlant)

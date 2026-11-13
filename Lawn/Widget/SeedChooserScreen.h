@@ -5,6 +5,7 @@
 #include "../../SexyAppFramework/Widget.h"
 #include "ScrollbarWidget.h"
 #include "../Net/NetCommon.h"
+#include "../Net/NetCursorTarget.h"
 
 using namespace Sexy;
 
@@ -114,6 +115,9 @@ public:
     void                    CoopToggleReady();
     void                    CoopRefreshStartButton();
     void                    CoopDrawRemotePicks(Graphics* g);
+    bool                    CoopCursorTargetAt(int theCanonicalX, int theCanonicalY, LawnNet::NetCursorTarget& theTarget, int16_t& theOffsetX, int16_t& theOffsetY);
+    bool                    CoopCursorTargetRect(const LawnNet::NetCursorTarget& theTarget, Rect& theCanonicalRect);
+    bool                    CoopCanPingSeed(int theSeedType);
     void                    CoopBroadcastChooserState(bool theForce = false);
     bool                    CoopBroadcastChooserStart();
     void                    CoopBuildBankFromLocalState();

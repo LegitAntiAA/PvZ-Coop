@@ -65,7 +65,7 @@ Expected result schema:
 
 The client uses the same fields with `"role":"client"` and a non-zero `snapshotsApplied`. Logs must contain ordered `SMOKE_CHECKPOINT` markers for `PLAYING`, `BASELINE`, `ACTION_ISSUED` on the owning side, and `ACTION_APPLIED` on both sides. The runner intersects `SMOKE_POST_ACTION_TX ... hash=<hex>` with `SMOKE_POST_ACTION_APPLIED ... hash=<hex>`; a pre-action or intro snapshot cannot satisfy the test. It also requires normal listen/authentication/WELCOME/profile/start/gameplay signatures and rejects access violations, smoke failures, version/protocol violations, queue overflow, malformed starts, rejected snapshots, assertions, and host-loss markers. Fatal signatures are polled while the processes are still running for fail-fast behavior.
 
-The Adventure 5 and Whack cursor assertions require the stock shovel/hammer draw path, player tint, darker outline, and `fallback=0`; receiving only a cursor type cannot pass them. `CURSOR_TYPE_PLANT_FROM_GLOVE` and `CURSOR_TYPE_PLANT_FROM_WHEEL_BARROW` deliberately remain on the generic pointer fallback because their plant/potted-plant object identity is not yet part of the cursor protocol. Hammer shape/tint is covered, but its transient swing animation phase is not serialized by this harness.
+The Adventure 5 and Whack cursor assertions require the stock shovel/hammer draw path, player tint, darker outline, and `fallback=0`; receiving only a cursor type cannot pass them. Unsupported remote tool shapes still use the generic pointer overlay. Zen glove held-plant IDs and the wheelbarrow view are synchronized for the controlled cursor and native preview without copying private potted-plant records. Hammer shape/tint is covered, but its transient swing animation phase is not serialized by this harness.
 
 Each GUID artifact tree preserves generated configs/manifests, role logs, atomic result JSON, a PID ledger, and `summary.json`. Failed runs are never cleaned automatically.
 
@@ -75,6 +75,11 @@ Additional hidden native-game workflows:
 
 | Runner | Coverage |
 |---|---|
+| `RunHelpSmoke.ps1` | Two actual800/1066 menus: seven native steps, ordinary animated zombie, speech body/tail/join pixels, UTF-8 typewriter and local tick gain, real early text pixels, three animated communication examples, Back/Close/Escape, URL fallback buttons and network level-start cleanup |
+| `RunControlsSmoke.ps1` | Normal and conveyor SDL digit/Q pickup, same stable packet/plant on both peers, repeat/chat/pause gates; native offscreen conveyor key must keep NORMAL before the visible-card positive case |
+| `RunCommunicationsSmoke.ps1 -Workflow chooser` | Actual Alt+right-click ping and rendered flash, manual different first picks and identity-relative upper-bank cursor; authoritative chat-echo barriers respect the normal750ms limiter |
+| `RunCommunicationsSmoke.ps1 -Workflow conveyor` | Full-intro native conveyor hover resolved against the current moving packet geometry and actual SDL-renderer captures |
+| `RunZenGardenSmoke.ps1` | Seventeen shared-garden checkpoints and four visible native tool animations per peer, client care/move/wheelbarrow/snail/chocolate/coin/garden actions, exact host-applied coin input and post-Score currency, unchanged private potted records |
 | `RunMysterySmoke.ps1` | Real SDL mystery toggle/cancel, fixed/mixed picks, secret INTRO, atomic reveal, actual discounted purchase and mirrored recharge at difficulty1 or10 |
 | `RunMysteryObserverSmoke.ps1` | Late INTRO/PLAYING observer, secret/revealed metadata, native pause/kick, reassigned cards and purchase; requires three owned game processes |
 | `RunDifficultySmoke.ps1 -FamiliesOnly` | Eighteen native D1/D10 cases across nine difficulty families; selected objectives/timers/resources rather than complete campaigns |

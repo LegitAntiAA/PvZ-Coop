@@ -84,10 +84,40 @@ SeedPacket* NetCursorPacket(LawnApp* app, uint16_t id)
 	return nullptr;
 }
 
-bool NetResolveCursorPoint(LawnApp* app, int slot, uint16_t id, int16_t& x, int16_t& y)
+uint16_t NetHeldCursorIdentity(LawnApp* app, CursorObject* cursor, uint8_t& seed, uint8_t& imitater)
 {
-	if (!id) return x >= -4096 && x <= 4096 && y >= -2048 && y <= 2048;
-	SeedPacket* packet = NetCursorPacket(app,id);
+	if (!app || !app->mBoard || !cursor) return 0;
+	if (cursor->mCursorType == CURSOR_TYPE_PLANT_FROM_BANK && app->mBoard->mSeedBank &&
+		cursor->mSeedBankIndex >= 0 && cursor->mSeedBankIndex < app->mBoard->mSeedBank->mNumPackets)
+		return app->mBoard->mSeedBank->mSeedPackets[cursor->mSeedBankIndex].mNetId;
+	if (cursor->mCursorType == CURSOR_TYPE_PLANT_FROM_GLOVE)
+	{
+		Plant* plant = app->mBoard->mPlants.DataArrayTryToGet((unsigned int)cursor->mGlovePlantID);
+		if (plant && !plant->mDead)
+		{
+			seed = (uint8_t)plant->mSeedType; imitater = (uint8_t)plant->mImitaterType;
+			return plant->mNetId;
+		}
+	}
+	return 0;
+}
+
+bool NetResolveCursorPoint(LawnApp* app, int slot, const LawnNet::NetCursorTarget& target, int16_t& x, int16_t& y)
+{
+	using namespace LawnNet;
+	if (!NetCursorTargetValid(target, NUM_SEEDS_IN_CHOOSER, SEED_IMITATER)) return false;
+	if (target.mKind == NETCURSOR_SCREEN) return x >= -4096 && x <= 4096 && y >= -2048 && y <= 2048;
+	if (target.mKind == NETCURSOR_CHOOSER_CATALOG || target.mKind == NETCURSOR_CHOOSER_BANK)
+	{
+		Rect rect;
+		if (!app || !app->mNetManager || app->mNetManager->GetInputPhase() != NETINPUT_CHOOSER ||
+			!app->mSeedChooserScreen || x < 0 || y < 0 || x >= SEED_PACKET_WIDTH || y >= SEED_PACKET_HEIGHT ||
+			!app->mSeedChooserScreen->CoopCursorTargetRect(target, rect)) return false;
+		x += rect.mX; y += rect.mY;
+		return true;
+	}
+	if (!app || app->mGameScene != SCENE_PLAYING) return false;
+	SeedPacket* packet = NetCursorPacket(app,target.mPacketId);
 	if (!packet || x < 0 || y < 0 || x >= packet->mWidth || y >= packet->mHeight) return false;
 	SeedBank* bank = app->mBoard->mSeedBank;
 	if (!app->mBoard->IsSeedPacketVisibleToSlot((int)(packet-bank->mSeedPackets),slot)) return false;
@@ -95,12 +125,17 @@ bool NetResolveCursorPoint(LawnApp* app, int slot, uint16_t id, int16_t& x, int1
 	return true;
 }
 
-void NetRelativeCursorPoint(LawnApp* app, uint16_t& id, int16_t& x, int16_t& y)
+void NetSetCursorPoint(LawnApp* app, LawnNet::NetRemoteCursor& cursor,
+	const LawnNet::NetCursorTarget& target, int16_t offsetX, int16_t offsetY, int16_t resolvedX, int16_t resolvedY)
 {
-	SeedPacket* packet = NetCursorPacket(app,id);
-	if (!packet) { id = 0; return; }
-	x -= app->mBoard->mSeedBank->mX + packet->mX + packet->mOffsetX;
-	y -= app->mBoard->mSeedBank->mY + packet->mY;
+	// Crossing between semantic cards must not interpolate over an unrelated
+	// viewer-relative slot. Motion inside the same card can remain smooth.
+	if (cursor.mHoverTarget.mKind != target.mKind || cursor.mHoverPacketId != target.mPacketId ||
+		cursor.mHoverTarget.mOwner != target.mOwner || cursor.mHoverTarget.mSeed != target.mSeed ||
+		cursor.mHoverTarget.mImitater != target.mImitater) cursor.mValid = false;
+	cursor.mHoverTarget = target; cursor.mHoverPacketId = target.mPacketId;
+	cursor.mHoverOffsetX = offsetX; cursor.mHoverOffsetY = offsetY;
+	cursor.SetTarget((int16_t)NetLocalX(app,resolvedX),(int16_t)NetLocalY(app,resolvedY));
 }
 }
 
@@ -541,8 +576,20 @@ void NetManager::Update()
 	if (mMode == MODE_NONE)
 		return;
 	for (int i = 0; i < NET_MAX_PLAYERS; i++)
-		if (mRemoteCursors[i].mValid)
-			mRemoteCursors[i].Interpolate();
+	{
+		NetRemoteCursor& cursor = mRemoteCursors[i];
+		if (!cursor.mValid) continue;
+		if (cursor.mHoverTarget.mKind != NETCURSOR_SCREEN)
+		{
+			int16_t x = cursor.mHoverOffsetX, y = cursor.mHoverOffsetY;
+			if (!NetResolveCursorPoint(mApp,mMySlot,cursor.mHoverTarget,x,y)) { cursor.Clear(); continue; }
+			cursor.SetTarget((int16_t)NetLocalX(mApp,x),(int16_t)NetLocalY(mApp,y));
+			// Conveyor motion and chooser bank shifts retain their identity even
+			// between cursor packets, without drifting onto a neighboring card.
+			cursor.mRenderX = (float)cursor.mX; cursor.mRenderY = (float)cursor.mY;
+		}
+		cursor.Interpolate();
+	}
 
 	// adopt pending connections
 	{
@@ -639,12 +686,7 @@ void NetManager::Update()
 				if (!NetIsValidHeldSeed(aSeed)) aSeed = 255;
 				if (anImitater != 255 && anImitater >= (uint8_t)SeedType::NUM_SEED_TYPES)
 					anImitater = 255;
-				uint16_t aHeldPacketId = 0;
-				if (anAuthoritative->mCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_BANK &&
-					mApp->mBoard->mSeedBank && anAuthoritative->mSeedBankIndex >= 0 &&
-					anAuthoritative->mSeedBankIndex < mApp->mBoard->mSeedBank->mNumPackets)
-					aHeldPacketId = mApp->mBoard->mSeedBank->mSeedPackets[
-						anAuthoritative->mSeedBankIndex].mNetId;
+				uint16_t aHeldPacketId = NetHeldCursorIdentity(mApp,anAuthoritative,aSeed,anImitater);
 				if (aPublished.mCursorType == aType && aPublished.mHeldSeed == aSeed &&
 					aPublished.mHeldImitater == anImitater && aPublished.mFlags == 0 &&
 					aPublished.mHeldPacketId == aHeldPacketId)
@@ -657,16 +699,14 @@ void NetManager::Update()
 				aPublished.mHeldPacketId = aHeldPacketId;
 				NetBuffer aRelay;
 				aRelay.WriteU8((uint8_t)aSlot);
-				int16_t aWireX = (int16_t)NetCanonicalX(mApp,aPublished.mX), aWireY = (int16_t)NetCanonicalY(mApp,aPublished.mY);
-				uint16_t aHoverId = aPublished.mHoverPacketId;
-				NetRelativeCursorPoint(mApp,aHoverId,aWireX,aWireY);
+				int16_t aWireX = aPublished.mHoverOffsetX, aWireY = aPublished.mHoverOffsetY;
 				aRelay.WriteI16(aWireX); aRelay.WriteI16(aWireY);
 				aRelay.WriteU8(aType);
 				aRelay.WriteU8(aSeed);
 				aRelay.WriteU8(anImitater);
 				aRelay.WriteU8(0);
 				aRelay.WriteU16(aHeldPacketId);
-				aRelay.WriteU16(aHoverId);
+				NetEncodeCursorTarget(aPublished.mHoverTarget,aRelay);
 				if (aPublished.mValid)
 					BroadcastMessage(NETMSG_CURSOR, aRelay);
 				else if (mSessions[aSlot].mAssigned)
@@ -1198,7 +1238,6 @@ void NetManager::OnClientKeyInput(NetSession* theSession, NetBuffer& thePayload)
 
 void NetManager::OnClientCursor(NetSession* theSession, NetBuffer& thePayload)
 {
-	static const size_t NET_CURSOR_WIRE_BYTES = 13;
 	if (thePayload.Remaining() != NET_CURSOR_WIRE_BYTES)
 	{
 		NetTrace("cursor rejected slot=%u expected=%zu bytes actual=%zu",
@@ -1220,11 +1259,11 @@ void NetManager::OnClientCursor(NetSession* theSession, NetBuffer& thePayload)
 	uint8_t aClaimedImitater = thePayload.ReadU8Or();
         const uint8_t aClaimedFlags = thePayload.ReadU8Or();
 	thePayload.ReadU16Or(); // claimed packet id is never authoritative
-	const uint16_t aHoverId = thePayload.ReadU16Or();
+	NetCursorTarget aTarget;
+	if (!NetDecodeCursorTarget(thePayload,aTarget,NUM_SEEDS_IN_CHOOSER,SEED_IMITATER)) return;
 	int16_t aResolvedX = aCanonicalX, aResolvedY = aCanonicalY;
-	if (!NetResolveCursorPoint(mApp,aSlot,aHoverId,aResolvedX,aResolvedY)) return;
-	aCursor.SetTarget((int16_t)NetLocalX(mApp,aResolvedX),(int16_t)NetLocalY(mApp,aResolvedY));
-	aCursor.mHoverPacketId = aHoverId;
+	if (!NetResolveCursorPoint(mApp,aSlot,aTarget,aResolvedX,aResolvedY)) { aCursor.Clear(); return; }
+	NetSetCursorPoint(mApp,aCursor,aTarget,aCanonicalX,aCanonicalY,aResolvedX,aResolvedY);
 
 	// During a game the host's per-player cursor is authoritative.  Clients
 	// provide only pointer coordinates, never the plant/tool they claim to hold.
@@ -1257,6 +1296,7 @@ void NetManager::OnClientCursor(NetSession* theSession, NetBuffer& thePayload)
 
 	// Relay the sanitized state to every client.  The sender uses the echo to
 	// update its local held silhouette; other peers see the remote cursor.
+	const uint16_t aHeldPacketId = NetHeldCursorIdentity(mApp,anAuthoritativeCursor,aCursor.mHeldSeed,aCursor.mHeldImitater);
 	NetBuffer aRelay;
 	aRelay.WriteU8(aSlot);
 	aRelay.WriteI16(aCanonicalX);
@@ -1265,16 +1305,9 @@ void NetManager::OnClientCursor(NetSession* theSession, NetBuffer& thePayload)
 	aRelay.WriteU8(aCursor.mHeldSeed);
 	aRelay.WriteU8(aCursor.mHeldImitater);
 	aRelay.WriteU8(aCursor.mFlags);
-	uint16_t aHeldPacketId = 0;
-	if (anAuthoritativeCursor &&
-		anAuthoritativeCursor->mCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_BANK &&
-		mApp->mBoard->mSeedBank && anAuthoritativeCursor->mSeedBankIndex >= 0 &&
-		anAuthoritativeCursor->mSeedBankIndex < mApp->mBoard->mSeedBank->mNumPackets)
-		aHeldPacketId = mApp->mBoard->mSeedBank->mSeedPackets[
-			anAuthoritativeCursor->mSeedBankIndex].mNetId;
 	aCursor.mHeldPacketId = aHeldPacketId;
 	aRelay.WriteU16(aHeldPacketId);
-	aRelay.WriteU16(aHoverId);
+	NetEncodeCursorTarget(aTarget,aRelay);
 	BroadcastMessage(NETMSG_CURSOR, aRelay);
 }
 
@@ -2152,7 +2185,6 @@ void NetManager::OnInputEpoch(NetBuffer& thePayload)
 
 void NetManager::OnCursor(NetBuffer& thePayload)
 {
-	static const size_t NET_CURSOR_WIRE_BYTES = 13;
 	if (thePayload.Remaining() != NET_CURSOR_WIRE_BYTES)
 	{
 		NetTrace("cursor echo rejected expected=%zu bytes actual=%zu",
@@ -2169,7 +2201,8 @@ void NetManager::OnCursor(NetBuffer& thePayload)
 	uint8_t aHeldImitater = thePayload.ReadU8Or();
 	uint8_t aFlags = thePayload.ReadU8Or();
 	uint16_t aHeldPacketId = thePayload.ReadU16Or();
-	const uint16_t aHoverId = thePayload.ReadU16Or();
+	NetCursorTarget aTarget;
+	if (!NetDecodeCursorTarget(thePayload,aTarget,NUM_SEEDS_IN_CHOOSER,SEED_IMITATER)) return;
 
 	// Echoes for our own slot carry the host-confirmed held seed.  Apply only
 	// that semantic state locally; local mouse coordinates remain immediate.
@@ -2200,6 +2233,17 @@ void NetManager::OnCursor(NetBuffer& thePayload)
 				aLocalCursor->mImitaterType = SeedType::SEED_NONE;
 			}
 			aLocalCursor->mSeedBankIndex = aHeldIndex;
+			if (aLocalCursor->mCursorType == CURSOR_TYPE_PLANT_FROM_GLOVE)
+			{
+				aLocalCursor->mGlovePlantID = PLANTID_NULL;
+				Plant* plant = nullptr;
+				while (mApp->mBoard->IteratePlants(plant))
+					if (aHeldPacketId && plant->mNetId == aHeldPacketId)
+					{
+						aLocalCursor->mGlovePlantID = (PlantID)mApp->mBoard->mPlants.DataArrayGetID(plant);
+						break;
+					}
+			}
 			if (aHeldIndex >= 0)
 			{
 				const SeedPacket& aHeld = mApp->mBoard->mSeedBank->mSeedPackets[aHeldIndex];
@@ -2216,9 +2260,9 @@ void NetManager::OnCursor(NetBuffer& thePayload)
 	}
 
 	NetRemoteCursor& aCursor = mRemoteCursors[aSlot];
-	if (!NetResolveCursorPoint(mApp,mMySlot,aHoverId,aX,aY)) return;
-	aCursor.SetTarget((int16_t)NetLocalX(mApp, aX), (int16_t)NetLocalY(mApp, aY));
-	aCursor.mHoverPacketId = aHoverId;
+	const int16_t aOffsetX = aX, aOffsetY = aY;
+	if (!NetResolveCursorPoint(mApp,mMySlot,aTarget,aX,aY)) { aCursor.Clear(); return; }
+	NetSetCursorPoint(mApp,aCursor,aTarget,aOffsetX,aOffsetY,aX,aY);
 	aCursor.mCursorType = aCursorType;
 	aCursor.mHeldSeed = aHeldSeed;
 	aCursor.mHeldImitater = aHeldImitater;
@@ -2751,34 +2795,37 @@ void NetManager::SendCursor(int theCursorType, int theHeldSeed, int theHeldImita
 		return;
 	sLastCursorSend = aNow;
 	int16_t aWireX = (int16_t)NetCanonicalX(mApp,theX), aWireY = (int16_t)NetCanonicalY(mApp,theY);
-	uint16_t aHoverId = 0;
+	NetCursorTarget aTarget;
 	if (mApp && mApp->mBoard && mApp->mGameScene == SCENE_PLAYING)
 	{
 		int hit = NetSeedPacketAt(mApp->mBoard,aWireX,aWireY,mMySlot);
-		if (hit >= 0) aHoverId = mApp->mBoard->mSeedBank->mSeedPackets[hit].mNetId;
+		if (hit >= 0)
+		{
+			const SeedPacket& packet = mApp->mBoard->mSeedBank->mSeedPackets[hit];
+			if (packet.mNetId)
+			{
+				aTarget.mKind = NETCURSOR_PACKET; aTarget.mPacketId = packet.mNetId;
+				aWireX -= mApp->mBoard->mSeedBank->mX + packet.mX + packet.mOffsetX;
+				aWireY -= mApp->mBoard->mSeedBank->mY + packet.mY;
+			}
+		}
 	}
-	NetRelativeCursorPoint(mApp,aHoverId,aWireX,aWireY);
+	else if (mApp && mApp->mSeedChooserScreen && mInputPhase == NETINPUT_CHOOSER)
+		mApp->mSeedChooserScreen->CoopCursorTargetAt(aWireX,aWireY,aTarget,aWireX,aWireY);
 
 	NetBuffer aMsg;
 	aMsg.WriteU8((uint8_t)mMySlot);
 	aMsg.WriteI16(aWireX);
 	aMsg.WriteI16(aWireY);
+	uint8_t aHeldSeed = (uint8_t)theHeldSeed, aHeldImitater = (uint8_t)theHeldImitater;
+	const uint16_t aHeldPacketId = NetHeldCursorIdentity(mApp,
+		mApp && mApp->mBoard ? mApp->mBoard->mCursorObject : nullptr,aHeldSeed,aHeldImitater);
 	aMsg.WriteU8((uint8_t)theCursorType);
-	aMsg.WriteU8((uint8_t)theHeldSeed);
-	aMsg.WriteU8((uint8_t)theHeldImitater);
+	aMsg.WriteU8(aHeldSeed);
+	aMsg.WriteU8(aHeldImitater);
 	aMsg.WriteU8(theFlags);
-	uint16_t aHeldPacketId = 0;
-	if (mApp && mApp->mBoard && mApp->mBoard->mSeedBank &&
-		theCursorType == (int)CursorType::CURSOR_TYPE_PLANT_FROM_BANK)
-	{
-		CursorObject* aCursor = mApp->mBoard->mCursorObject;
-		if (aCursor && aCursor->mSeedBankIndex >= 0 &&
-			aCursor->mSeedBankIndex < mApp->mBoard->mSeedBank->mNumPackets)
-			aHeldPacketId = mApp->mBoard->mSeedBank->mSeedPackets[
-				aCursor->mSeedBankIndex].mNetId;
-	}
 	aMsg.WriteU16(aHeldPacketId);
-	aMsg.WriteU16(aHoverId);
+	NetEncodeCursorTarget(aTarget,aMsg);
 
 	if (mMode == MODE_HOST)
 		BroadcastMessage(NETMSG_CURSOR, aMsg);

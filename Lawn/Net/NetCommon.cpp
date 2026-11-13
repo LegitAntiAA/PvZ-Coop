@@ -1051,6 +1051,8 @@ bool NetLoadConfig(NetConfig& theConfig)
 			theConfig.mUnlockAllMinigames = (aValue == "1" || aValue == "true" || aValue == "yes");
 		else if (aKey == "enable_coop")
 			theConfig.mEnableCoop = (aValue == "1" || aValue == "true" || aValue == "yes");
+		else if (aKey == "skipIntro")
+			theConfig.mSkipIntro = (aValue == "1");
 		else if (aKey == "base_snapshot_rate")
 			theConfig.mBaseSnapshotHz = atoi(aValue.c_str());
 		else if (aKey == "window_width")
@@ -1090,6 +1092,8 @@ bool NetSaveConfig(const NetConfig& theConfig)
 	fprintf(aFile, "nickname=%s\n", theConfig.mNick);
 	fprintf(aFile, "unlock_all_minigames=%d\n", theConfig.mUnlockAllMinigames ? 1 : 0);
 	fprintf(aFile, "enable_coop=%d\n", theConfig.mEnableCoop ? 1 : 0);
+	fprintf(aFile, "# skipIntro - 1 = skip the startup video (level intros are unchanged)\n");
+	fprintf(aFile, "skipIntro=%d\n", theConfig.mSkipIntro ? 1 : 0);
 	fprintf(aFile, "base_snapshot_rate=%d\n", theConfig.mBaseSnapshotHz);
 	fprintf(aFile, "window_width=%d\n", theConfig.mWindowWidth);
 	fprintf(aFile, "window_height=%d\n", theConfig.mWindowHeight);

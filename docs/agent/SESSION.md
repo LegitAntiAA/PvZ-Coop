@@ -1,4 +1,22 @@
-# Delivery checkpoint — 2026-11-12, 04:19 Moscow
+# Local acceptance checkpoint — 2026-11-13, 03:45 Moscow
+
+The ten follow-up requests, expanded shared Zen interaction and final tutorial style steering are implemented and locally accepted. User authorizes commits/pushes directly to main through existing gh authentication; no release/tag requested. Current protocol34 needs matching compiled builds. See WORKBOARD.md for task-level results and exact native artifacts, BUGS.md for confirmed causes and limits, DECISIONS.md for contracts.
+
+Repository before publication: main2730394, task changes not yet committed. Initial clean5e8963a baseline built/passed1647/0/0. Root fast-forwarded the two unrelated later remote docs/assets commits without overwriting them. gh account LegitAntiAA, Git author LegitAA/existing configured email. ALWAYS use explicit --repo LegitAntiAA/PvZ-Coop because gh's default repo differs. Publish a normal commit/push and inspect CI for that exact HEAD; GitHub is the live publication record.
+
+Final binary: build7 Win32 ReleaseGOTY Passed, NetProtocolTests1871 failures0 skipped0 Passed (`work/ui-controls-build7.log`, `work/ui-controls-unit7-tests.log`). Help7 and chooser7 passed on this binary; gameplay suites5b and mystery anchors3/5b passed before UI-only refinements. Native input/render evidence, not exit/hash alone, was inspected. No production source changes after build7.
+
+Help7 `work/ui-help7/run_be20ccfc1ae34efaa2f10154ad882481`: seven steps800/1066, unified AA pastel cloud/tail, TrebuchetMS, fresh partial-text pixels, quiet local ticks respecting mute/volume, Space reveal, native previews, Back/Close/Escape, URL fallback and actual menu→Adventure1 cleanup all Passed. Root independently viewed final renderer image and updated the user-facing outputs/pvz-talking-zombie-preview.png to7. Chooser7 `work/communications7/chooser/run_785f73d399c743398dfda549cb56936d`: real Alt+RMB flashes and different-order selected-bank semantic hover Passed, Root viewed actual host frame.
+
+Zen5b passed17checkpoints+4active-tool frames per peer; all requested care/move/wheelbarrow/coin/snail interactions, three gardens, need icons and protected client potted-save records. Exact coin23 input and actual Score/disappearance/currency0→6 verified. Store purchase/sale confirmation remains host-owned with client feedback; cosmetic snail stars/trail are not mirrored exactly. Controls normal/conveyor, negative clipped card, regular/conveyor relative cursors, Mystery D1/D5/D10, TD and full-intro EndlessST all whole Passed; artifact IDs in WORKBOARD.
+
+Earlier failed/weak fixtures and production issues were corrected and retested within the stated scopes. No open local blocker; no full campaign, external NAT, statistical balance or heard-audio claim. Independent reviews by controls/Zen/communications specialists completed; all source ownership is released. Root owns documentation/Git/publication/CI. No more broad suites unless a new issue appears.
+
+Validation constraints remain: NO Computer Use, foreground activation, global input or desktop screenshots. Only hidden owned games and renderer BMPs; max3 total. Suites serialized, Root grants slots. Every cleanup checks PID/exactEXE/UTC-start against owned-process.json. Final inventory0 after chooser7 cleanup. Use explicit Windows PowerShell5.1 for native runners; do not build while games are alive. MSBuild C:/Program Files (x86)/Microsoft Visual Studio/18/BuildTools/MSBuild/Current/Bin/MSBuild.exe.
+
+Memory informed invariant/validation lookup only; current repository and executed evidence supersede historical protocols. No memory updates authorized. Final citation uses MEMORY.md56-60 and the networking rollout01a1a74a-4292-7871-92d4-fea246cbe755 (rollout summary lines14-17).
+
+## Historical accepted checkpoint — 2026-11-12, 04:19 Moscow
 
 Requested core changes, Endless T/ST weather, and the final Plantern3×3 correction are implemented and locally accepted. Root publishes the final main checkpoint after this record; use actual Git/GitHub state to confirm published HEAD and CI, rather than historical hashes below. No active implementation remains at this checkpoint.
 

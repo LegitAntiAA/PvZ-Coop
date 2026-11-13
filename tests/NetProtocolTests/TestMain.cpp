@@ -270,7 +270,7 @@ void TestRelativePlayerColors()
                                 continue;
                         static const uint8_t aExpected[3][3] =
                         {
-                                { 70U, 130U, 255U },
+                                { 105U, 175U, 255U },
                                 { 255U, 70U, 70U },
                                 { 80U, 200U, 80U }
                         };
@@ -281,11 +281,11 @@ void TestRelativePlayerColors()
                 }
         }
 
-        CHECK(ColorEquals(LawnNet::GetRelativePlayerColor(0, 1), 70U, 130U, 255U));
-        CHECK(ColorEquals(LawnNet::GetRelativePlayerColor(1, 0), 70U, 130U, 255U));
+        CHECK(ColorEquals(LawnNet::GetRelativePlayerColor(0, 1), 105U, 175U, 255U));
+        CHECK(ColorEquals(LawnNet::GetRelativePlayerColor(1, 0), 105U, 175U, 255U));
 
 	CHECK(ColorEquals(LawnNet::GetPlayerColorBySlot(0), 255U, 255U, 255U));
-	CHECK(ColorEquals(LawnNet::GetPlayerColorBySlot(1), 70U, 130U, 255U));
+	CHECK(ColorEquals(LawnNet::GetPlayerColorBySlot(1), 105U, 175U, 255U));
 	CHECK(ColorEquals(LawnNet::GetPlayerColorBySlot(2), 255U, 70U, 70U));
 	CHECK(ColorEquals(LawnNet::GetPlayerColorBySlot(3), 80U, 200U, 80U));
 }
@@ -296,6 +296,7 @@ void TestConfigDefaults()
 	CHECK(std::strcmp(aConfig.mNick, "Player") == 0);
 	CHECK(!aConfig.mUnlockAllMinigames);
 	CHECK(aConfig.mEnableCoop);
+	CHECK(!aConfig.mSkipIntro);
 	CHECK(aConfig.mBaseSnapshotHz == LawnNet::NET_SNAPSHOT_HZ_DEFAULT);
 	CHECK(aConfig.mWindowWidth == 0);
         CHECK(aConfig.mWindowHeight == 0);
@@ -307,6 +308,7 @@ void TestConfigDefaults()
 	std::strcpy(aConfig.mNick, "Changed");
 	aConfig.mUnlockAllMinigames = true;
 	aConfig.mEnableCoop = false;
+	aConfig.mSkipIntro = true;
 	aConfig.mBaseSnapshotHz = 29;
 	aConfig.mWindowWidth = 1920;
         aConfig.mWindowHeight = 1080;
@@ -318,6 +320,7 @@ void TestConfigDefaults()
 	CHECK(std::strcmp(aConfig.mNick, "Player") == 0);
 	CHECK(!aConfig.mUnlockAllMinigames);
 	CHECK(aConfig.mEnableCoop);
+	CHECK(!aConfig.mSkipIntro);
 	CHECK(aConfig.mBaseSnapshotHz == LawnNet::NET_SNAPSHOT_HZ_DEFAULT);
 	CHECK(aConfig.mWindowWidth == 0);
         CHECK(aConfig.mWindowHeight == 0);
@@ -794,6 +797,7 @@ void TestConfigRoundTripInIsolatedDirectory()
 	std::strcpy(aSaved.mNick, "UnitTester");
 	aSaved.mUnlockAllMinigames = true;
 	aSaved.mEnableCoop = false;
+	aSaved.mSkipIntro = true;
 	aSaved.mBaseSnapshotHz = 29;
 	aSaved.mWindowWidth = 1920;
         aSaved.mWindowHeight = 1080;
@@ -809,6 +813,7 @@ void TestConfigRoundTripInIsolatedDirectory()
 	CHECK(std::strcmp(aLoaded.mNick, "UnitTester") == 0);
 	CHECK(aLoaded.mUnlockAllMinigames);
 	CHECK(!aLoaded.mEnableCoop);
+	CHECK(aLoaded.mSkipIntro);
 	CHECK(aLoaded.mBaseSnapshotHz == 29);
 	CHECK(aLoaded.mWindowWidth == 1920);
         CHECK(aLoaded.mWindowHeight == 1080);
@@ -829,6 +834,11 @@ void TestConfigRoundTripInIsolatedDirectory()
 	}
 	CHECK(LawnNet::NetLoadConfig(aLoaded));
 	CHECK(aLoaded.mHotbarTintAlpha == 77);
+	CHECK(aLoaded.mSkipIntro);
+	CHECK(WriteSmokeTestFile("coop.ini", "skipIntro=0\n"));
+	CHECK(LawnNet::NetLoadConfig(aLoaded) && !aLoaded.mSkipIntro);
+	CHECK(WriteSmokeTestFile("coop.ini", "skipIntro=1\n"));
+	CHECK(LawnNet::NetLoadConfig(aLoaded) && aLoaded.mSkipIntro);
 }
 
 } // namespace
@@ -865,6 +875,9 @@ void TestSpectatorAuthorityAndStrokeLifetime()
 	CHECK(LawnNet::NetStrokeAlpha(10000,0,5) == 0);
 	CHECK(LawnNet::NetStrokeAlpha(10000,4,5) == 0);
 }
+
+#include "NetCursorTargetTests.h"
+#include "NetZenGardenTests.h"
 
 int main(int argc, char** argv)
 {
@@ -925,6 +938,12 @@ int main(int argc, char** argv)
 	const auto aWeatherResult = RunNetEndlessWeatherTests();
 	gChecks += aWeatherResult.mChecks;
 	gFailures += aWeatherResult.mFailures;
+	const auto aCursorResult = RunNetCursorTargetTests();
+	gChecks += aCursorResult.mChecks;
+	gFailures += aCursorResult.mFailures;
+	const auto aZenResult = RunNetZenGardenTests();
+	gChecks += aZenResult.mChecks;
+	gFailures += aZenResult.mFailures;
 
 	std::printf("\nchecks=%d failures=%d skipped=%d\n", gChecks, gFailures, gSkipped);
 	return gFailures == 0 ? 0 : 1;

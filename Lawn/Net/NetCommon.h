@@ -27,7 +27,7 @@ namespace LawnNet
 // (the host broadcasts the same sounds via events).
 extern bool gNetSuppressSounds;
 
-static const uint32_t NET_PROTOCOL_VERSION = 33; // authoritative native fog grid and smooth Endless T/ST weather
+static const uint32_t NET_PROTOCOL_VERSION = 34; // semantic chooser cursors/pings and authoritative Zen plant needs
 static const uint16_t NET_DEFAULT_PORT = 27713;			// PvZ co-op port
 static const int NET_MAX_PLAYERS = 4;					// 1 host + 3 clients
 static const int NET_MAX_NICK_CHARS = 16;
@@ -57,7 +57,7 @@ inline NetColor GetRelativePlayerColor(int theViewerSlot, int theOwnerSlot)
 {
 	if (theOwnerSlot == theViewerSlot)
 		return { 255, 255, 255 };
-        static const NetColor aColors[NET_PLAYER_COLOR_COUNT] = { { 70, 130, 255 }, { 255, 70, 70 }, { 80, 200, 80 } };
+        static const NetColor aColors[NET_PLAYER_COLOR_COUNT] = { { 105, 175, 255 }, { 255, 70, 70 }, { 80, 200, 80 } };
         int aRemoteIndex = theOwnerSlot;
         if (theOwnerSlot > theViewerSlot)
                 aRemoteIndex--;
@@ -65,7 +65,7 @@ inline NetColor GetRelativePlayerColor(int theViewerSlot, int theOwnerSlot)
 }
 inline NetColor GetPlayerColorBySlot(int theSlot)
 {
-	static const NetColor aColors[NET_MAX_PLAYERS] = { { 255, 255, 255 }, { 70, 130, 255 }, { 255, 70, 70 }, { 80, 200, 80 } };
+	static const NetColor aColors[NET_MAX_PLAYERS] = { { 255, 255, 255 }, { 105, 175, 255 }, { 255, 70, 70 }, { 80, 200, 80 } };
 	return aColors[theSlot];
 }
 
@@ -97,7 +97,7 @@ enum NetMsgType : uint8_t
 
 	NETMSG_INPUT_MOUSE = 30,	// c->h: u32 epoch/seq, u8 action/button, i16 canonical x/y/index, u16 packet id, u8 type/imitater/owner
 	NETMSG_INPUT_KEY = 31,		// c->h: u32 epoch/seq, u16 keyCode (Q only), u8 down
-	NETMSG_CURSOR = 32,			// both: u8 slot, i16 x, i16 y, u8 cursorType, u8 heldSeed, u8 heldImitater, u8 flags
+	NETMSG_CURSOR = 32,			// both: slot, relative x/y, held cursor state/id, 6-byte semantic hover target
 	NETMSG_PAUSE = 33,			// h->c: u8 paused
 	NETMSG_PAUSE_REQ = 34,		// c->h: (client asks; host may ignore)
 	NETMSG_INPUT_EPOCH = 35,	// h->c: u32 epoch, u8 NetInputPhase
@@ -597,6 +597,7 @@ struct NetConfig
 	char mNick[NET_MAX_NICK + 1];
 	bool mUnlockAllMinigames;
 	bool mEnableCoop;			// master switch
+	bool mSkipIntro;			// skip the startup video, not level cutscenes
 	int  mBaseSnapshotHz;
 	int  mWindowWidth;			// 0 = default 1066
 	int  mWindowHeight;			// 0 = default 600
@@ -612,6 +613,7 @@ struct NetConfig
 		strcpy_s(mNick, "Player");
 		mUnlockAllMinigames = false;
 		mEnableCoop = true;
+		mSkipIntro = false;
 		mBaseSnapshotHz = NET_SNAPSHOT_HZ_DEFAULT;
 		mWindowWidth = 0;
 		mWindowHeight = 0;

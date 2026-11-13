@@ -3,6 +3,8 @@
 #include "Board.h"
 #include "Challenge.h"
 #include "ZenGarden.h"
+#include "Net/NetZenGardenSmoke.h"
+#include "Net/NetManager.h"
 #include "../LawnApp.h"
 #include "CursorObject.h"
 #include "System/Music.h"
@@ -260,6 +262,9 @@ PottedPlant* ZenGarden::PottedPlantFromIndex(int thePottedPlantIndex)
 void ZenGarden::ZenGardenInitLevel(bool theJustSwitchingGardens)
 {
     mBoard = mApp->mBoard;
+    mNetPlantStates.clear();
+    mNetWheelbarrowPlant.reset();
+    mNetStinkyChocolate = false;
     const bool aReadOnlyNetworkClient = mApp->NetIsClient() || mApp->mNetBlockProfileSave;
     if (!aReadOnlyNetworkClient)
     {
@@ -299,6 +304,14 @@ void ZenGarden::ZenGardenStart()
 //0x51D6B0
 bool ZenGarden::PlantCanHaveChocolate(Plant* thePlant)
 {
+    if (!thePlant) return false;
+    if (mApp->NetIsClient())
+    {
+        const auto found = mNetPlantStates.find(thePlant->mNetId);
+        return found != mNetPlantStates.end() && found->second.mCanHaveChocolate;
+    }
+    if (thePlant->mPottedPlantIndex < 0 || thePlant->mPottedPlantIndex >= mApp->mPlayerInfo->mNumPottedPlants)
+        return false;
     PottedPlant* aPottedPlant = PottedPlantFromIndex(thePlant->mPottedPlantIndex);
     return aPottedPlant->mPlantAge == PottedPlantAge::PLANTAGE_FULL && WasPlantNeedFulfilledToday(aPottedPlant) && !PlantHighOnChocolate(aPottedPlant);
 }
@@ -455,6 +468,12 @@ int ZenGarden::GetPlantSellPrice(Plant* thePlant)
 void ZenGarden::MouseDownWithMoneySign(Plant* thePlant)
 {
     mBoard->ClearCursor();
+    if (mApp->NetIsClient()) return;
+    if (mApp->NetIsHost() && mApp->mNetManager->GetRawActingPlayerSlot() > 0)
+    {
+        mApp->mNetManager->SendSystemChat("Only the host can confirm selling a shared garden plant.");
+        return;
+    }
 
     SexyString aHeader = TodStringTranslate(_S("[ZEN_SELL_HEADER]"));
     SexyString aLines = TodStringTranslate(_S("[ZEN_SELL_LINES]"));
@@ -605,6 +624,8 @@ bool ZenGarden::PlantsNeedWater()
 //0x51E2F0
 bool ZenGarden::PlantCanBeWatered(Plant* thePlant)
 {
+    if (mApp->NetIsClient())
+        return GetPlantNeedForDisplay(thePlant) == PottedPlantNeed::PLANTNEED_WATER;
     if (thePlant->mPottedPlantIndex == -1)
     {
         return false;
@@ -911,12 +932,19 @@ PottedPlantNeed ZenGarden::GetPlantsNeed(PottedPlant* thePottedPlant)
 //0x51EB70
 void ZenGarden::MouseDownWithFeedingTool(int x, int y, CursorType theCursorType)
 {
-    Plant* aPlantToFeed = nullptr;
+    if (mApp->NetIsClient()) return;
+    Plant* aPlantToFeed = mBoard->ToolHitTest(x, y);
+    if (aPlantToFeed && aPlantToFeed->mPottedPlantIndex < 0) aPlantToFeed = nullptr;
+    // Each ordered network action carries its own coordinates.  Highlighting
+    // belongs to the local pointer and must never choose a remote action target.
+    if (theCursorType == CursorType::CURSOR_TYPE_WATERING_CAN &&
+        mApp->mPlayerInfo->mPurchases[StoreItem::STORE_ITEM_GOLD_WATERINGCAN])
     {
         Plant* aPlant = nullptr;
         while (mBoard->IteratePlants(aPlant))
         {
-            if (aPlant->mHighlighted && aPlant->mPottedPlantIndex != -1)
+            if (aPlant->mPottedPlantIndex >= 0 && mBoard->IsPlantInGoldWateringCanRange(x, y, aPlant) &&
+                GetPlantNeedForDisplay(aPlant) == PottedPlantNeed::PLANTNEED_WATER)
             {
                 aPlantToFeed = aPlant;
                 break;
@@ -926,10 +954,12 @@ void ZenGarden::MouseDownWithFeedingTool(int x, int y, CursorType theCursorType)
 
     if (theCursorType == CursorType::CURSOR_TYPE_CHOCOLATE)
     {
-        TOD_ASSERT(mApp->mPlayerInfo->mPurchases[(int)StoreItem::STORE_ITEM_CHOCOLATE] > PURCHASE_COUNT_OFFSET);
+        if (mApp->mPlayerInfo->mPurchases[StoreItem::STORE_ITEM_CHOCOLATE] <= PURCHASE_COUNT_OFFSET)
+        { mBoard->ClearCursor(); return; }
 
         GridItem* aStinky = GetStinky();
-        if (aStinky && aStinky->mHighlighted)
+        if (aStinky && !IsStinkyHighOnChocolate() &&
+            Rect((int)aStinky->mPosX - 6, (int)aStinky->mPosY - 10, 84, 90).Contains(x, y))
         {
             WakeStinky();
             mApp->AddTodParticle(aStinky->mPosX + 40.0f, aStinky->mPosY + 40.0f, aStinky->mRenderOrder + 1, ParticleEffect::PARTICLE_PRESENT_PICKUP);
@@ -940,13 +970,35 @@ void ZenGarden::MouseDownWithFeedingTool(int x, int y, CursorType theCursorType)
             mApp->PlaySample(SOUND_MINDCONTROLLED);
         }
 
-        if (aPlantToFeed)
+        else if (aPlantToFeed && PlantCanHaveChocolate(aPlantToFeed))
         {
             mApp->mPlayerInfo->mPurchases[(int)StoreItem::STORE_ITEM_CHOCOLATE]--;
             FeedChocolateToPlant(aPlantToFeed);
             mApp->PlayFoley(FoleyType::FOLEY_WAKEUP);
         }
+        mBoard->ClearCursor();
+        return;
     }
+
+    if (aPlantToFeed)
+    {
+        const PottedPlantNeed need = GetPlantNeedForDisplay(aPlantToFeed);
+        const bool matches = (theCursorType == CursorType::CURSOR_TYPE_WATERING_CAN && need == PottedPlantNeed::PLANTNEED_WATER) ||
+            (theCursorType == CursorType::CURSOR_TYPE_FERTILIZER && need == PottedPlantNeed::PLANTNEED_FERTILIZER) ||
+            (theCursorType == CursorType::CURSOR_TYPE_BUG_SPRAY && need == PottedPlantNeed::PLANTNEED_BUGSPRAY) ||
+            (theCursorType == CursorType::CURSOR_TYPE_PHONOGRAPH && need == PottedPlantNeed::PLANTNEED_PHONOGRAPH);
+        if (!matches ||
+            (theCursorType == CursorType::CURSOR_TYPE_FERTILIZER && mApp->mPlayerInfo->mPurchases[StoreItem::STORE_ITEM_FERTILIZER] <= PURCHASE_COUNT_OFFSET) ||
+            (theCursorType == CursorType::CURSOR_TYPE_BUG_SPRAY && mApp->mPlayerInfo->mPurchases[StoreItem::STORE_ITEM_BUG_SPRAY] <= PURCHASE_COUNT_OFFSET))
+            aPlantToFeed = nullptr;
+    }
+    // The first tool has already reserved this need; a second peer must not
+    // spend another shared consumable before its animation has completed.
+    GridItem* pending = nullptr;
+    while (aPlantToFeed && mBoard->IterateGridItems(pending))
+        if (pending->mGridItemType == GridItemType::GRIDITEM_ZEN_TOOL &&
+            pending->mGridX == aPlantToFeed->mPlantCol && pending->mGridY == aPlantToFeed->mRow)
+            aPlantToFeed = nullptr;
 
     if (aPlantToFeed)
     {
@@ -1093,6 +1145,7 @@ void ZenGarden::DoFeedingTool(int x, int y, GridItemState theToolType)
 //0x51F580
 void ZenGarden::MouseDownWithTool(int x, int y, CursorType theCursorType)
 {
+    if (mApp->NetIsClient()) return;
     if (theCursorType == CursorType::CURSOR_TYPE_WHEEELBARROW && GetPottedPlantInWheelbarrow())
     {
         MouseDownWithFullWheelBarrow(x, y);
@@ -1117,6 +1170,11 @@ void ZenGarden::MouseDownWithTool(int x, int y, CursorType theCursorType)
         mBoard->ClearCursor();
         return;
     }
+    GridItem* pending = nullptr;
+    while (mBoard->IterateGridItems(pending))
+        if (pending->mGridItemType == GridItemType::GRIDITEM_ZEN_TOOL &&
+            pending->mGridX == aPlant->mPlantCol && pending->mGridY == aPlant->mRow)
+        { mBoard->ClearCursor(); return; }
 
     if (theCursorType == CursorType::CURSOR_TYPE_MONEY_SIGN)
     {
@@ -1141,11 +1199,20 @@ void ZenGarden::MouseDownWithTool(int x, int y, CursorType theCursorType)
 //0x51F700
 void ZenGarden::MovePlant(Plant* thePlant, int theGridX, int theGridY)
 {
-    if (mApp->mGameMode != GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN)
+    if (mApp->NetIsClient() || mApp->mGameMode != GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN ||
+        !thePlant || thePlant->mDead || thePlant->mPottedPlantIndex < 0 ||
+        thePlant->mPottedPlantIndex >= mApp->mPlayerInfo->mNumPottedPlants ||
+        mBoard->GridToPixelX(theGridX, theGridY) < 0 || mBoard->GridToPixelY(theGridX, theGridY) < 0 ||
+        mBoard->CanPlantAt(theGridX, theGridY, thePlant->mSeedType) != PlantingReason::PLANTING_OK)
     {
         return;
     }
 
+    GridItem* pending = nullptr;
+    while (mBoard->IterateGridItems(pending))
+        if (pending->mGridItemType == GridItemType::GRIDITEM_ZEN_TOOL &&
+            pending->mGridX == thePlant->mPlantCol && pending->mGridY == thePlant->mRow)
+            return;
     int aPosX = mBoard->GridToPixelX(theGridX, theGridY);
     int aPosY = mBoard->GridToPixelY(theGridX, theGridY);
     TOD_ASSERT(mBoard->GetTopPlantAt(theGridX, theGridY, PlantPriority::TOPPLANT_ANY) == nullptr);
@@ -1880,6 +1947,16 @@ GridItem* ZenGarden::GetStinky()
 //0x520D30
 void ZenGarden::GotoNextGarden()
 {
+    if (mApp->NetIsClient()) return;
+    // Garden changes destroy the old plant array, invalidating every held ID.
+    mBoard->ClearCursor();
+    for (int slot = 0; slot < LawnNet::NET_MAX_PLAYERS; ++slot)
+        if (mBoard->mNetPlayerCursors[slot])
+        {
+            mBoard->mNetPlayerCursors[slot]->mCursorType = CursorType::CURSOR_TYPE_NORMAL;
+            mBoard->mNetPlayerCursors[slot]->mType = SeedType::SEED_NONE;
+            mBoard->mNetPlayerCursors[slot]->mGlovePlantID = PlantID::PLANTID_NULL;
+        }
     LeaveGarden();
     mBoard->ClearAdvice(AdviceType::ADVICE_NONE);
     mBoard->mPlants.DataArrayFreeAll();
@@ -1973,8 +2050,9 @@ void ZenGarden::GotoNextGarden()
 //0x5210F0
 void ZenGarden::MouseDownWithFullWheelBarrow(int x, int y)
 {
+    if (mApp->NetIsClient()) return;
     PottedPlant* aPottedPlant = GetPottedPlantInWheelbarrow();
-    TOD_ASSERT(aPottedPlant);
+    if (!aPottedPlant) { mBoard->ClearCursor(); return; }
 
     if (mApp->mZenGarden->mGardenType == GardenType::GARDEN_AQUARIUM && !Plant::IsAquatic(aPottedPlant->mSeedType))
     {
@@ -2000,6 +2078,13 @@ void ZenGarden::MouseDownWithFullWheelBarrow(int x, int y)
 //0x521280
 void ZenGarden::MouseDownWithEmptyWheelBarrow(Plant* thePlant)
 {
+    if (mApp->NetIsClient() || !thePlant || thePlant->mDead || thePlant->mPottedPlantIndex < 0 ||
+        GetPottedPlantInWheelbarrow()) return;
+    GridItem* pending = nullptr;
+    while (mBoard->IterateGridItems(pending))
+        if (pending->mGridItemType == GridItemType::GRIDITEM_ZEN_TOOL &&
+            pending->mGridX == thePlant->mPlantCol && pending->mGridY == thePlant->mRow)
+            return;
     PottedPlant* aPottedPlant = PottedPlantFromIndex(thePlant->mPottedPlantIndex);
     RemovePottedPlant(thePlant);
     aPottedPlant->mWhichZenGarden = GardenType::GARDEN_WHEELBARROW;
@@ -2011,6 +2096,7 @@ void ZenGarden::MouseDownWithEmptyWheelBarrow(Plant* thePlant)
 //0x521310
 PottedPlant* ZenGarden::GetPottedPlantInWheelbarrow()
 {
+    if (mApp->NetIsClient()) return mNetWheelbarrowPlant.get();
     for (int i = 0; i < mApp->mPlayerInfo->mNumPottedPlants; i++)
     {
         PottedPlant* aPottedPlant = PottedPlantFromIndex(i);
@@ -2372,18 +2458,99 @@ void ZenGarden::PottedPlantUpdate(Plant* thePlant)
     UpdatePlantEffectState(thePlant);
 }
 
+PottedPlantNeed ZenGarden::GetPlantNeedForDisplay(Plant* thePlant)
+{
+    if (!thePlant || mApp->mGameMode != GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN)
+        return PottedPlantNeed::PLANTNEED_NONE;
+    if (mApp->NetIsClient())
+    {
+        const auto found = mNetPlantStates.find(thePlant->mNetId);
+        return found == mNetPlantStates.end() ? PottedPlantNeed::PLANTNEED_NONE : (PottedPlantNeed)found->second.mNeed;
+    }
+    if (thePlant->mPottedPlantIndex < 0 || !mApp->mPlayerInfo ||
+        thePlant->mPottedPlantIndex >= mApp->mPlayerInfo->mNumPottedPlants)
+        return PottedPlantNeed::PLANTNEED_NONE;
+    return GetPlantsNeed(PottedPlantFromIndex(thePlant->mPottedPlantIndex));
+}
+
+bool ZenGarden::GetPottedPlantForDisplay(Plant* thePlant, PottedPlant& thePottedPlant)
+{
+    if (!thePlant) return false;
+    if (!mApp->NetIsClient())
+    {
+        if (thePlant->mPottedPlantIndex < 0 || thePlant->mPottedPlantIndex >= mApp->mPlayerInfo->mNumPottedPlants)
+            return false;
+        thePottedPlant = *PottedPlantFromIndex(thePlant->mPottedPlantIndex);
+        return true;
+    }
+    const auto found = mNetPlantStates.find(thePlant->mNetId);
+    if (found == mNetPlantStates.end()) return false;
+    thePottedPlant = PottedPlant{};
+    thePottedPlant.mSeedType = (SeedType)found->second.mSeedType;
+    thePottedPlant.mPlantAge = (PottedPlantAge)found->second.mAge;
+    thePottedPlant.mFacing = (PottedPlant::FacingDirection)found->second.mFacing;
+    thePottedPlant.mDrawVariation = (DrawVariation)found->second.mVariation;
+    thePottedPlant.mWhichZenGarden = mGardenType;
+    return true;
+}
+
+LawnNet::NetZenPlantState ZenGarden::GetNetPlantState(Plant* thePlant)
+{
+    LawnNet::NetZenPlantState state;
+    PottedPlant potted;
+    if (mApp->mGameMode != GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN || !GetPottedPlantForDisplay(thePlant, potted))
+        return state;
+    state.mNeed = (uint8_t)GetPlantNeedForDisplay(thePlant);
+    state.mSeedType = (uint8_t)potted.mSeedType;
+    state.mAge = (uint8_t)potted.mPlantAge;
+    state.mFacing = (uint8_t)potted.mFacing;
+    state.mVariation = (uint8_t)potted.mDrawVariation;
+    state.mCanHaveChocolate = PlantCanHaveChocolate(thePlant);
+    return state;
+}
+
+void ZenGarden::ApplyNetGardenState(const LawnNet::NetZenGardenState& theState)
+{
+    if (!mApp->NetIsClient() || theState.mGarden == 255) return;
+    const BackgroundType background = theState.mGarden == (uint8_t)GardenType::GARDEN_MUSHROOM ?
+        BackgroundType::BACKGROUND_MUSHROOM_GARDEN : theState.mGarden == (uint8_t)GardenType::GARDEN_AQUARIUM ?
+        BackgroundType::BACKGROUND_ZOMBIQUARIUM : BackgroundType::BACKGROUND_GREENHOUSE;
+    if (mApp->mBoard->mBackground != background)
+    {
+        if (background == BackgroundType::BACKGROUND_MUSHROOM_GARDEN) TodLoadResources("DelayLoad_MushroomGarden");
+        else if (background == BackgroundType::BACKGROUND_ZOMBIQUARIUM) TodLoadResources("DelayLoad_Zombiquarium");
+        else TodLoadResources("DelayLoad_GreenHouseGarden");
+        TodLoadResources("DelayLoad_GreenHouseOverlay");
+        mApp->mBoard->mBackground = background;
+    }
+    mGardenType = (GardenType)theState.mGarden;
+    mNetStinkyChocolate = theState.mStinkyChocolate;
+    GridItem* snail = GetStinky();
+    if (snail && mApp->ReanimationTryToGet(snail->mGridItemReanimID)) StinkyAnimRateUpdate(snail);
+    const StoreItem supplies[] = { STORE_ITEM_FERTILIZER, STORE_ITEM_BUG_SPRAY, STORE_ITEM_CHOCOLATE };
+    for (int i = 0; i < 3; ++i) mApp->mPlayerInfo->mPurchases[supplies[i]] = theState.mSupplies[i];
+    if (theState.mWheelbarrow.mSeedType == 255) mNetWheelbarrowPlant.reset();
+    else
+    {
+        if (!mNetWheelbarrowPlant) mNetWheelbarrowPlant = std::make_shared<PottedPlant>();
+        *mNetWheelbarrowPlant = PottedPlant{};
+        mNetWheelbarrowPlant->mSeedType = (SeedType)theState.mWheelbarrow.mSeedType;
+        mNetWheelbarrowPlant->mPlantAge = (PottedPlantAge)theState.mWheelbarrow.mAge;
+        mNetWheelbarrowPlant->mFacing = (PottedPlant::FacingDirection)theState.mWheelbarrow.mFacing;
+        mNetWheelbarrowPlant->mDrawVariation = (DrawVariation)theState.mWheelbarrow.mVariation;
+        mNetWheelbarrowPlant->mWhichZenGarden = GardenType::GARDEN_WHEELBARROW;
+    }
+}
+
 //0x521F30
 void ZenGarden::DrawPlantOverlay(Graphics* g, Plant* thePlant)
 {
-    if (thePlant->mPottedPlantIndex == -1 || mApp->IsScreenSaver())
-    {
+    if (mApp->IsScreenSaver())
         return;
-    }
-
-    PottedPlant* aPottedPlant = PottedPlantFromIndex(thePlant->mPottedPlantIndex);
-    PottedPlantNeed aPlantNeed = mApp->mZenGarden->GetPlantsNeed(aPottedPlant);
+    const PottedPlantNeed aPlantNeed = GetPlantNeedForDisplay(thePlant);
     if (aPlantNeed == PottedPlantNeed::PLANTNEED_NONE)
     {
+        LawnNet::NetSmokeObserveZenOverlay(mApp, thePlant, aPlantNeed);
         return;
     }
 
@@ -2406,6 +2573,7 @@ void ZenGarden::DrawPlantOverlay(Graphics* g, Plant* thePlant)
         g->DrawImage(IMAGE_WATERDROP, 67, 9);
         break;
     }
+    LawnNet::NetSmokeObserveZenOverlay(mApp, thePlant, aPlantNeed);
 }
 
 //0x521FE0
@@ -2420,6 +2588,7 @@ void ZenGarden::WakeStinky()
 //0x522090
 bool ZenGarden::IsStinkyHighOnChocolate()
 {
+    if (mApp->NetIsClient()) return mNetStinkyChocolate;
     return _time32(nullptr) - mApp->mPlayerInfo->mLastStinkyChocolateTime < 3600;
 }
 
@@ -2508,6 +2677,9 @@ SeedType ZenGarden::PickRandomSeedType()
 //0x5223F0
 void ZenGarden::LeaveGarden()
 {
+    mNetPlantStates.clear();
+    mNetWheelbarrowPlant.reset();
+    mNetStinkyChocolate = false;
     if (mApp->NetIsClient() || mApp->mNetBlockProfileSave)
     {
         // Board/DataArray/effect disposal owns presentation cleanup.  Running

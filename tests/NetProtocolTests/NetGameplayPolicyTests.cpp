@@ -21,10 +21,20 @@ NetGameplayPolicyTestResult RunNetGameplayPolicyTests()
     checks = failures = 0;
     using namespace LawnNet;
     Check(RandomDiscountBasisPoints(0) == 0, "ordinary origin has no random discount");
-    Check(RandomDiscountBasisPoints(1) == 500 && RandomDiscountBasisPoints(10) == 2500, "random discount endpoints");
-    Check(DiscountedPacketCost(25, 1, 0) == 24 && DiscountedPacketCost(25, 10, 0) == 19, "fractional currency rounds up");
-    Check(DiscountedPacketCost(150, 1, 0) == 143 && DiscountedPacketCost(150, 10, 0) == 113, "half currency rounds up");
-    Check(DiscountedPacketCost(100, 10, 200) == 65 && DiscountedPacketCost(25, 10, 200) == 17, "random plus adaptive capped at 35 percent");
+    Check(RandomDiscountBasisPoints(1) == 700 && RandomDiscountBasisPoints(5) == 2000 &&
+        RandomDiscountBasisPoints(10) == 5500, "random discount anchors at D1 D5 and D10");
+    bool convex = true;
+    for (int level = 3; level <= 10; ++level)
+        convex &= RandomDiscountBasisPoints(level) - RandomDiscountBasisPoints(level - 1) >
+            RandomDiscountBasisPoints(level - 1) - RandomDiscountBasisPoints(level - 2);
+    Check(convex, "random discount increment strictly grows with every level");
+    Check(RandomDiscountBasisPoints(-1) == 0 && RandomDiscountBasisPoints(99) == 5500, "random discount origin bounds");
+    Check(DiscountedPacketCost(25, 1, 0) == 24 && DiscountedPacketCost(25, 10, 0) == 12, "fractional currency rounds up");
+    Check(DiscountedPacketCost(150, 1, 0) == 140 && DiscountedPacketCost(150, 10, 0) == 68, "half currency rounds up");
+    Check(DiscountedPacketCost(100, 5, 200) == 65 && DiscountedPacketCost(25, 5, 200) == 17,
+        "adaptive stacking retains the legacy thirty-five percent cap");
+    Check(DiscountedPacketCost(100, 10, 200) == 45 && DiscountedPacketCost(25, 10, 200) == 12,
+        "intrinsic fifty-five percent discount survives adaptive stacking cap");
     Check(DiscountedPacketCost(0, 10, 200) == 0 && DiscountedPacketCost(1, 10, 200) == 1, "free stays free and positive costs cannot become free");
     bool ordinaryStock = true, monotone = true, bounded = true;
     for (int base = 0; base < 1000; ++base)
@@ -37,7 +47,7 @@ NetGameplayPolicyTestResult RunNetGameplayPolicyTests()
             monotone &= cost <= previous;
             previous = cost;
             const int supported = DiscountedPacketCost(base, level, 200);
-            bounded &= supported >= GameplayCeilRatio(base, 65, 100) && supported <= cost;
+            bounded &= supported >= std::min(cost, GameplayCeilRatio(base, 65, 100)) && supported <= cost;
         }
     }
     Check(ordinaryStock, "every tested ordinary D1 base price is stock");

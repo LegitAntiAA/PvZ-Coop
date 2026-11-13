@@ -50,7 +50,10 @@ inline int DifficultyCount(int stock, int difficulty, int extraAtTen)
 
 inline int RandomDiscountBasisPoints(int originLevel)
 {
-    return originLevel <= 0 ? 0 : 500 + (2000 * (GameplayClamp(originLevel, 1, 10) - 1) + 4) / 9;
+    if (originLevel <= 0) return 0;
+    const int level = GameplayClamp(originLevel, 1, 10) - 1;
+    // Convex quadratic through D1=7%, D5=20%, D10=55%, rounded to 0.01%.
+    return (2100 + 475 * level + 125 * level * level + 1) / 3;
 }
 
 inline int DiscountedPacketCost(int base, int originLevel, int adaptivePermille)
@@ -58,7 +61,8 @@ inline int DiscountedPacketCost(int base, int originLevel, int adaptivePermille)
     if (base <= 0) return 0;
     const int randomCost = GameplayCeilRatio(base, 10000 - RandomDiscountBasisPoints(originLevel), 10000);
     const int supportedCost = GameplayCeilRatio(randomCost, 1000 - GameplayClamp(adaptivePermille, 0, 200), 1000);
-    const int floor = GameplayCeilRatio(base, 65, 100);
+    // Keep the old adaptive stacking cap without reducing an intrinsic discount.
+    const int floor = (std::min)(randomCost, GameplayCeilRatio(base, 65, 100));
     return supportedCost < floor ? floor : supportedCost;
 }
 

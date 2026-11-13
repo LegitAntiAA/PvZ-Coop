@@ -332,6 +332,7 @@ public:
 	virtual void					KeyChar(SexyChar theChar);
 	virtual void					KeyUp(KeyCode theKey) { ; }
 	virtual void					KeyDown(KeyCode theKey);
+	bool                            HandleHotbarKey(KeyCode theKey, bool theRepeat = false);
 	virtual void					Update();
 	void							UpdateLayers();
 	virtual void					Draw(Graphics* g);

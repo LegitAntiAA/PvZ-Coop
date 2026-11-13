@@ -2,6 +2,9 @@
 #define __ZENGARDEN_H__
 
 #include "../ConstEnums.h"
+#include "Net/NetZenGarden.h"
+#include <map>
+#include <memory>
 
 #define ZEN_MAX_GRIDSIZE_X 8
 #define ZEN_MAX_GRIDSIZE_Y 4
@@ -35,6 +38,9 @@ public:
     LawnApp*                mApp;           //+0x0
     Board*                  mBoard;         //+0x4
     GardenType              mGardenType;    //+0x8
+    std::map<unsigned short, LawnNet::NetZenPlantState> mNetPlantStates;
+    std::shared_ptr<PottedPlant> mNetWheelbarrowPlant;
+    bool mNetStinkyChocolate = false;
 
 public:
     ZenGarden();
@@ -70,6 +76,10 @@ public:
     PottedPlantNeed         GetPlantsNeed(PottedPlant* thePottedPlant);
     void                    MouseDownWithFeedingTool(int x, int y, CursorType theCursorType);
     void                    DrawPlantOverlay(Graphics* g, Plant* thePlant);
+    PottedPlantNeed         GetPlantNeedForDisplay(Plant* thePlant);
+    bool                    GetPottedPlantForDisplay(Plant* thePlant, PottedPlant& thePottedPlant);
+    LawnNet::NetZenPlantState GetNetPlantState(Plant* thePlant);
+    void                    ApplyNetGardenState(const LawnNet::NetZenGardenState& theState);
     PottedPlant*            PottedPlantFromIndex(int thePottedPlantIndex);
     bool                    WasPlantNeedFulfilledToday(PottedPlant* thePottedPlant);
     void                    PottedPlantUpdate(Plant* thePlant);

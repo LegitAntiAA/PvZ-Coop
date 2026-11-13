@@ -58,6 +58,10 @@ public:
 	// called by LawnApp on edit results
 	void ApplyNick();
 	Rect GetPanelRect() const;
+	Rect GetButtonRect(int theId) const;
+	bool IsCollapsed() const { return mCollapsed; }
+	bool IsLanExpanded() const { return mLanExpanded; }
+	void SetTutorialLayout(bool theCollapsed, bool theLanExpanded, bool thePreview = true);
 
 private:
 	struct UiButton
@@ -81,6 +85,7 @@ private:
 	DDImage* mPaperImage;
 	bool mLanExpanded;
 	bool mCollapsed;
+	bool mTutorialPreview = false;
 	bool mWasActive;
 	std::string mLastOnlineError;
 	std::vector<UiButton> mButtons;

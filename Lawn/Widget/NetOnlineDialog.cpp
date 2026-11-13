@@ -88,7 +88,7 @@ public:
 };
 }
 
-NetOnlineDialog::NetOnlineDialog(LawnApp* theApp) :
+NetOnlineDialog::NetOnlineDialog(LawnApp* theApp, bool theTutorialPreview) :
     LawnDialog(theApp, Dialogs::DIALOG_COOP_ONLINE, true, _S("ONLINE ROOMS"),
         _S(""), _S("CLOSE"), Dialog::BUTTONS_FOOTER),
     mPage(0), mRowsPerPage(6), mMaxPlayers(4), mLastActionTick(0), mAttemptedRoom(false), mPendingAction(0)
@@ -135,17 +135,17 @@ NetOnlineDialog::NetOnlineDialog(LawnApp* theApp) :
         6 * IMAGE_DIALOG_CENTERLEFT->mHeight + IMAGE_DIALOG_BOTTOMLEFT->mHeight;
     Resize(0, 0, aFrameWidth, aFrameHeight);
     LawnApp::CenterDialog(this, mWidth, mHeight);
-    mConnect->Resize(mWidth - 170, 104, 130, 30);
+    mConnect->Resize(mWidth - 184, 104, 130, 30);
     mRoomList->Resize(40, 172, 445, 264);
     mPrevious->Resize(318, 142, 76, 26);
     mNext->Resize(406, 142, 76, 26);
     mPassword->Resize(145, 447, 180, 28);
     mJoin->Resize(345, 443, 140, 36);
-    mRoomName->Resize(520, 212, 205, 30);
-    mCreatePassword->Resize(520, 279, 205, 30);
-    mCapacity->Resize(520, 326, 205, 34);
-    mCreate->Resize(520, 380, 205, 40);
-    if (!mApp->mNetManager->IsActive()) ButtonDepress(REFRESH);
+    mRoomName->Resize(514, 212, 205, 30);
+    mCreatePassword->Resize(514, 279, 205, 30);
+    mCapacity->Resize(514, 326, 205, 34);
+    mCreate->Resize(514, 380, 205, 40);
+    if (!theTutorialPreview && !mApp->mNetManager->IsActive()) ButtonDepress(REFRESH);
 }
 
 NetOnlineDialog::~NetOnlineDialog()
@@ -293,12 +293,12 @@ void NetOnlineDialog::Draw(Graphics* g)
 {
     LawnDialog::Draw(g);
     const Color aText(240, 228, 190);
-    NetUi::Paper(g, mPaperImage, Rect(500, 172, 245, 264));
+    NetUi::Paper(g, mPaperImage, Rect(494, 172, 245, 264));
     TodDrawString(g, StrFormat(_S("ROOMS  %d"), (int)mRooms.size()), 40, 161,
         FONT_BRIANNETOD16, aText, DS_ALIGN_LEFT);
-    TodDrawString(g, _S("CREATE A ROOM"), 622, 161, FONT_BRIANNETOD16, aText, DS_ALIGN_CENTER);
-    TodDrawString(g, _S("ROOM NAME"), 518, 202, FONT_BRIANNETOD12, NetUi::Ink(), DS_ALIGN_LEFT);
-    TodDrawString(g, _S("PASSWORD (OPTIONAL)"), 518, 269, FONT_BRIANNETOD12, NetUi::Ink(), DS_ALIGN_LEFT);
+    TodDrawString(g, _S("CREATE A ROOM"), 616, 161, FONT_BRIANNETOD16, aText, DS_ALIGN_CENTER);
+    TodDrawString(g, _S("ROOM NAME"), 512, 202, FONT_BRIANNETOD12, NetUi::Ink(), DS_ALIGN_LEFT);
+    TodDrawString(g, _S("PASSWORD (OPTIONAL)"), 512, 269, FONT_BRIANNETOD12, NetUi::Ink(), DS_ALIGN_LEFT);
     TodDrawString(g, _S("PASSWORD"), 40, 468, FONT_BRIANNETOD12, aText, DS_ALIGN_LEFT);
     NetOnline* anOnline = mApp->mNetManager->GetOnline();
     const SexyString aStatus = mApp->mNetManager->IsActive() ? _S("Leave your current game to join another room.") :

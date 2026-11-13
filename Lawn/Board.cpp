@@ -8290,7 +8290,8 @@ void Board::DrawGameObjects(Graphics* g)
 			{
 				AddGameObjectRenderItemPlant(aRenderList, aRenderItemCount, RenderObjectType::RENDER_ITEM_PLANT, aPlant);
 
-				if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN && aPlant->mPottedPlantIndex != -1)
+				if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN &&
+					(aPlant->mPottedPlantIndex != -1 || mApp->NetIsClient()))
 				{
 					RenderItem& aRenderItem = aRenderList[aRenderItemCount];
 					aRenderItem.mRenderObjectType = RenderObjectType::RENDER_ITEM_PLANT_OVERLAY;
@@ -10834,9 +10835,110 @@ void Board::DoTypingCheck(KeyCode theKey)
 	}
 }
 
+bool Board::HandleHotbarKey(KeyCode theKey, bool theRepeat)
+{
+	int aDigit = (int)theKey;
+	if (theKey >= KEYCODE_NUMPAD0 && theKey <= KEYCODE_NUMPAD9)
+		aDigit = '0' + (theKey - KEYCODE_NUMPAD0);
+	const bool aShovel = (int)theKey == 'Q';
+	if (!aShovel && (aDigit < '0' || aDigit > '9')) return false;
+	if (mApp->mGameScene != SCENE_PLAYING || mPaused || mTimeStopCounter > 0 ||
+		mApp->GetDialogCount() || mApp->mSeedChooserScreen || mApp->mNetChatTyping || !mCursorObject)
+		return false;
+	NetManager* aNet = mApp->mNetManager;
+	const int aSlot = aNet ? aNet->GetMySlot() : 0;
+	if (mApp->NetActive() && (aNet->IsSpectator() || aNet->GetInputPhase() != NETINPUT_PLAYING ||
+		(mApp->NetIsClient() && aNet->mRemotePaused))) return true;
+	// Heat Wave retains Q for its native shout when no shovel is available.
+	if (aShovel && (!mShowShovel || !CanUsePlantTools(aSlot))) return false;
+	if (theRepeat) return true;
+
+	int aX = 0, aY = 0;
+	uint16_t aPacketId = 0;
+	if (aShovel)
+	{
+		const Rect aRect = GetShovelButtonRect();
+		aX = aRect.mX + aRect.mWidth / 2; aY = aRect.mY + aRect.mHeight / 2;
+	}
+	else
+	{
+		if (!mSeedBank) return true;
+		const Rect aBankHitRect(mSeedBank->mX, mSeedBank->mY, max(0, mSeedBank->mWidth - 4), mSeedBank->mHeight);
+		// Match SeedBank::Draw's native conveyor clip. Entering cards can lie
+		// beyond it, over the shovel/menu HUD, before they become visible.
+		const Rect aConveyorClip(mSeedBank->mX + 90, mSeedBank->mY, 501, mSeedBank->mHeight);
+		const auto aPacketHitRect = [&](const SeedPacket& aPacket)
+		{
+			const bool aZombie = IsPvPMode() && mChallenge->IsZombieSeedType(aPacket.mPacketType);
+			Rect aRect(mSeedBank->mX + aPacket.mX + aPacket.mOffsetX, mSeedBank->mY + aPacket.mY,
+				aZombie ? 36 : aPacket.mWidth, aZombie ? 51 : aPacket.mHeight);
+			aRect = aRect.Intersection(aBankHitRect);
+			return HasConveyorBeltSeedBank() ? aRect.Intersection(aConveyorClip) : aRect;
+		};
+		std::vector<SeedPacket*> aPackets;
+		for (int i = 0; i < mSeedBank->mNumPackets && i < SEEDBANK_CAPACITY; ++i)
+		{
+			SeedPacket& aPacket = mSeedBank->mSeedPackets[i];
+			if (aPacket.mPacketType == SEED_NONE || aPacket.mSlotMachineCountDown > 0 ||
+				!IsSeedPacketVisibleToSlot(i, aSlot) ||
+				(mApp->NetActive() && aPacket.mNetOwnerSlot != NET_SHARED_OWNER && aPacket.mNetOwnerSlot != aSlot))
+				continue;
+			const Rect aVisible = aPacketHitRect(aPacket);
+			if (HasConveyorBeltSeedBank() && (aVisible.mWidth <= 0 || aVisible.mHeight <= 0)) continue;
+			aPackets.push_back(&aPacket);
+		}
+		std::stable_sort(aPackets.begin(), aPackets.end(), [](const SeedPacket* a, const SeedPacket* b)
+			{ return a->mX + a->mOffsetX < b->mX + b->mOffsetX; });
+		const size_t anIndex = aDigit == '0' ? 9U : (size_t)(aDigit - '1');
+		if (anIndex >= aPackets.size()) return true;
+		SeedPacket* aPacket = aPackets[anIndex];
+		const Rect aVisible = aPacketHitRect(*aPacket);
+		if (aVisible.mWidth <= 0 || aVisible.mHeight <= 0) return true;
+		aX = aVisible.mX + aVisible.mWidth / 2;
+		aY = aVisible.mY + aVisible.mHeight / 2;
+		aPacketId = aPacket->mNetId;
+		HitResult aHit{};
+		if (!mSeedBank->MouseHitTest(aX, aY, &aHit) || aHit.mObjectType != OBJECT_TYPE_SEEDPACKET ||
+			aHit.mObject != aPacket || (mApp->NetActive() && !aPacketId)) return true;
+	}
+	const int aWideX = mApp->mDDInterface ? mApp->mDDInterface->mWideScreenOffsetX : 0;
+	const int aWideY = mApp->mDDInterface ? mApp->mDDInterface->mWideScreenOffsetY : 0;
+	const auto aClick = [&](int aButton, int aClickX, int aClickY)
+	{
+		if (mApp->NetIsClient())
+		{
+			aNet->SendInput(true, aButton, mX + aClickX + aWideX, mY + aClickY + aWideY);
+			aNet->SendInput(false, aButton, mX + aClickX + aWideX, mY + aClickY + aWideY);
+		}
+		else
+		{
+			// A keyboard selection must not activate the button under the real mouse.
+			const bool aMenuOver = mMenuButton->mIsOver;
+			const bool aStoreOver = mStoreButton && mStoreButton->mIsOver;
+			mMenuButton->mIsOver = false;
+			if (mStoreButton) mStoreButton->mIsOver = false;
+			MouseDown(aClickX + aWideX, aClickY + aWideY, aButton);
+			MouseUp(aClickX + aWideX, aClickY + aWideY, aButton);
+			mMenuButton->mIsOver = aMenuOver;
+			if (mStoreButton) mStoreButton->mIsOver = aStoreOver;
+		}
+	};
+	// Cancellation and pickup use the same FIFO and authoritative packet IDs as clicks.
+	const bool aWasShovel = mCursorObject->mCursorType == CURSOR_TYPE_SHOVEL;
+	// A previous client pickup may still be awaiting its echo. Cancel at an
+	// empty toolbar point even when the local cursor has not caught up yet.
+	if (mApp->NetIsClient() || (mCursorObject->mCursorType != CURSOR_TYPE_NORMAL && mCursorObject->mCursorType != CURSOR_TYPE_HAMMER))
+		aClick(-1, 0, 0);
+	if (!aShovel || !aWasShovel) aClick(1, aX, aY);
+	NetTrace("hotbar key slot=%d key=%c packetId=%u client=%d", aSlot, aShovel ? 'Q' : aDigit,
+		aPacketId, mApp->NetIsClient() ? 1 : 0);
+	return true;
+}
+
 //0x41B820
 void Board::KeyDown(KeyCode theKey)
 {
+	if (HandleHotbarKey(theKey)) return;
 	DoTypingCheck(theKey);
 
 #ifdef _HAS_HEALTHBAR_TOGGLE

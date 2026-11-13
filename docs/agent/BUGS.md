@@ -1,4 +1,12 @@
-# Confirmed findings during play-test delivery
+# Current follow-up bugs — 2026-11-13
+
+- **URL-01 / HIGH / VERIFIED within the tested scope:** the SDL loop does not pump legacy URL completion, leaving a buttonless wait dialog; the error dialog also swapped body/footer. Added Close, synchronous completion after the shell accepts the URL, correct error body/OK and Escape. Help7 exercised real SDL fallback OK/Escape on both peers; success callback was source-reviewed. An external browser launch was not performed.
+- **ZEN-09 / HIGH / VERIFIED:** ghost plants deliberately lack a private potted index, suppressing need bubbles; feeding also used the host's highlighted object rather than action coordinates. Added validated presentation-only records/shared supplies, coordinate-based targeting and guarded ghost lookup. Zen5b passed 17 checkpoints plus four active-tool frames per peer, including client care, move/wheelbarrow, wake/feed snail, coins and garden changes. Private potted saves remained unchanged; no snapshot rejects. Store purchases/sale confirmation remain host-owned with client feedback; exact cosmetic snail stars/trail are not mirrored.
+- **HELP-LIFETIME / HIGH / VERIFIED:** board reset could free the tutorial zombie's shared effect holder before a deferred dialog destructor. Synchronous close/disposal before scene and board transitions passed independent review and Help7's actual Adventure1 start with client tutorial/browser open; both peers reached PLAYING without stale dialogs or a crash.
+- **CTRL-CONVEYOR-CLIP / HIGH / VERIFIED:** keyboard selection could click a fully clipped entering conveyor card at the shovel's position. Resolve the visible hit region and verify the exact stable packet via native hit-testing before dispatching ordered input. Controls5b negative offscreen case keeps NORMAL/no HUD selection, then selects and plants visible packet24 as rolling Wallnut25; normal bank, Q, cancellation and chat/pause gates also Passed.
+- **HELP-BUBBLE / MEDIUM / VERIFIED:** legacy polygon drawing did not fill the speech bubble in SDL; the later separate tail/body border exposed a seam and hard edges. One cached ARGB union shape now uses 4x4 edge coverage, pastel RGB249/247/242, one exterior border and Trebuchet MS. Help7 passed all seven steps at800/1066, actual partial-text ink, animated previews, tail/join pixel checks and visual review.
+
+## Historical findings during play-test delivery
 
 `FIXED` means implemented; `VERIFIED` requires executed evidence. Full original requirements remain in REQUEST.txt.
 

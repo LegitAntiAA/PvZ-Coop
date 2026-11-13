@@ -311,6 +311,7 @@ enum Dialogs
     DIALOG_ALREADY_UNLOCK,
     DIALOG_COOP_TEAMS,
     DIALOG_COOP_ONLINE,
+    DIALOG_COOP_HELP,
     NUM_DIALOGS
 };
 enum DebugTextMode

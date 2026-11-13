@@ -32,9 +32,9 @@ Distribute the **same compiled build** to everyone. Each game build generates a 
 
 Sun, progression, store purchases and profile name belong to the host. Your personal Zombatar and visual settings remain your own. Other players' packets are visible but cannot be used. Spectators cannot plant or perform gameplay actions. Chat includes join/leave/kick messages. The GitHub icon in the top-left menu opens this repository.
 
-Mystery cards stay locked and appear as **?** to everyone until gameplay starts, including their owner. They do not mark ordinary picker plants as taken or restrict anyone else's manual picks. Ordinary plants do not repeat within one random set; an Imitator may copy one of them. Fixed Crazy Dave cards remain visible. If anyone uses mystery plants, the usual missing-sunflower warning is skipped. Random cards cost 5% less at difficulty 1, rising linearly to 25% at 10; the discount stays with the card if its owner leaves.
+Mystery cards stay locked and appear as **?** to everyone until gameplay starts, including their owner. They do not mark ordinary picker plants as taken or restrict anyone else's manual picks. Ordinary plants do not repeat within one random set; an Imitator may copy one of them. Fixed Crazy Dave cards remain visible. If anyone uses mystery plants, the usual missing-sunflower warning is skipped. Random cards cost 7% less at difficulty 1, 20% at 5 and 55% at 10, following an accelerating quadratic curve; the discount stays with the card if its owner leaves.
 
-Difficulty also applies to playable mini-games and custom modes: wave-based games gain more/faster waves, while puzzles and other families adjust their own goals, resources or timers. Finite-ammo modes keep their native ammunition budget. In PvP, difficulty 1 has no comeback bonuses. Higher settings gradually help the trailing side: plants receive lower prices and faster firing/sun production; zombies receive lower prices, movement speed and extra health on newly spawned units. Existing zombies are never healed by a balance change. Combined mystery/comeback discounts are capped at 35%.
+Difficulty also applies to playable mini-games and custom modes: wave-based games gain more/faster waves, while puzzles and other families adjust their own goals, resources or timers. Finite-ammo modes keep their native ammunition budget. In PvP, difficulty 1 has no comeback bonuses. Higher settings gradually help the trailing side: plants receive lower prices and faster firing/sun production; zombies receive lower prices, movement speed and extra health on newly spawned units. Existing zombies are never healed by a balance change. Comeback stacking retains its 35% reduction cap; a larger intrinsic mystery discount is preserved.
 
 ### Custom modes
 
@@ -52,6 +52,8 @@ unlock_all_minigames=0
 # 1 unlocks all mini-games/custom modes and their menu buttons
 
 enable_coop=1
+skipIntro=0
+# 1 skips the startup video; level cutscenes keep their normal behavior
 base_snapshot_rate=15
 window_width=0
 window_height=0
@@ -59,6 +61,10 @@ borderless_fullscreen=1
 ```
 
 Default window size is 1066×600; set both dimensions for another size. The default configuration is resolved beside the EXE, independently of the launcher's working folder. The host's effective mini-game unlock setting is mirrored to clients. Window settings, co-op colors/tints and the personal Zombatar persist across restarts; the expanded settings dialog includes a live preview.
+
+Use `1–9` and `0` for plant slots and `Q` for the shovel, including co-op conveyors. Hovered cards follow their identity across player-specific ordering. Alt+right-click pings a plant during selection; Alt+left-click pings a gameplay card. The `?` beside GitHub opens a short Russian guided tour: an animated zombie speaks through a soft speech bubble with fast text and quiet ticks, alongside animated control examples. Back and Close are always available; Space or a click on the bubble reveals its full text.
+
+Zen Garden is shared: clients can care for and move plants, use the wheelbarrow, wake/feed Stinky and collect coins through the host. Needs, supplies and garden changes are mirrored without copying private potted-plant records. Purchases and sale confirmation remain host-controlled.
 
 ## Building
 
@@ -111,9 +117,9 @@ The [delivery board](docs/agent/WORKBOARD.md) records the checks and remaining w
 
 Прогресс, магазин, имя профиля и общая валюта принадлежат хосту. Личная внешность и настройки отображения остаются собственными у каждого игрока. Чужие пакеты видны, но недоступны для использования. В чате есть сообщения о входе, выходе и кике. Значок GitHub в левом верхнем углу меню открывает репозиторий.
 
-Случайный набор заблокирован и скрыт **знаками вопроса для всех**, включая владельца, до начала игры. Он не помечает растения в обычном выборе как занятые и не мешает другим выбирать их вручную. Обычные растения внутри набора не повторяются; Имитатор может скопировать уже выпавшее растение. Обязательные карты Дейва остаются видимыми. Если хотя бы один участник выбрал случайный набор, предупреждение об отсутствии подсолнуха пропускается. Скидка на случайные карты линейно растёт с 5% на сложности 1 до 25% на 10 и сохраняется при передаче карт ушедшего игрока.
+Случайный набор заблокирован и скрыт **знаками вопроса для всех**, включая владельца, до начала игры. Он не помечает растения в обычном выборе как занятые и не мешает другим выбирать их вручную. Обычные растения внутри набора не повторяются; Имитатор может скопировать уже выпавшее растение. Обязательные карты Дейва остаются видимыми. Если хотя бы один участник выбрал случайный набор, предупреждение об отсутствии подсолнуха пропускается. Скидка на случайные карты составляет 7% на сложности 1, 20% на 5 и 55% на 10; прибавка растёт на каждом следующем уровне по квадратичной кривой. Скидка сохраняется при передаче карт ушедшего игрока.
 
-Сложность действует и в доступных мини-играх и дополнительных режимах: волновые получают больше волн и более быстрый темп, остальные семейства меняют собственные цели, ресурсы или таймеры. В режимах с ограниченными боеприпасами их штатный запас сохраняется. В PvP на сложности 1 усилений нет; со 2 помощь отстающей команде нарастает плавно. У растений снижаются цены, ускоряются стрельба и выдача солнца; у зомби снижаются цены, растут скорость и здоровье новых зомби. Уже появившиеся зомби от пересчёта не лечатся. Общая скидка со случайным набором ограничена 35%.
+Сложность действует и в доступных мини-играх и дополнительных режимах: волновые получают больше волн и более быстрый темп, остальные семейства меняют собственные цели, ресурсы или таймеры. В режимах с ограниченными боеприпасами их штатный запас сохраняется. В PvP на сложности 1 усилений нет; со 2 помощь отстающей команде нарастает плавно. У растений снижаются цены, ускоряются стрельба и выдача солнца; у зомби снижаются цены, растут скорость и здоровье новых зомби. Уже появившиеся зомби от пересчёта не лечатся. Дополнительная помощь отстающим сохраняет прежний общий предел скидки 35%, но не уменьшает более высокую собственную скидку случайной карты.
 
 ### Дополнительные режимы
 
@@ -121,7 +127,11 @@ The [delivery board](docs/agent/WORKBOARD.md) records the checks and remaining w
 - **Tower Defense:** движение по случайной дороге; усиленный состав врагов, включая гаргантюа.
 - **PvP:** команда выбирается после открытия режима, перед загрузкой уровня. Во время выбора растений зомби видят экран ожидания, затем — только собственную панель и мозги. Старт — 25 общих мозгов, пассивный доход — 25 каждые 10 секунд; у растений остаётся штатный старт с 50 солнца. Инструменты растений недоступны зомби. Тарзанка выбирает нажатую клетку, шахтёр вылезает и идёт обратно без ложного прохода в дом. Цель растений — 100 убийств, цель зомби — добраться до дома.
 
-Параметры `coop.ini` приведены выше. По умолчанию файл находится рядом с EXE, независимо от рабочей папки запуска. Размер окна, цвета/тонировка кооператива и личный зомботар сохраняются после перезапуска; увеличенное окно настроек показывает предпросмотр. `unlock_all_minigames=1` открывает мини-игры, дополнительные режимы и кнопки меню; эффективная настройка хоста передаётся клиентам. Инструкция сборки и расположение результата также приведены выше.
+Параметры `coop.ini` приведены выше. По умолчанию файл находится рядом с EXE, независимо от рабочей папки запуска. `skipIntro=1` пропускает стартовый видеоролик; вступления самих уровней остаются штатными. Размер окна, цвета/тонировка кооператива и личный зомботар сохраняются после перезапуска; увеличенное окно настроек показывает предпросмотр. `unlock_all_minigames=1` открывает мини-игры, дополнительные режимы и кнопки меню; эффективная настройка хоста передаётся клиентам. Инструкция сборки и расположение результата также приведены выше.
+
+Клавиши `1–9` и `0` выбирают слоты растений, `Q` берёт лопату; бинды поддерживают кооператив и конвейеры. Курсор над карточкой привязан к самому растению при разном порядке слотов. Alt+ПКМ отмечает растение при выборе, Alt+ЛКМ — карточку во время игры. Кнопка `?` рядом с GitHub запускает короткое обучение на русском: зомби справа снизу «говорит» в мягком облачке с быстрой печатью, тихими звуковыми тиками и анимированными примерами управления. Всегда доступны «Назад», «Закрыть» и Escape; пробел или клик на облачко сразу показывает весь текст.
+
+Сад дзен общий: клиенты могут ухаживать за растениями и перемещать их, пользоваться тачкой, будить и кормить улитку, собирать монеты. Потребности, расходники и смена сада синхронизируются через хоста без копирования личных записей растений клиента. Покупки и подтверждение продажи остаются у хоста.
 
 ### Проверки и планы
 

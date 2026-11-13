@@ -1496,7 +1496,7 @@ void SeedChooserScreen::ShowToolTip()
 		const bool aTooFew = !mApp->mNetManager->IsChooserMystery(aSlot) &&
 			mApp->mNetManager->mChooserPickQuota[aSlot] - (aSlot == 0 ? CoopCountGlobalFixedPicks() : 0) > mBoard->GetMysteryPoolCapacity();
 		mToolTip->SetLabel(aTooFew ? _S("Not enough unlocked plants. Choose your seeds manually.") :
-			_S("Revealed when play begins. Random cards cost 5-25% less, depending on difficulty. Press MANUAL to clear them and choose your own."));
+            _S("Revealed when play begins. Random cards cost 7-55% less, depending on difficulty. Press MANUAL to clear them and choose your own."));
 		mToolTip->SetWarningText(_S(""));
 		const int aPadding = 8;
 		const bool aOverButton = Rect(mRandomButton->mX, mRandomButton->mY,
@@ -2049,6 +2049,103 @@ void SeedChooserScreen::CoopBroadcastChooserState(bool theForce)
 		LawnNet::NetTrace("chooser forced authoritative state echo hash=%u", aHash);
 	mCoopLastStateHash = aHash;
 	aNet->BroadcastMessage(LawnNet::NETMSG_CHOOSER_STATE, aMsg);
+}
+
+bool SeedChooserScreen::CoopCanPingSeed(int theSeedType)
+{
+    return mCoopChooserActive && mMouseVisible && mChooseState == CHOOSE_NORMAL &&
+        !CoopIsPvpZombieWaiting() && theSeedType >= 0 && theSeedType < NUM_SEEDS_IN_CHOOSER &&
+        mApp->SeedTypeAvailable((SeedType)theSeedType) && !SeedNotAllowedToPick((SeedType)theSeedType) &&
+        !SeedNotAllowedDuringTrial((SeedType)theSeedType);
+}
+
+bool SeedChooserScreen::CoopCursorTargetRect(const NetCursorTarget& theTarget, Rect& theCanonicalRect)
+{
+    NetManager* net = mApp ? mApp->mNetManager : nullptr;
+    if (!net || !mCoopChooserActive || !mMouseVisible || mChooseState != CHOOSE_NORMAL ||
+        CoopIsPvpZombieWaiting() || mApp->GetDialogCount() ||
+        !NetCursorTargetValid(theTarget, NUM_SEEDS_IN_CHOOSER, SEED_IMITATER)) return false;
+    if (theTarget.mKind == NETCURSOR_CHOOSER_CATALOG)
+    {
+        if (!mApp->SeedTypeAvailable((SeedType)theTarget.mSeed)) return false;
+        int x, y; GetSeedPositionInChooser(theTarget.mSeed, x, y);
+        if (theTarget.mSeed != SEED_IMITATER) y -= mScrollbar->mScrollValue;
+        const int top = Has7Rows() || mAllowBetaSeedpackets ? 123 : 163;
+        if (theTarget.mSeed != SEED_IMITATER && (y + SEED_PACKET_HEIGHT <= top || y >= top + 420)) return false;
+        theCanonicalRect = Rect(mX - mApp->mDDInterface->mWideScreenOffsetX + x,
+            mY - mApp->mDDInterface->mWideScreenOffsetY + y, SEED_PACKET_WIDTH, SEED_PACKET_HEIGHT);
+        return true;
+    }
+    if (theTarget.mKind != NETCURSOR_CHOOSER_BANK || mSeedsInFlight) return false;
+    const int mySlot = net->GetMySlot();
+    auto BankRect = [&](int index)
+    {
+        theCanonicalRect = Rect(mBoard->mSeedBank->mX + mBoard->GetSeedPacketPositionX(index),
+            mBoard->mSeedBank->mY + 8, SEED_PACKET_WIDTH, SEED_PACKET_HEIGHT);
+        return true;
+    };
+    const ChosenSeed& local = mChosenSeeds[theTarget.mSeed];
+    if (local.mSeedState == SEED_IN_BANK &&
+        theTarget.mOwner == (local.mCrazyDavePicked ? 0 : mySlot) &&
+        (uint8_t)local.mImitaterType == theTarget.mImitater)
+        return BankRect(local.mSeedIndexInBank);
+    int index = mSeedsInBank + CoopGetMysteryCount(mySlot);
+    for (int slot = 0; slot < NET_MAX_PLAYERS; ++slot)
+    {
+        if (slot == mySlot) continue;
+        for (int j = 0; j < mCoopRemotePickCount[slot] && j < 12; ++j)
+        {
+            const int type = mCoopRemotePicks[slot][j];
+            if (type == 255) { ++index; continue; }
+            if (type < 0 || type >= NUM_SEEDS_IN_CHOOSER || mChosenSeeds[type].mCrazyDavePicked) continue;
+            if (slot == theTarget.mOwner && type == theTarget.mSeed &&
+                (uint8_t)mCoopRemoteImitaters[slot][j] == theTarget.mImitater)
+                return BankRect(index);
+            ++index;
+        }
+    }
+    return false;
+}
+
+bool SeedChooserScreen::CoopCursorTargetAt(int theCanonicalX, int theCanonicalY,
+    NetCursorTarget& theTarget, int16_t& theOffsetX, int16_t& theOffsetY)
+{
+    NetManager* net = mApp ? mApp->mNetManager : nullptr;
+    if (!net) return false;
+    auto Hit = [&](const NetCursorTarget& target)
+    {
+        Rect rect;
+        if (!CoopCursorTargetRect(target, rect) || !rect.Contains(theCanonicalX, theCanonicalY)) return false;
+        theTarget = target;
+        theOffsetX = (int16_t)(theCanonicalX - rect.mX);
+        theOffsetY = (int16_t)(theCanonicalY - rect.mY);
+        return true;
+    };
+    for (int type = 0; type < NUM_SEEDS_IN_CHOOSER; ++type)
+    {
+        const ChosenSeed& seed = mChosenSeeds[type];
+        if (seed.mSeedState != SEED_IN_BANK) continue;
+        NetCursorTarget target; target.mKind = NETCURSOR_CHOOSER_BANK;
+        target.mOwner = (uint8_t)(seed.mCrazyDavePicked ? 0 : net->GetMySlot());
+        target.mSeed = (uint8_t)type; target.mImitater = (uint8_t)seed.mImitaterType;
+        if (Hit(target)) return true;
+    }
+    for (int slot = 0; slot < NET_MAX_PLAYERS; ++slot)
+        for (int j = 0; j < mCoopRemotePickCount[slot] && j < 12; ++j)
+        {
+            const int type = mCoopRemotePicks[slot][j];
+            if (type < 0 || type >= NUM_SEEDS_IN_CHOOSER) continue;
+            NetCursorTarget target; target.mKind = NETCURSOR_CHOOSER_BANK;
+            target.mOwner = (uint8_t)slot; target.mSeed = (uint8_t)type;
+            target.mImitater = (uint8_t)mCoopRemoteImitaters[slot][j];
+            if (Hit(target)) return true;
+        }
+    for (int type = 0; type < NUM_SEEDS_IN_CHOOSER; ++type)
+    {
+        NetCursorTarget target; target.mKind = NETCURSOR_CHOOSER_CATALOG; target.mSeed = (uint8_t)type;
+        if (Hit(target)) return true;
+    }
+    return false;
 }
 
 void SeedChooserScreen::CoopDrawRemotePicks(Graphics* g)

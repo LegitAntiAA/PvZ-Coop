@@ -11,6 +11,9 @@
 #include "../ToolTipWidget.h"
 #include "../System/SaveGame.h"
 #include "../../GameConstants.h"
+#include "CoopHelpDialog.h"
+#include "NetUi.h"
+#include "../Net/NetLobbyPanel.h"
 #include "../System/PlayerInfo.h"
 #include "../System/ProfileMgr.h"
 #include "../System/TypingCheck.h"
@@ -26,6 +29,21 @@
 #include "../../GameConstants.h"
 
 static float gFlowerCenter[3][2] = { { 765.0f, 483.0f }, { 663.0f, 455.0f }, { 701.0f, 439.0f } };  //0x665430
+
+namespace
+{
+// Native selector buttons are independent widgets and can overlap the drawn
+// icons. Give the icons their own last-added hit targets above those buttons.
+class SelectorIconHitbox : public Widget
+{
+	GameSelector* mSelector;
+public:
+	explicit SelectorIconHitbox(GameSelector* theSelector) : mSelector(theSelector) { mHasAlpha = true; }
+	void Update() override { mVisible = mSelector->MainMenuIconsVisible(); }
+	void MouseDown(int x, int y, int theClickCount) override
+	{ mSelector->MouseDown(mX + x, mY + y, theClickCount); }
+};
+}
 
 //0x448C80
 void GameSelectorOverlay::Draw(Graphics* g)
@@ -49,6 +67,10 @@ GameSelector::GameSelector(LawnApp* theApp)
 
 	mApp = theApp;
 	mGithubImage = theApp->GetImage(_S("extension/github-mark"));
+	mGithubIconHitbox = new SelectorIconHitbox(this);
+	mCoopHelpIconHitbox = new SelectorIconHitbox(this);
+	mGithubIconHitbox->Resize(8, 8, 32, 32);
+	mCoopHelpIconHitbox->Resize(48, 8, 32, 32);
 	mLevel = 1;
 	mLoading = false;
 	mHasTrophy = false;
@@ -466,6 +488,8 @@ GameSelector::GameSelector(LawnApp* theApp)
 //0x449D00¡¢0x449D20
 GameSelector::~GameSelector()
 {
+	delete mGithubIconHitbox;
+	delete mCoopHelpIconHitbox;
 	delete mGithubImage;
 	if (mAdventureButton)
 		delete mAdventureButton;
@@ -1183,7 +1207,7 @@ void GameSelector::DrawOverlay(Graphics* g)
 	} 
 
 	g->PopState();
-	if (mGithubImage && !mStartingGame)
+	if (mGithubImage && MainMenuIconsVisible())
 	{
 		const Rect anIconRect = GetGithubIconRect();
 		Graphics anIcon(*g);
@@ -1193,6 +1217,13 @@ void GameSelector::DrawOverlay(Graphics* g)
 			anIconRect.mWidth - 6, anIconRect.mHeight - 6);
 		anIcon.SetColor(Color(78, 66, 48));
 		anIcon.DrawRect(anIconRect.mX, anIconRect.mY, anIconRect.mWidth - 1, anIconRect.mHeight - 1);
+	}
+	if (MainMenuIconsVisible() && mApp->mNetLobbyPanel)
+	{
+		const Rect r = GetCoopHelpIconRect();
+		g->SetColor(Color(250, 246, 225)); g->FillRect(r);
+		g->SetColor(Color(78, 66, 48)); g->DrawRect(r.mX, r.mY, r.mWidth - 1, r.mHeight - 1);
+		NetUi::Literal(g, FONT_BRIANNETOD16, _S("?"), r.mX + r.mWidth / 2, r.mY + 23, NetUi::Ink(), 0);
 	}
 }
 
@@ -1699,12 +1730,16 @@ void GameSelector::AddedToManager(WidgetManager* theWidgetManager)
 #ifdef _HAS_UNLOCK
 	theWidgetManager->AddWidget(mUnlockButton);
 #endif
+	theWidgetManager->AddWidget(mGithubIconHitbox);
+	theWidgetManager->AddWidget(mCoopHelpIconHitbox);
 }
 
 //0x44BCA0
 void GameSelector::RemovedFromManager(WidgetManager* theWidgetManager)
 {
 	Widget::RemovedFromManager(theWidgetManager);
+	theWidgetManager->RemoveWidget(mGithubIconHitbox);
+	theWidgetManager->RemoveWidget(mCoopHelpIconHitbox);
 
 	theWidgetManager->RemoveWidget(mAdventureButton);
 	theWidgetManager->RemoveWidget(mMinigameButton);
@@ -1924,7 +1959,15 @@ void GameSelector::KeyChar(char theChar)
 //0x44C360
 void GameSelector::MouseDown(int x, int y, int theClickCount)
 {
-	if (theClickCount == 1 && !mStartingGame && GetGithubIconRect().Contains(x, y))
+	if (theClickCount == 1 && MainMenuIconsVisible() && mApp->mNetLobbyPanel &&
+		GetCoopHelpIconRect().Contains(x, y) && mApp->GetDialogCount() == 0)
+	{
+		CoopHelpDialog* aHelp = new CoopHelpDialog(mApp);
+		mApp->AddDialog(aHelp);
+		mWidgetManager->SetFocus(aHelp);
+		return;
+	}
+	if (theClickCount == 1 && MainMenuIconsVisible() && GetGithubIconRect().Contains(x, y))
 	{
 		mApp->OpenURL("https://github.com/LegitAntiAA/PvZ-Coop", false);
 		return;

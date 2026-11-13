@@ -45,7 +45,7 @@ class NetOnlineDialog : public LawnDialog, public Sexy::EditListener, public Sex
     void CloseBrowser();
 
 public:
-    explicit NetOnlineDialog(LawnApp* theApp);
+    explicit NetOnlineDialog(LawnApp* theApp, bool theTutorialPreview = false);
     ~NetOnlineDialog();
     void AddedToManager(Sexy::WidgetManager* theManager) override;
     void RemovedFromManager(Sexy::WidgetManager* theManager) override;

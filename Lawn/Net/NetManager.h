@@ -4,6 +4,7 @@
 #include "NetCommon.h"
 #include "NetConnection.h"
 #include "NetOnline.h"
+#include "NetCursorTarget.h"
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -22,7 +23,7 @@ namespace Sexy { class Graphics; }
 namespace LawnNet
 {
 enum NetAnnotationKind : uint8_t { NETANNOTATION_PING, NETANNOTATION_DRAW_BEGIN,
-	NETANNOTATION_DRAW_POINT, NETANNOTATION_DRAW_END, NETANNOTATION_SEED };
+	NETANNOTATION_DRAW_POINT, NETANNOTATION_DRAW_END, NETANNOTATION_SEED, NETANNOTATION_CHOOSER_SEED };
 struct NetAnnotation
 {
 	uint8_t mSlot, mKind;
@@ -50,10 +51,12 @@ struct NetRemoteCursor
 	uint8_t mHeldSeed;		// SeedType held in hand (for silhouette rendering)
 	uint8_t mHeldImitater;
 	uint8_t mFlags;
-	uint16_t mHeldPacketId;
+	uint16_t mHeldPacketId; // packet ID for BANK, plant net ID for GLOVE
 	uint16_t mHoverPacketId;
+	NetCursorTarget mHoverTarget;
+	int16_t mHoverOffsetX, mHoverOffsetY;
 	NetRemoteCursor() { Clear(); }
-	void Clear() { mValid = false; mX = 0; mY = 0; mRenderX = 0; mRenderY = 0; mCursorType = 0; mHeldSeed = 255; mHeldImitater = 255; mFlags = 0; mHeldPacketId = 0; mHoverPacketId = 0; }
+	void Clear() { mValid = false; mX = 0; mY = 0; mRenderX = 0; mRenderY = 0; mCursorType = 0; mHeldSeed = 255; mHeldImitater = 255; mFlags = 0; mHeldPacketId = 0; mHoverPacketId = 0; mHoverTarget = {}; mHoverOffsetX = mHoverOffsetY = 0; }
 	void SetTarget(int16_t theX, int16_t theY)
 	{
 		if (!mValid) { mRenderX = (float)theX; mRenderY = (float)theY; }
