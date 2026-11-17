@@ -1,0 +1,78 @@
+name: Publish PvZ-Coop Release History
+
+on:
+  release:
+    types: [published, edited, unpublished, deleted]
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/site-releases.yml
+
+# Release workflows run on a tag ref; a Pages deploy must run from main.
+# Dispatch a second run on main. GITHUB_TOKEN is allowed to trigger
+# workflow_dispatch even though it cannot trigger normal push/release runs.
+permissions:
+  actions: write
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pvz-coop-pages-deployment
+  cancel-in-progress: false
+
+jobs:
+  request-site-update:
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update site after release changes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh api -X POST "repos/$GH_REPO/actions/workflows/site-releases.yml/dispatches" -f ref=main
+
+  publish-site:
+    if: github.event_name != 'release'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out the website on main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+
+      - name: Generate static release history (GitHub API, once per run)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: python tools/update_site_releases.py
+
+      - name: Persist release history and latest-version metadata
+        run: |
+          git add docs/releases.json docs/index.html
+          if git diff --cached --quiet; then
+            echo "Static release data is already up to date"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "docs: refresh release history from GitHub Releases"
+            git push origin HEAD:main
+          fi
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload static website
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: docs
+
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

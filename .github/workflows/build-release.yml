@@ -99,6 +99,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      actions: write
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -111,3 +112,6 @@ jobs:
           TAG: ${{ github.ref_name }}
         run: |
           gh release create "$TAG" PvZ-Coop-Win32.zip --verify-tag --generate-notes --title "PvZ Co-op $TAG"
+          # GITHUB_TOKEN-created release events do not trigger other workflows.
+          # workflow_dispatch is exempt and runs the Pages update on main.
+          gh api -X POST "repos/$GH_REPO/actions/workflows/site-releases.yml/dispatches" -f ref=main
