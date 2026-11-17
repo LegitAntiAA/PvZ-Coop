@@ -53,6 +53,12 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: python tools/update_site_releases.py
 
+      - name: Validate website JavaScript and release updater
+        run: |
+          node --check docs/assets/index-release-history.js
+          node --check docs/release-history.js
+          python -m py_compile tools/update_site_releases.py
+
       - name: Persist release history and latest-version metadata
         run: |
           git add docs/releases.json docs/index.html
