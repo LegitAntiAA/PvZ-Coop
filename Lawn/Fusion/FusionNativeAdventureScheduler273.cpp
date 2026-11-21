@@ -2,9 +2,9 @@
 #include "FusionNativeAdventure273.h"
 #include "FusionNative.h"
 #include "FusionNativeZombies.h"
-#include "FusionNativeDayZombie273Bridge.h"
-#include "FusionDayZombie273Rules.h"
-#include "FusionNativeEffects269.h"
+#include "FusionNativeZombiePreflight280.h"
+#include "FusionSourceZombieClosure280.h"
+#include "FusionCampaign272Rules.h"
 #include "FusionNativeZombieVisual.h"
 #include "../Board.h"
 #include "../Zombie.h"
@@ -19,11 +19,11 @@ namespace LawnFusion
 namespace
 {
 using Result=FusionAdventureScheduler273Result;
-constexpr uint16_t admittedKinds278[]={0,2,3,4,8,21,100,104,106,108};
 struct Adapter
 {
     Board* board;
     std::string* error;
+    std::vector<uint16_t> prepared;
 };
 bool Reject(Adapter& a,const char* message)
 {if(a.error)*a.error=message;return false;}
@@ -37,29 +37,8 @@ bool Current(Board* b)
 bool Ready(void* user,uint16_t kind)
 {
     auto& a=*static_cast<Adapter*>(user);
-    if(std::find(std::begin(admittedKinds278),std::end(admittedKinds278),kind)==std::end(admittedKinds278))
-        return Reject(a,"Source scheduler native world refused an unadmitted source NPC; no replacement allowed.");
-    const auto actorReady=[&](uint16_t actor)
-    {
-        if(!FindFusionZombieProfile(actor)||GetNativeSourceZombieCarrier(actor)<0)
-            return Reject(a,"Source scheduler NPC factory is unavailable.");
-        if(!EnsureNativeSourceZombieVisuals(a.board,actor,a.error))return false;
-        if(!CanQueryNativeSourceZombieRoot273(a.board,actor))
-            return Reject(a,"Source scheduler cached model root pose is unavailable before batch allocation.");
-        // Day bridge validates the actual ordinary source world, projectile/FX
-        // resources, native head and allocation contract without birthing actors.
-        return !FindFusionDayZombie273Profile(actor)||CanSpawnNativeDayZombie273(a.board,actor,a.error);
-    };
-    if(!actorReady(kind))return false;
-    if(kind==21)
-    {
-        if(NativeSourceEffectParticle269(11)<0||!EnsureNativeSourceEffect269(a.board,11,a.error))
-            return Reject(a,"Source Doll fall's actual reliable effect is unavailable.");
-        // The final-only DiamondDoll can produce three independent children.
-        // Load/probe every child BEFORE Initialize consumes its first RNG draw.
-        for(const auto child:FusionDayZombie273NpcDependencies(kind))if(!actorReady(child))return false;
-    }
-    return true;
+    return std::find(a.prepared.begin(),a.prepared.end(),kind)!=a.prepared.end()||
+        Reject(a,"Source scheduler kind is absent from its prepared descriptor dependency closure.");
 }
 bool Health(void* user,float& output)
 {
@@ -80,18 +59,7 @@ bool CanSpawn(void* user,std::span<const uint16_t> kinds)
     auto& a=*static_cast<Adapter*>(user);auto* b=a.board;
     if(!Current(b)||b->mApp->NetIsClient()||b->mPaused||b->mApp->mGameScene!=SCENE_PLAYING)
         return Reject(a,"Source scheduler cannot spawn outside its active host Board.");
-    if(b->mZombies.mMaxSize<=b->mZombies.mSize||
-        kinds.size()>size_t(b->mZombies.mMaxSize-1-b->mZombies.mSize))
-        return Reject(a,"Source scheduler whole-wave native actor capacity is unavailable.");
-    bool checked[std::size(admittedKinds278)]={};
-    for(auto kind:kinds)
-    {
-        const auto found=std::find(std::begin(admittedKinds278),std::end(admittedKinds278),kind);
-        if(found==std::end(admittedKinds278))return Reject(a,"Source scheduler refused an unadmitted source NPC.");
-        const auto index=found-std::begin(admittedKinds278);
-        if(!checked[index]){if(!Ready(user,kind))return false;checked[index]=true;}
-    }
-    return CanAllocateNativeSourceDayBatch274(b,kinds,a.error);
+    return CanAllocateNativeSourceZombieBatch280(b,kinds,a.error);
 }
 bool Spawn(void* user,int wave,std::span<const FusionAdventureScheduler273Spawn> batch,float& output)
 {
@@ -127,7 +95,13 @@ Result InitializeNativeAdventureScheduler273(Board* board,FusionAdventureSchedul
     if(!board||!board->mApp||board->mApp->NetIsClient())return Result::NotHost;
     Adapter adapter{board,error};
     if(!Current(board)||!NativeSourceAdventureLevelReady273(level,uint32_t(cycle)))
-    {Reject(adapter,"Source scheduler native readiness is bounded to real Day Adventure1..8, cycle1.");return Result::NotReady;}
+    {Reject(adapter,"Source scheduler requires the shared admitted ordinary Day campaign policy.");return Result::NotReady;}
+    const auto* config=FindFusionSourceAdventure272(level);
+    if(!config){Reject(adapter,"Source scheduler descriptor is unavailable.");return Result::NotReady;}
+    std::vector<uint16_t> roots(config->allowedZombieKinds.begin(),config->allowedZombieKinds.end());
+    roots.push_back(0); // Exact source budget fallback, independently of the allow-list.
+    if(!BuildFusionSourceZombieClosure280(roots,adapter.prepared,error)||
+        !EnsureNativeSourceZombieClosure280(board,adapter.prepared,error))return Result::NotReady;
     return InitializeFusionAdventureScheduler273(state,true,level,cycle,difficulty,random,&adapter,Ready);
 }
 Result UpdateNativeAdventureScheduler273(Board* board,FusionAdventureScheduler273State& state,

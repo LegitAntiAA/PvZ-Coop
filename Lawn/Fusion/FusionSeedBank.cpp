@@ -117,6 +117,19 @@ bool TryMakeFusionEligibleCard(FusionPlantId kind, bool extra, FusionBankEligibl
     return true;
 }
 
+bool TryMakeFusionEnvironmentEligibleCard280(FusionPlantId kind, bool extra, bool night, bool shooting, FusionBankEligibleCard& output)
+{
+    FusionBankEligibleCard card;
+    if(!TryMakeFusionEligibleCard(kind,extra,card))return false;
+    if(!night&&!shooting&&((kind>=6&&kind<=11)||kind==19||kind==25))
+    {
+        const int surcharge=extra?150:75;
+        if(card.baseCost>(std::numeric_limits<int>::max)()-surcharge)return false;
+        card.baseCost+=surcharge;
+    }
+    output=card;return true;
+}
+
 bool FusionSeedBank::HasContext(uint32_t epoch, FusionBankPhase phase) const
 {
     return epoch != 0 && epoch == mState.epoch && mState.phase == phase &&

@@ -1,4 +1,5 @@
 #include "FusionNativeDayZombie273Bridge.h"
+#include "FusionCampaign272Rules.h"
 #include "FusionNative.h"
 #include "FusionNativeBasePlants.h"
 #include "FusionBasePlantRules.h"
@@ -32,7 +33,8 @@ bool Current(const Board* b)
 bool OrdinarySourceDay(Board* b)
 {
     const auto* c=GetNativeContext(b);
-    if(!Current(b)||!c->adventure.enabled||c->adventure.run.level<1||c->adventure.run.level>9||
+    const auto* level=c?FindFusionSourceAdventure272(c->adventure.run.level):nullptr;
+    if(!Current(b)||!c->adventure.enabled||!level||level->scene!=0||level->rows!=5||level->columns!=10||
         b->mBackground!=BACKGROUND_1_DAY||b->GetColumnCount()!=10||GetNativeFusionRowCount(b)!=5||
         !b->mTDPath.empty()||b->mGridItems.mSize)return false;
     for(int row=0;row<5;++row)if(b->mPlantRow[row]!=PLANTROW_NORMAL)return false;

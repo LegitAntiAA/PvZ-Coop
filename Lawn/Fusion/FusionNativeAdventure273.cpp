@@ -86,7 +86,7 @@ bool InitializeNativeSourceAdventure273(Board* b,const FusionAdventureSession273
     const auto* level=FindFusionSourceAdventure272(boot.run.level);auto* c=GetNativeContext(b);
     if(!Current(b)||!c||!boot.enabled||!FusionAdventureSessionValid273(boot)||!level||
         !NativeSourceAdventureLevelReady273(boot.run.level,boot.run.cycle)||level->scene!=0||level->rows!=5||level->columns!=10)
-    {if(error)*error="Source Adventure boot is invalid or outside the admitted Day1..8 world.";return false;}
+    {if(error)*error="Source Adventure boot is invalid or outside supported scene/controller capabilities.";return false;}
     const bool host=!b->mApp->NetIsClient();
     if(host&&(boot.wave||boot.run.over||boot.run.rewardCollected||boot.schedulerFailed||
         b->mZombies.mSize||b->mPlants.mSize))

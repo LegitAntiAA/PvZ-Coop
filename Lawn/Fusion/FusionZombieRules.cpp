@@ -1,6 +1,7 @@
 #include "FusionZombieRules.h"
 #include "SpecialZombie269Rules.h"
 #include "FusionDayZombie273Rules.h"
+#include "../../ConstEnums.h"
 #include <cmath>
 #include <limits>
 
@@ -28,6 +29,14 @@ const FusionZombieProfile* FindFusionZombieProfile(uint16_t kind)
     for (const auto& profile:profiles) if (profile.kind==kind) return &profile;
     if(const auto* profile=FindSpecialZombie269Profile(kind))return profile;
     return FindFusionDayZombie273Profile(kind); // Source facts; live creation has a separate complete-family gate.
+}
+int GetNativeSourceZombieCarrier(uint16_t kind)
+{
+    switch(kind){case 0:case 11:case 41:case 42:return ZOMBIE_NORMAL;case 2:case 12:return ZOMBIE_TRAFFIC_CONE;
+    case 4:case 13:case 111:return ZOMBIE_PAIL;case 109:return ZOMBIE_FOOTBALL;case 8:return ZOMBIE_DOOR;
+    case 15:case 104:return ZOMBIE_NEWSPAPER;case 14:case 18:return ZOMBIE_ZAMBONI;
+    case 3:return ZOMBIE_POLEVAULTER;case 21:case 22:case 23:return ZOMBIE_TRAFFIC_CONE;
+    case 100:case 106:case 107:case 108:return ZOMBIE_NORMAL;default:return -1;}
 }
 
 bool TryPrepareFusionZombieSpawn(uint16_t kind, int sourcePreset, float draw, FusionZombieSpawn& output)

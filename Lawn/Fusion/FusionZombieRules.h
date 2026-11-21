@@ -28,6 +28,9 @@ struct FusionZombieSpawn
     bool operator==(const FusionZombieSpawn&) const = default;
 };
 const FusionZombieProfile* FindFusionZombieProfile(uint16_t kind);
+// Actual implemented native carrier registry, shared by pure readiness and the
+// real typed factory. A staged profile without a carrier is not admission.
+int GetNativeSourceZombieCarrier(uint16_t kind);
 // Profiles include staged source families. Native creation must also pass its
 // complete-family capability/resource/wire gate; a profile is not admission.
 // The caller supplies one source RNG sample. No RNG or co-op scaling occurs here.

@@ -117,10 +117,51 @@ def allowed_adventure(code, level):
     raise ValueError("source allow-list trace exceeded finite bound")
 
 
+def adventure_requirements(unique, tutorial_update, preplants):
+    """Recover the shared source controllers, not native level-number gates."""
+    start = unique.index("uVar1 = *(uint *)(*(longlong *)(GameAPP_TypeInfo + 0xb8) + 0x118);")
+    end = unique.index("switchD_1803218da_caseD_5:", start)
+    body = unique[start:end]
+    low_switch = switch_body(body, "uVar1")
+    tutor_target = re.search(r"goto (switchD_[A-Za-z0-9_]+_caseD_4);", low_switch)[1]
+    tutors = {int(re.search(r"if \(uVar1 != (\d+)\)", body)[1], 0)}
+    tutors.update(kind for kind, value in cases(low_switch).items() if value.strip().startswith("goto " + tutor_target + ";"))
+    tutors.update(int(value, 0) for value in re.findall(
+        r"if \(uVar1 == (0x[0-9a-f]+|\d+)\) goto " + tutor_target + ";", body))
+    mask = int(re.search(r"\(\((0x[0-9a-f]+)U >> \(uVar1 & 0x1f\) & 1\) == 0\)", body)[1], 0)
+    tutors.update(kind for kind in range(14, 25) if mask >> kind & 1)
+    pair = re.search(r"if \(\(uVar1 == (0x[0-9a-f]+)\) \|\| \(uVar1 == (0x[0-9a-f]+)\)\) goto " + tutor_target, body)
+    if not pair or "(lVar5 + 0x20)" not in body or "(param_1 + 0x1fb) = 1;" not in body or \
+            "+ 0x111) == '\\0')" not in body or "+ 0x14c) == 1)" not in body:
+        raise ValueError("source Adventure tutorial activation changed")
+    tutors.update(int(value, 0) for value in pair.groups())
+    dispatched = {int(value) for value in re.findall(r"TutorManager__TutorUpdate(\d+)\(param_1,0\);", tutorial_update)}
+    if tutors != dispatched:
+        raise ValueError("source tutorial activation/dispatch coverage disagrees")
+    conveyor_branch = body[body.index("else {\n      if ((int)uVar1 < 0x24)"):]
+    conveyors = {int(value, 0) for value in re.findall(r"uVar1 != (0x[0-9a-f]+)", conveyor_branch)}
+    if len(conveyors) != 3 or "(param_1 + 0x1f5) = 1;" not in conveyor_branch or "(param_1 + 0x19f) = 0;" not in conveyor_branch:
+        raise ValueError("source Adventure conveyor controller changed")
+    roof_columns = int(re.search(r"iVar5 = (\d+);", preplants)[1])
+    if "(param_1 + 0x1f2)" not in preplants or "iVar8,iVar3,0x1b,0,0,0,1,0" not in preplants or "while (iVar8 < %d);" % roof_columns not in preplants:
+        raise ValueError("source Roof Pot preplant recipe changed")
+    adventure = preplants[preplants.index("if (iVar8 == 0)"):preplants.index("if (iVar8 != 1)")]
+    extra_level = int(re.search(r"\+ 0x118\) != (0x[0-9a-f]+)\)", adventure)[1], 0)
+    extra_last = re.search(r"if \(\((\d+) < iVar8\).*?, (\d+) < iVar5\)\)", adventure)
+    if not extra_last or int(extra_last[1]) != 4 or "iVar5,iVar8,0x1b,0,0,0,1,0" not in adventure:
+        raise ValueError("source Adventure extra Pot preplant recipe changed")
+    return tutors, conveyors, roof_columns, extra_level, int(extra_last[2]) + 1
+
+
 def export():
     primary_path = STAGE / "source-level-mode-primary.json"
     primary = functions(primary_path)
     old = functions(RECOVERED / "levels-ghidra-batch1.json")
+    unique = functions(RECOVERED / "levels-ghidra-batch2.json")["Board__SetUniqueLevel"]
+    tutorial_update = functions(RECOVERED / "levels-ghidra-batch3.json")["TutorManager__Update"]
+    requirements_path = ROOT / "work/fusion/stage280/source-requirements-primary.json"
+    preplants = load(requirements_path)["decompiled_code"].replace("\r", "")
+    tutors, conveyors, roof_columns, extra_pot_level, extra_pot_columns = adventure_requirements(unique, tutorial_update, preplants)
     scene_code = primary["UIMgr__GetSceneType"]
     adventure_wave_code = primary["InitZombieList__InitAdvWave"]
     challenge_wave_code = primary["InitZombieList__InitChallengeWave"]
@@ -166,6 +207,9 @@ def export():
             "initialSun": (500, 150, 300, 150, 300)[scene], "initialMoney": 3000,
             "maximumWavesFirstCycle": wave_count(adventure_wave_cases[level], None),
             "laterCycleWaveBonus": 10, "allowedZombieKinds": allowed,
+            "requirements": {"tutorialId": level if level in tutors else 0,
+                "conveyor": level in conveyors,
+                "roofPreplantColumns": (extra_pot_columns if level == extra_pot_level else roof_columns) if scene == 4 else 0},
             "nativeProjection": {"background": scene,
                 "layoutLevel": scene * 10 + (level - 1) % 9 + 1,
                 "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"}})
@@ -240,13 +284,17 @@ def export():
         RECOVERED / "levels-ghidra-batch2.json", RECOVERED / "levels-ghidra-batch3.json",
         RECOVERED / "levels-ghidra-batch7.json", RECOVERED / "levels-ghidra-batch8.json",
         RECOVERED / "waves-contract.json", selection_path, STAGE / "source-boss-insertion-primary.json", catalog_path,
-        STAGE / "unlock-primary.c"]
+        STAGE / "unlock-primary.c", requirements_path]
     report = {"schema": 1, "sourceVersion": "Fusion2.3.1", "runtimeVerified": False,
         "sourceBinarySha256": load(RECOVERED / "waves-contract.json")["sources"][0]["sha256"],
         "sourceEvidence": [{"path": p.relative_to(ROOT).as_posix(),
             "sha256": hashlib.sha256(p.read_bytes()).hexdigest()} for p in source_paths],
         "adventure": adventure, "challenges": challenges, "baseUnlocks": unlocks,
         "adventureSpecialUnlocks": special_unlocks,
+        "adventureRequirementsSource": {"tutorialActivation": "Board.SetUniqueLevel1803216E0, cycle1 and !disableTutorial",
+            "tutorialDispatch": "TutorManager.Update18034D7C0",
+            "conveyor": "Board.SetUniqueLevel: isConvey=true; cardSelectable/cardBank=false",
+            "roofPreplants": "Board.SetPrePlants18031E130: Pot27 in first3 columns; source37 adds columns3/4"},
         "zombieSelectionInSourceDictionaryOrder": weighted,
         "waveGeneration": {"source": "recovered/waves-contract.json + InitZombieList.InitZombie3E3B60",
             "difficultyMultipliers": [1, 3, 5, 7, 10, 10],
@@ -270,7 +318,8 @@ def export():
         generated.append("constexpr uint16_t zombies%d[] = {%s};\n" % (row["level"], ",".join(map(str, row["allowedZombieKinds"]))))
     generated.append("constexpr FusionSourceAdventure272 adventure272[] = {\n")
     for r in adventure:
-        generated.append("    {%d,%d,%d,%d,%d,%d,%d,zombies%d},\n" % (r["level"], r["scene"], r["rows"], r["columns"], r["maximumWavesFirstCycle"], r["initialSun"], r["initialMoney"], r["level"]))
+        requirements = r["requirements"]
+        generated.append("    {%d,%d,%d,%d,%d,%d,%d,zombies%d,%d,%s,%d},\n" % (r["level"], r["scene"], r["rows"], r["columns"], r["maximumWavesFirstCycle"], r["initialSun"], r["initialMoney"], r["level"], requirements["tutorialId"], "true" if requirements["conveyor"] else "false", requirements["roofPreplantColumns"]))
     generated.append("};\nconstexpr FusionSourceChallenge272 challenges272[] = {\n")
     for r in challenges:
         generated.append('    {%d,"%s",%d,%d,%s},\n' % (r["id"], r["enumName"], r["scene"] if r["scene"] is not None else -1,

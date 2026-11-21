@@ -205,14 +205,6 @@ bool IsNativeSourceZombie(const Zombie* zombie)
         int(zombie->mZombieType)==GetNativeSourceZombieCarrier(data->kind);
 }
 
-int GetNativeSourceZombieCarrier(uint16_t kind)
-{
-    switch(kind){case 0:case 11:case 41:case 42:return ZOMBIE_NORMAL;case 2:case 12:return ZOMBIE_TRAFFIC_CONE;
-    case 4:case 13:case 111:return ZOMBIE_PAIL;case 109:return ZOMBIE_FOOTBALL;case 8:return ZOMBIE_DOOR;
-    case 15:case 104:return ZOMBIE_NEWSPAPER;case 14:case 18:return ZOMBIE_ZAMBONI;
-    case 3:return ZOMBIE_POLEVAULTER;case 21:case 22:case 23:return ZOMBIE_TRAFFIC_CONE;
-    case 100:case 106:case 107:case 108:return ZOMBIE_NORMAL;default:return -1;}
-}
 bool ApplyNativeSourceZombie111Armor(Zombie* zombie,int damage,int& overkill)
 {
     auto* data=GetNativeSourceZombieData(zombie);if(!data||(data->kind!=111&&data->kind!=109))return false;

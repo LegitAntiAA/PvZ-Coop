@@ -1,13 +1,14 @@
 #pragma once
 #include "FusionAdventureSession273.h"
+#include "FusionCampaign272Rules.h"
 #include <string>
 class Board;class Zombie;class Coin;
 namespace LawnFusion
 {
 // One bounded readiness policy for host entry, remote entry and live scheduler.
 // Public exposure and profile unlocks remain separate requirements.
-constexpr bool NativeSourceAdventureLevelReady273(int level,uint32_t cycle)
-{return cycle==1&&level>=1&&level<=8;}
+inline bool NativeSourceAdventureLevelReady273(int level,uint32_t cycle)
+{return NativeSourceAdventureLevelReady280(level,cycle);}
 struct FusionCommand;
 // Identifies the real source session on host and snapshot clients; legacy
 // Classic-Adventure+Fusion and validation fixtures do not enable this state.

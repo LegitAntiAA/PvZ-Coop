@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <span>
+#include <string>
 
 namespace LawnFusion
 {
@@ -13,6 +14,9 @@ struct FusionSourceAdventure272
     uint16_t firstCycleWaves;
     int initialSun, initialMoney;
     std::span<const uint16_t> allowedZombieKinds;
+    uint8_t tutorialId; //0: no source tutorial; otherwise source TutorUpdate ID.
+    bool conveyor; //Source disables the ordinary selectable bank.
+    uint8_t roofPreplantColumns; //Pot27 in every row of these first columns.
 };
 struct FusionSourceChallenge272
 {
@@ -38,6 +42,9 @@ struct FusionSourceWavePick272
 };
 
 const FusionSourceAdventure272* FindFusionSourceAdventure272(int level);
+// Pure native world/controller/NPC capability gate, independent of progression.
+// Caller still validates profile/cards and native resources/capacity before RNG.
+bool NativeSourceAdventureLevelReady280(int level,uint32_t cycle,std::string* error=nullptr);
 const FusionSourceChallenge272* FindFusionSourceChallenge272(int level);
 std::span<const FusionSourceZombieWeight272> FusionSourceZombieWeights272();
 bool TryGetFusionSourceAdventureWaves272(int level,int cycle,int& waves);

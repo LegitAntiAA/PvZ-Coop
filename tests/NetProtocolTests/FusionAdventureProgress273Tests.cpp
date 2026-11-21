@@ -1,5 +1,6 @@
 #include "FusionAdventureProgress273Tests.h"
 #include "../../Lawn/Fusion/FusionAdventureProgress273.h"
+#include "../../Lawn/Fusion/FusionCampaign272Rules.h"
 #include <cstdio>
 #include <limits>
 #include <type_traits>
@@ -128,6 +129,20 @@ FusionAdventureProgress273TestResult RunFusionAdventureProgress273Tests()
     invalid=profile;invalid.frontierLevel=46;CHECK(!FusionAdventureProfileValid273(invalid));
     invalid=profile;invalid.cycle=0;CHECK(!FusionAdventureProfileValid273(invalid));
     invalid=profile;invalid.cycle=uint32_t((std::numeric_limits<int32_t>::max)())+1;CHECK(!FusionAdventureProfileValid273(invalid));
+    // Capability admission does not award a frontier or completion. Fresh9
+    // shares the Day mechanisms; its earned10 transition still has no Night
+    // world/tutorial capability even though pure source progression permits it.
+    FusionAdventureProfile273 dayBoundary;dayBoundary.frontierLevel=9;dayBoundary.completedLevels=0xff;
+    CHECK(CanEnterFusionAdventureLevel273(dayBoundary,9)&&NativeSourceAdventureLevelReady280(9,dayBoundary.cycle));
+    CHECK(!CanEnterFusionAdventureLevel273(dayBoundary,10));
+    CHECK(!FusionAdventureBaseUnlocked273(dayBoundary,6));
+    FusionAdventureRun273 boundaryRun;
+    CHECK(BeginFusionAdventureRun273(dayBoundary,9,false,boundaryRun)&&!boundaryRun.tutorial.active);
+    CHECK(TryArmFusionAdventureReward273(boundaryRun,30,30,0,false)&&BindFusionAdventureTrophy273(boundaryRun,91,910));
+    CHECK(TryCollectFusionAdventureReward273(dayBoundary,boundaryRun,91,910));
+    CHECK(dayBoundary.frontierLevel==10&&dayBoundary.completedLevels==0x1ff&&FusionAdventureBaseUnlocked273(dayBoundary,6));
+    CHECK(CanEnterFusionAdventureLevel273(dayBoundary,10)&&!NativeSourceAdventureLevelReady280(10,dayBoundary.cycle));
+    CHECK(BeginFusionAdventureRun273(dayBoundary,9,false,boundaryRun)&&boundaryRun.replay&&NativeSourceAdventureLevelReady280(9,dayBoundary.cycle));
     CHECK(BeginFusionAdventureRun273(profile,1,false,run));
     run.tutorial.timerTicks=1;CHECK(!FusionAdventureRunValid273(run));
     CHECK(BeginFusionAdventureRun273(profile,1,false,run));

@@ -20,6 +20,7 @@
 #include "../Board.h"
 #include "../Coin.h"
 #include "FusionNativeAdventure273.h"
+#include "FusionCampaign272Rules.h"
 #include "../Plant.h"
 #include "../Projectile.h"
 #include "../SeedPacket.h"
@@ -545,6 +546,8 @@ bool InitializeNativeBoardContext(Board* board, uint32_t epoch, uint32_t seed,
     context->level = level;
     context->adventure = board->mApp->mSourceAdventure;
     context->validation = !context->adventure.enabled&&board->mApp->IsFusionValidationFixture();
+    const auto* sourceLevel=context->adventure.enabled?FindFusionSourceAdventure272(context->adventure.run.level):nullptr;
+    if(context->adventure.enabled&&!sourceLevel)return false;
     for (size_t index = 0; index < FusionPlantCount(); ++index)
     {
         const auto* plant = FusionPlantAt(index);
@@ -573,7 +576,10 @@ bool InitializeNativeBoardContext(Board* board, uint32_t epoch, uint32_t seed,
         for (bool extra : {false, true})
         {
             FusionBankEligibleCard card;
-            if (!TryMakeFusionEligibleCard(kind, extra, card)) return false;
+            // Use the source scene before the borrowed native layout is configured.
+            // Ordinary Adventure has no shooting-board tag.
+            if(sourceLevel ? !TryMakeFusionEnvironmentEligibleCard280(kind,extra,sourceLevel->scene==1||sourceLevel->scene==3,false,card) :
+                !TryMakeFusionEligibleCard(kind,extra,card))return false;
             context->eligible.push_back(card);
         }
     }

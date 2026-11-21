@@ -1,5 +1,7 @@
 #include "FusionCampaign272Tests.h"
 #include "../../Lawn/Fusion/FusionCampaign272Rules.h"
+#include "../../Lawn/Fusion/FusionSourceZombieClosure280.h"
+#include <algorithm>
 #include <cstdio>
 #include <limits>
 #include <set>
@@ -16,12 +18,41 @@ FusionCampaign272TestResult RunFusionCampaign272Tests()
     using namespace LawnFusion;
     result={};std::printf("[ RUN      ] Fusion.SourceCampaign272\n");
     std::set<uint16_t> allKinds;
+    // Independent source controller/lesson dispatch, including the non-Day
+    // requirements that must stay visible while their native worlds are closed.
+    const std::set<int> tutorialLevels={1,4,7,8,10,13,15,22,24,30,35,42};
+    const std::set<int> conveyorLevels={27,36,45};
     for(int level=1;level<=45;++level)
     {
         const auto* source=FindFusionSourceAdventure272(level);
         CHECK(source&&source->level==level&&source->columns==10);
         CHECK(source->scene==(level-1)/9);
         CHECK(source->rows==((source->scene==2||source->scene==3)?6:5));
+        CHECK(source->tutorialId==(tutorialLevels.contains(level)?level:0));
+        CHECK(source->conveyor==conveyorLevels.contains(level));
+        CHECK(source->roofPreplantColumns==(source->scene==4?(level==37?5:3):0));
+        std::string readinessError="old error";
+        const bool ready=NativeSourceAdventureLevelReady280(level,1,&readinessError);
+        CHECK(ready==readinessError.empty());
+        if(source->scene==0)
+        {
+            // All nine Day descriptors share implemented world/NPC mechanisms;
+            // source9 must not fail because of the old level<=8 admission list.
+            CHECK(ready);
+            std::vector<uint16_t> closure;
+            CHECK(BuildFusionSourceZombieClosure280(source->allowedZombieKinds,closure));
+            for(auto kind:source->allowedZombieKinds)
+                CHECK(std::find(closure.begin(),closure.end(),kind)!=closure.end());
+        }
+        else
+        {
+            CHECK(!ready);
+            const char* category=source->conveyor?"controller:":source->roofPreplantColumns?"preplants:":
+                source->tutorialId?"tutorial:":"world:";
+            CHECK(readinessError.starts_with(category));
+        }
+        CHECK(!NativeSourceAdventureLevelReady280(level,0,&readinessError)&&readinessError.starts_with("cycle:"));
+        CHECK(!NativeSourceAdventureLevelReady280(level,2,&readinessError)&&readinessError.starts_with("cycle:"));
         CHECK(!source->allowedZombieKinds.empty());
         for(auto kind:source->allowedZombieKinds){allKinds.insert(kind);CHECK(FusionSourceAdventureAllowsZombie272(level,kind));}
         int waves=0,later=0;
@@ -40,6 +71,14 @@ FusionCampaign272TestResult RunFusionCampaign272Tests()
     }
     CHECK(allKinds.size()==40);
     CHECK(FindFusionSourceAdventure272(0)==nullptr&&FindFusionSourceAdventure272(46)==nullptr);
+    std::string readinessError;
+    for(int malformed:{-1,0,46,(std::numeric_limits<int>::min)(),(std::numeric_limits<int>::max)()})
+        CHECK(!NativeSourceAdventureLevelReady280(malformed,1,&readinessError)&&readinessError.starts_with("descriptor:"));
+    CHECK(!NativeSourceAdventureLevelReady280(1,(std::numeric_limits<uint32_t>::max)(),&readinessError)&&readinessError.starts_with("cycle:"));
+    CHECK(NativeSourceAdventureLevelReady280(9,1,&readinessError)&&readinessError.empty());
+    CHECK(NativeSourceAdventureLevelReady280(9,1));
+    CHECK(!NativeSourceAdventureLevelReady280(10,1)&&!NativeSourceAdventureLevelReady280(19,1));
+    CHECK(!NativeSourceAdventureLevelReady280(28,1)&&!NativeSourceAdventureLevelReady280(37,1));
     CHECK(FindFusionSourceAdventure272(1)->initialSun==500);
     CHECK(FindFusionSourceAdventure272(10)->initialSun==150);
     CHECK(FindFusionSourceAdventure272(19)->initialSun==300);

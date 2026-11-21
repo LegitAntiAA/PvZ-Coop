@@ -27,6 +27,9 @@ struct FusionBankEligibleCard
 // Ordinary source bank-card price/CD only; eligibility and mystery discounts
 // belong to their existing callers. Failure leaves output unchanged.
 bool TryMakeFusionEligibleCard(FusionPlantId kind, bool extra, FusionBankEligibleCard& output);
+// CardUI.Start42F060: awake mushrooms cost more outside Night/shooting boards.
+// Retains the ordinary card's recharge and leaves output unchanged on failure.
+bool TryMakeFusionEnvironmentEligibleCard280(FusionPlantId kind, bool extra, bool night, bool shooting, FusionBankEligibleCard& output);
 // Source negative costs grant sun; discounts apply only to positive purchases.
 int FusionBankPacketCost(int baseCost,int randomOrigin);
 

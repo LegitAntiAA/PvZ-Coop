@@ -204,7 +204,7 @@ bool InitializeNativeSpecialZombie269PaperAddon(Zombie* z)
     if(z->mApp->ReanimationTryToGet(z->mSpecialHeadReanimID))return true;
     auto* body=Body(z);if(!body||!body->TrackExists("anim_head1"))return false;
     auto* head=z->mApp->AddReanimation(0,0,0,REANIM_PEASHOOTER);if(!head)return false;
-    head->PlayReanim("anim_shoot",REANIM_PLAY_ONCE_AND_HOLD,0,0);head->mAnimTime=head->mLastFrameTime=1;head->mLoopCount=1;
+    head->PlayReanim("anim_shooting",REANIM_PLAY_ONCE_AND_HOLD,0,0);head->mAnimTime=head->mLastFrameTime=1;head->mLoopCount=1;
     z->mSpecialHeadReanimID=z->mApp->ReanimationGetID(head);
     auto* track=body->GetTrackInstanceByName("anim_head1");
     if(!AttachReanim(track->mAttachmentID,head,0,0))
@@ -238,7 +238,7 @@ bool UpdateNativeSpecialZombie269PaperShoot(Zombie* z,NativeSpecialZombie269Node
     const float speed=3*GetNativeSourceZombieData(z)->originSpeed*factor;
     head->mAnimRate=head->mFrameCount*speed;
     if(StepSpecialZombie269PaperShootCounter(z->mSummonCounter,PaperStatus(z)==6,z->mBoard->mTimeStopCounter>0,!z->mHasHead))
-    {head->PlayReanim("anim_shoot",REANIM_PLAY_ONCE_AND_HOLD,0,head->mAnimRate);z->mBossHeadCounter=1;}
+    {head->PlayReanim("anim_shooting",REANIM_PLAY_ONCE_AND_HOLD,0,head->mAnimRate);z->mBossHeadCounter=1;}
     // Callback follows the real additive clip even if base state changes.
     if(z->mBossHeadCounter==1&&head->mAnimTime>=.6666667f)
     {z->mBossHeadCounter=2;CreateNativeSpecialZombie269PaperShot(z,query);}

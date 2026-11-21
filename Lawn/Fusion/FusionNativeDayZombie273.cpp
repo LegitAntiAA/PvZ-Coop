@@ -85,7 +85,7 @@ bool Head(Zombie* z)
     // alone are too late. A dead attachment still occupies its pool slot.
     if(!reanimations.mBlock||reanimations.mSize>=reanimations.mMaxSize||!attachmentReady())return false;
     auto* head=z->mApp->AddReanimation(0,0,0,REANIM_PEASHOOTER);if(!head)return false;
-    head->PlayReanim("anim_shoot",REANIM_PLAY_ONCE_AND_HOLD,0,0);
+    head->PlayReanim("anim_shooting",REANIM_PLAY_ONCE_AND_HOLD,0,0);
     head->mAnimTime=head->mLastFrameTime=1;head->mLoopCount=1;
     z->mSpecialHeadReanimID=z->mApp->ReanimationGetID(head);
     if(!attachmentReady()||!AttachReanim(track->mAttachmentID,head,0,0))
@@ -210,7 +210,7 @@ bool UpdateNativeDayZombie273(Zombie* z,const NativeDayZombie273Hooks& hooks)
     {
         if(play)after=1.5f+RandRangeFloat(-.1f,.1f);
         s->shootCountdown=after;
-        if(play){head->PlayReanim("anim_shoot",REANIM_PLAY_ONCE_AND_HOLD,0,head->mAnimRate);s->shootEvent=1;}
+        if(play){head->PlayReanim("anim_shooting",REANIM_PLAY_ONCE_AND_HOLD,0,head->mAnimRate);s->shootEvent=1;}
     }
     if(s->shootEvent==1&&head->mAnimTime>=.6666667f){s->shootEvent=2;CreateNativeDayZombie273Shot(z);}
     if(head->mLoopCount>0)s->shootEvent=0;

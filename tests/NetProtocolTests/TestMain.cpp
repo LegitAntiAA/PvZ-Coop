@@ -75,6 +75,7 @@ int RunFusionTools268CommandTests(int& checks);
 #include "FusionDayZombie273Tests.h"
 #include "FusionBucketReceivers274Tests.h"
 #include "FusionLimbEvent276Tests.h"
+#include "FusionZombieClosure280Tests.h"
 #include "FusionSimulationTests.h"
 #include "FusionWireTests.h"
 #include "FusionRoomWireTests.h"
@@ -1205,6 +1206,7 @@ int main(int argc, char** argv)
 	int aDay273Checks=0;gFailures+=RunFusionDayZombie273Tests(aDay273Checks);gChecks+=aDay273Checks;
 	int aBucket274Checks=0;gFailures+=RunFusionBucketReceivers274Tests(aBucket274Checks);gChecks+=aBucket274Checks;
 	int aLimb276Checks=0;gFailures+=RunFusionLimbEvent276Tests(aLimb276Checks);gChecks+=aLimb276Checks;
+	int aClosure280Checks=0;gFailures+=RunFusionZombieClosure280Tests(aClosure280Checks);gChecks+=aClosure280Checks;
 	gChecks += aFusionModeResult.mChecks;
 	gFailures += aFusionModeResult.mFailures;
 	const auto aFusionSimulationResult = RunFusionSimulationTests();

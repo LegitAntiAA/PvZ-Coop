@@ -998,7 +998,7 @@ bool NetDay273AllocationCapacity(Board* board,const NetBuffer& body,const LawnFu
                 case SEED_PUMPKINSHELL:case SEED_FLOWERPOT:case SEED_POTATOMINE:case SEED_GARLIC:case SEED_BLOVER:
                 case SEED_JALAPENO:case SEED_SQUASH:case SEED_TORCHWOOD:case SEED_CHOMPER:case SEED_CABBAGEPULT:
                 case SEED_KERNELPULT:case SEED_MELONPULT:case SEED_WINTERMELON:case SEED_CATTAIL:case SEED_CACTUS:
-                case SEED_MARIGOLD:case SEED_SPIKEWEED:case SEED_SPIKEROCK:case SEED_FUMESHROOM:case SEED_IMITATER:break;
+                case SEED_MARIGOLD:case SEED_SPIKEWEED:case SEED_SPIKEROCK:case SEED_FUMESHROOM:case SEED_PUFFSHROOM:case SEED_IMITATER:break;
                 default:return reject("plant-factory-not-budgeted",section,type);
                 }
                 const auto reanim=GetPlantDefinition(SeedType(type)).mReanimationType;
@@ -1007,9 +1007,9 @@ bool NetDay273AllocationCapacity(Board* board,const NetBuffer& body,const LawnFu
                 // pass the same no-dynamic-attacher proof as every carrier.
                 if(!plainDefinition(reanim))return reject("plant-definition-or-attacher",section,type);
                 reanims+=1+heads;attachments+=heads; // Each Attach call can require at most one container.
-                // A raw daytime Fume carrier initializes before Fusion metadata
+                // A raw daytime mushroom initializes before Fusion metadata
                 // is bound and can allocate its sleep reanimation (PlantInitialize).
-                if(type==SEED_FUMESHROOM){++reanims;if(!plainDefinition(REANIM_SLEEPING))return reject("fume-initial-sleep-definition",section,type);}
+                if(type==SEED_FUMESHROOM||type==SEED_PUFFSHROOM){++reanims;if(!plainDefinition(REANIM_SLEEPING))return reject("mushroom-initial-sleep-definition",section,type);}
                 if(scan.mData[start+11]&1){++reanims;if(!plainDefinition(REANIM_SLEEPING))return reject("sleep-definition",section,type);}
                 if(type==SEED_POTATOMINE)
                 {

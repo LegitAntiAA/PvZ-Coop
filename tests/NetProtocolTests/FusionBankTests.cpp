@@ -51,6 +51,46 @@ bool EnterPlaying(FusionSeedBank& bank)
     return ReadyAll(bank) && bank.CommitIntro(epoch) && bank.BeginPlaying(epoch);
 }
 
+void SourceEnvironmentPolicy280()
+{
+    for(uint16_t kind:{uint16_t(6),uint16_t(19)})
+    {
+        FusionBankEligibleCard day,extra,night,nightExtra,shooting;
+        Check(TryMakeFusionEnvironmentEligibleCard280(kind,false,false,false,day)&&day.baseCost==75&&day.rechargeSeconds==7.5f&&
+            TryMakeFusionEnvironmentEligibleCard280(kind,true,false,false,extra)&&extra.baseCost==175&&extra.rechargeSeconds==7.5f,
+            "source Day Puff/SeaPuff normal75 extra175 preserve recharge7.5");
+        Check(TryMakeFusionEnvironmentEligibleCard280(kind,false,true,false,night)&&night.baseCost==0&&
+            TryMakeFusionEnvironmentEligibleCard280(kind,true,true,false,nightExtra)&&nightExtra.baseCost==25&&
+            TryMakeFusionEnvironmentEligibleCard280(kind,true,false,true,shooting)&&shooting==nightExtra,
+            "source Night and shooting exclusions preserve ordinary Puff prices");
+    }
+    FusionBankEligibleCard pea;
+    Check(TryMakeFusionEnvironmentEligibleCard280(0,true,false,false,pea)&&pea.baseCost==200,
+        "environment surcharge does not change a Peashooter packet");
+    const FusionBankEligibleCard sentinel{7,true,777,13.25f};auto invalid=sentinel;
+    Check(!TryMakeFusionEnvironmentEligibleCard280(65535,true,false,false,invalid)&&invalid==sentinel,
+        "unknown environment card leaves the full output unchanged");
+
+    FusionBankEligibleCard normal,extra;
+    Check(TryMakeFusionEnvironmentEligibleCard280(6,false,false,false,normal)&&
+        TryMakeFusionEnvironmentEligibleCard280(6,true,false,false,extra),"Day source packet fixtures built");
+    const std::vector<FusionBankEligibleCard> cards={normal,extra};FusionSeedBank host,client;
+    uint16_t normalId=0,extraId=0;
+    Check(host.Open(280,1,cards,3,2)&&host.Choose(280,0,6,false,&normalId)&&host.Choose(280,1,6,true,&extraId)&&EnterPlaying(host),
+        "projected Day cards enter the shared two-owner native bank");
+    const auto* normalPacket=host.PeekReadyPacket(280,0,normalId);const auto* extraPacket=host.PeekReadyPacket(280,1,extraId);
+    Check(normalPacket&&extraPacket&&normalPacket->price==75&&extraPacket->price==175,
+        "both owners use the projected canonical packet prices");
+    Check(client.Open(280,1,cards,3,2)&&client.ApplySnapshot(host.State())&&Same(client.State(),host.State()),
+        "client applies the same Day eligibility and packet economy");
+    const auto before=client.State();auto wrong=before;++wrong.revision;wrong.packets[0].price=0;
+    Check(!FusionSeedBank::ValidateSnapshot(wrong,cards,2)&&!client.ApplySnapshot(wrong)&&Same(client.State(),before),
+        "Night-priced packet cannot enter the Day bank or partially change its state");
+    Check(host.CommitPacketUse(280,1,extraId)&&host.AdvanceRecharge(280,7.49f)&&!host.PeekReadyPacket(280,1,extraId)&&
+        host.AdvanceRecharge(280,.02f)&&host.PeekReadyPacket(280,1,extraId),
+        "extra Day Puff retains the source7.5-second cooldown");
+}
+
 void SourceCardPolicy()
 {
     struct Golden { uint16_t kind; int normal, extra; float recharge; };
@@ -425,6 +465,7 @@ FusionBankTestResult RunFusionBankTests()
 {
     checks = failures = 0;
     SourceCardPolicy();
+    SourceEnvironmentPolicy280();
     ManualAndAuthority();
     MysteryPrivacyAndFailure();
     QuotasAndGenerations();

@@ -594,14 +594,13 @@ bool NativeZombieVisuals::CanQueryRoot(uint16_t kind) const
     const auto found=mImpl->models.find(kind);
     if(found==mImpl->models.end())return false;
     const auto& model=*found->second;
-    if(!std::isfinite(model.shadowX)||!std::isfinite(model.shadowY))return false;
-    const std::vector<const char*> states=DayPrefab273(kind)&&kind!=3&&!FusionDayZombie273Doll(kind)?
-        std::vector<const char*>{"idle","walk"}:std::vector<const char*>{"idle","walk","walk2"};
-    for(const auto* state:states)
+    if(!std::isfinite(model.shadowX)||!std::isfinite(model.shadowY)||model.durations.empty())return false;
+    // Load already selected the real required states for this source model.
+    // Money, armored walkers and vehicles do not universally own walk2.
+    for(const auto& [state,duration]:model.durations)
     {
-        if(!model.durations.contains(state))return false;
         float x=0,y=0;
-        if(!model.animation.TryGetNodeOffset("",x,y,state,0,nullptr,-1,1,&model.options)||
+        if(!std::isfinite(duration)||duration<=0||!model.animation.TryGetNodeOffset("",x,y,state.c_str(),0,nullptr,-1,1,&model.options)||
             !std::isfinite(x)||!std::isfinite(y))return false;
     }
     return true;

@@ -47,6 +47,10 @@
     {
       "path": "work/fusion/stage272/modes/unlock-primary.c",
       "sha256": "c4ff45b2786c7909f818966b1a4eb8a8362d01ec52b53fe3acba959473659c1e"
+    },
+    {
+      "path": "work/fusion/stage280/source-requirements-primary.json",
+      "sha256": "6ee448bbe78d00a63c8236e4a16c556a86f81b502a97df6152cbc07eb58267bb"
     }
   ],
   "adventure": [
@@ -62,6 +66,11 @@
       "allowedZombieKinds": [
         0
       ],
+      "requirements": {
+        "tutorialId": 1,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 0,
         "layoutLevel": 1,
@@ -82,6 +91,11 @@
         0,
         2
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 0,
         "layoutLevel": 2,
@@ -103,6 +117,11 @@
         2,
         4
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 0,
         "layoutLevel": 3,
@@ -124,6 +143,11 @@
         2,
         3
       ],
+      "requirements": {
+        "tutorialId": 4,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 0,
         "layoutLevel": 4,
@@ -146,6 +170,11 @@
         4,
         100
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 0,
         "layoutLevel": 5,
@@ -168,6 +197,11 @@
         4,
         21
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 0,
         "layoutLevel": 6,
@@ -193,6 +227,11 @@
         21,
         104
       ],
+      "requirements": {
+        "tutorialId": 7,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 0,
         "layoutLevel": 7,
@@ -217,6 +256,11 @@
         106,
         108
       ],
+      "requirements": {
+        "tutorialId": 8,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 0,
         "layoutLevel": 8,
@@ -243,6 +287,11 @@
         106,
         107
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 0,
         "layoutLevel": 9,
@@ -265,6 +314,11 @@
         0,
         2
       ],
+      "requirements": {
+        "tutorialId": 10,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 1,
         "layoutLevel": 11,
@@ -286,6 +340,11 @@
         2,
         8
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 1,
         "layoutLevel": 12,
@@ -308,6 +367,11 @@
         5,
         9
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 1,
         "layoutLevel": 13,
@@ -331,6 +395,11 @@
         5,
         9
       ],
+      "requirements": {
+        "tutorialId": 13,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 1,
         "layoutLevel": 14,
@@ -355,6 +424,11 @@
         5,
         9
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 1,
         "layoutLevel": 15,
@@ -379,6 +453,11 @@
         6,
         9
       ],
+      "requirements": {
+        "tutorialId": 15,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 1,
         "layoutLevel": 16,
@@ -404,6 +483,11 @@
         9,
         10
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 1,
         "layoutLevel": 17,
@@ -429,6 +513,11 @@
         10,
         109
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 1,
         "layoutLevel": 18,
@@ -456,6 +545,11 @@
         109,
         111
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 1,
         "layoutLevel": 19,
@@ -478,6 +572,11 @@
         0,
         2
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 2,
         "layoutLevel": 21,
@@ -499,6 +598,11 @@
         2,
         9
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 2,
         "layoutLevel": 22,
@@ -521,6 +625,11 @@
         4,
         17
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 2,
         "layoutLevel": 23,
@@ -546,6 +655,11 @@
         5,
         14
       ],
+      "requirements": {
+        "tutorialId": 22,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 2,
         "layoutLevel": 24,
@@ -570,6 +684,11 @@
         14,
         16
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 2,
         "layoutLevel": 25,
@@ -594,6 +713,11 @@
         14,
         18
       ],
+      "requirements": {
+        "tutorialId": 24,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 2,
         "layoutLevel": 26,
@@ -621,6 +745,11 @@
         18,
         20
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 2,
         "layoutLevel": 27,
@@ -649,6 +778,11 @@
         18,
         20
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 2,
         "layoutLevel": 28,
@@ -679,6 +813,11 @@
         19,
         20
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": true,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 2,
         "layoutLevel": 29,
@@ -704,6 +843,11 @@
         0,
         2
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 3,
         "layoutLevel": 31,
@@ -725,6 +869,11 @@
         2,
         24
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 3,
         "layoutLevel": 32,
@@ -749,6 +898,11 @@
         5,
         25
       ],
+      "requirements": {
+        "tutorialId": 30,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 3,
         "layoutLevel": 33,
@@ -774,6 +928,11 @@
         8,
         25
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 3,
         "layoutLevel": 34,
@@ -799,6 +958,11 @@
         24,
         26
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 3,
         "layoutLevel": 35,
@@ -826,6 +990,11 @@
         25,
         28
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 3,
         "layoutLevel": 36,
@@ -854,6 +1023,11 @@
         27,
         28
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 3,
         "layoutLevel": 37,
@@ -883,6 +1057,11 @@
         30,
         106
       ],
+      "requirements": {
+        "tutorialId": 35,
+        "conveyor": false,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 3,
         "layoutLevel": 38,
@@ -913,6 +1092,11 @@
         29,
         30
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": true,
+        "roofPreplantColumns": 0
+      },
       "nativeProjection": {
         "background": 3,
         "layoutLevel": 39,
@@ -938,6 +1122,11 @@
         0,
         2
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": false,
+        "roofPreplantColumns": 5
+      },
       "nativeProjection": {
         "background": 4,
         "layoutLevel": 41,
@@ -959,6 +1148,11 @@
         2,
         32
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": false,
+        "roofPreplantColumns": 3
+      },
       "nativeProjection": {
         "background": 4,
         "layoutLevel": 42,
@@ -982,6 +1176,11 @@
         2,
         4
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": false,
+        "roofPreplantColumns": 3
+      },
       "nativeProjection": {
         "background": 4,
         "layoutLevel": 43,
@@ -1006,6 +1205,11 @@
         33,
         106
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": false,
+        "roofPreplantColumns": 3
+      },
       "nativeProjection": {
         "background": 4,
         "layoutLevel": 44,
@@ -1031,6 +1235,11 @@
         40,
         45
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": false,
+        "roofPreplantColumns": 3
+      },
       "nativeProjection": {
         "background": 4,
         "layoutLevel": 45,
@@ -1056,6 +1265,11 @@
         31,
         34
       ],
+      "requirements": {
+        "tutorialId": 42,
+        "conveyor": false,
+        "roofPreplantColumns": 3
+      },
       "nativeProjection": {
         "background": 4,
         "layoutLevel": 46,
@@ -1079,6 +1293,11 @@
         35,
         106
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": false,
+        "roofPreplantColumns": 3
+      },
       "nativeProjection": {
         "background": 4,
         "layoutLevel": 47,
@@ -1105,6 +1324,11 @@
         38,
         112
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": false,
+        "roofPreplantColumns": 3
+      },
       "nativeProjection": {
         "background": 4,
         "layoutLevel": 48,
@@ -1138,6 +1362,11 @@
         45,
         112
       ],
+      "requirements": {
+        "tutorialId": 0,
+        "conveyor": true,
+        "roofPreplantColumns": 3
+      },
       "nativeProjection": {
         "background": 4,
         "layoutLevel": 49,
@@ -2287,6 +2516,12 @@
       "requiredAdventureCompleted": 6
     }
   ],
+  "adventureRequirementsSource": {
+    "tutorialActivation": "Board.SetUniqueLevel1803216E0, cycle1 and !disableTutorial",
+    "tutorialDispatch": "TutorManager.Update18034D7C0",
+    "conveyor": "Board.SetUniqueLevel: isConvey=true; cardSelectable/cardBank=false",
+    "roofPreplants": "Board.SetPrePlants18031E130: Pot27 in first3 columns; source37 adds columns3/4"
+  },
   "zombieSelectionInSourceDictionaryOrder": [
     {
       "kind": 0,

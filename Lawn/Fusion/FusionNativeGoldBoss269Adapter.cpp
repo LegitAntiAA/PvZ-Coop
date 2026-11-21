@@ -48,7 +48,7 @@ bool AddClock(Zombie* z,bool aimed)
 {
  if(Head(z,aimed))return true;auto* body=Body(z);if(!body||!body->TrackExists("anim_head1"))return false;
  auto* head=z->mApp->AddReanimation(0,0,0,REANIM_PEASHOOTER);if(!head)return false;
- const auto id=z->mApp->ReanimationGetID(head);head->PlayReanim("anim_shoot",REANIM_PLAY_ONCE_AND_HOLD,0,0);head->mAnimTime=head->mLastFrameTime=1;head->mLoopCount=1;
+ const auto id=z->mApp->ReanimationGetID(head);head->PlayReanim("anim_shooting",REANIM_PLAY_ONCE_AND_HOLD,0,0);head->mAnimTime=head->mLastFrameTime=1;head->mLoopCount=1;
  if(!AttachReanim(body->GetTrackInstanceByName("anim_head1")->mAttachmentID,head,0,0)){z->mApp->RemoveReanimation(id);return false;}
  if(aimed)z->mBossFireBallReanimID=id;else z->mSpecialHeadReanimID=id;return true;
 }
@@ -113,7 +113,7 @@ void TriggerNativeGoldBoss269Animation(Zombie* z,bool aimed)
 {
  if(!Live(z)||!IsNativeGoldPaper269(z)||!AddClock(z,aimed))return;auto* s=EditNativeGoldBoss269State(z);auto* head=Head(z,aimed);if(!s||!head)return;
  const bool ultimate=GetNativeSourceZombieData(z)->kind==223;const float duration=ultimate?.33333334f:1.8333334f;
- head->PlayReanim("anim_shoot",REANIM_PLAY_ONCE_AND_HOLD,0,head->mFrameCount*(aimed?2.f:3.f)*GetNativeSourceZombieData(z)->originSpeed*Factor(z)/duration);
+ head->PlayReanim("anim_shooting",REANIM_PLAY_ONCE_AND_HOLD,0,head->mFrameCount*(aimed?2.f:3.f)*GetNativeSourceZombieData(z)->originSpeed*Factor(z)/duration);
  if(aimed)s->aimedEvent=1;else z->mBossHeadCounter=1;
 }
 bool UpdateNativeGoldPaper269(Zombie* z)

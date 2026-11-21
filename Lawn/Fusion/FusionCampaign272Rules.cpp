@@ -1,4 +1,5 @@
 #include "FusionCampaign272Rules.h"
+#include "FusionSourceZombieClosure280.h"
 #include <algorithm>
 
 namespace LawnFusion
@@ -10,6 +11,32 @@ namespace
 
 const FusionSourceAdventure272* FindFusionSourceAdventure272(int level)
 {return level>=1&&level<=45?&adventure272[level-1]:nullptr;}
+bool NativeSourceAdventureLevelReady280(int level,uint32_t cycle,std::string* error)
+{
+    if(error)error->clear();
+    const auto reject=[&](const char* reason){if(error)*error=reason;return false;};
+    const auto* source=FindFusionSourceAdventure272(level);
+    if(!source||source->level!=level||source->scene>4||source->columns!=10||
+        source->rows!=((source->scene==2||source->scene==3)?6:5)||
+        source->firstCycleWaves==0||source->initialSun<0||source->initialMoney<0||
+        source->allowedZombieKinds.empty()||
+        (source->tutorialId&&source->tutorialId!=source->level)||source->roofPreplantColumns>source->columns)
+        return reject("descriptor: source Adventure configuration is invalid or unavailable.");
+    if(cycle!=1)return reject("cycle: native source world currently supports cycle1 only.");
+    if(source->conveyor)return reject("controller: source conveyor card feed is not implemented.");
+    if(source->roofPreplantColumns)return reject("preplants: source Roof Pot27 initialization is not implemented.");
+    switch(source->tutorialId)
+    {
+    case 0:case 1:case 4:case 7:case 8:break;
+    default:return reject("tutorial: source lesson has no native implementation.");
+    }
+    if(source->scene!=0||source->rows!=5)
+        return reject("world: native source actor world requires Day with five normal grass rows.");
+    std::vector<uint16_t> closure;std::string dependencyError;
+    if(!BuildFusionSourceZombieClosure280(source->allowedZombieKinds,closure,&dependencyError))
+    {if(error)*error="npc: "+dependencyError;return false;}
+    return true;
+}
 const FusionSourceChallenge272* FindFusionSourceChallenge272(int level)
 {return level>=1&&level<=122?&challenges272[level-1]:nullptr;}
 std::span<const FusionSourceZombieWeight272> FusionSourceZombieWeights272()
