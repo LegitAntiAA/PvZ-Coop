@@ -1,5 +1,7 @@
 ## ROOT 272 — 2026-11-21
 
+USER STEER273: merge published Fusion into main and delete codex/fusion-coop-20261113. Root integrates the existing main website changes without history rewrite, then continues direct main commits/pushes via authenticated gh. E1 is implementing the real source scheduler; E2 source tutorial/reward/progression. Their new files remain unregistered/unpublished until Root integration and verification.
+
 - FUSION-HP-272: DONE bounded. Root; shared native health rendering and source zombie eligibility.65g paired Passed107common/5frames, client HP frame inspected; full NPC AI parity outside scope.
 - FUSION-MONEY-272: DONE bounded. E1/Root; source whitelist/shared preview/native rejection advice. Actual client Z->hover->LMB on source1 at3000 preserves money/identity/health, no misleading highlight;65g Passed.
 - FUSION-SHOVEL-R-272: DONE bounded. E3/Root; production/help/smoke Q->R implemented, Q speed/HeatWave retained.65j Adventure1 and Adventure5BowlingClient controls Passed actual host/client SDL R pickup/cancel, chat and pause gates; client frames inspected.
