@@ -291,6 +291,7 @@ bool AdvanceNativeSelection(Board* board);
 bool BeginNativePlaying(Board* board);
 bool ReconcileNativePlayers(Board* board, uint8_t activeMask);
 void UpdateNativeFieldButton(Board* board);
+bool NativeFieldToggleAvailable277(const Board* board);
 bool HandleNativeFieldPointer(Board* board, bool down, int button, int x, int y);
 void PruneNativeMetadata(Board* board);
 

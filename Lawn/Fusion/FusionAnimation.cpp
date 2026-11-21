@@ -366,6 +366,15 @@ struct FusionAnimation::Impl
         for(int i=0;i<int(pose.size());++i)calculate(i);
     }
     std::vector<Node> nodes;
+    // Unity sibling names need not be unique. Hierarchy/render identity is the
+    // serialized node index; a textual path can be missing(-1) or ambiguous(-2).
+    std::map<std::string,int,std::less<>> nodeIndex;
+    int FindNode(const char* path) const
+    {
+        if(!path)return -1;
+        const auto found=nodeIndex.find(path);
+        return found==nodeIndex.end()?-1:found->second;
+    }
     std::vector<Sprite> sprites;
     std::map<std::string, Variant> variants;
     std::map<std::string, Clip> clips;
@@ -632,7 +641,6 @@ bool FusionAnimation::Load(LawnApp* app, const std::string& path, std::string& e
             }
             result->variants.emplace(it.key(), variant);
         }
-        std::map<std::string, int> nodeIndex;
         for (const auto& item : data.at("nodes"))
         {
             Node node;
@@ -645,7 +653,8 @@ bool FusionAnimation::Load(LawnApp* app, const std::string& path, std::string& e
             if (!std::isfinite(norm) || norm < 0.000001f) throw std::runtime_error("invalid rotation at node: "+node.path);
             for (float& value : node.rest.rotation) value /= std::sqrt(norm);
             node.rest.active = item.at("active").get<bool>();
-            if (!nodeIndex.emplace(node.path, static_cast<int>(result->nodes.size())).second) throw std::runtime_error("duplicate transform path");
+            const auto [path,unique]=result->nodeIndex.emplace(node.path,static_cast<int>(result->nodes.size()));
+            if(!unique)path->second=-2;
             result->nodes.push_back(node);
         }
         if (result->root < 0 || result->root >= static_cast<int>(result->nodes.size())) throw std::runtime_error("invalid root transform");
@@ -738,7 +747,8 @@ bool FusionAnimation::Load(LawnApp* app, const std::string& path, std::string& e
             for (const auto& item : it.value().at("curves"))
             {
                 Curve curve;
-                const auto node = nodeIndex.find(item.at("path").get<std::string>()); curve.node = node == nodeIndex.end() ? -1 : node->second;
+                const auto path=item.at("path").get<std::string>();curve.node=result->FindNode(path.c_str());
+                if(curve.node==-2)throw std::runtime_error("ambiguous transform path: "+path);
                 const std::string kind = item.at("kind").get<std::string>();
                 if (kind == "position") curve.kind = CurveKind::Position;
                 else if (kind == "scale") curve.kind = CurveKind::Scale;
@@ -898,6 +908,17 @@ bool FusionAnimation::Impl::SamplePose(const char* baseName,float baseElapsed,co
     const State* base = FindState(baseName);
     if (!base && !isStatic) return false;
     if (options && (!std::isfinite(options->attackSpeed) || options->attackSpeed <= 0)) return false;
+    if(options)
+    {
+        const auto ambiguous=[&](const auto& values)
+        {return std::any_of(values.begin(),values.end(),[&](const auto& value){return FindNode(value.nodePath.c_str())==-2;});};
+        for(const auto& path:options->hiddenNodePaths)if(FindNode(path.c_str())==-2)return false;
+        if(FindNode(options->spritePathPrefix.c_str())==-2||
+            ambiguous(options->nodeActivityOverrides)||ambiguous(options->nodeRotations)||
+            ambiguous(options->nodeWorldPositions)||ambiguous(options->spriteReplacements)||
+            ambiguous(options->spriteSortingOverrides)||ambiguous(options->sortingGroupOverrides)||
+            ambiguous(options->maskSortingOverrides))return false;
+    }
     const auto parameterSpeed = [&](const State& state)
     { return state.speedParameterName == "attackSpeed" ? (options ? options->attackSpeed : 1.0f) : speed; };
     pose.clear(); pose.reserve(nodes.size());
@@ -952,9 +973,8 @@ bool FusionAnimation::Impl::SamplePose(const char* baseName,float baseElapsed,co
         for (const auto& position : options->nodeWorldPositions)
         {
             if (!std::isfinite(position.x) || !std::isfinite(position.y)) return false;
-            const auto found=std::find_if(nodes.begin(),nodes.end(),[&](const Node& n){return n.path==position.nodePath;});
-            if(found==nodes.end()) return false;
-            const int index=static_cast<int>(found-nodes.begin());
+            const int index=FindNode(position.nodePath.c_str());
+            if(index<0)return false;
             Matrix world=Transform(pose[index].position,pose[index].rotation,pose[index].scale);
             Matrix parent=Transform(Vector{0,0,0},Quaternion{0,0,0,1},Vector{1,1,1});
             int ancestor=nodes[index].parent;
@@ -978,12 +998,10 @@ bool FusionAnimation::TryGetNodeTransform(const char* path,std::array<float,6>& 
     float speed,const FusionAnimationDrawOptions* options) const
 {
     if(!mImpl||!path)return false;
-    const auto found=std::find_if(mImpl->nodes.begin(),mImpl->nodes.end(),
-        [&](const Node& n){return n.path==path;});
-    if(found==mImpl->nodes.end())return false;
+    int index=mImpl->FindNode(path);
+    if(index<0)return false;
     std::vector<Pose> pose;
     if(!mImpl->SamplePose(baseName,baseElapsed,actionName,actionElapsed,speed,options,pose))return false;
-    int index=static_cast<int>(found-mImpl->nodes.begin());
     Matrix world=Transform(pose[index].position,pose[index].rotation,pose[index].scale);
     while((index=mImpl->nodes[index].parent)>=0)
         world=Multiply(Transform(pose[index].position,pose[index].rotation,pose[index].scale),world);
@@ -1005,10 +1023,10 @@ bool FusionAnimation::TryGetNodeActivity(const char* path,bool& active,
     float speed,const FusionAnimationDrawOptions* options) const
 {
     if(!mImpl||!path)return false;
-    const auto found=std::find_if(mImpl->nodes.begin(),mImpl->nodes.end(),[&](const Node& node){return node.path==path;});
-    if(found==mImpl->nodes.end())return false;std::vector<Pose> pose;
+    int index=mImpl->FindNode(path);
+    if(index<0)return false;std::vector<Pose> pose;
     if(!mImpl->SamplePose(baseName,baseElapsed,actionName,actionElapsed,speed,options,pose))return false;
-    bool result=true;int index=int(found-mImpl->nodes.begin());
+    bool result=true;
     while(index>=0){result=result&&pose[index].active;index=mImpl->nodes[index].parent;}
     active=result;return true;
 }

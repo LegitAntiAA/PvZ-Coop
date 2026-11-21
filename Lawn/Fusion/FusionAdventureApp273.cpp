@@ -19,9 +19,11 @@ bool SourceFixture(const LawnApp* app)
     const char* pole=std::getenv("PVZ_COOP_SMOKE_FUSION_POLE275");
     const char* lesson4=std::getenv("PVZ_COOP_SMOKE_FUSION_LESSON4_275");
     const char* limbs=std::getenv("PVZ_COOP_SMOKE_FUSION_LIMBS276");
+    const char* adventure56=std::getenv("PVZ_COOP_SMOKE_FUSION_ADVENTURE56_277");
     return app->CoopSmokeActive()&&app->mCoopSmokeManifest.mScenario==LawnNet::NETSMOKE_SCENARIO_FUSION_VALIDATION&&
         ((value&&std::strcmp(value,"1")==0)||(day&&std::strcmp(day,"1")==0)||(pole&&std::strcmp(pole,"1")==0)||
-         (lesson4&&std::strcmp(lesson4,"1")==0)||(limbs&&std::strcmp(limbs,"1")==0));
+         (lesson4&&std::strcmp(lesson4,"1")==0)||(limbs&&std::strcmp(limbs,"1")==0)||
+         (adventure56&&std::strcmp(adventure56,"1")==0));
 }
 }
 

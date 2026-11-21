@@ -8274,8 +8274,7 @@ void Board::DrawBackdrop(Graphics* g)
 		aBackdropTraceCount++;
 	}
 
-	const bool aNativeFusionField = mBackground == BackgroundType::BACKGROUND_1_DAY &&
-		LawnFusion::IsNativeFusionBoard(this) && LawnFusion::DrawNativeFusionField(g, this,
+	const bool aNativeFusionField = LawnFusion::IsNativeFusionBoard(this) && LawnFusion::DrawNativeFusionField(g, this,
 			mApp->mNetManager && mApp->mNetManager->mConfig.mFusionClassicField);
 	if (aNativeFusionField)
 	{
@@ -8337,7 +8336,7 @@ void Board::DrawBackdrop(Graphics* g)
 		DrawHouseDoorBottom(g);
 	}
 
-	if (StageHasPool())
+	if (StageHasPool() && !(aNativeFusionField && mBackground == BACKGROUND_3_POOL))
 	{
 		mApp->mPoolEffect->PoolEffectDraw(g, StageIsNight());
 	}
@@ -10344,6 +10343,9 @@ void Board::DrawFog(Graphics* g)
 
 void Board::DrawCover(Graphics* g)
 {
+	LawnFusion::NativeFieldView277 field;
+	if((mBackground==BACKGROUND_2_NIGHT||mBackground==BACKGROUND_3_POOL)&&
+		LawnFusion::QueryNativeFusionField277(this,field)&&field.sourceSelected&&field.artReady)return;
 	g->PushState();
 	switch (mBackground)
 	{

@@ -172,7 +172,7 @@ def rotation_curve(text):
  return range_curve(block(text,'curve'))
 
 
-def projected_rectangle(assets,prefab,trans,objects,tid,shape,pose_model):
+def projected_rectangle(assets,prefab,trans,objects,tid,shape,pose_model,stationary_launch=False):
  if pose_model is None:raise ValueError('rectangle projection needs complete source model pose proof')
  model_path=pathlib.Path(pose_model);model=json.loads(model_path.read_text(encoding='utf-8-sig'))
  source_hash=hashlib.sha256((assets/prefab).read_bytes()).hexdigest()
@@ -203,7 +203,7 @@ def projected_rectangle(assets,prefab,trans,objects,tid,shape,pose_model):
   if abs(x)>1e-6 and abs(y)>1e-6:raise ValueError('skew/rotated rectangle projection unsupported')
  if sum(abs(v[0])>1e-6 for v in axes)>1 or sum(abs(v[1])>1e-6 for v in axes)>1:raise ValueError('overlapping rectangle projection coordinates unsupported')
  launch=[basis[0][2],basis[1][2]]
- if math.hypot(*launch)<1e-6:raise ValueError('rectangle launch normal has zero native projection')
+ if math.hypot(*launch)<1e-6 and not stationary_launch:raise ValueError('rectangle launch normal has zero native projection')
  return {'basis':basis,'halfSize':half,'normal':[0,0,1],'scalingMode':1,'ancestorTrs':records,'staticAncestorRotations':True,'staticParticleScale':True,'offset':[0,0,0],'shapeRotation':[0,0,0],'sourceModelSha256':hashlib.sha256(model_path.read_bytes()).hexdigest(),'sourcePrefabSha256':source_hash,'ancestorPaths':paths,'sourceProjectionPolicy':'Unity Local1: full ancestor rotation, only PS own local scale; actual node point supplies translation','sourceScalingModeReference':'https://docs.unity3d.com/kr/6000.0/ScriptReference/ParticleSystemScalingMode.Local.html'}
 
 
@@ -282,7 +282,7 @@ def export(assets,prefab,output,source_id,scope_ids=None,pose_model=None,guid_lo
    if compat:
     record['shape'].update(position=e.vector(shape,'m_Position'),rotation=e.vector(shape,'m_Rotation'),randomDirectionAmount=1,
      nativeCompatibility='source Cone4 with fully randomized direction -> native2D CIRCLE radial/angular projection; source 3D cone/random coupling and projected ellipse differ, actual offset/rotation/scale retained')
-   if ty==18:record['shape']['projectedRectangle']=projected_rectangle(assets,prefab,trans,objects,tid,shape,pose_model)
+   if ty==18:record['shape']['projectedRectangle']=projected_rectangle(assets,prefab,trans,objects,tid,shape,pose_model,record['speedRange']==[0.,0.])
    if ty==10:
     arc=block(shape,'arc')
     if record['speed']!=0 or e.vector(t,'m_LocalRotation')!={'x':0.,'y':0.,'z':0.,'w':1.} or float(e.required(shape,'radiusThickness'))!=1 or float(e.required(arc,'value'))!=360 or int(e.required(arc,'mode'))!=0 or float(e.required(arc,'spread'))!=0:raise ValueError('circle particle requires full static disk/identity/zero launch speed')

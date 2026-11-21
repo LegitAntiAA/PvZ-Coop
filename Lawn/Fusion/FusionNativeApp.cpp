@@ -15,10 +15,14 @@
 
 namespace LawnFusion
 {
+bool NativeFieldToggleAvailable277(const Board* board)
+{return IsNativeFusionBoard(board)&&board->mBackground==BACKGROUND_1_DAY;}
 void UpdateNativeFieldButton(Board* board)
 {
     auto* context = GetNativeContext(board);
-    if (!context || !board->mMenuButton) return;
+    if (!context) return;
+    ReconcileNativeFusionField277(board);
+    if (!board->mMenuButton) return;
     if (!context->fieldButton)
     {
         context->fieldButton = std::make_unique<GameButton>(-1);
@@ -31,8 +35,10 @@ void UpdateNativeFieldButton(Board* board)
     // The native stone borders overlap by four pixels, as in stacked menus.
     // The full46px native image ends above the first lawn row at y80.
     button->Resize(menu->mX, menu->mY + menu->mHeight - 4, menu->mWidth, menu->mHeight);
-    button->mBtnNoDraw = board->mApp->mGameScene != SCENE_PLAYING;
-    button->mDisabled = board->mApp->GetDialogCount() != 0 || !board->mApp->mNetManager;
+    const bool available=NativeFieldToggleAvailable277(board);
+    button->mBtnNoDraw = !available || board->mApp->mGameScene != SCENE_PLAYING;
+    button->mDisabled = !available || board->mApp->GetDialogCount() != 0 || !board->mApp->mNetManager;
+    if(!available)context->fieldButtonReleasePending=false;
     if (button->mBtnNoDraw || button->mDisabled) context->fieldButtonPressed = false;
     button->Update();
     button->mIsDown = context->fieldButtonPressed;
@@ -42,6 +48,8 @@ bool HandleNativeFieldPointer(Board* board, bool down, int button, int x, int y)
 {
     auto* context = GetNativeContext(board);
     if (!context || button != 1 || !context->fieldButton) return false;
+    if(!NativeFieldToggleAvailable277(board))
+    {context->fieldButtonPressed=context->fieldButtonReleasePending=false;return false;}
     auto* field = context->fieldButton.get();
     const bool enabled = board->mApp->mGameScene == SCENE_PLAYING &&
         board->mApp->GetDialogCount() == 0 && board->mApp->mNetManager;
@@ -77,6 +85,7 @@ bool HandleNativeFieldPointer(Board* board, bool down, int button, int x, int y)
     LawnNet::NetTrace("Fusion field preference saved skin=%s localOnly=1 columns=%d pitch=%d",
         config.mFusionClassicField ? "native" : "fusion", board->GetColumnCount(), board->GetCellPitchX());
     board->MarkDirty();
+    ReconcileNativeFusionField277(board);
     return true;
 }
 }

@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <vector>
 class Board;class LawnApp;class Zombie;class TodParticleSystem;class TodParticleDefinition;
 namespace LawnNet { struct NetFusionLimbEvent276; }
 namespace LawnFusion
@@ -23,6 +24,9 @@ public:
     bool EnsureEmbedded(Board*,uint16_t,const std::string& modelPath,std::string& error);
     bool EnsureEmbeddedProjectile(Board*,uint16_t,const std::string& modelPath,std::string& error);
     bool EnsureEmbeddedZombie(Board*,uint16_t,const std::string& modelPath,std::string& error);
+    bool EnsureField277(Board*,uint16_t scene,const std::string& model,std::vector<int64_t>& proof,std::string& error);
+    void ReconcileField277(Board*,uint16_t scene,bool enabled,float x,float y,int order);
+    bool QueryField277(const Board*,uint16_t& resource,uint32_t& system,float& x,float& y) const;
     bool PlayZombieLimbEvent(Board*,const LawnNet::NetFusionLimbEvent276&,bool& newEvent);
     void UpdateEmbedded(Board*);
     bool BirthPoints(Board*,uint16_t sourceKind,float x,float y,std::array<NativeDoom269Point,8>&) const;
@@ -38,6 +42,9 @@ bool PlayNativeSourceZombieLimb276(Zombie*,bool head);
 // True acknowledges a valid event, including duplicate/cosmetic capacity drop.
 // Full canonical seen-set survives owner deletion and resets with Board/epoch.
 bool PlayNativeSourceZombieLimbEvent276(Board*,const LawnNet::NetFusionLimbEvent276&);
+bool EnsureNativeField277Resources(Board*,uint16_t scene,const std::string& model,std::vector<int64_t>& proof,std::string& error);
+void ReconcileNativeField277Particle(Board*,uint16_t scene,bool enabled,float x,float y,int order);
+bool QueryNativeField277Particle(const Board*,uint16_t& resource,uint32_t& system,float& x,float& y);
 // Explicit reliable-event mapping; dynamic cache resource IDs never enter the
 // native stock array or the network presentation event.
 int NativeSourceEffectParticle269(uint16_t sourceKind);

@@ -138,6 +138,8 @@ namespace LawnNet
 	bool NetSmokeUpdateFusionPole275(LawnApp* theApp);
 	bool NetSmokeUpdateFusionLesson4_275(LawnApp* theApp);
 	bool NetSmokeUpdateFusionDayLimbs276(LawnApp* theApp);
+	bool NetSmokeUpdateFusionAdventure56_277(LawnApp* theApp);
+	bool NetSmokeUpdateFusionField277(LawnApp* theApp);
 	bool NetSmokeUpdateZenGarden(LawnApp* theApp);
 	bool NetSmokeZenGardenAllowsStart(LawnApp* theApp, uint8_t theMode, int32_t theLevel);
 	bool NetSmokeUpdateMystery(LawnApp* theApp);
@@ -6017,6 +6019,10 @@ void LawnApp::CoopSmokeUpdate()
 	if (LawnNet::NetSmokeUpdateFusionDayZombie274(this))
 		return;
 	if (LawnNet::NetSmokeUpdateFusionDayLimbs276(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionField277(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionAdventure56_277(this))
 		return;
 	if (LawnNet::NetSmokeUpdateFusionPole275(this))
 		return;

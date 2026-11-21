@@ -1,3 +1,27 @@
+## ROOT 277C — 2026-11-21
+
+- BG277-NIGHT/POOL + DUPPATH277 + FIELD277: DONE bounded app67c111common/22BMP +34actualnativeLoadchecks/peer; sourcewaterlocalpause/teardown/prefs/Dayregressionverifiedandviewed. FogRoof/fullPoolcampaignNotExecuted.
+- ADVENTURE56-277: DONE OPENING-ONLY app67b1746common/28BMP, actual2waves/realpurchases/shovel/Sun; fullvictory/finalDoll/trophypending.
+- PUBLISH277: IN_PROGRESS Root directmain/usergh, current8e4CIallgreen. NoRelease.
+- NEXT278: READY fullsource4/5/6nativevictory +nativeTutor7/8 integration, notpuremetadataacceptance; missingGold938stillgated.
+
+## ROOT 277B — 2026-11-21
+
+- ADVENTURE56-277: DONE OPENING-ONLY app67b1746common/28BMP realpurchase/shovel/Sun/first2waves; full20/finalDoll/trophyNotExecuted.
+- BG277-NIGHT/POOL: IN_TESTING app67c; exact17assets/nativewater6000, noFogRoof.
+- DUPPATH277: IN_TESTING commonloaderfix+bgprefix; static9modelsaudit/reviewPassed, actual34checknativeLoadregression running inField67c.
+- FIELD277: IN_TESTING Rootownedexec16769, run_a7c9dde99e2f46daa9088e707da93355. DoNotBuildwhilepairlive.
+- UNIT277: DONE Unit4 actual72384/0/0+14PythonPassed beforecommonloaderedit; nativeLoaderhasseparaterealregression.
+- PUBLISH277: READY afterFieldactualproof; main8e4fbdbcurrentandallCIgreen. No release.
+
+## ROOT 277A — 2026-11-21
+
+- PUBLISH276: DONE main8e4fbdb userghidentityverified; UnitCI72370/0/1Passed/local72384/0/0. BuildCIpending.
+- ADVENTURE56-277: IN_PROGRESS E1 boundedreadiness/resources +realopeningfixture; fullvictory/finalDollrewardNotExecuted.
+- BG277-NIGHT/POOL: IN_PROGRESS E2 genuineart/nativewater6000. NightPoolalwayssource/Daytogglepreserved; FogRoofdefer. Staging6PythonchecksPassed, runtimeNotExecuted.
+- FIELD277-QA: IN_PROGRESS E3newfixtureNight/Pool/Day realSDL/PS/render/localpreference. Rootregistration/runnercontracts/buildspending.
+- ROOT277-INTEGRATE: IN_PROGRESS Root App/project/runner/docs andonlybuild/gameoperator; allsourcefreeze required beforecombinedbuild.
+
 ## ROOT 276B — 2026-11-21
 
 - LIMBS276: DONE bounded runtime829common/46BMP app66u;9resources/10host+10clientrealFX, no stock/drop/duplicate. Standaloneownerdelete/latejoin/pool-exhaustion runtimeNotExecuted.

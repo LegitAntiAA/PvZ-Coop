@@ -41,7 +41,7 @@ std::string Digest(const std::string& value)
 }
 struct Binding
 {
-    int64_t component=0;uint16_t resource=0;std::string path,package;bool emission=true;int sortingOrder=0;NativeWorldParticle269Definition* definition=nullptr;
+    int64_t component=0,renderer=0;uint16_t resource=0;std::string path,package;bool emission=true;int sortingOrder=0;NativeWorldParticle269Definition* definition=nullptr;
 };
 void ValidateOwnerDestroyedParticle273(uint16_t kind,const Json& entry,const std::string& modelPath)
 {
@@ -66,12 +66,21 @@ void ValidateOwnerDestroyedParticle273(uint16_t kind,const Json& entry,const std
     std::ifstream file(modelPath,std::ios::binary);const std::string bytes((std::istreambuf_iterator<char>(file)),{});
     if(!file||Digest(bytes)!=modelHash)throw std::runtime_error("source Doll lifecycle model hierarchy differs");
 }
-std::vector<Binding> LoadBindings(uint16_t kind,const std::string& modelPath,const std::string& manifestPath,bool projectile=false,bool zombie=false)
+std::vector<Binding> LoadBindings(uint16_t kind,const std::string& modelPath,const std::string& manifestPath,bool projectile=false,bool zombie=false,bool field=false)
 {
     const Json model=Read(modelPath),manifest=Read(manifestPath);if(manifest.at("schema")!=1)throw std::runtime_error("unknown embedded source manifest");
-    const auto& families=manifest.at(zombie?"zombies":projectile?"projectiles":"plants");const char* key=projectile?"modelKey":"kind";
+    const auto& families=manifest.at(field?"fields":zombie?"zombies":projectile?"projectiles":"plants");const char* key=field?"sourceSceneType":projectile?"modelKey":"kind";
     const auto plant=std::find_if(families.begin(),families.end(),[=](const Json& p){return p.at(key)==kind;});
     if(plant==families.end()||plant->at("status")!="Passed")throw std::runtime_error("source embedded particle family remains blocked");
+    if(field)
+    {
+        const char* prefab=kind==1?"Resources/background/background2.prefab":kind==2?"Resources/background/background3.prefab":nullptr;
+        const char* background=kind==1?"BACKGROUND_2_NIGHT":"BACKGROUND_3_POOL";
+        std::ifstream file(modelPath,std::ios::binary);const std::string bytes((std::istreambuf_iterator<char>(file)),{});
+        if(!prefab||manifest.at("ownerScope")!="nativeBoardField277"||plant->at("nativeBackground").get<std::string>()!=background||
+            model.at("sourcePrefab").get<std::string>()!=prefab||plant->at("sourcePrefab").get<std::string>()!=prefab||!file||Digest(bytes)!=plant->at("sourceModelSha256").get<std::string>())
+            throw std::runtime_error("source field model identity differs");
+    }
     std::map<std::pair<int,int64_t>,std::string> actual;
     for(const auto& component:model.at("nonRenderingComponents"))
     {
@@ -79,9 +88,9 @@ std::vector<Binding> LoadBindings(uint16_t kind,const std::string& modelPath,con
         const auto key=std::make_pair(type,component.at("fileId").get<int64_t>());
         if(!actual.emplace(key,component.at("serializedComponent").get<std::string>()).second)throw std::runtime_error("duplicate source particle component");
     }
-    if(actual.empty())throw std::runtime_error("model has no source particle components");
+    if(actual.empty()&&!field)throw std::runtime_error("model has no source particle components");
     std::set<std::pair<int,int64_t>> covered;std::vector<Binding> result;size_t bindingCount=0;
-    for(const auto& entry:manifest.at("bindings"))if(entry.at(zombie?"sourceZombieKind":projectile?"modelKey":"plantKind")==kind)
+    for(const auto& entry:manifest.at("bindings"))if(entry.at(field?"sourceSceneType":zombie?"sourceZombieKind":projectile?"modelKey":"plantKind")==kind)
     {
         if(entry.at("status")!="Passed"||entry.at("sourcePrefab")!=model.at("sourcePrefab"))throw std::runtime_error("embedded source binding differs");
         const int64_t ps=entry.at("sourceParticleFileId").get<int64_t>(),renderer=entry.at("sourceRendererFileId").get<int64_t>();
@@ -94,10 +103,11 @@ std::vector<Binding> LoadBindings(uint16_t kind,const std::string& modelPath,con
         ++bindingCount;
         if(entry.contains("nativeLifecycle"))
         {
-            if(!zombie||projectile)throw std::runtime_error("foreign source particle lifecycle proof");
+            if(!zombie||projectile||field)throw std::runtime_error("foreign source particle lifecycle proof");
             ValidateOwnerDestroyedParticle273(kind,entry,modelPath);continue;
         }
-        Binding binding;binding.component=ps;const int id=entry.at("resourceKind").get<int>();if(id<1||id>65535)throw std::runtime_error("invalid native particle resource key");binding.resource=uint16_t(id);
+        Binding binding;binding.component=ps;binding.renderer=renderer;const int id=entry.at("resourceKind").get<int>();if(id<1||id>65535)throw std::runtime_error("invalid native particle resource key");binding.resource=uint16_t(id);
+        if(field&&(kind!=2||id!=6000))throw std::runtime_error("unregistered native field particle resource");
         binding.path=entry.at("nodePath").get<std::string>();binding.emission=entry.at("defaultEmissionEnabled").get<bool>();
         if(std::none_of(model.at("nodes").begin(),model.at("nodes").end(),[&](const Json& n){return n.at("path")==binding.path;}))throw std::runtime_error("missing actual source particle node");
         const auto resource=std::find_if(manifest.at("resources").begin(),manifest.at("resources").end(),[&](const Json& r){return r.at("resourceKind")==id;});
@@ -105,6 +115,33 @@ std::vector<Binding> LoadBindings(uint16_t kind,const std::string& modelPath,con
         const auto relative=std::filesystem::path(resource->at("package").get<std::string>());if(relative.is_absolute()||relative.lexically_normal().string().find("..")!=std::string::npos)throw std::runtime_error("invalid embedded particle resource path");
         binding.package=(std::filesystem::path(manifestPath).parent_path()/relative).string();std::ifstream file(binding.package,std::ios::binary);const std::string bytes((std::istreambuf_iterator<char>(file)),{});
         if(!file||Digest(bytes)!=resource->at("effectSha256").get<std::string>())throw std::runtime_error("compiled source particle resource hash differs");
+        if(field)
+        {
+            const Json effect=Json::parse(bytes);const auto& rectangle=effect.at("emitters").at(0).at("shape").at("projectedRectangle");
+            if(entry.at("sourceModelSha256")!=plant->at("sourceModelSha256")||
+                rectangle.at("sourceModelSha256")!=plant->at("sourceModelSha256")||
+                effect.at("sourceComponentIds")!=Json::array({ps})||effect.at("sourcePrefab")!=model.at("sourcePrefab")||
+                effect.at("sourceKind")!=id||!effect.at("ignoredBindings").empty()||!effect.at("deferredComponents").empty()||
+                rectangle.at("sourcePrefabSha256")!=entry.at("sourcePrefabSha256")||effect.at("sourcePrefabSha256")!=entry.at("sourcePrefabSha256"))
+                throw std::runtime_error("source field particle/model proof differs");
+            const auto& chain=entry.at("sourceHierarchy");
+            if(chain.size()!=rectangle.at("ancestorTrs").size()||chain.size()!=rectangle.at("ancestorPaths").size())
+                throw std::runtime_error("source field particle ancestry count differs");
+            int parent=-1;
+            for(size_t i=0;i<chain.size();++i)
+            {
+                const auto& record=chain.at(i);const auto& nodes=model.at("nodes");
+                const auto node=std::find_if(nodes.begin(),nodes.end(),[&](const Json& n){return n.at("path")==record.at("path");});
+                if(node==nodes.end()||node->at("parent")!=parent||record.at("path")!=rectangle.at("ancestorPaths").at(i))
+                    throw std::runtime_error("source field particle ancestry differs");
+                for(const char* transform:{"position","rotation","scale"})
+                    if(node->at(transform)!=record.at(transform)||record.at(transform)!=rectangle.at("ancestorTrs").at(i).at(transform))
+                        throw std::runtime_error("source field particle transform differs");
+                parent=int(node-nodes.begin());
+            }
+            if(chain.empty()||chain.back().at("path")!=binding.path)
+                throw std::runtime_error("source field particle node differs");
+        }
         const auto& raw=actual.at({199,renderer});const std::string tag="  m_SortingOrder: ";const auto at=raw.find(tag);if(at!=std::string::npos)binding.sortingOrder=std::stoi(raw.substr(at+tag.size()));
         result.push_back(std::move(binding));
     }
@@ -123,6 +160,8 @@ struct NativeEmbeddedEffects269::Impl
     std::map<std::tuple<uint32_t,uint16_t,int64_t>,Lease> projectileLeases;
     std::map<std::tuple<uint32_t,uint16_t,int64_t>,Lease> derivedPlantLeases;
     std::map<uint16_t,std::vector<Binding>> zombieBindings;
+    std::map<uint16_t,std::vector<Binding>> fieldBindings;
+    uint16_t fieldScene=0,fieldResource=0;uint32_t fieldSystem=0;float fieldX=0,fieldY=0;
     std::map<std::tuple<uint32_t,uint16_t,int64_t>,Lease> zombieLeases;
     // Separate from actor-owned polling leases: a reliable loss can arrive
     // before the first actor snapshot or after its native array slot is gone.
@@ -135,11 +174,12 @@ struct NativeEmbeddedEffects269::Impl
     TodParticleSystem* System(uint32_t id) const
     {return id&&app&&app->mEffectSystem&&app->mEffectSystem->mParticleHolder==holder?app->ParticleTryToGet(static_cast<ParticleSystemID>(id)):nullptr;}
     void Kill(Lease& lease){if(auto* system=System(lease.system))system->ParticleSystemDie();lease.system=0;}
+    void StopField(){if(auto* system=System(fieldSystem))system->ParticleSystemDie();fieldScene=fieldResource=0;fieldSystem=0;fieldX=fieldY=0;}
     bool Valid(Board* board) const{return board&&app&&app->mBoard==board&&board->mApp==app&&IsNativeFusionBoard(board)&&app->mEffectSystem&&app->mEffectSystem->mParticleHolder==holder&&holder;}
 };
 NativeEmbeddedEffects269::NativeEmbeddedEffects269(LawnApp* app):mImpl(std::make_unique<Impl>())
 {mImpl->app=app;mImpl->holder=app&&app->mEffectSystem?app->mEffectSystem->mParticleHolder:nullptr;}
-NativeEmbeddedEffects269::~NativeEmbeddedEffects269(){for(auto& entry:mImpl->leases)mImpl->Kill(entry.second);for(auto& entry:mImpl->projectileLeases)mImpl->Kill(entry.second);for(auto& entry:mImpl->derivedPlantLeases)mImpl->Kill(entry.second);for(auto& entry:mImpl->zombieLeases)mImpl->Kill(entry.second);for(auto& entry:mImpl->limbEvents)if(auto* system=mImpl->System(entry.second))system->ParticleSystemDie();}
+NativeEmbeddedEffects269::~NativeEmbeddedEffects269(){mImpl->StopField();for(auto& entry:mImpl->leases)mImpl->Kill(entry.second);for(auto& entry:mImpl->projectileLeases)mImpl->Kill(entry.second);for(auto& entry:mImpl->derivedPlantLeases)mImpl->Kill(entry.second);for(auto& entry:mImpl->zombieLeases)mImpl->Kill(entry.second);for(auto& entry:mImpl->limbEvents)if(auto* system=mImpl->System(entry.second))system->ParticleSystemDie();}
 bool NativeEmbeddedEffects269::Ensure(Board* board,uint16_t kind,const std::string& model,const std::string& manifest,std::string& error)
 {
     try
@@ -173,6 +213,61 @@ bool NativeEmbeddedEffects269::EnsureZombie(Board* board,uint16_t kind,const std
         mImpl->zombieBindings.emplace(kind,std::move(bindings));error.clear();return true;
     }
     catch(const std::exception& ex){error=ex.what();return false;}
+}
+bool NativeEmbeddedEffects269::EnsureField277(Board* board,uint16_t scene,const std::string& model,const std::string& manifest,std::vector<int64_t>& proof,std::string& error)
+{
+    proof.clear();
+    try
+    {
+        if(!mImpl->Valid(board))throw std::runtime_error("native field particle Board unavailable");
+        if(!((scene==1&&board->mBackground==BACKGROUND_2_NIGHT)||(scene==2&&board->mBackground==BACKGROUND_3_POOL)))
+            throw std::runtime_error("native field scene/background differs");
+        auto found=mImpl->fieldBindings.find(scene);
+        if(found==mImpl->fieldBindings.end())
+        {
+            auto bindings=LoadBindings(scene,model,manifest,false,false,true);
+            for(auto& binding:bindings){binding.definition=EnsureNativeEmbeddedParticle269Resource(board,binding.resource,binding.package,error);if(!binding.definition)return false;}
+            found=mImpl->fieldBindings.emplace(scene,std::move(bindings)).first;
+        }
+        for(const auto& b:found->second){proof.push_back(b.component);proof.push_back(b.renderer);}
+        error.clear();return true;
+    }
+    catch(const std::exception& e){error=e.what();return false;}
+}
+bool NativeEmbeddedEffects269::FieldResourceAdmitted277(uint16_t resource) const
+{
+    const auto found=mImpl->fieldBindings.find(2);
+    return resource==6000&&found!=mImpl->fieldBindings.end()&&found->second.size()==1&&
+        found->second.front().resource==resource&&found->second.front().definition;
+}
+void NativeEmbeddedEffects269::ReconcileField277(Board* board,uint16_t scene,bool enabled,float x,float y,int order)
+{
+    if(!enabled||scene!=2||!mImpl->Valid(board)||board->mBackground!=BACKGROUND_3_POOL||!std::isfinite(x)||!std::isfinite(y))
+    {mImpl->StopField();return;}
+    const auto found=mImpl->fieldBindings.find(scene);
+    if(found==mImpl->fieldBindings.end()||found->second.size()!=1){mImpl->StopField();return;}
+    const auto& b=found->second.front();
+    if(mImpl->fieldScene!=scene||mImpl->fieldResource!=b.resource)mImpl->StopField();
+    mImpl->fieldScene=scene;mImpl->fieldResource=b.resource;mImpl->fieldX=x;mImpl->fieldY=y;
+    auto* system=mImpl->System(mImpl->fieldSystem);
+    if(!system||system->mDead)
+    {
+        system=CreateNativeEmbeddedParticle269System(board,b.resource,b.definition,x,y,order,b.emission);
+        mImpl->fieldSystem=system?uint32_t(mImpl->app->ParticleGetID(system)):0;
+        if(system)LawnNet::NetTrace("Fusion field277 water started background=%d resource=%u system=%u anchor=(%.3f,%.3f) order=%d localOnly=1",int(board->mBackground),b.resource,mImpl->fieldSystem,x,y,order);
+    }
+    if(system){system->mDontUpdate=board->mPaused;system->mRenderOrder=order;system->SystemMove(x,y);}
+}
+bool NativeEmbeddedEffects269::QueryField277(const Board* board,uint16_t& resource,uint32_t& id,float& x,float& y) const
+{
+    resource=0;id=0;x=y=0;
+    if(!mImpl->Valid(const_cast<Board*>(board))||mImpl->fieldScene!=2)return false;
+    resource=mImpl->fieldResource;x=mImpl->fieldX;y=mImpl->fieldY;
+    const auto* system=mImpl->System(mImpl->fieldSystem);
+    const auto found=mImpl->fieldBindings.find(2);
+    if(system&&!system->mDead&&system->mEffectType==PARTICLE_FUSION_EMBEDDED269&&found!=mImpl->fieldBindings.end()&&
+        found->second.size()==1&&system->mParticleDef==found->second.front().definition->Data(found->second.front().emission))id=mImpl->fieldSystem;
+    return true;
 }
 bool NativeEmbeddedEffects269::PlayZombieLimbEvent(Board* board,const LawnNet::NetFusionLimbEvent276& event,bool& newEvent)
 {

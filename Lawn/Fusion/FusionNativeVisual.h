@@ -19,6 +19,14 @@ namespace LawnFusion
 {
 enum class FusionCompanion269Family:uint8_t;
 enum class NativeWorldRemainder269Family:uint8_t;
+struct NativeFieldView277
+{
+    uint8_t background=0;
+    bool sourceSelected=false,artReady=false;
+    uint16_t waterResource=0;
+    uint32_t waterSystemId=0;
+    float waterX=0,waterY=0;
+};
 // Board-owned asset cache. It owns no entities, clocks, gameplay or camera.
 class NativeVisuals
 {
@@ -68,6 +76,8 @@ public:
     bool DrawProjectile(Sexy::Graphics* graphics, Projectile* projectile) const;
     bool DrawPortrait(Sexy::Graphics* graphics, uint16_t kind, const Sexy::Rect& bounds, int grayness, bool preserveTint = false) const;
     bool DrawField(Sexy::Graphics* graphics, Board* board, bool useClassicArt);
+    void ReconcileField(Board*);
+    bool QueryField(const Board*,NativeFieldView277&) const;
 
 private:
     struct Impl;
@@ -134,9 +144,12 @@ bool DrawNativeFusionPumpkinBack(Sexy::Graphics* graphics, Plant* pumpkin);
 bool DrawNativeFusionProjectile(Sexy::Graphics* graphics, Projectile* projectile);
 bool DrawNativeFusionPortrait(Sexy::Graphics* graphics, uint16_t kind,
     const Sexy::Rect& bounds, int grayness = 255, bool preserveTint = false);
-// DrawBackdrop calls this only for its native Fusion10x5 day field. The caller
-// supplies the existing Board graphics transform; this adds no camera or world.
+// DrawBackdrop supplies the existing native Board transform. Night/Pool use
+// genuine source art only; the proven Day10 native/source choice is retained.
+// This adds no camera or world.
 bool DrawNativeFusionField(Sexy::Graphics* graphics, Board* board, bool useClassicArt);
+void ReconcileNativeFusionField277(Board*);
+bool QueryNativeFusionField277(const Board*,NativeFieldView277&);
 }
 
 #endif

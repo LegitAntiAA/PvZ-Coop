@@ -178,7 +178,9 @@ bool NativeSourceEffects269::Ensure(Board* board,uint16_t kind,std::string& erro
 TodParticleSystem* NativeSourceEffects269::Create(Board* board,uint16_t kind,float x,float y,int order,bool emission)
 {
     if(!std::isfinite(x)||!std::isfinite(y)||std::abs(x)>4096||std::abs(y)>4096)return nullptr;
-    if((kind>=2000&&kind<3000)||(kind>=5000&&kind<6000))
+    const bool field=kind==6000&&mImpl->embedded&&mImpl->embedded->FieldResourceAdmitted277(kind);
+    if(kind==6000&&!field)return nullptr; // Only the exact field manifest can admit this family.
+    if((kind>=2000&&kind<3000)||(kind>=5000&&kind<6000)||field)
     {
         // Binding preflight loaded this exact hashed resource already. AUX
         // resource paths belong to their manifest, not the plant-only folder.
@@ -266,6 +268,28 @@ bool NativeSourceEffects269::EnsureEmbeddedZombie(Board* board,uint16_t kind,con
 {
     if(!mImpl->embedded)mImpl->embedded=std::make_unique<NativeEmbeddedEffects269>(mImpl->app);
     return mImpl->embedded->EnsureZombie(board,kind,model,(ResourceRoot()/"zombies270"/"manifest.json").string(),error);
+}
+bool NativeSourceEffects269::EnsureField277(Board* board,uint16_t scene,const std::string& model,std::vector<int64_t>& proof,std::string& error)
+{
+    if(!mImpl->embedded)mImpl->embedded=std::make_unique<NativeEmbeddedEffects269>(mImpl->app);
+    return mImpl->embedded->EnsureField277(board,scene,model,(ResourceRoot()/"fields277"/"manifest.json").string(),proof,error);
+}
+void NativeSourceEffects269::ReconcileField277(Board* board,uint16_t scene,bool enabled,float x,float y,int order)
+{if(mImpl->embedded)mImpl->embedded->ReconcileField277(board,scene,enabled,x,y,order);}
+bool NativeSourceEffects269::QueryField277(const Board* board,uint16_t& resource,uint32_t& system,float& x,float& y) const
+{return mImpl->embedded&&mImpl->embedded->QueryField277(board,resource,system,x,y);}
+bool EnsureNativeField277Resources(Board* board,uint16_t scene,const std::string& model,std::vector<int64_t>& proof,std::string& error)
+{
+    auto* cache=GetNativeSourceEffects269(board,true);
+    return cache&&cache->EnsureField277(board,scene,model,proof,error);
+}
+void ReconcileNativeField277Particle(Board* board,uint16_t scene,bool enabled,float x,float y,int order)
+{if(auto* cache=GetNativeSourceEffects269(board,false))cache->ReconcileField277(board,scene,enabled,x,y,order);}
+bool QueryNativeField277Particle(const Board* board,uint16_t& resource,uint32_t& system,float& x,float& y)
+{
+    resource=0;system=0;x=y=0;
+    auto* cache=GetNativeSourceEffects269(const_cast<Board*>(board),false);
+    return cache&&cache->QueryField277(board,resource,system,x,y);
 }
 NativeWorldParticle269Definition* EnsureNativeEmbeddedParticle269Resource(Board* board,uint16_t kind,const std::string& path,std::string& error)
 {auto* cache=GetNativeSourceEffects269(board,true);if(!cache){error="native source cache unavailable";return nullptr;}return cache->WorldDefinition(board,kind,path,error);}
