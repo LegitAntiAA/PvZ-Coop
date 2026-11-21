@@ -187,6 +187,7 @@
     <ClCompile Include="..\..\Lawn\Fusion\FusionAdventureSession273.cpp" />
     <ClCompile Include="FusionAdventureScheduler273Tests.cpp" />
     <ClCompile Include="FusionAdventureProgress273Tests.cpp" />
+    <ClCompile Include="FusionAdventureLessons274Tests.cpp" />
     <ClCompile Include="FusionAdventureSession273Tests.cpp" />
     <ClCompile Include="FusionAdventureStart273Tests.cpp" />
     <ClCompile Include="..\..\Lawn\Fusion\FusionDayZombie273Rules.cpp" />

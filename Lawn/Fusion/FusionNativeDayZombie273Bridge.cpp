@@ -29,6 +29,29 @@ namespace
 {
 bool Current(const Board* b)
 {return b&&b->mApp&&b->mApp->mBoard==b&&IsNativeFusionBoard(b)&&!GetNativeContext(b)->adventureTeardown;}
+bool OrdinarySourceDay(Board* b)
+{
+    const auto* c=GetNativeContext(b);
+    if(!Current(b)||!c->adventure.enabled||c->adventure.run.level<1||c->adventure.run.level>9||
+        b->mBackground!=BACKGROUND_1_DAY||b->GetColumnCount()!=10||GetNativeFusionRowCount(b)!=5||
+        !b->mTDPath.empty()||b->mGridItems.mSize)return false;
+    for(int row=0;row<5;++row)if(b->mPlantRow[row]!=PLANTROW_NORMAL)return false;
+    Zombie* actor=nullptr;
+    while(b->IterateZombies(actor))
+    {
+        const auto* source=GetNativeSourceZombieData(actor);
+        // This source-only closure contains no ladder producer or Tower Corner
+        // operation. Garlic changes row but never the source targetRow field.
+        if(!source)return false;
+        switch(source->kind)
+        {
+        case 0:case 2:case 3:case 4:case 8:case 21:case 22:case 23:
+        case 100:case 104:case 106:case 107:case 108:break;
+        default:return false;
+        }
+    }
+    return true;
+}
 bool Host(const Zombie* z)
 {return z&&Current(z->mBoard)&&!z->mNetGhost&&!z->mApp->NetIsClient()&&!z->mDead&&
     z->mApp->mGameScene==SCENE_PLAYING&&!z->mBoard->mPaused;}
@@ -48,8 +71,8 @@ bool PlantTraits(const Plant* p,FusionDayZombie273PlantTraits& result)
 void PoleContact(Zombie*,Plant*)
 {
     // OnTriggerStay2D36F390 dispatches +0x2a8 = slot23 GetLadder385A40,
-    // NOT slot48 AttackEffect37F310. Contact deals no damage. Source3 stays
-    // gated until its actual ladder timer/coordinate continuation is mapped.
+    // NOT slot48 AttackEffect37F310. Contact deals no damage. OrdinarySourceDay
+    // admits only worlds without a ladder, where that source call is a no-op.
 }
 bool FxReady(Board* b,uint16_t kind,std::string* error=nullptr)
 {
@@ -151,11 +174,9 @@ bool CanSpawnNativeDayZombie273(Board* b,uint16_t kind,std::string* error)
     const auto reject=[&](const char* reason){if(error)*error=reason;return false;};
     if(!Current(b)||!FindFusionDayZombie273Profile(kind)||b->mApp->mGameMode!=GAMEMODE_ADVENTURE)
         return reject("Day family requires its bounded native Adventure world.");
-    // Root/E1: raw ghost commit cannot yet reserve all body/head/Attachment
-    // allocations transactionally. Never admit a host that its peer cannot adopt.
-    if(b->mApp->NetActive())return reject("Day network admission awaits shared native body/head allocation reservation.");
-    if(kind==3)return reject("Pole contact awaits the source GetLadder timer and coordinate continuation.");
-    if(FusionDayZombie273Doll(kind))return reject("Doll family awaits complete8s spawned target-row continuation and pinned lifecycle proof.");
+    // Typed snapshots own these births. The receiving Board checks the whole
+    // incoming native resource peak before it mutates any presentation actor.
+    if(!OrdinarySourceDay(b))return reject("Day family requires the fresh ordinary source Day closure without Tower, ladders or imported actors.");
     if(kNativeFusionSnapshotVersion<26)return reject("Day source state is absent from the native wire contract.");
     if(!EnsureNativeSourceZombieVisuals(b,kind,error))return false;
     if(kind==3&&(Sexy::SOUND_GRASSSTEP<0||Sexy::SOUND_POLEVAULT<0||!FxReady(b,23,error)))return false;
@@ -168,7 +189,8 @@ bool CanSpawnNativeDayZombie273(Board* b,uint16_t kind,std::string* error)
         if(!NativeProjectileMetadataValid(shot,PROJECTILE_PEA,MOTION_BACKWARDS)||!EnsureNativeProjectileVisuals(b,shot.kind))
             return reject("Day hostile source projectile family is not ready.");
     }
-    return true;
+    const uint16_t batch[]={kind};
+    return CanAllocateNativeSourceDayBatch274(b,batch,error);
 }
 bool PrepareNativeDayZombie273ChomperArmor(Zombie* z,Coin*& born,int& oldType,int& oldHealth)
 {

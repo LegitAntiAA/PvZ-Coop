@@ -14,8 +14,9 @@ constexpr bool kSourceAdventurePublicReady273=false;
 bool SourceFixture(const LawnApp* app)
 {
     const char* value=std::getenv("PVZ_COOP_SMOKE_FUSION_SOURCE273");
+    const char* day=std::getenv("PVZ_COOP_SMOKE_FUSION_DAY274");
     return app->CoopSmokeActive()&&app->mCoopSmokeManifest.mScenario==LawnNet::NETSMOKE_SCENARIO_FUSION_VALIDATION&&
-        value&&std::strcmp(value,"1")==0;
+        ((value&&std::strcmp(value,"1")==0)||(day&&std::strcmp(day,"1")==0));
 }
 }
 

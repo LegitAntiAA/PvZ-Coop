@@ -6,6 +6,8 @@
 #include <cmath>
 #include <cstdint>
 #include <limits>
+#include <span>
+#include <string>
 
 class Board;
 class Zombie;
@@ -75,6 +77,12 @@ inline int NativeSourceZombieLivenessHealth(float health)
 
 // Explicit opt-in only. No wave/catalog/global native factory is redirected.
 // Existing AddZombieInRow initialization and co-op/endless policy are retained.
+// True only during the synchronous native carrier initialization of a typed
+// source birth, before its source identity can be attached to that carrier.
+bool IsNativeSourceZombieBirth(const Board* board);
+// Whole-batch peak capacity for the admitted ordinary Day carriers. No dead
+// resource is credited before EffectSystem actually returns it to its pool.
+bool CanAllocateNativeSourceDayBatch274(Board* board,std::span<const uint16_t> kinds,std::string* error=nullptr);
 Zombie* SpawnNativeSourceZombie(Board* board,uint16_t kind,int row,int fromWave,
     int sourcePreset=kFusionZombieSourcePreset);
 struct NativeSourceZombieSpawnRequest

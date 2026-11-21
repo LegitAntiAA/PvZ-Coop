@@ -67,7 +67,7 @@ bool CanSpawn(void* user,std::span<const uint16_t> kinds)
         if(index<0)return Reject(a,"Source scheduler refused an unadmitted source NPC.");
         if(!checked[index]){if(!Ready(user,kind))return false;checked[index]=true;}
     }
-    return true;
+    return CanAllocateNativeSourceDayBatch274(b,kinds,a.error);
 }
 bool Spawn(void* user,int wave,std::span<const FusionAdventureScheduler273Spawn> batch,float& output)
 {

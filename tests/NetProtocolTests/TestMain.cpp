@@ -69,6 +69,7 @@ int RunFusionTools268CommandTests(int& checks);
 #include "FusionCampaign272Tests.h"
 #include "FusionAdventureScheduler273Tests.h"
 #include "FusionAdventureProgress273Tests.h"
+#include "FusionAdventureLessons274Tests.h"
 #include "FusionAdventureSession273Tests.h"
 #include "FusionAdventureStart273Tests.h"
 #include "FusionDayZombie273Tests.h"
@@ -1194,6 +1195,8 @@ int main(int argc, char** argv)
 	gChecks+=aScheduler273.mChecks;gFailures+=aScheduler273.mFailures;
 	const auto aProgress273=RunFusionAdventureProgress273Tests();
 	gChecks+=aProgress273.mChecks;gFailures+=aProgress273.mFailures;
+	const auto aLessons274=RunFusionAdventureLessons274Tests();
+	gChecks+=aLessons274.mChecks;gFailures+=aLessons274.mFailures;
 	const auto aSession273=RunFusionAdventureSession273Tests();
 	gChecks+=aSession273.mChecks;gFailures+=aSession273.mFailures;
 	const auto aStart273=RunFusionAdventureStart273Tests();

@@ -351,9 +351,11 @@ bool DayPose273(const Zombie* zombie,const ZombieModel& model,FusionAnimationDra
 {
     const auto* data=GetNativeSourceZombieData(zombie);if(!data||!DayPrefab273(data->kind))return true;
     const auto* day=GetNativeDayZombie273(zombie);
-    if(!day||!NativeDayZombie273StateValid(data->kind,*day))return false;
+    if(!day||!NativeDayZombie273ControllerValid(data->kind,*day))return false;
     const char* head=nullptr;float phase=0;
-    if(GetNativeDayZombie273HeadPose(zombie,head,phase))
+    const bool headPose=GetNativeDayZombie273HeadPose(zombie,head,phase);
+    if(FusionDayZombie273Shooter(data->kind)&&day->shootEvent&&!headPose)return false;
+    if(headPose)
     {
         if(!head)return false;
         const auto duration=model.durations.find(head);

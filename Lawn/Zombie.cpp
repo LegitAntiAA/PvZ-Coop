@@ -1012,6 +1012,7 @@ void Zombie::ZombieInitialize(int theRow, ZombieType theType, bool theVariant, Z
 
 #ifdef _HAS_ZOMBATAR
     if (IsOnBoard() && theFromWave >= 0 && !mApp->NetIsClient() && mApp->mNetManager &&
+        !LawnFusion::IsNativeSourceZombieBirth(mBoard) &&
         (mZombieType == ZombieType::ZOMBIE_NORMAL || mZombieType == ZombieType::ZOMBIE_FLAG))
     {
         LawnNet::NetManager* aNet = mApp->mNetManager;

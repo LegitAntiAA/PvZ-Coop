@@ -19,8 +19,11 @@
 #include "../Net/NetCommon.h"
 #include "../../LawnApp.h"
 #include "../../Sexy.TodLib/Reanimator.h"
+#include "../../Sexy.TodLib/Attachment.h"
+#include "../../Sexy.TodLib/EffectSystem.h"
 #include "../../Sexy.TodLib/TodCommon.h"
 #include "../../Sexy.TodLib/TodFoley.h"
+#include <cstring>
 
 namespace LawnFusion
 {
@@ -29,6 +32,14 @@ namespace
 // Deliberate native projection, not a claim about Unity's unresolved builtin
 // root-motion pass. The raw curve is scaled and reflected exactly once.
 constexpr double kRootPixels = .31 * 72.0 / 1.35;
+
+thread_local const Board* sourceBirthBoard=nullptr;
+struct SourceBirthScope
+{
+    const Board* previous;
+    explicit SourceBirthScope(const Board* board):previous(sourceBirthBoard){sourceBirthBoard=board;}
+    ~SourceBirthScope(){sourceBirthBoard=previous;}
+};
 
 bool CurrentBoard(Board* board)
 {
@@ -135,6 +146,55 @@ bool Acquire(Zombie* zombie,NativeSourceZombieData& data)
         zombie->mNetId,data.kind,static_cast<unsigned>(data.targetEntity),data.targetId,data.targetGeneration,zombie->mBoard->mMainCounter);
     return true;
 }
+}
+
+bool IsNativeSourceZombieBirth(const Board* board)
+{return board&&sourceBirthBoard==board&&IsNativeFusionBoard(board);}
+
+bool CanAllocateNativeSourceDayBatch274(Board* board,std::span<const uint16_t> kinds,std::string* error)
+{
+    if(error)error->clear();
+    const auto reject=[&](const char* why){if(error)*error=why;return false;};
+    if(!CurrentBoard(board)||board->mApp->NetIsClient()||board->mBackground!=BACKGROUND_1_DAY||GetNativeFusionRowCount(board)!=5)
+        return reject("Source Day allocation requires the host ordinary Day Board.");
+    for(int row=0;row<5;++row)if(board->mPlantRow[row]!=PLANTROW_NORMAL)
+        return reject("Source Day allocation does not cover a pool or dirt initializer.");
+    size_t reanimations=0,attachments=0;
+    for(auto kind:kinds)
+    {
+        const int carrier=GetNativeSourceZombieCarrier(kind);
+        if(carrier!=ZOMBIE_NORMAL&&carrier!=ZOMBIE_TRAFFIC_CONE&&carrier!=ZOMBIE_PAIL&&
+            carrier!=ZOMBIE_DOOR&&carrier!=ZOMBIE_POLEVAULTER&&carrier!=ZOMBIE_NEWSPAPER)
+            return reject("Source Day batch contains an uncovered native carrier initializer.");
+        const bool head=kind==100||kind==108||kind==104;
+        const ReanimationType types[]={GetZombieDefinition(static_cast<ZombieType>(carrier)).mReanimationType,
+            head?REANIM_PEASHOOTER:REANIM_NONE};
+        for(auto type:types)if(type!=REANIM_NONE)
+        {
+            ReanimatorEnsureDefinitionLoaded(type,false);
+            if(!gReanimatorDefArray||unsigned(type)>=gReanimatorDefCount)return reject("Source Day native definition is unavailable.");
+            const auto& tracks=gReanimatorDefArray[int(type)].mTracks;
+            if(!tracks.tracks||tracks.count<=0)return reject("Source Day native definition has no tracks.");
+            for(int i=0;i<tracks.count;++i)if(tracks.tracks[i].mName&&strnicmp(tracks.tracks[i].mName,"attacher__",10)==0)
+                return reject("Source Day native definition has an unbudgeted dynamic attacher.");
+            ++reanimations;
+        }
+        if(head)++attachments;
+    }
+    // Loading is complete before reading availability. These synchronous host
+    // factories do not pump messages or run gameplay between check and birth.
+    auto* effects=board->mApp->mEffectSystem;
+    if(!effects||effects!=gEffectSystem||!effects->mReanimationHolder||!effects->mAttachmentHolder)
+        return reject("Source Day native effect pools are unavailable.");
+    const auto& r=effects->mReanimationHolder->mReanimations;
+    const auto& a=effects->mAttachmentHolder->mAttachments;
+    if(!r.mBlock||!a.mBlock||r.mSize>r.mMaxSize||a.mSize>a.mMaxSize||
+        reanimations>size_t(r.mMaxSize-r.mSize)||attachments>size_t(a.mMaxSize-a.mSize))
+        return reject("Source Day whole-batch native animation capacity is unavailable.");
+    if(board->mZombies.mSize>=board->mZombies.mMaxSize||
+        kinds.size()>=size_t(board->mZombies.mMaxSize-board->mZombies.mSize))
+        return reject("Source Day whole-batch native zombie capacity is unavailable.");
+    return true;
 }
 
 bool IsNativeSourceZombie(const Zombie* zombie)
@@ -260,10 +320,28 @@ Zombie* SpawnNativeSourceZombie(Board* board,const NativeSourceZombieSpawnReques
         LawnNet::NetTrace("Fusion source Zombie resource rejected kind=%u reason=%s",kind,resourceError.c_str());
         return nullptr;
     }
+    const int nativeCarrier=GetNativeSourceZombieCarrier(kind);
+    if(board->mBackground==BACKGROUND_1_DAY&&GetNativeFusionRowCount(board)==5&&
+        (nativeCarrier==ZOMBIE_NORMAL||nativeCarrier==ZOMBIE_TRAFFIC_CONE||nativeCarrier==ZOMBIE_PAIL||
+         nativeCarrier==ZOMBIE_DOOR||nativeCarrier==ZOMBIE_POLEVAULTER||nativeCarrier==ZOMBIE_NEWSPAPER))
+    {
+        // Includes transitive births such as SilverDoll23 -> ordinary Cone2.
+        // Source metadata is attached after the native initializer, so every
+        // covered factory must guard its peak before that initializer can run.
+        const uint16_t batch[]={kind};
+        if(!CanAllocateNativeSourceDayBatch274(board,batch,&resourceError))
+        {LawnNet::NetTrace("Fusion source Day allocation deferred kind=%u reason=%s",kind,resourceError.c_str());return nullptr;}
+    }
     FusionZombieSpawn spawn;
     if (!TryPrepareFusionZombieSpawn(kind,preset,RandRangeFloat(kFusionZombieMinimumOriginSpeed,
         kFusionZombieMaximumOriginSpeed),spawn)) return nullptr;
-    auto* zombie=board->AddZombieInRow(static_cast<ZombieType>(GetNativeSourceZombieCarrier(kind)),row,fromWave);
+    Zombie* zombie=nullptr;
+    {
+        // Source packages provide their complete character artwork. Native
+        // roster avatars would be invisible extra allocations on this carrier.
+        SourceBirthScope birth(board);
+        zombie=board->AddZombieInRow(static_cast<ZombieType>(GetNativeSourceZombieCarrier(kind)),row,fromWave);
+    }
     if (!zombie) return nullptr;
     if(kind!=0&&kind!=2)
     {

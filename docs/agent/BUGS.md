@@ -1,3 +1,7 @@
+## FUSION-DAY-HOST-POSE274 — VERIFIED bounded
+
+HIGH, new Day100/108 shooter renderer. Day66n genuine8NPC smoke failed at firstshootEvent with unavailablemodelnodes. Renderer applied strictwirevalidation to hoststate whose headclock is supplied only to outboundcopy; absenthead+event invalidated model and muzzle. Controller-field validation now shared independently of unchanged strictwirehead validation; renderer requiresactualnativeheadpose.20regressionassertions Passed within71749/0/0. Day66o Passed38common/10BMP; real0/11shots visible onhost/client, pausedcanonicalhead/state agreement. Full NPC combat remains separate.
+
 ## FUSION-ASSET-GIT274 — VERIFIED packaging
 
 MEDIUM, exported Fusion packages. Git text=auto changed raw JSON line endings, breaking pinned SHA256 after checkout despite valid working packages. Confirmed153 staged/working mismatches among2859 assets. assets/fusion -text and renormalization preserve exact original bytes; audit now2859/0, filtered checkout of seven pinned files with autocrlf true/false14/0 Passed. Logical asset content unchanged. Game behavior was not rerun for this packaging-only change; app66l runtime evidence remains separate.

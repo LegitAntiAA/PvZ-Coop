@@ -1,5 +1,6 @@
 #include "FusionDayZombie273Tests.h"
 #include "../../Lawn/Fusion/FusionDayZombie273Rules.h"
+#include "../../Lawn/Fusion/FusionNativeDayZombie273.h"
 #include <cmath>
 #include <cstdio>
 #include <limits>
@@ -125,6 +126,20 @@ int RunFusionDayZombie273Tests(int& checks)
     CHECK(TryStepFusionDayZombie273Armor(106,2200,2200,armor,overkill)&&armor==0&&overkill==0);
     CHECK(TryStepFusionDayZombie273Armor(107,1100,1111,armor,overkill)&&armor==0&&overkill==11);
     CHECK(!TryStepFusionDayZombie273Armor(108,100,1,armor,overkill));
+    // A firing host has a live attached head but no copied wire head. Rendering
+    // must accept this controller while the network still rejects that absent
+    // head/event tuple until capture has supplied the actual native clock.
+    for(uint16_t kind:{100,108})for(uint8_t event:{1,2})
+    {
+        NativeDayZombie273State live;live.shootEvent=event;
+        CHECK(NativeDayZombie273ControllerValid(kind,live));
+        CHECK(!NativeDayZombie273StateValid(kind,live));
+        live.head.mPresent=true;live.head.mFrameCount=1;
+        CHECK(NativeDayZombie273StateValid(kind,live));
+        live.shootEvent=3;CHECK(!NativeDayZombie273ControllerValid(kind,live));
+        live.shootEvent=event;live.shootCountdown=std::numeric_limits<float>::quiet_NaN();
+        CHECK(!NativeDayZombie273ControllerValid(kind,live));
+    }
 #undef CHECK
     return failures;
 }

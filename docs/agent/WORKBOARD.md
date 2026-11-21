@@ -1,3 +1,21 @@
+## ROOT 274C — 2026-11-21
+
+- DAY-ALLOC/MOVEMENT274: DONE bounded. App66o pair Passed38common/10BMP,8actualNPC/body/head/UIDtoken/naturalmovement, hostile0/11 andpausedcanonicalheadproof; Root genuineFusionDayframesviewed. Unit71749/0/0Passed. Doesnotestablishfull8NPCcombatreadiness; historicalNPC15unchanged.
+- DAY-HOST-POSE274: DONE verified. Livehostcontroller wasvalidatedaswirewithabsentcopiedhead; firstshootEvent hidmodels/muzzle. Controller/wirevalidationseparatedwithoutweakeningcodec;20regressionchecks+visiblepairedshotsPassed.
+- DAY-COMBAT274: READY, Root/nextassignedengineers. Polejump success/block, Dollchain21->22->23->2, armor107/106, actual106/108Bucketdrops andIronShieldinteraction stillneedgenuinecooppairproof.
+- LESSONS-NATIVE274: READY afterpurekernel. Native missionidentity/actions/advice notwired; source4needsPole,7Giftavailability/Paper104,8Bucket106closure. App admission1..3/publicfalse preserved.
+- NONDAY-BG274: inventoryDONE only;4stagedgenuinepackages, Pool/FogwaterPS+FogMgrneedrealowners. CustombgDay-only; noPoolcampaignacceptance.
+- PUBLISH274: IN_REVIEW. Protectedverifiedcheckpointreadyforuseridentitymaincommit/pushthroughgh; noRelease.
+
+## ROOT 274B — 2026-11-21
+
+- ASSET-GIT274: DONE, published b210381 via gh, author/committer LegitAntiAA.
+- BUCKET-SMOKE274: DONE bounded. App66m pair Passed179 common/8BMP;4actualSDL replacements,4unsupported preserves, canonicalfreshidentity/HP/sharedowner/consume-once; Root clientframes reviewed. Drops/acquisition/allocator-exhaustion/IronShield not covered.
+- LESSONS274: IN_PROGRESS overall; pure4/7/8 kernel+614assertions Done, suite71729/0/0Passed. Native actions/identities/advice/wire-peer semantics pending; no gameplay count.
+- DAY-ALLOC274: IN_TESTING, Root/E1. Allincoming nativeentity/R/A/PS/emitter precommit, strictsourceDay/noGrid scope, hostwholewave+centralfactory guards, source-onlyavatar suppression. Staticindependentreview fixes integrated; app66n building, realDaycohort next.
+- DAY-NPC274: IN_TESTING staging. New8NPC owned source1 fixture registered;5frames/role,20+snapshots, trueROOT/Shadow, actual0/11shots. Runtime not yet executed; combatextras not covered. NPC acceptancecount stays15.
+- NONDAY-BG274: BACKLOG implementation, E2 currentread-only inventory. SourcePool19..27exists; customFusionbackground hookcurrentlyDay-only, Poolusesnativefallback. BucketPoolfixture isnotcampaignproof.
+
 ## ROOT 274A — 2026-11-21
 
 - PUBLISH273: DONE. main c5f3837, GitHub author/committer LegitAntiAA, direct push through gh.

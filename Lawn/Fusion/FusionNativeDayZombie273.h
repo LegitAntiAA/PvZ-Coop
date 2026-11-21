@@ -25,17 +25,23 @@ struct NativeDayZombie273State
 // with prune/reset/adopt/hash/validation beside sourceZombies. No local actor list.
 NativeDayZombie273State* EditNativeDayZombie273(Zombie*,bool create=false);
 const NativeDayZombie273State* GetNativeDayZombie273(const Zombie*);
-inline bool NativeDayZombie273StateValid(uint16_t kind,const NativeDayZombie273State& s)
+// The host controller owns its live Reanimation, not a copied wire head clock.
+// Capture fills head only in the outbound copy; drawing reads the live resource.
+inline bool NativeDayZombie273ControllerValid(uint16_t kind,const NativeDayZombie273State& s)
 {
     if(!FindFusionDayZombie273Profile(kind)||s.armorStage>2||s.shootEvent>2||!std::isfinite(s.shootCountdown)||
         s.shootCountdown<-.01f||s.shootCountdown>1.6f)return false;
     if(kind==3){if(s.status!=0&&s.status!=2&&s.status!=3)return false;if(s.shadowEnabled!=(s.status!=3))return false;}
     else if(s.status||!s.shadowEnabled)return false;
     if(!FusionDayZombie273Doll(kind)&&kind!=106&&kind!=107&&s.armorStage)return false;
+    return FusionDayZombie273Shooter(kind)||(!s.shootEvent&&s.shootCountdown==1.5f);
+}
+inline bool NativeDayZombie273StateValid(uint16_t kind,const NativeDayZombie273State& s)
+{
+    if(!NativeDayZombie273ControllerValid(kind,s))return false;
     const auto& h=s.head;
     if(!std::isfinite(h.mAnimTime)||h.mAnimTime<0||h.mAnimTime>1||!std::isfinite(h.mAnimRate)||
         std::abs(h.mAnimRate)>10000||h.mLoopType>5||!LawnNet::NetZombieAnimStateFitsFrames(h,65535))return false;
-    if(!FusionDayZombie273Shooter(kind)&&(s.shootEvent||s.shootCountdown!=1.5f))return false;
     if(!FusionDayZombie273Shooter(kind)&&!FusionDayZombie273Doll(kind)&&h.mPresent)return false;
     if(!h.mPresent&&(s.shootEvent||h.mDead||h.mFrameStart||h.mFrameCount||h.mAnimTime||h.mAnimRate||h.mLoopType||h.mLoopCount))return false;
     return true;

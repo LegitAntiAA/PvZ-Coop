@@ -5,6 +5,7 @@
 #include "../Plant.h"
 #include "../Zombie.h"
 #include "../Coin.h"
+#include "../CursorObject.h"
 #include "../Cutscene.h"
 #include "../Widget/SeedChooserScreen.h"
 #include "../Widget/GameButton.h"
@@ -34,7 +35,8 @@ struct Spec {uint16_t kind;int col,row;};
 const std::vector<Spec> groups[]={
     {{25,0,0},{1100,0,5},{1101,7,2},{1154,9,5}},
     {{1092,2,2},{1097,3,1},{1098,4,1},{1099,5,1},{935,6,2},{1129,8,0},{1162,8,4}},
-    {{1102,1,0},{1027,3,0},{1028,5,0},{1029,7,0}}};
+    {{1102,1,0},{1027,3,0},{1028,5,0},{1029,7,0}},
+    {{0,2,0},{3,4,0},{0,3,1},{3,5,1}}};
 struct Ref {uint16_t id=0;uint32_t token=0;};
 struct PulseProof {Ref source{};uint16_t target=0;int before=0,after=0,damage=0;bool ready=false,sent=false;};
 struct State
@@ -47,6 +49,9 @@ struct State
     uint16_t balloonId=0;float balloonStartX=0,balloonMaxX=0;Ref blowItem{};std::string blowProof;
     std::array<Ref,8> actors{},receivers{};
     std::array<Ref,10> items{};
+    std::array<Ref,4> bucketFresh{};
+    std::array<bool,4> bucketNegative{};
+    uint32_t bucketNegativeSamples=0,bucketResultSamples=0;
     Ref protectedSun{},machineParent{},machineFresh{},receiverGuard{};
     bool machineIce=false,machineFire=false,machineOverheal=false,machineProtection=false,mineDamage=false,mineChildDamage=false;
     int machinePreviousHealth=0;
@@ -62,6 +67,7 @@ struct State
     std::set<uint32_t> seaItems;
     std::set<std::string> frames;std::map<std::string,int> draws;
 }s;
+bool Bucket274(){const char* v=std::getenv("PVZ_COOP_SMOKE_FUSION_BUCKET274");return v&&std::strcmp(v,"1")==0;}
 const auto& Specs(){return groups[s.group];}
 int Expected(){return (1<<int(Specs().size()))-1;}
 const char* Role(LawnApp* a){return a->NetIsHost()?"host":"client";}
@@ -150,7 +156,7 @@ bool Setup(LawnApp* a)
         for(int i=0;i<5;++i)if(!MakeZombie(a,ZOMBIE_PAIL,Specs()[i].col,Specs()[i].row))return false;
         if(!MakeZombie(a,ZOMBIE_NORMAL,7,0)||!MakeZombie(a,ZOMBIE_NORMAL,1,0)||!MakeZombie(a,ZOMBIE_NORMAL,8,4))return false;
     }
-    else
+    else if(s.group==2)
     {
         At(b,5,0,1028)->mPlantHealth=15000;At(b,7,0,1029)->mPlantHealth=7000;
         if(!MakePlant(a,3,8,0,true)||!MakePlant(a,931,7,5,true))return false;
@@ -162,6 +168,20 @@ bool Setup(LawnApp* a)
             const auto type=i==8?FusionEquipmentType::Machine:i==0||i==3?FusionEquipmentType::Helmet:i==2?FusionEquipmentType::Door:FusionEquipmentType::Bucket;
             auto* coin=CreateNativeEquipment(b,type,float(b->GetCellCenterX(i,4)),float(b->GridToPixelY(i,4)+50),false);
             if(!Require(a,coin&&GetNativeEquipmentData(coin),"Equipment268 proven initial usable-item factory refused"))return false;
+        }
+    }
+    else if(s.group==3)
+    {
+        // Isolated acquisition-neutral world: no enemies, damaged actors or
+        // timer/RNG rewrites. Actual factories alone create initial actors/items.
+        if(!MakePlant(a,4,8,0,true))return false;
+        for(int i=0;i<4;++i)
+        {
+            auto* coin=CreateNativeEquipment(b,FusionEquipmentType::Bucket,
+                float(b->GetCellCenterX(1+2*i,4)),float(b->GridToPixelY(1+2*i,4)+50),false);
+            const auto* d=GetNativeEquipmentData(coin);
+            if(!Require(a,coin&&d&&d->type==FusionEquipmentType::Bucket&&d->factoryType==FusionEquipmentType::Bucket,
+                "Bucket274 initial genuine Bucket factory failed"))return false;
         }
     }
     s.setup=true;s.pauseRequested=Escape(a);
@@ -186,8 +206,41 @@ bool TargetManifest(LawnApp* a)
     if(!Require(a,s.zombies.size()==std::size_t(s.group==2?2:s.group==1?8:5),"Equipment268 authoritative target count differs"))return false;
     s.idsReady=true;return true;
 }
+bool BucketBaseline274(LawnApp* a)
+{
+    auto* b=a->mBoard;if(b->mBackground!=BACKGROUND_3_POOL||GetNativeFusionRowCount(b)!=6)return false;
+    for(int i=0;i<4;++i)
+    {
+        const auto& spec=Specs()[i];auto* p=At(b,spec.col,spec.row,spec.kind);const auto* d=GetNativePlantData(p);
+        if(!p||!d)return false;const auto* source=FusionFindPlant(spec.kind);
+        if(!Require(a,source&&d->owner==(i<2?0:1)&&!d->packetId&&!d->randomOrigin&&
+            d->firstParent==kFusionNoPlant&&d->secondParent==kFusionNoPlant&&
+            p->mPlantHealth==source->maxHealth&&p->mPlantMaxHealth==source->maxHealth,
+            "Bucket274 initial canonical actor/provenance differs"))return false;
+        if(!s.actors[i].id)s.actors[i]={p->mNetId,d->instanceToken};
+        if(!Require(a,p->mNetId==s.actors[i].id&&d->instanceToken==s.actors[i].token&&p->mNetId&&d->instanceToken,
+            "Bucket274 original actor identity changed before input"))return false;
+        if(!s.items[i].id)
+        {
+            Coin* c=nullptr;while(b->IterateCoins(c))if(const auto* item=GetNativeEquipmentData(c);item&&!c->mDead&&
+                item->factoryType==FusionEquipmentType::Bucket&&item->type==FusionEquipmentType::Bucket&&
+                item->claimSlot==255&&!item->sourcePlantId&&std::abs(c->mPosX+20-b->GetCellCenterX(1+2*i,4))<35)
+            {s.items[i]={c->mNetId,item->instanceToken};break;}
+        }
+        if(!s.items[i].id)return false;
+    }
+    auto* guard=At(b,8,0,4);const auto* gd=GetNativePlantData(guard);if(!guard||!gd)return false;
+    if(!s.receiverGuard.id)s.receiverGuard={guard->mNetId,gd->instanceToken};
+    if(!Require(a,guard->mNetId==s.receiverGuard.id&&gd->instanceToken==s.receiverGuard.token&&
+        gd->owner==LawnNet::NET_SHARED_OWNER&&guard->mPlantHealth==300&&guard->mPlantMaxHealth==300,
+        "Bucket274 unsupported receiver guard differs"))return false;
+    if(s.start<0){s.start=b->mMainCounter;NetTrace("SMOKE_BUCKET274_BASELINE role=%s epoch=%u actors=4 buckets=4 guard=%u guardToken=%u initialFactory=1 acquisition=NotExecuted postSetupActorWrites=0",
+        Role(a),s.epoch,s.receiverGuard.id,s.receiverGuard.token);}
+    return true;
+}
 bool Baseline(LawnApp* a)
 {
+    if(s.group==3)return BucketBaseline274(a);
     auto* b=a->mBoard;if(!TargetManifest(a)||b->mBackground!=BACKGROUND_3_POOL||GetNativeFusionRowCount(b)!=6)return false;
     for(int i=0;i<int(Specs().size());++i)
     {
@@ -234,6 +287,82 @@ bool Baseline(LawnApp* a)
     // with the host's reset Pool counter.
     if(s.start<0){s.start=b->mMainCounter;NetTrace("SMOKE_EQUIPMENT268_CLOCK role=%s group=%d epoch=%u start=%d paused=%d samples=%u",Role(a),s.group,s.epoch,s.start,b->mPaused?1:0,Samples(a));}
     return true;
+}
+bool BucketPreserved274(LawnApp* a,int index)
+{
+    auto* b=a->mBoard;auto* old=Actor(b,index);const auto* d=GetNativePlantData(old);
+    auto* guard=At(b,8,0,4);const auto* gd=GetNativePlantData(guard);
+    auto* coin=ResolveNativeEquipment(b,s.items[index].id,s.items[index].token);const auto* item=GetNativeEquipmentData(coin);
+    const auto* definition=FusionFindPlant(Specs()[index].kind);
+    return Require(a,old&&d&&definition&&old->mPlantHealth==definition->maxHealth&&old->mPlantMaxHealth==definition->maxHealth&&
+        guard&&gd&&guard->mNetId==s.receiverGuard.id&&gd->instanceToken==s.receiverGuard.token&&guard->mPlantHealth==300&&
+        item&&item->type==FusionEquipmentType::Bucket&&item->factoryType==FusionEquipmentType::Bucket&&
+        item->phase==NativeEquipmentPhase::Cursor&&item->claimSlot==(index<2?0:1),
+        "Bucket274 unsupported real item use changed the item, receiver or original actor");
+}
+bool BucketReplacement274(LawnApp* a,int index)
+{
+    auto* b=a->mBoard;const auto& spec=Specs()[index];const uint16_t kind=spec.kind==0?1020:1029;
+    auto* p=At(b,spec.col,spec.row,kind);const auto* d=GetNativePlantData(p);
+    if(!p||!d)return false;
+    const auto* definition=FusionFindPlant(kind);
+    int cellActors=0;Plant* other=nullptr;while(b->IteratePlants(other))if(!other->mDead&&other->mPlantCol==spec.col&&other->mRow==spec.row)++cellActors;
+    if(!Require(a,definition&&p->mNetId&&d->instanceToken&&p->mNetId!=s.actors[index].id&&d->instanceToken!=s.actors[index].token&&
+        d->owner==LawnNet::NET_SHARED_OWNER&&!d->packetId&&!d->randomOrigin&&
+        d->firstParent==kFusionNoPlant&&d->secondParent==kFusionNoPlant&&p->mSeedType==GetNativeSeedForPlant(kind)&&
+        p->mPlantHealth==definition->maxHealth&&p->mPlantMaxHealth==definition->maxHealth&&cellActors==1&&!Actor(b,index),
+        "Bucket274 replacement canonical HP/type/fresh identity/default provenance differs"))return false;
+    if(!s.bucketFresh[index].id)s.bucketFresh[index]={p->mNetId,d->instanceToken};
+    return Require(a,p->mNetId==s.bucketFresh[index].id&&d->instanceToken==s.bucketFresh[index].token,
+        "Bucket274 replacement identity changed or item produced a duplicate replacement")&&
+        !ResolveNativeEquipment(b,s.items[index].id,s.items[index].token);
+}
+void ObserveBuckets274(LawnApp* a)
+{
+    auto* b=a->mBoard;if(s.stage!=5||!s.baseline||b->mPaused||s.ui>=4)return;
+    const int i=s.ui,owner=i<2?0:1;const auto& spec=Specs()[i];const auto now=GetTickCount();
+    if(!s.uiSince)s.uiSince=now;
+    if(now-s.uiSince>30000){a->CoopSmokeFail("Bucket274 bounded native pickup/rejection/replacement deadline");return;}
+    auto* coin=ResolveNativeEquipment(b,s.items[i].id,s.items[i].token);const auto* item=GetNativeEquipmentData(coin);
+    if(i==0&&item&&item->phase==NativeEquipmentPhase::Cursor&&!Capture(a,"flight"))return;
+    const auto negative="BUCKET_NEG_"+std::to_string(i),negativeOkay="BUCKET_NEG_OK_"+std::to_string(i);
+    if(!s.bucketNegative[i])
+    {
+        if(Slot(a)==owner)
+        {
+            if(s.uiPhase==0&&item&&item->phase==NativeEquipmentPhase::World&&b->mCursorObject->mCursorType==CURSOR_TYPE_NORMAL)
+            {if(BoardClick(a,coin->mPosX+20,coin->mPosY+20)){s.uiPhase=1;NetTrace("SMOKE_BUCKET274_UI role=%s operation=%d owner=%d phase=pickup coin=%u token=%u",Role(a),i,owner,coin->mNetId,item->instanceToken);}return;}
+            if(s.uiPhase==1&&item&&item->phase==NativeEquipmentPhase::Cursor&&item->claimSlot==owner)
+            {if(BoardClick(a,float(b->GetCellCenterX(8,0)),float(b->GridToPixelY(8,0)+50))){s.uiPhase=2;s.uiSince=now;s.bucketNegativeSamples=Samples(a);NetTrace("SMOKE_BUCKET274_UI role=%s operation=%d owner=%d phase=unsupported-use guard=%u",Role(a),i,owner,s.receiverGuard.id);}return;}
+            // SDL input is processed before this later reliable chat marker.
+            // Peer observation and post-input snapshots prove preservation;
+            // no fixture calls the production command handler directly.
+            if(s.uiPhase!=2||now-s.uiSince<850||Samples(a)-s.bucketNegativeSamples<3||!Send(a,Tag(negative.c_str())))return;
+        }
+        if(!Has(a,owner,Tag(negative.c_str())))return;
+        if(Slot(a)!=owner&&!s.bucketNegativeSamples){s.bucketNegativeSamples=Samples(a);return;}
+        if(Samples(a)-s.bucketNegativeSamples<3||!BucketPreserved274(a,i))return;
+        s.bucketNegative[i]=true;
+        NetTrace("SMOKE_BUCKET274_PRESERVED role=%s operation=%d owner=%d coin=%u token=%u guard=%u original=%u realSDL=1 serverRejectionCode=NotClaimed",Role(a),i,owner,s.items[i].id,s.items[i].token,s.receiverGuard.id,s.actors[i].id);
+    }
+    if(!Barrier(a,negativeOkay.c_str()))return;
+    if(s.uiPhase<3)s.uiPhase=3;
+    if(Slot(a)==owner&&s.uiPhase==3)
+    {
+        if(!BucketPreserved274(a,i))return;
+        if(BoardClick(a,float(b->GetCellCenterX(spec.col,spec.row)),float(b->GridToPixelY(spec.col,spec.row)+50)))
+        {s.uiPhase=4;NetTrace("SMOKE_BUCKET274_UI role=%s operation=%d owner=%d phase=replace source=%u old=%u oldToken=%u",Role(a),i,owner,spec.kind,s.actors[i].id,s.actors[i].token);}
+        return;
+    }
+    if(!BucketReplacement274(a,i))return;
+    if(!s.bucketResultSamples){s.bucketResultSamples=Samples(a);return;}
+    if(Samples(a)-s.bucketResultSamples<3)return;
+    const auto proof="BUCKET_DONE_"+std::to_string(i)+"_"+std::to_string(s.bucketFresh[i].id)+"_"+std::to_string(s.bucketFresh[i].token);
+    if(!Barrier(a,proof.c_str()))return;
+    NetTrace("SMOKE_BUCKET274_REPLACED role=%s operation=%d owner=%d source=%u result=%u old=%u oldToken=%u fresh=%u freshToken=%u hp=%d item=%u itemToken=%u consumed=1 stablePostSnapshots=3 sharedOwner=1 defaultParents=1 packet=0 realSDL=1",
+        Role(a),i,owner,spec.kind,spec.kind==0?1020:1029,s.actors[i].id,s.actors[i].token,s.bucketFresh[i].id,s.bucketFresh[i].token,
+        FusionFindPlant(spec.kind==0?1020:1029)->maxHealth,s.items[i].id,s.items[i].token);
+    s.mask|=1<<i;++s.ui;s.uiPhase=0;s.uiSince=0;s.bucketNegativeSamples=s.bucketResultSamples=0;
 }
 bool ReceiverComplete(Board* b,int index)
 {
@@ -429,6 +558,7 @@ void TraceCohort(LawnApp* a)
 }
 void Observe(LawnApp* a)
 {
+    if(s.group==3){ObserveBuckets274(a);return;}
     auto* b=a->mBoard;const int elapsed=b->mMainCounter-s.start;
     if(a->mGameScene==SCENE_ZOMBIES_WON){TraceCohort(a);a->CoopSmokeFail("Equipment268 natural cohort reached terminal scene");return;}
     for(int i=0;i<int(Specs().size());++i)
@@ -503,6 +633,14 @@ void Observe(LawnApp* a)
 bool Complete(LawnApp* a)
 {
     if(s.mask!=Expected())return false;
+    if(s.group==3)
+    {
+        if(s.ui!=4)return false;
+        for(int i=0;i<4;++i)if(!s.bucketNegative[i]||!BucketReplacement274(a,i))return false;
+        auto* guard=At(a->mBoard,8,0,4);const auto* d=GetNativePlantData(guard);
+        return Require(a,guard&&d&&guard->mNetId==s.receiverGuard.id&&d->instanceToken==s.receiverGuard.token&&
+            guard->mPlantHealth==300&&guard->mPlantMaxHealth==300,"Bucket274 unsupported guard changed after the accepted item operations");
+    }
     if(s.group==1)
     {
         if(!s.mineProofReady||(a->NetIsHost()&&!s.mineProofSent))return false;
@@ -522,7 +660,7 @@ bool NetSmokeUpdateFusionEquipment268(LawnApp* a)
 {
     const char* enabled=std::getenv("PVZ_COOP_SMOKE_FUSION_EQUIPMENT268"),*native=std::getenv("PVZ_COOP_SMOKE_FUSION_NATIVE");
     if(!a||!enabled||std::strcmp(enabled,"1")||!native||std::strcmp(native,"1")||!a->CoopSmokeActive()||a->mCoopSmokeManifest.mScenario!=NETSMOKE_SCENARIO_FUSION_VALIDATION)return false;
-    if(a->mCoopSmokeResultWritten)return true;if(!s.since)s.since=GetTickCount();
+    if(a->mCoopSmokeResultWritten)return true;if(!s.since){s.since=GetTickCount();if(Bucket274()){s.group=3;NetTrace("SMOKE_BUCKET274_SELECTED role=%s cohort=Bucket274 hostOperations=2 clientOperations=2 isolatedInitialFactory=1",Role(a));}}
     if(GetTickCount()-s.since>150000){char why[160];sprintf_s(why,"Equipment268 bounded deadline group=%d stage=%d mask=%02x expected=%02x ui=%d",s.group,s.stage,s.mask,Expected(),s.ui);a->CoopSmokeFail(why);return true;}
     if(!a->mNetManager||!a->mNetManager->IsActive())return true;a->mCoopSmokePeerReady=true;
     if(s.stage==0)
@@ -535,6 +673,7 @@ bool NetSmokeUpdateFusionEquipment268(LawnApp* a)
     if(s.stage==10)
     {
         if(!Barrier(a,"NEXT"))return true;
+        if(s.group==3){NetTrace("SMOKE_BUCKET274_COMPLETE role=%s operations=4 hostOperations=2 clientOperations=2 unsupportedPreserved=4 source0to1020=2 source3to1029=2 freshUIDToken=1 canonicalHP=1 sharedOwner=1 itemConsumedOnce=1 postSetupActorWrites=0 acquisition=NotExecuted sourceAI=NotClaimed allocatorExhaustion=NotExecuted ironShieldProof=NotExecuted",Role(a));a->CoopSmokeWriteResult(true,nullptr);return true;}
         if(s.group==2){NetTrace("SMOKE_EQUIPMENT268_COMPLETE role=%s groups=3 sourcePlants=15 equipmentPlants=14 deathProducer=1 regressionAuxKind=1162 clientPreparationTimer=NotClaimed freshFrames=12 initialFactory=1 acquisition=NotExecuted sourceAI=NotClaimed postSetupActorWrites=0",Role(a));a->CoopSmokeWriteResult(true,nullptr);return true;}
         State next;next.group=s.group+1;next.previousEpoch=s.epoch;next.chat=s.chat;s=std::move(next);Advance(a,1);
         if(a->NetIsHost()){std::string error;if(!a->StartFusionValidation(&error))a->CoopSmokeFail(error.c_str());}return true;
@@ -583,7 +722,7 @@ bool NetSmokeUpdateFusionEquipment268(LawnApp* a)
     else if(s.stage==5)
     {
         if(b->mPaused)return true;Observe(a);if(a->mCoopSmokeResultWritten)return true;
-        const int minimum=s.group==0?4700:s.group==1?1800:1200;
+        const int minimum=s.group==3?20:s.group==0?4700:s.group==1?1800:1200;
         if(b->mMainCounter-s.start<minimum||!Complete(a)||!Barrier(a,"EFFECTS"))return true;
         s.pauseRequested=false;Advance(a,6);
     }
@@ -595,9 +734,10 @@ bool NetSmokeUpdateFusionEquipment268(LawnApp* a)
     else if(s.stage==7)
     {
         if(!b->mPaused||Samples(a)-s.samples<2||!Complete(a))return true;
-        NetBuffer digest;for(const auto& spec:Specs()){auto* p=At(b,spec.col,spec.row,s.group==2&&spec.kind==1027?1028:spec.kind);const auto* d=GetNativePlantData(p);digest.WriteU16(p?p->mNetId:0);digest.WriteU32(d?d->instanceToken:0);digest.WriteI32(p?p->mPlantHealth:-1);}
+        NetBuffer digest;for(const auto& spec:Specs()){auto* p=At(b,spec.col,spec.row,s.group==3?(spec.kind==0?1020:1029):s.group==2&&spec.kind==1027?1028:spec.kind);const auto* d=GetNativePlantData(p);digest.WriteU16(p?p->mNetId:0);digest.WriteU32(d?d->instanceToken:0);digest.WriteI32(p?p->mPlantHealth:-1);}
         char hp[40];sprintf_s(hp,"HP_%08x",NetFnv1a32(digest.Data(),digest.Size()));if(!Barrier(a,hp)||!Capture(a,"complete")||!Barrier(a,"FINAL"))return true;
-        NetTrace("SMOKE_EQUIPMENT268_CASE role=%s group=%d epoch=%u kinds=%zu mask=%02x finalSameHP=1 snapshots=%u acquisition=NotExecuted sourceAI=NotClaimed clientPulseTimer=NotClaimed clientPreparationTimer=NotClaimed zeroDamageVariantsDoNotClaimDamage=1 regressionAuxKind=1162 postSetupActorWrites=0",Role(a),s.group,s.epoch,Specs().size(),s.mask,Samples(a));Advance(a,10);
+        if(s.group==3)NetTrace("SMOKE_BUCKET274_CASE role=%s epoch=%u operations=4 mask=%02x finalSameIdentityHP=1 snapshots=%u freshFrames=%zu postSetupActorWrites=0",Role(a),s.epoch,s.mask,Samples(a),s.frames.size());
+        else NetTrace("SMOKE_EQUIPMENT268_CASE role=%s group=%d epoch=%u kinds=%zu mask=%02x finalSameHP=1 snapshots=%u acquisition=NotExecuted sourceAI=NotClaimed clientPulseTimer=NotClaimed clientPreparationTimer=NotClaimed zeroDamageVariantsDoNotClaimDamage=1 regressionAuxKind=1162 postSetupActorWrites=0",Role(a),s.group,s.epoch,Specs().size(),s.mask,Samples(a));Advance(a,10);
     }
     return true;
 }

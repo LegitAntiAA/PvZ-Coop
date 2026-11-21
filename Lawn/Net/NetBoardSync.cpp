@@ -17,6 +17,7 @@
 #include "../../Resources.h"
 #include "../../Sexy.TodLib/Reanimator.h"
 #include "../../Sexy.TodLib/Attachment.h"
+#include "../../Sexy.TodLib/EffectSystem.h"
 #include "../../Sexy.TodLib/TodParticle.h"
 #include "../System/PlayerInfo.h"
 #include "../../GameConstants.h"
@@ -55,6 +56,9 @@
 #include <float.h>
 #include <limits.h>
 #include <algorithm>
+#include <array>
+#include <cstring>
+#include <initializer_list>
 #include <set>
 
 using namespace LawnNet;
@@ -718,9 +722,9 @@ bool NetBindNativeFusionFrame(Board* board, const LawnFusion::NativeSnapshotFram
 		context->dayZombies273[board->mZombies.DataArrayGetID(zombie)]=record.data;
 		if(LawnFusion::FusionDayZombie273Shooter(source->kind))
 		{
-			// Precommit admission already requires this real attached resource.
-			// Never allocate a Day head after the raw snapshot has mutated actors.
-			if(record.data.head.mPresent&&!board->mApp->ReanimationTryToGet(zombie->mSpecialHeadReanimID))return false;
+			// The complete raw batch's native allocations were bounded before
+			// commit, including this actual attached head and its track container.
+			if(record.data.head.mPresent&&!LawnFusion::EnsureNativeDayZombie273ShooterHead(zombie))return false;
 			if(!record.data.head.mPresent)
 			{
 				board->mApp->RemoveReanimation(zombie->mSpecialHeadReanimID);
@@ -894,44 +898,210 @@ uint32_t NetGetReanimationFrameCapacity(const Reanimation* theReanim)
 	return (uint32_t)theReanim->mDefinition->mTracks.tracks[0].mTransforms.count;
 }
 
-bool NetDay273CanAdoptWithoutAllocating(Board* board,const LawnFusion::NativeSnapshotFrame& frame)
+bool NetDay273AllocationCapacity(Board* board,const NetBuffer& body,const LawnFusion::NativeSnapshotFrame& frame)
 {
     if(frame.dayZombies273.empty())return true;
-    const auto* context=LawnFusion::GetNativeContext(board);
-    if(!context||!board->mApp)return false;
-    // Temporary admission gate, NOT an estimated per-zombie capacity budget.
-    // AddZombieInRow can allocate a body plus variant/Zombatar attachments;
-    // earlier raw snapshot sections may allocate plant/projectile effects too.
-    // Until that complete batch has a reservation contract, Day frames may
-    // update only an already allocated, identical native generation and head.
-    for(const auto& record:frame.dayZombies273)
+    const auto reject=[](const char* reason,int section=-1,unsigned type=0)
     {
-        const auto incoming=std::find_if(frame.sourceZombies.begin(),frame.sourceZombies.end(),
-            [&](const auto& value){return value.id==record.id;});
-        auto* zombie=board->NetGetGhostZombie(record.id);
-        const auto* current=LawnFusion::GetNativeSourceZombieData(zombie);
-        if(incoming==frame.sourceZombies.end()||!zombie||!current||
-            current->kind!=incoming->data.kind||current->instanceToken!=incoming->data.instanceToken||
-            zombie->mZombieType!=LawnFusion::GetNativeSourceZombieCarrier(incoming->data.kind)||
-            !board->mApp->ReanimationTryToGet(zombie->mBodyReanimID))
+        NetTrace("Day274 snapshot allocation rejected reason=%s section=%d type=%u",reason,section,type);return false;
+    };
+    if(!board||!board->mApp||!LawnFusion::GetNativeContext(board))return reject("no-board-context");
+    auto* app=board->mApp;auto* effects=app->mEffectSystem;
+    if(!frame.adventure.enabled||frame.adventure.run.level<1||frame.adventure.run.level>9||
+        app->mGameMode!=GAMEMODE_ADVENTURE||frame.background!=BACKGROUND_1_DAY||
+        board->mBackground!=BACKGROUND_1_DAY||app->mUpdateAppDepth>1)
+        return reject("only-nonreentrant-source-Day1-through9");
+    if(!effects||effects!=gEffectSystem||!effects->mReanimationHolder||!effects->mAttachmentHolder||!effects->mParticleHolder)
+        return reject("no-effect-pools");
+    if(board->mMustacheMode||board->mFutureMode||board->mPinataMode)return reject("extra-native-limb-FX-modes-not-budgeted");
+    for(int row=0;row<5;++row)if(board->mPlantRow[row]!=PLANTROW_NORMAL)return reject("non-Day-row");
+    // A source-proven upper bound for ALL incoming actors, including reused
+    // ones. This deliberately overcounts rather than duplicating every reuse
+    // predicate. No credit for omitted/replaced/dead actors pending cleanup.
+    // NetDrainMessages applies synchronously on the main thread. Definitions
+    // are loaded before the final pool read; no message pump follows the check.
+    uint64_t reanims=0,attachments=0,systems=0,emitters=0;std::array<unsigned,6> counts{};
+    const auto particleUpper=[&](std::initializer_list<ParticleEffect> choices,unsigned calls)
+    {
+        unsigned maximum=0;
+        for(const auto type:choices)
         {
-            NetTrace("Day273 snapshot admission deferred: body/generation allocation unreserved id=%u",record.id);
-            return false;
+            if(!gParticleDefArray||unsigned(type)>=unsigned(gParticleDefCount))return false;
+            const auto& def=gParticleDefArray[type];
+            if(def.mEmitterDefCount<0||(def.mEmitterDefCount&&!def.mEmitterDefs))return false;
+            maximum=(std::max)(maximum,unsigned(def.mEmitterDefCount));
         }
-        const auto generation=board->mZombies.DataArrayGetID(zombie);
-        const auto token=context->zombieInstanceTokens.find(generation);
-        if(token==context->zombieInstanceTokens.end()||token->second!=incoming->data.instanceToken)return false;
-        if(LawnFusion::FusionDayZombie273Shooter(incoming->data.kind)&&record.data.head.mPresent)
+        systems+=calls;emitters+=uint64_t(calls)*maximum;return true;
+    };
+    const auto plainDefinition=[](ReanimationType type,const char* required=nullptr)
+    {
+        if(unsigned(type)>=gReanimatorDefCount)return false;
+        ReanimatorEnsureDefinitionLoaded(type,false);
+        if(!gReanimatorDefArray)return false;
+        const auto& tracks=gReanimatorDefArray[type].mTracks;
+        if(!tracks.tracks||tracks.count<=0||tracks.tracks[0].mTransforms.count<=0)return false;
+        bool found=!required;
+        for(int i=0;i<tracks.count;++i)
         {
-            const auto* head=board->mApp->ReanimationTryToGet(zombie->mSpecialHeadReanimID);
-            if(!head||head->mReanimationType!=REANIM_PEASHOOTER||!head->mIsAttachment||
-                !NetZombieAnimStateFitsFrames(record.data.head,NetGetReanimationFrameCapacity(head)))
+            const auto* name=tracks.tracks[i].mName;if(!name)return false;
+            // ZombieInitialize calls UpdateReanim, which evaluates these and
+            // may allocate arbitrary nested native child resources.
+            if(_strnicmp(name,"attacher__",10)==0)return false;
+            if(required&&_stricmp(name,required)==0)found=true;
+        }
+        return found;
+    };
+    const auto attachmentRoom=[&](AttachmentID id,unsigned additions)
+    {
+        const auto& pool=effects->mAttachmentHolder->mAttachments;
+        if(!pool.mBlock)return false;
+        const auto* item=effects->mAttachmentHolder->mAttachments.DataArrayTryToGet(unsigned(id));
+        return !item||item->mDead||(item->mNumEffects>=0&&unsigned(item->mNumEffects)+additions<=MAX_EFFECTS_PER_ATTACHMENT);
+    };
+    const auto trackRoom=[&](Reanimation* reanim,const char* track,unsigned additions)
+    {
+        if(!reanim)return true; // A fresh body's track containers start empty.
+        if(!reanim->TrackExists(track))return false;
+        return attachmentRoom(reanim->GetTrackInstanceByName(track)->mAttachmentID,additions);
+    };
+    NetBuffer scan=body;
+    const size_t coreBytes=43+MAX_GRID_SIZE_Y*4+9+10+NET_CHALLENGE_RUNTIME_WIRE_BYTES+
+        NET_ENDLESS_WEATHER_WIRE_BYTES+NET_ZEN_GARDEN_WIRE_BYTES;
+    scan.mReadPos=coreBytes+6;uint8_t packets=0;
+    if(!scan.ReadU8(&packets)||packets>SEEDBANK_CAPACITY||scan.Remaining()<packets*NET_SEED_PACKET_WIRE_BYTES)
+        return reject("packet-framing");
+    scan.mReadPos+=packets*NET_SEED_PACKET_WIRE_BYTES;
+    const size_t sizes[]={NET_PLANT_WIRE_BYTES,NET_ZOMBIE_WIRE_BYTES,NET_PROJECTILE_WIRE_BYTES,NET_COIN_WIRE_BYTES,NET_MOWER_WIRE_BYTES,37};
+    for(int section=0;section<6;++section)
+    {
+        uint16_t count=0;
+        if(!scan.ReadU16(&count)||count>scan.Remaining()/sizes[section])return reject("actor-framing",section);
+        counts[section]=count;
+        if(section==5&&count)return reject("GridItem-visual-factory-not-budgeted",section);
+        for(unsigned i=0;i<count;++i)
+        {
+            const size_t start=scan.mReadPos;const auto id=scan.ReadU16Or();const unsigned type=scan.ReadU8Or();
+            if(section==0)
             {
-                NetTrace("Day273 snapshot admission deferred: head allocation unreserved id=%u",record.id);
-                return false;
+                unsigned heads=0;
+                switch(type)
+                {
+                case SEED_PEASHOOTER:case SEED_SNOWPEA:case SEED_REPEATER:case SEED_LEFTPEATER:case SEED_GATLINGPEA:heads=1;break;
+                case SEED_SPLITPEA:heads=2;break;
+                case SEED_THREEPEATER:heads=3;break;
+                case SEED_SUNFLOWER:case SEED_TWINSUNFLOWER:case SEED_CHERRYBOMB:case SEED_WALLNUT:case SEED_TALLNUT:
+                case SEED_PUMPKINSHELL:case SEED_FLOWERPOT:case SEED_POTATOMINE:case SEED_GARLIC:case SEED_BLOVER:
+                case SEED_JALAPENO:case SEED_SQUASH:case SEED_TORCHWOOD:case SEED_CHOMPER:case SEED_CABBAGEPULT:
+                case SEED_KERNELPULT:case SEED_MELONPULT:case SEED_WINTERMELON:case SEED_CATTAIL:case SEED_CACTUS:
+                case SEED_MARIGOLD:case SEED_SPIKEWEED:case SEED_SPIKEROCK:break;
+                default:return reject("plant-factory-not-budgeted",section,type);
+                }
+                const auto reanim=GetPlantDefinition(SeedType(type)).mReanimationType;
+                if(!plainDefinition(reanim))return reject("plant-definition-or-attacher",section,type);
+                reanims+=1+heads;attachments+=heads; // Each Attach call can require at most one container.
+                if(scan.mData[start+11]&1){++reanims;if(!plainDefinition(REANIM_SLEEPING))return reject("sleep-definition",section,type);}
+                if(type==SEED_POTATOMINE)
+                {
+                    ++reanims;++attachments; // Initializer/presentation glow uses one resource, never both.
+                    auto* old=board->NetGetGhostPlant(id);
+                    if(!plainDefinition(reanim,"anim_light")||!trackRoom(old?app->ReanimationTryToGet(old->mBodyReanimID):nullptr,"anim_light",1))
+                        return reject("potato-glow-track-capacity",section,type);
+                    if(!particleUpper({PARTICLE_POTATO_MINE_RISE},1))return reject("potato-particle-definition",section,type);
+                }
             }
+            else if(section==1)
+            {
+                switch(type)
+                {
+                case ZOMBIE_NORMAL:case ZOMBIE_TRAFFIC_CONE:case ZOMBIE_PAIL:case ZOMBIE_DOOR:case ZOMBIE_POLEVAULTER:case ZOMBIE_NEWSPAPER:break;
+                default:return reject("zombie-carrier-not-budgeted",section,type);
+                }
+                const auto reanim=GetZombieDefinition(ZombieType(type)).mReanimationType;
+                if(!plainDefinition(reanim))return reject("zombie-definition-or-attacher",section,type);
+                ++reanims;
+                auto* old=board->NetGetGhostZombie(id);
+                const auto flags=scan.mData[start+NET_ZOMBIE_CHILLED_OFFSET-1];
+                if(flags&2)return reject("pool-zombie-in-Day",section,type);
+                // One arm plus one head at most for these six ground carriers.
+                // Newspaper substitutes its head effect; source106/108 omit it.
+                // All incoming actors are counted, not just observed loss edges.
+                if(!particleUpper({PARTICLE_ZOMBIE_ARM,PARTICLE_MOWERED_ZOMBIE_ARM,PARTICLE_ZOMBIE_HEAD,
+                    PARTICLE_MOWERED_ZOMBIE_HEAD,PARTICLE_ZOMBIE_NEWSPAPER_HEAD},2))return reject("limb-particle-definitions",section,type);
+                const auto source=std::find_if(frame.sourceZombies.begin(),frame.sourceZombies.end(),[&](const auto& value){return value.id==id;});
+                unsigned headEffects=0;
+                if(source==frame.sourceZombies.end()&&type==ZOMBIE_NORMAL)
+                {
+                    // Actual maximum: base1 + hair2 + eyewear2 + accessory1 + hat2.
+                    reanims+=8;++attachments;headEffects=8;
+                    if(!plainDefinition(REANIM_ZOMBATAR))return reject("Zombatar-definition",section,type);
+                }
+                if(source!=frame.sourceZombies.end()&&(source->data.kind==104||source->data.kind==100||source->data.kind==108))
+                {
+                    ++reanims;++attachments;headEffects=1;
+                    if(!plainDefinition(REANIM_PEASHOOTER))return reject("source-head-definition",section,type);
+                }
+                if(headEffects&&(!plainDefinition(reanim,"anim_head1")||!trackRoom(old?app->ReanimationTryToGet(old->mBodyReanimID):nullptr,"anim_head1",headEffects)))
+                    return reject("zombie-head-track-capacity",section,type);
+            }
+            else if(section==2)
+            {
+                switch(type)
+                {
+                case PROJECTILE_FIREBALL:++reanims;++attachments;if(!plainDefinition(REANIM_FIRE_PEA))return reject("fireball-definition",section,type);break;
+                case PROJECTILE_SNOWPEA:case PROJECTILE_WINTERMELON:
+                    ++attachments;if(!particleUpper({PARTICLE_SNOWPEA_TRAIL},1))return reject("snow-trail-definition",section,type);break;
+                case PROJECTILE_PUFF:
+                    ++attachments;if(!particleUpper({PARTICLE_PUFFSHROOM_TRAIL},1))return reject("puff-trail-definition",section,type);break;
+                case PROJECTILE_PEA:case PROJECTILE_CABBAGE:case PROJECTILE_MELON:case PROJECTILE_STAR:case PROJECTILE_SPIKE:
+                case PROJECTILE_BASKETBALL:case PROJECTILE_KERNEL:case PROJECTILE_COBBIG:case PROJECTILE_BUTTER:case PROJECTILE_ZOMBIE_PEA:break;
+                default:return reject("projectile-factory-not-budgeted",section,type);
+                }
+            }
+            else if(section==3)
+            {
+                ReanimationType reanim=REANIM_NONE;
+                switch(type)
+                {
+                case COIN_SUN:case COIN_SMALLSUN:case COIN_LARGESUN:reanim=REANIM_SUN;break;
+                case COIN_SILVER:reanim=REANIM_COIN_SILVER;break;
+                case COIN_GOLD:reanim=REANIM_COIN_GOLD;break;
+                case COIN_DIAMOND:reanim=REANIM_DIAMOND;break;
+                case COIN_NONE:case COIN_TROPHY:case COIN_USABLE_SEED_PACKET:break;
+                default:return reject("coin-factory-not-budgeted",section,type);
+                }
+                if(reanim!=REANIM_NONE){++reanims;++attachments;if(!plainDefinition(reanim))return reject("coin-definition",section,type);}
+                ++attachments; // NetUpdatePresentation: either arrow or collection effect, including old Coins.
+                if(!particleUpper({PARTICLE_AWARD_PICKUP_ARROW,PARTICLE_COIN_PICKUP_ARROW,PARTICLE_STARBURST,PARTICLE_SEED_PACKET_PICKUP},2))
+                    return reject("coin-particle-definitions",section,type);
+                auto* old=board->NetGetGhostCoin(id);
+                if(old&&!attachmentRoom(old->mAttachmentID,1))return reject("coin-effect-track-capacity",section,type);
+            }
+            else if(section==4)
+            {
+                NetBuffer mowerWire=scan;mowerWire.mReadPos=start;
+                NetMowerSnapshotState mower;
+                if(!NetDecodeMowerSnapshotState(mowerWire,mower)||mower.mType!=LAWNMOWER_LAWN)
+                    return reject("non-Day-mower",section,mower.mType);
+                ++reanims;if(!plainDefinition(REANIM_LAWNMOWER))return reject("mower-definition",section,type);
+            }
+            scan.mReadPos=start+sizes[section];
         }
     }
+    if(scan.Remaining())return reject("trailing-raw-body");
+    const auto room=[](const auto& pool,uint64_t added,unsigned spare=0)
+    {return !added||(pool.mBlock&&uint64_t(pool.mSize)+added+spare<=pool.mMaxSize);};
+    if(!room(board->mPlants,counts[0])||!room(board->mZombies,counts[1],1)||!room(board->mProjectiles,counts[2])||
+        !room(board->mCoins,counts[3])||!room(board->mLawnMowers,counts[4])||!room(board->mGridItems,counts[5]))return reject("native-entity-pool-upper-bound");
+    if(!room(effects->mReanimationHolder->mReanimations,reanims)||!room(effects->mAttachmentHolder->mAttachments,attachments))
+        return reject("reanimation-or-attachment-pool-upper-bound");
+    if(!room(effects->mParticleHolder->mParticleSystems,systems)||!room(effects->mParticleHolder->mEmitters,emitters))
+        return reject("particle-system-or-emitter-pool-upper-bound");
+    if(std::any_of(frame.dayZombies273.begin(),frame.dayZombies273.end(),[&](const auto& record){return !board->NetGetGhostZombie(record.id);}))
+        NetTrace("Day274 snapshot capacity admitted R=%u+%llu/%u A=%u+%llu/%u PS=%u+%llu/%u emitters=%u+%llu/%u allIncomingUpperBound=1 deletionCredit=0",
+            effects->mReanimationHolder->mReanimations.mSize,static_cast<unsigned long long>(reanims),effects->mReanimationHolder->mReanimations.mMaxSize,
+            effects->mAttachmentHolder->mAttachments.mSize,static_cast<unsigned long long>(attachments),effects->mAttachmentHolder->mAttachments.mMaxSize,
+            effects->mParticleHolder->mParticleSystems.mSize,static_cast<unsigned long long>(systems),effects->mParticleHolder->mParticleSystems.mMaxSize,
+            effects->mParticleHolder->mEmitters.mSize,static_cast<unsigned long long>(emitters),effects->mParticleHolder->mEmitters.mMaxSize);
     return true;
 }
 
@@ -3059,8 +3229,7 @@ void Board::NetApplySnapshot(NetBuffer& b, bool* theApplied)
 			  (context->adventure.run.rewardCollected&&!aFusionFrame.adventure.run.rewardCollected) ||
 			  (aFusionFrame.adventure.profile.completedLevels|context->adventure.profile.completedLevels)!=aFusionFrame.adventure.profile.completedLevels)) ||
 			!aFusionSelection.ApplySnapshot(aFusionFrame.selection) ||
-			!NetPreflightNativeFusionBody(nativeBody, aFusionFrame) ||
-            !NetDay273CanAdoptWithoutAllocating(this,aFusionFrame))
+			!NetPreflightNativeFusionBody(nativeBody, aFusionFrame))
 		{
 			NetTrace("native Fusion snapshot preflight rejected epoch=%u bytes=%zu", context->epoch, b.Remaining());
 			return;
@@ -3096,6 +3265,7 @@ void Board::NetApplySnapshot(NetBuffer& b, bool* theApplied)
 				mApp->mNetManager->ReportFusionResourceFailure("Fusion resources could not be loaded. Check your game installation.");
 			return;
 		}
+		if(!NetDay273AllocationCapacity(this,nativeBody,aFusionFrame))return;
 		aZombieTerrainChanged = static_cast<uint8_t>(mBackground) != aFusionFrame.background;
 		if (!LawnFusion::ConfigureNativeFusionBackground(this,aFusionFrame.background)) return;
 		b = std::move(nativeBody);
@@ -4013,7 +4183,9 @@ void Board::NetApplySnapshot(NetBuffer& b, bool* theApplied)
 		aZombie->mVisible = true;
 		aZombie->mFromWave = aWire.mFromWave;
 		aZombie->mRenderOrder = aWire.mRenderOrder;
-		aZombie->ApplyNetZombatar(aWire.mZombatar);
+        const bool sourceArtwork=aNativeFusion&&std::any_of(aFusionFrame.sourceZombies.begin(),aFusionFrame.sourceZombies.end(),
+            [&](const auto& record){return record.id==aWire.mId;});
+		aZombie->ApplyNetZombatar(sourceArtwork?NetZombatarAppearance{}:aWire.mZombatar);
 		const HelmType aPreviousHelmet = aZombie->mHelmType;
 		const ShieldType aPreviousShield = aZombie->mShieldType;
 		const bool aHadHelmet = aZombie->mHelmHealth > 0;
