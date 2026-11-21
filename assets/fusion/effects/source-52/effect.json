@@ -1,0 +1,1507 @@
+{
+  "schema": 1,
+  "sourceKind": 52,
+  "sourcePrefab": "Resources/particle/prefabs/SuperGloom.prefab",
+  "sourcePrefabSha256": "a2001010ffcb573dfefb1a6a9955d1c690929657b5c5a0c58da7cdc9fbc9b323",
+  "nativeAdapter": "TodParticleSystem17-emitter source-compatible subset",
+  "emitters": [
+    {
+      "nodeName": "SuperGloom",
+      "nodeIndex": -1,
+      "sourceTransformFileId": 4977153420339851,
+      "sourcePosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "sourceRotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "sourceScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "sourceActive": true,
+      "rendererEnabled": false,
+      "duration": 0.3,
+      "delay": 0.0,
+      "lifetime": 0.3,
+      "speed": 5.0,
+      "size": 1.0,
+      "rotation": 0.0,
+      "rate": 10.0,
+      "maxActive": 1000,
+      "sourceStopAction": 2,
+      "sourceSimulationSpace": 0,
+      "sourceScalingMode": 1,
+      "enabledModules": [
+        "InitialModule",
+        "EmissionModule"
+      ],
+      "sizeCurve": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "shape": {
+        "type": -1,
+        "radius": 0,
+        "scale": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        },
+        "angle": 0
+      },
+      "sprite": null,
+      "material": "",
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      }
+    },
+    {
+      "nodeName": "PuffSplat_7",
+      "nodeIndex": 0,
+      "sourceTransformFileId": 4161607090078389,
+      "sourcePosition": {
+        "x": 1.5556355,
+        "y": 1.5556345,
+        "z": 0.0
+      },
+      "sourceRotation": {
+        "x": 0.6532815,
+        "y": -0.270598,
+        "z": 0.27059823,
+        "w": -0.65328145
+      },
+      "sourceScale": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5
+      },
+      "sourceActive": true,
+      "rendererEnabled": true,
+      "duration": 0.3,
+      "delay": 0.5,
+      "lifetime": 0.3,
+      "speed": 8.0,
+      "size": 1.0,
+      "rotation": 0.0,
+      "rate": 9999.0,
+      "maxActive": 8,
+      "sourceStopAction": 2,
+      "sourceSimulationSpace": 0,
+      "sourceScalingMode": 1,
+      "enabledModules": [
+        "InitialModule",
+        "ShapeModule",
+        "EmissionModule",
+        "SizeModule",
+        "UVModule"
+      ],
+      "sizeCurve": [
+        [
+          0.0,
+          1.0
+        ],
+        [
+          1.0,
+          0.0
+        ]
+      ],
+      "shape": {
+        "type": 0,
+        "radius": 1.0,
+        "scale": {
+          "x": 0.3,
+          "y": 0.3,
+          "z": 0.3
+        },
+        "angle": 25.0
+      },
+      "sprite": {
+        "sourceGuid": "c1e0af47256647145bc7802568f6e30c",
+        "source": "Resources/particle/2_0.asset",
+        "sourceTexture": "Resources/particle/fenhelan.png",
+        "sourceTextureSha256": "e9c3aeb41c6500802d790610891cb278d3e775099da17faff0234b39fb5a755e",
+        "texture": "textures/c1e0af47256647145bc7802568f6e30c.png",
+        "textureSha256": "6cb9f834bef468d3d4e1923b9c4b12c6f4aef90e400b43a3e035156c9acffe2d",
+        "width": 32,
+        "height": 27,
+        "pixelsPerUnit": 100.0,
+        "sourceSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: 2\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 39\n    width: 32\n    height: 27\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    9f7ee2e50f2d4134c8f01161650c082f: 1954151049041183748\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 0b6e6d0ab26e1a448854966098e886c7, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: 0ad723be713d0a3e000000000ad7233e713d0a3e000000000ad723be713d0abe000000000ad7233e713d0abe000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 39\n      width: 32\n      height: 27\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 20, z: 100, w: 52.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n"
+      },
+      "material": "",
+      "color": {
+        "r": 0.7647059,
+        "g": 0.5647059,
+        "b": 0.57254905,
+        "a": 1.0
+      },
+      "uvPolicy": "source single-sprite sequence invariant",
+      "materialAdapter": "Unity built-in Default-Particle10308 -> native alpha blend; HDR/soft intersection unavailable"
+    },
+    {
+      "nodeName": "PuffSplat_6",
+      "nodeIndex": 1,
+      "sourceTransformFileId": 4313026266067498,
+      "sourcePosition": {
+        "x": 0.0,
+        "y": 2.2,
+        "z": -0.0
+      },
+      "sourceRotation": {
+        "x": 0.7071068,
+        "y": 6.596146e-08,
+        "z": 2.1852282e-08,
+        "w": -0.70710677
+      },
+      "sourceScale": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5
+      },
+      "sourceActive": true,
+      "rendererEnabled": true,
+      "duration": 0.3,
+      "delay": 0.5,
+      "lifetime": 0.3,
+      "speed": 8.0,
+      "size": 1.0,
+      "rotation": 0.0,
+      "rate": 9999.0,
+      "maxActive": 8,
+      "sourceStopAction": 2,
+      "sourceSimulationSpace": 0,
+      "sourceScalingMode": 1,
+      "enabledModules": [
+        "InitialModule",
+        "ShapeModule",
+        "EmissionModule",
+        "SizeModule",
+        "UVModule"
+      ],
+      "sizeCurve": [
+        [
+          0.0,
+          1.0
+        ],
+        [
+          1.0,
+          0.0
+        ]
+      ],
+      "shape": {
+        "type": 0,
+        "radius": 1.0,
+        "scale": {
+          "x": 0.3,
+          "y": 0.3,
+          "z": 0.3
+        },
+        "angle": 25.0
+      },
+      "sprite": {
+        "sourceGuid": "c1e0af47256647145bc7802568f6e30c",
+        "source": "Resources/particle/2_0.asset",
+        "sourceTexture": "Resources/particle/fenhelan.png",
+        "sourceTextureSha256": "e9c3aeb41c6500802d790610891cb278d3e775099da17faff0234b39fb5a755e",
+        "texture": "textures/c1e0af47256647145bc7802568f6e30c.png",
+        "textureSha256": "6cb9f834bef468d3d4e1923b9c4b12c6f4aef90e400b43a3e035156c9acffe2d",
+        "width": 32,
+        "height": 27,
+        "pixelsPerUnit": 100.0,
+        "sourceSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: 2\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 39\n    width: 32\n    height: 27\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    9f7ee2e50f2d4134c8f01161650c082f: 1954151049041183748\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 0b6e6d0ab26e1a448854966098e886c7, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: 0ad723be713d0a3e000000000ad7233e713d0a3e000000000ad723be713d0abe000000000ad7233e713d0abe000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 39\n      width: 32\n      height: 27\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 20, z: 100, w: 52.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n"
+      },
+      "material": "",
+      "color": {
+        "r": 0.7647059,
+        "g": 0.5647059,
+        "b": 0.57254905,
+        "a": 1.0
+      },
+      "uvPolicy": "source single-sprite sequence invariant",
+      "materialAdapter": "Unity built-in Default-Particle10308 -> native alpha blend; HDR/soft intersection unavailable"
+    },
+    {
+      "nodeName": "PuffSplat_5",
+      "nodeIndex": 2,
+      "sourceTransformFileId": 4634108722742392,
+      "sourcePosition": {
+        "x": -1.4142139,
+        "y": 1.4142132,
+        "z": -0.0
+      },
+      "sourceRotation": {
+        "x": 0.27059817,
+        "y": 0.6532815,
+        "z": -0.65328157,
+        "w": -0.27059785
+      },
+      "sourceScale": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5
+      },
+      "sourceActive": true,
+      "rendererEnabled": true,
+      "duration": 0.3,
+      "delay": 0.5,
+      "lifetime": 0.3,
+      "speed": 8.0,
+      "size": 1.0,
+      "rotation": 0.0,
+      "rate": 9999.0,
+      "maxActive": 8,
+      "sourceStopAction": 2,
+      "sourceSimulationSpace": 0,
+      "sourceScalingMode": 1,
+      "enabledModules": [
+        "InitialModule",
+        "ShapeModule",
+        "EmissionModule",
+        "SizeModule",
+        "UVModule"
+      ],
+      "sizeCurve": [
+        [
+          0.0,
+          1.0
+        ],
+        [
+          1.0,
+          0.0
+        ]
+      ],
+      "shape": {
+        "type": 0,
+        "radius": 1.0,
+        "scale": {
+          "x": 0.3,
+          "y": 0.3,
+          "z": 0.3
+        },
+        "angle": 25.0
+      },
+      "sprite": {
+        "sourceGuid": "c1e0af47256647145bc7802568f6e30c",
+        "source": "Resources/particle/2_0.asset",
+        "sourceTexture": "Resources/particle/fenhelan.png",
+        "sourceTextureSha256": "e9c3aeb41c6500802d790610891cb278d3e775099da17faff0234b39fb5a755e",
+        "texture": "textures/c1e0af47256647145bc7802568f6e30c.png",
+        "textureSha256": "6cb9f834bef468d3d4e1923b9c4b12c6f4aef90e400b43a3e035156c9acffe2d",
+        "width": 32,
+        "height": 27,
+        "pixelsPerUnit": 100.0,
+        "sourceSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: 2\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 39\n    width: 32\n    height: 27\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    9f7ee2e50f2d4134c8f01161650c082f: 1954151049041183748\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 0b6e6d0ab26e1a448854966098e886c7, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: 0ad723be713d0a3e000000000ad7233e713d0a3e000000000ad723be713d0abe000000000ad7233e713d0abe000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 39\n      width: 32\n      height: 27\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 20, z: 100, w: 52.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n"
+      },
+      "material": "",
+      "color": {
+        "r": 0.7647059,
+        "g": 0.5647059,
+        "b": 0.57254905,
+        "a": 1.0
+      },
+      "uvPolicy": "source single-sprite sequence invariant",
+      "materialAdapter": "Unity built-in Default-Particle10308 -> native alpha blend; HDR/soft intersection unavailable"
+    },
+    {
+      "nodeName": "PuffSplat_4",
+      "nodeIndex": 3,
+      "sourceTransformFileId": 4642988549198181,
+      "sourcePosition": {
+        "x": -2.0,
+        "y": -0.0,
+        "z": -0.0
+      },
+      "sourceRotation": {
+        "x": 4.2028788e-08,
+        "y": 0.7071067,
+        "z": -0.70710695,
+        "w": 1.6565923e-07
+      },
+      "sourceScale": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5
+      },
+      "sourceActive": true,
+      "rendererEnabled": true,
+      "duration": 0.3,
+      "delay": 0.5,
+      "lifetime": 0.3,
+      "speed": 8.0,
+      "size": 1.0,
+      "rotation": 0.0,
+      "rate": 9999.0,
+      "maxActive": 8,
+      "sourceStopAction": 2,
+      "sourceSimulationSpace": 0,
+      "sourceScalingMode": 1,
+      "enabledModules": [
+        "InitialModule",
+        "ShapeModule",
+        "EmissionModule",
+        "SizeModule",
+        "UVModule"
+      ],
+      "sizeCurve": [
+        [
+          0.0,
+          1.0
+        ],
+        [
+          1.0,
+          0.0
+        ]
+      ],
+      "shape": {
+        "type": 0,
+        "radius": 1.0,
+        "scale": {
+          "x": 0.3,
+          "y": 0.3,
+          "z": 0.3
+        },
+        "angle": 25.0
+      },
+      "sprite": {
+        "sourceGuid": "c1e0af47256647145bc7802568f6e30c",
+        "source": "Resources/particle/2_0.asset",
+        "sourceTexture": "Resources/particle/fenhelan.png",
+        "sourceTextureSha256": "e9c3aeb41c6500802d790610891cb278d3e775099da17faff0234b39fb5a755e",
+        "texture": "textures/c1e0af47256647145bc7802568f6e30c.png",
+        "textureSha256": "6cb9f834bef468d3d4e1923b9c4b12c6f4aef90e400b43a3e035156c9acffe2d",
+        "width": 32,
+        "height": 27,
+        "pixelsPerUnit": 100.0,
+        "sourceSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: 2\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 39\n    width: 32\n    height: 27\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    9f7ee2e50f2d4134c8f01161650c082f: 1954151049041183748\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 0b6e6d0ab26e1a448854966098e886c7, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: 0ad723be713d0a3e000000000ad7233e713d0a3e000000000ad723be713d0abe000000000ad7233e713d0abe000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 39\n      width: 32\n      height: 27\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 20, z: 100, w: 52.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n"
+      },
+      "material": "",
+      "color": {
+        "r": 0.7647059,
+        "g": 0.5647059,
+        "b": 0.57254905,
+        "a": 1.0
+      },
+      "uvPolicy": "source single-sprite sequence invariant",
+      "materialAdapter": "Unity built-in Default-Particle10308 -> native alpha blend; HDR/soft intersection unavailable"
+    },
+    {
+      "nodeName": "PuffSplat_3",
+      "nodeIndex": 4,
+      "sourceTransformFileId": 4918264173551851,
+      "sourcePosition": {
+        "x": -1.4142137,
+        "y": -1.4142133,
+        "z": 0.0
+      },
+      "sourceRotation": {
+        "x": -0.27059796,
+        "y": 0.6532814,
+        "z": -0.6532816,
+        "w": 0.27059805
+      },
+      "sourceScale": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5
+      },
+      "sourceActive": true,
+      "rendererEnabled": true,
+      "duration": 0.3,
+      "delay": 0.5,
+      "lifetime": 0.3,
+      "speed": 8.0,
+      "size": 1.0,
+      "rotation": 0.0,
+      "rate": 9999.0,
+      "maxActive": 8,
+      "sourceStopAction": 2,
+      "sourceSimulationSpace": 0,
+      "sourceScalingMode": 1,
+      "enabledModules": [
+        "InitialModule",
+        "ShapeModule",
+        "EmissionModule",
+        "SizeModule",
+        "UVModule"
+      ],
+      "sizeCurve": [
+        [
+          0.0,
+          1.0
+        ],
+        [
+          1.0,
+          0.0
+        ]
+      ],
+      "shape": {
+        "type": 0,
+        "radius": 1.0,
+        "scale": {
+          "x": 0.3,
+          "y": 0.3,
+          "z": 0.3
+        },
+        "angle": 25.0
+      },
+      "sprite": {
+        "sourceGuid": "c1e0af47256647145bc7802568f6e30c",
+        "source": "Resources/particle/2_0.asset",
+        "sourceTexture": "Resources/particle/fenhelan.png",
+        "sourceTextureSha256": "e9c3aeb41c6500802d790610891cb278d3e775099da17faff0234b39fb5a755e",
+        "texture": "textures/c1e0af47256647145bc7802568f6e30c.png",
+        "textureSha256": "6cb9f834bef468d3d4e1923b9c4b12c6f4aef90e400b43a3e035156c9acffe2d",
+        "width": 32,
+        "height": 27,
+        "pixelsPerUnit": 100.0,
+        "sourceSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: 2\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 39\n    width: 32\n    height: 27\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    9f7ee2e50f2d4134c8f01161650c082f: 1954151049041183748\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 0b6e6d0ab26e1a448854966098e886c7, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: 0ad723be713d0a3e000000000ad7233e713d0a3e000000000ad723be713d0abe000000000ad7233e713d0abe000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 39\n      width: 32\n      height: 27\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 20, z: 100, w: 52.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n"
+      },
+      "material": "",
+      "color": {
+        "r": 0.7647059,
+        "g": 0.5647059,
+        "b": 0.57254905,
+        "a": 1.0
+      },
+      "uvPolicy": "source single-sprite sequence invariant",
+      "materialAdapter": "Unity built-in Default-Particle10308 -> native alpha blend; HDR/soft intersection unavailable"
+    },
+    {
+      "nodeName": "PuffSplat_2",
+      "nodeIndex": 5,
+      "sourceTransformFileId": 4371939378208658,
+      "sourcePosition": {
+        "x": -0.0,
+        "y": -2.0,
+        "z": 0.0
+      },
+      "sourceRotation": {
+        "x": -0.49999994,
+        "y": 0.49999994,
+        "z": -0.5000002,
+        "w": 0.49999997
+      },
+      "sourceScale": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5
+      },
+      "sourceActive": true,
+      "rendererEnabled": true,
+      "duration": 0.3,
+      "delay": 0.5,
+      "lifetime": 0.3,
+      "speed": 8.0,
+      "size": 1.0,
+      "rotation": 0.0,
+      "rate": 9999.0,
+      "maxActive": 8,
+      "sourceStopAction": 2,
+      "sourceSimulationSpace": 0,
+      "sourceScalingMode": 1,
+      "enabledModules": [
+        "InitialModule",
+        "ShapeModule",
+        "EmissionModule",
+        "SizeModule",
+        "UVModule"
+      ],
+      "sizeCurve": [
+        [
+          0.0,
+          1.0
+        ],
+        [
+          1.0,
+          0.0
+        ]
+      ],
+      "shape": {
+        "type": 0,
+        "radius": 1.0,
+        "scale": {
+          "x": 0.3,
+          "y": 0.3,
+          "z": 0.3
+        },
+        "angle": 25.0
+      },
+      "sprite": {
+        "sourceGuid": "c1e0af47256647145bc7802568f6e30c",
+        "source": "Resources/particle/2_0.asset",
+        "sourceTexture": "Resources/particle/fenhelan.png",
+        "sourceTextureSha256": "e9c3aeb41c6500802d790610891cb278d3e775099da17faff0234b39fb5a755e",
+        "texture": "textures/c1e0af47256647145bc7802568f6e30c.png",
+        "textureSha256": "6cb9f834bef468d3d4e1923b9c4b12c6f4aef90e400b43a3e035156c9acffe2d",
+        "width": 32,
+        "height": 27,
+        "pixelsPerUnit": 100.0,
+        "sourceSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: 2\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 39\n    width: 32\n    height: 27\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    9f7ee2e50f2d4134c8f01161650c082f: 1954151049041183748\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 0b6e6d0ab26e1a448854966098e886c7, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: 0ad723be713d0a3e000000000ad7233e713d0a3e000000000ad723be713d0abe000000000ad7233e713d0abe000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 39\n      width: 32\n      height: 27\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 20, z: 100, w: 52.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n"
+      },
+      "material": "",
+      "color": {
+        "r": 0.7647059,
+        "g": 0.5647059,
+        "b": 0.57254905,
+        "a": 1.0
+      },
+      "uvPolicy": "source single-sprite sequence invariant",
+      "materialAdapter": "Unity built-in Default-Particle10308 -> native alpha blend; HDR/soft intersection unavailable"
+    },
+    {
+      "nodeName": "PuffSplat_1",
+      "nodeIndex": 6,
+      "sourceTransformFileId": 4017697238300914,
+      "sourcePosition": {
+        "x": 1.4142127,
+        "y": -1.4142139,
+        "z": 0.0
+      },
+      "sourceRotation": {
+        "x": -0.6532815,
+        "y": 0.27059805,
+        "z": -0.2705982,
+        "w": 0.65328145
+      },
+      "sourceScale": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5
+      },
+      "sourceActive": true,
+      "rendererEnabled": true,
+      "duration": 0.3,
+      "delay": 0.5,
+      "lifetime": 0.3,
+      "speed": 8.0,
+      "size": 1.0,
+      "rotation": 0.0,
+      "rate": 9999.0,
+      "maxActive": 8,
+      "sourceStopAction": 2,
+      "sourceSimulationSpace": 0,
+      "sourceScalingMode": 1,
+      "enabledModules": [
+        "InitialModule",
+        "ShapeModule",
+        "EmissionModule",
+        "SizeModule",
+        "UVModule"
+      ],
+      "sizeCurve": [
+        [
+          0.0,
+          1.0
+        ],
+        [
+          1.0,
+          0.0
+        ]
+      ],
+      "shape": {
+        "type": 0,
+        "radius": 1.0,
+        "scale": {
+          "x": 0.3,
+          "y": 0.3,
+          "z": 0.3
+        },
+        "angle": 25.0
+      },
+      "sprite": {
+        "sourceGuid": "c1e0af47256647145bc7802568f6e30c",
+        "source": "Resources/particle/2_0.asset",
+        "sourceTexture": "Resources/particle/fenhelan.png",
+        "sourceTextureSha256": "e9c3aeb41c6500802d790610891cb278d3e775099da17faff0234b39fb5a755e",
+        "texture": "textures/c1e0af47256647145bc7802568f6e30c.png",
+        "textureSha256": "6cb9f834bef468d3d4e1923b9c4b12c6f4aef90e400b43a3e035156c9acffe2d",
+        "width": 32,
+        "height": 27,
+        "pixelsPerUnit": 100.0,
+        "sourceSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: 2\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 39\n    width: 32\n    height: 27\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    9f7ee2e50f2d4134c8f01161650c082f: 1954151049041183748\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 0b6e6d0ab26e1a448854966098e886c7, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: 0ad723be713d0a3e000000000ad7233e713d0a3e000000000ad723be713d0abe000000000ad7233e713d0abe000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 39\n      width: 32\n      height: 27\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 20, z: 100, w: 52.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n"
+      },
+      "material": "",
+      "color": {
+        "r": 0.7647059,
+        "g": 0.5647059,
+        "b": 0.57254905,
+        "a": 1.0
+      },
+      "uvPolicy": "source single-sprite sequence invariant",
+      "materialAdapter": "Unity built-in Default-Particle10308 -> native alpha blend; HDR/soft intersection unavailable"
+    },
+    {
+      "nodeName": "PuffSplat",
+      "nodeIndex": 7,
+      "sourceTransformFileId": 4089843903986396,
+      "sourcePosition": {
+        "x": 2.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "sourceRotation": {
+        "x": -0.7071068,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 0.7071068
+      },
+      "sourceScale": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5
+      },
+      "sourceActive": true,
+      "rendererEnabled": true,
+      "duration": 0.3,
+      "delay": 0.5,
+      "lifetime": 0.3,
+      "speed": 8.0,
+      "size": 1.0,
+      "rotation": 0.0,
+      "rate": 9999.0,
+      "maxActive": 8,
+      "sourceStopAction": 2,
+      "sourceSimulationSpace": 0,
+      "sourceScalingMode": 1,
+      "enabledModules": [
+        "InitialModule",
+        "ShapeModule",
+        "EmissionModule",
+        "SizeModule",
+        "UVModule"
+      ],
+      "sizeCurve": [
+        [
+          0.0,
+          1.0
+        ],
+        [
+          1.0,
+          0.0
+        ]
+      ],
+      "shape": {
+        "type": 0,
+        "radius": 1.0,
+        "scale": {
+          "x": 0.3,
+          "y": 0.3,
+          "z": 0.3
+        },
+        "angle": 25.0
+      },
+      "sprite": {
+        "sourceGuid": "c1e0af47256647145bc7802568f6e30c",
+        "source": "Resources/particle/2_0.asset",
+        "sourceTexture": "Resources/particle/fenhelan.png",
+        "sourceTextureSha256": "e9c3aeb41c6500802d790610891cb278d3e775099da17faff0234b39fb5a755e",
+        "texture": "textures/c1e0af47256647145bc7802568f6e30c.png",
+        "textureSha256": "6cb9f834bef468d3d4e1923b9c4b12c6f4aef90e400b43a3e035156c9acffe2d",
+        "width": 32,
+        "height": 27,
+        "pixelsPerUnit": 100.0,
+        "sourceSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: 2\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 39\n    width: 32\n    height: 27\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    9f7ee2e50f2d4134c8f01161650c082f: 1954151049041183748\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 0b6e6d0ab26e1a448854966098e886c7, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: 0ad723be713d0a3e000000000ad7233e713d0a3e000000000ad723be713d0abe000000000ad7233e713d0abe000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 39\n      width: 32\n      height: 27\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 20, z: 100, w: 52.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n"
+      },
+      "material": "",
+      "color": {
+        "r": 0.7647059,
+        "g": 0.5647059,
+        "b": 0.57254905,
+        "a": 1.0
+      },
+      "uvPolicy": "source single-sprite sequence invariant",
+      "materialAdapter": "Unity built-in Default-Particle10308 -> native alpha blend; HDR/soft intersection unavailable"
+    },
+    {
+      "nodeName": "fume_short",
+      "nodeIndex": 8,
+      "sourceTransformFileId": 4060945828524476,
+      "sourcePosition": {
+        "x": 0.0,
+        "y": 0.75,
+        "z": -8.940695e-08
+      },
+      "sourceRotation": {
+        "x": -0.7071068,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 0.7071068
+      },
+      "sourceScale": {
+        "x": 0.5,
+        "y": 0.5000001,
+        "z": 0.5000001
+      },
+      "sourceActive": true,
+      "rendererEnabled": true,
+      "duration": 0.5,
+      "delay": 0.0,
+      "lifetime": 0.5,
+      "speed": 5.0,
+      "size": 1.0,
+      "rotation": 0.0,
+      "rate": 100.0,
+      "maxActive": 4,
+      "sourceStopAction": 0,
+      "sourceSimulationSpace": 0,
+      "sourceScalingMode": 1,
+      "enabledModules": [
+        "InitialModule",
+        "ShapeModule",
+        "EmissionModule",
+        "UVModule"
+      ],
+      "sizeCurve": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "shape": {
+        "type": 4,
+        "radius": 0.0001,
+        "scale": {
+          "x": 1.0,
+          "y": 1.0,
+          "z": 1.0
+        },
+        "angle": 20.0
+      },
+      "sprite": {
+        "sourceGuid": "c1e0af47256647145bc7802568f6e30c",
+        "source": "Resources/particle/2_0.asset",
+        "sourceTexture": "Resources/particle/fenhelan.png",
+        "sourceTextureSha256": "e9c3aeb41c6500802d790610891cb278d3e775099da17faff0234b39fb5a755e",
+        "texture": "textures/c1e0af47256647145bc7802568f6e30c.png",
+        "textureSha256": "6cb9f834bef468d3d4e1923b9c4b12c6f4aef90e400b43a3e035156c9acffe2d",
+        "width": 32,
+        "height": 27,
+        "pixelsPerUnit": 100.0,
+        "sourceSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: 2\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 39\n    width: 32\n    height: 27\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    9f7ee2e50f2d4134c8f01161650c082f: 1954151049041183748\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 0b6e6d0ab26e1a448854966098e886c7, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: 0ad723be713d0a3e000000000ad7233e713d0a3e000000000ad723be713d0abe000000000ad7233e713d0abe000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 39\n      width: 32\n      height: 27\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 20, z: 100, w: 52.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n"
+      },
+      "material": "",
+      "color": {
+        "r": 0.764151,
+        "g": 0.56590426,
+        "b": 0.5714886,
+        "a": 1.0
+      },
+      "uvPolicy": "source single-sprite sequence invariant",
+      "shaderSource": "Shader/Universal Render Pipeline_2D_Sprite-Lit-Default.shader",
+      "shaderSha256": "39eb05c5d704c20d9fe845ed01d0206f0468477feaec635a06d3b705518a51cc",
+      "materialSource": "Material/Sprite-Lit-Default.mat",
+      "materialSha256": "15480e3bcd837b8129c6fa847fd8a3e1f93172dac09c3d39d5939476221a1236",
+      "serializedMaterial": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!21 &2100000\nMaterial:\n  serializedVersion: 8\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Sprite-Lit-Default\n  m_Shader: {fileID: 4800000, guid: 9b96bf551cb095c48a0cf08916b3d634, type: 3}\n  m_Parent: {fileID: 0}\n  m_ModifiedSerializedProperties: 0\n  m_ValidKeywords:\n  - ETC1_EXTERNAL_ALPHA\n  m_InvalidKeywords: []\n  m_LightmapFlags: 4\n  m_EnableInstancingVariants: 0\n  m_DoubleSidedGI: 0\n  m_CustomRenderQueue: -1\n  stringTagMap: {}\n  disabledShaderPasses: []\n  m_LockedProperties:\n  m_SavedProperties:\n    serializedVersion: 3\n    m_TexEnvs:\n      _AlphaTex:\n        m_Texture: {fileID: 0}\n        m_Scale: {x: 1, y: 1}\n        m_Offset: {x: 0, y: 0}\n      _MainTex:\n        m_Texture: {fileID: 0}\n        m_Scale: {x: 1, y: 1}\n        m_Offset: {x: 0, y: 0}\n      _MaskTex:\n        m_Texture: {fileID: 0}\n        m_Scale: {x: 1, y: 1}\n        m_Offset: {x: 0, y: 0}\n      _NormalMap:\n        m_Texture: {fileID: 0}\n        m_Scale: {x: 1, y: 1}\n        m_Offset: {x: 0, y: 0}\n    m_Ints: {}\n    m_Floats:\n      _EnableExternalAlpha: 0\n    m_Colors:\n      _Color: {r: 1, g: 1, b: 1, a: 1}\n      _Flip: {r: 1, g: 1, b: 1, a: 1}\n      _RendererColor: {r: 1, g: 1, b: 1, a: 1}\n  m_BuildTextureStacks: []\n",
+      "materialAdapter": "source particle material -> native alpha blend; original RGB/alpha/sprite preserved; shader/HDR edge bounded"
+    },
+    {
+      "nodeName": "fume_short",
+      "nodeIndex": 9,
+      "sourceTransformFileId": 4518489005915545,
+      "sourcePosition": {
+        "x": -0.53033006,
+        "y": 0.53033006,
+        "z": -6.705522e-08
+      },
+      "sourceRotation": {
+        "x": -0.6532815,
+        "y": -0.27059805,
+        "z": 0.27059805,
+        "w": 0.6532815
+      },
+      "sourceScale": {
+        "x": 0.5,
+        "y": 0.5000001,
+        "z": 0.5000001
+      },
+      "sourceActive": true,
+      "rendererEnabled": true,
+      "duration": 0.5,
+      "delay": 0.0,
+      "lifetime": 0.5,
+      "speed": 5.0,
+      "size": 1.0,
+      "rotation": 0.0,
+      "rate": 100.0,
+      "maxActive": 4,
+      "sourceStopAction": 0,
+      "sourceSimulationSpace": 0,
+      "sourceScalingMode": 1,
+      "enabledModules": [
+        "InitialModule",
+        "ShapeModule",
+        "EmissionModule",
+        "UVModule"
+      ],
+      "sizeCurve": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "shape": {
+        "type": 4,
+        "radius": 0.0001,
+        "scale": {
+          "x": 1.0,
+          "y": 1.0,
+          "z": 1.0
+        },
+        "angle": 20.0
+      },
+      "sprite": {
+        "sourceGuid": "c1e0af47256647145bc7802568f6e30c",
+        "source": "Resources/particle/2_0.asset",
+        "sourceTexture": "Resources/particle/fenhelan.png",
+        "sourceTextureSha256": "e9c3aeb41c6500802d790610891cb278d3e775099da17faff0234b39fb5a755e",
+        "texture": "textures/c1e0af47256647145bc7802568f6e30c.png",
+        "textureSha256": "6cb9f834bef468d3d4e1923b9c4b12c6f4aef90e400b43a3e035156c9acffe2d",
+        "width": 32,
+        "height": 27,
+        "pixelsPerUnit": 100.0,
+        "sourceSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: 2\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 39\n    width: 32\n    height: 27\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    9f7ee2e50f2d4134c8f01161650c082f: 1954151049041183748\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 0b6e6d0ab26e1a448854966098e886c7, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: 0ad723be713d0a3e000000000ad7233e713d0a3e000000000ad723be713d0abe000000000ad7233e713d0abe000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 39\n      width: 32\n      height: 27\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 20, z: 100, w: 52.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n"
+      },
+      "material": "",
+      "color": {
+        "r": 0.764151,
+        "g": 0.56590426,
+        "b": 0.5714886,
+        "a": 1.0
+      },
+      "uvPolicy": "source single-sprite sequence invariant",
+      "shaderSource": "Shader/Universal Render Pipeline_2D_Sprite-Lit-Default.shader",
+      "shaderSha256": "39eb05c5d704c20d9fe845ed01d0206f0468477feaec635a06d3b705518a51cc",
+      "materialSource": "Material/Sprite-Lit-Default.mat",
+      "materialSha256": "15480e3bcd837b8129c6fa847fd8a3e1f93172dac09c3d39d5939476221a1236",
+      "serializedMaterial": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!21 &2100000\nMaterial:\n  serializedVersion: 8\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Sprite-Lit-Default\n  m_Shader: {fileID: 4800000, guid: 9b96bf551cb095c48a0cf08916b3d634, type: 3}\n  m_Parent: {fileID: 0}\n  m_ModifiedSerializedProperties: 0\n  m_ValidKeywords:\n  - ETC1_EXTERNAL_ALPHA\n  m_InvalidKeywords: []\n  m_LightmapFlags: 4\n  m_EnableInstancingVariants: 0\n  m_DoubleSidedGI: 0\n  m_CustomRenderQueue: -1\n  stringTagMap: {}\n  disabledShaderPasses: []\n  m_LockedProperties:\n  m_SavedProperties:\n    serializedVersion: 3\n    m_TexEnvs:\n      _AlphaTex:\n        m_Texture: {fileID: 0}\n        m_Scale: {x: 1, y: 1}\n        m_Offset: {x: 0, y: 0}\n      _MainTex:\n        m_Texture: {fileID: 0}\n        m_Scale: {x: 1, y: 1}\n        m_Offset: {x: 0, y: 0}\n      _MaskTex:\n        m_Texture: {fileID: 0}\n        m_Scale: {x: 1, y: 1}\n        m_Offset: {x: 0, y: 0}\n      _NormalMap:\n        m_Texture: {fileID: 0}\n        m_Scale: {x: 1, y: 1}\n        m_Offset: {x: 0, y: 0}\n    m_Ints: {}\n    m_Floats:\n      _EnableExternalAlpha: 0\n    m_Colors:\n      _Color: {r: 1, g: 1, b: 1, a: 1}\n      _Flip: {r: 1, g: 1, b: 1, a: 1}\n      _RendererColor: {r: 1, g: 1, b: 1, a: 1}\n  m_BuildTextureStacks: []\n",
+      "materialAdapter": "source particle material -> native alpha blend; original RGB/alpha/sprite preserved; shader/HDR edge bounded"
+    },
+    {
+      "nodeName": "fume_short",
+      "nodeIndex": 10,
+      "sourceTransformFileId": 4967328832014496,
+      "sourcePosition": {
+        "x": 0.53033006,
+        "y": 0.53033006,
+        "z": -6.705522e-08
+      },
+      "sourceRotation": {
+        "x": -0.6532815,
+        "y": 0.27059805,
+        "z": -0.27059805,
+        "w": 0.6532815
+      },
+      "sourceScale": {
+        "x": 0.5,
+        "y": 0.5000001,
+        "z": 0.5000001
+      },
+      "sourceActive": true,
+      "rendererEnabled": true,
+      "duration": 0.5,
+      "delay": 0.0,
+      "lifetime": 0.5,
+      "speed": 5.0,
+      "size": 1.0,
+      "rotation": 0.0,
+      "rate": 100.0,
+      "maxActive": 4,
+      "sourceStopAction": 0,
+      "sourceSimulationSpace": 0,
+      "sourceScalingMode": 1,
+      "enabledModules": [
+        "InitialModule",
+        "ShapeModule",
+        "EmissionModule",
+        "UVModule"
+      ],
+      "sizeCurve": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "shape": {
+        "type": 4,
+        "radius": 0.0001,
+        "scale": {
+          "x": 1.0,
+          "y": 1.0,
+          "z": 1.0
+        },
+        "angle": 20.0
+      },
+      "sprite": {
+        "sourceGuid": "c1e0af47256647145bc7802568f6e30c",
+        "source": "Resources/particle/2_0.asset",
+        "sourceTexture": "Resources/particle/fenhelan.png",
+        "sourceTextureSha256": "e9c3aeb41c6500802d790610891cb278d3e775099da17faff0234b39fb5a755e",
+        "texture": "textures/c1e0af47256647145bc7802568f6e30c.png",
+        "textureSha256": "6cb9f834bef468d3d4e1923b9c4b12c6f4aef90e400b43a3e035156c9acffe2d",
+        "width": 32,
+        "height": 27,
+        "pixelsPerUnit": 100.0,
+        "sourceSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: 2\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 39\n    width: 32\n    height: 27\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    9f7ee2e50f2d4134c8f01161650c082f: 1954151049041183748\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 0b6e6d0ab26e1a448854966098e886c7, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: 0ad723be713d0a3e000000000ad7233e713d0a3e000000000ad723be713d0abe000000000ad7233e713d0abe000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 39\n      width: 32\n      height: 27\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 20, z: 100, w: 52.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n"
+      },
+      "material": "",
+      "color": {
+        "r": 0.764151,
+        "g": 0.56590426,
+        "b": 0.5714886,
+        "a": 1.0
+      },
+      "uvPolicy": "source single-sprite sequence invariant",
+      "shaderSource": "Shader/Universal Render Pipeline_2D_Sprite-Lit-Default.shader",
+      "shaderSha256": "39eb05c5d704c20d9fe845ed01d0206f0468477feaec635a06d3b705518a51cc",
+      "materialSource": "Material/Sprite-Lit-Default.mat",
+      "materialSha256": "15480e3bcd837b8129c6fa847fd8a3e1f93172dac09c3d39d5939476221a1236",
+      "serializedMaterial": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!21 &2100000\nMaterial:\n  serializedVersion: 8\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Sprite-Lit-Default\n  m_Shader: {fileID: 4800000, guid: 9b96bf551cb095c48a0cf08916b3d634, type: 3}\n  m_Parent: {fileID: 0}\n  m_ModifiedSerializedProperties: 0\n  m_ValidKeywords:\n  - ETC1_EXTERNAL_ALPHA\n  m_InvalidKeywords: []\n  m_LightmapFlags: 4\n  m_EnableInstancingVariants: 0\n  m_DoubleSidedGI: 0\n  m_CustomRenderQueue: -1\n  stringTagMap: {}\n  disabledShaderPasses: []\n  m_LockedProperties:\n  m_SavedProperties:\n    serializedVersion: 3\n    m_TexEnvs:\n      _AlphaTex:\n        m_Texture: {fileID: 0}\n        m_Scale: {x: 1, y: 1}\n        m_Offset: {x: 0, y: 0}\n      _MainTex:\n        m_Texture: {fileID: 0}\n        m_Scale: {x: 1, y: 1}\n        m_Offset: {x: 0, y: 0}\n      _MaskTex:\n        m_Texture: {fileID: 0}\n        m_Scale: {x: 1, y: 1}\n        m_Offset: {x: 0, y: 0}\n      _NormalMap:\n        m_Texture: {fileID: 0}\n        m_Scale: {x: 1, y: 1}\n        m_Offset: {x: 0, y: 0}\n    m_Ints: {}\n    m_Floats:\n      _EnableExternalAlpha: 0\n    m_Colors:\n      _Color: {r: 1, g: 1, b: 1, a: 1}\n      _Flip: {r: 1, g: 1, b: 1, a: 1}\n      _RendererColor: {r: 1, g: 1, b: 1, a: 1}\n  m_BuildTextureStacks: []\n",
+      "materialAdapter": "source particle material -> native alpha blend; original RGB/alpha/sprite preserved; shader/HDR edge bounded"
+    },
+    {
+      "nodeName": "fume_short",
+      "nodeIndex": 11,
+      "sourceTransformFileId": 4919942235722503,
+      "sourcePosition": {
+        "x": 0.53033006,
+        "y": -0.53033006,
+        "z": -6.705522e-08
+      },
+      "sourceRotation": {
+        "x": -0.27059805,
+        "y": 0.6532815,
+        "z": -0.6532815,
+        "w": 0.27059805
+      },
+      "sourceScale": {
+        "x": 0.5,
+        "y": 0.5000001,
+        "z": 0.5000001
+      },
+      "sourceActive": true,
+      "rendererEnabled": true,
+      "duration": 0.5,
+      "delay": 0.0,
+      "lifetime": 0.5,
+      "speed": 5.0,
+      "size": 1.0,
+      "rotation": 0.0,
+      "rate": 100.0,
+      "maxActive": 4,
+      "sourceStopAction": 0,
+      "sourceSimulationSpace": 0,
+      "sourceScalingMode": 1,
+      "enabledModules": [
+        "InitialModule",
+        "ShapeModule",
+        "EmissionModule",
+        "UVModule"
+      ],
+      "sizeCurve": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "shape": {
+        "type": 4,
+        "radius": 0.0001,
+        "scale": {
+          "x": 1.0,
+          "y": 1.0,
+          "z": 1.0
+        },
+        "angle": 20.0
+      },
+      "sprite": {
+        "sourceGuid": "c1e0af47256647145bc7802568f6e30c",
+        "source": "Resources/particle/2_0.asset",
+        "sourceTexture": "Resources/particle/fenhelan.png",
+        "sourceTextureSha256": "e9c3aeb41c6500802d790610891cb278d3e775099da17faff0234b39fb5a755e",
+        "texture": "textures/c1e0af47256647145bc7802568f6e30c.png",
+        "textureSha256": "6cb9f834bef468d3d4e1923b9c4b12c6f4aef90e400b43a3e035156c9acffe2d",
+        "width": 32,
+        "height": 27,
+        "pixelsPerUnit": 100.0,
+        "sourceSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: 2\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 39\n    width: 32\n    height: 27\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    9f7ee2e50f2d4134c8f01161650c082f: 1954151049041183748\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 0b6e6d0ab26e1a448854966098e886c7, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: 0ad723be713d0a3e000000000ad7233e713d0a3e000000000ad723be713d0abe000000000ad7233e713d0abe000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 39\n      width: 32\n      height: 27\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 20, z: 100, w: 52.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n"
+      },
+      "material": "",
+      "color": {
+        "r": 0.764151,
+        "g": 0.56590426,
+        "b": 0.5714886,
+        "a": 1.0
+      },
+      "uvPolicy": "source single-sprite sequence invariant",
+      "shaderSource": "Shader/Universal Render Pipeline_2D_Sprite-Lit-Default.shader",
+      "shaderSha256": "39eb05c5d704c20d9fe845ed01d0206f0468477feaec635a06d3b705518a51cc",
+      "materialSource": "Material/Sprite-Lit-Default.mat",
+      "materialSha256": "15480e3bcd837b8129c6fa847fd8a3e1f93172dac09c3d39d5939476221a1236",
+      "serializedMaterial": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!21 &2100000\nMaterial:\n  serializedVersion: 8\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Sprite-Lit-Default\n  m_Shader: {fileID: 4800000, guid: 9b96bf551cb095c48a0cf08916b3d634, type: 3}\n  m_Parent: {fileID: 0}\n  m_ModifiedSerializedProperties: 0\n  m_ValidKeywords:\n  - ETC1_EXTERNAL_ALPHA\n  m_InvalidKeywords: []\n  m_LightmapFlags: 4\n  m_EnableInstancingVariants: 0\n  m_DoubleSidedGI: 0\n  m_CustomRenderQueue: -1\n  stringTagMap: {}\n  disabledShaderPasses: []\n  m_LockedProperties:\n  m_SavedProperties:\n    serializedVersion: 3\n    m_TexEnvs:\n      _AlphaTex:\n        m_Texture: {fileID: 0}\n        m_Scale: {x: 1, y: 1}\n        m_Offset: {x: 0, y: 0}\n      _MainTex:\n        m_Texture: {fileID: 0}\n        m_Scale: {x: 1, y: 1}\n        m_Offset: {x: 0, y: 0}\n      _MaskTex:\n        m_Texture: {fileID: 0}\n        m_Scale: {x: 1, y: 1}\n        m_Offset: {x: 0, y: 0}\n      _NormalMap:\n        m_Texture: {fileID: 0}\n        m_Scale: {x: 1, y: 1}\n        m_Offset: {x: 0, y: 0}\n    m_Ints: {}\n    m_Floats:\n      _EnableExternalAlpha: 0\n    m_Colors:\n      _Color: {r: 1, g: 1, b: 1, a: 1}\n      _Flip: {r: 1, g: 1, b: 1, a: 1}\n      _RendererColor: {r: 1, g: 1, b: 1, a: 1}\n  m_BuildTextureStacks: []\n",
+      "materialAdapter": "source particle material -> native alpha blend; original RGB/alpha/sprite preserved; shader/HDR edge bounded"
+    },
+    {
+      "nodeName": "fume_short",
+      "nodeIndex": 12,
+      "sourceTransformFileId": 4632746491512912,
+      "sourcePosition": {
+        "x": 0.75,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "sourceRotation": {
+        "x": -0.5,
+        "y": 0.5,
+        "z": -0.5,
+        "w": 0.5
+      },
+      "sourceScale": {
+        "x": 0.5,
+        "y": 0.5000001,
+        "z": 0.5000001
+      },
+      "sourceActive": true,
+      "rendererEnabled": true,
+      "duration": 0.5,
+      "delay": 0.0,
+      "lifetime": 0.5,
+      "speed": 5.0,
+      "size": 1.0,
+      "rotation": 0.0,
+      "rate": 100.0,
+      "maxActive": 4,
+      "sourceStopAction": 0,
+      "sourceSimulationSpace": 0,
+      "sourceScalingMode": 1,
+      "enabledModules": [
+        "InitialModule",
+        "ShapeModule",
+        "EmissionModule",
+        "UVModule"
+      ],
+      "sizeCurve": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "shape": {
+        "type": 4,
+        "radius": 0.0001,
+        "scale": {
+          "x": 1.0,
+          "y": 1.0,
+          "z": 1.0
+        },
+        "angle": 20.0
+      },
+      "sprite": {
+        "sourceGuid": "c1e0af47256647145bc7802568f6e30c",
+        "source": "Resources/particle/2_0.asset",
+        "sourceTexture": "Resources/particle/fenhelan.png",
+        "sourceTextureSha256": "e9c3aeb41c6500802d790610891cb278d3e775099da17faff0234b39fb5a755e",
+        "texture": "textures/c1e0af47256647145bc7802568f6e30c.png",
+        "textureSha256": "6cb9f834bef468d3d4e1923b9c4b12c6f4aef90e400b43a3e035156c9acffe2d",
+        "width": 32,
+        "height": 27,
+        "pixelsPerUnit": 100.0,
+        "sourceSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: 2\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 39\n    width: 32\n    height: 27\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    9f7ee2e50f2d4134c8f01161650c082f: 1954151049041183748\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 0b6e6d0ab26e1a448854966098e886c7, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: 0ad723be713d0a3e000000000ad7233e713d0a3e000000000ad723be713d0abe000000000ad7233e713d0abe000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 39\n      width: 32\n      height: 27\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 20, z: 100, w: 52.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n"
+      },
+      "material": "",
+      "color": {
+        "r": 0.764151,
+        "g": 0.56590426,
+        "b": 0.5714886,
+        "a": 1.0
+      },
+      "uvPolicy": "source single-sprite sequence invariant",
+      "shaderSource": "Shader/Universal Render Pipeline_2D_Sprite-Lit-Default.shader",
+      "shaderSha256": "39eb05c5d704c20d9fe845ed01d0206f0468477feaec635a06d3b705518a51cc",
+      "materialSource": "Material/Sprite-Lit-Default.mat",
+      "materialSha256": "15480e3bcd837b8129c6fa847fd8a3e1f93172dac09c3d39d5939476221a1236",
+      "serializedMaterial": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!21 &2100000\nMaterial:\n  serializedVersion: 8\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Sprite-Lit-Default\n  m_Shader: {fileID: 4800000, guid: 9b96bf551cb095c48a0cf08916b3d634, type: 3}\n  m_Parent: {fileID: 0}\n  m_ModifiedSerializedProperties: 0\n  m_ValidKeywords:\n  - ETC1_EXTERNAL_ALPHA\n  m_InvalidKeywords: []\n  m_LightmapFlags: 4\n  m_EnableInstancingVariants: 0\n  m_DoubleSidedGI: 0\n  m_CustomRenderQueue: -1\n  stringTagMap: {}\n  disabledShaderPasses: []\n  m_LockedProperties:\n  m_SavedProperties:\n    serializedVersion: 3\n    m_TexEnvs:\n      _AlphaTex:\n        m_Texture: {fileID: 0}\n        m_Scale: {x: 1, y: 1}\n        m_Offset: {x: 0, y: 0}\n      _MainTex:\n        m_Texture: {fileID: 0}\n        m_Scale: {x: 1, y: 1}\n        m_Offset: {x: 0, y: 0}\n      _MaskTex:\n        m_Texture: {fileID: 0}\n        m_Scale: {x: 1, y: 1}\n        m_Offset: {x: 0, y: 0}\n      _NormalMap:\n        m_Texture: {fileID: 0}\n        m_Scale: {x: 1, y: 1}\n        m_Offset: {x: 0, y: 0}\n    m_Ints: {}\n    m_Floats:\n      _EnableExternalAlpha: 0\n    m_Colors:\n      _Color: {r: 1, g: 1, b: 1, a: 1}\n      _Flip: {r: 1, g: 1, b: 1, a: 1}\n      _RendererColor: {r: 1, g: 1, b: 1, a: 1}\n  m_BuildTextureStacks: []\n",
+      "materialAdapter": "source particle material -> native alpha blend; original RGB/alpha/sprite preserved; shader/HDR edge bounded"
+    },
+    {
+      "nodeName": "fume_short",
+      "nodeIndex": 13,
+      "sourceTransformFileId": 4436073260064126,
+      "sourcePosition": {
+        "x": -0.75,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "sourceRotation": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": -0.5,
+        "w": -0.5
+      },
+      "sourceScale": {
+        "x": 0.5,
+        "y": 0.5000001,
+        "z": 0.5000001
+      },
+      "sourceActive": true,
+      "rendererEnabled": true,
+      "duration": 0.5,
+      "delay": 0.0,
+      "lifetime": 0.5,
+      "speed": 5.0,
+      "size": 1.0,
+      "rotation": 0.0,
+      "rate": 100.0,
+      "maxActive": 4,
+      "sourceStopAction": 0,
+      "sourceSimulationSpace": 0,
+      "sourceScalingMode": 1,
+      "enabledModules": [
+        "InitialModule",
+        "ShapeModule",
+        "EmissionModule",
+        "UVModule"
+      ],
+      "sizeCurve": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "shape": {
+        "type": 4,
+        "radius": 0.0001,
+        "scale": {
+          "x": 1.0,
+          "y": 1.0,
+          "z": 1.0
+        },
+        "angle": 20.0
+      },
+      "sprite": {
+        "sourceGuid": "c1e0af47256647145bc7802568f6e30c",
+        "source": "Resources/particle/2_0.asset",
+        "sourceTexture": "Resources/particle/fenhelan.png",
+        "sourceTextureSha256": "e9c3aeb41c6500802d790610891cb278d3e775099da17faff0234b39fb5a755e",
+        "texture": "textures/c1e0af47256647145bc7802568f6e30c.png",
+        "textureSha256": "6cb9f834bef468d3d4e1923b9c4b12c6f4aef90e400b43a3e035156c9acffe2d",
+        "width": 32,
+        "height": 27,
+        "pixelsPerUnit": 100.0,
+        "sourceSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: 2\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 39\n    width: 32\n    height: 27\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    9f7ee2e50f2d4134c8f01161650c082f: 1954151049041183748\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 0b6e6d0ab26e1a448854966098e886c7, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: 0ad723be713d0a3e000000000ad7233e713d0a3e000000000ad723be713d0abe000000000ad7233e713d0abe000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 39\n      width: 32\n      height: 27\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 20, z: 100, w: 52.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n"
+      },
+      "material": "",
+      "color": {
+        "r": 0.764151,
+        "g": 0.56590426,
+        "b": 0.5714886,
+        "a": 1.0
+      },
+      "uvPolicy": "source single-sprite sequence invariant",
+      "shaderSource": "Shader/Universal Render Pipeline_2D_Sprite-Lit-Default.shader",
+      "shaderSha256": "39eb05c5d704c20d9fe845ed01d0206f0468477feaec635a06d3b705518a51cc",
+      "materialSource": "Material/Sprite-Lit-Default.mat",
+      "materialSha256": "15480e3bcd837b8129c6fa847fd8a3e1f93172dac09c3d39d5939476221a1236",
+      "serializedMaterial": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!21 &2100000\nMaterial:\n  serializedVersion: 8\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Sprite-Lit-Default\n  m_Shader: {fileID: 4800000, guid: 9b96bf551cb095c48a0cf08916b3d634, type: 3}\n  m_Parent: {fileID: 0}\n  m_ModifiedSerializedProperties: 0\n  m_ValidKeywords:\n  - ETC1_EXTERNAL_ALPHA\n  m_InvalidKeywords: []\n  m_LightmapFlags: 4\n  m_EnableInstancingVariants: 0\n  m_DoubleSidedGI: 0\n  m_CustomRenderQueue: -1\n  stringTagMap: {}\n  disabledShaderPasses: []\n  m_LockedProperties:\n  m_SavedProperties:\n    serializedVersion: 3\n    m_TexEnvs:\n      _AlphaTex:\n        m_Texture: {fileID: 0}\n        m_Scale: {x: 1, y: 1}\n        m_Offset: {x: 0, y: 0}\n      _MainTex:\n        m_Texture: {fileID: 0}\n        m_Scale: {x: 1, y: 1}\n        m_Offset: {x: 0, y: 0}\n      _MaskTex:\n        m_Texture: {fileID: 0}\n        m_Scale: {x: 1, y: 1}\n        m_Offset: {x: 0, y: 0}\n      _NormalMap:\n        m_Texture: {fileID: 0}\n        m_Scale: {x: 1, y: 1}\n        m_Offset: {x: 0, y: 0}\n    m_Ints: {}\n    m_Floats:\n      _EnableExternalAlpha: 0\n    m_Colors:\n      _Color: {r: 1, g: 1, b: 1, a: 1}\n      _Flip: {r: 1, g: 1, b: 1, a: 1}\n      _RendererColor: {r: 1, g: 1, b: 1, a: 1}\n  m_BuildTextureStacks: []\n",
+      "materialAdapter": "source particle material -> native alpha blend; original RGB/alpha/sprite preserved; shader/HDR edge bounded"
+    },
+    {
+      "nodeName": "fume_short",
+      "nodeIndex": 14,
+      "sourceTransformFileId": 4000955326284023,
+      "sourcePosition": {
+        "x": 0.0,
+        "y": -0.75,
+        "z": 4.470349e-08
+      },
+      "sourceRotation": {
+        "x": 0.0,
+        "y": 0.70710677,
+        "z": -0.70710677,
+        "w": 0.0
+      },
+      "sourceScale": {
+        "x": 0.5,
+        "y": 0.5000001,
+        "z": 0.5000001
+      },
+      "sourceActive": true,
+      "rendererEnabled": true,
+      "duration": 0.5,
+      "delay": 0.0,
+      "lifetime": 0.5,
+      "speed": 5.0,
+      "size": 1.0,
+      "rotation": 0.0,
+      "rate": 100.0,
+      "maxActive": 4,
+      "sourceStopAction": 0,
+      "sourceSimulationSpace": 0,
+      "sourceScalingMode": 1,
+      "enabledModules": [
+        "InitialModule",
+        "ShapeModule",
+        "EmissionModule",
+        "UVModule"
+      ],
+      "sizeCurve": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "shape": {
+        "type": 4,
+        "radius": 0.0001,
+        "scale": {
+          "x": 1.0,
+          "y": 1.0,
+          "z": 1.0
+        },
+        "angle": 20.0
+      },
+      "sprite": {
+        "sourceGuid": "c1e0af47256647145bc7802568f6e30c",
+        "source": "Resources/particle/2_0.asset",
+        "sourceTexture": "Resources/particle/fenhelan.png",
+        "sourceTextureSha256": "e9c3aeb41c6500802d790610891cb278d3e775099da17faff0234b39fb5a755e",
+        "texture": "textures/c1e0af47256647145bc7802568f6e30c.png",
+        "textureSha256": "6cb9f834bef468d3d4e1923b9c4b12c6f4aef90e400b43a3e035156c9acffe2d",
+        "width": 32,
+        "height": 27,
+        "pixelsPerUnit": 100.0,
+        "sourceSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: 2\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 39\n    width: 32\n    height: 27\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    9f7ee2e50f2d4134c8f01161650c082f: 1954151049041183748\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 0b6e6d0ab26e1a448854966098e886c7, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: 0ad723be713d0a3e000000000ad7233e713d0a3e000000000ad723be713d0abe000000000ad7233e713d0abe000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 39\n      width: 32\n      height: 27\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 20, z: 100, w: 52.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n"
+      },
+      "material": "",
+      "color": {
+        "r": 0.764151,
+        "g": 0.56590426,
+        "b": 0.5714886,
+        "a": 1.0
+      },
+      "uvPolicy": "source single-sprite sequence invariant",
+      "shaderSource": "Shader/Universal Render Pipeline_2D_Sprite-Lit-Default.shader",
+      "shaderSha256": "39eb05c5d704c20d9fe845ed01d0206f0468477feaec635a06d3b705518a51cc",
+      "materialSource": "Material/Sprite-Lit-Default.mat",
+      "materialSha256": "15480e3bcd837b8129c6fa847fd8a3e1f93172dac09c3d39d5939476221a1236",
+      "serializedMaterial": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!21 &2100000\nMaterial:\n  serializedVersion: 8\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Sprite-Lit-Default\n  m_Shader: {fileID: 4800000, guid: 9b96bf551cb095c48a0cf08916b3d634, type: 3}\n  m_Parent: {fileID: 0}\n  m_ModifiedSerializedProperties: 0\n  m_ValidKeywords:\n  - ETC1_EXTERNAL_ALPHA\n  m_InvalidKeywords: []\n  m_LightmapFlags: 4\n  m_EnableInstancingVariants: 0\n  m_DoubleSidedGI: 0\n  m_CustomRenderQueue: -1\n  stringTagMap: {}\n  disabledShaderPasses: []\n  m_LockedProperties:\n  m_SavedProperties:\n    serializedVersion: 3\n    m_TexEnvs:\n      _AlphaTex:\n        m_Texture: {fileID: 0}\n        m_Scale: {x: 1, y: 1}\n        m_Offset: {x: 0, y: 0}\n      _MainTex:\n        m_Texture: {fileID: 0}\n        m_Scale: {x: 1, y: 1}\n        m_Offset: {x: 0, y: 0}\n      _MaskTex:\n        m_Texture: {fileID: 0}\n        m_Scale: {x: 1, y: 1}\n        m_Offset: {x: 0, y: 0}\n      _NormalMap:\n        m_Texture: {fileID: 0}\n        m_Scale: {x: 1, y: 1}\n        m_Offset: {x: 0, y: 0}\n    m_Ints: {}\n    m_Floats:\n      _EnableExternalAlpha: 0\n    m_Colors:\n      _Color: {r: 1, g: 1, b: 1, a: 1}\n      _Flip: {r: 1, g: 1, b: 1, a: 1}\n      _RendererColor: {r: 1, g: 1, b: 1, a: 1}\n  m_BuildTextureStacks: []\n",
+      "materialAdapter": "source particle material -> native alpha blend; original RGB/alpha/sprite preserved; shader/HDR edge bounded"
+    },
+    {
+      "nodeName": "fume_short",
+      "nodeIndex": 15,
+      "sourceTransformFileId": 4581786255902400,
+      "sourcePosition": {
+        "x": -0.53033006,
+        "y": -0.53033006,
+        "z": -6.705522e-08
+      },
+      "sourceRotation": {
+        "x": 0.27059805,
+        "y": 0.6532815,
+        "z": -0.6532815,
+        "w": -0.27059805
+      },
+      "sourceScale": {
+        "x": 0.5,
+        "y": 0.5000001,
+        "z": 0.5000001
+      },
+      "sourceActive": true,
+      "rendererEnabled": true,
+      "duration": 0.5,
+      "delay": 0.0,
+      "lifetime": 0.5,
+      "speed": 5.0,
+      "size": 1.0,
+      "rotation": 0.0,
+      "rate": 100.0,
+      "maxActive": 4,
+      "sourceStopAction": 0,
+      "sourceSimulationSpace": 0,
+      "sourceScalingMode": 1,
+      "enabledModules": [
+        "InitialModule",
+        "ShapeModule",
+        "EmissionModule",
+        "UVModule"
+      ],
+      "sizeCurve": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "shape": {
+        "type": 4,
+        "radius": 0.0001,
+        "scale": {
+          "x": 1.0,
+          "y": 1.0,
+          "z": 1.0
+        },
+        "angle": 20.0
+      },
+      "sprite": {
+        "sourceGuid": "c1e0af47256647145bc7802568f6e30c",
+        "source": "Resources/particle/2_0.asset",
+        "sourceTexture": "Resources/particle/fenhelan.png",
+        "sourceTextureSha256": "e9c3aeb41c6500802d790610891cb278d3e775099da17faff0234b39fb5a755e",
+        "texture": "textures/c1e0af47256647145bc7802568f6e30c.png",
+        "textureSha256": "6cb9f834bef468d3d4e1923b9c4b12c6f4aef90e400b43a3e035156c9acffe2d",
+        "width": 32,
+        "height": 27,
+        "pixelsPerUnit": 100.0,
+        "sourceSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: 2\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 39\n    width: 32\n    height: 27\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    9f7ee2e50f2d4134c8f01161650c082f: 1954151049041183748\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 0b6e6d0ab26e1a448854966098e886c7, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: 0ad723be713d0a3e000000000ad7233e713d0a3e000000000ad723be713d0abe000000000ad7233e713d0abe000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 39\n      width: 32\n      height: 27\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 20, z: 100, w: 52.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n"
+      },
+      "material": "",
+      "color": {
+        "r": 0.764151,
+        "g": 0.56590426,
+        "b": 0.5714886,
+        "a": 1.0
+      },
+      "uvPolicy": "source single-sprite sequence invariant",
+      "shaderSource": "Shader/Universal Render Pipeline_2D_Sprite-Lit-Default.shader",
+      "shaderSha256": "39eb05c5d704c20d9fe845ed01d0206f0468477feaec635a06d3b705518a51cc",
+      "materialSource": "Material/Sprite-Lit-Default.mat",
+      "materialSha256": "15480e3bcd837b8129c6fa847fd8a3e1f93172dac09c3d39d5939476221a1236",
+      "serializedMaterial": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!21 &2100000\nMaterial:\n  serializedVersion: 8\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Sprite-Lit-Default\n  m_Shader: {fileID: 4800000, guid: 9b96bf551cb095c48a0cf08916b3d634, type: 3}\n  m_Parent: {fileID: 0}\n  m_ModifiedSerializedProperties: 0\n  m_ValidKeywords:\n  - ETC1_EXTERNAL_ALPHA\n  m_InvalidKeywords: []\n  m_LightmapFlags: 4\n  m_EnableInstancingVariants: 0\n  m_DoubleSidedGI: 0\n  m_CustomRenderQueue: -1\n  stringTagMap: {}\n  disabledShaderPasses: []\n  m_LockedProperties:\n  m_SavedProperties:\n    serializedVersion: 3\n    m_TexEnvs:\n      _AlphaTex:\n        m_Texture: {fileID: 0}\n        m_Scale: {x: 1, y: 1}\n        m_Offset: {x: 0, y: 0}\n      _MainTex:\n        m_Texture: {fileID: 0}\n        m_Scale: {x: 1, y: 1}\n        m_Offset: {x: 0, y: 0}\n      _MaskTex:\n        m_Texture: {fileID: 0}\n        m_Scale: {x: 1, y: 1}\n        m_Offset: {x: 0, y: 0}\n      _NormalMap:\n        m_Texture: {fileID: 0}\n        m_Scale: {x: 1, y: 1}\n        m_Offset: {x: 0, y: 0}\n    m_Ints: {}\n    m_Floats:\n      _EnableExternalAlpha: 0\n    m_Colors:\n      _Color: {r: 1, g: 1, b: 1, a: 1}\n      _Flip: {r: 1, g: 1, b: 1, a: 1}\n      _RendererColor: {r: 1, g: 1, b: 1, a: 1}\n  m_BuildTextureStacks: []\n",
+      "materialAdapter": "source particle material -> native alpha blend; original RGB/alpha/sprite preserved; shader/HDR edge bounded"
+    }
+  ],
+  "birthPoints": [
+    {
+      "x": 1.5556355,
+      "y": 1.5556345,
+      "z": 0.0
+    },
+    {
+      "x": 0.0,
+      "y": 2.2,
+      "z": -0.0
+    },
+    {
+      "x": -1.4142139,
+      "y": 1.4142132,
+      "z": -0.0
+    },
+    {
+      "x": -2.0,
+      "y": -0.0,
+      "z": -0.0
+    },
+    {
+      "x": -1.4142137,
+      "y": -1.4142133,
+      "z": 0.0
+    },
+    {
+      "x": -0.0,
+      "y": -2.0,
+      "z": 0.0
+    },
+    {
+      "x": 1.4142127,
+      "y": -1.4142139,
+      "z": 0.0
+    },
+    {
+      "x": 2.0,
+      "y": 0.0,
+      "z": 0.0
+    }
+  ],
+  "sources": [
+    {
+      "path": "Material/Sprite-Lit-Default.mat",
+      "sha256": "15480e3bcd837b8129c6fa847fd8a3e1f93172dac09c3d39d5939476221a1236"
+    },
+    {
+      "path": "Material/Sprite-Lit-Default.mat.meta",
+      "sha256": "f1a5a6f0beae39db520e4f14757190af2eef087fd3b2c913ff8b123f350a142d"
+    },
+    {
+      "path": "Resources/particle/2_0.asset",
+      "sha256": "f4369ee5de647150698d41b46c0b8d6ffd337caa98a8af860b285687a6b74f9e"
+    },
+    {
+      "path": "Resources/particle/2_0.asset.meta",
+      "sha256": "f006a31c684045bedb5b0d9c0725d5b2956561693044f1d47b611dd17fbb4ebf"
+    },
+    {
+      "path": "Resources/particle/fenhelan.png",
+      "sha256": "e9c3aeb41c6500802d790610891cb278d3e775099da17faff0234b39fb5a755e"
+    },
+    {
+      "path": "Resources/particle/fenhelan.png.meta",
+      "sha256": "7bfdb82ac91d34e97dd512b1483cc83ee2baa56332ec573886413b1b326ff50e"
+    },
+    {
+      "path": "Resources/particle/prefabs/SuperGloom.prefab",
+      "sha256": "a2001010ffcb573dfefb1a6a9955d1c690929657b5c5a0c58da7cdc9fbc9b323"
+    },
+    {
+      "path": "Shader/Universal Render Pipeline_2D_Sprite-Lit-Default.shader",
+      "sha256": "39eb05c5d704c20d9fe845ed01d0206f0468477feaec635a06d3b705518a51cc"
+    },
+    {
+      "path": "Shader/Universal Render Pipeline_2D_Sprite-Lit-Default.shader.meta",
+      "sha256": "6846a7f5e992838ae10754f1d989248846b174a43f0dc7b451d4fea2042bb37e"
+    }
+  ],
+  "ignoredBindings": [],
+  "deferredComponents": [],
+  "limits": [
+    "Native2D sphere/cone projection and random distribution differ from Unity3D",
+    "Native10ms quantization and stopAction child-tree shutdown not Unity runtime verified",
+    "Shader HDR/soft-particle material edge behavior bounded; native alpha blend",
+    "Source single-sprite sheet timing invariant; nonlinear curves rejected"
+  ]
+}

@@ -33,7 +33,8 @@ enum NetSmokeScenarioId : uint8_t
 	NETSMOKE_SCENARIO_ENDLESS_ST = 12,
 	NETSMOKE_SCENARIO_PVP_1V1 = 13,
 	NETSMOKE_SCENARIO_ENDLESS_OVERFLOW = 14,
-	NETSMOKE_SCENARIO_ENDLESS_T = 15
+	NETSMOKE_SCENARIO_ENDLESS_T = 15,
+	NETSMOKE_SCENARIO_FUSION_VALIDATION = 16
 };
 
 // Runtime-only smoke setup.  Manifest/protocol tests never call this function,
@@ -72,6 +73,8 @@ inline const NetSmokeScenarioDefinition* NetSmokeScenarioTable(size_t& theCount)
 {
 	static const NetSmokeScenarioDefinition aScenarios[] =
 	{
+		{ NETSMOKE_SCENARIO_FUSION_VALIDATION, "fusion_validation", "fusion_validation", 1,
+			(uint8_t)GameMode::GAMEMODE_ADVENTURE, false },
 		{ NETSMOKE_SCENARIO_ADVENTURE_1, "adventure1", "adventure", 1,
 			(uint8_t)GameMode::GAMEMODE_ADVENTURE, false },
 		{ NETSMOKE_SCENARIO_ADVENTURE_5_BOWLING, "adventure5_bowling", "adventure", 5,

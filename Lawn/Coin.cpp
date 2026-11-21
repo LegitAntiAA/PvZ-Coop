@@ -1,4 +1,5 @@
 #include "Coin.h"
+#include "CoinMotion.h"
 #include "Board.h"
 #include "Cutscene.h"
 #include "ZenGarden.h"
@@ -18,6 +19,12 @@
 #include "../Sexy.TodLib/FilterEffect.h"
 #include "Net/NetCommon.h"
 #include "Net/NetManager.h"
+#include "Fusion/FusionNative.h"
+#include "Fusion/FusionNativeMoney.h"
+#include "Fusion/FusionNativeEquipment.h"
+#include "Fusion/FusionNativeEquipment268.h"
+#include "Fusion/FusionNativeTools268.h"
+#include "Fusion/FusionNativeVisual.h"
 
 Coin::Coin()
 {
@@ -510,7 +517,9 @@ bool Coin::IsPresentWithAdvice()
 //0x4309D0
 void Coin::ScoreCoin()
 {
+    if (LawnFusion::IsNativeEquipmentCoin(this)) return;
     Die();
+    if (LawnFusion::CreditNativeMoneyCoin(this)) return;
 
     if (IsSun())
     {
@@ -617,6 +626,7 @@ void Coin::AddBouncyArrow()
 
 void Coin::NetUpdatePresentation()
 {
+    if (LawnFusion::IsNativeEquipmentCoin(this)) return;
     if (!mNetGhost || mDead)
         return;
     if (!mIsBeingCollected)
@@ -790,26 +800,10 @@ void Coin::UpdateCollected()
         return;
     }
 
-    float aDeltaX = abs(mPosX - aDestX);
-    float aDeltaY = abs(mPosY - aDestY);
-    if (mPosX > aDestX)
-    {
-        mPosX -= aDeltaX / 21.0f;
-    }
-    else if (mPosX < aDestX)
-    {
-        mPosX += aDeltaX / 21.0f;
-    }
-    if (mPosY > aDestY)
-    {
-        mPosY -= aDeltaY / 21.0f;
-    }
-    else if (mPosY < aDestY)
-    {
-        mPosY += aDeltaY / 21.0f;
-    }
-
-    mCollectionDistance = sqrt(aDeltaY * aDeltaY + aDeltaX * aDeltaX);
+    const LawnCoinMotion::CollectionStep aMotion = LawnCoinMotion::AdvanceCollection(mPosX, mPosY, aDestX, aDestY);
+    mPosX = aMotion.x;
+    mPosY = aMotion.y;
+    mCollectionDistance = aMotion.distance;
 
     if (IsPresentWithAdvice())
     {
@@ -846,15 +840,16 @@ void Coin::UpdateCollected()
             ScoreCoin();
         }
 
-        mScale = ClampFloat(mCollectionDistance * 0.05f, 0.5f, 1.0f);
-        mScale *= GetSunScale();
+        mScale = LawnCoinMotion::CollectionScale(mCollectionDistance, GetSunScale());
     }
 }
 
 //0x431500
 void Coin::Update()
 {
+    if(LawnFusion::UpdateNativeFertilize269(this)||LawnFusion::UpdateNativeDroppedCard269(this))return;
     mCoinAge++;
+    if (LawnFusion::UpdateNativeEquipmentCoin(this)) return;
     if (mApp->mGameScene != GameScenes::SCENE_PLAYING && mApp->mGameScene != GameScenes::SCENE_AWARD && mBoard && !mBoard->mCutScene->ShouldRunUpsellBoard())
     {
         return;
@@ -926,6 +921,8 @@ SeedType Coin::GetFinalSeedPacketType()
 //0x431810
 void Coin::Draw(Graphics* g)
 {
+    if(LawnFusion::DrawNativeFertilize269(g,this)||LawnFusion::DrawNativeDroppedCard269(g,this))return;
+    if (LawnFusion::DrawNativeFusionEquipment(g,this)) return;
     g->SetColor(GetColor());
     if (mType == CoinType::COIN_DIAMOND)
     {
@@ -1164,6 +1161,7 @@ void Coin::FanOutCoins(CoinType theCoinType, int theNumCoins)
 //0x432000
 void Coin::TryAutoCollectAfterLevelAward()
 {
+    if (LawnFusion::IsNativeEquipmentCoin(this)) return;
     bool aCanBeAutoCollected = false;
     if (IsMoney() && mCoinMotion != CoinMotion::COIN_MOTION_FROM_PRESENT)
     {
@@ -1188,6 +1186,7 @@ void Coin::TryAutoCollectAfterLevelAward()
 //0x432060
 void Coin::Collect()
 {
+    if (LawnFusion::IsNativeEquipmentCoin(this)) return;
     if (mDead)
         return;
 
@@ -1457,7 +1456,9 @@ float Coin::GetSunScale()
 //0x4329A0
 int Coin::GetSunValue()
 {
-    return mType == CoinType::COIN_SUN ? 25 : mType == CoinType::COIN_SMALLSUN ? 15 : mType == CoinType::COIN_LARGESUN ? 50 : 0;
+    const int aValue = mType == CoinType::COIN_SUN ? 25 : mType == CoinType::COIN_SMALLSUN ? 15 : mType == CoinType::COIN_LARGESUN ? 50 : 0;
+    return LawnFusion::IsNativeFusionBoard(mBoard) && LawnFusion::GetNativeContext(mBoard) ?
+        LawnFusion::GetNativeCoinValue(this, aValue) : aValue;
 }
 
 //0x4329D0
@@ -1567,6 +1568,13 @@ void Coin::MouseDown(int x, int y, int theClickCount)
 //0x432DD0
 void Coin::Die()
 {
+    LawnFusion::NativeFertilize269CoinRemoving(this);
+    LawnFusion::NativeDroppedCard269Removing(this);
+    if (const auto* item=LawnFusion::GetNativeEquipmentData(this))
+    {
+        LawnFusion::ClearNativeEquipmentLease(mBoard,mNetId,item->instanceToken);
+        LawnFusion::NativeEquipmentCoinRemoving268(this);
+    }
     TOD_ASSERT(!mBoard || mBoard->mCursorObject->mCoinID != (CoinID)mBoard->mCoins.DataArrayGetID(this));
 
     mDead = true;

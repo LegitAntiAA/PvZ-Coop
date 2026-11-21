@@ -1,0 +1,4788 @@
+{
+  "schema": 1,
+  "sourcePrefab": "Resources/plants/starfruit/magnetstar/MagnetStarPrefab.prefab",
+  "unitsPerNativePixel": 0.01,
+  "applyRootMotion": false,
+  "static": false,
+  "root": 0,
+  "nodes": [
+    {
+      "name": "MagnetStarPrefab",
+      "active": true,
+      "tag": "Plant",
+      "parent": -1,
+      "path": "",
+      "position": {
+        "x": 2.044,
+        "y": 0.815,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 0.32,
+        "y": 0.32,
+        "z": 0.32
+      }
+    },
+    {
+      "name": "Starfruit_body",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "Starfruit_body",
+      "position": {
+        "x": -0.005000114,
+        "y": 1.8349999,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "Starfruit_eyes2",
+      "active": false,
+      "tag": "Untagged",
+      "parent": 1,
+      "path": "Starfruit_body/Starfruit_eyes2",
+      "position": {
+        "x": 0.1249998,
+        "y": 0.4900001,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "Starfruit_eyes1",
+      "active": false,
+      "tag": "Untagged",
+      "parent": 1,
+      "path": "Starfruit_body/Starfruit_eyes1",
+      "position": {
+        "x": 0.1149999,
+        "y": 0.45999992,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "Starfruit_stem",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 1,
+      "path": "Starfruit_body/Starfruit_stem",
+      "position": {
+        "x": -0.238,
+        "y": 1.7199999,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "Starfruit_leaf",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 4,
+      "path": "Starfruit_body/Starfruit_stem/Starfruit_leaf",
+      "position": {
+        "x": -0.30699977,
+        "y": 0.19599986,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "Starfruit_smile",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 1,
+      "path": "Starfruit_body/Starfruit_smile",
+      "position": {
+        "x": 0.291,
+        "y": 0.029,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "Starfruit_mouth",
+      "active": false,
+      "tag": "Untagged",
+      "parent": 1,
+      "path": "Starfruit_body/Starfruit_mouth",
+      "position": {
+        "x": 0.388,
+        "y": -0.193,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "Shadow",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "Shadow",
+      "position": {
+        "x": 0.02,
+        "y": 1.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 5.3957057,
+        "y": 5.913102,
+        "z": 0.84472895
+      }
+    },
+    {
+      "name": "Shoot1",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "Shoot1",
+      "position": {
+        "x": -0.42999983,
+        "y": 3.5099998,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.7071068,
+        "w": 0.7071068
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "Shoot2",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "Shoot2",
+      "position": {
+        "x": -0.43,
+        "y": 0.13999993,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": -0.7071068,
+        "w": 0.7071068
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "Shoot3",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "Shoot3",
+      "position": {
+        "x": -1.75,
+        "y": 2.18,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "Shoot4",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "Shoot4",
+      "position": {
+        "x": 1.7499998,
+        "y": 2.91,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.2588191,
+        "w": 0.9659258
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "Shoot5",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "Shoot5",
+      "position": {
+        "x": 1.75,
+        "y": 1.0100001,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": -0.258819,
+        "w": 0.9659259
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    }
+  ],
+  "sourceHierarchy": null,
+  "sprites": [
+    {
+      "texture": "textures/e699dfbb9a1f.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Starfruit_body\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 4\n    width: 452\n    height: 383\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    bbaab82ed75c0304ebb721db3751fc97: -6803446408903662684\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: a6d32cdf36d193b42ab315fabb4b5a73, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 21\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 9\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 080007000500060005000700030005000600040005000300010004000300000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 9\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 184\n      _typelessdata: 8fc2054052b8ee3f00000000d7a3104052b8aebf00000000d7a3104014aeb73f00000000cdccec3fb81ef53f00000000713daa3fb81ef5bf000000000ad723bfb81ef5bf00000000d7a370bfb81ef53f00000000d7a310c00000903f00000000d7a310c07b14aebd0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 4\n      width: 452\n      height: 383\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 230, z: 100, w: 195.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 2.0899999141693115,
+            "y": 1.8650000095367432,
+            "z": 0.0,
+            "u": 0.8574218582361937,
+            "v": 0.6269531240686774
+          },
+          {
+            "x": 2.259999990463257,
+            "y": -1.3650000095367432,
+            "z": 0.0,
+            "u": 0.8906249981373549,
+            "v": 0.9423828134313226
+          },
+          {
+            "x": 2.259999990463257,
+            "y": 1.434999942779541,
+            "z": 0.0,
+            "u": 0.8906249981373549,
+            "v": 0.6689453180879354
+          },
+          {
+            "x": 1.850000023841858,
+            "y": 1.9149999618530273,
+            "z": 0.0,
+            "u": 0.8105468796566129,
+            "v": 0.6220703162252903
+          },
+          {
+            "x": 1.3300000429153442,
+            "y": -1.9149999618530273,
+            "z": 0.0,
+            "u": 0.7089843833819032,
+            "v": 0.9960937462747097
+          },
+          {
+            "x": -0.6399999856948853,
+            "y": -1.9149999618530273,
+            "z": 0.0,
+            "u": 0.3242187527939677,
+            "v": 0.9960937462747097
+          },
+          {
+            "x": -0.9399999976158142,
+            "y": 1.9149999618530273,
+            "z": 0.0,
+            "u": 0.2656250004656613,
+            "v": 0.6220703162252903
+          },
+          {
+            "x": -2.259999990463257,
+            "y": 1.125,
+            "z": 0.0,
+            "u": 0.00781250186264515,
+            "v": 0.69921875
+          },
+          {
+            "x": -2.259999990463257,
+            "y": -0.08500000089406967,
+            "z": 0.0,
+            "u": 0.00781250186264515,
+            "v": 0.8173828125873115
+          }
+        ],
+        "indices": [
+          8,
+          7,
+          5,
+          6,
+          5,
+          7,
+          3,
+          5,
+          6,
+          4,
+          5,
+          3,
+          1,
+          4,
+          3,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/starfruit/magnetstar/Starfruit_body.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 4.0,
+        "width": 452.0,
+        "height": 383.0,
+        "yTop": 637.0
+      },
+      "logicalSize": {
+        "width": 452.0,
+        "height": 383.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "6d582e65d4854234388885765e589905",
+      "node": 1,
+      "sortingOrder": 1,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    },
+    {
+      "texture": "textures/e699dfbb9a1f.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Starfruit_mouth\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 715\n    width: 58\n    height: 46\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    bbaab82ed75c0304ebb721db3751fc97: 1486899381842952375\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: a6d32cdf36d193b42ab315fabb4b5a73, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 15\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 7\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 060005000400000004000500030004000000010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 7\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 152\n      _typelessdata: b81e853e1f856b3e00000000e17a943e3d0a57be00000000e17a943ecdcccc3d000000001f856b3e1f856bbe000000008fc2f5bd1f856bbe00000000e17a94be1f856b3e00000000e17a94beb81e05be000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 715\n      width: 58\n      height: 46\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 33, z: 100, w: 738}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.25999999046325684,
+            "y": 0.23000000417232513,
+            "z": 0.0,
+            "u": 0.11523437313735485,
+            "v": 0.2568359370925464
+          },
+          {
+            "x": 0.28999999165534973,
+            "y": -0.20999999344348907,
+            "z": 0.0,
+            "u": 0.1210937483701855,
+            "v": 0.29980468685971573
+          },
+          {
+            "x": 0.28999999165534973,
+            "y": 0.10000000149011612,
+            "z": 0.0,
+            "u": 0.1210937483701855,
+            "v": 0.26953124985448085
+          },
+          {
+            "x": 0.23000000417232513,
+            "y": -0.23000000417232513,
+            "z": 0.0,
+            "u": 0.10937500081490725,
+            "v": 0.3017578129074536
+          },
+          {
+            "x": -0.11999999731779099,
+            "y": -0.23000000417232513,
+            "z": 0.0,
+            "u": 0.04101562552386895,
+            "v": 0.3017578129074536
+          },
+          {
+            "x": -0.28999999165534973,
+            "y": 0.23000000417232513,
+            "z": 0.0,
+            "u": 0.007812501629814506,
+            "v": 0.2568359370925464
+          },
+          {
+            "x": -0.28999999165534973,
+            "y": -0.12999999523162842,
+            "z": 0.0,
+            "u": 0.007812501629814506,
+            "v": 0.2919921870343387
+          }
+        ],
+        "indices": [
+          6,
+          5,
+          4,
+          0,
+          4,
+          5,
+          3,
+          4,
+          0,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/starfruit/magnetstar/Starfruit_mouth.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 715.0,
+        "width": 58.0,
+        "height": 46.0,
+        "yTop": 263.0
+      },
+      "logicalSize": {
+        "width": 58.0,
+        "height": 46.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "6f7ecccf170861b4289a3b8a89a1b1cf",
+      "node": 7,
+      "sortingOrder": 2,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    },
+    {
+      "texture": "textures/e699dfbb9a1f.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Starfruit_smile\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 579\n    width: 112\n    height: 58\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    bbaab82ed75c0304ebb721db3751fc97: 4151973626877883593\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: a6d32cdf36d193b42ab315fabb4b5a73, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 18\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 8\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 070006000500040005000600030005000400000003000400010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 8\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 160\n      _typelessdata: 295c0f3fe17a943e0000000014aec73ee17a94be00000000295c0f3fec51b8bd000000008fc275bde17a94be000000000ad723bee17a943e00000000713d0abfb81e85be00000000295c0fbf5c8f423e00000000295c0fbf8fc275be0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 579\n      width: 112\n      height: 58\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 60, z: 100, w: 608}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.5600000023841858,
+            "y": 0.28999999165534973,
+            "z": 0.0,
+            "u": 0.2265625004656613,
+            "v": 0.37792968831490725
+          },
+          {
+            "x": 0.38999998569488525,
+            "y": -0.28999999165534973,
+            "z": 0.0,
+            "u": 0.19335937220603228,
+            "v": 0.43457031168509275
+          },
+          {
+            "x": 0.5600000023841858,
+            "y": -0.09000000357627869,
+            "z": 0.0,
+            "u": 0.2265625004656613,
+            "v": 0.41503906284924597
+          },
+          {
+            "x": -0.05999999865889549,
+            "y": -0.28999999165534973,
+            "z": 0.0,
+            "u": 0.10546875026193447,
+            "v": 0.43457031168509275
+          },
+          {
+            "x": -0.1599999964237213,
+            "y": 0.28999999165534973,
+            "z": 0.0,
+            "u": 0.08593750069849193,
+            "v": 0.37792968831490725
+          },
+          {
+            "x": -0.5400000214576721,
+            "y": -0.25999999046325684,
+            "z": 0.0,
+            "u": 0.011718745809048414,
+            "v": 0.4316406240686774
+          },
+          {
+            "x": -0.5600000023841858,
+            "y": 0.1899999976158142,
+            "z": 0.0,
+            "u": 0.007812499534338713,
+            "v": 0.38769531273283064
+          },
+          {
+            "x": -0.5600000023841858,
+            "y": -0.23999999463558197,
+            "z": 0.0,
+            "u": 0.007812499534338713,
+            "v": 0.42968749947613105
+          }
+        ],
+        "indices": [
+          7,
+          6,
+          5,
+          4,
+          5,
+          6,
+          3,
+          5,
+          4,
+          0,
+          3,
+          4,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/starfruit/magnetstar/Starfruit_smile.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 579.0,
+        "width": 112.0,
+        "height": 58.0,
+        "yTop": 387.0
+      },
+      "logicalSize": {
+        "width": 112.0,
+        "height": 58.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "674fa05b7a468674cbad54bf81ea76e2",
+      "node": 6,
+      "sortingOrder": 3,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    },
+    {
+      "texture": "textures/e699dfbb9a1f.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Starfruit_stem\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 645\n    width: 80\n    height: 62\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    bbaab82ed75c0304ebb721db3751fc97: -7708174319042043936\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: a6d32cdf36d193b42ab315fabb4b5a73, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 39\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 14\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 0900070006000d000c000b0008000b000c000a000b00080009000a000800070009000800040007000800060007000400050006000400030005000400000003000400010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 14\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 288\n      _typelessdata: 713d8a3e52b89e3e00000000cdcccc3e0ad7a3bc00000000cdcccc3eec51383e00000000cdcc4c3e295c0fbe000000008fc2f53c52b89e3e000000000ad723bcec51b8bd000000000ad7a3bc0ad7a3bc000000008fc2f5bc0ad7233c00000000ae4761be8fc2753e00000000cdcc4cbd8fc2f5bd00000000cdcc4cbd52b89ebe0000000052b89ebe52b89ebe00000000cdccccbe295c8f3d00000000cdccccbeec5138be00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 645\n      width: 80\n      height: 62\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 44, z: 100, w: 676}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.27000001072883606,
+            "y": 0.3100000023841858,
+            "z": 0.0,
+            "u": 0.1386718770954758,
+            "v": 0.30957031226716936
+          },
+          {
+            "x": 0.4000000059604645,
+            "y": -0.019999999552965164,
+            "z": 0.0,
+            "u": 0.16406250116415322,
+            "v": 0.34179687495634425
+          },
+          {
+            "x": 0.4000000059604645,
+            "y": 0.18000000715255737,
+            "z": 0.0,
+            "u": 0.16406250116415322,
+            "v": 0.32226562430150807
+          },
+          {
+            "x": 0.20000000298023224,
+            "y": -0.14000000059604645,
+            "z": 0.0,
+            "u": 0.1250000005820766,
+            "v": 0.35351562505820766
+          },
+          {
+            "x": 0.029999999329447746,
+            "y": 0.3100000023841858,
+            "z": 0.0,
+            "u": 0.09179687486903276,
+            "v": 0.30957031226716936
+          },
+          {
+            "x": -0.009999999776482582,
+            "y": -0.09000000357627869,
+            "z": 0.0,
+            "u": 0.08398437504365575,
+            "v": 0.34863281284924597
+          },
+          {
+            "x": -0.019999999552965164,
+            "y": -0.019999999552965164,
+            "z": 0.0,
+            "u": 0.08203125008731149,
+            "v": 0.34179687495634425
+          },
+          {
+            "x": -0.029999999329447746,
+            "y": 0.009999999776482582,
+            "z": 0.0,
+            "u": 0.08007812513096724,
+            "v": 0.3388671875218279
+          },
+          {
+            "x": -0.2199999988079071,
+            "y": 0.23999999463558197,
+            "z": 0.0,
+            "u": 0.042968750232830644,
+            "v": 0.31640625052386895
+          },
+          {
+            "x": -0.05000000074505806,
+            "y": -0.11999999731779099,
+            "z": 0.0,
+            "u": 0.07617187485448085,
+            "v": 0.3515624997380655
+          },
+          {
+            "x": -0.05000000074505806,
+            "y": -0.3100000023841858,
+            "z": 0.0,
+            "u": 0.07617187485448085,
+            "v": 0.37011718773283064
+          },
+          {
+            "x": -0.3100000023841858,
+            "y": -0.3100000023841858,
+            "z": 0.0,
+            "u": 0.025390624534338713,
+            "v": 0.37011718773283064
+          },
+          {
+            "x": -0.4000000059604645,
+            "y": 0.07000000029802322,
+            "z": 0.0,
+            "u": 0.007812498835846782,
+            "v": 0.33300781247089617
+          },
+          {
+            "x": -0.4000000059604645,
+            "y": -0.18000000715255737,
+            "z": 0.0,
+            "u": 0.007812498835846782,
+            "v": 0.35742187569849193
+          }
+        ],
+        "indices": [
+          9,
+          7,
+          6,
+          13,
+          12,
+          11,
+          8,
+          11,
+          12,
+          10,
+          11,
+          8,
+          9,
+          10,
+          8,
+          7,
+          9,
+          8,
+          4,
+          7,
+          8,
+          6,
+          7,
+          4,
+          5,
+          6,
+          4,
+          3,
+          5,
+          4,
+          0,
+          3,
+          4,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/starfruit/magnetstar/Starfruit_stem.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 645.0,
+        "width": 80.0,
+        "height": 62.0,
+        "yTop": 317.0
+      },
+      "logicalSize": {
+        "width": 80.0,
+        "height": 62.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "56f43dffbc3f26d4b8f1af16c39a12ce",
+      "node": 4,
+      "sortingOrder": 5,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    },
+    {
+      "texture": "textures/e699dfbb9a1f.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Starfruit_eyes1\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 487\n    width: 146\n    height: 84\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    bbaab82ed75c0304ebb721db3751fc97: 4619729524496028644\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: a6d32cdf36d193b42ab315fabb4b5a73, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 18\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 8\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 070006000500040005000600030005000400000003000400010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 8\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 160\n      _typelessdata: 713d0a3f3d0ad73e0000000048e13a3f295c0fbe0000000048e13a3f52b89e3e00000000b81e053f3d0ad7be0000000048e1fabe3d0ad73e00000000295c0fbf3d0ad7be0000000048e13abf0ad7a33e0000000048e13abf295c0fbe0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 487\n      width: 146\n      height: 84\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 77, z: 100, w: 529}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.5400000214576721,
+            "y": 0.41999998688697815,
+            "z": 0.0,
+            "u": 0.2558593791909516,
+            "v": 0.44238281378056854
+          },
+          {
+            "x": 0.7300000190734863,
+            "y": -0.14000000059604645,
+            "z": 0.0,
+            "u": 0.2929687537252903,
+            "v": 0.49707031255820766
+          },
+          {
+            "x": 0.7300000190734863,
+            "y": 0.3100000023841858,
+            "z": 0.0,
+            "u": 0.2929687537252903,
+            "v": 0.45312499976716936
+          },
+          {
+            "x": 0.5199999809265137,
+            "y": -0.41999998688697815,
+            "z": 0.0,
+            "u": 0.2519531212747097,
+            "v": 0.5244140612194315
+          },
+          {
+            "x": -0.49000000953674316,
+            "y": 0.41999998688697815,
+            "z": 0.0,
+            "u": 0.05468749813735485,
+            "v": 0.44238281378056854
+          },
+          {
+            "x": -0.5600000023841858,
+            "y": -0.41999998688697815,
+            "z": 0.0,
+            "u": 0.04101562453433871,
+            "v": 0.5244140612194315
+          },
+          {
+            "x": -0.7300000190734863,
+            "y": 0.3199999928474426,
+            "z": 0.0,
+            "u": 0.0078124962747097015,
+            "v": 0.45214843819849193
+          },
+          {
+            "x": -0.7300000190734863,
+            "y": -0.14000000059604645,
+            "z": 0.0,
+            "u": 0.0078124962747097015,
+            "v": 0.49707031255820766
+          }
+        ],
+        "indices": [
+          7,
+          6,
+          5,
+          4,
+          5,
+          6,
+          3,
+          5,
+          4,
+          0,
+          3,
+          4,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/starfruit/magnetstar/Starfruit_eyes1.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 487.0,
+        "width": 146.0,
+        "height": 84.0,
+        "yTop": 453.0
+      },
+      "logicalSize": {
+        "width": 146.0,
+        "height": 84.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "6d10dc0dc110bcf429fad7be6d4e7359",
+      "node": 3,
+      "sortingOrder": 6,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    },
+    {
+      "texture": "textures/e699dfbb9a1f.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Starfruit_eyes2\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 395\n    width: 146\n    height: 84\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    bbaab82ed75c0304ebb721db3751fc97: 1026126448060856257\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: a6d32cdf36d193b42ab315fabb4b5a73, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 18\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 8\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 070006000500040005000600030005000400000003000400010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 8\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 160\n      _typelessdata: 713d0a3f3d0ad73e0000000048e13a3f295c0fbe0000000048e13a3f52b89e3e00000000b81e053f3d0ad7be0000000048e1fabe3d0ad73e00000000295c0fbf3d0ad7be0000000048e13abf0ad7a33e0000000048e13abf295c0fbe0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 395\n      width: 146\n      height: 84\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 77, z: 100, w: 437}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.5400000214576721,
+            "y": 0.41999998688697815,
+            "z": 0.0,
+            "u": 0.2558593791909516,
+            "v": 0.5322265637805685
+          },
+          {
+            "x": 0.7300000190734863,
+            "y": -0.14000000059604645,
+            "z": 0.0,
+            "u": 0.2929687537252903,
+            "v": 0.5869140625582077
+          },
+          {
+            "x": 0.7300000190734863,
+            "y": 0.3100000023841858,
+            "z": 0.0,
+            "u": 0.2929687537252903,
+            "v": 0.5429687497671694
+          },
+          {
+            "x": 0.5199999809265137,
+            "y": -0.41999998688697815,
+            "z": 0.0,
+            "u": 0.2519531212747097,
+            "v": 0.6142578112194315
+          },
+          {
+            "x": -0.49000000953674316,
+            "y": 0.41999998688697815,
+            "z": 0.0,
+            "u": 0.05468749813735485,
+            "v": 0.5322265637805685
+          },
+          {
+            "x": -0.5600000023841858,
+            "y": -0.41999998688697815,
+            "z": 0.0,
+            "u": 0.04101562453433871,
+            "v": 0.6142578112194315
+          },
+          {
+            "x": -0.7300000190734863,
+            "y": 0.3199999928474426,
+            "z": 0.0,
+            "u": 0.0078124962747097015,
+            "v": 0.5419921881984919
+          },
+          {
+            "x": -0.7300000190734863,
+            "y": -0.14000000059604645,
+            "z": 0.0,
+            "u": 0.0078124962747097015,
+            "v": 0.5869140625582077
+          }
+        ],
+        "indices": [
+          7,
+          6,
+          5,
+          4,
+          5,
+          6,
+          3,
+          5,
+          4,
+          0,
+          3,
+          4,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/starfruit/magnetstar/Starfruit_eyes2.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 395.0,
+        "width": 146.0,
+        "height": 84.0,
+        "yTop": 545.0
+      },
+      "logicalSize": {
+        "width": 146.0,
+        "height": 84.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "e575c69b87fcd244abc3e4b72dc213df",
+      "node": 2,
+      "sortingOrder": 7,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    }
+  ],
+  "spriteVariants": {
+    "6d582e65d4854234388885765e589905": {
+      "texture": "textures/e699dfbb9a1f.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Starfruit_body\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 4\n    width: 452\n    height: 383\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    bbaab82ed75c0304ebb721db3751fc97: -6803446408903662684\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: a6d32cdf36d193b42ab315fabb4b5a73, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 21\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 9\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 080007000500060005000700030005000600040005000300010004000300000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 9\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 184\n      _typelessdata: 8fc2054052b8ee3f00000000d7a3104052b8aebf00000000d7a3104014aeb73f00000000cdccec3fb81ef53f00000000713daa3fb81ef5bf000000000ad723bfb81ef5bf00000000d7a370bfb81ef53f00000000d7a310c00000903f00000000d7a310c07b14aebd0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 4\n      width: 452\n      height: 383\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 230, z: 100, w: 195.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 2.0899999141693115,
+            "y": 1.8650000095367432,
+            "z": 0.0,
+            "u": 0.8574218582361937,
+            "v": 0.6269531240686774
+          },
+          {
+            "x": 2.259999990463257,
+            "y": -1.3650000095367432,
+            "z": 0.0,
+            "u": 0.8906249981373549,
+            "v": 0.9423828134313226
+          },
+          {
+            "x": 2.259999990463257,
+            "y": 1.434999942779541,
+            "z": 0.0,
+            "u": 0.8906249981373549,
+            "v": 0.6689453180879354
+          },
+          {
+            "x": 1.850000023841858,
+            "y": 1.9149999618530273,
+            "z": 0.0,
+            "u": 0.8105468796566129,
+            "v": 0.6220703162252903
+          },
+          {
+            "x": 1.3300000429153442,
+            "y": -1.9149999618530273,
+            "z": 0.0,
+            "u": 0.7089843833819032,
+            "v": 0.9960937462747097
+          },
+          {
+            "x": -0.6399999856948853,
+            "y": -1.9149999618530273,
+            "z": 0.0,
+            "u": 0.3242187527939677,
+            "v": 0.9960937462747097
+          },
+          {
+            "x": -0.9399999976158142,
+            "y": 1.9149999618530273,
+            "z": 0.0,
+            "u": 0.2656250004656613,
+            "v": 0.6220703162252903
+          },
+          {
+            "x": -2.259999990463257,
+            "y": 1.125,
+            "z": 0.0,
+            "u": 0.00781250186264515,
+            "v": 0.69921875
+          },
+          {
+            "x": -2.259999990463257,
+            "y": -0.08500000089406967,
+            "z": 0.0,
+            "u": 0.00781250186264515,
+            "v": 0.8173828125873115
+          }
+        ],
+        "indices": [
+          8,
+          7,
+          5,
+          6,
+          5,
+          7,
+          3,
+          5,
+          6,
+          4,
+          5,
+          3,
+          1,
+          4,
+          3,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/starfruit/magnetstar/Starfruit_body.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 4.0,
+        "width": 452.0,
+        "height": 383.0,
+        "yTop": 637.0
+      },
+      "logicalSize": {
+        "width": 452.0,
+        "height": 383.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "e575c69b87fcd244abc3e4b72dc213df": {
+      "texture": "textures/e699dfbb9a1f.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Starfruit_eyes2\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 395\n    width: 146\n    height: 84\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    bbaab82ed75c0304ebb721db3751fc97: 1026126448060856257\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: a6d32cdf36d193b42ab315fabb4b5a73, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 18\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 8\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 070006000500040005000600030005000400000003000400010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 8\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 160\n      _typelessdata: 713d0a3f3d0ad73e0000000048e13a3f295c0fbe0000000048e13a3f52b89e3e00000000b81e053f3d0ad7be0000000048e1fabe3d0ad73e00000000295c0fbf3d0ad7be0000000048e13abf0ad7a33e0000000048e13abf295c0fbe0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 395\n      width: 146\n      height: 84\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 77, z: 100, w: 437}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.5400000214576721,
+            "y": 0.41999998688697815,
+            "z": 0.0,
+            "u": 0.2558593791909516,
+            "v": 0.5322265637805685
+          },
+          {
+            "x": 0.7300000190734863,
+            "y": -0.14000000059604645,
+            "z": 0.0,
+            "u": 0.2929687537252903,
+            "v": 0.5869140625582077
+          },
+          {
+            "x": 0.7300000190734863,
+            "y": 0.3100000023841858,
+            "z": 0.0,
+            "u": 0.2929687537252903,
+            "v": 0.5429687497671694
+          },
+          {
+            "x": 0.5199999809265137,
+            "y": -0.41999998688697815,
+            "z": 0.0,
+            "u": 0.2519531212747097,
+            "v": 0.6142578112194315
+          },
+          {
+            "x": -0.49000000953674316,
+            "y": 0.41999998688697815,
+            "z": 0.0,
+            "u": 0.05468749813735485,
+            "v": 0.5322265637805685
+          },
+          {
+            "x": -0.5600000023841858,
+            "y": -0.41999998688697815,
+            "z": 0.0,
+            "u": 0.04101562453433871,
+            "v": 0.6142578112194315
+          },
+          {
+            "x": -0.7300000190734863,
+            "y": 0.3199999928474426,
+            "z": 0.0,
+            "u": 0.0078124962747097015,
+            "v": 0.5419921881984919
+          },
+          {
+            "x": -0.7300000190734863,
+            "y": -0.14000000059604645,
+            "z": 0.0,
+            "u": 0.0078124962747097015,
+            "v": 0.5869140625582077
+          }
+        ],
+        "indices": [
+          7,
+          6,
+          5,
+          4,
+          5,
+          6,
+          3,
+          5,
+          4,
+          0,
+          3,
+          4,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/starfruit/magnetstar/Starfruit_eyes2.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 395.0,
+        "width": 146.0,
+        "height": 84.0,
+        "yTop": 545.0
+      },
+      "logicalSize": {
+        "width": 146.0,
+        "height": 84.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "6d10dc0dc110bcf429fad7be6d4e7359": {
+      "texture": "textures/e699dfbb9a1f.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Starfruit_eyes1\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 487\n    width: 146\n    height: 84\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    bbaab82ed75c0304ebb721db3751fc97: 4619729524496028644\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: a6d32cdf36d193b42ab315fabb4b5a73, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 18\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 8\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 070006000500040005000600030005000400000003000400010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 8\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 160\n      _typelessdata: 713d0a3f3d0ad73e0000000048e13a3f295c0fbe0000000048e13a3f52b89e3e00000000b81e053f3d0ad7be0000000048e1fabe3d0ad73e00000000295c0fbf3d0ad7be0000000048e13abf0ad7a33e0000000048e13abf295c0fbe0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 487\n      width: 146\n      height: 84\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 77, z: 100, w: 529}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.5400000214576721,
+            "y": 0.41999998688697815,
+            "z": 0.0,
+            "u": 0.2558593791909516,
+            "v": 0.44238281378056854
+          },
+          {
+            "x": 0.7300000190734863,
+            "y": -0.14000000059604645,
+            "z": 0.0,
+            "u": 0.2929687537252903,
+            "v": 0.49707031255820766
+          },
+          {
+            "x": 0.7300000190734863,
+            "y": 0.3100000023841858,
+            "z": 0.0,
+            "u": 0.2929687537252903,
+            "v": 0.45312499976716936
+          },
+          {
+            "x": 0.5199999809265137,
+            "y": -0.41999998688697815,
+            "z": 0.0,
+            "u": 0.2519531212747097,
+            "v": 0.5244140612194315
+          },
+          {
+            "x": -0.49000000953674316,
+            "y": 0.41999998688697815,
+            "z": 0.0,
+            "u": 0.05468749813735485,
+            "v": 0.44238281378056854
+          },
+          {
+            "x": -0.5600000023841858,
+            "y": -0.41999998688697815,
+            "z": 0.0,
+            "u": 0.04101562453433871,
+            "v": 0.5244140612194315
+          },
+          {
+            "x": -0.7300000190734863,
+            "y": 0.3199999928474426,
+            "z": 0.0,
+            "u": 0.0078124962747097015,
+            "v": 0.45214843819849193
+          },
+          {
+            "x": -0.7300000190734863,
+            "y": -0.14000000059604645,
+            "z": 0.0,
+            "u": 0.0078124962747097015,
+            "v": 0.49707031255820766
+          }
+        ],
+        "indices": [
+          7,
+          6,
+          5,
+          4,
+          5,
+          6,
+          3,
+          5,
+          4,
+          0,
+          3,
+          4,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/starfruit/magnetstar/Starfruit_eyes1.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 487.0,
+        "width": 146.0,
+        "height": 84.0,
+        "yTop": 453.0
+      },
+      "logicalSize": {
+        "width": 146.0,
+        "height": 84.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "56f43dffbc3f26d4b8f1af16c39a12ce": {
+      "texture": "textures/e699dfbb9a1f.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Starfruit_stem\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 645\n    width: 80\n    height: 62\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    bbaab82ed75c0304ebb721db3751fc97: -7708174319042043936\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: a6d32cdf36d193b42ab315fabb4b5a73, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 39\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 14\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 0900070006000d000c000b0008000b000c000a000b00080009000a000800070009000800040007000800060007000400050006000400030005000400000003000400010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 14\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 288\n      _typelessdata: 713d8a3e52b89e3e00000000cdcccc3e0ad7a3bc00000000cdcccc3eec51383e00000000cdcc4c3e295c0fbe000000008fc2f53c52b89e3e000000000ad723bcec51b8bd000000000ad7a3bc0ad7a3bc000000008fc2f5bc0ad7233c00000000ae4761be8fc2753e00000000cdcc4cbd8fc2f5bd00000000cdcc4cbd52b89ebe0000000052b89ebe52b89ebe00000000cdccccbe295c8f3d00000000cdccccbeec5138be00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 645\n      width: 80\n      height: 62\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 44, z: 100, w: 676}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.27000001072883606,
+            "y": 0.3100000023841858,
+            "z": 0.0,
+            "u": 0.1386718770954758,
+            "v": 0.30957031226716936
+          },
+          {
+            "x": 0.4000000059604645,
+            "y": -0.019999999552965164,
+            "z": 0.0,
+            "u": 0.16406250116415322,
+            "v": 0.34179687495634425
+          },
+          {
+            "x": 0.4000000059604645,
+            "y": 0.18000000715255737,
+            "z": 0.0,
+            "u": 0.16406250116415322,
+            "v": 0.32226562430150807
+          },
+          {
+            "x": 0.20000000298023224,
+            "y": -0.14000000059604645,
+            "z": 0.0,
+            "u": 0.1250000005820766,
+            "v": 0.35351562505820766
+          },
+          {
+            "x": 0.029999999329447746,
+            "y": 0.3100000023841858,
+            "z": 0.0,
+            "u": 0.09179687486903276,
+            "v": 0.30957031226716936
+          },
+          {
+            "x": -0.009999999776482582,
+            "y": -0.09000000357627869,
+            "z": 0.0,
+            "u": 0.08398437504365575,
+            "v": 0.34863281284924597
+          },
+          {
+            "x": -0.019999999552965164,
+            "y": -0.019999999552965164,
+            "z": 0.0,
+            "u": 0.08203125008731149,
+            "v": 0.34179687495634425
+          },
+          {
+            "x": -0.029999999329447746,
+            "y": 0.009999999776482582,
+            "z": 0.0,
+            "u": 0.08007812513096724,
+            "v": 0.3388671875218279
+          },
+          {
+            "x": -0.2199999988079071,
+            "y": 0.23999999463558197,
+            "z": 0.0,
+            "u": 0.042968750232830644,
+            "v": 0.31640625052386895
+          },
+          {
+            "x": -0.05000000074505806,
+            "y": -0.11999999731779099,
+            "z": 0.0,
+            "u": 0.07617187485448085,
+            "v": 0.3515624997380655
+          },
+          {
+            "x": -0.05000000074505806,
+            "y": -0.3100000023841858,
+            "z": 0.0,
+            "u": 0.07617187485448085,
+            "v": 0.37011718773283064
+          },
+          {
+            "x": -0.3100000023841858,
+            "y": -0.3100000023841858,
+            "z": 0.0,
+            "u": 0.025390624534338713,
+            "v": 0.37011718773283064
+          },
+          {
+            "x": -0.4000000059604645,
+            "y": 0.07000000029802322,
+            "z": 0.0,
+            "u": 0.007812498835846782,
+            "v": 0.33300781247089617
+          },
+          {
+            "x": -0.4000000059604645,
+            "y": -0.18000000715255737,
+            "z": 0.0,
+            "u": 0.007812498835846782,
+            "v": 0.35742187569849193
+          }
+        ],
+        "indices": [
+          9,
+          7,
+          6,
+          13,
+          12,
+          11,
+          8,
+          11,
+          12,
+          10,
+          11,
+          8,
+          9,
+          10,
+          8,
+          7,
+          9,
+          8,
+          4,
+          7,
+          8,
+          6,
+          7,
+          4,
+          5,
+          6,
+          4,
+          3,
+          5,
+          4,
+          0,
+          3,
+          4,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/starfruit/magnetstar/Starfruit_stem.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 645.0,
+        "width": 80.0,
+        "height": 62.0,
+        "yTop": 317.0
+      },
+      "logicalSize": {
+        "width": 80.0,
+        "height": 62.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "674fa05b7a468674cbad54bf81ea76e2": {
+      "texture": "textures/e699dfbb9a1f.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Starfruit_smile\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 579\n    width: 112\n    height: 58\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    bbaab82ed75c0304ebb721db3751fc97: 4151973626877883593\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: a6d32cdf36d193b42ab315fabb4b5a73, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 18\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 8\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 070006000500040005000600030005000400000003000400010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 8\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 160\n      _typelessdata: 295c0f3fe17a943e0000000014aec73ee17a94be00000000295c0f3fec51b8bd000000008fc275bde17a94be000000000ad723bee17a943e00000000713d0abfb81e85be00000000295c0fbf5c8f423e00000000295c0fbf8fc275be0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 579\n      width: 112\n      height: 58\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 60, z: 100, w: 608}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.5600000023841858,
+            "y": 0.28999999165534973,
+            "z": 0.0,
+            "u": 0.2265625004656613,
+            "v": 0.37792968831490725
+          },
+          {
+            "x": 0.38999998569488525,
+            "y": -0.28999999165534973,
+            "z": 0.0,
+            "u": 0.19335937220603228,
+            "v": 0.43457031168509275
+          },
+          {
+            "x": 0.5600000023841858,
+            "y": -0.09000000357627869,
+            "z": 0.0,
+            "u": 0.2265625004656613,
+            "v": 0.41503906284924597
+          },
+          {
+            "x": -0.05999999865889549,
+            "y": -0.28999999165534973,
+            "z": 0.0,
+            "u": 0.10546875026193447,
+            "v": 0.43457031168509275
+          },
+          {
+            "x": -0.1599999964237213,
+            "y": 0.28999999165534973,
+            "z": 0.0,
+            "u": 0.08593750069849193,
+            "v": 0.37792968831490725
+          },
+          {
+            "x": -0.5400000214576721,
+            "y": -0.25999999046325684,
+            "z": 0.0,
+            "u": 0.011718745809048414,
+            "v": 0.4316406240686774
+          },
+          {
+            "x": -0.5600000023841858,
+            "y": 0.1899999976158142,
+            "z": 0.0,
+            "u": 0.007812499534338713,
+            "v": 0.38769531273283064
+          },
+          {
+            "x": -0.5600000023841858,
+            "y": -0.23999999463558197,
+            "z": 0.0,
+            "u": 0.007812499534338713,
+            "v": 0.42968749947613105
+          }
+        ],
+        "indices": [
+          7,
+          6,
+          5,
+          4,
+          5,
+          6,
+          3,
+          5,
+          4,
+          0,
+          3,
+          4,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/starfruit/magnetstar/Starfruit_smile.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 579.0,
+        "width": 112.0,
+        "height": 58.0,
+        "yTop": 387.0
+      },
+      "logicalSize": {
+        "width": 112.0,
+        "height": 58.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "6f7ecccf170861b4289a3b8a89a1b1cf": {
+      "texture": "textures/e699dfbb9a1f.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Starfruit_mouth\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 715\n    width: 58\n    height: 46\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    bbaab82ed75c0304ebb721db3751fc97: 1486899381842952375\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: a6d32cdf36d193b42ab315fabb4b5a73, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 15\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 7\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 060005000400000004000500030004000000010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 7\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 152\n      _typelessdata: b81e853e1f856b3e00000000e17a943e3d0a57be00000000e17a943ecdcccc3d000000001f856b3e1f856bbe000000008fc2f5bd1f856bbe00000000e17a94be1f856b3e00000000e17a94beb81e05be000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 715\n      width: 58\n      height: 46\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 33, z: 100, w: 738}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.25999999046325684,
+            "y": 0.23000000417232513,
+            "z": 0.0,
+            "u": 0.11523437313735485,
+            "v": 0.2568359370925464
+          },
+          {
+            "x": 0.28999999165534973,
+            "y": -0.20999999344348907,
+            "z": 0.0,
+            "u": 0.1210937483701855,
+            "v": 0.29980468685971573
+          },
+          {
+            "x": 0.28999999165534973,
+            "y": 0.10000000149011612,
+            "z": 0.0,
+            "u": 0.1210937483701855,
+            "v": 0.26953124985448085
+          },
+          {
+            "x": 0.23000000417232513,
+            "y": -0.23000000417232513,
+            "z": 0.0,
+            "u": 0.10937500081490725,
+            "v": 0.3017578129074536
+          },
+          {
+            "x": -0.11999999731779099,
+            "y": -0.23000000417232513,
+            "z": 0.0,
+            "u": 0.04101562552386895,
+            "v": 0.3017578129074536
+          },
+          {
+            "x": -0.28999999165534973,
+            "y": 0.23000000417232513,
+            "z": 0.0,
+            "u": 0.007812501629814506,
+            "v": 0.2568359370925464
+          },
+          {
+            "x": -0.28999999165534973,
+            "y": -0.12999999523162842,
+            "z": 0.0,
+            "u": 0.007812501629814506,
+            "v": 0.2919921870343387
+          }
+        ],
+        "indices": [
+          6,
+          5,
+          4,
+          0,
+          4,
+          5,
+          3,
+          4,
+          0,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/starfruit/magnetstar/Starfruit_mouth.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 715.0,
+        "width": 58.0,
+        "height": 46.0,
+        "yTop": 263.0
+      },
+      "logicalSize": {
+        "width": 58.0,
+        "height": 46.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    }
+  },
+  "extraSpriteGuids": {},
+  "anchors": {
+    "shadow": {
+      "path": "Shadow",
+      "x": 0.0064,
+      "y": 0.32,
+      "relativeToRuntimeRoot": true
+    }
+  },
+  "visualBounds": {
+    "minX": -0.7248000334282422,
+    "maxX": 0.7215999604682423,
+    "minY": -0.025600019792968776,
+    "maxY": 1.2367999367629394
+  },
+  "clips": {
+    "idle": {
+      "name": "idle",
+      "duration": 2.0,
+      "additiveReferencePoseTime": 0.0,
+      "hasAdditiveReferencePose": false,
+      "loop": true,
+      "sourceSampleRate": 60.0,
+      "curves": [
+        {
+          "kind": "euler",
+          "path": "Starfruit_body/Starfruit_stem",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": "-Infinity",
+                "z": -10.711579
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6333333,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -6.784
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -6.4821534
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": "-Infinity",
+                "z": -6.4821534
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.3666667,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -8.436
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 5.533637
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": "-Infinity",
+                "z": 5.533636
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 2.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 13.319989
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Starfruit_body/Starfruit_stem"
+        },
+        {
+          "kind": "position",
+          "path": "Starfruit_body",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": -0.005000114,
+                "y": 1.8349999,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": -7.352547e-10,
+                "y": -0.014210437,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6333333,
+              "value": {
+                "x": -0.0050001144,
+                "y": 1.826,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -0.008863559,
+                "y": 0.014303857,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": -0.008863558,
+                "y": 0.014303848,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.3666667,
+              "value": {
+                "x": -0.018,
+                "y": 1.8574,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.001399515,
+                "y": 0.0037248782,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0013995087,
+                "y": 0.0037248395,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 2.0,
+              "value": {
+                "x": -0.005000114,
+                "y": 1.8349999,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.020526137,
+                "y": -0.035368428,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Starfruit_body"
+        },
+        {
+          "kind": "position",
+          "path": "Starfruit_body/Starfruit_stem",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": -0.238,
+                "y": 1.7199999,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.076152645,
+                "y": -0.014052517,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6333333,
+              "value": {
+                "x": -0.18977,
+                "y": 1.7111,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.021968069,
+                "y": -0.0075401035,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.021968072,
+                "y": -0.0075401044,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.3666667,
+              "value": {
+                "x": -0.21339543,
+                "y": 1.7103463,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -0.035532925,
+                "y": 0.0071073924,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": -0.035532914,
+                "y": 0.007107392,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 2.0,
+              "value": {
+                "x": -0.238,
+                "y": 1.7199999,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -0.03884933,
+                "y": 0.015242475,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Starfruit_body/Starfruit_stem"
+        },
+        {
+          "kind": "scale",
+          "path": "Starfruit_body",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.07894729,
+                "y": -0.06319482,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6333333,
+              "value": {
+                "x": 1.05,
+                "y": 0.9599766,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": -0.056772128,
+                "y": 0.03560019,
+                "z": -0.0060272897
+              },
+              "outSlope": {
+                "x": -0.056772098,
+                "y": 0.035600174,
+                "z": -0.006027289
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.3666667,
+              "value": {
+                "x": 0.9088395,
+                "y": 1.0585331,
+                "z": 0.99116
+              },
+              "inSlope": {
+                "x": -0.02427697,
+                "y": 0.020987244,
+                "z": 0.00095167826
+              },
+              "outSlope": {
+                "x": -0.024276942,
+                "y": 0.020987261,
+                "z": 0.00095167756
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 2.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.14393765,
+                "y": -0.09242063,
+                "z": 0.013957931
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Starfruit_body"
+        },
+        {
+          "kind": "scale",
+          "path": "Starfruit_body/Starfruit_stem",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": -0.090994745,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6333333,
+              "value": {
+                "x": 1.0,
+                "y": 0.94237,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": -0.051784113,
+                "y": -0.045497376,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": -0.05178411,
+                "y": -0.045497373,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.3666667,
+              "value": {
+                "x": 0.92405,
+                "y": 0.94237,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.008176476,
+                "y": 0.045497373,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0081764385,
+                "y": 0.045497373,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 2.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.119921125,
+                "y": 0.09099477,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Starfruit_body/Starfruit_stem"
+        },
+        {
+          "kind": "float",
+          "path": "Starfruit_body/Starfruit_mouth",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": "-Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 2.0,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": 0.0,
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "attribute": "m_IsActive",
+          "classID": 1,
+          "sourceBindingPath": "Starfruit_body/Starfruit_mouth"
+        }
+      ],
+      "events": []
+    },
+    "shoot": {
+      "name": "shoot",
+      "duration": 0.6666667,
+      "additiveReferencePoseTime": 0.0,
+      "hasAdditiveReferencePose": false,
+      "loop": false,
+      "sourceSampleRate": 60.0,
+      "curves": [
+        {
+          "kind": "euler",
+          "path": "Starfruit_body/Starfruit_stem",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": "-Infinity",
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.36666667,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -24.749
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -2.0315641e-05
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": "-Infinity",
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.41666666,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -1.25
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 16.666687
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": "-Infinity",
+                "z": 16.666664
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -1.0331478e-06
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Starfruit_body/Starfruit_stem"
+        },
+        {
+          "kind": "euler",
+          "path": "Starfruit_body/Starfruit_stem/Starfruit_leaf",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": "-Infinity",
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.36666667,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -7.357
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 2.609324e-06
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": "-Infinity",
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.41666666,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 19.561
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -0.00013386579
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": "-Infinity",
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.5,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 9.083
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -78.244
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": "-Infinity",
+                "z": -78.243996
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 1.142422e-05
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Starfruit_body/Starfruit_stem/Starfruit_leaf"
+        },
+        {
+          "kind": "euler",
+          "path": "Starfruit_body/Starfruit_smile",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": "-Infinity",
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.41666666,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 2.999
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -2.944018e-06
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": "-Infinity",
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 4.7655085e-06
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Starfruit_body/Starfruit_smile"
+        },
+        {
+          "kind": "position",
+          "path": "Starfruit_body",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": -0.005000114,
+                "y": 1.8349999,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.33333334,
+              "value": {
+                "x": -0.014,
+                "y": 1.854,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 4.827915e-09,
+                "y": -1.0192423e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.36666667,
+              "value": {
+                "x": -0.003,
+                "y": 1.835,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 1.629196e-08,
+                "y": 3.0477906e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.41666666,
+              "value": {
+                "x": -0.003,
+                "y": 1.8415,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": -7.1520025e-09,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": -0.005000114,
+                "y": 1.8349999,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 1.3443449e-10,
+                "y": -7.480033e-09,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Starfruit_body"
+        },
+        {
+          "kind": "position",
+          "path": "Starfruit_body/Starfruit_mouth",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.388,
+                "y": -0.193,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.33333334,
+              "value": {
+                "x": 0.345,
+                "y": -0.138,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 2.3067006e-08,
+                "y": -2.9504303e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": "-Infinity",
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.36666667,
+              "value": {
+                "x": 0.353,
+                "y": -0.138,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -4.132601e-08,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.41666666,
+              "value": {
+                "x": 0.353,
+                "y": -0.205,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 2.3838574e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": 0.388,
+                "y": -0.193,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -1.0728881e-08,
+                "y": 1.782182e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Starfruit_body/Starfruit_mouth"
+        },
+        {
+          "kind": "position",
+          "path": "Starfruit_body/Starfruit_stem",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": -0.238,
+                "y": 1.7199999,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.36666667,
+              "value": {
+                "x": -0.139,
+                "y": 1.589,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -7.008062e-08,
+                "y": -0.115199625,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": -0.11519966,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.41666666,
+              "value": {
+                "x": -0.269,
+                "y": 1.577,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 2.0503926e-06,
+                "y": -1.44593155e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.5,
+              "value": {
+                "x": -0.239,
+                "y": 1.682,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.015999703,
+                "y": 0.57199985,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.015999792,
+                "y": 0.5719995,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": -0.238,
+                "y": 1.7199999,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -3.5812397e-09,
+                "y": -4.6570623e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Starfruit_body/Starfruit_stem"
+        },
+        {
+          "kind": "position",
+          "path": "Starfruit_body/Starfruit_stem/Starfruit_leaf",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": -0.30699977,
+                "y": 0.19599986,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.36666667,
+              "value": {
+                "x": -0.232,
+                "y": 0.227,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 1.7109732e-08,
+                "y": 2.1181332e-09,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.41666666,
+              "value": {
+                "x": -0.304,
+                "y": 0.149,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -0.41999912,
+                "y": 9.533139e-09,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": -0.41999996,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.5,
+              "value": {
+                "x": -0.318,
+                "y": 0.206,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 1.5892587e-10,
+                "y": 1.4654812e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": -0.30699977,
+                "y": 0.19599986,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -7.4713675e-09,
+                "y": 4.2915943e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Starfruit_body/Starfruit_stem/Starfruit_leaf"
+        },
+        {
+          "kind": "position",
+          "path": "Starfruit_body/Starfruit_eyes1",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.1149999,
+                "y": 0.45999992,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.36666667,
+              "value": {
+                "x": 0.09,
+                "y": 0.484,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 4.495762e-09,
+                "y": -1.943968e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": 0.1149999,
+                "y": 0.45999992,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -9.139295e-09,
+                "y": -9.536683e-09,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Starfruit_body/Starfruit_eyes1"
+        },
+        {
+          "kind": "position",
+          "path": "Starfruit_body/Starfruit_smile",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.291,
+                "y": 0.029,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.36666667,
+              "value": {
+                "x": 0.283,
+                "y": 0.045,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 1.0486647e-08,
+                "y": 1.7798819e-06,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 1.7875882e-06,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.41666666,
+              "value": {
+                "x": 0.297,
+                "y": 0.045000188,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -4.7683084e-08,
+                "y": 9.3909404e-14,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": 0.291,
+                "y": 0.029,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -8.910953e-09,
+                "y": 1.0734083e-09,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Starfruit_body/Starfruit_smile"
+        },
+        {
+          "kind": "position",
+          "path": "Starfruit_body/Starfruit_eyes2",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.1249998,
+                "y": 0.4900001,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.41666666,
+              "value": {
+                "x": 0.114,
+                "y": 0.482,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -3.7764813e-09,
+                "y": 1.122322e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": 0.1249998,
+                "y": 0.4900001,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -1.6683439e-09,
+                "y": -5.367361e-10,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Starfruit_body/Starfruit_eyes2"
+        },
+        {
+          "kind": "scale",
+          "path": "Starfruit_body",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.33333334,
+              "value": {
+                "x": 0.87009007,
+                "y": 1.05924,
+                "z": 1.0088
+              },
+              "inSlope": {
+                "x": 2.2863485e-07,
+                "y": -3.1778804e-08,
+                "z": -4.720704e-09
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.36666667,
+              "value": {
+                "x": 0.9788513,
+                "y": 1.030744,
+                "z": 1.0088
+              },
+              "inSlope": {
+                "x": 2.626586,
+                "y": -0.8019202,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 2.626585,
+                "y": -0.8019206,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.41666666,
+              "value": {
+                "x": 1.0889721,
+                "y": 0.9924133,
+                "z": 1.0088
+              },
+              "inSlope": {
+                "x": -2.808574e-07,
+                "y": 1.4215341e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 1.6132534e-08,
+                "y": 6.459767e-10,
+                "z": 2.8253377e-09
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Starfruit_body"
+        },
+        {
+          "kind": "scale",
+          "path": "Starfruit_body/Starfruit_mouth",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.33333334,
+              "value": {
+                "x": 0.6818,
+                "y": 0.6818,
+                "z": 0.6818
+              },
+              "inSlope": {
+                "x": 1.7069578e-07,
+                "y": 1.7069578e-07,
+                "z": 1.7069578e-07
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": "-Infinity",
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.36666667,
+              "value": {
+                "x": 0.9971325,
+                "y": 0.6818,
+                "z": 0.6818
+              },
+              "inSlope": {
+                "x": 6.321893,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 6.3218937,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.41666666,
+              "value": {
+                "x": 1.2086244,
+                "y": 0.8264098,
+                "z": 0.8264098
+              },
+              "inSlope": {
+                "x": -2.3773151e-07,
+                "y": 1.0606663,
+                "z": 1.0606663
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 1.0606666,
+                "z": 1.0606666
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 2.3925105e-07,
+                "y": 9.556958e-09,
+                "z": 9.556958e-09
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Starfruit_body/Starfruit_mouth"
+        },
+        {
+          "kind": "scale",
+          "path": "Starfruit_body/Starfruit_eyes1",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.36666667,
+              "value": {
+                "x": 1.0990735,
+                "y": 1.0990735,
+                "z": 1.0990735
+              },
+              "inSlope": {
+                "x": -1.7501087e-07,
+                "y": -1.7501087e-07,
+                "z": -1.7501087e-07
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": -7.094127e-09,
+                "y": -7.094127e-09,
+                "z": -7.094127e-09
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Starfruit_body/Starfruit_eyes1"
+        },
+        {
+          "kind": "scale",
+          "path": "Starfruit_body/Starfruit_smile",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.36666667,
+              "value": {
+                "x": 0.93697447,
+                "y": 0.97348,
+                "z": 0.97348
+              },
+              "inSlope": {
+                "x": 4.8579455e-08,
+                "y": 6.6389894e-10,
+                "z": 6.6389894e-10
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": "-Infinity",
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.41666666,
+              "value": {
+                "x": 1.0189598,
+                "y": 0.97348,
+                "z": 0.97348
+              },
+              "inSlope": {
+                "x": -1.4367811e-07,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 3.934314e-08,
+                "y": -3.1170863e-08,
+                "z": -3.1170863e-08
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Starfruit_body/Starfruit_smile"
+        },
+        {
+          "kind": "scale",
+          "path": "Starfruit_body/Starfruit_eyes2",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.41666666,
+              "value": {
+                "x": 1.0795,
+                "y": 1.0795,
+                "z": 1.0795
+              },
+              "inSlope": {
+                "x": 5.2129415e-08,
+                "y": 5.2129415e-08,
+                "z": 5.2129415e-08
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": -1.0967456e-08,
+                "y": -1.0967456e-08,
+                "z": -1.0967456e-08
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Starfruit_body/Starfruit_eyes2"
+        },
+        {
+          "kind": "float",
+          "path": "Starfruit_body/Starfruit_mouth",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.33333334,
+              "value": 1.0,
+              "inSlope": 0.0,
+              "outSlope": "-Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.6666667,
+              "value": 1.0,
+              "inSlope": 0.0,
+              "outSlope": 0.0,
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "attribute": "m_IsActive",
+          "classID": 1,
+          "sourceBindingPath": "Starfruit_body/Starfruit_mouth"
+        },
+        {
+          "kind": "float",
+          "path": "Starfruit_body/Starfruit_eyes1",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.36666667,
+              "value": 1.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.41666666,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.46666667,
+              "value": 1.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.5,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": "-Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.6666667,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": 0.0,
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "attribute": "m_IsActive",
+          "classID": 1,
+          "sourceBindingPath": "Starfruit_body/Starfruit_eyes1"
+        },
+        {
+          "kind": "float",
+          "path": "Starfruit_body/Starfruit_eyes2",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.41666666,
+              "value": 1.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.46666667,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": "-Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.6666667,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": 0.0,
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "attribute": "m_IsActive",
+          "classID": 1,
+          "sourceBindingPath": "Starfruit_body/Starfruit_eyes2"
+        }
+      ],
+      "events": [
+        {
+          "time": 0.41666666,
+          "functionName": "AnimShoot",
+          "intParameter": 0,
+          "floatParameter": 0.0,
+          "stringParameter": ""
+        }
+      ]
+    }
+  },
+  "controller": {
+    "states": [
+      {
+        "id": 1102724804207875695,
+        "name": "idle",
+        "clip": "idle",
+        "speed": 1.0,
+        "speedParameterActive": true,
+        "speedParameter": "Speed"
+      },
+      {
+        "id": 1102618682377417806,
+        "name": "shoot",
+        "clip": "shoot",
+        "speed": 1.1,
+        "speedParameterActive": true,
+        "speedParameter": "Speed"
+      }
+    ],
+    "layers": [
+      {
+        "name": "Base Layer",
+        "blendingMode": 0,
+        "defaultState": 1102724804207875695,
+        "states": [
+          1102724804207875695,
+          1102618682377417806
+        ],
+        "defaultWeight": 0.0
+      }
+    ],
+    "serializedController": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!91 &9100000\nAnimatorController:\n  serializedVersion: 5\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Starfruit\n  m_AnimatorParameters:\n  - m_Name: Speed\n    m_Type: 1\n    m_DefaultFloat: 1\n    m_DefaultInt: 0\n    m_DefaultBool: 0\n    m_Controller: {fileID: 9100000}\n  - m_Name: shoot\n    m_Type: 9\n    m_DefaultFloat: 0\n    m_DefaultInt: 0\n    m_DefaultBool: 0\n    m_Controller: {fileID: 9100000}\n  m_AnimatorLayers:\n  - serializedVersion: 5\n    m_Name: Base Layer\n    m_StateMachine: {fileID: 1107709254077376921}\n    m_Mask: {fileID: 0}\n    m_Motions: []\n    m_Behaviours: []\n    m_BlendingMode: 0\n    m_SyncedLayerIndex: -1\n    m_DefaultWeight: 0\n    m_IKPass: 0\n    m_SyncedLayerAffectsTiming: 0\n    m_Controller: {fileID: 9100000}\n--- !u!1107 &1107709254077376921\nAnimatorStateMachine:\n  serializedVersion: 6\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Base Layer\n  m_ChildStates:\n  - m_State: {fileID: 1102724804207875695}\n    m_Position: {x: 0, y: 0, z: 0}\n  - m_State: {fileID: 1102618682377417806}\n    m_Position: {x: 250, y: 0, z: 0}\n  m_ChildStateMachines: []\n  m_AnyStateTransitions:\n  - {fileID: 1101730242686860875}\n  m_EntryTransitions: []\n  m_StateMachineTransitions: {}\n  m_StateMachineBehaviours: []\n  m_AnyStatePosition: {x: 0, y: -100, z: 0}\n  m_EntryPosition: {x: 250, y: -100, z: 0}\n  m_ExitPosition: {x: 500, y: -100, z: 0}\n  m_ParentStateMachinePosition: {x: 0, y: -200, z: 0}\n  m_DefaultState: {fileID: 1102724804207875695}\n--- !u!1101 &1101730242686860875\nAnimatorStateTransition:\n  serializedVersion: 3\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name:\n  m_Conditions:\n  - m_ConditionMode: 1\n    m_ConditionEvent: shoot\n    m_EventTreshold: 0\n  m_DstStateMachine: {fileID: 0}\n  m_DstState: {fileID: 1102618682377417806}\n  m_Solo: 0\n  m_Mute: 0\n  m_IsExit: 0\n  m_TransitionDuration: 0.25\n  m_TransitionOffset: 0\n  m_ExitTime: 0.75\n  m_HasExitTime: 0\n  m_HasFixedDuration: 1\n  m_InterruptionSource: 0\n  m_OrderedInterruption: 1\n  m_CanTransitionToSelf: 1\n--- !u!1102 &1102724804207875695\nAnimatorState:\n  serializedVersion: 6\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: idle\n  m_Speed: 1\n  m_CycleOffset: 0\n  m_Transitions: []\n  m_StateMachineBehaviours: []\n  m_Position: {x: 0, y: 0, z: 0}\n  m_IKOnFeet: 0\n  m_WriteDefaultValues: 1\n  m_Mirror: 0\n  m_SpeedParameterActive: 1\n  m_MirrorParameterActive: 0\n  m_CycleOffsetParameterActive: 0\n  m_TimeParameterActive: 0\n  m_Motion: {fileID: 7400000, guid: fb23b11071d13824abf35203b155d31b, type: 2}\n  m_Tag:\n  m_SpeedParameter: Speed\n  m_MirrorParameter:\n  m_CycleOffsetParameter:\n  m_TimeParameter:\n--- !u!1102 &1102618682377417806\nAnimatorState:\n  serializedVersion: 6\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: shoot\n  m_Speed: 1.1\n  m_CycleOffset: 0\n  m_Transitions:\n  - {fileID: 1101703437598541787}\n  m_StateMachineBehaviours: []\n  m_Position: {x: 250, y: 0, z: 0}\n  m_IKOnFeet: 0\n  m_WriteDefaultValues: 1\n  m_Mirror: 0\n  m_SpeedParameterActive: 1\n  m_MirrorParameterActive: 0\n  m_CycleOffsetParameterActive: 0\n  m_TimeParameterActive: 0\n  m_Motion: {fileID: 7400000, guid: 8932341962db3654e9e2f162d4e9b7c0, type: 2}\n  m_Tag:\n  m_SpeedParameter: Speed\n  m_MirrorParameter:\n  m_CycleOffsetParameter:\n  m_TimeParameter:\n--- !u!1101 &1101703437598541787\nAnimatorStateTransition:\n  serializedVersion: 3\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name:\n  m_Conditions: []\n  m_DstStateMachine: {fileID: 0}\n  m_DstState: {fileID: 1102724804207875695}\n  m_Solo: 0\n  m_Mute: 0\n  m_IsExit: 0\n  m_TransitionDuration: 0.25\n  m_TransitionOffset: 0\n  m_ExitTime: 0.75\n  m_HasExitTime: 1\n  m_HasFixedDuration: 1\n  m_InterruptionSource: 0\n  m_OrderedInterruption: 1\n  m_CanTransitionToSelf: 1\n"
+  },
+  "nonRenderingComponents": [
+    {
+      "typeId": 61,
+      "fileId": 61985305603660343,
+      "serializedComponent": "BoxCollider2D:\n  serializedVersion: 2\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1709254077376921}\n  m_Enabled: 1\n  m_Density: 1\n  m_Material: {fileID: 0}\n  m_IncludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_ExcludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_LayerOverridePriority: 0\n  m_ForceSendLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_ForceReceiveLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_ContactCaptureLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_CallbackLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_IsTrigger: 1\n  m_UsedByEffector: 0\n  m_UsedByComposite: 0\n  m_Offset: {x: -0.033859253, y: 1.9977412}\n  m_SpriteTilingProperty:\n    border: {x: 0, y: 0, z: 0, w: 0}\n    pivot: {x: 0, y: 0}\n    oldSize: {x: 0, y: 0}\n    newSize: {x: 0, y: 0}\n    adaptiveTilingThreshold: 0\n    drawMode: 0\n    adaptiveTiling: 0\n  m_AutoTiling: 0\n  m_Size: {x: 4.3860025, y: 3.9119606}\n  m_EdgeRadius: 0\n"
+    },
+    {
+      "typeId": 61,
+      "fileId": 61705390221481576,
+      "serializedComponent": "BoxCollider2D:\n  serializedVersion: 2\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1709254077376921}\n  m_Enabled: 1\n  m_Density: 1\n  m_Material: {fileID: 0}\n  m_IncludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_ExcludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_LayerOverridePriority: 0\n  m_ForceSendLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_ForceReceiveLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_ContactCaptureLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_CallbackLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_IsTrigger: 1\n  m_UsedByEffector: 0\n  m_UsedByComposite: 0\n  m_Offset: {x: 0.69413054, y: 2.268621}\n  m_SpriteTilingProperty:\n    border: {x: 0, y: 0, z: 0, w: 0}\n    pivot: {x: 0, y: 0}\n    oldSize: {x: 0, y: 0}\n    newSize: {x: 0, y: 0}\n    adaptiveTilingThreshold: 0\n    drawMode: 0\n    adaptiveTiling: 0\n  m_AutoTiling: 0\n  m_Size: {x: 2.1173797, y: 3.844242}\n  m_EdgeRadius: 0\n"
+    },
+    {
+      "typeId": 50,
+      "fileId": 50977153420339851,
+      "serializedComponent": "Rigidbody2D:\n  serializedVersion: 4\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1709254077376921}\n  m_BodyType: 1\n  m_Simulated: 1\n  m_UseFullKinematicContacts: 0\n  m_UseAutoMass: 0\n  m_Mass: 1\n  m_LinearDrag: 0\n  m_AngularDrag: 0.05\n  m_GravityScale: 1\n  m_Material: {fileID: 0}\n  m_IncludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_ExcludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_Interpolate: 0\n  m_SleepingMode: 1\n  m_CollisionDetection: 0\n  m_Constraints: 0\n"
+    },
+    {
+      "typeId": 114,
+      "fileId": 114256069497284392,
+      "serializedComponent": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1709254077376921}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 5097b76f3833c208897ad1be6bc1ad0c, type: 3}\n  m_Name:\n  m_EditorClassIdentifier:\n  mouseCollider: {fileID: 0}\n  thePlantMaxHealth: 300\n  thePlantHealth: 300\n  attackDamage: 20\n  thePlantAttackInterval: 1.5\n  thePlantProduceInterval: 0\n  isLily: 0\n  invincible: 0\n  isShort: 0\n  board: {fileID: 0}\n  pumpkin: {fileID: 0}\n  shadow: {fileID: 0}\n  startPos: {x: 0, y: 0, z: 0}\n  thePlantColumn: 0\n  thePlantRow: 0\n  magnetCount: 0\n  theLevel: 0\n  thePlantSpeed: 1\n  thePlantAttackCountDown: 0\n  thePlantProduceCountDown: 0\n  attributeCountdown: 0\n  lightCountDown: 0\n  flashCountDown: 0\n  wheatTime: 0\n  brightness: 1\n  lastTakeDamgeTime: 0\n  disappearTime: 0\n  isFlashing: 0\n  isFromWheat: 0\n  alwaysLightUp: 0\n  isCrashed: 0\n  melonSputter: 0\n  dieMeansLose: 0\n  isGray: 0\n  isConnected: 0\n  keepShooting: 0\n  waitingDestory: 0\n  targetBox: {x: 0, y: 0}\n  moveTime: 0\n  timers:\n  - 0\n  - 0\n  - 0\n  disableCount: 0\n  attributeCount: 0\n  puffPlace: 0\n  baseLayer: 0\n  currentLightLevel: 0\n  p: 4\n  thePlantStage: 0\n  thePlantType: 0\n  theLilyType: -1\n  firstParent: -1\n  secondParent: -1\n  zombieLayer:\n    serializedVersion: 2\n    m_Bits: 0\n  plantLayer:\n    serializedVersion: 2\n    m_Bits: 0\n  theStatus: 0\n  next: {fileID: 0}\n  pre: {fileID: 0}\n  bulletLayer:\n    serializedVersion: 2\n    m_Bits: 0\n  plantTag:\n    flyingPlant: 0\n    hardLandPlant: 0\n    waterPlant: 0\n    pumpkinPlant: 0\n    lanternPlant: 0\n    smallLanternPlant: 0\n    puffPlant: 0\n    nutPlant: 0\n    tallNutPlant: 0\n    potatoPlant: 0\n    caltropPlant: 0\n    tanglekelpPlant: 0\n    magnetPlant: 0\n    potPlant: 0\n    doubleBoxPlant: 0\n    spickRockPlant: 0\n    icePlant: 0\n    firePlant: 0\n  anim: {fileID: 0}\n  healthText: {fileID: 0}\n  healthTextShadow: {fileID: 0}\n  levelIcon: {fileID: 0}\n  targetPlant: {fileID: 0}\n  targetZombie: {fileID: 0}\n  falling: 0\n  regeneration: 0\n  shoot: {fileID: 0}\n  connectPlant: {fileID: 0}\n  dreamTime: 0.1\n"
+    }
+  ],
+  "colliders": [
+    {
+      "type": "box",
+      "node": 0,
+      "fileId": 61985305603660343,
+      "enabled": true,
+      "trigger": true,
+      "offset": {
+        "x": -0.033859253,
+        "y": 1.9977412
+      },
+      "size": {
+        "x": 4.3860025,
+        "y": 3.9119606
+      }
+    },
+    {
+      "type": "box",
+      "node": 0,
+      "fileId": 61705390221481576,
+      "enabled": true,
+      "trigger": true,
+      "offset": {
+        "x": 0.69413054,
+        "y": 2.268621
+      },
+      "size": {
+        "x": 2.1173797,
+        "y": 3.844242
+      }
+    }
+  ],
+  "ignoredBindings": [],
+  "omittedInactiveNodes": [],
+  "spritePrefix": null,
+  "unusedSpriteBonesExplicitlyAllowed": false,
+  "sources": [
+    {
+      "path": "Resources/plants/starfruit/idle.anim",
+      "sha256": "e0c9c9b075a167d6d9ce18c49e19c12bdd463ab4835fe64e05658438ae49c3d2"
+    },
+    {
+      "path": "Resources/plants/starfruit/idle.anim.meta",
+      "sha256": "c932dc6146155e7e219fe8b6158620763c8baead48789a1498816a8593157573"
+    },
+    {
+      "path": "Resources/plants/starfruit/magnetstar/MagnetStar.png",
+      "sha256": "e699dfbb9a1fc12c0bc691e91aaa39cac8eedd615c9c4a30c1d59ec77a95bdca"
+    },
+    {
+      "path": "Resources/plants/starfruit/magnetstar/MagnetStar.png.meta",
+      "sha256": "a1b7d248e64bfe61eaa8caff1f118898b9fe4a13580a9811a27c3585c786b7d2"
+    },
+    {
+      "path": "Resources/plants/starfruit/magnetstar/MagnetStarPrefab.prefab",
+      "sha256": "dea66d07a06ad26afb3ca00a9be2e010e9b860817e5d3b31bc0cd4412bcdc658"
+    },
+    {
+      "path": "Resources/plants/starfruit/magnetstar/Starfruit_body.asset",
+      "sha256": "ab0b40984f9ef24093df9fbb4085a301df0d82a88866ef9012790a2347bbf4ad"
+    },
+    {
+      "path": "Resources/plants/starfruit/magnetstar/Starfruit_body.asset.meta",
+      "sha256": "0920518a2dd72b81663b2e283d5dfc3a0ceab369b89572b2644f1fff767f5b6d"
+    },
+    {
+      "path": "Resources/plants/starfruit/magnetstar/Starfruit_eyes1.asset",
+      "sha256": "6cfe794c790987cda5498e92571cca4f40335ea130b87457b8849d3c59d72a2f"
+    },
+    {
+      "path": "Resources/plants/starfruit/magnetstar/Starfruit_eyes1.asset.meta",
+      "sha256": "70e40aaf298c37b55f7989c03456d9d59058db0341d060b7a7e8678366e4a89e"
+    },
+    {
+      "path": "Resources/plants/starfruit/magnetstar/Starfruit_eyes2.asset",
+      "sha256": "03b4c9c18b380598cd89eca218594cf627fd6f2bf0009bde91bcaebb1ead9f85"
+    },
+    {
+      "path": "Resources/plants/starfruit/magnetstar/Starfruit_eyes2.asset.meta",
+      "sha256": "a3c11579eb576c813b2a5c8378fc59e52119c38537980f30fb8586065f179f96"
+    },
+    {
+      "path": "Resources/plants/starfruit/magnetstar/Starfruit_mouth.asset",
+      "sha256": "20f125bcf31a04415df914a831e8052f50ea70347b4f9a89492ab484af7d529e"
+    },
+    {
+      "path": "Resources/plants/starfruit/magnetstar/Starfruit_mouth.asset.meta",
+      "sha256": "ec87cf27c328a14d3e5475d88c1342ce266dd5b23d137529fd1c2834e3df8972"
+    },
+    {
+      "path": "Resources/plants/starfruit/magnetstar/Starfruit_smile.asset",
+      "sha256": "f317ba213eb8afb2d873fd760a80defed0144277deaf388f9330ab80d22bc675"
+    },
+    {
+      "path": "Resources/plants/starfruit/magnetstar/Starfruit_smile.asset.meta",
+      "sha256": "b6af6168241eb12822b870546a8811bbd30fe1f984313f8558896a1634de5dcc"
+    },
+    {
+      "path": "Resources/plants/starfruit/magnetstar/Starfruit_stem.asset",
+      "sha256": "c39c98e44b1aa32e4b9c03a6cd942fd48e0b57e13292bcb0ad58c3b5aae6b7c0"
+    },
+    {
+      "path": "Resources/plants/starfruit/magnetstar/Starfruit_stem.asset.meta",
+      "sha256": "42a02725f08ed7687f4c9a34f34c5616b10613226e92aef902538a8f3212cb84"
+    },
+    {
+      "path": "Resources/plants/starfruit/shoot.anim",
+      "sha256": "71c03a6619017db23c8b85d7a350b757c6afec8a862949826a0c4291493ff84a"
+    },
+    {
+      "path": "Resources/plants/starfruit/shoot.anim.meta",
+      "sha256": "82739cd190690c29186158ea4eda9b5ebbb3953c2d90c0898b4134fce208ae90"
+    },
+    {
+      "path": "Resources/plants/starfruit/Starfruit.controller",
+      "sha256": "0171ae1bdd19c84fe49710b5dca82dce9dcaec336608a2f09a754a90b82c78b7"
+    },
+    {
+      "path": "Resources/plants/starfruit/Starfruit.controller.meta",
+      "sha256": "efafd41796aacdf109950faea7b1839372f245219482fc082a409f39c641ca54"
+    }
+  ],
+  "deferredComponents": [],
+  "validation": "Exported source data. Native rendering and source-runtime comparison are separate verification steps."
+}

@@ -1,0 +1,1324 @@
+{
+  "schema": 1,
+  "sourcePrefab": "Resources/bullet/prefabs/SuperFirePea.prefab",
+  "unitsPerNativePixel": 0.01,
+  "applyRootMotion": false,
+  "static": false,
+  "root": 0,
+  "nodes": [
+    {
+      "name": "SuperFirePea",
+      "active": true,
+      "tag": "Untagged",
+      "parent": -1,
+      "path": "",
+      "position": {
+        "x": -0.57,
+        "y": -2.86,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.7,
+        "y": 1.7,
+        "z": 1.7
+      }
+    },
+    {
+      "name": "Flame",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "Flame",
+      "position": {
+        "x": -0.198,
+        "y": -0.012000027,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 0.25,
+        "y": 0.25,
+        "z": 0.25
+      }
+    },
+    {
+      "name": "Image",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "Image",
+      "position": {
+        "x": -3.5062e-08,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 0.25,
+        "y": 0.25,
+        "z": 0.25
+      }
+    },
+    {
+      "name": "Shadow",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "Shadow",
+      "position": {
+        "x": 0.0052941195,
+        "y": -0.37352952,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 0.3,
+        "y": 0.24999999,
+        "z": 1.0
+      }
+    }
+  ],
+  "sourceHierarchy": null,
+  "sprites": [
+    {
+      "texture": "../projectile-pea/textures/cfbfebf76995.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: FirePea_flame1\n  m_Rect:\n    serializedVersion: 2\n    x: 1087\n    y: 0\n    width: 234\n    height: 146\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    6707ada5ce8b5564793716b48fd09bac: -985704713891330833\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 2be43b649cd811049b3a36efc777b799, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 15\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 7\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 060005000300040003000500000003000400010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 7\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 152\n      _typelessdata: cdcc0cbf48e13a3f000000008fc2953f48e13abf000000008fc2953f48e13a3f0000000048e13abf48e13abf00000000e17a94bf8fc2753e000000008fc295bf1f856b3e000000008fc295bfa470bdbe000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 1087\n      y: 0\n      width: 234\n      height: 146\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 1083, y: -4}\n    settingsRaw: 65\n    uvTransform: {x: 100, y: 1204, z: 100, w: 73}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -0.550000011920929,
+            "y": 0.7300000190734863,
+            "z": 0.0,
+            "u": 0.5610351556679234,
+            "v": 0.9287109365686774
+          },
+          {
+            "x": 1.1699999570846558,
+            "y": -0.7300000190734863,
+            "z": 0.0,
+            "u": 0.6450195291545242,
+            "v": 1.0000000009313226
+          },
+          {
+            "x": 1.1699999570846558,
+            "y": 0.7300000190734863,
+            "z": 0.0,
+            "u": 0.6450195291545242,
+            "v": 0.9287109365686774
+          },
+          {
+            "x": -0.7300000190734863,
+            "y": -0.7300000190734863,
+            "z": 0.0,
+            "u": 0.5522460928186774,
+            "v": 1.0000000009313226
+          },
+          {
+            "x": -1.159999966621399,
+            "y": 0.23999999463558197,
+            "z": 0.0,
+            "u": 0.5312500016298145,
+            "v": 0.9526367190119345
+          },
+          {
+            "x": -1.1699999570846558,
+            "y": 0.23000000417232513,
+            "z": 0.0,
+            "u": 0.5307617208454758,
+            "v": 0.9531249997962732
+          },
+          {
+            "x": -1.1699999570846558,
+            "y": -0.3700000047683716,
+            "z": 0.0,
+            "u": 0.5307617208454758,
+            "v": 0.9824218752328306
+          }
+        ],
+        "indices": [
+          6,
+          5,
+          3,
+          4,
+          3,
+          5,
+          0,
+          3,
+          4,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/bullet/bulletspirtes/FirePea_flame1_0.asset",
+      "textureRect": {
+        "x": 1087.0,
+        "y": 0.0,
+        "width": 234.0,
+        "height": 146.0,
+        "yTop": 1902.0
+      },
+      "logicalSize": {
+        "width": 234.0,
+        "height": 146.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "a7cb20dc1dd67e249ab46dc7d9804770",
+      "node": 1,
+      "sortingOrder": 0,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    },
+    {
+      "texture": "../cactus/textures/7924e0d6960d.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: plantshadow\n  m_Rect:\n    serializedVersion: 2\n    x: 0\n    y: 0\n    width: 86\n    height: 36\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    b79a0977f249dd948866a2f5a914ba3a: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 0286c7c34d435bf4694be6a09458c445, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: f628dcbeec51383e00000000f628dc3eec51383e00000000f628dcbeec5138be00000000f628dc3eec5138be000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 86\n      height: 36\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 0\n    uvTransform: {x: 100, y: 43, z: 100, w: 18}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -0.4300000071525574,
+            "y": 0.18000000715255737,
+            "z": 0.0,
+            "u": -8.316927177961482e-09,
+            "v": -1.986821485111534e-08
+          },
+          {
+            "x": 0.4300000071525574,
+            "y": 0.18000000715255737,
+            "z": 0.0,
+            "u": 1.0000000083169271,
+            "v": -1.986821485111534e-08
+          },
+          {
+            "x": -0.4300000071525574,
+            "y": -0.18000000715255737,
+            "z": 0.0,
+            "u": -8.316927177961482e-09,
+            "v": 1.0000000198682149
+          },
+          {
+            "x": 0.4300000071525574,
+            "y": -0.18000000715255737,
+            "z": 0.0,
+            "u": 1.0000000083169271,
+            "v": 1.0000000198682149
+          }
+        ],
+        "indices": [
+          0,
+          1,
+          2,
+          2,
+          1,
+          3
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/board/plantshadow.asset",
+      "textureRect": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 86.0,
+        "height": 36.0,
+        "yTop": 0.0
+      },
+      "logicalSize": {
+        "width": 86.0,
+        "height": 36.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "e741cea7caea00248903707884a3228b",
+      "node": 3,
+      "sortingOrder": 0,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    },
+    {
+      "texture": "../projectile-pea/textures/cfbfebf76995.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: FirePea\n  m_Rect:\n    serializedVersion: 2\n    x: 1363\n    y: 0\n    width: 158\n    height: 158\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    6707ada5ce8b5564793716b48fd09bac: -2850001983659400729\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 2be43b649cd811049b3a36efc777b799, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 9\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 5\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 040003000100000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 5\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 104\n      _typelessdata: 5c8f42bf713d4a3f00000000713d4a3f713d4abf00000000713d4a3f713d4a3f00000000713d4abfb81e453f00000000713d4abf713d4abf000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 1363\n      y: 0\n      width: 158\n      height: 158\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 1143, y: -158}\n    settingsRaw: 65\n    uvTransform: {x: 100, y: 1442, z: 100, w: 79}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -0.7599999904632568,
+            "y": 0.7900000214576721,
+            "z": 0.0,
+            "u": 0.6669921879656613,
+            "v": 0.9228515614522621
+          },
+          {
+            "x": 0.7900000214576721,
+            "y": -0.7900000214576721,
+            "z": 0.0,
+            "u": 0.7426757822977379,
+            "v": 1.000000001047738
+          },
+          {
+            "x": 0.7900000214576721,
+            "y": 0.7900000214576721,
+            "z": 0.0,
+            "u": 0.7426757822977379,
+            "v": 0.9228515614522621
+          },
+          {
+            "x": -0.7900000214576721,
+            "y": 0.7699999809265137,
+            "z": 0.0,
+            "u": 0.6655273427022621,
+            "v": 0.9238281259313226
+          },
+          {
+            "x": -0.7900000214576721,
+            "y": -0.7900000214576721,
+            "z": 0.0,
+            "u": 0.6655273427022621,
+            "v": 1.000000001047738
+          }
+        ],
+        "indices": [
+          4,
+          3,
+          1,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/bullet/bulletspirtes/FirePea_1.asset",
+      "textureRect": {
+        "x": 1363.0,
+        "y": 0.0,
+        "width": 158.0,
+        "height": 158.0,
+        "yTop": 1890.0
+      },
+      "logicalSize": {
+        "width": 158.0,
+        "height": 158.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "53eebe500b3cd12488f2e7b26015eb72",
+      "node": 2,
+      "sortingOrder": 1,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    }
+  ],
+  "spriteVariants": {
+    "a7cb20dc1dd67e249ab46dc7d9804770": {
+      "texture": "../projectile-pea/textures/cfbfebf76995.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: FirePea_flame1\n  m_Rect:\n    serializedVersion: 2\n    x: 1087\n    y: 0\n    width: 234\n    height: 146\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    6707ada5ce8b5564793716b48fd09bac: -985704713891330833\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 2be43b649cd811049b3a36efc777b799, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 15\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 7\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 060005000300040003000500000003000400010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 7\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 152\n      _typelessdata: cdcc0cbf48e13a3f000000008fc2953f48e13abf000000008fc2953f48e13a3f0000000048e13abf48e13abf00000000e17a94bf8fc2753e000000008fc295bf1f856b3e000000008fc295bfa470bdbe000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 1087\n      y: 0\n      width: 234\n      height: 146\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 1083, y: -4}\n    settingsRaw: 65\n    uvTransform: {x: 100, y: 1204, z: 100, w: 73}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -0.550000011920929,
+            "y": 0.7300000190734863,
+            "z": 0.0,
+            "u": 0.5610351556679234,
+            "v": 0.9287109365686774
+          },
+          {
+            "x": 1.1699999570846558,
+            "y": -0.7300000190734863,
+            "z": 0.0,
+            "u": 0.6450195291545242,
+            "v": 1.0000000009313226
+          },
+          {
+            "x": 1.1699999570846558,
+            "y": 0.7300000190734863,
+            "z": 0.0,
+            "u": 0.6450195291545242,
+            "v": 0.9287109365686774
+          },
+          {
+            "x": -0.7300000190734863,
+            "y": -0.7300000190734863,
+            "z": 0.0,
+            "u": 0.5522460928186774,
+            "v": 1.0000000009313226
+          },
+          {
+            "x": -1.159999966621399,
+            "y": 0.23999999463558197,
+            "z": 0.0,
+            "u": 0.5312500016298145,
+            "v": 0.9526367190119345
+          },
+          {
+            "x": -1.1699999570846558,
+            "y": 0.23000000417232513,
+            "z": 0.0,
+            "u": 0.5307617208454758,
+            "v": 0.9531249997962732
+          },
+          {
+            "x": -1.1699999570846558,
+            "y": -0.3700000047683716,
+            "z": 0.0,
+            "u": 0.5307617208454758,
+            "v": 0.9824218752328306
+          }
+        ],
+        "indices": [
+          6,
+          5,
+          3,
+          4,
+          3,
+          5,
+          0,
+          3,
+          4,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/bullet/bulletspirtes/FirePea_flame1_0.asset",
+      "textureRect": {
+        "x": 1087.0,
+        "y": 0.0,
+        "width": 234.0,
+        "height": 146.0,
+        "yTop": 1902.0
+      },
+      "logicalSize": {
+        "width": 234.0,
+        "height": 146.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "53eebe500b3cd12488f2e7b26015eb72": {
+      "texture": "../projectile-pea/textures/cfbfebf76995.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: FirePea\n  m_Rect:\n    serializedVersion: 2\n    x: 1363\n    y: 0\n    width: 158\n    height: 158\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    6707ada5ce8b5564793716b48fd09bac: -2850001983659400729\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 2be43b649cd811049b3a36efc777b799, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 9\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 5\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 040003000100000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 5\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 104\n      _typelessdata: 5c8f42bf713d4a3f00000000713d4a3f713d4abf00000000713d4a3f713d4a3f00000000713d4abfb81e453f00000000713d4abf713d4abf000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 1363\n      y: 0\n      width: 158\n      height: 158\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 1143, y: -158}\n    settingsRaw: 65\n    uvTransform: {x: 100, y: 1442, z: 100, w: 79}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -0.7599999904632568,
+            "y": 0.7900000214576721,
+            "z": 0.0,
+            "u": 0.6669921879656613,
+            "v": 0.9228515614522621
+          },
+          {
+            "x": 0.7900000214576721,
+            "y": -0.7900000214576721,
+            "z": 0.0,
+            "u": 0.7426757822977379,
+            "v": 1.000000001047738
+          },
+          {
+            "x": 0.7900000214576721,
+            "y": 0.7900000214576721,
+            "z": 0.0,
+            "u": 0.7426757822977379,
+            "v": 0.9228515614522621
+          },
+          {
+            "x": -0.7900000214576721,
+            "y": 0.7699999809265137,
+            "z": 0.0,
+            "u": 0.6655273427022621,
+            "v": 0.9238281259313226
+          },
+          {
+            "x": -0.7900000214576721,
+            "y": -0.7900000214576721,
+            "z": 0.0,
+            "u": 0.6655273427022621,
+            "v": 1.000000001047738
+          }
+        ],
+        "indices": [
+          4,
+          3,
+          1,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/bullet/bulletspirtes/FirePea_1.asset",
+      "textureRect": {
+        "x": 1363.0,
+        "y": 0.0,
+        "width": 158.0,
+        "height": 158.0,
+        "yTop": 1890.0
+      },
+      "logicalSize": {
+        "width": 158.0,
+        "height": 158.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "e741cea7caea00248903707884a3228b": {
+      "texture": "../cactus/textures/7924e0d6960d.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: plantshadow\n  m_Rect:\n    serializedVersion: 2\n    x: 0\n    y: 0\n    width: 86\n    height: 36\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    b79a0977f249dd948866a2f5a914ba3a: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 0286c7c34d435bf4694be6a09458c445, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: f628dcbeec51383e00000000f628dc3eec51383e00000000f628dcbeec5138be00000000f628dc3eec5138be000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 86\n      height: 36\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 0\n    uvTransform: {x: 100, y: 43, z: 100, w: 18}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -0.4300000071525574,
+            "y": 0.18000000715255737,
+            "z": 0.0,
+            "u": -8.316927177961482e-09,
+            "v": -1.986821485111534e-08
+          },
+          {
+            "x": 0.4300000071525574,
+            "y": 0.18000000715255737,
+            "z": 0.0,
+            "u": 1.0000000083169271,
+            "v": -1.986821485111534e-08
+          },
+          {
+            "x": -0.4300000071525574,
+            "y": -0.18000000715255737,
+            "z": 0.0,
+            "u": -8.316927177961482e-09,
+            "v": 1.0000000198682149
+          },
+          {
+            "x": 0.4300000071525574,
+            "y": -0.18000000715255737,
+            "z": 0.0,
+            "u": 1.0000000083169271,
+            "v": 1.0000000198682149
+          }
+        ],
+        "indices": [
+          0,
+          1,
+          2,
+          2,
+          1,
+          3
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/board/plantshadow.asset",
+      "textureRect": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 86.0,
+        "height": 36.0,
+        "yTop": 0.0
+      },
+      "logicalSize": {
+        "width": 86.0,
+        "height": 36.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "66fef6b3c03ad0d4abe0a30c3b0f14e9": {
+      "texture": "../projectile-pea/textures/cfbfebf76995.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: FirePea_flame2\n  m_Rect:\n    serializedVersion: 2\n    x: 922\n    y: 644\n    width: 200\n    height: 142\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    6707ada5ce8b5564793716b48fd09bac: -7578555794294231740\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 2be43b649cd811049b3a36efc777b799, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 21\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 9\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 080007000600050006000700030006000500040003000500000003000400010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 9\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 184\n      _typelessdata: 0000803f8fc2353f000000008fc2353f8fc235bf000000000000803f52b81ebf0000000048e1fabe8fc235bf00000000c3f528bf8fc2353f00000000333373bf3333b33e00000000a4707dbf9a9919be00000000000080bf295c8f3e00000000000080bf0ad7a3bd0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 922\n      y: 644\n      width: 200\n      height: 142\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 676, y: 640}\n    settingsRaw: 65\n    uvTransform: {x: 100, y: 1022, z: 100, w: 715}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 1.0,
+            "y": 0.7099999785423279,
+            "z": 0.0,
+            "u": 0.5478515625,
+            "v": 0.6162109385477379
+          },
+          {
+            "x": 0.7099999785423279,
+            "y": -0.7099999785423279,
+            "z": 0.0,
+            "u": 0.5336914052022621,
+            "v": 0.6855468739522621
+          },
+          {
+            "x": 1.0,
+            "y": -0.6200000047683716,
+            "z": 0.0,
+            "u": 0.5478515625,
+            "v": 0.6811523439828306
+          },
+          {
+            "x": -0.49000000953674316,
+            "y": -0.7099999785423279,
+            "z": 0.0,
+            "u": 0.4750976557843387,
+            "v": 0.6855468739522621
+          },
+          {
+            "x": -0.6600000262260437,
+            "y": 0.7099999785423279,
+            "z": 0.0,
+            "u": 0.46679687371943146,
+            "v": 0.6162109385477379
+          },
+          {
+            "x": -0.949999988079071,
+            "y": 0.3499999940395355,
+            "z": 0.0,
+            "u": 0.4526367193320766,
+            "v": 0.6337890627910383
+          },
+          {
+            "x": -0.9900000095367432,
+            "y": -0.15000000596046448,
+            "z": 0.0,
+            "u": 0.4506835932843387,
+            "v": 0.6582031252910383
+          },
+          {
+            "x": -1.0,
+            "y": 0.2800000011920929,
+            "z": 0.0,
+            "u": 0.4501953125,
+            "v": 0.6372070311917923
+          },
+          {
+            "x": -1.0,
+            "y": -0.07999999821186066,
+            "z": 0.0,
+            "u": 0.4501953125,
+            "v": 0.6547851561626885
+          }
+        ],
+        "indices": [
+          8,
+          7,
+          6,
+          5,
+          6,
+          7,
+          3,
+          6,
+          5,
+          4,
+          3,
+          5,
+          0,
+          3,
+          4,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/bullet/bulletspirtes/FirePea_flame2.asset",
+      "textureRect": {
+        "x": 922.0,
+        "y": 644.0,
+        "width": 200.0,
+        "height": 142.0,
+        "yTop": 1262.0
+      },
+      "logicalSize": {
+        "width": 200.0,
+        "height": 142.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "344d5a9580322454da4f1a50cecdfd9e": {
+      "texture": "../projectile-pea/textures/cfbfebf76995.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: FirePea_flame3\n  m_Rect:\n    serializedVersion: 2\n    x: 744\n    y: 510\n    width: 208\n    height: 158\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    6707ada5ce8b5564793716b48fd09bac: 8163345175201643279\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 2be43b649cd811049b3a36efc777b799, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 24\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 10\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 090008000700050007000800060007000500030006000500040003000500000003000400010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 10\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 208\n      _typelessdata: b81e853f8fc2353f00000000ae47813fb81e45bf00000000b81e853f9a9919bf000000000ad7633f713d4abf00000000cdcc4c3f713d4a3f00000000295c0fbe713d4a3f00000000713d8abe713d4abf00000000a4707dbf0ad7233d00000000b81e85bf0000003f00000000b81e85bf295c8f3d0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 744\n      y: 510\n      width: 208\n      height: 158\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 740, y: 352}\n    settingsRaw: 65\n    uvTransform: {x: 100, y: 848, z: 100, w: 589}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 1.0399999618530273,
+            "y": 0.7099999785423279,
+            "z": 0.0,
+            "u": 0.46484374813735485,
+            "v": 0.6777343760477379
+          },
+          {
+            "x": 1.0099999904632568,
+            "y": -0.7699999809265137,
+            "z": 0.0,
+            "u": 0.4633789057843387,
+            "v": 0.7499999990686774
+          },
+          {
+            "x": 1.0399999618530273,
+            "y": -0.6000000238418579,
+            "z": 0.0,
+            "u": 0.46484374813735485,
+            "v": 0.7416992199141532
+          },
+          {
+            "x": 0.8899999856948853,
+            "y": -0.7900000214576721,
+            "z": 0.0,
+            "u": 0.45751953055150807,
+            "v": 0.7509765635477379
+          },
+          {
+            "x": 0.800000011920929,
+            "y": 0.7900000214576721,
+            "z": 0.0,
+            "u": 0.4531250005820766,
+            "v": 0.6738281239522621
+          },
+          {
+            "x": -0.14000000059604645,
+            "y": 0.7900000214576721,
+            "z": 0.0,
+            "u": 0.40722656247089617,
+            "v": 0.6738281239522621
+          },
+          {
+            "x": -0.27000001072883606,
+            "y": -0.7900000214576721,
+            "z": 0.0,
+            "u": 0.40087890572613105,
+            "v": 0.7509765635477379
+          },
+          {
+            "x": -0.9900000095367432,
+            "y": 0.03999999910593033,
+            "z": 0.0,
+            "u": 0.3657226557843387,
+            "v": 0.7104492187936557
+          },
+          {
+            "x": -1.0399999618530273,
+            "y": 0.5,
+            "z": 0.0,
+            "u": 0.36328125186264515,
+            "v": 0.68798828125
+          },
+          {
+            "x": -1.0399999618530273,
+            "y": 0.07000000029802322,
+            "z": 0.0,
+            "u": 0.36328125186264515,
+            "v": 0.7089843749854481
+          }
+        ],
+        "indices": [
+          9,
+          8,
+          7,
+          5,
+          7,
+          8,
+          6,
+          7,
+          5,
+          3,
+          6,
+          5,
+          4,
+          3,
+          5,
+          0,
+          3,
+          4,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/bullet/bulletspirtes/FirePea_flame3_1.asset",
+      "textureRect": {
+        "x": 744.0,
+        "y": 510.0,
+        "width": 208.0,
+        "height": 158.0,
+        "yTop": 1380.0
+      },
+      "logicalSize": {
+        "width": 208.0,
+        "height": 158.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    }
+  },
+  "extraSpriteGuids": {},
+  "anchors": {
+    "shadow": {
+      "path": "Shadow",
+      "x": 0.00900000315,
+      "y": -0.635000184,
+      "relativeToRuntimeRoot": true
+    }
+  },
+  "visualBounds": {
+    "minX": -0.8338499817609787,
+    "maxX": 0.33574994951411063,
+    "minY": -0.7115001839798368,
+    "maxY": 0.33575000911951064
+  },
+  "clips": {
+    "FirePeaIdle": {
+      "name": "FirePeaIdle",
+      "duration": 1.0666666,
+      "additiveReferencePoseTime": 0.0,
+      "hasAdditiveReferencePose": false,
+      "loop": true,
+      "sourceSampleRate": 60.0,
+      "curves": [
+        {
+          "kind": "euler",
+          "path": "Image",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": "-Infinity",
+                "z": -342.85715
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.05,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -360.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -342.85715
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Image"
+        },
+        {
+          "kind": "float",
+          "path": "Flame",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": 1.0,
+              "inSlope": 0.0,
+              "outSlope": 0.0,
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "attribute": "m_Enabled",
+          "classID": 212,
+          "scriptFileId": 0,
+          "sourceBindingPath": "Flame"
+        },
+        {
+          "kind": "float",
+          "path": "Image",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": 1.0,
+              "inSlope": 0.0,
+              "outSlope": 0.0,
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "attribute": "m_Enabled",
+          "classID": 212,
+          "scriptFileId": 0,
+          "sourceBindingPath": "Image"
+        },
+        {
+          "kind": "sprite",
+          "path": "Flame",
+          "keys": [
+            {
+              "time": 0.0,
+              "spriteGuid": "a7cb20dc1dd67e249ab46dc7d9804770"
+            },
+            {
+              "time": 0.05,
+              "spriteGuid": "66fef6b3c03ad0d4abe0a30c3b0f14e9"
+            },
+            {
+              "time": 0.1,
+              "spriteGuid": "344d5a9580322454da4f1a50cecdfd9e"
+            },
+            {
+              "time": 0.15,
+              "spriteGuid": "a7cb20dc1dd67e249ab46dc7d9804770"
+            },
+            {
+              "time": 0.2,
+              "spriteGuid": "66fef6b3c03ad0d4abe0a30c3b0f14e9"
+            },
+            {
+              "time": 0.25,
+              "spriteGuid": "344d5a9580322454da4f1a50cecdfd9e"
+            },
+            {
+              "time": 0.3,
+              "spriteGuid": "a7cb20dc1dd67e249ab46dc7d9804770"
+            },
+            {
+              "time": 0.35,
+              "spriteGuid": "66fef6b3c03ad0d4abe0a30c3b0f14e9"
+            },
+            {
+              "time": 0.4,
+              "spriteGuid": "344d5a9580322454da4f1a50cecdfd9e"
+            },
+            {
+              "time": 0.45,
+              "spriteGuid": "a7cb20dc1dd67e249ab46dc7d9804770"
+            },
+            {
+              "time": 0.5,
+              "spriteGuid": "66fef6b3c03ad0d4abe0a30c3b0f14e9"
+            },
+            {
+              "time": 0.55,
+              "spriteGuid": "344d5a9580322454da4f1a50cecdfd9e"
+            },
+            {
+              "time": 0.6,
+              "spriteGuid": "a7cb20dc1dd67e249ab46dc7d9804770"
+            },
+            {
+              "time": 0.65,
+              "spriteGuid": "66fef6b3c03ad0d4abe0a30c3b0f14e9"
+            },
+            {
+              "time": 0.7,
+              "spriteGuid": "344d5a9580322454da4f1a50cecdfd9e"
+            },
+            {
+              "time": 0.75,
+              "spriteGuid": "a7cb20dc1dd67e249ab46dc7d9804770"
+            },
+            {
+              "time": 0.8,
+              "spriteGuid": "66fef6b3c03ad0d4abe0a30c3b0f14e9"
+            },
+            {
+              "time": 0.85,
+              "spriteGuid": "344d5a9580322454da4f1a50cecdfd9e"
+            },
+            {
+              "time": 0.9,
+              "spriteGuid": "a7cb20dc1dd67e249ab46dc7d9804770"
+            },
+            {
+              "time": 0.95,
+              "spriteGuid": "66fef6b3c03ad0d4abe0a30c3b0f14e9"
+            },
+            {
+              "time": 1.0,
+              "spriteGuid": "344d5a9580322454da4f1a50cecdfd9e"
+            },
+            {
+              "time": 1.05,
+              "spriteGuid": "a7cb20dc1dd67e249ab46dc7d9804770"
+            }
+          ],
+          "sourceBindingPath": "Flame"
+        }
+      ],
+      "events": []
+    },
+    "stop": {
+      "name": "stop",
+      "duration": 0.083333336,
+      "additiveReferencePoseTime": 0.0,
+      "hasAdditiveReferencePose": false,
+      "loop": false,
+      "sourceSampleRate": 60.0,
+      "curves": [
+        {
+          "kind": "float",
+          "path": "Flame",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": "-Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.083333336,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": 0.0,
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "attribute": "m_Enabled",
+          "classID": 212,
+          "scriptFileId": 0,
+          "sourceBindingPath": "Flame"
+        },
+        {
+          "kind": "float",
+          "path": "Image",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": "-Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.083333336,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": 0.0,
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "attribute": "m_Enabled",
+          "classID": 212,
+          "scriptFileId": 0,
+          "sourceBindingPath": "Image"
+        }
+      ],
+      "events": []
+    }
+  },
+  "controller": {
+    "states": [
+      {
+        "id": 1102730242686860875,
+        "name": "FirePeaIdle",
+        "clip": "FirePeaIdle",
+        "speed": 1.0,
+        "speedParameterActive": false,
+        "speedParameter": ""
+      },
+      {
+        "id": 1102724804207875695,
+        "name": "stop",
+        "clip": "stop",
+        "speed": 1.0,
+        "speedParameterActive": false,
+        "speedParameter": ""
+      }
+    ],
+    "layers": [
+      {
+        "name": "Base Layer",
+        "blendingMode": 0,
+        "defaultState": 1102730242686860875,
+        "states": [
+          1102730242686860875,
+          1102724804207875695
+        ],
+        "defaultWeight": 0.0
+      }
+    ],
+    "serializedController": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!91 &9100000\nAnimatorController:\n  serializedVersion: 5\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: SuperFirePea\n  m_AnimatorParameters: []\n  m_AnimatorLayers:\n  - serializedVersion: 5\n    m_Name: Base Layer\n    m_StateMachine: {fileID: 1107709254077376921}\n    m_Mask: {fileID: 0}\n    m_Motions: []\n    m_Behaviours: []\n    m_BlendingMode: 0\n    m_SyncedLayerIndex: -1\n    m_DefaultWeight: 0\n    m_IKPass: 0\n    m_SyncedLayerAffectsTiming: 0\n    m_Controller: {fileID: 9100000}\n--- !u!1107 &1107709254077376921\nAnimatorStateMachine:\n  serializedVersion: 6\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Base Layer\n  m_ChildStates:\n  - m_State: {fileID: 1102730242686860875}\n    m_Position: {x: 0, y: 0, z: 0}\n  - m_State: {fileID: 1102724804207875695}\n    m_Position: {x: 250, y: 0, z: 0}\n  m_ChildStateMachines: []\n  m_AnyStateTransitions: []\n  m_EntryTransitions: []\n  m_StateMachineTransitions: {}\n  m_StateMachineBehaviours: []\n  m_AnyStatePosition: {x: 0, y: -100, z: 0}\n  m_EntryPosition: {x: 250, y: -100, z: 0}\n  m_ExitPosition: {x: 500, y: -100, z: 0}\n  m_ParentStateMachinePosition: {x: 0, y: -200, z: 0}\n  m_DefaultState: {fileID: 1102730242686860875}\n--- !u!1102 &1102730242686860875\nAnimatorState:\n  serializedVersion: 6\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: FirePeaIdle\n  m_Speed: 1\n  m_CycleOffset: 0\n  m_Transitions: []\n  m_StateMachineBehaviours: []\n  m_Position: {x: 0, y: 0, z: 0}\n  m_IKOnFeet: 0\n  m_WriteDefaultValues: 1\n  m_Mirror: 0\n  m_SpeedParameterActive: 0\n  m_MirrorParameterActive: 0\n  m_CycleOffsetParameterActive: 0\n  m_TimeParameterActive: 0\n  m_Motion: {fileID: 7400000, guid: 509f1d5f837a7504a8ac2419547eaf4a, type: 2}\n  m_Tag:\n  m_SpeedParameter:\n  m_MirrorParameter:\n  m_CycleOffsetParameter:\n  m_TimeParameter:\n--- !u!1102 &1102724804207875695\nAnimatorState:\n  serializedVersion: 6\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: stop\n  m_Speed: 1\n  m_CycleOffset: 0\n  m_Transitions: []\n  m_StateMachineBehaviours: []\n  m_Position: {x: 250, y: 0, z: 0}\n  m_IKOnFeet: 0\n  m_WriteDefaultValues: 1\n  m_Mirror: 0\n  m_SpeedParameterActive: 0\n  m_MirrorParameterActive: 0\n  m_CycleOffsetParameterActive: 0\n  m_TimeParameterActive: 0\n  m_Motion: {fileID: 7400000, guid: 83ed06f0f3ee38a4eacdbc768490622b, type: 2}\n  m_Tag:\n  m_SpeedParameter:\n  m_MirrorParameter:\n  m_CycleOffsetParameter:\n  m_TimeParameter:\n"
+  },
+  "nonRenderingComponents": [
+    {
+      "typeId": 61,
+      "fileId": 61099118695303065,
+      "serializedComponent": "BoxCollider2D:\n  serializedVersion: 2\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1709254077376921}\n  m_Enabled: 1\n  m_Density: 1\n  m_Material: {fileID: 0}\n  m_IncludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_ExcludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_LayerOverridePriority: 0\n  m_ForceSendLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_ForceReceiveLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_ContactCaptureLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_CallbackLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_IsTrigger: 0\n  m_UsedByEffector: 0\n  m_UsedByComposite: 0\n  m_Offset: {x: 0, y: 0}\n  m_SpriteTilingProperty:\n    border: {x: 0, y: 0, z: 0, w: 0}\n    pivot: {x: 0, y: 0}\n    oldSize: {x: 0, y: 0}\n    newSize: {x: 0, y: 0}\n    adaptiveTilingThreshold: 0\n    drawMode: 0\n    adaptiveTiling: 0\n  m_AutoTiling: 0\n  m_Size: {x: 0.31117183, y: 0.33539104}\n  m_EdgeRadius: 0\n"
+    }
+  ],
+  "colliders": [
+    {
+      "type": "box",
+      "node": 0,
+      "fileId": 61099118695303065,
+      "enabled": true,
+      "trigger": false,
+      "offset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "size": {
+        "x": 0.31117183,
+        "y": 0.33539104
+      }
+    }
+  ],
+  "ignoredBindings": [],
+  "omittedInactiveNodes": [],
+  "spritePrefix": null,
+  "unusedSpriteBonesExplicitlyAllowed": false,
+  "sources": [
+    {
+      "path": "Resources/board/plantshadow.asset",
+      "sha256": "e02e122cb3bfb8765afedad2150f3172d60feb8f549356312efca74dce78ae71"
+    },
+    {
+      "path": "Resources/board/plantshadow.asset.meta",
+      "sha256": "08bf3a1a85aabd4284a5755b459880ee4aa2b4575ccdb802a5fcaa2d0ecd462a"
+    },
+    {
+      "path": "Resources/board/plantshadow.png",
+      "sha256": "7924e0d6960dcba0b775b7ebc7d6a49ecb82b27b55b3216f4f6d83f04492a45a"
+    },
+    {
+      "path": "Resources/board/plantshadow.png.meta",
+      "sha256": "901cd63206d878ad5e0556c56e9691ee440a48dddb2a45971ee256b0e139c923"
+    },
+    {
+      "path": "Resources/bullet/bulletspirtes/FirePea_1.asset",
+      "sha256": "afa0293edb7d7fa75ca2b77359c7734bd29de7566f86789ab219c1b51c8f10f2"
+    },
+    {
+      "path": "Resources/bullet/bulletspirtes/FirePea_1.asset.meta",
+      "sha256": "2cdd945157207ef01261074599b10239e8e61768e43f0dc0a4bd7cc4cfd9a2a5"
+    },
+    {
+      "path": "Resources/bullet/bulletspirtes/FirePea_flame1_0.asset",
+      "sha256": "9ced62191c5bad1c337c2c70e5c382faac5b42f0d8d80b4d1dd08e64225d4ef1"
+    },
+    {
+      "path": "Resources/bullet/bulletspirtes/FirePea_flame1_0.asset.meta",
+      "sha256": "3c2f3f803ad92396b2eeb42832c0b71f9d62b8b023d0d6e8a0b695a6cbf67123"
+    },
+    {
+      "path": "Resources/bullet/bulletspirtes/FirePea_flame2.asset",
+      "sha256": "460418ac41886ab55e996d7e61d2e9be47a0c6dd1ff555f1bb4668b99da72534"
+    },
+    {
+      "path": "Resources/bullet/bulletspirtes/FirePea_flame2.asset.meta",
+      "sha256": "a01b4287e2f2ae35571accddca916538076e2016009a7b9b6bbbca12527dc68b"
+    },
+    {
+      "path": "Resources/bullet/bulletspirtes/FirePea_flame3_1.asset",
+      "sha256": "3be0626af9e12db69a4b87295e82228c77c923538ad023a1bbfb0370892403ac"
+    },
+    {
+      "path": "Resources/bullet/bulletspirtes/FirePea_flame3_1.asset.meta",
+      "sha256": "ef51edacb005c921db26694b7067558068754378290c2d4ed35ed2c40a7f22a6"
+    },
+    {
+      "path": "Resources/bullet/prefabs/SuperFirePea.prefab",
+      "sha256": "9154aebdd5d182d37809e59241957885ff5b71c31677ca7886f1914b370d8cc3"
+    },
+    {
+      "path": "Resources/bullet/superfirepea/FirePeaIdle.anim",
+      "sha256": "c541f44640db38d15a668fcc7baffe5430c1ec23228a92f29a07eb073d28ce74"
+    },
+    {
+      "path": "Resources/bullet/superfirepea/FirePeaIdle.anim.meta",
+      "sha256": "2a82ae5655fb7ca94b5342ebea3b3a516c90b60bc4bf492313c2fbc36da023ce"
+    },
+    {
+      "path": "Resources/bullet/superfirepea/stop.anim",
+      "sha256": "4bef6a46ebd8042b6a51019871def4f5087e1f3f4babfe8b0727e906f2fab523"
+    },
+    {
+      "path": "Resources/bullet/superfirepea/stop.anim.meta",
+      "sha256": "0da2bb32d7925264f54d68c80031a04ca637b824b0b46e9808ae976051fcd962"
+    },
+    {
+      "path": "Resources/bullet/superfirepea/SuperFirePea.controller",
+      "sha256": "078dce81035d787a069b21b5063ed8c5570ca6a5aafba5fb5cc52aa9c4737747"
+    },
+    {
+      "path": "Resources/bullet/superfirepea/SuperFirePea.controller.meta",
+      "sha256": "18f1771e97508c398d9a4a6f0d2eba61d1c03e6c68cc96c419d7e624624d13dc"
+    },
+    {
+      "path": "Texture2D/sactx-0-2048x2048-DXT5_BC3-bullets-75988085.png",
+      "sha256": "cfbfebf76995deb93f8f8cbd6da703477bdf3dac26ebcf747bbfb3aa799fc8f9"
+    },
+    {
+      "path": "Texture2D/sactx-0-2048x2048-DXT5_BC3-bullets-75988085.png.meta",
+      "sha256": "861517b544a980fb9772f2d0200eddbcb1df31fe18211ed12353b07327456af5"
+    }
+  ],
+  "deferredComponents": [],
+  "validation": "Exported source data. Native rendering and source-runtime comparison are separate verification steps."
+}

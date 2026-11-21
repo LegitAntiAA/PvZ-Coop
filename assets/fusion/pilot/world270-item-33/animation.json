@@ -1,0 +1,2838 @@
+{
+  "schema": 1,
+  "sourcePrefab": "Resources/zombies/_image/IceBall.prefab",
+  "unitsPerNativePixel": 0.01,
+  "applyRootMotion": true,
+  "static": false,
+  "root": 0,
+  "nodes": [
+    {
+      "name": "IceBall",
+      "active": true,
+      "tag": "Untagged",
+      "parent": -1,
+      "path": "",
+      "position": {
+        "x": -2.1940606,
+        "y": -1.1954502,
+        "z": 0.5023123
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 0.2,
+        "y": 0.2,
+        "z": 0.2
+      }
+    },
+    {
+      "name": "Sprites",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "Sprites",
+      "position": {
+        "x": 0.0,
+        "y": 3.32,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "Zombie_boss_iceball_multiply",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 1,
+      "path": "Sprites/Zombie_boss_iceball_multiply",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "Zombie_boss_icefire_shadow",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 1,
+      "path": "Sprites/Zombie_boss_icefire_shadow",
+      "position": {
+        "x": 0.014060736,
+        "y": -0.66455007,
+        "z": -0.5023123
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "Zombie_boss_iceball_highlight",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 1,
+      "path": "Sprites/Zombie_boss_iceball_highlight",
+      "position": {
+        "x": -0.9800005,
+        "y": 1.3799999,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "Anim",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "Anim",
+      "position": {
+        "x": 0.0,
+        "y": 3.32,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "Zombie_boss_iceball",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 5,
+      "path": "Anim/Zombie_boss_iceball",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "Zombie_boss_iceball_overlay",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 5,
+      "path": "Anim/Zombie_boss_iceball_overlay",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "Zombie_boss_iceball_crystal2",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 5,
+      "path": "Anim/Zombie_boss_iceball_crystal2",
+      "position": {
+        "x": 1.0699999,
+        "y": -1.1099999,
+        "z": -2.5115614
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "Zombie_boss_iceball_crystal1",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 5,
+      "path": "Anim/Zombie_boss_iceball_crystal1",
+      "position": {
+        "x": 2.08,
+        "y": 1.2900002,
+        "z": -2.5115614
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "Zombie_boss_iceball_crystal3",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 5,
+      "path": "Anim/Zombie_boss_iceball_crystal3",
+      "position": {
+        "x": -0.24999976,
+        "y": 1.3399999,
+        "z": -2.5115614
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "Shadow",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "Shadow",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    }
+  ],
+  "sourceHierarchy": null,
+  "sprites": [
+    {
+      "texture": "../world270-item-32/textures/584460789621.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Zombie_boss_icefire_shadow\n  m_Rect:\n    serializedVersion: 2\n    x: 1341.5\n    y: 872.5\n    width: 328\n    height: 136\n  m_Offset: {x: -0.49999952, y: -0.25000024}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 50\n  m_Pivot: {x: 0.4984756, y: 0.49816176}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    f9ed2676da850b14fba59e59f25a4420: 592901994515355390\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 99526ce586479ff48971751618cd2389, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 21\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 9\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 080007000500060005000700040005000600010005000400030001000400000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 9\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 184\n      _typelessdata: d7a340403333733f000000005c8f5240cdccacbf000000005c8f5240295c4f3f0000000085eb0140295caf3f0000000014aee7bf295caf3f00000000ec5148c0cdccacbf0000000052b84ec05c8fa23f00000000ae4751c0ec51983f00000000ae4751c014aea7bf0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 1341.5\n      y: 872.5\n      width: 328\n      height: 136\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 50, y: 1505, z: 50, w: 940}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 3.009999990463257,
+            "y": 0.949999988079071,
+            "z": 0.0,
+            "u": 0.8083496091421694,
+            "v": 0.03564453183207661
+          },
+          {
+            "x": 3.2899999618530273,
+            "y": -1.350000023841858,
+            "z": 0.0,
+            "u": 0.8151855459436774,
+            "v": 0.14794921991415322
+          },
+          {
+            "x": 3.2899999618530273,
+            "y": 0.8100000023841858,
+            "z": 0.0,
+            "u": 0.8151855459436774,
+            "v": 0.04248046863358468
+          },
+          {
+            "x": 2.0299999713897705,
+            "y": 1.3700000047683716,
+            "z": 0.0,
+            "u": 0.7844238274265081,
+            "v": 0.015136718517169356
+          },
+          {
+            "x": -1.809999942779541,
+            "y": 1.3700000047683716,
+            "z": 0.0,
+            "u": 0.6906738295219839,
+            "v": 0.015136718517169356
+          },
+          {
+            "x": -3.130000114440918,
+            "y": -1.350000023841858,
+            "z": 0.0,
+            "u": 0.6584472628310323,
+            "v": 0.14794921991415322
+          },
+          {
+            "x": -3.2300000190734863,
+            "y": 1.2699999809265137,
+            "z": 0.0,
+            "u": 0.6560058589093387,
+            "v": 0.020019532181322575
+          },
+          {
+            "x": -3.2699999809265137,
+            "y": 1.190000057220459,
+            "z": 0.0,
+            "u": 0.6550292973406613,
+            "v": 0.023925778456032276
+          },
+          {
+            "x": -3.2699999809265137,
+            "y": -1.309999942779541,
+            "z": 0.0,
+            "u": 0.6550292973406613,
+            "v": 0.14599609095603228
+          }
+        ],
+        "indices": [
+          8,
+          7,
+          5,
+          6,
+          5,
+          7,
+          4,
+          5,
+          6,
+          1,
+          5,
+          4,
+          3,
+          1,
+          4,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/_image/Zombie_boss_icefire_shadow.asset",
+      "textureRect": {
+        "x": 1341.5,
+        "y": 872.5,
+        "width": 328.0,
+        "height": 136.0,
+        "yTop": 15.5
+      },
+      "logicalSize": {
+        "width": 328.0,
+        "height": 136.0
+      },
+      "pivot": {
+        "x": 0.4984756,
+        "y": 0.49816176
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 50.0,
+      "guid": "8fe4e5db023736d4cad0d3bb0ac73360",
+      "node": 11,
+      "sortingOrder": -1,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 0.8
+      },
+      "flipX": false,
+      "flipY": false,
+      "maskInteraction": 0
+    },
+    {
+      "texture": "../world270-item-32/textures/584460789621.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Zombie_boss_icefire_shadow\n  m_Rect:\n    serializedVersion: 2\n    x: 1341.5\n    y: 872.5\n    width: 328\n    height: 136\n  m_Offset: {x: -0.49999952, y: -0.25000024}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 50\n  m_Pivot: {x: 0.4984756, y: 0.49816176}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    f9ed2676da850b14fba59e59f25a4420: 592901994515355390\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 99526ce586479ff48971751618cd2389, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 21\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 9\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 080007000500060005000700040005000600010005000400030001000400000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 9\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 184\n      _typelessdata: d7a340403333733f000000005c8f5240cdccacbf000000005c8f5240295c4f3f0000000085eb0140295caf3f0000000014aee7bf295caf3f00000000ec5148c0cdccacbf0000000052b84ec05c8fa23f00000000ae4751c0ec51983f00000000ae4751c014aea7bf0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 1341.5\n      y: 872.5\n      width: 328\n      height: 136\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 50, y: 1505, z: 50, w: 940}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 3.009999990463257,
+            "y": 0.949999988079071,
+            "z": 0.0,
+            "u": 0.8083496091421694,
+            "v": 0.03564453183207661
+          },
+          {
+            "x": 3.2899999618530273,
+            "y": -1.350000023841858,
+            "z": 0.0,
+            "u": 0.8151855459436774,
+            "v": 0.14794921991415322
+          },
+          {
+            "x": 3.2899999618530273,
+            "y": 0.8100000023841858,
+            "z": 0.0,
+            "u": 0.8151855459436774,
+            "v": 0.04248046863358468
+          },
+          {
+            "x": 2.0299999713897705,
+            "y": 1.3700000047683716,
+            "z": 0.0,
+            "u": 0.7844238274265081,
+            "v": 0.015136718517169356
+          },
+          {
+            "x": -1.809999942779541,
+            "y": 1.3700000047683716,
+            "z": 0.0,
+            "u": 0.6906738295219839,
+            "v": 0.015136718517169356
+          },
+          {
+            "x": -3.130000114440918,
+            "y": -1.350000023841858,
+            "z": 0.0,
+            "u": 0.6584472628310323,
+            "v": 0.14794921991415322
+          },
+          {
+            "x": -3.2300000190734863,
+            "y": 1.2699999809265137,
+            "z": 0.0,
+            "u": 0.6560058589093387,
+            "v": 0.020019532181322575
+          },
+          {
+            "x": -3.2699999809265137,
+            "y": 1.190000057220459,
+            "z": 0.0,
+            "u": 0.6550292973406613,
+            "v": 0.023925778456032276
+          },
+          {
+            "x": -3.2699999809265137,
+            "y": -1.309999942779541,
+            "z": 0.0,
+            "u": 0.6550292973406613,
+            "v": 0.14599609095603228
+          }
+        ],
+        "indices": [
+          8,
+          7,
+          5,
+          6,
+          5,
+          7,
+          4,
+          5,
+          6,
+          1,
+          5,
+          4,
+          3,
+          1,
+          4,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/_image/Zombie_boss_icefire_shadow.asset",
+      "textureRect": {
+        "x": 1341.5,
+        "y": 872.5,
+        "width": 328.0,
+        "height": 136.0,
+        "yTop": 15.5
+      },
+      "logicalSize": {
+        "width": 328.0,
+        "height": 136.0
+      },
+      "pivot": {
+        "x": 0.4984756,
+        "y": 0.49816176
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 50.0,
+      "guid": "8fe4e5db023736d4cad0d3bb0ac73360",
+      "node": 3,
+      "sortingOrder": 0,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false,
+      "maskInteraction": 0
+    },
+    {
+      "texture": "../world270-item-32/textures/584460789621.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Zombie_boss_iceball\n  m_Rect:\n    serializedVersion: 2\n    x: 562\n    y: 2\n    width: 365\n    height: 365\n  m_Offset: {x: 0, y: -0.2499947}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 50\n  m_Pivot: {x: 0.5, y: 0.49931508}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    f9ed2676da850b14fba59e59f25a4420: 3765928170442828525\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 99526ce586479ff48971751618cd2389, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 24\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 10\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 090008000600070006000800050006000700030006000500040003000500000003000400010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 10\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 208\n      _typelessdata: e17a04409a996940000000009a99694085eb01c0000000009a99694085ebf13f000000000000e03f9a9969c0000000006666c6bf9a9969400000000085eb01c08fc2654000000000ec5108c09a9969c00000000048e14ac00ad75340000000009a9969c0d7a3d03f000000009a9969c0000010c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 562\n      y: 2\n      width: 365\n      height: 365\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 50, y: 744.5, z: 50, w: 184.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 2.069999933242798,
+            "y": 3.6500000953674316,
+            "z": 0.0,
+            "u": 0.4140624983701855,
+            "v": 0.6416015578433871
+          },
+          {
+            "x": 3.6500000953674316,
+            "y": -2.0299999713897705,
+            "z": 0.0,
+            "u": 0.45263672107830644,
+            "v": 0.9189453111030161
+          },
+          {
+            "x": 3.6500000953674316,
+            "y": 1.8899999856948853,
+            "z": 0.0,
+            "u": 0.45263672107830644,
+            "v": 0.7275390631984919
+          },
+          {
+            "x": 1.75,
+            "y": -3.6500000953674316,
+            "z": 0.0,
+            "u": 0.40625,
+            "v": 0.9980468796566129
+          },
+          {
+            "x": -1.5499999523162842,
+            "y": 3.6500000953674316,
+            "z": 0.0,
+            "u": 0.3256835949141532,
+            "v": 0.6416015578433871
+          },
+          {
+            "x": -2.0299999713897705,
+            "y": 3.5899999141693115,
+            "z": 0.0,
+            "u": 0.31396484444849193,
+            "v": 0.6445312541909516
+          },
+          {
+            "x": -2.130000114440918,
+            "y": -3.6500000953674316,
+            "z": 0.0,
+            "u": 0.3115234347060323,
+            "v": 0.9980468796566129
+          },
+          {
+            "x": -3.1700000762939453,
+            "y": 3.309999942779541,
+            "z": 0.0,
+            "u": 0.28613281063735485,
+            "v": 0.6582031277939677
+          },
+          {
+            "x": -3.6500000953674316,
+            "y": 1.6299999952316284,
+            "z": 0.0,
+            "u": 0.27441406017169356,
+            "v": 0.7402343752328306
+          },
+          {
+            "x": -3.6500000953674316,
+            "y": -2.25,
+            "z": 0.0,
+            "u": 0.27441406017169356,
+            "v": 0.9296875
+          }
+        ],
+        "indices": [
+          9,
+          8,
+          6,
+          7,
+          6,
+          8,
+          5,
+          6,
+          7,
+          3,
+          6,
+          5,
+          4,
+          3,
+          5,
+          0,
+          3,
+          4,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/_image/Zombie_boss_iceball.asset",
+      "textureRect": {
+        "x": 562.0,
+        "y": 2.0,
+        "width": 365.0,
+        "height": 365.0,
+        "yTop": 657.0
+      },
+      "logicalSize": {
+        "width": 365.0,
+        "height": 365.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.49931508
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 50.0,
+      "guid": "794c1a85bf456074187ac545361b2708",
+      "node": 6,
+      "sortingOrder": 1,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false,
+      "maskInteraction": 0
+    },
+    {
+      "texture": "../world270-item-32/textures/584460789621.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Zombie_boss_iceball_multiply\n  m_Rect:\n    serializedVersion: 2\n    x: 931\n    y: 2\n    width: 363\n    height: 361\n  m_Offset: {x: -0.24999878, y: -0.24999848}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 50\n  m_Pivot: {x: 0.4993113, y: 0.49930748}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    f9ed2676da850b14fba59e59f25a4420: 1087638621759269888\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 99526ce586479ff48971751618cd2389, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 33\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 15\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 0e000d000c000b000c000d0009000c000b00080009000b000a0009000800070006000500040005000600010005000400030001000400000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 15\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 312\n      _typelessdata: 1f851b403d0a674000000000ec5168403d0a67c000000000ec5168406666564000000000f628dc3e3d0a67400000000085ebd13e8fc2654000000000000010c03d0a67c000000000ec5168c014ae073f00000000ec5168c0b81ea5bf000000000ad7c3bf3d0a67400000000052b8febf66665640000000000ad7c3bfd7a36040000000001f851bc03d0a674000000000295c1fc06666564000000000d7a320c085eb614000000000d7a320c0713d5a4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 931\n      y: 2\n      width: 363\n      height: 361\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 50, y: 1112.5, z: 50, w: 182.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 2.430000066757202,
+            "y": 3.609999895095825,
+            "z": 0.0,
+            "u": 0.6025390641298145,
+            "v": 0.6455078176222742
+          },
+          {
+            "x": 3.630000114440918,
+            "y": -3.609999895095825,
+            "z": 0.0,
+            "u": 0.6318359402939677,
+            "v": 0.9980468698777258
+          },
+          {
+            "x": 3.630000114440918,
+            "y": 3.3499999046325684,
+            "z": 0.0,
+            "u": 0.6318359402939677,
+            "v": 0.6582031296566129
+          },
+          {
+            "x": 0.4300000071525574,
+            "y": 3.609999895095825,
+            "z": 0.0,
+            "u": 0.553710937674623,
+            "v": 0.6455078176222742
+          },
+          {
+            "x": 0.4099999964237213,
+            "y": 3.5899999141693115,
+            "z": 0.0,
+            "u": 0.5532226561626885,
+            "v": 0.6464843791909516
+          },
+          {
+            "x": -2.25,
+            "y": -3.609999895095825,
+            "z": 0.0,
+            "u": 0.48828125,
+            "v": 0.9980468698777258
+          },
+          {
+            "x": -3.630000114440918,
+            "y": 0.5299999713897705,
+            "z": 0.0,
+            "u": 0.4545898409560323,
+            "v": 0.7958984388969839
+          },
+          {
+            "x": -3.630000114440918,
+            "y": -1.2899999618530273,
+            "z": 0.0,
+            "u": 0.4545898409560323,
+            "v": 0.8847656231373549
+          },
+          {
+            "x": -1.5299999713897705,
+            "y": 3.609999895095825,
+            "z": 0.0,
+            "u": 0.5058593756984919,
+            "v": 0.6455078176222742
+          },
+          {
+            "x": -1.9900000095367432,
+            "y": 3.3499999046325684,
+            "z": 0.0,
+            "u": 0.49462890601716936,
+            "v": 0.6582031296566129
+          },
+          {
+            "x": -1.5299999713897705,
+            "y": 3.509999990463257,
+            "z": 0.0,
+            "u": 0.5058593756984919,
+            "v": 0.6503906254656613
+          },
+          {
+            "x": -2.430000066757202,
+            "y": 3.609999895095825,
+            "z": 0.0,
+            "u": 0.4838867171201855,
+            "v": 0.6455078176222742
+          },
+          {
+            "x": -2.490000009536743,
+            "y": 3.3499999046325684,
+            "z": 0.0,
+            "u": 0.48242187476716936,
+            "v": 0.6582031296566129
+          },
+          {
+            "x": -2.509999990463257,
+            "y": 3.5299999713897705,
+            "z": 0.0,
+            "u": 0.48193359398283064,
+            "v": 0.6494140638969839
+          },
+          {
+            "x": -2.509999990463257,
+            "y": 3.4100000858306885,
+            "z": 0.0,
+            "u": 0.48193359398283064,
+            "v": 0.6552734333090484
+          }
+        ],
+        "indices": [
+          14,
+          13,
+          12,
+          11,
+          12,
+          13,
+          9,
+          12,
+          11,
+          8,
+          9,
+          11,
+          10,
+          9,
+          8,
+          7,
+          6,
+          5,
+          4,
+          5,
+          6,
+          1,
+          5,
+          4,
+          3,
+          1,
+          4,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/_image/Zombie_boss_iceball_multiply.asset",
+      "textureRect": {
+        "x": 931.0,
+        "y": 2.0,
+        "width": 363.0,
+        "height": 361.0,
+        "yTop": 661.0
+      },
+      "logicalSize": {
+        "width": 363.0,
+        "height": 361.0
+      },
+      "pivot": {
+        "x": 0.4993113,
+        "y": 0.49930748
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 50.0,
+      "guid": "bd089c19fc3f2a94ca6b906bf881406c",
+      "node": 2,
+      "sortingOrder": 2,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false,
+      "maskInteraction": 0
+    },
+    {
+      "texture": "../world270-item-32/textures/584460789621.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Zombie_boss_iceball_crystal2\n  m_Rect:\n    serializedVersion: 2\n    x: 1485\n    y: 362.5\n    width: 106\n    height: 121\n  m_Offset: {x: 0, y: -0.24999878}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 50\n  m_Pivot: {x: 0.5, y: 0.4979339}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    f9ed2676da850b14fba59e59f25a4420: 3135912357668492084\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 99526ce586479ff48971751618cd2389, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 27\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 11\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 0a0009000700080007000900040007000800060007000400050006000400010005000400030001000400000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 11\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 232\n      _typelessdata: 14ae873f7b14ae3e000000000000803f333333bf0000000014ae873fe17a14bf000000005c8f423f9a99993f00000000ec51383ff6289c3f000000003333333f85eb91bf000000003d0ad73e9a9999bf000000000ad7a3be9a9999bf0000000052b81ebff6289c3f0000000014ae87bf52b81e3f0000000014ae87bfae4761bf0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 1485\n      y: 362.5\n      width: 106\n      height: 121\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 50, y: 1538, z: 50, w: 422.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 1.059999942779541,
+            "y": 0.3400000035762787,
+            "z": 0.0,
+            "u": 0.7768554673530161,
+            "v": 0.570800781075377
+          },
+          {
+            "x": 1.0,
+            "y": -0.699999988079071,
+            "z": 0.0,
+            "u": 0.775390625,
+            "v": 0.6215820306679234
+          },
+          {
+            "x": 1.059999942779541,
+            "y": -0.5799999833106995,
+            "z": 0.0,
+            "u": 0.7768554673530161,
+            "v": 0.6157226554350927
+          },
+          {
+            "x": 0.7599999904632568,
+            "y": 1.2000000476837158,
+            "z": 0.0,
+            "u": 0.7695312497671694,
+            "v": 0.5288085914216936
+          },
+          {
+            "x": 0.7200000286102295,
+            "y": 1.2200000286102295,
+            "z": 0.0,
+            "u": 0.7685546881984919,
+            "v": 0.5278320298530161
+          },
+          {
+            "x": 0.699999988079071,
+            "y": -1.1399999856948853,
+            "z": 0.0,
+            "u": 0.7680664059589617,
+            "v": 0.6430664055515081
+          },
+          {
+            "x": 0.41999998688697815,
+            "y": -1.2000000476837158,
+            "z": 0.0,
+            "u": 0.7612304684298579,
+            "v": 0.6459960960783064
+          },
+          {
+            "x": -0.3199999928474426,
+            "y": -1.2000000476837158,
+            "z": 0.0,
+            "u": 0.743164062674623,
+            "v": 0.6459960960783064
+          },
+          {
+            "x": -0.6200000047683716,
+            "y": 1.2200000286102295,
+            "z": 0.0,
+            "u": 0.7358398436335847,
+            "v": 0.5278320298530161
+          },
+          {
+            "x": -1.059999942779541,
+            "y": 0.6200000047683716,
+            "z": 0.0,
+            "u": 0.7250976576469839,
+            "v": 0.5571289060171694
+          },
+          {
+            "x": -1.059999942779541,
+            "y": -0.8799999952316284,
+            "z": 0.0,
+            "u": 0.7250976576469839,
+            "v": 0.6303710935171694
+          }
+        ],
+        "indices": [
+          10,
+          9,
+          7,
+          8,
+          7,
+          9,
+          4,
+          7,
+          8,
+          6,
+          7,
+          4,
+          5,
+          6,
+          4,
+          1,
+          5,
+          4,
+          3,
+          1,
+          4,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/_image/Zombie_boss_iceball_crystal2.asset",
+      "textureRect": {
+        "x": 1485.0,
+        "y": 362.5,
+        "width": 106.0,
+        "height": 121.0,
+        "yTop": 540.5
+      },
+      "logicalSize": {
+        "width": 106.0,
+        "height": 121.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.4979339
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 50.0,
+      "guid": "f70a42740ed6f7f489fd7ec2787ecd7a",
+      "node": 8,
+      "sortingOrder": 3,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false,
+      "maskInteraction": 0
+    },
+    {
+      "texture": "../world270-item-32/textures/584460789621.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Zombie_boss_iceball_crystal1\n  m_Rect:\n    serializedVersion: 2\n    x: 1485\n    y: 487\n    width: 48\n    height: 61\n  m_Offset: {x: 0, y: -0.2499997}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 50\n  m_Pivot: {x: 0.5, y: 0.49590164}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    f9ed2676da850b14fba59e59f25a4420: 3828675075260969889\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 99526ce586479ff48971751618cd2389, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 24\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 10\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 090008000500070005000800060005000700040005000600010005000400030001000400000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 10\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 208\n      _typelessdata: 8fc2f53e85ebd13e00000000b81e853ef6281cbf000000008fc2f53e85eb11bf000000000ad7233ef6281c3f00000000ec5138bef6281c3f00000000cdcc4cbef6281cbf00000000ae4761be14ae073f000000009a9999be85ebd13e000000008fc2f5be295c8f3d000000008fc2f5bee17a94be0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 1485\n      y: 487\n      width: 48\n      height: 61\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 50, y: 1509, z: 50, w: 517.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.47999998927116394,
+            "y": 0.4099999964237213,
+            "z": 0.0,
+            "u": 0.7485351559880655,
+            "v": 0.474609375174623
+          },
+          {
+            "x": 0.25999999046325684,
+            "y": -0.6100000143051147,
+            "z": 0.0,
+            "u": 0.7431640622671694,
+            "v": 0.5244140631984919
+          },
+          {
+            "x": 0.47999998927116394,
+            "y": -0.5699999928474426,
+            "z": 0.0,
+            "u": 0.7485351559880655,
+            "v": 0.522460937150754
+          },
+          {
+            "x": 0.1599999964237213,
+            "y": 0.6100000143051147,
+            "z": 0.0,
+            "u": 0.7407226561626885,
+            "v": 0.46484374930150807
+          },
+          {
+            "x": -0.18000000715255737,
+            "y": 0.6100000143051147,
+            "z": 0.0,
+            "u": 0.732421874825377,
+            "v": 0.46484374930150807
+          },
+          {
+            "x": -0.20000000298023224,
+            "y": -0.6100000143051147,
+            "z": 0.0,
+            "u": 0.7319335936772404,
+            "v": 0.5244140631984919
+          },
+          {
+            "x": -0.2199999988079071,
+            "y": 0.5299999713897705,
+            "z": 0.0,
+            "u": 0.7314453125291038,
+            "v": 0.46875000139698386
+          },
+          {
+            "x": -0.30000001192092896,
+            "y": 0.4099999964237213,
+            "z": 0.0,
+            "u": 0.7294921872089617,
+            "v": 0.474609375174623
+          },
+          {
+            "x": -0.47999998927116394,
+            "y": 0.07000000029802322,
+            "z": 0.0,
+            "u": 0.7250976565119345,
+            "v": 0.4912109374854481
+          },
+          {
+            "x": -0.47999998927116394,
+            "y": -0.28999999165534973,
+            "z": 0.0,
+            "u": 0.7250976565119345,
+            "v": 0.5087890620925464
+          }
+        ],
+        "indices": [
+          9,
+          8,
+          5,
+          7,
+          5,
+          8,
+          6,
+          5,
+          7,
+          4,
+          5,
+          6,
+          1,
+          5,
+          4,
+          3,
+          1,
+          4,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/_image/Zombie_boss_iceball_crystal1.asset",
+      "textureRect": {
+        "x": 1485.0,
+        "y": 487.0,
+        "width": 48.0,
+        "height": 61.0,
+        "yTop": 476.0
+      },
+      "logicalSize": {
+        "width": 48.0,
+        "height": 61.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.49590164
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 50.0,
+      "guid": "88c88648893cd6e47a6917c73027e3bd",
+      "node": 9,
+      "sortingOrder": 3,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false,
+      "maskInteraction": 0
+    },
+    {
+      "texture": "../world270-item-32/textures/584460789621.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Zombie_boss_iceball_crystal3\n  m_Rect:\n    serializedVersion: 2\n    x: 1921\n    y: 779\n    width: 106\n    height: 113\n  m_Offset: {x: 0, y: -0.24999842}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 50\n  m_Pivot: {x: 0.5, y: 0.49778762}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    f9ed2676da850b14fba59e59f25a4420: 4159483352935295919\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 99526ce586479ff48971751618cd2389, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 21\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 9\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 080007000600050006000700010006000500040001000500030001000400000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 9\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 184\n      _typelessdata: 14ae873f7b142ebe00000000ae47613fd7a390bf0000000014ae873f9a9959bf00000000ec51383ff6281c3f000000009a99993ed7a3903f00000000ae47e1bed7a3903f00000000295c0fbfd7a390bf0000000014ae87bf48e1fa3e0000000014ae87bfd7a3f0be0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 1921\n      y: 779\n      width: 106\n      height: 113\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 50, y: 1974, z: 50, w: 835.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 1.059999942779541,
+            "y": -0.17000000178813934,
+            "z": 0.0,
+            "u": 0.9897460923530161,
+            "v": 0.1923828125873115
+          },
+          {
+            "x": 0.8799999952316284,
+            "y": -1.1299999952316284,
+            "z": 0.0,
+            "u": 0.9853515623835847,
+            "v": 0.23925781226716936
+          },
+          {
+            "x": 1.059999942779541,
+            "y": -0.8500000238418579,
+            "z": 0.0,
+            "u": 0.9897460923530161,
+            "v": 0.22558593866415322
+          },
+          {
+            "x": 0.7200000286102295,
+            "y": 0.6100000143051147,
+            "z": 0.0,
+            "u": 0.9814453131984919,
+            "v": 0.15429687430150807
+          },
+          {
+            "x": 0.30000001192092896,
+            "y": 1.1299999952316284,
+            "z": 0.0,
+            "u": 0.9711914065410383,
+            "v": 0.12890625023283064
+          },
+          {
+            "x": -0.4399999976158142,
+            "y": 1.1299999952316284,
+            "z": 0.0,
+            "u": 0.9531250000582077,
+            "v": 0.12890625023283064
+          },
+          {
+            "x": -0.5600000023841858,
+            "y": -1.1299999952316284,
+            "z": 0.0,
+            "u": 0.9501953124417923,
+            "v": 0.23925781226716936
+          },
+          {
+            "x": -1.059999942779541,
+            "y": 0.49000000953674316,
+            "z": 0.0,
+            "u": 0.9379882826469839,
+            "v": 0.1601562495343387
+          },
+          {
+            "x": -1.059999942779541,
+            "y": -0.4699999988079071,
+            "z": 0.0,
+            "u": 0.9379882826469839,
+            "v": 0.20703124994179234
+          }
+        ],
+        "indices": [
+          8,
+          7,
+          6,
+          5,
+          6,
+          7,
+          1,
+          6,
+          5,
+          4,
+          1,
+          5,
+          3,
+          1,
+          4,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/_image/Zombie_boss_iceball_crystal3.asset",
+      "textureRect": {
+        "x": 1921.0,
+        "y": 779.0,
+        "width": 106.0,
+        "height": 113.0,
+        "yTop": 132.0
+      },
+      "logicalSize": {
+        "width": 106.0,
+        "height": 113.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.49778762
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 50.0,
+      "guid": "917a4e68f16c91747b533b2ef30a80f7",
+      "node": 10,
+      "sortingOrder": 3,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false,
+      "maskInteraction": 0
+    },
+    {
+      "texture": "../world270-item-32/textures/584460789621.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Zombie_boss_iceball_highlight\n  m_Rect:\n    serializedVersion: 2\n    x: 1675\n    y: 779\n    width: 242\n    height: 215\n  m_Offset: {x: 0, y: -0.2500014}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 50\n  m_Pivot: {x: 0.5, y: 0.4988372}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    f9ed2676da850b14fba59e59f25a4420: -9053719244792512164\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 99526ce586479ff48971751618cd2389, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 18\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 8\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 070006000500040005000600030005000400000003000400010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 8\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 160\n      _typelessdata: 48e11a409a99094000000000c3f5a83f9a9909c00000000048e11a407b146ebf0000000085eb91bf9a9909c000000000666606c09a990940000000008fc215c07b14cebf0000000048e11ac0e17a04400000000048e11ac05c8fa2bf0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 1675\n      y: 779\n      width: 242\n      height: 215\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 50, y: 1796, z: 50, w: 886.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 2.4200000762939453,
+            "y": 2.1500000953674316,
+            "z": 0.0,
+            "u": 0.9360351581126451,
+            "v": 0.029296870343387127
+          },
+          {
+            "x": 1.3200000524520874,
+            "y": -2.1500000953674316,
+            "z": 0.0,
+            "u": 0.9091796887805685,
+            "v": 0.23925781715661287
+          },
+          {
+            "x": 2.4200000762939453,
+            "y": -0.9300000071525574,
+            "z": 0.0,
+            "u": 0.9360351581126451,
+            "v": 0.17968750034924597
+          },
+          {
+            "x": -1.1399999856948853,
+            "y": -2.1500000953674316,
+            "z": 0.0,
+            "u": 0.849121094099246,
+            "v": 0.23925781715661287
+          },
+          {
+            "x": -2.0999999046325684,
+            "y": 2.1500000953674316,
+            "z": 0.0,
+            "u": 0.8256835960783064,
+            "v": 0.029296870343387127
+          },
+          {
+            "x": -2.3399999141693115,
+            "y": -1.6100000143051147,
+            "z": 0.0,
+            "u": 0.8198242208454758,
+            "v": 0.21289062569849193
+          },
+          {
+            "x": -2.4200000762939453,
+            "y": 2.069999933242798,
+            "z": 0.0,
+            "u": 0.8178710918873549,
+            "v": 0.03320312825962901
+          },
+          {
+            "x": -2.4200000762939453,
+            "y": -1.2699999809265137,
+            "z": 0.0,
+            "u": 0.8178710918873549,
+            "v": 0.19628906156867743
+          }
+        ],
+        "indices": [
+          7,
+          6,
+          5,
+          4,
+          5,
+          6,
+          3,
+          5,
+          4,
+          0,
+          3,
+          4,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/_image/Zombie_boss_iceball_highlight.asset",
+      "textureRect": {
+        "x": 1675.0,
+        "y": 779.0,
+        "width": 242.0,
+        "height": 215.0,
+        "yTop": 30.0
+      },
+      "logicalSize": {
+        "width": 242.0,
+        "height": 215.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.4988372
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 50.0,
+      "guid": "5c97a1924c27e6744b9ba2f322c7a65c",
+      "node": 4,
+      "sortingOrder": 4,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false,
+      "maskInteraction": 0
+    },
+    {
+      "texture": "../world270-item-32/textures/584460789621.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Zombie_boss_iceball_overlay\n  m_Rect:\n    serializedVersion: 2\n    x: 1657.5\n    y: 2\n    width: 357\n    height: 353\n  m_Offset: {x: -0.49999997, y: -0.2500025}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 50\n  m_Pivot: {x: 0.49859944, y: 0.49929178}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    f9ed2676da850b14fba59e59f25a4420: 8378049516056940413\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 99526ce586479ff48971751618cd2389, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 21\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 9\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 080007000400060004000700050004000600030004000500010004000300000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 9\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 184\n      _typelessdata: b81e65401f851b400000000085eb114085eb61c000000000b81e6540713deabf000000008fc2f53f85eb61400000000014aec7bf85eb61c000000000295c0fc085eb6140000000008fc255c0cdcc1c40000000000ad763c00000a03f000000000ad763c052b8bebf0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 1657.5\n      y: 2\n      width: 357\n      height: 353\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 50, y: 1835.5, z: 50, w: 178.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 3.5799999237060547,
+            "y": 2.430000066757202,
+            "z": 0.0,
+            "u": 0.9836425762623549,
+            "v": 0.707031246740371
+          },
+          {
+            "x": 2.2799999713897705,
+            "y": -3.5299999713897705,
+            "z": 0.0,
+            "u": 0.9519042961765081,
+            "v": 0.9980468736030161
+          },
+          {
+            "x": 3.5799999237060547,
+            "y": -1.8300000429153442,
+            "z": 0.0,
+            "u": 0.9836425762623549,
+            "v": 0.9150390645954758
+          },
+          {
+            "x": 1.9199999570846558,
+            "y": 3.5299999713897705,
+            "z": 0.0,
+            "u": 0.9431152333272621,
+            "v": 0.6533203138969839
+          },
+          {
+            "x": -1.559999942779541,
+            "y": -3.5299999713897705,
+            "z": 0.0,
+            "u": 0.8581542982719839,
+            "v": 0.9980468736030161
+          },
+          {
+            "x": -2.240000009536743,
+            "y": 3.5299999713897705,
+            "z": 0.0,
+            "u": 0.8415527341421694,
+            "v": 0.6533203138969839
+          },
+          {
+            "x": -3.3399999141693115,
+            "y": 2.450000047683716,
+            "z": 0.0,
+            "u": 0.8146972677204758,
+            "v": 0.7060546851716936
+          },
+          {
+            "x": -3.559999942779541,
+            "y": 1.25,
+            "z": 0.0,
+            "u": 0.8093261732719839,
+            "v": 0.7646484375
+          },
+          {
+            "x": -3.559999942779541,
+            "y": -1.4900000095367432,
+            "z": 0.0,
+            "u": 0.8093261732719839,
+            "v": 0.8984375004656613
+          }
+        ],
+        "indices": [
+          8,
+          7,
+          4,
+          6,
+          4,
+          7,
+          5,
+          4,
+          6,
+          3,
+          4,
+          5,
+          1,
+          4,
+          3,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/_image/Zombie_boss_iceball_overlay.asset",
+      "textureRect": {
+        "x": 1657.5,
+        "y": 2.0,
+        "width": 357.0,
+        "height": 353.0,
+        "yTop": 669.0
+      },
+      "logicalSize": {
+        "width": 357.0,
+        "height": 353.0
+      },
+      "pivot": {
+        "x": 0.49859944,
+        "y": 0.49929178
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 50.0,
+      "guid": "1738c651bf68bc24684641602054b1d7",
+      "node": 7,
+      "sortingOrder": 4,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false,
+      "maskInteraction": 0
+    }
+  ],
+  "spriteVariants": {
+    "bd089c19fc3f2a94ca6b906bf881406c": {
+      "texture": "../world270-item-32/textures/584460789621.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Zombie_boss_iceball_multiply\n  m_Rect:\n    serializedVersion: 2\n    x: 931\n    y: 2\n    width: 363\n    height: 361\n  m_Offset: {x: -0.24999878, y: -0.24999848}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 50\n  m_Pivot: {x: 0.4993113, y: 0.49930748}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    f9ed2676da850b14fba59e59f25a4420: 1087638621759269888\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 99526ce586479ff48971751618cd2389, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 33\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 15\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 0e000d000c000b000c000d0009000c000b00080009000b000a0009000800070006000500040005000600010005000400030001000400000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 15\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 312\n      _typelessdata: 1f851b403d0a674000000000ec5168403d0a67c000000000ec5168406666564000000000f628dc3e3d0a67400000000085ebd13e8fc2654000000000000010c03d0a67c000000000ec5168c014ae073f00000000ec5168c0b81ea5bf000000000ad7c3bf3d0a67400000000052b8febf66665640000000000ad7c3bfd7a36040000000001f851bc03d0a674000000000295c1fc06666564000000000d7a320c085eb614000000000d7a320c0713d5a4000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 931\n      y: 2\n      width: 363\n      height: 361\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 50, y: 1112.5, z: 50, w: 182.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 2.430000066757202,
+            "y": 3.609999895095825,
+            "z": 0.0,
+            "u": 0.6025390641298145,
+            "v": 0.6455078176222742
+          },
+          {
+            "x": 3.630000114440918,
+            "y": -3.609999895095825,
+            "z": 0.0,
+            "u": 0.6318359402939677,
+            "v": 0.9980468698777258
+          },
+          {
+            "x": 3.630000114440918,
+            "y": 3.3499999046325684,
+            "z": 0.0,
+            "u": 0.6318359402939677,
+            "v": 0.6582031296566129
+          },
+          {
+            "x": 0.4300000071525574,
+            "y": 3.609999895095825,
+            "z": 0.0,
+            "u": 0.553710937674623,
+            "v": 0.6455078176222742
+          },
+          {
+            "x": 0.4099999964237213,
+            "y": 3.5899999141693115,
+            "z": 0.0,
+            "u": 0.5532226561626885,
+            "v": 0.6464843791909516
+          },
+          {
+            "x": -2.25,
+            "y": -3.609999895095825,
+            "z": 0.0,
+            "u": 0.48828125,
+            "v": 0.9980468698777258
+          },
+          {
+            "x": -3.630000114440918,
+            "y": 0.5299999713897705,
+            "z": 0.0,
+            "u": 0.4545898409560323,
+            "v": 0.7958984388969839
+          },
+          {
+            "x": -3.630000114440918,
+            "y": -1.2899999618530273,
+            "z": 0.0,
+            "u": 0.4545898409560323,
+            "v": 0.8847656231373549
+          },
+          {
+            "x": -1.5299999713897705,
+            "y": 3.609999895095825,
+            "z": 0.0,
+            "u": 0.5058593756984919,
+            "v": 0.6455078176222742
+          },
+          {
+            "x": -1.9900000095367432,
+            "y": 3.3499999046325684,
+            "z": 0.0,
+            "u": 0.49462890601716936,
+            "v": 0.6582031296566129
+          },
+          {
+            "x": -1.5299999713897705,
+            "y": 3.509999990463257,
+            "z": 0.0,
+            "u": 0.5058593756984919,
+            "v": 0.6503906254656613
+          },
+          {
+            "x": -2.430000066757202,
+            "y": 3.609999895095825,
+            "z": 0.0,
+            "u": 0.4838867171201855,
+            "v": 0.6455078176222742
+          },
+          {
+            "x": -2.490000009536743,
+            "y": 3.3499999046325684,
+            "z": 0.0,
+            "u": 0.48242187476716936,
+            "v": 0.6582031296566129
+          },
+          {
+            "x": -2.509999990463257,
+            "y": 3.5299999713897705,
+            "z": 0.0,
+            "u": 0.48193359398283064,
+            "v": 0.6494140638969839
+          },
+          {
+            "x": -2.509999990463257,
+            "y": 3.4100000858306885,
+            "z": 0.0,
+            "u": 0.48193359398283064,
+            "v": 0.6552734333090484
+          }
+        ],
+        "indices": [
+          14,
+          13,
+          12,
+          11,
+          12,
+          13,
+          9,
+          12,
+          11,
+          8,
+          9,
+          11,
+          10,
+          9,
+          8,
+          7,
+          6,
+          5,
+          4,
+          5,
+          6,
+          1,
+          5,
+          4,
+          3,
+          1,
+          4,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/_image/Zombie_boss_iceball_multiply.asset",
+      "textureRect": {
+        "x": 931.0,
+        "y": 2.0,
+        "width": 363.0,
+        "height": 361.0,
+        "yTop": 661.0
+      },
+      "logicalSize": {
+        "width": 363.0,
+        "height": 361.0
+      },
+      "pivot": {
+        "x": 0.4993113,
+        "y": 0.49930748
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 50.0
+    },
+    "8fe4e5db023736d4cad0d3bb0ac73360": {
+      "texture": "../world270-item-32/textures/584460789621.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Zombie_boss_icefire_shadow\n  m_Rect:\n    serializedVersion: 2\n    x: 1341.5\n    y: 872.5\n    width: 328\n    height: 136\n  m_Offset: {x: -0.49999952, y: -0.25000024}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 50\n  m_Pivot: {x: 0.4984756, y: 0.49816176}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    f9ed2676da850b14fba59e59f25a4420: 592901994515355390\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 99526ce586479ff48971751618cd2389, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 21\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 9\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 080007000500060005000700040005000600010005000400030001000400000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 9\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 184\n      _typelessdata: d7a340403333733f000000005c8f5240cdccacbf000000005c8f5240295c4f3f0000000085eb0140295caf3f0000000014aee7bf295caf3f00000000ec5148c0cdccacbf0000000052b84ec05c8fa23f00000000ae4751c0ec51983f00000000ae4751c014aea7bf0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 1341.5\n      y: 872.5\n      width: 328\n      height: 136\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 50, y: 1505, z: 50, w: 940}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 3.009999990463257,
+            "y": 0.949999988079071,
+            "z": 0.0,
+            "u": 0.8083496091421694,
+            "v": 0.03564453183207661
+          },
+          {
+            "x": 3.2899999618530273,
+            "y": -1.350000023841858,
+            "z": 0.0,
+            "u": 0.8151855459436774,
+            "v": 0.14794921991415322
+          },
+          {
+            "x": 3.2899999618530273,
+            "y": 0.8100000023841858,
+            "z": 0.0,
+            "u": 0.8151855459436774,
+            "v": 0.04248046863358468
+          },
+          {
+            "x": 2.0299999713897705,
+            "y": 1.3700000047683716,
+            "z": 0.0,
+            "u": 0.7844238274265081,
+            "v": 0.015136718517169356
+          },
+          {
+            "x": -1.809999942779541,
+            "y": 1.3700000047683716,
+            "z": 0.0,
+            "u": 0.6906738295219839,
+            "v": 0.015136718517169356
+          },
+          {
+            "x": -3.130000114440918,
+            "y": -1.350000023841858,
+            "z": 0.0,
+            "u": 0.6584472628310323,
+            "v": 0.14794921991415322
+          },
+          {
+            "x": -3.2300000190734863,
+            "y": 1.2699999809265137,
+            "z": 0.0,
+            "u": 0.6560058589093387,
+            "v": 0.020019532181322575
+          },
+          {
+            "x": -3.2699999809265137,
+            "y": 1.190000057220459,
+            "z": 0.0,
+            "u": 0.6550292973406613,
+            "v": 0.023925778456032276
+          },
+          {
+            "x": -3.2699999809265137,
+            "y": -1.309999942779541,
+            "z": 0.0,
+            "u": 0.6550292973406613,
+            "v": 0.14599609095603228
+          }
+        ],
+        "indices": [
+          8,
+          7,
+          5,
+          6,
+          5,
+          7,
+          4,
+          5,
+          6,
+          1,
+          5,
+          4,
+          3,
+          1,
+          4,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/_image/Zombie_boss_icefire_shadow.asset",
+      "textureRect": {
+        "x": 1341.5,
+        "y": 872.5,
+        "width": 328.0,
+        "height": 136.0,
+        "yTop": 15.5
+      },
+      "logicalSize": {
+        "width": 328.0,
+        "height": 136.0
+      },
+      "pivot": {
+        "x": 0.4984756,
+        "y": 0.49816176
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 50.0
+    },
+    "5c97a1924c27e6744b9ba2f322c7a65c": {
+      "texture": "../world270-item-32/textures/584460789621.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Zombie_boss_iceball_highlight\n  m_Rect:\n    serializedVersion: 2\n    x: 1675\n    y: 779\n    width: 242\n    height: 215\n  m_Offset: {x: 0, y: -0.2500014}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 50\n  m_Pivot: {x: 0.5, y: 0.4988372}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    f9ed2676da850b14fba59e59f25a4420: -9053719244792512164\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 99526ce586479ff48971751618cd2389, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 18\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 8\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 070006000500040005000600030005000400000003000400010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 8\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 160\n      _typelessdata: 48e11a409a99094000000000c3f5a83f9a9909c00000000048e11a407b146ebf0000000085eb91bf9a9909c000000000666606c09a990940000000008fc215c07b14cebf0000000048e11ac0e17a04400000000048e11ac05c8fa2bf0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 1675\n      y: 779\n      width: 242\n      height: 215\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 50, y: 1796, z: 50, w: 886.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 2.4200000762939453,
+            "y": 2.1500000953674316,
+            "z": 0.0,
+            "u": 0.9360351581126451,
+            "v": 0.029296870343387127
+          },
+          {
+            "x": 1.3200000524520874,
+            "y": -2.1500000953674316,
+            "z": 0.0,
+            "u": 0.9091796887805685,
+            "v": 0.23925781715661287
+          },
+          {
+            "x": 2.4200000762939453,
+            "y": -0.9300000071525574,
+            "z": 0.0,
+            "u": 0.9360351581126451,
+            "v": 0.17968750034924597
+          },
+          {
+            "x": -1.1399999856948853,
+            "y": -2.1500000953674316,
+            "z": 0.0,
+            "u": 0.849121094099246,
+            "v": 0.23925781715661287
+          },
+          {
+            "x": -2.0999999046325684,
+            "y": 2.1500000953674316,
+            "z": 0.0,
+            "u": 0.8256835960783064,
+            "v": 0.029296870343387127
+          },
+          {
+            "x": -2.3399999141693115,
+            "y": -1.6100000143051147,
+            "z": 0.0,
+            "u": 0.8198242208454758,
+            "v": 0.21289062569849193
+          },
+          {
+            "x": -2.4200000762939453,
+            "y": 2.069999933242798,
+            "z": 0.0,
+            "u": 0.8178710918873549,
+            "v": 0.03320312825962901
+          },
+          {
+            "x": -2.4200000762939453,
+            "y": -1.2699999809265137,
+            "z": 0.0,
+            "u": 0.8178710918873549,
+            "v": 0.19628906156867743
+          }
+        ],
+        "indices": [
+          7,
+          6,
+          5,
+          4,
+          5,
+          6,
+          3,
+          5,
+          4,
+          0,
+          3,
+          4,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/_image/Zombie_boss_iceball_highlight.asset",
+      "textureRect": {
+        "x": 1675.0,
+        "y": 779.0,
+        "width": 242.0,
+        "height": 215.0,
+        "yTop": 30.0
+      },
+      "logicalSize": {
+        "width": 242.0,
+        "height": 215.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.4988372
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 50.0
+    },
+    "794c1a85bf456074187ac545361b2708": {
+      "texture": "../world270-item-32/textures/584460789621.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Zombie_boss_iceball\n  m_Rect:\n    serializedVersion: 2\n    x: 562\n    y: 2\n    width: 365\n    height: 365\n  m_Offset: {x: 0, y: -0.2499947}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 50\n  m_Pivot: {x: 0.5, y: 0.49931508}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    f9ed2676da850b14fba59e59f25a4420: 3765928170442828525\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 99526ce586479ff48971751618cd2389, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 24\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 10\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 090008000600070006000800050006000700030006000500040003000500000003000400010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 10\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 208\n      _typelessdata: e17a04409a996940000000009a99694085eb01c0000000009a99694085ebf13f000000000000e03f9a9969c0000000006666c6bf9a9969400000000085eb01c08fc2654000000000ec5108c09a9969c00000000048e14ac00ad75340000000009a9969c0d7a3d03f000000009a9969c0000010c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 562\n      y: 2\n      width: 365\n      height: 365\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 50, y: 744.5, z: 50, w: 184.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 2.069999933242798,
+            "y": 3.6500000953674316,
+            "z": 0.0,
+            "u": 0.4140624983701855,
+            "v": 0.6416015578433871
+          },
+          {
+            "x": 3.6500000953674316,
+            "y": -2.0299999713897705,
+            "z": 0.0,
+            "u": 0.45263672107830644,
+            "v": 0.9189453111030161
+          },
+          {
+            "x": 3.6500000953674316,
+            "y": 1.8899999856948853,
+            "z": 0.0,
+            "u": 0.45263672107830644,
+            "v": 0.7275390631984919
+          },
+          {
+            "x": 1.75,
+            "y": -3.6500000953674316,
+            "z": 0.0,
+            "u": 0.40625,
+            "v": 0.9980468796566129
+          },
+          {
+            "x": -1.5499999523162842,
+            "y": 3.6500000953674316,
+            "z": 0.0,
+            "u": 0.3256835949141532,
+            "v": 0.6416015578433871
+          },
+          {
+            "x": -2.0299999713897705,
+            "y": 3.5899999141693115,
+            "z": 0.0,
+            "u": 0.31396484444849193,
+            "v": 0.6445312541909516
+          },
+          {
+            "x": -2.130000114440918,
+            "y": -3.6500000953674316,
+            "z": 0.0,
+            "u": 0.3115234347060323,
+            "v": 0.9980468796566129
+          },
+          {
+            "x": -3.1700000762939453,
+            "y": 3.309999942779541,
+            "z": 0.0,
+            "u": 0.28613281063735485,
+            "v": 0.6582031277939677
+          },
+          {
+            "x": -3.6500000953674316,
+            "y": 1.6299999952316284,
+            "z": 0.0,
+            "u": 0.27441406017169356,
+            "v": 0.7402343752328306
+          },
+          {
+            "x": -3.6500000953674316,
+            "y": -2.25,
+            "z": 0.0,
+            "u": 0.27441406017169356,
+            "v": 0.9296875
+          }
+        ],
+        "indices": [
+          9,
+          8,
+          6,
+          7,
+          6,
+          8,
+          5,
+          6,
+          7,
+          3,
+          6,
+          5,
+          4,
+          3,
+          5,
+          0,
+          3,
+          4,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/_image/Zombie_boss_iceball.asset",
+      "textureRect": {
+        "x": 562.0,
+        "y": 2.0,
+        "width": 365.0,
+        "height": 365.0,
+        "yTop": 657.0
+      },
+      "logicalSize": {
+        "width": 365.0,
+        "height": 365.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.49931508
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 50.0
+    },
+    "1738c651bf68bc24684641602054b1d7": {
+      "texture": "../world270-item-32/textures/584460789621.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Zombie_boss_iceball_overlay\n  m_Rect:\n    serializedVersion: 2\n    x: 1657.5\n    y: 2\n    width: 357\n    height: 353\n  m_Offset: {x: -0.49999997, y: -0.2500025}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 50\n  m_Pivot: {x: 0.49859944, y: 0.49929178}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    f9ed2676da850b14fba59e59f25a4420: 8378049516056940413\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 99526ce586479ff48971751618cd2389, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 21\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 9\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 080007000400060004000700050004000600030004000500010004000300000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 9\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 184\n      _typelessdata: b81e65401f851b400000000085eb114085eb61c000000000b81e6540713deabf000000008fc2f53f85eb61400000000014aec7bf85eb61c000000000295c0fc085eb6140000000008fc255c0cdcc1c40000000000ad763c00000a03f000000000ad763c052b8bebf0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 1657.5\n      y: 2\n      width: 357\n      height: 353\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 50, y: 1835.5, z: 50, w: 178.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 3.5799999237060547,
+            "y": 2.430000066757202,
+            "z": 0.0,
+            "u": 0.9836425762623549,
+            "v": 0.707031246740371
+          },
+          {
+            "x": 2.2799999713897705,
+            "y": -3.5299999713897705,
+            "z": 0.0,
+            "u": 0.9519042961765081,
+            "v": 0.9980468736030161
+          },
+          {
+            "x": 3.5799999237060547,
+            "y": -1.8300000429153442,
+            "z": 0.0,
+            "u": 0.9836425762623549,
+            "v": 0.9150390645954758
+          },
+          {
+            "x": 1.9199999570846558,
+            "y": 3.5299999713897705,
+            "z": 0.0,
+            "u": 0.9431152333272621,
+            "v": 0.6533203138969839
+          },
+          {
+            "x": -1.559999942779541,
+            "y": -3.5299999713897705,
+            "z": 0.0,
+            "u": 0.8581542982719839,
+            "v": 0.9980468736030161
+          },
+          {
+            "x": -2.240000009536743,
+            "y": 3.5299999713897705,
+            "z": 0.0,
+            "u": 0.8415527341421694,
+            "v": 0.6533203138969839
+          },
+          {
+            "x": -3.3399999141693115,
+            "y": 2.450000047683716,
+            "z": 0.0,
+            "u": 0.8146972677204758,
+            "v": 0.7060546851716936
+          },
+          {
+            "x": -3.559999942779541,
+            "y": 1.25,
+            "z": 0.0,
+            "u": 0.8093261732719839,
+            "v": 0.7646484375
+          },
+          {
+            "x": -3.559999942779541,
+            "y": -1.4900000095367432,
+            "z": 0.0,
+            "u": 0.8093261732719839,
+            "v": 0.8984375004656613
+          }
+        ],
+        "indices": [
+          8,
+          7,
+          4,
+          6,
+          4,
+          7,
+          5,
+          4,
+          6,
+          3,
+          4,
+          5,
+          1,
+          4,
+          3,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/_image/Zombie_boss_iceball_overlay.asset",
+      "textureRect": {
+        "x": 1657.5,
+        "y": 2.0,
+        "width": 357.0,
+        "height": 353.0,
+        "yTop": 669.0
+      },
+      "logicalSize": {
+        "width": 357.0,
+        "height": 353.0
+      },
+      "pivot": {
+        "x": 0.49859944,
+        "y": 0.49929178
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 50.0
+    },
+    "f70a42740ed6f7f489fd7ec2787ecd7a": {
+      "texture": "../world270-item-32/textures/584460789621.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Zombie_boss_iceball_crystal2\n  m_Rect:\n    serializedVersion: 2\n    x: 1485\n    y: 362.5\n    width: 106\n    height: 121\n  m_Offset: {x: 0, y: -0.24999878}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 50\n  m_Pivot: {x: 0.5, y: 0.4979339}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    f9ed2676da850b14fba59e59f25a4420: 3135912357668492084\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 99526ce586479ff48971751618cd2389, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 27\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 11\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 0a0009000700080007000900040007000800060007000400050006000400010005000400030001000400000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 11\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 232\n      _typelessdata: 14ae873f7b14ae3e000000000000803f333333bf0000000014ae873fe17a14bf000000005c8f423f9a99993f00000000ec51383ff6289c3f000000003333333f85eb91bf000000003d0ad73e9a9999bf000000000ad7a3be9a9999bf0000000052b81ebff6289c3f0000000014ae87bf52b81e3f0000000014ae87bfae4761bf0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 1485\n      y: 362.5\n      width: 106\n      height: 121\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 50, y: 1538, z: 50, w: 422.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 1.059999942779541,
+            "y": 0.3400000035762787,
+            "z": 0.0,
+            "u": 0.7768554673530161,
+            "v": 0.570800781075377
+          },
+          {
+            "x": 1.0,
+            "y": -0.699999988079071,
+            "z": 0.0,
+            "u": 0.775390625,
+            "v": 0.6215820306679234
+          },
+          {
+            "x": 1.059999942779541,
+            "y": -0.5799999833106995,
+            "z": 0.0,
+            "u": 0.7768554673530161,
+            "v": 0.6157226554350927
+          },
+          {
+            "x": 0.7599999904632568,
+            "y": 1.2000000476837158,
+            "z": 0.0,
+            "u": 0.7695312497671694,
+            "v": 0.5288085914216936
+          },
+          {
+            "x": 0.7200000286102295,
+            "y": 1.2200000286102295,
+            "z": 0.0,
+            "u": 0.7685546881984919,
+            "v": 0.5278320298530161
+          },
+          {
+            "x": 0.699999988079071,
+            "y": -1.1399999856948853,
+            "z": 0.0,
+            "u": 0.7680664059589617,
+            "v": 0.6430664055515081
+          },
+          {
+            "x": 0.41999998688697815,
+            "y": -1.2000000476837158,
+            "z": 0.0,
+            "u": 0.7612304684298579,
+            "v": 0.6459960960783064
+          },
+          {
+            "x": -0.3199999928474426,
+            "y": -1.2000000476837158,
+            "z": 0.0,
+            "u": 0.743164062674623,
+            "v": 0.6459960960783064
+          },
+          {
+            "x": -0.6200000047683716,
+            "y": 1.2200000286102295,
+            "z": 0.0,
+            "u": 0.7358398436335847,
+            "v": 0.5278320298530161
+          },
+          {
+            "x": -1.059999942779541,
+            "y": 0.6200000047683716,
+            "z": 0.0,
+            "u": 0.7250976576469839,
+            "v": 0.5571289060171694
+          },
+          {
+            "x": -1.059999942779541,
+            "y": -0.8799999952316284,
+            "z": 0.0,
+            "u": 0.7250976576469839,
+            "v": 0.6303710935171694
+          }
+        ],
+        "indices": [
+          10,
+          9,
+          7,
+          8,
+          7,
+          9,
+          4,
+          7,
+          8,
+          6,
+          7,
+          4,
+          5,
+          6,
+          4,
+          1,
+          5,
+          4,
+          3,
+          1,
+          4,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/_image/Zombie_boss_iceball_crystal2.asset",
+      "textureRect": {
+        "x": 1485.0,
+        "y": 362.5,
+        "width": 106.0,
+        "height": 121.0,
+        "yTop": 540.5
+      },
+      "logicalSize": {
+        "width": 106.0,
+        "height": 121.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.4979339
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 50.0
+    },
+    "88c88648893cd6e47a6917c73027e3bd": {
+      "texture": "../world270-item-32/textures/584460789621.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Zombie_boss_iceball_crystal1\n  m_Rect:\n    serializedVersion: 2\n    x: 1485\n    y: 487\n    width: 48\n    height: 61\n  m_Offset: {x: 0, y: -0.2499997}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 50\n  m_Pivot: {x: 0.5, y: 0.49590164}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    f9ed2676da850b14fba59e59f25a4420: 3828675075260969889\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 99526ce586479ff48971751618cd2389, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 24\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 10\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 090008000500070005000800060005000700040005000600010005000400030001000400000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 10\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 208\n      _typelessdata: 8fc2f53e85ebd13e00000000b81e853ef6281cbf000000008fc2f53e85eb11bf000000000ad7233ef6281c3f00000000ec5138bef6281c3f00000000cdcc4cbef6281cbf00000000ae4761be14ae073f000000009a9999be85ebd13e000000008fc2f5be295c8f3d000000008fc2f5bee17a94be0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 1485\n      y: 487\n      width: 48\n      height: 61\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 50, y: 1509, z: 50, w: 517.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.47999998927116394,
+            "y": 0.4099999964237213,
+            "z": 0.0,
+            "u": 0.7485351559880655,
+            "v": 0.474609375174623
+          },
+          {
+            "x": 0.25999999046325684,
+            "y": -0.6100000143051147,
+            "z": 0.0,
+            "u": 0.7431640622671694,
+            "v": 0.5244140631984919
+          },
+          {
+            "x": 0.47999998927116394,
+            "y": -0.5699999928474426,
+            "z": 0.0,
+            "u": 0.7485351559880655,
+            "v": 0.522460937150754
+          },
+          {
+            "x": 0.1599999964237213,
+            "y": 0.6100000143051147,
+            "z": 0.0,
+            "u": 0.7407226561626885,
+            "v": 0.46484374930150807
+          },
+          {
+            "x": -0.18000000715255737,
+            "y": 0.6100000143051147,
+            "z": 0.0,
+            "u": 0.732421874825377,
+            "v": 0.46484374930150807
+          },
+          {
+            "x": -0.20000000298023224,
+            "y": -0.6100000143051147,
+            "z": 0.0,
+            "u": 0.7319335936772404,
+            "v": 0.5244140631984919
+          },
+          {
+            "x": -0.2199999988079071,
+            "y": 0.5299999713897705,
+            "z": 0.0,
+            "u": 0.7314453125291038,
+            "v": 0.46875000139698386
+          },
+          {
+            "x": -0.30000001192092896,
+            "y": 0.4099999964237213,
+            "z": 0.0,
+            "u": 0.7294921872089617,
+            "v": 0.474609375174623
+          },
+          {
+            "x": -0.47999998927116394,
+            "y": 0.07000000029802322,
+            "z": 0.0,
+            "u": 0.7250976565119345,
+            "v": 0.4912109374854481
+          },
+          {
+            "x": -0.47999998927116394,
+            "y": -0.28999999165534973,
+            "z": 0.0,
+            "u": 0.7250976565119345,
+            "v": 0.5087890620925464
+          }
+        ],
+        "indices": [
+          9,
+          8,
+          5,
+          7,
+          5,
+          8,
+          6,
+          5,
+          7,
+          4,
+          5,
+          6,
+          1,
+          5,
+          4,
+          3,
+          1,
+          4,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/_image/Zombie_boss_iceball_crystal1.asset",
+      "textureRect": {
+        "x": 1485.0,
+        "y": 487.0,
+        "width": 48.0,
+        "height": 61.0,
+        "yTop": 476.0
+      },
+      "logicalSize": {
+        "width": 48.0,
+        "height": 61.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.49590164
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 50.0
+    },
+    "917a4e68f16c91747b533b2ef30a80f7": {
+      "texture": "../world270-item-32/textures/584460789621.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Zombie_boss_iceball_crystal3\n  m_Rect:\n    serializedVersion: 2\n    x: 1921\n    y: 779\n    width: 106\n    height: 113\n  m_Offset: {x: 0, y: -0.24999842}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 50\n  m_Pivot: {x: 0.5, y: 0.49778762}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    f9ed2676da850b14fba59e59f25a4420: 4159483352935295919\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 99526ce586479ff48971751618cd2389, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 21\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 9\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 080007000600050006000700010006000500040001000500030001000400000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 9\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 184\n      _typelessdata: 14ae873f7b142ebe00000000ae47613fd7a390bf0000000014ae873f9a9959bf00000000ec51383ff6281c3f000000009a99993ed7a3903f00000000ae47e1bed7a3903f00000000295c0fbfd7a390bf0000000014ae87bf48e1fa3e0000000014ae87bfd7a3f0be0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 1921\n      y: 779\n      width: 106\n      height: 113\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 50, y: 1974, z: 50, w: 835.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 1.059999942779541,
+            "y": -0.17000000178813934,
+            "z": 0.0,
+            "u": 0.9897460923530161,
+            "v": 0.1923828125873115
+          },
+          {
+            "x": 0.8799999952316284,
+            "y": -1.1299999952316284,
+            "z": 0.0,
+            "u": 0.9853515623835847,
+            "v": 0.23925781226716936
+          },
+          {
+            "x": 1.059999942779541,
+            "y": -0.8500000238418579,
+            "z": 0.0,
+            "u": 0.9897460923530161,
+            "v": 0.22558593866415322
+          },
+          {
+            "x": 0.7200000286102295,
+            "y": 0.6100000143051147,
+            "z": 0.0,
+            "u": 0.9814453131984919,
+            "v": 0.15429687430150807
+          },
+          {
+            "x": 0.30000001192092896,
+            "y": 1.1299999952316284,
+            "z": 0.0,
+            "u": 0.9711914065410383,
+            "v": 0.12890625023283064
+          },
+          {
+            "x": -0.4399999976158142,
+            "y": 1.1299999952316284,
+            "z": 0.0,
+            "u": 0.9531250000582077,
+            "v": 0.12890625023283064
+          },
+          {
+            "x": -0.5600000023841858,
+            "y": -1.1299999952316284,
+            "z": 0.0,
+            "u": 0.9501953124417923,
+            "v": 0.23925781226716936
+          },
+          {
+            "x": -1.059999942779541,
+            "y": 0.49000000953674316,
+            "z": 0.0,
+            "u": 0.9379882826469839,
+            "v": 0.1601562495343387
+          },
+          {
+            "x": -1.059999942779541,
+            "y": -0.4699999988079071,
+            "z": 0.0,
+            "u": 0.9379882826469839,
+            "v": 0.20703124994179234
+          }
+        ],
+        "indices": [
+          8,
+          7,
+          6,
+          5,
+          6,
+          7,
+          1,
+          6,
+          5,
+          4,
+          1,
+          5,
+          3,
+          1,
+          4,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/_image/Zombie_boss_iceball_crystal3.asset",
+      "textureRect": {
+        "x": 1921.0,
+        "y": 779.0,
+        "width": 106.0,
+        "height": 113.0,
+        "yTop": 132.0
+      },
+      "logicalSize": {
+        "width": 106.0,
+        "height": 113.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.49778762
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 50.0
+    }
+  },
+  "extraSpriteGuids": {},
+  "anchors": {
+    "shadow": {
+      "path": "Shadow",
+      "x": 0.0,
+      "y": 0.0,
+      "relativeToRuntimeRoot": true
+    }
+  },
+  "visualBounds": {
+    "minX": -0.7300000190734863,
+    "maxX": 0.7300000190734863,
+    "minY": -0.2700000047683716,
+    "maxY": 1.3940000190734865
+  },
+  "clips": {
+    "move": {
+      "name": "move",
+      "duration": 1.0,
+      "additiveReferencePoseTime": 0.0,
+      "hasAdditiveReferencePose": false,
+      "loop": true,
+      "sourceSampleRate": 60.0,
+      "curves": [
+        {
+          "kind": "euler",
+          "path": "Anim",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": "-Infinity",
+                "z": 360.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 360.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 360.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Anim"
+        }
+      ],
+      "events": []
+    }
+  },
+  "controller": {
+    "states": [
+      {
+        "id": 1102730242686860875,
+        "name": "move",
+        "clip": "move",
+        "speed": 0.3,
+        "speedParameterActive": true,
+        "speedParameter": "Speed"
+      }
+    ],
+    "layers": [
+      {
+        "name": "Base Layer",
+        "blendingMode": 0,
+        "defaultState": 1102730242686860875,
+        "states": [
+          1102730242686860875
+        ],
+        "defaultWeight": 0.0
+      }
+    ],
+    "serializedController": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!91 &9100000\nAnimatorController:\n  serializedVersion: 5\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Ball\n  m_AnimatorParameters:\n  - m_Name: Speed\n    m_Type: 1\n    m_DefaultFloat: 0\n    m_DefaultInt: 0\n    m_DefaultBool: 0\n    m_Controller: {fileID: 9100000}\n  m_AnimatorLayers:\n  - serializedVersion: 5\n    m_Name: Base Layer\n    m_StateMachine: {fileID: 1107709254077376921}\n    m_Mask: {fileID: 0}\n    m_Motions: []\n    m_Behaviours: []\n    m_BlendingMode: 0\n    m_SyncedLayerIndex: -1\n    m_DefaultWeight: 0\n    m_IKPass: 0\n    m_SyncedLayerAffectsTiming: 0\n    m_Controller: {fileID: 9100000}\n--- !u!1107 &1107709254077376921\nAnimatorStateMachine:\n  serializedVersion: 6\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Base Layer\n  m_ChildStates:\n  - m_State: {fileID: 1102730242686860875}\n    m_Position: {x: 0, y: 0, z: 0}\n  m_ChildStateMachines: []\n  m_AnyStateTransitions: []\n  m_EntryTransitions: []\n  m_StateMachineTransitions: {}\n  m_StateMachineBehaviours: []\n  m_AnyStatePosition: {x: 0, y: -100, z: 0}\n  m_EntryPosition: {x: 250, y: -100, z: 0}\n  m_ExitPosition: {x: 500, y: -100, z: 0}\n  m_ParentStateMachinePosition: {x: 0, y: -200, z: 0}\n  m_DefaultState: {fileID: 1102730242686860875}\n--- !u!1102 &1102730242686860875\nAnimatorState:\n  serializedVersion: 6\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: move\n  m_Speed: 0.3\n  m_CycleOffset: 0\n  m_Transitions: []\n  m_StateMachineBehaviours: []\n  m_Position: {x: 0, y: 0, z: 0}\n  m_IKOnFeet: 0\n  m_WriteDefaultValues: 1\n  m_Mirror: 0\n  m_SpeedParameterActive: 1\n  m_MirrorParameterActive: 0\n  m_CycleOffsetParameterActive: 0\n  m_TimeParameterActive: 0\n  m_Motion: {fileID: 7400000, guid: 8aabcf170a1e69e47a6f5c796b0d44a4, type: 2}\n  m_Tag:\n  m_SpeedParameter: Speed\n  m_MirrorParameter:\n  m_CycleOffsetParameter:\n  m_TimeParameter:\n"
+  },
+  "nonRenderingComponents": [
+    {
+      "typeId": 210,
+      "fileId": 210372920208702427,
+      "serializedComponent": "SortingGroup:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1709254077376921}\n  m_Enabled: 1\n  m_SortingLayerID: 0\n  m_SortingLayer: 0\n  m_SortingOrder: 0\n  m_SortAtRoot: 0\n"
+    },
+    {
+      "typeId": 61,
+      "fileId": 61025901758691103,
+      "serializedComponent": "BoxCollider2D:\n  serializedVersion: 2\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1709254077376921}\n  m_Enabled: 1\n  m_Density: 1\n  m_Material: {fileID: 0}\n  m_IncludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_ExcludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_LayerOverridePriority: 0\n  m_ForceSendLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_ForceReceiveLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_ContactCaptureLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_CallbackLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_IsTrigger: 1\n  m_UsedByEffector: 0\n  m_UsedByComposite: 0\n  m_Offset: {x: 0.07292247, y: 3.495518}\n  m_SpriteTilingProperty:\n    border: {x: 0, y: 0, z: 0, w: 0}\n    pivot: {x: 0, y: 0}\n    oldSize: {x: 0, y: 0}\n    newSize: {x: 0, y: 0}\n    adaptiveTilingThreshold: 0\n    drawMode: 0\n    adaptiveTiling: 0\n  m_AutoTiling: 0\n  m_Size: {x: 4.9917836, y: 6.95663}\n  m_EdgeRadius: 0\n"
+    },
+    {
+      "typeId": 50,
+      "fileId": 50705390221481576,
+      "serializedComponent": "Rigidbody2D:\n  serializedVersion: 4\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1709254077376921}\n  m_BodyType: 1\n  m_Simulated: 1\n  m_UseFullKinematicContacts: 0\n  m_UseAutoMass: 0\n  m_Mass: 1\n  m_LinearDrag: 0\n  m_AngularDrag: 0.05\n  m_GravityScale: 1\n  m_Material: {fileID: 0}\n  m_IncludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_ExcludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_Interpolate: 0\n  m_SleepingMode: 1\n  m_CollisionDetection: 0\n  m_Constraints: 0\n"
+    },
+    {
+      "typeId": 114,
+      "fileId": 114977153420339851,
+      "serializedComponent": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1709254077376921}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 2dad113e8164275a9f3f091dd2fcc402, type: 3}\n  m_Name:\n  m_EditorClassIdentifier:\n  obstacleType: 1\n  theBallRow: 0\n  boss: 0\n"
+    }
+  ],
+  "colliders": [
+    {
+      "type": "box",
+      "node": 0,
+      "fileId": 61025901758691103,
+      "enabled": true,
+      "trigger": true,
+      "offset": {
+        "x": 0.07292247,
+        "y": 3.495518
+      },
+      "size": {
+        "x": 4.9917836,
+        "y": 6.95663
+      }
+    }
+  ],
+  "ignoredBindings": [],
+  "omittedInactiveNodes": [],
+  "spritePrefix": null,
+  "unusedSpriteBonesExplicitlyAllowed": false,
+  "sources": [
+    {
+      "path": "Resources/zombies/_image/Ball.controller",
+      "sha256": "fd3d429a79cd3be80830066154aa2f8913f1b78aef8f51e3802c01a54e8db955"
+    },
+    {
+      "path": "Resources/zombies/_image/Ball.controller.meta",
+      "sha256": "13fcb4f57a2eb48b57776bca9683538598f8b10c084088136f247033c27c5bed"
+    },
+    {
+      "path": "Resources/zombies/_image/Boss_ball.png",
+      "sha256": "5844607896215762c799d719bfd426d30747c228a5ac04414c551d83473a9884"
+    },
+    {
+      "path": "Resources/zombies/_image/Boss_ball.png.meta",
+      "sha256": "0daedb8bc9a78cbec089017dfd372a6e45f5d3c1cbabe350a568039883351b88"
+    },
+    {
+      "path": "Resources/zombies/_image/IceBall.prefab",
+      "sha256": "04e76b5918c3ae0bd19ea9d2677bcd25fefb3ddb86032a3c37bb19f78f61ff9d"
+    },
+    {
+      "path": "Resources/zombies/_image/move.anim",
+      "sha256": "05efdd9c1061648c2689b5b671763ff4cf451db690e0d8c0f2fe5aff883502dc"
+    },
+    {
+      "path": "Resources/zombies/_image/move.anim.meta",
+      "sha256": "dd4cf3602e54b9c009ba1bde4de10dd0e47f7e2b2014856bf5de3ed478de847a"
+    },
+    {
+      "path": "Resources/zombies/_image/Zombie_boss_iceball.asset",
+      "sha256": "5a9e74f7351a9ed2f4ebbaddf147ba2e5f7d5dacec5120627cc067b8c9ce2612"
+    },
+    {
+      "path": "Resources/zombies/_image/Zombie_boss_iceball.asset.meta",
+      "sha256": "a1635fe3782ad87ff8be29762ff7df106ea8b022d6fc26ff307d8c610e2b6fdf"
+    },
+    {
+      "path": "Resources/zombies/_image/Zombie_boss_iceball_crystal1.asset",
+      "sha256": "62152fdad81b438c796d19aade757d1dc9f21b8e24a50d65531e60e2863bde0e"
+    },
+    {
+      "path": "Resources/zombies/_image/Zombie_boss_iceball_crystal1.asset.meta",
+      "sha256": "b52dc79ae11cdf631bd389d9e02a4c98e5e946090e5d169cb9c8affc5f44e185"
+    },
+    {
+      "path": "Resources/zombies/_image/Zombie_boss_iceball_crystal2.asset",
+      "sha256": "2a8d867d48de69ce906952794cea99df63d256e20b1ba3923c0332d6cbf3e615"
+    },
+    {
+      "path": "Resources/zombies/_image/Zombie_boss_iceball_crystal2.asset.meta",
+      "sha256": "708324f4e4392f4494a9aa7c2d99fdadc546acd1674425b6598061137ad9d7cc"
+    },
+    {
+      "path": "Resources/zombies/_image/Zombie_boss_iceball_crystal3.asset",
+      "sha256": "7e7f5e9d6002ff4a4f36486dfcde5ed87b60d9804cc40a284c49dee93a0be25c"
+    },
+    {
+      "path": "Resources/zombies/_image/Zombie_boss_iceball_crystal3.asset.meta",
+      "sha256": "de552feef9b67d4eb6ca3e78ff66b72f989c849f5797e7110c4aa5ca2c3e6dfa"
+    },
+    {
+      "path": "Resources/zombies/_image/Zombie_boss_iceball_highlight.asset",
+      "sha256": "a07e7ef99899a4337d112f6a917ed0f79ef1a2b14d80e23f5e48d43cdcf2fdd8"
+    },
+    {
+      "path": "Resources/zombies/_image/Zombie_boss_iceball_highlight.asset.meta",
+      "sha256": "32932cdc4c84620a93ab4e3d840e79e101ec3cc12f7e078cf4ccc309850f3787"
+    },
+    {
+      "path": "Resources/zombies/_image/Zombie_boss_iceball_multiply.asset",
+      "sha256": "2754c6637eded2ac75e0eee5fb803bfcd082615370381ca5e30a3bda2183c637"
+    },
+    {
+      "path": "Resources/zombies/_image/Zombie_boss_iceball_multiply.asset.meta",
+      "sha256": "e11d192e83c5b75c28d32fcb636361220192960d59574ab2b54dd6430ad40419"
+    },
+    {
+      "path": "Resources/zombies/_image/Zombie_boss_iceball_overlay.asset",
+      "sha256": "0757f7845a436e5c995112dd4132a5d93de5170b2bb445cc46eca5bbe6c34f9f"
+    },
+    {
+      "path": "Resources/zombies/_image/Zombie_boss_iceball_overlay.asset.meta",
+      "sha256": "91030d4458ed71c31102823722a36739d989dfa279df97db14dc5eb374bad3e5"
+    },
+    {
+      "path": "Resources/zombies/_image/Zombie_boss_icefire_shadow.asset",
+      "sha256": "4e76c7abf988c8416f6b7ba2efebf552d9d3bdbe455d1cbe82a1e064d0829f56"
+    },
+    {
+      "path": "Resources/zombies/_image/Zombie_boss_icefire_shadow.asset.meta",
+      "sha256": "53bfe69021e5e5b8ba1bec329dd4a2fc88dc68da377d05bb381f1bacec16c917"
+    }
+  ],
+  "deferredComponents": [],
+  "validation": "Exported source data. Native rendering and source-runtime comparison are separate verification steps.",
+  "rendererFeatures": [
+    "spriteMaskV1",
+    "spriteSkinV1"
+  ],
+  "sourceMasks": [],
+  "sourceSkins": []
+}

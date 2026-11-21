@@ -1,0 +1,261 @@
+{
+  "schema": 1,
+  "projectiles": [
+    {
+      "modelKey": 3030,
+      "status": "Passed",
+      "count": 1,
+      "sourceModelIgnoredBindings": [],
+      "scope": "Particle binding only; full source sprite/model admission remains independent"
+    },
+    {
+      "modelKey": 4010,
+      "status": "Passed",
+      "count": 1,
+      "sourceModelIgnoredBindings": [],
+      "scope": "Particle binding only; full source sprite/model admission remains independent"
+    },
+    {
+      "modelKey": 4011,
+      "status": "Passed",
+      "count": 1,
+      "sourceModelIgnoredBindings": [],
+      "scope": "Particle binding only; full source sprite/model admission remains independent"
+    },
+    {
+      "modelKey": 4012,
+      "status": "Passed",
+      "count": 1,
+      "sourceModelIgnoredBindings": [],
+      "scope": "Particle binding only; full source sprite/model admission remains independent"
+    },
+    {
+      "modelKey": 4047,
+      "status": "Passed",
+      "count": 2,
+      "sourceModelIgnoredBindings": [],
+      "scope": "Particle binding only; full source sprite/model admission remains independent"
+    },
+    {
+      "modelKey": 3022,
+      "status": "Passed",
+      "count": 1,
+      "sourceModelIgnoredBindings": [],
+      "scope": "Exact source PuffBlack PS; native-compatible Tod material projection"
+    },
+    {
+      "modelKey": 4937,
+      "status": "Passed",
+      "count": 1,
+      "sourceModelIgnoredBindings": [],
+      "scope": "Actual static LightBall with its own exactPS; line2938/2939 excluded"
+    }
+  ],
+  "bindings": [
+    {
+      "modelKey": 3030,
+      "sourcePrefab": "Resources/bullet/prefabs/FirekelpBullet.prefab",
+      "sourceParticleFileId": 198372920208702427,
+      "sourceRendererFileId": 199025901758691103,
+      "serializedParticleSha256": "ef0210464b0eaacd43a479afb871bf33a52c941ba327dde47d68711a92ea37f9",
+      "serializedRendererSha256": "1a81cfd7f4fdc2acda42c4dfbfb1bb077236d4133ace700b03b7133c13952eaf",
+      "nodePath": "Kelp/Particle System",
+      "resourceKind": 2030,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "modelKey": 4010,
+      "sourcePrefab": "Resources/items/BigStar.prefab",
+      "sourceParticleFileId": 198243736805655561,
+      "sourceRendererFileId": 199061268324235159,
+      "serializedParticleSha256": "9b3724335f237b9079dd016b1de11328bf79699a8a439c4cd54e41c3764fb830",
+      "serializedRendererSha256": "bfe330792162ac44a8f782a00477cf0a8a0af1b02dc582736f90f339993589cd",
+      "nodePath": "Particle System",
+      "resourceKind": 2410,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "modelKey": 4011,
+      "sourcePrefab": "Resources/items/BigSuperStar.prefab",
+      "sourceParticleFileId": 198243736805655561,
+      "sourceRendererFileId": 199061268324235159,
+      "serializedParticleSha256": "9b3724335f237b9079dd016b1de11328bf79699a8a439c4cd54e41c3764fb830",
+      "serializedRendererSha256": "bfe330792162ac44a8f782a00477cf0a8a0af1b02dc582736f90f339993589cd",
+      "nodePath": "Particle System",
+      "resourceKind": 2411,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "modelKey": 4012,
+      "sourcePrefab": "Resources/items/BigUltimateStar.prefab",
+      "sourceParticleFileId": 198243736805655561,
+      "sourceRendererFileId": 199061268324235159,
+      "serializedParticleSha256": "9b3724335f237b9079dd016b1de11328bf79699a8a439c4cd54e41c3764fb830",
+      "serializedRendererSha256": "bfe330792162ac44a8f782a00477cf0a8a0af1b02dc582736f90f339993589cd",
+      "nodePath": "Particle System",
+      "resourceKind": 2412,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "modelKey": 4047,
+      "sourcePrefab": "Resources/items/SolarStar.prefab",
+      "sourceParticleFileId": 198589667821646929,
+      "sourceRendererFileId": 199372920208702427,
+      "serializedParticleSha256": "f3346cc4c59582128f0e44f02b7be537da83f34d5e8f7a8c30971d19711fe29e",
+      "serializedRendererSha256": "8d3624ec03549e0dc6d99fa258d5a227f1891347eacca509253e2d8756b19e22",
+      "nodePath": "particle/sun1",
+      "resourceKind": 2447,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "modelKey": 4047,
+      "sourcePrefab": "Resources/items/SolarStar.prefab",
+      "sourceParticleFileId": 198985305603660343,
+      "sourceRendererFileId": 199705390221481576,
+      "serializedParticleSha256": "45062b59d1dc5ea0585ea19f20995530d5adeb90dbe804f1dd045b643fee040a",
+      "serializedRendererSha256": "baafc9a4a68f8cbda42ce20989a2d92c879eeee1294b429e462be87e01364bbb",
+      "nodePath": "particle/sun2",
+      "resourceKind": 2448,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "modelKey": 3022,
+      "sourcePrefab": "Resources/bullet/prefabs/PuffBlack.prefab",
+      "sourceParticleFileId": 198099118695303065,
+      "sourceRendererFileId": 199243736805655561,
+      "serializedParticleSha256": "298a56bfdfaca2ab0ff256d4948409fbbf7f04930238b9e38f5cd57c5383fe21",
+      "serializedRendererSha256": "57a26984d1470f3e4fb5c282bf89c9bfb33a63982b11beadd1d92a07a49f24f3",
+      "nodePath": "Particle System",
+      "resourceKind": 2022,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "sourcePrefab": "Resources/plants/umbrellaleaf/laserumbrella/LightBall.prefab",
+      "sourceParticleFileId": 198884547391421755,
+      "sourceRendererFileId": 199099118695303065,
+      "nodePath": "fightball_1",
+      "serializedParticleSha256": "336b88b89e665e944fd60f0e38d96c7d8e4ea8aaefc4cd106e69eeb73d4971e2",
+      "serializedRendererSha256": "3765a2b7ba0fdbfecce8ca96ecbbe1edaa067370d6028dfccd420fba3dd9b722",
+      "modelKey": 4937,
+      "resourceKind": 2937,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    }
+  ],
+  "resources": [
+    {
+      "resourceKind": 2030,
+      "prefab": "Resources/bullet/prefabs/FirekelpBullet.prefab",
+      "componentFileId": 198372920208702427,
+      "status": "Passed",
+      "package": "projectile/2030/effect.json",
+      "effectSha256": "9ccdb39507af7db4ac19113971b438837dcd0030eb2cc5069f0ab35d005b2dec",
+      "files": {
+        "effect.json": "9ccdb39507af7db4ac19113971b438837dcd0030eb2cc5069f0ab35d005b2dec",
+        "textures/d25d5447c9082674d9e3b4619552dc99.png": "2bb64e20c73dd3d29bb80e7d31f2c81d0cb312a240f554c3033d73e81b35ad6d"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2410,
+      "prefab": "Resources/items/BigStar.prefab",
+      "componentFileId": 198243736805655561,
+      "status": "Passed",
+      "package": "projectile/2410/effect.json",
+      "effectSha256": "2193da3ee9fe36aebf819c0c0da48a56659496742db50a82a3330246b60d0703",
+      "files": {
+        "effect.json": "2193da3ee9fe36aebf819c0c0da48a56659496742db50a82a3330246b60d0703",
+        "textures/59371d3919c0aa7469e82363b4a7de0b.png": "62fadea9d809b3e3857078c238560833da26bbdde4a0e3c1669734ed78c021ac"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2411,
+      "prefab": "Resources/items/BigSuperStar.prefab",
+      "componentFileId": 198243736805655561,
+      "status": "Passed",
+      "package": "projectile/2411/effect.json",
+      "effectSha256": "ea300f926602642fba1f49310f48879f7dcfd16bd45d708497e8fa48bb25d223",
+      "files": {
+        "effect.json": "ea300f926602642fba1f49310f48879f7dcfd16bd45d708497e8fa48bb25d223",
+        "textures/59371d3919c0aa7469e82363b4a7de0b.png": "62fadea9d809b3e3857078c238560833da26bbdde4a0e3c1669734ed78c021ac"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2412,
+      "prefab": "Resources/items/BigUltimateStar.prefab",
+      "componentFileId": 198243736805655561,
+      "status": "Passed",
+      "package": "projectile/2412/effect.json",
+      "effectSha256": "4a0a4cd9698632a40a1a3d03c635e7e856158b1842608a719019a660a237b9ab",
+      "files": {
+        "effect.json": "4a0a4cd9698632a40a1a3d03c635e7e856158b1842608a719019a660a237b9ab",
+        "textures/59371d3919c0aa7469e82363b4a7de0b.png": "62fadea9d809b3e3857078c238560833da26bbdde4a0e3c1669734ed78c021ac"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2447,
+      "prefab": "Resources/items/SolarStar.prefab",
+      "componentFileId": 198589667821646929,
+      "status": "Passed",
+      "package": "projectile/2447/effect.json",
+      "effectSha256": "a35ee530b7f263b8266b64e0d97fd83483c2b08f100e5c7c58c7744eb27c30ee",
+      "files": {
+        "effect.json": "a35ee530b7f263b8266b64e0d97fd83483c2b08f100e5c7c58c7744eb27c30ee",
+        "textures/59371d3919c0aa7469e82363b4a7de0b.png": "62fadea9d809b3e3857078c238560833da26bbdde4a0e3c1669734ed78c021ac"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2448,
+      "prefab": "Resources/items/SolarStar.prefab",
+      "componentFileId": 198985305603660343,
+      "status": "Passed",
+      "package": "projectile/2448/effect.json",
+      "effectSha256": "d0d63aade781ba6425ff46ab8be1457be74f34cfd8798299d5efec602290cc3f",
+      "files": {
+        "effect.json": "d0d63aade781ba6425ff46ab8be1457be74f34cfd8798299d5efec602290cc3f",
+        "textures/59371d3919c0aa7469e82363b4a7de0b.png": "62fadea9d809b3e3857078c238560833da26bbdde4a0e3c1669734ed78c021ac"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2022,
+      "prefab": "Resources/bullet/prefabs/PuffBlack.prefab",
+      "componentFileId": 198099118695303065,
+      "status": "Passed",
+      "package": "projectile/2022/effect.json",
+      "effectSha256": "a263a7649217bc8fb3e5605514c75fda813c9daa641c2c6e60384fdce9f4ccf9",
+      "files": {
+        "effect.json": "a263a7649217bc8fb3e5605514c75fda813c9daa641c2c6e60384fdce9f4ccf9",
+        "textures/5c37f9d9463008745bf2be6c5e46736b.png": "3742e89e4560c71f37fd8b830dfbb37f1719defaba6bb45f5e80bd59db4a9061"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2937,
+      "prefab": "Resources/plants/umbrellaleaf/laserumbrella/LightBall.prefab",
+      "componentFileId": 198884547391421755,
+      "status": "Passed",
+      "package": "projectile/2937/effect.json",
+      "effectSha256": "850f854379d69d20b81fb654b96e96e585fd16063d192e86a85147291c381e12",
+      "files": {
+        "effect.json": "850f854379d69d20b81fb654b96e96e585fd16063d192e86a85147291c381e12",
+        "textures/59371d3919c0aa7469e82363b4a7de0b.png": "62fadea9d809b3e3857078c238560833da26bbdde4a0e3c1669734ed78c021ac"
+      },
+      "emitters": 1
+    }
+  ],
+  "nativeLoader": "Not executed",
+  "nativeRuntime": "Not executed",
+  "acceptanceIncrement": 0
+}

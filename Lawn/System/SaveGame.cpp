@@ -514,6 +514,7 @@ void FixBoardAfterLoad(Board* theBoard)
 //0x481FE0
 bool LawnLoadGame(Board* theBoard, const SexyString& theFilePath)
 {
+	if (theBoard && theBoard->mApp->GetContentMode() == LawnFusion::ContentMode::Fusion) return false;
 	SaveGameContext aContext;
 	aContext.mFailed = false;
 	aContext.mReading = true;
@@ -557,6 +558,7 @@ bool LawnLoadGame(Board* theBoard, const SexyString& theFilePath)
 //0x4820D0
 bool LawnSaveGame(Board* theBoard, const SexyString& theFilePath)
 {
+	if (theBoard && theBoard->mApp->GetContentMode() == LawnFusion::ContentMode::Fusion) return false;
 	if (theBoard && theBoard->mSeedBank)
 		for (int i = 0; i < SEEDBANK_CAPACITY; ++i)
 			if (theBoard->mSeedBank->mSeedPackets[i].mRandomDiscountLevel > 10 ||

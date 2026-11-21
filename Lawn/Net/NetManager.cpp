@@ -2,6 +2,8 @@
 #include "NetBuildVersion.h"
 #include "../../LawnApp.h"
 #include "../Board.h"
+#include "../Fusion/FusionNative.h"
+#include "../Fusion/FusionNativeGloveUI.h"
 #include "../SeedPacket.h"
 #include "../CursorObject.h"
 #include "../Challenge.h"
@@ -388,6 +390,7 @@ void NetManager::CancelConnect()
 
 void NetManager::Disconnect()
 {
+	ClearFusionTraffic();
 	if (mOnline) mOnline->Stop();
 	mOnlineIntent = 0; mOnlinePlaying = false;
 	if (mMode != MODE_NONE || mConnecting || mClientConnected)
@@ -431,6 +434,8 @@ void NetManager::Disconnect()
 	mMySlot = 0;
 	mActingPlayerSlot = -1;
 	mDisconnectReason.clear();
+	mContentModeNegotiated = false;
+	mRejectClientState = false;
 	mInputEpoch = 1;
 	mNextInputSequence = 1;
 	mLastInputMoveTick = 0;
@@ -547,7 +552,8 @@ void NetManager::DropSession(int theSlot, bool theNotify)
 		NetTrace("drop peer slot=%d checkpoint=lobby_notify_begin", theSlot);
 		SendLobbyState();
 		NetTrace("drop peer slot=%d checkpoint=lobby_notify_complete", theSlot);
-		if (aWasActive && mApp && mApp->mSeedChooserScreen && mChooserOpen)
+		if (aWasActive && mApp && mApp->mSeedChooserScreen && mChooserOpen &&
+			!LawnFusion::IsNativeFusionBoard(mApp->mBoard))
 		{
 			ResetReadyState();
 			mApp->KillSeedChooserScreen();
@@ -556,6 +562,7 @@ void NetManager::DropSession(int theSlot, bool theNotify)
 		}
 	}
 	NetTrace("drop peer slot=%d complete", theSlot);
+	if (mApp && (mApp->mFusionRuntime || LawnFusion::IsNativeFusionBoard(mApp->mBoard))) mApp->FusionRosterChanged();
 }
 
 // -------------------------------------------------------------------------
@@ -721,7 +728,7 @@ void NetManager::Update()
 	else if (mMode == MODE_CLIENT && mHostConn)
 	{
 		mHostConn->PumpMessages();
-		if (!mHostConn->IsConnected())
+		if (mRejectClientState || !mHostConn->IsConnected())
 		{
 			mClientConnected = false;
 			// host lost: notify the app (returns to menu with a message)
@@ -805,6 +812,10 @@ void NetManager::HandleMessage(NetSession* theSession, uint8_t theMsgType, NetBu
 	}
 	if (mKicked[theSession->mSlot] && theMsgType != NETMSG_KICK_ACK &&
 		theMsgType != NETMSG_PING && theMsgType != NETMSG_PONG) return;
+	if (mApp && mApp->GetContentMode() == LawnFusion::ContentMode::Fusion &&
+		((mApp->mFusionRuntime && (theMsgType == NETMSG_INPUT_MOUSE || theMsgType == NETMSG_INPUT_KEY)) || theMsgType == NETMSG_SEED_PICK ||
+		 theMsgType == NETMSG_SEED_UNPICK || theMsgType == NETMSG_CHOOSER_MYSTERY || theMsgType == NETMSG_READY ||
+		 theMsgType == NETMSG_STORE_ACTION)) return;
 	if (mPlayers[theSession->mSlot].mSpectator && !NetSpectatorMaySend(theMsgType))
 	{ NetTrace("spectator mutation rejected slot=%u type=%s",theSession->mSlot,NetMessageName(theMsgType)); return; }
 	if (theMsgType != NETMSG_CURSOR && theMsgType != NETMSG_PING && theMsgType != NETMSG_PONG)
@@ -813,6 +824,9 @@ void NetManager::HandleMessage(NetSession* theSession, uint8_t theMsgType, NetBu
 	{
 	case NETMSG_KICK_ACK:
 		if (mKicked[theSession->mSlot] && thePayload.Remaining() == 0) mDeferredDrop[theSession->mSlot] = true;
+		break;
+	case NETMSG_FUSION_COMMAND:
+		ReceiveFusionCommand(theSession, thePayload);
 		break;
 	case NETMSG_PING:
 	{
@@ -913,8 +927,17 @@ void NetManager::OnHello(NetSession* theSession, NetBuffer& thePayload)
 	NetTrace("peer authenticated slot=%u nick=%s", theSession->mSlot, aPlayer.mNick);
 
 	NetBuffer aWelcome;
-	aWelcome.WriteU8(theSession->mSlot);
-	aWelcome.WriteString(mPlayers[0].mNick);
+	NetWelcomeState aWelcomeState;
+	aWelcomeState.mSlot = theSession->mSlot;
+	aWelcomeState.mHostNick = mPlayers[0].mNick;
+	aWelcomeState.mContentMode = mApp ? mApp->GetContentMode() : LawnFusion::ContentMode::Classic;
+	if (!mApp || !mApp->IsContentModeAvailable(aWelcomeState.mContentMode) ||
+		!NetEncodeWelcomeState(aWelcomeState, aWelcome))
+	{
+		NetTrace("WELCOME rejected: host content mode is unavailable or invalid");
+		mDeferredDrop[theSession->mSlot] = true;
+		return;
+	}
 	theSession->mConn.SendMessage(NETMSG_WELCOME, aWelcome);
 	// A late peer must learn the current lifetime token on the same ordered TCP
 	// stream before it can observe any subsequent board/chooser barrier.
@@ -1397,11 +1420,25 @@ void NetManager::OnClientSeedPick(NetSession* theSession, NetBuffer& thePayload,
 bool NetManager::IsChooserMystery(int theSlot) const
 {
 	return theSlot >= 0 && theSlot < NET_MAX_PLAYERS &&
-		(mChooserMysteryMask & (1U << theSlot)) != 0;
+		(GetChooserMysteryMask() & (1U << theSlot)) != 0;
+}
+
+uint8_t NetManager::GetChooserMysteryMask() const
+{
+	if (const auto* context = LawnFusion::GetNativeContext(mApp ? mApp->mBoard : nullptr))
+		return context->selection.State().mysteryMask;
+	return mChooserMysteryMask;
 }
 
 bool NetManager::HasActiveMysteryDeck() const
 {
+	if (const auto* context = LawnFusion::GetNativeContext(mApp ? mApp->mBoard : nullptr))
+	{
+		const auto& state = context->selection.State();
+		for (int slot = 0; slot < NET_MAX_PLAYERS; ++slot)
+			if ((state.mysteryMask & state.activeMask & (1U << slot)) && state.quotas[slot] > 0) return true;
+		return false;
+	}
 	for (int i = 0; i < NET_MAX_PLAYERS; ++i)
 		if (IsChooserMystery(i) && mPlayers[i].mActive && !mPlayers[i].mSpectator &&
 			mChooserPickQuota[i] > 0 &&
@@ -1435,6 +1472,18 @@ bool NetManager::QueueChooserMystery(int theSlot, bool theEnabled)
 
 bool NetManager::RequestChooserMystery(bool theEnabled)
 {
+	if (const auto* context = LawnFusion::GetNativeContext(mApp ? mApp->mBoard : nullptr))
+	{
+		const auto& state = context->selection.State();
+		const int slot = IsActive() ? mMySlot : 0;
+		if (slot >= NET_MAX_PLAYERS || (IsActive() && IsSpectator()) || !mApp->mSeedChooserScreen ||
+			state.phase != LawnFusion::FusionBankPhase::Choosing || !(state.activeMask & (1U << slot)) ||
+			state.quotas[slot] == 0) return false;
+		LawnFusion::FusionCommand command;
+		command.action = LawnFusion::FusionCommandKind::Mystery;
+		command.enabled = theEnabled;
+		return mApp->SubmitNativeFusionCommand(command);
+	}
 	if (!IsActive() || IsSpectator() || !mChooserOpen || !mApp || !mApp->mSeedChooserScreen ||
 		mChooserPickQuota[mMySlot] <= 0 ||
 		(mApp->mGameMode == GAMEMODE_COOP_PVP && GetMyTeam() != NETTEAM_PLANTS))
@@ -1525,11 +1574,42 @@ void NetManager::SetSnapshotHz(int theHz)
 // -------------------------------------------------------------------------
 void NetManager::HandleMessageClient(uint8_t theMsgType, NetBuffer& thePayload)
 {
+	if (mApp && mApp->mFusionRuntime &&
+		(theMsgType == NETMSG_SNAPSHOT || theMsgType == NETMSG_BOARD_EVENT || theMsgType == NETMSG_INTRO_STATE ||
+		 theMsgType == NETMSG_DAVE_STATE || theMsgType == NETMSG_START_PLAYING || theMsgType == NETMSG_START_GAME ||
+		 theMsgType == NETMSG_CHOOSER_OPEN || theMsgType == NETMSG_CHOOSER_STATE || theMsgType == NETMSG_CHOOSER_START ||
+		 theMsgType == NETMSG_PROFILE_SYNC || theMsgType == NETMSG_STORE_SYNC))
+	{
+		NetTrace("Fusion ignored legacy gameplay frame type=%u", theMsgType);
+		return;
+	}
+	// Callbacks run inside NetConnection::PumpMessages. Mark a fatal handshake
+	// failure here, skip later queued state, and tear down only after it unwinds.
+	if (mRejectClientState) return;
+	if (!mContentModeNegotiated && theMsgType != NETMSG_WELCOME && theMsgType != NETMSG_PING &&
+		theMsgType != NETMSG_PONG && theMsgType != NETMSG_LOBBY_FULL && theMsgType != NETMSG_VERSION_MISMATCH)
+	{
+		RejectHostState("handshake", "Host state arrived before content mode negotiation.");
+		return;
+	}
 	if (theMsgType != NETMSG_CURSOR && theMsgType != NETMSG_SNAPSHOT && theMsgType != NETMSG_DAVE_STATE &&
 		theMsgType != NETMSG_PING && theMsgType != NETMSG_PONG)
 		NetTrace("RX client type=%s(%u) bytes=%zu", NetMessageName(theMsgType), theMsgType, thePayload.Size());
 	switch (theMsgType)
 	{
+	case NETMSG_FUSION_START:
+	{
+		std::string error;
+		if (!mApp || mApp->GetContentMode() != LawnFusion::ContentMode::Fusion ||
+			!mApp->NetOnFusionStart(thePayload, &error))
+			RejectHostState("FUSION_START", error.empty() ? "Invalid Fusion start." : error);
+		break;
+	}
+	case NETMSG_FUSION_ROOM:
+		if (!mApp || mApp->GetContentMode() != LawnFusion::ContentMode::Fusion || !mApp->mFusionRuntime)
+			RejectHostState("FUSION_ROOM", "Fusion state arrived outside its board lifetime.");
+		else { mFusionRoom = thePayload; mHasFusionRoom = true; }
+		break;
 	case NETMSG_PING:
 	{
 		uint32_t aSeq = thePayload.ReadU32Or();
@@ -1629,7 +1709,7 @@ void NetManager::HandleMessageClient(uint8_t theMsgType, NetBuffer& thePayload)
 				}
 				NetTrace("final chooser bank applied packets=%d", mApp->mBoard->mSeedBank->mNumPackets);
 			}
-			else if (mApp->mBoard->ChooseSeedsOnCurrentLevel() &&
+			else if (!LawnFusion::IsNativeFusionBoard(mApp->mBoard) && mApp->mBoard->ChooseSeedsOnCurrentLevel() &&
 				mApp->mBoard->mCutScene && mApp->mBoard->mCutScene->mSeedChoosing)
 			{
 				NetTrace("START_PLAYING deferred: chooser level has no final bank payload");
@@ -1757,60 +1837,97 @@ void NetManager::OnSceneCmd(NetBuffer& thePayload)
 
 void NetManager::OnWelcome(NetBuffer& thePayload)
 {
-	mMySlot = thePayload.ReadU8Or();
-	char aHostNick[NET_MAX_NICK + 1];
-	thePayload.ReadString(aHostNick, NET_MAX_NICK + 1);
+	NetBuffer aCandidate = thePayload;
+	NetWelcomeState aWelcome;
+	std::string anError;
+	if (mContentModeNegotiated || !NetDecodeWelcomeState(aCandidate, aWelcome))
+	{
+		RejectHostState("WELCOME", "Host sent an invalid content mode handshake.");
+		return;
+	}
+	if (!mApp || !mApp->IsContentModeAvailable(aWelcome.mContentMode, &anError) ||
+		!mApp->ApplyContentModeFromHost(aWelcome.mContentMode, &anError))
+	{
+		RejectHostState("WELCOME", anError.empty() ? "The host's content mode is unavailable." : anError);
+		return;
+	}
+	mMySlot = aWelcome.mSlot;
 	mPlayers[0].Reset();
 	mPlayers[0].mActive = true;
 	mPlayers[0].mSlot = 0;
-	strcpy_s(mPlayers[0].mNick, aHostNick);
+	strcpy_s(mPlayers[0].mNick, aWelcome.mHostNick.c_str());
+	mContentModeNegotiated = true;
+	thePayload.mReadPos = aCandidate.mReadPos;
 	NetBuffer anAppearance;
 	if (NetEncodeZombatar(mLocalZombatar, anAppearance) && mHostConn)
 		mHostConn->SendMessage(NETMSG_ZOMBATAR, anAppearance);
-	NetTrace("WELCOME assignedSlot=%u hostNick=%s", mMySlot, aHostNick);
+	NetTrace("WELCOME assignedSlot=%u hostNick=%s contentMode=%s", mMySlot,
+		aWelcome.mHostNick.c_str(), LawnFusion::ContentModeName(aWelcome.mContentMode));
+}
+
+void NetManager::RejectHostState(const char* theContext, const std::string& theReason)
+{
+	if (mRejectClientState) return;
+	mRejectClientState = true;
+	mDisconnectReason = theReason;
+	strncpy_s(mConnectStatus, theReason.c_str(), _TRUNCATE);
+	NetTrace("host state rejected context=%s reason=%s", theContext, theReason.c_str());
 }
 
 void NetManager::EncodeLobbyState(NetBuffer& theBuffer)
 {
-	for (int i = 0; i < NET_MAX_PLAYERS; i++)
+	NetLobbyState aState;
+	for (int i = 0; i < NET_MAX_PLAYERS; ++i)
 	{
-		const NetPlayerInfo& aP = mPlayers[i];
-		theBuffer.WriteU8(aP.mActive ? 1 : 0);
-		theBuffer.WriteU8(i);
-		theBuffer.WriteString(aP.mNick);
-		theBuffer.WriteU16(aP.mPing);
-		theBuffer.WriteU8(aP.mTeam);
-		theBuffer.WriteU8(aP.mReady);
-		theBuffer.WriteU8(aP.mSpectator ? 1 : 0);
+		aState.mPlayers[i] = mPlayers[i];
+		// Inactive entries are Reset() to slot zero internally; the wire roster
+		// has always used its canonical array slot, including empty positions.
+		aState.mPlayers[i].mSlot = (uint8_t)i;
 	}
-	theBuffer.WriteU8((uint8_t)mDifficulty);
+	aState.mDifficulty = (uint8_t)mDifficulty;
+	aState.mContentMode = mApp ? mApp->GetContentMode() : LawnFusion::ContentMode::Classic;
+	if (!NetEncodeLobbyState(aState, theBuffer))
+		NetTrace("lobby state encode rejected: invalid participant/content fields");
 }
 
 void NetManager::OnLobbyState(NetBuffer& thePayload)
 {
-	const size_t aStart = thePayload.mReadPos;
-	NetPlayerInfo aPlayers[NET_MAX_PLAYERS];
-	for (int i = 0; i < NET_MAX_PLAYERS; i++)
+	NetBuffer aCandidate = thePayload;
+	NetLobbyState aState;
+	std::string anError;
+	if (!NetDecodeLobbyState(aCandidate, aState))
 	{
-		NetPlayerInfo& aP = aPlayers[i];
-		uint8_t active = 0, slot = 0, spectator = 0;
-		if (!thePayload.ReadU8(&active) || !thePayload.ReadU8(&slot) ||
-			!thePayload.ReadString(aP.mNick, sizeof(aP.mNick)) || !thePayload.ReadU16(&aP.mPing) ||
-			!thePayload.ReadU8(&aP.mTeam) || !thePayload.ReadU8(&aP.mReady) || !thePayload.ReadU8(&spectator) ||
-			active > 1 || slot != i || spectator > 1 || aP.mReady > 1 ||
-			(aP.mTeam > NETTEAM_ZOMBIES && aP.mTeam != NETTEAM_NONE))
-		{ thePayload.mReadPos = aStart; NetTrace("lobby state rejected: participant fields"); return; }
-		aP.mActive = active != 0; aP.mSlot = slot; aP.mSpectator = spectator != 0;
+		RejectHostState("LOBBY_STATE", "Host sent invalid lobby/content mode state.");
+		return;
 	}
-	uint8_t difficulty = 0;
-	if (!thePayload.ReadU8(&difficulty) || difficulty < 1 || difficulty > 10 || thePayload.Remaining())
-	{ thePayload.mReadPos = aStart; NetTrace("lobby state rejected: difficulty/trailing bytes"); return; }
-	for (int i = 0; i < NET_MAX_PLAYERS; ++i) mPlayers[i] = aPlayers[i];
-	mDifficulty = difficulty;
+	if (!mApp || !mApp->IsContentModeAvailable(aState.mContentMode, &anError) ||
+		!mApp->ApplyContentModeFromHost(aState.mContentMode, &anError))
+	{
+		RejectHostState("LOBBY_STATE", anError.empty() ? "The host's content mode is unavailable." : anError);
+		return;
+	}
+	for (int i = 0; i < NET_MAX_PLAYERS; ++i) mPlayers[i] = aState.mPlayers[i];
+	mDifficulty = aState.mDifficulty;
+	thePayload.mReadPos = aCandidate.mReadPos;
 }
 
 void NetManager::OnStartGame(NetBuffer& thePayload)
 {
+	NetBuffer aCandidate = thePayload;
+	NetStartGameState aState;
+	std::string anError;
+	if (!NetDecodeStartGame(aCandidate, aState, (int)GameMode::NUM_GAME_MODES,
+		(int)GameMode::GAMEMODE_COOP_TOWER_DEFENSE))
+	{
+		RejectHostState("START_GAME", "Host sent an invalid game/content mode descriptor.");
+		return;
+	}
+	if (!mApp || aState.mContentMode != mApp->GetContentMode() ||
+		!mApp->IsContentModeAvailable(aState.mContentMode, &anError))
+	{
+		RejectHostState("START_GAME", anError.empty() ? "Game content mode differs from the negotiated lobby." : anError);
+		return;
+	}
 	// START_GAME is the lifetime barrier between two boards.  Nothing queued
 	// for the previous board may survive long enough to reach the new one.
 	ClearPendingBoardMessages("START_GAME");
@@ -2022,6 +2139,15 @@ void NetManager::ClearPendingBoardMessages(const char* theReason)
 void NetManager::PurgePendingInputs(const char* theReason, int theSlot)
 {
 	std::lock_guard<std::mutex> aLock(mSessionsMutex);
+	for (auto it = mFusionCommands.begin(); it != mFusionCommands.end(); )
+	{
+		if (theSlot < 0 || it->slot == theSlot)
+		{
+			if (mFusionCommandCount[it->slot]) --mFusionCommandCount[it->slot];
+			it = mFusionCommands.erase(it);
+		}
+		else ++it;
+	}
 	size_t aRemoved = 0;
 	if (theSlot < 0)
 	{
@@ -2134,6 +2260,8 @@ void NetManager::AdvanceInputPhase(NetInputPhase thePhase, const char* theReason
 	if (aNextEpoch == 0)
 		aNextEpoch = 1;
 	mInputEpoch = aNextEpoch;
+	mNextInputSequence = 1;
+	ClearFusionTraffic();
 	mInputPhase = thePhase;
 	mAnnotations.clear();
 	mChooserOpen = thePhase == NETINPUT_CHOOSER;
@@ -2175,6 +2303,7 @@ void NetManager::OnInputEpoch(NetBuffer& thePayload)
 		return;
 	}
 	mInputEpoch = anEpoch;
+	ClearFusionTraffic();
 	mInputPhase = aPhase;
 	mAnnotations.clear();
 	mNextInputSequence = 1;
@@ -2211,6 +2340,20 @@ void NetManager::OnCursor(NetBuffer& thePayload)
 		if (mApp && mApp->mBoard)
 		{
 			CursorObject* aLocalCursor = mApp->mBoard->mCursorObject;
+			if (Plant* aGlovePlant = LawnFusion::GetNativeGloveHeldPlant(mApp->mBoard, aSlot))
+			{
+				aCursorType = CURSOR_TYPE_PLANT_FROM_GLOVE;
+				aHeldPacketId = aGlovePlant->mNetId;
+				aHeldSeed = static_cast<uint8_t>(aGlovePlant->mSeedType);
+				aHeldImitater = static_cast<uint8_t>(aGlovePlant->mImitaterType);
+			}
+			const auto* aFusionContext = LawnFusion::GetNativeContext(mApp->mBoard);
+			const CursorType aLocalFusionTool = aLocalCursor->mCursorType;
+			const bool aKeepFusionTool = aFusionContext && !aFusionContext->gloveHolds[aSlot].plantId &&
+				(aLocalFusionTool == CURSOR_TYPE_GLOVE ||
+				(aLocalFusionTool == CURSOR_TYPE_MONEY_SIGN && aCursorType == CURSOR_TYPE_NORMAL &&
+				aHeldPacketId == 0 && aHeldSeed == 255 &&
+				aFusionContext->selection.State().phase == LawnFusion::FusionBankPhase::Playing));
 			aLocalCursor->mCursorType = (CursorType)aCursorType;
 			aLocalCursor->mType = NetIsValidHeldSeed(aHeldSeed) && aHeldSeed != 255 ? (SeedType)aHeldSeed : SeedType::SEED_NONE;
 			aLocalCursor->mImitaterType = aHeldImitater < (uint8_t)SeedType::NUM_SEED_TYPES ? (SeedType)aHeldImitater : SeedType::SEED_NONE;
@@ -2249,6 +2392,16 @@ void NetManager::OnCursor(NetBuffer& thePayload)
 				const SeedPacket& aHeld = mApp->mBoard->mSeedBank->mSeedPackets[aHeldIndex];
 				aLocalCursor->mType = aHeld.mPacketType;
 				aLocalCursor->mImitaterType = aHeld.mImitaterType;
+			}
+			// Local Fusion tools send typed intents; an empty held-card echo
+			// must not cancel their selection before the next plant click.
+			if (aKeepFusionTool)
+			{
+				aLocalCursor->mCursorType = aLocalFusionTool;
+				aLocalCursor->mType = SEED_NONE;
+				aLocalCursor->mImitaterType = SEED_NONE;
+				aLocalCursor->mSeedBankIndex = -1;
+				aLocalCursor->mGlovePlantID = PLANTID_NULL;
 			}
 			NetTrace("cursor held packet echo slot=%u id=%u index=%d type=%u",
 				aSlot, aHeldPacketId, aHeldIndex, aHeldSeed);
@@ -2506,7 +2659,31 @@ void NetManager::SendLobbyState()
 		return;
 	NetBuffer aState;
 	EncodeLobbyState(aState);
+	if (aState.Size() == 0) return;
 	BroadcastMessage(NETMSG_LOBBY_STATE, aState);
+}
+
+void NetManager::NotifyContentModeChanged()
+{
+	if (!IsHosting() || !mApp || mApp->mBoard) return;
+	ClearPendingBoardMessages("CONTENT_MODE");
+	mCurrentStart.Clear();
+	mStartTDPath.clear();
+	mRemotePicks.clear();
+	mRemoteChooserStates.clear();
+	mPendingChooserStarts.clear();
+	mChooserMysteryMask = 0;
+	mChooserBankCount = 0;
+	mChooserPicksPerPlayer = 0;
+	for (int i = 0; i < NET_MAX_PLAYERS; ++i)
+	{
+		mPlayers[i].mReady = 0;
+		mChooserPickQuota[i] = 0;
+		mRemoteCursors[i].Clear();
+	}
+	AdvanceInputPhase(NETINPUT_MENU, "CONTENT_MODE");
+	SendLobbyState();
+	NetTrace("content mode broadcast mode=%s difficulty=%d", LawnFusion::ContentModeName(mApp->GetContentMode()), mDifficulty);
 }
 
 void NetManager::SetMyTeam(uint8_t theTeam)
@@ -2623,19 +2800,32 @@ uint32_t NetManager::BroadcastAdventureStartFx()
 
 void NetManager::BroadcastStartGame(int theGameMode, int theLevel, uint32_t theBoardSeed)
 {
+	if (!IsHosting() || !mApp || theGameMode < 0 || theGameMode >= (int)GameMode::NUM_GAME_MODES ||
+		!mApp->IsContentModeAvailable(mApp->GetContentMode()))
+	{
+		NetTrace("start game broadcast rejected: invalid mode/authority/unavailable content");
+		return;
+	}
+	NetStartGameState aState;
+	aState.mContentMode = mApp->GetContentMode();
+	aState.mGameMode = (uint8_t)theGameMode;
+	aState.mContentEpoch = mApp->GetContentMode() == LawnFusion::ContentMode::Fusion ? mApp->mNativeFusionEpoch : 0;
+	aState.mLevel = theLevel;
+	aState.mPlayerCount = (uint8_t)GetPlayerCount();
+	aState.mBoardSeed = theBoardSeed;
+	aState.mTDPath = mStartTDPath;
+	NetBuffer aMsg;
+	if (!NetEncodeStartGame(aState, aMsg, (int)GameMode::NUM_GAME_MODES,
+		(int)GameMode::GAMEMODE_COOP_TOWER_DEFENSE))
+	{
+		NetTrace("start game broadcast rejected: invalid descriptor");
+		return;
+	}
 	// Ordered immediately before START_GAME.  This invalidates every click from
 	// the previous board even if it was already buffered by TCP.
 	AdvanceInputPhase(NETINPUT_INTRO, "START_GAME");
-	NetTrace("start game broadcast mode=%d level=%d players=%d seed=%u tdPathCells=%zu", theGameMode, theLevel, GetPlayerCount(), theBoardSeed, mStartTDPath.size());
-	NetBuffer aMsg;
-	aMsg.WriteU8((uint8_t)theGameMode);
-	aMsg.WriteI32(theLevel);
-	aMsg.WriteU8((uint8_t)GetPlayerCount());
-	aMsg.WriteU32(theBoardSeed);
-	// TD path
-	aMsg.WriteU8((uint8_t)mStartTDPath.size());
-	for (uint8_t aCell : mStartTDPath)
-		aMsg.WriteU8(aCell);
+	NetTrace("start game broadcast mode=%d level=%d players=%d seed=%u tdPathCells=%zu contentMode=%s",
+		theGameMode, theLevel, GetPlayerCount(), theBoardSeed, mStartTDPath.size(), LawnFusion::ContentModeName(aState.mContentMode));
 	mCurrentStart = aMsg;
 	BroadcastMessage(NETMSG_START_GAME, aMsg);
 }
@@ -2850,6 +3040,7 @@ void NetManager::SendBoardEvent(const NetBuffer& thePayload, uint8_t theEventTyp
 
 void NetManager::SendSnapshot(const NetBuffer& thePayload)
 {
+	if (thePayload.Size() == 0) return;
 	BroadcastMessage(NETMSG_SNAPSHOT, thePayload);
 	if (mApp && mApp->CoopSmokeActive())
 		mApp->CoopSmokeOnSnapshotTx(NetFnv1a32(thePayload.Data(), thePayload.Size()),

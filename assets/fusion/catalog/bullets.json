@@ -1,0 +1,1502 @@
+[
+  {
+    "id": 0,
+    "enumName": "Pea",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 1,
+    "enumName": "Cherry",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 2,
+    "enumName": "Peanut",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 3,
+    "enumName": "SuperCherry",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 4,
+    "enumName": "ZombieBlock1",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 5,
+    "enumName": "ZombieBlock2",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 6,
+    "enumName": "ZombieBlock3",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 7,
+    "enumName": "Potato",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 8,
+    "enumName": "SmallSun",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 9,
+    "enumName": "Puff",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 10,
+    "enumName": "PuffPea",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 11,
+    "enumName": "IronPea",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 12,
+    "enumName": "ThreeSpike",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 13,
+    "enumName": "Puff_randomColor",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 14,
+    "enumName": "Puff_love",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 15,
+    "enumName": "SnowPea",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 16,
+    "enumName": "Puff_snowPea",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 17,
+    "enumName": "IceSpark",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 18,
+    "enumName": "IceSpark_small",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 20,
+    "enumName": "MagicTrack",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 21,
+    "enumName": "Puff_snow",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 22,
+    "enumName": "Puff_dark",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 23,
+    "enumName": "Doom",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 24,
+    "enumName": "IceDoom",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 25,
+    "enumName": "FirePea_yellow",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 26,
+    "enumName": "FirePea_orange",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 27,
+    "enumName": "FirePea_red",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 28,
+    "enumName": "Squash",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 29,
+    "enumName": "Tangkelp",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 30,
+    "enumName": "Firekelp",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 32,
+    "enumName": "SquashKelp",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 33,
+    "enumName": "NormalTrack",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 34,
+    "enumName": "IceTrack",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 35,
+    "enumName": "FireTrack",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 36,
+    "enumName": "CherrySquashBullet",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 37,
+    "enumName": "Cactus",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 38,
+    "enumName": "LanternCactus",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 39,
+    "enumName": "Star",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 40,
+    "enumName": "LanternStar",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 41,
+    "enumName": "SeaStar",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 42,
+    "enumName": "CactusStar",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 43,
+    "enumName": "JackboxStar",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 44,
+    "enumName": "PickaxeStar",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 45,
+    "enumName": "MagnetStar",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 46,
+    "enumName": "IronStar",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 47,
+    "enumName": "MagnetCactus",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 48,
+    "enumName": "SuperStar",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 49,
+    "enumName": "UltimateStar",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 50,
+    "enumName": "EletricPea",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 51,
+    "enumName": "SwordBullet",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 52,
+    "enumName": "Cabbage",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 53,
+    "enumName": "SunCabbage",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 54,
+    "enumName": "Kernal",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 55,
+    "enumName": "Butter",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 56,
+    "enumName": "BigKernal",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 57,
+    "enumName": "BigButter",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 58,
+    "enumName": "Basketball",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 59,
+    "enumName": "MelonBullet",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 60,
+    "enumName": "WinterMelonBullet",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 61,
+    "enumName": "GarlicKernal",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 62,
+    "enumName": "GarlicButter",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 63,
+    "enumName": "GarlicCabbage",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 64,
+    "enumName": "GarlicMelon",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 65,
+    "enumName": "CannonBullet",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 66,
+    "enumName": "Melon_corn",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 67,
+    "enumName": "Melon_butter",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 68,
+    "enumName": "CannonBullet_fire",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 69,
+    "enumName": "CannonBullet_ice",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 70,
+    "enumName": "Melon_cabbage",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 71,
+    "enumName": "Melon_super",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 72,
+    "enumName": "Melon_ultimate",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 73,
+    "enumName": "Melon_cannon",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 74,
+    "enumName": "Cabbage_silver",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 75,
+    "enumName": "Cabbage_gold",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 76,
+    "enumName": "Kernal_silver",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 77,
+    "enumName": "Kernal_gold",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 78,
+    "enumName": "Butter_silver",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 79,
+    "enumName": "Butter_gold",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 80,
+    "enumName": "ProjectileCannon_smallGold",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 81,
+    "enumName": "Melon_silver",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 82,
+    "enumName": "Melon_gold",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 83,
+    "enumName": "GoldMelon_cannon",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 84,
+    "enumName": "Ultimate_cannon",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 85,
+    "enumName": "Ultimate_kernal",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 86,
+    "enumName": "Melon_fire",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 87,
+    "enumName": "Super_fire_pea",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 89,
+    "enumName": "Bomb_garlic",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 90,
+    "enumName": "PuffPea_iron",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 91,
+    "enumName": "CactusBullet_lour",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 92,
+    "enumName": "Puff_potato",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 93,
+    "enumName": "ProjectileSteelPea",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 94,
+    "enumName": "Shulk_leaf",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 95,
+    "enumName": "SunSpark",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 96,
+    "enumName": "EndoSunBullet",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 97,
+    "enumName": "ExtremeSnowPea",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 98,
+    "enumName": "ProjectileSilver",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 99,
+    "enumName": "ProjectileGold",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 100,
+    "enumName": "UltimateCactus",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 101,
+    "enumName": "SnowBall",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  },
+  {
+    "id": 102,
+    "enumName": "Cactus_doom",
+    "almanac": null,
+    "assets": {
+      "className": null,
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "paths": [],
+      "scriptGuidVerifiedPrefabs": [],
+      "animationConverted": false,
+      "loaderBinding": {},
+      "classEvidence": null
+    },
+    "runtimeImplemented": false
+  }
+]

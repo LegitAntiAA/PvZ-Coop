@@ -3,6 +3,7 @@
 #include "Zombie.h"
 #include "Cutscene.h"
 #include "Projectile.h"
+#include "Fusion/FusionNativeHostileProjectile.h"
 #include "../LawnApp.h"
 #include "../Resources.h"
 #include "../GameConstants.h"
@@ -14,6 +15,33 @@
 #include "../Sexy.TodLib/Trail.h"
 #include "../Sexy.TodLib/EffectSystem.h"
 #include "../Sexy.TodLib/FilterEffect.h"
+#include "Fusion/FusionNative.h"
+#include "Fusion/FusionNativeMorePlants269Backend.h"
+#include "Fusion/FusionNativeCherryShooter.h"
+#include "Fusion/FusionNativeBasePlants.h"
+#include "Fusion/FusionBasePlantRules.h"
+#include "Fusion/FusionCherryShooterRules.h"
+#include "Fusion/FusionNativeVisual.h"
+#include "Fusion/FusionNativeRollingProjectile.h"
+#include "Fusion/FusionNativeCold.h"
+#include "Fusion/FusionNativeFire.h"
+#include "Fusion/FusionNativeLobber.h"
+#include "Fusion/FusionNativeBatchActions.h"
+#include "Fusion/FusionNativeRecipientShooters.h"
+#include "Fusion/FusionNativeShooterBatch.h"
+#include "Fusion/FusionNativeFireActionBatch.h"
+#include "Fusion/FusionNativeCannon268.h"
+#include "Fusion/FusionNativeWater268.h"
+#include "Fusion/FusionNativeStar269.h"
+#include "Fusion/FusionNativeHypno269.h"
+#include "Fusion/FusionNativeChomper268.h"
+#include "Fusion/FusionNativePlantDamage.h"
+#include "Fusion/FusionNativeCompanions269.h"
+#include "Fusion/FusionNativeSummonPlants269.h"
+#include "Fusion/FusionNativeWorldActors269.h"
+#include "Fusion/FusionNativeWorldRemainder269.h"
+#include "Fusion/FusionNativeLastPlants269.h"
+#include "Fusion/FusionStar269Rules.h"
 
 ProjectileDefinition gProjectileDefinition[] = {  //0x69F1C0
 	{ ProjectileType::PROJECTILE_PEA,           0,  20  },
@@ -82,7 +110,7 @@ void Projectile::ProjectileInitializeInternal(int theX, int theY, int theRenderO
 	mAttachmentID = AttachmentID::ATTACHMENTID_NULL;
 	mCobTargetRow = 0;
 	mTargetZombieID = ZombieID::ZOMBIEID_NULL;
-	mOnHighGround = mBoard->mGridSquareType[aGridX][theRow] == GridSquareType::GRIDSQUARE_HIGH_GROUND;
+	mOnHighGround = mBoard->GetGridSquareTypeAt(aGridX, theRow) == GridSquareType::GRIDSQUARE_HIGH_GROUND;
 	mRad = 0.0f;
 	if (mBoard->StageHasRoof())
 	{
@@ -313,6 +341,7 @@ Plant* Projectile::FindCollisionTargetPlant()
 //0x46CC30
 bool Projectile::PeaAboutToHitTorchwood()
 {
+    if (LawnFusion::IsNativeFusionBoard(mBoard)) return false;
 	if (mMotionType != ProjectileMotion::MOTION_STRAIGHT)
 		return false;
 
@@ -360,7 +389,11 @@ Zombie* Projectile::FindCollisionTarget()
 	Zombie* aZombie = nullptr;
 	while (mBoard->IterateZombies(aZombie))
 	{
-		bool isEffected = aZombie->EffectedByDamage((unsigned int)mDamageRangeFlags);
+		if (LawnFusion::NativeWater268ZombieCaptured(aZombie)) continue;
+		bool isEffected = LawnFusion::IsNativeBatchProjectile(this) ? LawnFusion::NativeBatchProjectileCanHit(this,aZombie) :
+			LawnFusion::IsNativeTimedPeaProjectile(this) ? LawnFusion::NativeTimedPeaProjectileCanHit(this, aZombie) :
+			LawnFusion::IsNativePuffProjectile(this) ? LawnFusion::NativePuffProjectileCanHit(this, aZombie) :
+			aZombie->EffectedByDamage((unsigned int)mDamageRangeFlags);
 
 		if (mProjectileType == ProjectileType::PROJECTILE_ZOMBIE_PEA && aZombie->mMindControlled) {
 			isEffected = aZombie->EffectedByDamage(129);
@@ -417,10 +450,44 @@ Zombie* Projectile::FindCollisionTarget()
 	return aBestZombie;
 }
 
+namespace
+{
+bool HandleNativeWorldSource91Collision(Projectile* p)
+{
+ const auto* d=LawnFusion::GetNativeProjectileData(p);if(!d||d->kind!=91)return false;
+ if(p->mDead||p->mNetGhost||p->mApp->NetIsClient()||!LawnFusion::CanApplyNativeFusionGameplay(p->mBoard))return true;
+ Rect broad;if(!LawnFusion::GetNativeWorldRemainder269Source91Rect(p,broad))return true;
+ Zombie* z=nullptr;while(p->mBoard->IterateZombies(z))
+ {
+  if(z->mDead||z->IsDeadOrDying()||z->mMindControlled||LawnFusion::GetNativeFusionZombieHealth(z)<=0||LawnFusion::NativeWater268ZombieCaptured(z)||
+     !LawnFusion::FusionStar269CanHitStatus(d->specialType,LawnFusion::GetNativeFusionZombieStatus(z)))continue;
+  if(d->specialType==6){if(p->mBoard->ZombieTryToGet(p->mTargetZombieID)!=z)continue;}
+  else if(z->mRow!=p->mRow)continue;
+  const Rect target=z->GetZombieRect();
+  if(GetRectOverlap(broad,target)>=0&&LawnFusion::NativeWorldRemainder269Source91Touches(p,target))
+  {LawnFusion::ApplyNativeWorldRemainder269Source91Impact(p,z);break;}
+ }
+ return true;
+}
+}
+
 //0x46CE80
 void Projectile::CheckForCollision()
 {
-	if (mMotionType == ProjectileMotion::MOTION_PUFF && mProjectileAge >= 75)
+    if(LawnFusion::IsNativeWorldRemainder269Aux(this)||LawnFusion::IsNativeLastPlants269KelpProjectile(this)||HandleNativeWorldSource91Collision(this))return;
+    if(LawnFusion::IsNativeCompanion269(this)||LawnFusion::IsNativeWorld269Beam(this))return;
+    if(LawnFusion::HandleNativeRemainingLeaves269Collision(this))return;
+    if(LawnFusion::HandleNativeCompanion269ShotCollision(this))return;
+    if (LawnFusion::HandleNativeStar269ProjectileCollision(this) ||
+        LawnFusion::HandleNativeHypno269ProjectileCollision(this)) return;
+	if (LawnFusion::HandleNativeRollingProjectileCollision(this)) return;
+	if (LawnFusion::NativeBatchProjectileExpired(this) || LawnFusion::NativeTimedPeaProjectileExpired(this) || LawnFusion::NativePuffProjectileExpired(this))
+	{
+		Die();
+		return;
+	}
+	if (LawnFusion::HandleNativeColdPiercingCollision(this)) return;
+	if (mMotionType == ProjectileMotion::MOTION_PUFF && !LawnFusion::IsNativePuffProjectile(this) && mProjectileAge >= 75)
 	{
 		Die();
 		return;
@@ -428,7 +495,8 @@ void Projectile::CheckForCollision()
 
 	Zombie* aTargetZombie = mMotionType == ProjectileMotion::MOTION_HOMING ?  mBoard->ZombieTryToGet(mTargetZombieID) : nullptr;
 
-	if ((mPosX > WIDE_BOARD_WIDTH && mProjectileType != ProjectileType::PROJECTILE_ZOMBIE_PEA || mPosX + mWidth < 0) && !aTargetZombie)
+	if (!LawnFusion::IsNativeTimedPeaProjectile(this) && !LawnFusion::IsNativePuffProjectile(this) &&
+		(mPosX > WIDE_BOARD_WIDTH && mProjectileType != ProjectileType::PROJECTILE_ZOMBIE_PEA || mPosX + mWidth < 0) && !aTargetZombie)
 	{
 		Die();
 		return;
@@ -475,7 +543,8 @@ void Projectile::CheckForCollision()
 		if (aPlant)
 		{
 			const ProjectileDefinition& aProjectileDef = GetProjectileDef();
-			aPlant->mPlantHealth -= aProjectileDef.mDamage;
+            if (LawnFusion::GetNativePlantData(aPlant)) LawnFusion::ApplyNativeSourcePlantDamage(aPlant,aProjectileDef.mDamage,0);
+            else aPlant->mPlantHealth -= aProjectileDef.mDamage;
 			aPlant->mEatenFlashCountdown = max(aPlant->mEatenFlashCountdown, 25);
 
 			mApp->PlayFoley(FoleyType::FOLEY_SPLAT);
@@ -560,7 +629,7 @@ void Projectile::CheckForHighGround()
 	if (CantHitHighGround())
 	{
 		int aGridX = mBoard->PixelToGridXKeepOnBoard(mPosX + 30, mPosY);
-		if (mBoard->mGridSquareType[aGridX][mRow] == GridSquareType::GRIDSQUARE_HIGH_GROUND)
+		if (mBoard->GetGridSquareTypeAt(aGridX, mRow) == GridSquareType::GRIDSQUARE_HIGH_GROUND)
 		{
 			DoImpact(nullptr);
 		}
@@ -587,6 +656,7 @@ bool Projectile::IsSplashDamage(Zombie* theZombie)
 unsigned int Projectile::GetDamageFlags(Zombie* theZombie)
 {
 	unsigned int aDamageFlags = 0U;
+	if (LawnFusion::TryGetNativeTimedPeaDamageFlags(this, aDamageFlags)) return aDamageFlags;
 
 	bool considerateHoming = false;
 	if (mMotionType == ProjectileMotion::MOTION_HOMING || mMotionType == ProjectileMotion::MOTION_BEE)
@@ -700,8 +770,8 @@ void Projectile::DoSplashDamage(Zombie* theZombie)
 		}
 	}
 
-	int aOriginalDamage = aProjectileDef.mDamage;
-	int aSplashDamage = aProjectileDef.mDamage / 3;
+	int aOriginalDamage = LawnFusion::GetNativeProjectileDamage(this, aProjectileDef.mDamage);
+	int aSplashDamage = aOriginalDamage / 3;
 	int aMaxSplashDamageAmount = aSplashDamage * 7;
 	if (mProjectileType == ProjectileType::PROJECTILE_FIREBALL)
 	{
@@ -746,6 +816,12 @@ void Projectile::DoSplashDamage(Zombie* theZombie)
 //0x46D490
 void Projectile::UpdateLobMotion()
 {
+    if (LawnFusion::MoveNativeFireActionProjectile(this))
+    {
+        if (!mDead) LawnFusion::HandleNativeFireActionProjectileCollision(this);
+        return;
+    }
+    if (LawnFusion::UpdateNativeLobberMotion(this)) return;
 	float displaceX = -700.0f;
 
 	if (mProjectileType == ProjectileType::PROJECTILE_COBBIG && !FloatApproxEqual(mRad, 0.0f))
@@ -849,7 +925,7 @@ void Projectile::UpdateLobMotion()
 	}
 	int aGridX = mBoard->PixelToGridXKeepOnBoard(mX, mY);
 	bool isHighGround = false;
-	if (mBoard->mGridSquareType[aGridX][mRow] == GridSquareType::GRIDSQUARE_HIGH_GROUND)
+	if (mBoard->GetGridSquareTypeAt(aGridX, mRow) == GridSquareType::GRIDSQUARE_HIGH_GROUND)
 	{
 		aGroundZ -= HIGH_GROUND_HEIGHT;
 	}
@@ -885,7 +961,8 @@ void Projectile::UpdateLobMotion()
 		}
 		else
 		{
-			aPlant->mPlantHealth -= GetProjectileDef().mDamage;
+            if (LawnFusion::GetNativePlantData(aPlant)) LawnFusion::ApplyNativeSourcePlantDamage(aPlant,GetProjectileDef().mDamage,0);
+            else aPlant->mPlantHealth -= GetProjectileDef().mDamage;
 			aPlant->mEatenFlashCountdown = max(aPlant->mEatenFlashCountdown, 25);
 			mApp->PlayFoley(FoleyType::FOLEY_SPLAT);
 			Die();
@@ -916,7 +993,35 @@ void Projectile::UpdateLobMotion()
 //0x46D890
 void Projectile::UpdateNormalMotion()
 {
-	if (mMotionType == ProjectileMotion::MOTION_BACKWARDS)
+	if (LawnFusion::MoveNativeShooterBatchProjectile(this))
+	{
+		if (!mDead) LawnFusion::HandleNativeShooterBatchProjectileCollision(this);
+		return;
+	}
+	if (LawnFusion::MoveNativeFireActionProjectile(this))
+	{
+		if (!mDead) LawnFusion::HandleNativeFireActionProjectileCollision(this);
+		return;
+	}
+	if (LawnFusion::MoveNativeRecipientProjectile(this))
+	{
+		if (!mDead) LawnFusion::HandleNativeRecipientProjectileCollision(this);
+		return;
+	}
+	if (LawnFusion::UpdateNativeRollingProjectileMotion(this))
+	{
+		if (!mDead) CheckForCollision();
+		return; // Grass rolling has its own land clamp, not Pea high-ground impact.
+	}
+	if (LawnFusion::MoveNativeBatchProjectile(this))
+	{
+		if (mDead) return;
+	}
+	else if (LawnFusion::UpdateNativeTimedPeaProjectileMotion(this))
+	{
+		// The profile consumed X; use the existing collision and retirement tail.
+	}
+	else if (mMotionType == ProjectileMotion::MOTION_BACKWARDS)
 	{
 		mPosX -= 3.33f;
 	}
@@ -1027,7 +1132,8 @@ void Projectile::UpdateNormalMotion()
 	}
 	else
 	{
-		mPosX += 3.33f;
+		mPosX += LawnFusion::IsNativeTimedPeaProjectile(this) ? mVelX :
+			LawnFusion::IsNativePuffProjectile(this) ? LawnFusion::kFusionPuffPixelsPerTick : 3.33f;
 	}
 
 	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_HIGH_GRAVITY)
@@ -1050,12 +1156,40 @@ void Projectile::UpdateNormalMotion()
 	}
 
 	CheckForCollision();
-	CheckForHighGround();
+	// Source controllers own their launch planes and retirement. A Three shot
+	// can start between native rows without hitting an imaginary ground step.
+	if (!LawnFusion::IsNativeTimedPeaProjectile(this) && !LawnFusion::IsNativeBatchProjectile(this)) CheckForHighGround();
 }
 
 //0x46DC70
 void Projectile::UpdateMotion()
 {
+    if(LawnFusion::UpdateNativeSourceSuperCherryProjectile(this,LawnFusion::QueueNativeSuperCherryStart))return;
+    if(LawnFusion::UpdateNativeWorldRemainder269Aux(this)||LawnFusion::MoveNativeLastPlants269KelpProjectile(this))return;
+    if(LawnFusion::MoveNativeWorldRemainder269Source91(this)){if(!mDead)HandleNativeWorldSource91Collision(this);return;}
+    if(LawnFusion::MoveNativeRemainingLeaves269Projectile(this)){if(!mDead)LawnFusion::HandleNativeRemainingLeaves269Collision(this);return;}
+    if(LawnFusion::MoveNativeGoldMagnet269Projectile(this)){if(!mDead)CheckForCollision();return;}
+    if(LawnFusion::UpdateNativeCompanion269(this)||LawnFusion::UpdateNativeWorld269Beam(this))return;
+    if(LawnFusion::UpdateNativeCompanion269Shot(this)){if(!mDead)LawnFusion::HandleNativeCompanion269ShotCollision(this);return;}
+    if (LawnFusion::MoveNativeStar269Projectile(this))
+    {
+        if (!mDead) LawnFusion::HandleNativeStar269ProjectileCollision(this);
+        return;
+    }
+    if (LawnFusion::MoveNativeHypno269Projectile(this))
+    {
+        if (!mDead) LawnFusion::HandleNativeHypno269ProjectileCollision(this);
+        return;
+    }
+    if (LawnFusion::UpdateNativeWater268Projectile(this) || LawnFusion::UpdateNativeChomper268Projectile(this) ||
+        LawnFusion::MoveNativeCannon268Projectile(this)) return;
+    if (LawnFusion::MoveNativeCannon268Kernel(this)) { if (!mDead) CheckForCollision(); return; }
+    if (LawnFusion::MoveNativeMore269PlanarLobber(this))
+    {
+        if (!mDead) CheckForCollision();
+        return;
+    }
+    if (LawnFusion::UpdateNativeSourcePlanarProjectile(this)) return;
 	if (mAnimTicksPerFrame > 0)
 	{
 		mAnimCounter = (mAnimCounter + 1) % (mNumFrames * mAnimTicksPerFrame);
@@ -1142,7 +1276,24 @@ void Projectile::PlayImpactSound(Zombie* theZombie)
 //0x46E000
 void Projectile::DoImpact(Zombie* theZombie)
 {
+    if (theZombie && LawnFusion::NativeWater268ZombieCaptured(theZombie)) return;
+    if(LawnFusion::ApplyNativeWorldRemainder269Source91Impact(this,theZombie)||LawnFusion::ApplyNativeLastPlants269KelpImpact(this,theZombie))return;
+    if (LawnFusion::ApplyNativeStar269ProjectileImpact(this,theZombie) ||
+        LawnFusion::ApplyNativeHypno269ProjectileImpact(this,theZombie)) return;
+    if (LawnFusion::ApplyNativeWater268ProjectileImpact(this,theZombie) ||
+        LawnFusion::ApplyNativeChomper268ProjectileImpact(this,theZombie) ||
+        LawnFusion::ApplyNativeCannon268KernelImpact(this,theZombie)) return;
+    if (LawnFusion::ApplyNativeShooterBatchProjectileImpact(this,theZombie)) return;
+    if (LawnFusion::ApplyNativeFireActionProjectileImpact(this,theZombie)) return;
+    if (!theZombie && LawnFusion::ApplyNativeColdProjectileLand(this)) return;
+    if (LawnFusion::ApplyNativeRecipientProjectileImpact(this,theZombie)) return;
+    if (LawnFusion::ApplyNativeBatchProjectileImpact(this,theZombie)) return;
+    if (LawnFusion::ApplyNativeLobberImpact(this,theZombie)) return;
+	if (LawnFusion::ApplyNativeRollingProjectileImpact(this, theZombie)) return;
+	if (LawnFusion::ApplyNativeColdPiercingImpact(this, theZombie)) return;
+	if (LawnFusion::ApplyNativeFireImpact(this, theZombie)) return;
 	ProjectileDefinition aProjDef = GetProjectileDef();
+	aProjDef.mDamage = LawnFusion::GetNativeProjectileDamage(this, aProjDef.mDamage);
 #ifdef _PIERCING_CACTUS
 	if (theZombie && mProjectileType == ProjectileType::PROJECTILE_PIERCE_SPIKE)
 	{
@@ -1207,8 +1358,20 @@ void Projectile::DoImpact(Zombie* theZombie)
 	else if (theZombie)
 	{
 		unsigned int aDamageFlags = GetDamageFlags(theZombie);
-		theZombie->TakeDamage(aProjDef.mDamage, aDamageFlags);
+		LawnFusion::FusionColdDamageContext coldContext;
+		const LawnFusion::FusionColdDamageContext* context = nullptr;
+		if (LawnFusion::IsNativeColdProjectile(this))
+		{
+			if (!LawnFusion::PrepareNativeColdHit(this, theZombie, aProjDef.mDamage, coldContext))
+			{
+				Die();
+				return;
+			}
+			context = &coldContext;
+		}
+		theZombie->TakeDamage(aProjDef.mDamage, aDamageFlags, context);
 	}
+	LawnFusion::NativeProjectileHit(this, theZombie != nullptr);
 
 	float aLastPosX = mPosX - mVelX;
 	float aLastPosY = mPosY + mPosZ - mVelY - mVelZ;
@@ -1238,7 +1401,7 @@ void Projectile::DoImpact(Zombie* theZombie)
 	else if (mProjectileType == ProjectileType::PROJECTILE_PEA || mProjectileType == ProjectileType::PROJECTILE_ZOMBIE_PEA)
 	{
 		aSplatPosX -= 15.0f;
-		aEffect = ParticleEffect::PARTICLE_PEA_SPLAT;
+		aEffect = LawnFusion::IsNativeColdProjectile(this) ? ParticleEffect::PARTICLE_SNOWPEA_SPLAT : ParticleEffect::PARTICLE_PEA_SPLAT;
 	}
 	else if (mProjectileType == ProjectileType::PROJECTILE_SNOWPEA)
 	{
@@ -1382,7 +1545,7 @@ void Projectile::DoImpact(Zombie* theZombie)
 
 			int aGridX = mBoard->PixelToGridXKeepOnBoard(mX, mY);
 			bool isHighGround = false;
-			if (mBoard->mGridSquareType[aGridX][mRow] == GridSquareType::GRIDSQUARE_HIGH_GROUND)
+			if (mBoard->GetGridSquareTypeAt(aGridX, mRow) == GridSquareType::GRIDSQUARE_HIGH_GROUND)
 			{
 				mY -= HIGH_GROUND_HEIGHT;
 			}
@@ -1439,7 +1602,8 @@ void Projectile::Update()
 	{
 		mClickBackoffCounter--;
 	}
-	mRotation += mRotationSpeed;
+    if (!LawnFusion::IsNativeWorldRemainder269Aux(this) && !LawnFusion::IsNativeRemainingLeaves269Projectile(this) && !LawnFusion::IsNativeStar269Projectile(this) && !LawnFusion::IsNativeWater268Projectile(this) && !LawnFusion::IsNativeChomper268Projectile(this))
+	    mRotation += mRotationSpeed;
 
 	if (mIsPlayingImpactAnimation) 
 	{
@@ -1465,8 +1629,11 @@ void Projectile::Update()
 void Projectile::Draw(Graphics* g)
 {
 	Graphics gProj(*g);
+	if(LawnFusion::DrawNativeCompanion269(&gProj,this))return;
+	if(LawnFusion::IsNativeWorld269Beam(this)){Graphics world(gProj);world.Translate(-mX,-mY);LawnFusion::DrawNativeWorld269Beam(&world,this);return;}
 	gProj.SetColorizeImages(true);
 	gProj.SetColor(mOverrideColor);
+	if (LawnFusion::DrawNativeFusionProjectile(&gProj, this)) return;
 
 	const ProjectileDefinition& aProjectileDef = GetProjectileDef();
 
@@ -1630,6 +1797,8 @@ void Projectile::Draw(Graphics* g)
 //0x46E8C0
 void Projectile::DrawShadow(Graphics* g)
 {
+	if(LawnFusion::IsNativeCompanion269(this)||LawnFusion::IsNativeWorld269Beam(this))return;
+	if (LawnFusion::IsNativeCannon268Projectile(this)) return; // Source way14 owns its phase-visible shadow.
 	if (mIsPlayingImpactAnimation)	return;
 
 	int aCelCol = 0;
@@ -1641,7 +1810,7 @@ void Projectile::DrawShadow(Graphics* g)
 
 	int aGridX = mBoard->PixelToGridXKeepOnBoard(mX, mY);
 	bool isHighGround = false;
-	if (mBoard->mGridSquareType[aGridX][mRow] == GridSquareType::GRIDSQUARE_HIGH_GROUND)
+	if (mBoard->GetGridSquareTypeAt(aGridX, mRow) == GridSquareType::GRIDSQUARE_HIGH_GROUND)
 	{
 		isHighGround = true;
 	}
@@ -1723,7 +1892,7 @@ void Projectile::DrawShadow(Graphics* g)
 		}
 		int aGridX = mBoard->PixelToGridXKeepOnBoard(mX, mY);
 		bool isHighGround = false;
-		if (mBoard->mGridSquareType[aGridX][mRow] == GridSquareType::GRIDSQUARE_HIGH_GROUND)
+		if (mBoard->GetGridSquareTypeAt(aGridX, mRow) == GridSquareType::GRIDSQUARE_HIGH_GROUND)
 		{
 			aGroundZ -= HIGH_GROUND_HEIGHT;
 		}
@@ -1745,6 +1914,11 @@ void Projectile::DrawShadow(Graphics* g)
 //0x46EB20
 void Projectile::Die()
 {
+	LawnFusion::NativeCompanion269Removing(this,true);
+    LawnFusion::NativeRemainingLeaves269ProjectileRemoving(this);
+	LawnFusion::NativeStar269ProjectileRemoving(this);
+	LawnFusion::RetireNativeRollingProjectile(this);
+	LawnFusion::RetireNativeColdProjectile(this);
 	mDead = true;
 
 	if (mProjectileType == ProjectileType::PROJECTILE_PUFF || mProjectileType == ProjectileType::PROJECTILE_SNOWPEA)
@@ -1761,6 +1935,22 @@ void Projectile::Die()
 //0x46EBC0
 Rect Projectile::GetProjectileRect()
 {
+	Rect aNativeCherryRect;
+    if(LawnFusion::GetNativeWorldRemainder269Source91Rect(this,aNativeCherryRect)||LawnFusion::GetNativeLastPlants269KelpProjectileRect(this,aNativeCherryRect))return aNativeCherryRect;
+    if(LawnFusion::GetNativeRemainingLeaves269ProjectileRect(this,aNativeCherryRect))return aNativeCherryRect;
+    if (LawnFusion::GetNativeStar269ProjectileRect(this,aNativeCherryRect) ||
+        LawnFusion::GetNativeHypno269ProjectileRect(this,aNativeCherryRect)) return aNativeCherryRect;
+    if (LawnFusion::GetNativeWater268ProjectileRect(this,aNativeCherryRect) ||
+        LawnFusion::GetNativeChomper268ProjectileRect(this,aNativeCherryRect) ||
+        LawnFusion::GetNativeCannon268KernelRect(this,aNativeCherryRect)) return aNativeCherryRect;
+    if (LawnFusion::GetNativeShooterBatchProjectileRect(this,aNativeCherryRect)) return aNativeCherryRect;
+    if (LawnFusion::GetNativeFireActionProjectileRect(this,aNativeCherryRect)) return aNativeCherryRect;
+    if (LawnFusion::GetNativeRecipientProjectileRect(this,aNativeCherryRect)) return aNativeCherryRect;
+    if (LawnFusion::GetNativeBatchProjectileRect(this,aNativeCherryRect)) return aNativeCherryRect;
+    if (LawnFusion::GetNativeLobberProjectileRect(this,aNativeCherryRect)) return aNativeCherryRect;
+	if (LawnFusion::GetNativeRollingProjectileRect(this, aNativeCherryRect)) return aNativeCherryRect;
+	if (LawnFusion::GetNativeTimedPeaProjectileRect(this, aNativeCherryRect)) return aNativeCherryRect;
+	if (LawnFusion::GetNativePuffProjectileRect(this, aNativeCherryRect)) return aNativeCherryRect;
 	if (mProjectileType == ProjectileType::PROJECTILE_PEA || 
 		mProjectileType == ProjectileType::PROJECTILE_SNOWPEA ||
 		mProjectileType == ProjectileType::PROJECTILE_ZOMBIE_PEA 
@@ -1828,6 +2018,20 @@ void Projectile::ConvertToFireball(int theGridX)
 		aFirePeaReanim->mFilterEffect = mFilterEffect;
 	}
 	AttachReanim(mAttachmentID, aFirePeaReanim, aOffsetX, aOffsetY);
+}
+
+void Projectile::SyncFireballPresentationDirection()
+{
+    if (mProjectileType != ProjectileType::PROJECTILE_FIREBALL) return;
+    const bool backwards = mMotionType == ProjectileMotion::MOTION_BACKWARDS;
+    if (Reanimation* reanim = FindReanimAttachment(mAttachmentID))
+        reanim->OverrideScale(backwards ? -1.0f : 1.0f,1.0f);
+    AttachEffect* effect = FindFirstAttachment(mAttachmentID);
+    if (effect && effect->mEffectType == EffectType::EFFECT_REANIM)
+    {
+        effect->mOffset.m02 = backwards ? 55.0f : -25.0f;
+        effect->mOffset.m12 = -25.0f;
+    }
 }
 
 //0x46EE00

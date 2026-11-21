@@ -19,6 +19,7 @@
 
 #include "NetSmokeScenario.h"
 #include "NetZombatar.h"
+#include "../Fusion/FusionMode.h"
 
 namespace LawnNet
 {
@@ -27,7 +28,7 @@ namespace LawnNet
 // (the host broadcasts the same sounds via events).
 extern bool gNetSuppressSounds;
 
-static const uint32_t NET_PROTOCOL_VERSION = 34; // semantic chooser cursors/pings and authoritative Zen plant needs
+static const uint32_t NET_PROTOCOL_VERSION = 61; // Native Classic Adventure with Fusion plants; FNS25.
 static const uint16_t NET_DEFAULT_PORT = 27713;			// PvZ co-op port
 static const int NET_MAX_PLAYERS = 4;					// 1 host + 3 clients
 static const int NET_MAX_NICK_CHARS = 16;
@@ -46,6 +47,20 @@ static const int NET_INPUT_MOVE_HZ = 30;				// authoritative motion/drag cap
 static const int NET_INPUT_QUEUE_PER_PLAYER = 64;	// hard back-pressure limit per peer
 static const int NET_INPUT_QUEUE_TOTAL = 128;		// hard back-pressure limit for the host
 static const int NET_INPUT_APPLY_BUDGET = 16;		// maximum remote actions applied per frame
+
+// Shared chooser/bank policy: local player's cards precede the other slots.
+inline int NetSeedBankOwnerAt(int theViewerSlot, int theOffset)
+{
+	if (theViewerSlot < 0 || theViewerSlot >= NET_MAX_PLAYERS) theViewerSlot = 0;
+	return (theViewerSlot + theOffset) % NET_MAX_PLAYERS;
+}
+
+inline int NetSeedBankOwnerRank(int theViewerSlot, int theOwnerSlot)
+{
+	if (theViewerSlot < 0 || theViewerSlot >= NET_MAX_PLAYERS) theViewerSlot = 0;
+	if (theOwnerSlot < 0 || theOwnerSlot >= NET_MAX_PLAYERS) return NET_MAX_PLAYERS;
+	return (theOwnerSlot - theViewerSlot + NET_MAX_PLAYERS) % NET_MAX_PLAYERS;
+}
 
 // Relative player colors: viewer always sees self uncolored; others get
 // blue/red/green in stable slot order after removing the viewer's own slot.
@@ -77,13 +92,13 @@ enum NetMsgType : uint8_t
 	NETMSG_PING = 1,			// both: u32 seq
 	NETMSG_PONG = 2,			// both: u32 seq
 	NETMSG_HELLO = 3,			// c->h: u32 version, string nick
-	NETMSG_WELCOME = 4,			// h->c: u8 yourSlot, string hostNick
+	NETMSG_WELCOME = 4,			// h->c: u8 yourSlot, string hostNick, u8 contentMode
 	NETMSG_LOBBY_FULL = 5,		// h->c: (disconnect after)
 	NETMSG_VERSION_MISMATCH = 6,// h->c: (disconnect after)
 
-	NETMSG_LOBBY_STATE = 10,	// h->all: 4 x {u8 active, u8 slot, string nick, u16 ping, u8 team, u8 ready}
+	NETMSG_LOBBY_STATE = 10,	// h->all: 4 x participant, u8 difficulty, u8 contentMode
 	NETMSG_TEAM_SELECT = 11,	// c->h: u8 team (0 plants / 1 zombies); h echoes via LOBBY_STATE
-	NETMSG_START_GAME = 12,		// h->all: u8 gameMode, i32 level, u8 playerCount, u8 teams[4], TD path cells
+	NETMSG_START_GAME = 12,		// h->all: u8 contentMode/gameMode, i32 level, u8 count, u32 seed, TD path cells
 	NETMSG_SCENE_CMD = 13,		// h->all: u8 cmd, i32 param (menu/challenge/award/etc sync)
 	NETMSG_BACK_TO_MENU = 14,	// h->all: (host ended the game)
 	NETMSG_START_PLAYING = 15,	// h->all: camera8, bounded mystery reveal by packet id; enter gameplay atomically
@@ -122,7 +137,10 @@ enum NetMsgType : uint8_t
 
 	NETMSG_DEBUG_TEXT = 70,		// both: string (debug log)
 	NETMSG_CHAT_SEND = 71,		// c->h: UTF-8 string; sender slot comes from session
-	NETMSG_CHAT_BROADCAST = 72	// h->c: u8 sender slot, UTF-8 string
+	NETMSG_CHAT_BROADCAST = 72,	// h->c: u8 sender slot, UTF-8 string
+	NETMSG_FUSION_COMMAND = 80,
+	NETMSG_FUSION_ROOM = 81,
+	NETMSG_FUSION_START = 82
 };
 
 // An input epoch is a host-issued lifetime token for one UI/gameplay phase.
@@ -191,7 +209,8 @@ enum NetBoardEvent : uint8_t
 	BOARDEV_ADVICE_STATE = 23,		// u32 board seed, u8 op/style/help/len, label bytes
 	BOARDEV_READY_SET_PLANT = 24,		// empty: materialize the stock intro reanimation
 	BOARDEV_PRESENTATION_PARTICLE = 25, // u16 type, f32 x/y, i32 render order
-	BOARDEV_PRESENTATION_REANIM = 26    // u16 type, f32 x/y, i32 order, animation state
+	BOARDEV_PRESENTATION_REANIM = 26,   // u16 type, f32 x/y, i32 order, animation state
+	BOARDEV_PRESENTATION_FWOOSH = 27    // u8 row; native Board owns the finite effect lifecycle.
 };
 
 // Exact payload sizes for coin/sun board events.  Keep these shared by the
@@ -319,6 +338,42 @@ public:
 	inline int32_t ReadI32Or() { int32_t v = 0; ReadI32(&v); return v; }
 	inline float ReadF32Or() { float v = 0.f; ReadF32(&v); return v; }
 };
+
+// Content identity is decoded before a profile, scene or board is changed.
+// These complete-payload codecs commit neither output nor read position on error.
+struct NetWelcomeState
+{
+	uint8_t mSlot = 0;
+	std::string mHostNick;
+	LawnFusion::ContentMode mContentMode = LawnFusion::ContentMode::Classic;
+};
+
+struct NetLobbyState
+{
+	NetPlayerInfo mPlayers[NET_MAX_PLAYERS];
+	uint8_t mDifficulty = 1;
+	LawnFusion::ContentMode mContentMode = LawnFusion::ContentMode::Classic;
+};
+
+struct NetStartGameState
+{
+	LawnFusion::ContentMode mContentMode = LawnFusion::ContentMode::Classic;
+	uint32_t mContentEpoch = 0;
+	uint8_t mGameMode = 0;
+	int32_t mLevel = 0;
+	uint8_t mPlayerCount = 0;
+	uint32_t mBoardSeed = 0;
+	std::vector<uint8_t> mTDPath;
+};
+
+bool NetEncodeWelcomeState(const NetWelcomeState& theState, NetBuffer& theBuffer);
+bool NetDecodeWelcomeState(NetBuffer& theBuffer, NetWelcomeState& theState);
+bool NetEncodeLobbyState(const NetLobbyState& theState, NetBuffer& theBuffer);
+bool NetDecodeLobbyState(NetBuffer& theBuffer, NetLobbyState& theState);
+bool NetEncodeStartGame(const NetStartGameState& theState, NetBuffer& theBuffer,
+	int theGameModeCount, int theTowerDefenseMode);
+bool NetDecodeStartGame(NetBuffer& theBuffer, NetStartGameState& theState,
+	int theGameModeCount, int theTowerDefenseMode);
 
 inline bool NetPayloadHasExactBytes(const NetBuffer& thePayload, size_t theExpectedBytes)
 {
@@ -598,6 +653,8 @@ struct NetConfig
 	bool mUnlockAllMinigames;
 	bool mEnableCoop;			// master switch
 	bool mSkipIntro;			// skip the startup video, not level cutscenes
+	bool mFusionClassicField;	// local presentation only; both skins use the same native10x5 board
+	int  mFusionAdventureLevel;	// separate Fusion campaign progress1..50; Classic profile is unchanged
 	int  mBaseSnapshotHz;
 	int  mWindowWidth;			// 0 = default 1066
 	int  mWindowHeight;			// 0 = default 600
@@ -614,6 +671,8 @@ struct NetConfig
 		mUnlockAllMinigames = false;
 		mEnableCoop = true;
 		mSkipIntro = false;
+		mFusionClassicField = false;
+		mFusionAdventureLevel = 1;
 		mBaseSnapshotHz = NET_SNAPSHOT_HZ_DEFAULT;
 		mWindowWidth = 0;
 		mWindowHeight = 0;

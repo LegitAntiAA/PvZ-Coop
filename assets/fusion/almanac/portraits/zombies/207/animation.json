@@ -1,0 +1,492 @@
+{
+  "anchors": {},
+  "applyRootMotion": false,
+  "clips": {},
+  "colliders": [],
+  "controller": {
+    "layers": [],
+    "serializedController": "",
+    "states": []
+  },
+  "deferredComponents": [],
+  "extraSpriteGuids": {},
+  "ignoredBindings": [],
+  "nodes": [
+    {
+      "active": true,
+      "name": "AlmanacZombie",
+      "parent": -1,
+      "path": "",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "ZombieGrop",
+      "parent": 0,
+      "path": "ZombieGrop",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "Grop3",
+      "parent": 1,
+      "path": "ZombieGrop/Grop3",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "Pages",
+      "parent": 2,
+      "path": "ZombieGrop/Grop3/Pages",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "Page1",
+      "parent": 3,
+      "path": "ZombieGrop/Grop3/Pages/Page1",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "Card",
+      "parent": 4,
+      "path": "ZombieGrop/Grop3/Pages/Page1/Card",
+      "position": {
+        "x": -5.699999,
+        "y": 0.6999998,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0
+      },
+      "scale": {
+        "x": 2.0,
+        "y": 2.0,
+        "z": 2.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "QingZombie",
+      "parent": 5,
+      "path": "ZombieGrop/Grop3/Pages/Page1/Card/QingZombie",
+      "position": {
+        "x": 0.0,
+        "y": -0.12,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0
+      },
+      "scale": {
+        "x": 0.4078,
+        "y": 0.4078,
+        "z": 0.4078
+      },
+      "tag": "Untagged"
+    }
+  ],
+  "nonRenderingComponents": [],
+  "omittedInactiveNodes": [],
+  "root": 0,
+  "schema": 1,
+  "sourceHierarchy": null,
+  "sourcePrefab": "Resources/ui/almanac/AlmanacZombie.prefab",
+  "sources": [
+    {
+      "path": "Resources/image/zombiesidle/RedJackson.asset",
+      "sha256": "a0dde2cd071e44d10a9ca6497863d190eebda0932b67257cc792378aa08f4fc7"
+    },
+    {
+      "path": "Resources/image/zombiesidle/RedJackson.asset.meta",
+      "sha256": "165966b6c759a7b4f4e046dd4c07d7bdd995aa63238f73769765e22d4e6faa6a"
+    },
+    {
+      "path": "Resources/image/zombiesidle/RedJackson.png",
+      "sha256": "af6f4ea66a9a7844fd02f8d6a89386fb5cc6c5f0d674a537c16f41e4f4325eca"
+    },
+    {
+      "path": "Resources/image/zombiesidle/RedJackson.png.meta",
+      "sha256": "5af517d0545fd5ac451f73e563754479a7d192f842c54c086c53fac51eeba593"
+    },
+    {
+      "path": "Resources/ui/almanac/AlmanacZombie.prefab",
+      "sha256": "3704e03391ea372601e15cf6ff49fe731500ffe92d998adfedb0e88b284862aa"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/AlmanacCardZombie.cs.meta",
+      "sha256": "faf8882f92625339ade5d8a2ce122f5a60ea07c1beef78676fc31bd10df144dd"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/AlmanacZombieCtrl.cs.meta",
+      "sha256": "319f4f60a393ede0ab9edf0b0157927d2087703afa027f6a777bf09ebcb81c5d"
+    }
+  ],
+  "spritePrefix": null,
+  "spriteVariants": {
+    "a577236daedf28b4abb773ef78958892": {
+      "hasBoneMetadata": false,
+      "logicalSize": {
+        "height": 177.0,
+        "width": 115.0
+      },
+      "mesh": {
+        "indices": [
+          7,
+          6,
+          4,
+          5,
+          4,
+          6,
+          3,
+          4,
+          5,
+          1,
+          4,
+          3,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform",
+        "vertices": [
+          {
+            "u": 0.9217391428740128,
+            "v": 0.005649717514124242,
+            "x": 0.48500001430511475,
+            "y": 0.875,
+            "z": 0.0
+          },
+          {
+            "u": 0.9999999896339749,
+            "v": 0.9999999946120095,
+            "x": 0.574999988079071,
+            "y": -0.8849999904632568,
+            "z": 0.0
+          },
+          {
+            "u": 0.9999999896339749,
+            "v": 0.36158191820995955,
+            "x": 0.574999988079071,
+            "y": 0.24500000476837158,
+            "z": 0.0
+          },
+          {
+            "u": 0.834782600402832,
+            "v": 5.387990498206818e-09,
+            "x": 0.38499999046325684,
+            "y": 0.8849999904632568,
+            "z": 0.0
+          },
+          {
+            "u": 0.313043475151062,
+            "v": 0.9999999946120095,
+            "x": -0.2150000035762787,
+            "y": -0.8849999904632568,
+            "z": 0.0
+          },
+          {
+            "u": 0.18260868735935376,
+            "v": 5.387990498206818e-09,
+            "x": -0.36500000953674316,
+            "y": 0.8849999904632568,
+            "z": 0.0
+          },
+          {
+            "u": 1.0366025178328804e-08,
+            "v": 0.14689265536723162,
+            "x": -0.574999988079071,
+            "y": 0.625,
+            "z": 0.0
+          },
+          {
+            "u": 1.0366025178328804e-08,
+            "v": 0.6271186407003025,
+            "x": -0.574999988079071,
+            "y": -0.22499999403953552,
+            "z": 0.0
+          }
+        ]
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "pixelsPerUnit": 100.0,
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: RedJackson\n  m_Rect:\n    serializedVersion: 2\n    x: 0\n    y: 0\n    width: 115\n    height: 177\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    9c7de6ecf4b40db4a8e5688c8c978702: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: f812c663f3747974aa35705e682e11b3, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 18\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 8\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 070006000400050004000600030004000500010004000300000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 8\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 160\n      _typelessdata: ec51f83e0000603f000000003333133f5c8f62bf000000003333133f48e17a3e00000000b81ec53e5c8f623f00000000f6285cbe5c8f62bf0000000048e1babe5c8f623f00000000333313bf0000203f00000000333313bf666666be0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 115\n      height: 177\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 57.5, z: 100, w: 88.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape:\n  - - {x: 0.465, y: -0.48499998}\n    - {x: 0.435, y: -0.125}\n    - {x: 0.505, y: -0.074999996}\n    - {x: 0.445, y: 0.074999996}\n    - {x: 0.39499998, y: 0.225}\n    - {x: 0.315, y: 0.295}\n    - {x: 0.285, y: 0.505}\n    - {x: 0.255, y: 0.59499997}\n    - {x: 0.295, y: 0.755}\n    - {x: 0.105, y: 0.78499997}\n    - {x: 0.035, y: 0.875}\n    - {x: -0.16499999, y: 0.875}\n    - {x: -0.405, y: 0.79499996}\n    - {x: -0.385, y: 0.645}\n    - {x: -0.48499998, y: 0.60499996}\n    - {x: -0.505, y: 0.545}\n    - {x: -0.505, y: 0.465}\n    - {x: -0.405, y: 0.39499998}\n    - {x: -0.415, y: 0.305}\n    - {x: -0.36499998, y: 0.225}\n    - {x: -0.255, y: 0.185}\n    - {x: -0.295, y: 0.114999995}\n    - {x: -0.225, y: -0.125}\n    - {x: -0.285, y: -0.305}\n    - {x: -0.285, y: -0.42499998}\n    - {x: -0.235, y: -0.525}\n    - {x: -0.074999996, y: -0.49499997}\n    - {x: -0.055, y: -0.42499998}\n    - {x: -0.065, y: -0.21499999}\n    - {x: 0.005, y: -0.095}\n    - {x: 0.065, y: -0.285}\n    - {x: 0.005, y: -0.505}\n    - {x: 0.035, y: -0.545}\n    - {x: 0.125, y: -0.555}\n    - {x: 0.005, y: -0.66499996}\n    - {x: -0.015, y: -0.745}\n    - {x: 0.21499999, y: -0.885}\n    - {x: 0.515, y: -0.885}\n    - {x: 0.575, y: -0.875}\n    - {x: 0.575, y: -0.705}\n  m_Bones: []\n  m_SpriteID:\n",
+      "sourceSprite": "Resources/image/zombiesidle/RedJackson.asset",
+      "texture": "../../textures/af6f4ea66a9a7844fd02f8d6a89386fb5cc6c5f0d674a537c16f41e4f4325eca.png",
+      "textureRect": {
+        "height": 177.0,
+        "width": 115.0,
+        "x": 0.0,
+        "y": 0.0,
+        "yTop": 0.0
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      }
+    }
+  },
+  "sprites": [
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "enabled": true,
+      "flipX": false,
+      "flipY": false,
+      "guid": "a577236daedf28b4abb773ef78958892",
+      "hasBoneMetadata": false,
+      "logicalSize": {
+        "height": 177.0,
+        "width": 115.0
+      },
+      "mesh": {
+        "indices": [
+          7,
+          6,
+          4,
+          5,
+          4,
+          6,
+          3,
+          4,
+          5,
+          1,
+          4,
+          3,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform",
+        "vertices": [
+          {
+            "u": 0.9217391428740128,
+            "v": 0.005649717514124242,
+            "x": 0.48500001430511475,
+            "y": 0.875,
+            "z": 0.0
+          },
+          {
+            "u": 0.9999999896339749,
+            "v": 0.9999999946120095,
+            "x": 0.574999988079071,
+            "y": -0.8849999904632568,
+            "z": 0.0
+          },
+          {
+            "u": 0.9999999896339749,
+            "v": 0.36158191820995955,
+            "x": 0.574999988079071,
+            "y": 0.24500000476837158,
+            "z": 0.0
+          },
+          {
+            "u": 0.834782600402832,
+            "v": 5.387990498206818e-09,
+            "x": 0.38499999046325684,
+            "y": 0.8849999904632568,
+            "z": 0.0
+          },
+          {
+            "u": 0.313043475151062,
+            "v": 0.9999999946120095,
+            "x": -0.2150000035762787,
+            "y": -0.8849999904632568,
+            "z": 0.0
+          },
+          {
+            "u": 0.18260868735935376,
+            "v": 5.387990498206818e-09,
+            "x": -0.36500000953674316,
+            "y": 0.8849999904632568,
+            "z": 0.0
+          },
+          {
+            "u": 1.0366025178328804e-08,
+            "v": 0.14689265536723162,
+            "x": -0.574999988079071,
+            "y": 0.625,
+            "z": 0.0
+          },
+          {
+            "u": 1.0366025178328804e-08,
+            "v": 0.6271186407003025,
+            "x": -0.574999988079071,
+            "y": -0.22499999403953552,
+            "z": 0.0
+          }
+        ]
+      },
+      "node": 6,
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "pixelsPerUnit": 100.0,
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: RedJackson\n  m_Rect:\n    serializedVersion: 2\n    x: 0\n    y: 0\n    width: 115\n    height: 177\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    9c7de6ecf4b40db4a8e5688c8c978702: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: f812c663f3747974aa35705e682e11b3, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 18\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 8\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 070006000400050004000600030004000500010004000300000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 8\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 160\n      _typelessdata: ec51f83e0000603f000000003333133f5c8f62bf000000003333133f48e17a3e00000000b81ec53e5c8f623f00000000f6285cbe5c8f62bf0000000048e1babe5c8f623f00000000333313bf0000203f00000000333313bf666666be0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 115\n      height: 177\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 57.5, z: 100, w: 88.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape:\n  - - {x: 0.465, y: -0.48499998}\n    - {x: 0.435, y: -0.125}\n    - {x: 0.505, y: -0.074999996}\n    - {x: 0.445, y: 0.074999996}\n    - {x: 0.39499998, y: 0.225}\n    - {x: 0.315, y: 0.295}\n    - {x: 0.285, y: 0.505}\n    - {x: 0.255, y: 0.59499997}\n    - {x: 0.295, y: 0.755}\n    - {x: 0.105, y: 0.78499997}\n    - {x: 0.035, y: 0.875}\n    - {x: -0.16499999, y: 0.875}\n    - {x: -0.405, y: 0.79499996}\n    - {x: -0.385, y: 0.645}\n    - {x: -0.48499998, y: 0.60499996}\n    - {x: -0.505, y: 0.545}\n    - {x: -0.505, y: 0.465}\n    - {x: -0.405, y: 0.39499998}\n    - {x: -0.415, y: 0.305}\n    - {x: -0.36499998, y: 0.225}\n    - {x: -0.255, y: 0.185}\n    - {x: -0.295, y: 0.114999995}\n    - {x: -0.225, y: -0.125}\n    - {x: -0.285, y: -0.305}\n    - {x: -0.285, y: -0.42499998}\n    - {x: -0.235, y: -0.525}\n    - {x: -0.074999996, y: -0.49499997}\n    - {x: -0.055, y: -0.42499998}\n    - {x: -0.065, y: -0.21499999}\n    - {x: 0.005, y: -0.095}\n    - {x: 0.065, y: -0.285}\n    - {x: 0.005, y: -0.505}\n    - {x: 0.035, y: -0.545}\n    - {x: 0.125, y: -0.555}\n    - {x: 0.005, y: -0.66499996}\n    - {x: -0.015, y: -0.745}\n    - {x: 0.21499999, y: -0.885}\n    - {x: 0.515, y: -0.885}\n    - {x: 0.575, y: -0.875}\n    - {x: 0.575, y: -0.705}\n  m_Bones: []\n  m_SpriteID:\n",
+      "sortingLayerId": 0,
+      "sortingOrder": 1,
+      "sourceSprite": "Resources/image/zombiesidle/RedJackson.asset",
+      "texture": "../../textures/af6f4ea66a9a7844fd02f8d6a89386fb5cc6c5f0d674a537c16f41e4f4325eca.png",
+      "textureRect": {
+        "height": 177.0,
+        "width": 115.0,
+        "x": 0.0,
+        "y": 0.0,
+        "yTop": 0.0
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      }
+    }
+  ],
+  "static": true,
+  "uiPortraitExtraction": {
+    "gameObjectFileId": 1244195695387915,
+    "originalRendererEnabled": true,
+    "sourceActivity": [
+      {
+        "gameObjectFileId": 1709254077376921,
+        "originalActive": true
+      },
+      {
+        "gameObjectFileId": 1724804207875695,
+        "originalActive": true
+      },
+      {
+        "gameObjectFileId": 1092164755975753,
+        "originalActive": false
+      },
+      {
+        "gameObjectFileId": 1595037906316070,
+        "originalActive": true
+      },
+      {
+        "gameObjectFileId": 1919793621727318,
+        "originalActive": true
+      },
+      {
+        "gameObjectFileId": 1039761640139988,
+        "originalActive": true
+      },
+      {
+        "gameObjectFileId": 1244195695387915,
+        "originalActive": true
+      }
+    ],
+    "sourceSpriteRenderer": "SpriteRenderer:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1244195695387915}\n  m_Enabled: 1\n  m_CastShadows: 0\n  m_ReceiveShadows: 0\n  m_DynamicOccludee: 1\n  m_StaticShadowCaster: 0\n  m_MotionVectors: 1\n  m_LightProbeUsage: 1\n  m_ReflectionProbeUsage: 1\n  m_RayTracingMode: 0\n  m_RayTraceProcedural: 0\n  m_RenderingLayerMask: 1\n  m_RendererPriority: 0\n  m_Materials:\n  - {fileID: 2100000, guid: 8fa820fab1c50434da82a0d53ec31815, type: 2}\n  m_StaticBatchInfo:\n    firstSubMesh: 0\n    subMeshCount: 0\n  m_StaticBatchRoot: {fileID: 0}\n  m_ProbeAnchor: {fileID: 0}\n  m_LightProbeVolumeOverride: {fileID: 0}\n  m_ScaleInLightmap: 1\n  m_ReceiveGI: 1\n  m_PreserveUVs: 0\n  m_IgnoreNormalsForChartDetection: 0\n  m_ImportantGI: 0\n  m_StitchLightmapSeams: 0\n  m_SelectedEditorRenderState: 3\n  m_MinimumChartSize: 4\n  m_AutoUVMaxDistance: 0.5\n  m_AutoUVMaxAngle: 89\n  m_LightmapParameters: {fileID: 0}\n  m_SortingLayerID: 0\n  m_SortingLayer: 0\n  m_SortingOrder: 1\n  m_Sprite: {fileID: 21300000, guid: a577236daedf28b4abb773ef78958892, type: 2}\n  m_Color: {r: 1, g: 1, b: 1, a: 1}\n  m_FlipX: 0\n  m_FlipY: 0\n  m_DrawMode: 0\n  m_Size: {x: 5.18, y: 7.04}\n  m_AdaptiveModeThreshold: 0.5\n  m_SpriteTileMode: 0\n  m_WasSpriteAssigned: 1\n  m_MaskInteraction: 1\n  m_SpriteSortPoint: 0\n",
+    "spriteRendererFileId": 212322846371448090,
+    "uiVisiblePose": "selected portrait renderer and its retained ancestors active"
+  },
+  "unitsPerNativePixel": 0.01,
+  "unusedSpriteBonesExplicitlyAllowed": false,
+  "validation": "Exported source data. Native rendering and source-runtime comparison are separate verification steps.",
+  "visualBounds": {
+    "maxX": -5.231029009722709,
+    "maxY": 1.1818057922218324,
+    "minX": -6.168968990277291,
+    "minY": -0.2618061922218323
+  }
+}

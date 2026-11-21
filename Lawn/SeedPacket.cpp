@@ -11,6 +11,11 @@
 #include "../SexyAppFramework/SexyMatrix.h"
 #include "../LawnApp.h"
 #include "Net/NetManager.h"
+#include "Fusion/FusionNative.h"
+#include "Fusion/FusionNativeVisual.h"
+#include "Fusion/FusionPortraitCache.h"
+#include <algorithm>
+#include "Widget/SeedChooserScreen.h"
 
 SeedPacket::SeedPacket()
 {
@@ -278,7 +283,7 @@ void SeedPacketDrawSeed(Graphics* g, float x, float y, SeedType theSeedType, See
 }
 
 //0x4876F0
-void DrawSeedPacket(Graphics* g, float x, float y, SeedType theSeedType, SeedType theImitaterType, float thePercentDark, int theGrayness, bool theDrawCost, bool theUseCurrentCost)
+static void DrawSeedPacketInternal(Graphics* g, float x, float y, SeedType theSeedType, SeedType theImitaterType, float thePercentDark, int theGrayness, bool theDrawCost, bool theUseCurrentCost, const LawnFusion::NativePacketData* theFusionPacket, LawnFusion::FusionPortraitCache* thePortraitCache = nullptr)
 {
 	g->PushState();
 	g->SetLinearBlend(true);
@@ -309,6 +314,7 @@ void DrawSeedPacket(Graphics* g, float x, float y, SeedType theSeedType, SeedTyp
 		theSeedType == SeedType::SEED_SLOT_MACHINE_DIAMOND ? 6 :
 		theSeedType == SeedType::SEED_ZOMBIQUARIUM_SNORKLE ? 7 :
 		theSeedType == SeedType::SEED_ZOMBIQUARIUM_TROPHY ? 8 : 2;
+	if (theFusionPacket) aPacketBackground = theFusionPacket->isExtra ? 1 : 2;
 
 	//if (g->mScaleX > 1 || g->mScaleY > 1)
 	{
@@ -558,9 +564,31 @@ void DrawSeedPacket(Graphics* g, float x, float y, SeedType theSeedType, SeedTyp
 	}
 	aOffsetX = g->mScaleX * aOffsetX;
 	aOffsetY = g->mScaleY * (aOffsetY + 1.0f);
+	auto aDrawPortrait = [&]()
+	{
+		bool aPortraitDrawn = false;
+		if (theFusionPacket && thePortraitCache)
+		{
+			aPortraitDrawn = thePortraitCache->Draw(g, LawnFusion::FusionPortraitGroup::Plants, theFusionPacket->kind,
+				Rect(FloatRoundToInt(x + 5 * g->mScaleX), FloatRoundToInt(y + 8 * g->mScaleY),
+					FloatRoundToInt(40 * g->mScaleX), FloatRoundToInt(43 * g->mScaleY)),
+				g->GetColorizeImages() ? g->GetColor().mRed : 255);
+		}
+		if (!aPortraitDrawn && theFusionPacket)
+		{
+			aPortraitDrawn = LawnFusion::DrawNativeFusionPortrait(g, theFusionPacket->kind,
+				Rect(FloatRoundToInt(x + 5 * g->mScaleX), FloatRoundToInt(y + 8 * g->mScaleY),
+					FloatRoundToInt(40 * g->mScaleX), FloatRoundToInt(43 * g->mScaleY)),
+				g->GetColorizeImages() ? g->GetColor().mRed : 255);
+		}
+		if (!aPortraitDrawn && aDrawSeedInMiddle)
+		{
+			SeedPacketDrawSeed(g, x, y, theSeedType, theImitaterType, aOffsetX, aOffsetY, aScale);
+		}
+	};
 	if (aDrawSeedInMiddle)
 	{
-		SeedPacketDrawSeed(g, x, y, theSeedType, theImitaterType, aOffsetX, aOffsetY, aScale);
+		aDrawPortrait();
 	}
 
 	if (thePercentDark > 0.0f)
@@ -572,7 +600,7 @@ void DrawSeedPacket(Graphics* g, float x, float y, SeedType theSeedType, SeedTyp
 		TodDrawImageCelScaledF(g, Sexy::IMAGE_SEEDS, x, y, aPacketBackground, 0, g->mScaleX, g->mScaleY);
 		if (aDrawSeedInMiddle)
 		{
-			SeedPacketDrawSeed(g, x, y, theSeedType, theImitaterType, aOffsetX, aOffsetY, aScale);
+			aDrawPortrait();
 		}
 		g->SetColor(Color::White);
 		g->SetColorizeImages(false);
@@ -582,7 +610,11 @@ void DrawSeedPacket(Graphics* g, float x, float y, SeedType theSeedType, SeedTyp
 	if (theDrawCost)
 	{
 		SexyString aCostStr;
-		if (gLawnApp->mBoard && gLawnApp->mBoard->PlantUsesAcceleratedPricing(aSeedType) && !gLawnApp->GetDialog(Dialogs::DIALOG_ALMANAC)
+		if (theFusionPacket)
+		{
+			aCostStr = StrFormat(_S("%d"), theFusionPacket->price);
+		}
+		else if (gLawnApp->mBoard && gLawnApp->mBoard->PlantUsesAcceleratedPricing(aSeedType) && !gLawnApp->GetDialog(Dialogs::DIALOG_ALMANAC)
 			)
 		{
 			if (theUseCurrentCost)
@@ -623,6 +655,23 @@ void DrawSeedPacket(Graphics* g, float x, float y, SeedType theSeedType, SeedTyp
 	g->PopState();
 }
 
+void DrawSeedPacket(Graphics* g, float x, float y, SeedType theSeedType, SeedType theImitaterType, float thePercentDark, int theGrayness, bool theDrawCost, bool theUseCurrentCost)
+{
+	DrawSeedPacketInternal(g, x, y, theSeedType, theImitaterType, thePercentDark, theGrayness, theDrawCost, theUseCurrentCost, nullptr);
+}
+
+void DrawNativeFusionSeedPacket(Graphics* g, float x, float y, uint16_t theKind, bool theExtra, int theCost, float thePercentDark, int theGrayness, bool theDrawCost, LawnFusion::FusionPortraitCache* thePortraitCache)
+{
+	LawnFusion::NativePacketData aPacket;
+	aPacket.kind = theKind;
+	aPacket.isExtra = theExtra;
+	aPacket.price = theCost;
+	// Sparse source IDs never enter the native SeedType arrays.
+	const SeedType aNativeSeed = LawnFusion::GetNativeSeedForPlant(theKind);
+	const SeedType aPortrait = aNativeSeed == SEED_NONE ? SEED_PEASHOOTER : aNativeSeed;
+	DrawSeedPacketInternal(g, x, y, aPortrait, SEED_NONE, thePercentDark, theGrayness, theDrawCost, false, &aPacket, thePortraitCache);
+}
+
 //0x488220
 void DrawMysterySeedPacket(Graphics* g, float x, float y, int theGrayness)
 {
@@ -639,6 +688,7 @@ void DrawMysterySeedPacket(Graphics* g, float x, float y, int theGrayness)
 
 void SeedPacket::Draw(Graphics* g)
 {
+	const LawnFusion::NativePacketData* aFusionPacket = LawnFusion::GetNativePacketData(this);
 	if (IsMysteryPending())
 	{
 		DrawMysterySeedPacket(g, (float)mOffsetX, 0.0f, mBoard->mSeedBank->mCutSceneDarken);
@@ -652,7 +702,7 @@ void SeedPacket::Draw(Graphics* g)
 		}
 		return;
 	}
-	if (mPacketType == SeedType::SEED_NONE) return;
+	if (mPacketType == SeedType::SEED_NONE && !aFusionPacket) return;
 	float aPercentDark = 0.0f;
 	if (!mActive)
 	{
@@ -689,7 +739,7 @@ void SeedPacket::Draw(Graphics* g)
 		{
 			aDrawCost = false;
 		}
-		int aCost = mBoard->GetSeedPacketCost(*this);
+		int aCost = aFusionPacket ? aFusionPacket->price : mBoard->GetSeedPacketCost(*this);
 		bool isPvPZombiePacket = mBoard->IsPvPMode() && mBoard->mChallenge->IsZombieSeedType(mPacketType);
 
 		int aGrayness = 255;
@@ -724,14 +774,17 @@ void SeedPacket::Draw(Graphics* g)
 			aPercentDark = 0.0f;
 		}
 		else if (((isPvPZombiePacket ? !mBoard->CanTakeBrains(aCost) : !mBoard->CanTakeSunMoney(aCost)) && aDrawCost) ||
-			aPercentDark > 1.0f || (!isPvPZombiePacket && !mBoard->PlantingRequirementsMet(aUseSeedType)))
+			aPercentDark > 1.0f || (!aFusionPacket && !isPvPZombiePacket && !mBoard->PlantingRequirementsMet(aUseSeedType)))
 		{
 			aGrayness = 128;
 		}
 
 		g->PushState();
 
-		DrawSeedPacket(g, mOffsetX, 0.0f, mPacketType, mImitaterType, aPercentDark, aGrayness, false, true);
+		if (aFusionPacket)
+			DrawNativeFusionSeedPacket(g, mOffsetX, 0.0f, aFusionPacket->kind, aFusionPacket->isExtra, aFusionPacket->price, aPercentDark, aGrayness, false);
+		else
+			DrawSeedPacket(g, mOffsetX, 0.0f, mPacketType, mImitaterType, aPercentDark, aGrayness, false, true);
 
 		// co-op: tint other players' packets with their color
 		if (mApp->NetActive() && mNetOwnerSlot < LawnNet::NET_MAX_PLAYERS &&
@@ -785,6 +838,15 @@ void SeedPacket::Draw(Graphics* g)
 //0x488500
 bool SeedPacket::CanPickUp()
 {
+	if (const LawnFusion::NativePacketData* aPacket = LawnFusion::GetNativePacketData(this))
+	{
+		if (mBoard->mPaused || mApp->mGameScene != SCENE_PLAYING || !mActive || mRefreshing)
+			return false;
+		if (mApp->NetActive() && (!mApp->mNetManager || mApp->mNetManager->IsSpectator() ||
+			aPacket->owner != mApp->mNetManager->GetActingPlayerSlot()))
+			return false;
+		return mBoard->CanTakeSunMoney(mBoard->GetSeedPacketCost(*this));
+	}
 	if (mBoard->mPaused || mApp->mGameScene != GameScenes::SCENE_PLAYING || mPacketType == SeedType::SEED_NONE)
 	{
 		return false;
@@ -828,6 +890,17 @@ bool SeedPacket::CanPickUp()
 //0x488590
 void SeedPacket::MouseDown(int x, int y, int theClickCount)
 {
+	if (LawnFusion::GetNativePacketData(this))
+	{
+		if (theClickCount != 1 || !CanPickUp()) return;
+		mBoard->mCursorObject->mType = mPacketType;
+		mBoard->mCursorObject->mImitaterType = SEED_NONE;
+		mBoard->mCursorObject->mCursorType = CURSOR_TYPE_PLANT_FROM_BANK;
+		mBoard->mCursorObject->mSeedBankIndex = mIndex;
+		mApp->PlaySample(SOUND_SEEDLIFT);
+		mBoard->OnSeedPacketPickedUp(mPacketType);
+		return;
+	}
 	if (mBoard->mPaused || mApp->mGameScene != GameScenes::SCENE_PLAYING || mPacketType == SeedType::SEED_NONE)
 	{
 		return;
@@ -1000,36 +1073,7 @@ void SeedPacket::MouseDown(int x, int y, int theClickCount)
 		mBoard->mCursorObject->mSeedBankIndex = mIndex;
 		mApp->PlaySample(SOUND_SEEDLIFT);
 
-		if (mBoard->mTutorialState == TutorialState::TUTORIAL_LEVEL_1_PICK_UP_PEASHOOTER)
-		{
-			mBoard->SetTutorialState(TutorialState::TUTORIAL_LEVEL_1_PLANT_PEASHOOTER);
-		}
-		else if (mBoard->mTutorialState == TutorialState::TUTORIAL_LEVEL_2_PICK_UP_SUNFLOWER)
-		{
-			if (mPacketType == SeedType::SEED_SUNFLOWER)
-			{
-				mBoard->SetTutorialState(TutorialState::TUTORIAL_LEVEL_2_PLANT_SUNFLOWER);
-			}
-			else
-			{
-				mBoard->SetTutorialState(TutorialState::TUTORIAL_LEVEL_2_REFRESH_SUNFLOWER);
-			}
-		}
-		else if (mBoard->mTutorialState == TutorialState::TUTORIAL_MORESUN_PICK_UP_SUNFLOWER)
-		{
-			if (mPacketType == SeedType::SEED_SUNFLOWER)
-			{
-				mBoard->SetTutorialState(TutorialState::TUTORIAL_MORESUN_PLANT_SUNFLOWER);
-			}
-			else
-			{
-				mBoard->SetTutorialState(TutorialState::TUTORIAL_MORESUN_REFRESH_SUNFLOWER);
-			}
-		}
-		else if (mBoard->mTutorialState == TutorialState::TUTORIAL_WHACK_A_ZOMBIE_PICK_SEED || mBoard->mTutorialState == TutorialState::TUTORIAL_WHACK_A_ZOMBIE_BEFORE_PICK_SEED)
-		{
-			mBoard->SetTutorialState(TutorialState::TUTORIAL_WHACK_A_ZOMBIE_COMPLETED);
-		}
+		mBoard->OnSeedPacketPickedUp(mPacketType);
 
 		Deactivate();
 	}
@@ -1038,6 +1082,15 @@ void SeedPacket::MouseDown(int x, int y, int theClickCount)
 //0x488EC0
 void SeedPacket::WasPlanted()
 {
+	if (const LawnFusion::NativePacketData* aPacket = LawnFusion::GetNativePacketData(this))
+	{
+		mTimesUsed++;
+		mActive = false;
+		mRefreshing = true;
+		mRefreshCounter = 0;
+		mRefreshTime = max(0, FloatRoundToInt(aPacket->rechargeSeconds * 100.0f));
+		return;
+	}
 	TOD_ASSERT(mPacketType != SeedType::SEED_NONE);
 
 	if (mBoard->HasConveyorBeltSeedBank())
@@ -1098,6 +1151,59 @@ SeedBank::SeedBank()
 	mCutSceneDarken = 255;
 }
 
+void SeedBank::SortPacketsForViewer(int theViewerSlot)
+{
+	if (!mBoard || mNumPackets < 0 || mNumPackets > SEEDBANK_CAPACITY) return;
+	struct HeldCursor
+	{
+		CursorObject* cursor;
+		uint16_t packetId;
+		int oldIndex;
+		int slot;
+	};
+	std::vector<HeldCursor> cursors;
+	for (int i = 0; i < mNumPackets; ++i) mSeedPackets[i].mIndex = i;
+	auto remember = [&](CursorObject* cursor, int slot)
+	{
+		if (!cursor || cursor->mCursorType != CURSOR_TYPE_PLANT_FROM_BANK ||
+			std::any_of(cursors.begin(), cursors.end(), [&](const auto& old) { return old.cursor == cursor; })) return;
+		const int index = cursor->mSeedBankIndex;
+		cursors.push_back({cursor, index >= 0 && index < mNumPackets ? mSeedPackets[index].mNetId : uint16_t(0), index, slot});
+	};
+	LawnNet::NetManager* net = mApp ? mApp->mNetManager : nullptr;
+	remember(mBoard->mCursorObject, net ? net->GetActingPlayerSlot() : 0);
+	for (int slot = 0; slot < LawnNet::NET_MAX_PLAYERS; ++slot) remember(mBoard->mNetPlayerCursors[slot], slot);
+	std::stable_sort(mSeedPackets, mSeedPackets + mNumPackets, [=](const SeedPacket& a, const SeedPacket& b)
+	{
+		return LawnNet::NetSeedBankOwnerRank(theViewerSlot, a.mNetOwnerSlot) <
+			LawnNet::NetSeedBankOwnerRank(theViewerSlot, b.mNetOwnerSlot);
+	});
+	for (const auto& held : cursors)
+	{
+		int index = -1;
+		for (int i = 0; i < mNumPackets; ++i)
+			if (held.packetId ? mSeedPackets[i].mNetId == held.packetId :
+				(held.oldIndex >= 0 && mSeedPackets[i].mIndex == held.oldIndex)) { index = i; break; }
+		if (index >= 0) held.cursor->mSeedBankIndex = index;
+		else
+		{
+			CursorObject* previousCursor = mBoard->mCursorObject;
+			const int previousSlot = net ? net->GetRawActingPlayerSlot() : -1;
+			mBoard->mCursorObject = held.cursor;
+			if (net) net->SetActingPlayerSlot(held.slot);
+			mBoard->ClearCursor();
+			mBoard->mCursorObject = previousCursor;
+			if (net) net->SetActingPlayerSlot(previousSlot);
+		}
+	}
+	for (int i = 0; i < mNumPackets; ++i)
+	{
+		mSeedPackets[i].mIndex = i;
+		mSeedPackets[i].mX = mBoard->GetSeedPacketPositionX(i);
+		mSeedPackets[i].mY = mBoard->GetSeedPacketPositionY(i);
+	}
+}
+
 //0x489630
 void SeedBank::Draw(Graphics* g)
 {
@@ -1149,6 +1255,8 @@ void SeedBank::Draw(Graphics* g)
 	for (int i = 0; i < mNumPackets; i++)
 	{
 		SeedPacket* aSeedPacket = &mSeedPackets[i];
+		if (LawnFusion::IsNativeFusionBoard(mBoard) && mApp->mSeedChooserScreen &&
+			mApp->mSeedChooserScreen->mNativeFusionChooser && mBoard->mCutScene && mBoard->mCutScene->mSeedChoosing) continue;
 		if (!mBoard->IsSeedPacketVisibleToSlot(i, aViewerSlot))
 			continue;
 		if ((aSeedPacket->mPacketType != SeedType::SEED_NONE || aSeedPacket->IsMysteryPending()) && aSeedPacket->BeginDraw(g))

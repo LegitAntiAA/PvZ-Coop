@@ -1,0 +1,806 @@
+{
+  "anchors": {},
+  "applyRootMotion": false,
+  "clips": {},
+  "colliders": [],
+  "controller": {
+    "layers": [],
+    "serializedController": "",
+    "states": []
+  },
+  "deferredComponents": [],
+  "extraSpriteGuids": {},
+  "ignoredBindings": [],
+  "nodes": [
+    {
+      "active": true,
+      "name": "AlmanacZombie",
+      "parent": -1,
+      "path": "",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "ZombieGrop",
+      "parent": 0,
+      "path": "ZombieGrop",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "Grop3",
+      "parent": 1,
+      "path": "ZombieGrop/Grop3",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "Pages",
+      "parent": 2,
+      "path": "ZombieGrop/Grop3/Pages",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "Page1",
+      "parent": 3,
+      "path": "ZombieGrop/Grop3/Pages/Page1",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "Card",
+      "parent": 4,
+      "path": "ZombieGrop/Grop3/Pages/Page1/Card",
+      "position": {
+        "x": -0.299999,
+        "y": 0.6999998,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0
+      },
+      "scale": {
+        "x": 2.0,
+        "y": 2.0,
+        "z": 2.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "SuperMachineNut",
+      "parent": 5,
+      "path": "ZombieGrop/Grop3/Pages/Page1/Card/SuperMachineNut",
+      "position": {
+        "x": 0.024,
+        "y": -0.026,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0
+      },
+      "scale": {
+        "x": 0.26813078,
+        "y": 0.26813078,
+        "z": 0.26813078
+      },
+      "tag": "Untagged"
+    }
+  ],
+  "nonRenderingComponents": [],
+  "omittedInactiveNodes": [],
+  "root": 0,
+  "schema": 1,
+  "sourceHierarchy": null,
+  "sourcePrefab": "Resources/ui/almanac/AlmanacZombie.prefab",
+  "sources": [
+    {
+      "path": "Resources/image/zombiesidle/DolphinGatlingZombie.asset",
+      "sha256": "60c7323a97af0d85da398d998388e09ac77c0cdeb064776f6e728a8407dac40b"
+    },
+    {
+      "path": "Resources/image/zombiesidle/DolphinGatlingZombie.asset.meta",
+      "sha256": "ee5faf4c7cc8e26abdd95f92ce115ae10637b1c95bc4b748cb596105048c026c"
+    },
+    {
+      "path": "Resources/image/zombiesidle/DolphinGatlingZombie.png",
+      "sha256": "1c711270a39c45139ce1816c0e7f2b2e0731c115b5170bedad6658b9bd9fa32e"
+    },
+    {
+      "path": "Resources/image/zombiesidle/DolphinGatlingZombie.png.meta",
+      "sha256": "0ff52ef12d7cd2cce20378c0f49f1c7d4fc5b70911e71d9c21d124aaaf07288c"
+    },
+    {
+      "path": "Resources/ui/almanac/AlmanacZombie.prefab",
+      "sha256": "3704e03391ea372601e15cf6ff49fe731500ffe92d998adfedb0e88b284862aa"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/AlmanacCardZombie.cs.meta",
+      "sha256": "faf8882f92625339ade5d8a2ce122f5a60ea07c1beef78676fc31bd10df144dd"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/AlmanacZombieCtrl.cs.meta",
+      "sha256": "319f4f60a393ede0ab9edf0b0157927d2087703afa027f6a777bf09ebcb81c5d"
+    }
+  ],
+  "spritePrefix": null,
+  "spriteVariants": {
+    "e4acd6890eefdfa4f82175c6bbd9172b": {
+      "hasBoneMetadata": false,
+      "logicalSize": {
+        "height": 205.88097,
+        "width": 197.0
+      },
+      "mesh": {
+        "indices": [
+          23,
+          22,
+          21,
+          9,
+          21,
+          22,
+          19,
+          21,
+          9,
+          10,
+          19,
+          9,
+          18,
+          19,
+          10,
+          17,
+          18,
+          10,
+          20,
+          19,
+          18,
+          18,
+          16,
+          15,
+          12,
+          16,
+          17,
+          18,
+          17,
+          16,
+          15,
+          16,
+          12,
+          13,
+          15,
+          12,
+          14,
+          13,
+          12,
+          11,
+          8,
+          9,
+          10,
+          9,
+          8,
+          7,
+          6,
+          5,
+          4,
+          5,
+          6,
+          3,
+          5,
+          4,
+          0,
+          3,
+          4,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform",
+        "vertices": [
+          {
+            "u": 0.5329949226476214,
+            "v": 0.9590909047560259,
+            "x": 0.06499999761581421,
+            "y": -1.0099999904632568,
+            "z": 0.0
+          },
+          {
+            "u": 0.5431472085756699,
+            "v": 0.977272705598311,
+            "x": 0.08500000089406967,
+            "y": -1.0499999523162842,
+            "z": 0.0
+          },
+          {
+            "u": 0.5431472085756699,
+            "v": 0.9727272553877397,
+            "x": 0.08500000089406967,
+            "y": -1.0399999618530273,
+            "z": 0.0
+          },
+          {
+            "u": 0.5329949226476214,
+            "v": 0.9909091104160656,
+            "x": 0.06499999761581421,
+            "y": -1.0800000429153442,
+            "z": 0.0
+          },
+          {
+            "u": 0.5228426405015936,
+            "v": 0.9590909047560259,
+            "x": 0.04500000178813934,
+            "y": -1.0099999904632568,
+            "z": 0.0
+          },
+          {
+            "u": 0.5228426405015936,
+            "v": 0.9909091104160656,
+            "x": 0.04500000178813934,
+            "y": -1.0800000429153442,
+            "z": 0.0
+          },
+          {
+            "u": 0.5126903555190503,
+            "v": 0.9636363549665972,
+            "x": 0.02500000037252903,
+            "y": -1.0199999809265137,
+            "z": 0.0
+          },
+          {
+            "u": 0.5126903555190503,
+            "v": 0.9863636602054943,
+            "x": 0.02500000037252903,
+            "y": -1.0700000524520874,
+            "z": 0.0
+          },
+          {
+            "u": -7.261479566545051e-09,
+            "v": 0.13636363094503234,
+            "x": -0.9850000143051147,
+            "y": 0.800000011920929,
+            "z": 0.0
+          },
+          {
+            "u": 0.18781725404226235,
+            "v": 0.5090909088877114,
+            "x": -0.6150000095367432,
+            "y": -0.019999999552965164,
+            "z": 0.0
+          },
+          {
+            "u": 0.25888325175658095,
+            "v": 0.05454544587568799,
+            "x": -0.4749999940395355,
+            "y": 0.9800000190734863,
+            "z": 0.0
+          },
+          {
+            "u": -7.261479566545051e-09,
+            "v": 0.4590909074653279,
+            "x": -0.9850000143051147,
+            "y": 0.09000000357627869,
+            "z": 0.0
+          },
+          {
+            "u": 1.0000000072614796,
+            "v": 0.6818181845274838,
+            "x": 0.9850000143051147,
+            "y": -0.4000000059604645,
+            "z": 0.0
+          },
+          {
+            "u": 0.9492385738392166,
+            "v": 0.8545454415408048,
+            "x": 0.8849999904632568,
+            "y": -0.7799999713897705,
+            "z": 0.0
+          },
+          {
+            "u": 1.0000000072614796,
+            "v": 0.8454545411196622,
+            "x": 0.9850000143051147,
+            "y": -0.7599999904632568,
+            "z": 0.0
+          },
+          {
+            "u": 0.7563451752444814,
+            "v": 0.8181818127632141,
+            "x": 0.5049999952316284,
+            "y": -0.699999988079071,
+            "z": 0.0
+          },
+          {
+            "u": 0.7258883212423567,
+            "v": 0.7772727337750521,
+            "x": 0.4449999928474426,
+            "y": -0.6100000143051147,
+            "z": 0.0
+          },
+          {
+            "u": 0.6345177592359824,
+            "v": 0.05454544587568799,
+            "x": 0.26499998569488525,
+            "y": 0.9800000190734863,
+            "z": 0.0
+          },
+          {
+            "u": 0.7258883212423567,
+            "v": 0.7954545346173373,
+            "x": 0.4449999928474426,
+            "y": -0.6499999761581421,
+            "z": 0.0
+          },
+          {
+            "u": 0.7563451752444814,
+            "v": 0.9409091039137407,
+            "x": 0.5049999952316284,
+            "y": -0.9700000286102295,
+            "z": 0.0
+          },
+          {
+            "u": 0.7715736173736263,
+            "v": 0.8863636472008445,
+            "x": 0.5350000262260437,
+            "y": -0.8500000238418579,
+            "z": 0.0
+          },
+          {
+            "u": 0.18781725404226235,
+            "v": 0.9409091039137407,
+            "x": -0.6150000095367432,
+            "y": -0.9700000286102295,
+            "z": 0.0
+          },
+          {
+            "u": 0.11167513416503287,
+            "v": 0.7454545552080327,
+            "x": -0.7649999856948853,
+            "y": -0.5400000214576721,
+            "z": 0.0
+          },
+          {
+            "u": 0.07614214287191479,
+            "v": 0.9090908982537009,
+            "x": -0.8349999785423279,
+            "y": -0.8999999761581421,
+            "z": 0.0
+          }
+        ]
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.52420527
+      },
+      "pixelsPerUnit": 100.0,
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: DolphinGatlingZombie\n  m_Rect:\n    serializedVersion: 2\n    x: 0\n    y: 2.0761204\n    width: 197\n    height: 205.88097\n  m_Offset: {x: 0, y: 4.9834037}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.52420527}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    4574f71008451fb4c8f6ecb17e41f2e2: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 202b22ac992845948aa83d8aec19aad0, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 63\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 24\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 1700160015000900150016001300150009000a0013000900120013000a00110012000a00140013001200120010000f000c00100011001200110010000f0010000c000d000f000c000e000d000c000b00080009000a0009000800070006000500040005000600030005000400000003000400010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 24\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 480\n      _typelessdata: b81e853dae4781bf000000007b14ae3d666686bf000000007b14ae3db81e85bf00000000b81e853d713d8abf00000000ec51383dae4781bf00000000ec51383d713d8abf00000000cdcccc3c5c8f82bf00000000cdcccc3cc3f588bf00000000f6287cbfcdcc4c3f00000000a4701dbf0ad7a3bc000000003333f3be48e17a3f00000000f6287cbfec51b83d00000000f6287c3fcdccccbe000000005c8f623f14ae47bf00000000f6287c3f5c8f42bf00000000ae47013f333333bf000000000ad7e33ef6281cbf0000000014ae873e48e17a3f000000000ad7e33e666626bf00000000ae47013fec5178bf00000000c3f5083f9a9959bf00000000a4701dbfec5178bf000000000ad743bf713d0abf000000008fc255bf666666bf00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 2.0761204\n      width: 197\n      height: 205.88097\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 98.5, z: 100, w: 110}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape:\n  - - {x: 0.545, y: -0.55}\n    - {x: 0.475, y: -0.64}\n    - {x: 0.525, y: -0.66999996}\n    - {x: 0.73499995, y: -0.65999997}\n    - {x: 0.85499996, y: -0.71999997}\n    - {x: 0.955, y: -0.75}\n    - {x: 0.98499995, y: -0.74}\n    - {x: 0.98499995, y: -0.66999996}\n    - {x: 0.97499996, y: -0.62}\n    - {x: 0.815, y: -0.35999998}\n    - {x: 0.655, y: -0.17}\n    - {x: 0.475, y: -0.049999997}\n    - {x: 0.475, y: 0.04}\n    - {x: 0.385, y: 0.14999999}\n    - {x: 0.305, y: 0.28}\n    - {x: 0.255, y: 0.35}\n    - {x: 0.114999995, y: 0.41}\n    - {x: 0.16499999, y: 0.57}\n    - {x: 0.175, y: 0.66999996}\n    - {x: -0.044999998, y: 0.96}\n    - {x: -0.36499998, y: 0.96}\n    - {x: -0.575, y: 0.82}\n    - {x: -0.60499996, y: 0.7}\n    - {x: -0.755, y: 0.59}\n    - {x: -0.92499995, y: 0.52}\n    - {x: -0.97499996, y: 0.39999998}\n    - {x: -0.98499995, y: 0.37}\n    - {x: -0.98499995, y: 0.24}\n    - {x: -0.965, y: 0.19}\n    - {x: -0.865, y: 0.07}\n    - {x: -0.59499997, y: 0.04}\n    - {x: -0.435, y: 0.14}\n    - {x: -0.255, y: 0.06}\n    - {x: -0.24499999, y: -0.08}\n    - {x: -0.445, y: -0.21}\n    - {x: -0.66499996, y: -0.42}\n    - {x: -0.73499995, y: -0.52}\n    - {x: -0.705, y: -0.78999996}\n    - {x: -0.645, y: -0.82}\n    - {x: -0.525, y: -0.85999995}\n    - {x: -0.205, y: -0.76}\n    - {x: -0.125, y: -0.81}\n    - {x: 0.035, y: -0.93}\n    - {x: 0.114999995, y: -0.95}\n    - {x: 0.355, y: -0.95}\n    - {x: 0.48499998, y: -0.88}\n    - {x: 0.48499998, y: -0.82}\n    - {x: 0.39499998, y: -0.61}\n  - - {x: 0.185, y: -0.72999996}\n    - {x: 0.125, y: -0.7}\n    - {x: 0.13499999, y: -0.69}\n    - {x: 0.13499999, y: -0.66999996}\n    - {x: 0.095, y: -0.63}\n    - {x: 0.13499999, y: -0.63}\n    - {x: 0.145, y: -0.64}\n    - {x: 0.225, y: -0.65}\n    - {x: 0.255, y: -0.65999997}\n    - {x: 0.255, y: -0.68}\n    - {x: 0.285, y: -0.72999996}\n    - {x: 0.24499999, y: -0.72999996}\n    - {x: 0.21499999, y: -0.74}\n    - {x: 0.205, y: -0.72999996}\n  m_Bones: []\n  m_SpriteID:\n",
+      "sourceSprite": "Resources/image/zombiesidle/DolphinGatlingZombie.asset",
+      "texture": "../../textures/1c711270a39c45139ce1816c0e7f2b2e0731c115b5170bedad6658b9bd9fa32e.png",
+      "textureRect": {
+        "height": 205.88097,
+        "width": 197.0,
+        "x": 0.0,
+        "y": 2.0761204,
+        "yTop": 12.042909600000002
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      }
+    }
+  },
+  "sprites": [
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "enabled": true,
+      "flipX": false,
+      "flipY": false,
+      "guid": "e4acd6890eefdfa4f82175c6bbd9172b",
+      "hasBoneMetadata": false,
+      "logicalSize": {
+        "height": 205.88097,
+        "width": 197.0
+      },
+      "mesh": {
+        "indices": [
+          23,
+          22,
+          21,
+          9,
+          21,
+          22,
+          19,
+          21,
+          9,
+          10,
+          19,
+          9,
+          18,
+          19,
+          10,
+          17,
+          18,
+          10,
+          20,
+          19,
+          18,
+          18,
+          16,
+          15,
+          12,
+          16,
+          17,
+          18,
+          17,
+          16,
+          15,
+          16,
+          12,
+          13,
+          15,
+          12,
+          14,
+          13,
+          12,
+          11,
+          8,
+          9,
+          10,
+          9,
+          8,
+          7,
+          6,
+          5,
+          4,
+          5,
+          6,
+          3,
+          5,
+          4,
+          0,
+          3,
+          4,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform",
+        "vertices": [
+          {
+            "u": 0.5329949226476214,
+            "v": 0.9590909047560259,
+            "x": 0.06499999761581421,
+            "y": -1.0099999904632568,
+            "z": 0.0
+          },
+          {
+            "u": 0.5431472085756699,
+            "v": 0.977272705598311,
+            "x": 0.08500000089406967,
+            "y": -1.0499999523162842,
+            "z": 0.0
+          },
+          {
+            "u": 0.5431472085756699,
+            "v": 0.9727272553877397,
+            "x": 0.08500000089406967,
+            "y": -1.0399999618530273,
+            "z": 0.0
+          },
+          {
+            "u": 0.5329949226476214,
+            "v": 0.9909091104160656,
+            "x": 0.06499999761581421,
+            "y": -1.0800000429153442,
+            "z": 0.0
+          },
+          {
+            "u": 0.5228426405015936,
+            "v": 0.9590909047560259,
+            "x": 0.04500000178813934,
+            "y": -1.0099999904632568,
+            "z": 0.0
+          },
+          {
+            "u": 0.5228426405015936,
+            "v": 0.9909091104160656,
+            "x": 0.04500000178813934,
+            "y": -1.0800000429153442,
+            "z": 0.0
+          },
+          {
+            "u": 0.5126903555190503,
+            "v": 0.9636363549665972,
+            "x": 0.02500000037252903,
+            "y": -1.0199999809265137,
+            "z": 0.0
+          },
+          {
+            "u": 0.5126903555190503,
+            "v": 0.9863636602054943,
+            "x": 0.02500000037252903,
+            "y": -1.0700000524520874,
+            "z": 0.0
+          },
+          {
+            "u": -7.261479566545051e-09,
+            "v": 0.13636363094503234,
+            "x": -0.9850000143051147,
+            "y": 0.800000011920929,
+            "z": 0.0
+          },
+          {
+            "u": 0.18781725404226235,
+            "v": 0.5090909088877114,
+            "x": -0.6150000095367432,
+            "y": -0.019999999552965164,
+            "z": 0.0
+          },
+          {
+            "u": 0.25888325175658095,
+            "v": 0.05454544587568799,
+            "x": -0.4749999940395355,
+            "y": 0.9800000190734863,
+            "z": 0.0
+          },
+          {
+            "u": -7.261479566545051e-09,
+            "v": 0.4590909074653279,
+            "x": -0.9850000143051147,
+            "y": 0.09000000357627869,
+            "z": 0.0
+          },
+          {
+            "u": 1.0000000072614796,
+            "v": 0.6818181845274838,
+            "x": 0.9850000143051147,
+            "y": -0.4000000059604645,
+            "z": 0.0
+          },
+          {
+            "u": 0.9492385738392166,
+            "v": 0.8545454415408048,
+            "x": 0.8849999904632568,
+            "y": -0.7799999713897705,
+            "z": 0.0
+          },
+          {
+            "u": 1.0000000072614796,
+            "v": 0.8454545411196622,
+            "x": 0.9850000143051147,
+            "y": -0.7599999904632568,
+            "z": 0.0
+          },
+          {
+            "u": 0.7563451752444814,
+            "v": 0.8181818127632141,
+            "x": 0.5049999952316284,
+            "y": -0.699999988079071,
+            "z": 0.0
+          },
+          {
+            "u": 0.7258883212423567,
+            "v": 0.7772727337750521,
+            "x": 0.4449999928474426,
+            "y": -0.6100000143051147,
+            "z": 0.0
+          },
+          {
+            "u": 0.6345177592359824,
+            "v": 0.05454544587568799,
+            "x": 0.26499998569488525,
+            "y": 0.9800000190734863,
+            "z": 0.0
+          },
+          {
+            "u": 0.7258883212423567,
+            "v": 0.7954545346173373,
+            "x": 0.4449999928474426,
+            "y": -0.6499999761581421,
+            "z": 0.0
+          },
+          {
+            "u": 0.7563451752444814,
+            "v": 0.9409091039137407,
+            "x": 0.5049999952316284,
+            "y": -0.9700000286102295,
+            "z": 0.0
+          },
+          {
+            "u": 0.7715736173736263,
+            "v": 0.8863636472008445,
+            "x": 0.5350000262260437,
+            "y": -0.8500000238418579,
+            "z": 0.0
+          },
+          {
+            "u": 0.18781725404226235,
+            "v": 0.9409091039137407,
+            "x": -0.6150000095367432,
+            "y": -0.9700000286102295,
+            "z": 0.0
+          },
+          {
+            "u": 0.11167513416503287,
+            "v": 0.7454545552080327,
+            "x": -0.7649999856948853,
+            "y": -0.5400000214576721,
+            "z": 0.0
+          },
+          {
+            "u": 0.07614214287191479,
+            "v": 0.9090908982537009,
+            "x": -0.8349999785423279,
+            "y": -0.8999999761581421,
+            "z": 0.0
+          }
+        ]
+      },
+      "node": 6,
+      "pivot": {
+        "x": 0.5,
+        "y": 0.52420527
+      },
+      "pixelsPerUnit": 100.0,
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: DolphinGatlingZombie\n  m_Rect:\n    serializedVersion: 2\n    x: 0\n    y: 2.0761204\n    width: 197\n    height: 205.88097\n  m_Offset: {x: 0, y: 4.9834037}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.52420527}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    4574f71008451fb4c8f6ecb17e41f2e2: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 202b22ac992845948aa83d8aec19aad0, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 63\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 24\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 1700160015000900150016001300150009000a0013000900120013000a00110012000a00140013001200120010000f000c00100011001200110010000f0010000c000d000f000c000e000d000c000b00080009000a0009000800070006000500040005000600030005000400000003000400010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 24\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 480\n      _typelessdata: b81e853dae4781bf000000007b14ae3d666686bf000000007b14ae3db81e85bf00000000b81e853d713d8abf00000000ec51383dae4781bf00000000ec51383d713d8abf00000000cdcccc3c5c8f82bf00000000cdcccc3cc3f588bf00000000f6287cbfcdcc4c3f00000000a4701dbf0ad7a3bc000000003333f3be48e17a3f00000000f6287cbfec51b83d00000000f6287c3fcdccccbe000000005c8f623f14ae47bf00000000f6287c3f5c8f42bf00000000ae47013f333333bf000000000ad7e33ef6281cbf0000000014ae873e48e17a3f000000000ad7e33e666626bf00000000ae47013fec5178bf00000000c3f5083f9a9959bf00000000a4701dbfec5178bf000000000ad743bf713d0abf000000008fc255bf666666bf00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 2.0761204\n      width: 197\n      height: 205.88097\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 98.5, z: 100, w: 110}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape:\n  - - {x: 0.545, y: -0.55}\n    - {x: 0.475, y: -0.64}\n    - {x: 0.525, y: -0.66999996}\n    - {x: 0.73499995, y: -0.65999997}\n    - {x: 0.85499996, y: -0.71999997}\n    - {x: 0.955, y: -0.75}\n    - {x: 0.98499995, y: -0.74}\n    - {x: 0.98499995, y: -0.66999996}\n    - {x: 0.97499996, y: -0.62}\n    - {x: 0.815, y: -0.35999998}\n    - {x: 0.655, y: -0.17}\n    - {x: 0.475, y: -0.049999997}\n    - {x: 0.475, y: 0.04}\n    - {x: 0.385, y: 0.14999999}\n    - {x: 0.305, y: 0.28}\n    - {x: 0.255, y: 0.35}\n    - {x: 0.114999995, y: 0.41}\n    - {x: 0.16499999, y: 0.57}\n    - {x: 0.175, y: 0.66999996}\n    - {x: -0.044999998, y: 0.96}\n    - {x: -0.36499998, y: 0.96}\n    - {x: -0.575, y: 0.82}\n    - {x: -0.60499996, y: 0.7}\n    - {x: -0.755, y: 0.59}\n    - {x: -0.92499995, y: 0.52}\n    - {x: -0.97499996, y: 0.39999998}\n    - {x: -0.98499995, y: 0.37}\n    - {x: -0.98499995, y: 0.24}\n    - {x: -0.965, y: 0.19}\n    - {x: -0.865, y: 0.07}\n    - {x: -0.59499997, y: 0.04}\n    - {x: -0.435, y: 0.14}\n    - {x: -0.255, y: 0.06}\n    - {x: -0.24499999, y: -0.08}\n    - {x: -0.445, y: -0.21}\n    - {x: -0.66499996, y: -0.42}\n    - {x: -0.73499995, y: -0.52}\n    - {x: -0.705, y: -0.78999996}\n    - {x: -0.645, y: -0.82}\n    - {x: -0.525, y: -0.85999995}\n    - {x: -0.205, y: -0.76}\n    - {x: -0.125, y: -0.81}\n    - {x: 0.035, y: -0.93}\n    - {x: 0.114999995, y: -0.95}\n    - {x: 0.355, y: -0.95}\n    - {x: 0.48499998, y: -0.88}\n    - {x: 0.48499998, y: -0.82}\n    - {x: 0.39499998, y: -0.61}\n  - - {x: 0.185, y: -0.72999996}\n    - {x: 0.125, y: -0.7}\n    - {x: 0.13499999, y: -0.69}\n    - {x: 0.13499999, y: -0.66999996}\n    - {x: 0.095, y: -0.63}\n    - {x: 0.13499999, y: -0.63}\n    - {x: 0.145, y: -0.64}\n    - {x: 0.225, y: -0.65}\n    - {x: 0.255, y: -0.65999997}\n    - {x: 0.255, y: -0.68}\n    - {x: 0.285, y: -0.72999996}\n    - {x: 0.24499999, y: -0.72999996}\n    - {x: 0.21499999, y: -0.74}\n    - {x: 0.205, y: -0.72999996}\n  m_Bones: []\n  m_SpriteID:\n",
+      "sortingLayerId": 0,
+      "sortingOrder": 1,
+      "sourceSprite": "Resources/image/zombiesidle/DolphinGatlingZombie.asset",
+      "texture": "../../textures/1c711270a39c45139ce1816c0e7f2b2e0731c115b5170bedad6658b9bd9fa32e.png",
+      "textureRect": {
+        "height": 205.88097,
+        "width": 197.0,
+        "x": 0.0,
+        "y": 2.0761204,
+        "yTop": 12.042909600000002
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      }
+    }
+  ],
+  "static": true,
+  "uiPortraitExtraction": {
+    "gameObjectFileId": 1064312066010861,
+    "originalRendererEnabled": true,
+    "sourceActivity": [
+      {
+        "gameObjectFileId": 1709254077376921,
+        "originalActive": true
+      },
+      {
+        "gameObjectFileId": 1724804207875695,
+        "originalActive": true
+      },
+      {
+        "gameObjectFileId": 1092164755975753,
+        "originalActive": false
+      },
+      {
+        "gameObjectFileId": 1595037906316070,
+        "originalActive": true
+      },
+      {
+        "gameObjectFileId": 1919793621727318,
+        "originalActive": true
+      },
+      {
+        "gameObjectFileId": 1742177870120833,
+        "originalActive": true
+      },
+      {
+        "gameObjectFileId": 1064312066010861,
+        "originalActive": true
+      }
+    ],
+    "sourceSpriteRenderer": "SpriteRenderer:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1064312066010861}\n  m_Enabled: 1\n  m_CastShadows: 0\n  m_ReceiveShadows: 0\n  m_DynamicOccludee: 1\n  m_StaticShadowCaster: 0\n  m_MotionVectors: 1\n  m_LightProbeUsage: 1\n  m_ReflectionProbeUsage: 1\n  m_RayTracingMode: 0\n  m_RayTraceProcedural: 0\n  m_RenderingLayerMask: 1\n  m_RendererPriority: 0\n  m_Materials:\n  - {fileID: 2100000, guid: 8fa820fab1c50434da82a0d53ec31815, type: 2}\n  m_StaticBatchInfo:\n    firstSubMesh: 0\n    subMeshCount: 0\n  m_StaticBatchRoot: {fileID: 0}\n  m_ProbeAnchor: {fileID: 0}\n  m_LightProbeVolumeOverride: {fileID: 0}\n  m_ScaleInLightmap: 1\n  m_ReceiveGI: 1\n  m_PreserveUVs: 0\n  m_IgnoreNormalsForChartDetection: 0\n  m_ImportantGI: 0\n  m_StitchLightmapSeams: 0\n  m_SelectedEditorRenderState: 3\n  m_MinimumChartSize: 4\n  m_AutoUVMaxDistance: 0.5\n  m_AutoUVMaxAngle: 89\n  m_LightmapParameters: {fileID: 0}\n  m_SortingLayerID: 0\n  m_SortingLayer: 0\n  m_SortingOrder: 1\n  m_Sprite: {fileID: 21300000, guid: e4acd6890eefdfa4f82175c6bbd9172b, type: 2}\n  m_Color: {r: 1, g: 1, b: 1, a: 1}\n  m_FlipX: 0\n  m_FlipY: 0\n  m_DrawMode: 0\n  m_Size: {x: 5.18, y: 7.04}\n  m_AdaptiveModeThreshold: 0.5\n  m_SpriteTileMode: 0\n  m_WasSpriteAssigned: 1\n  m_MaskInteraction: 1\n  m_SpriteSortPoint: 0\n",
+    "spriteRendererFileId": 212955939573708457,
+    "uiVisiblePose": "selected portrait renderer and its retained ancestors active"
+  },
+  "unitsPerNativePixel": 0.01,
+  "unusedSpriteBonesExplicitlyAllowed": false,
+  "validation": "Exported source data. Native rendering and source-runtime comparison are separate verification steps.",
+  "visualBounds": {
+    "maxX": 0.2762186442712831,
+    "maxY": 1.1735361390283776,
+    "minX": -0.7802166442712832,
+    "minY": 0.06883729218615042
+  }
+}

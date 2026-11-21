@@ -1,5 +1,6 @@
 #include "../Board.h"
 #include "../../LawnApp.h"
+#include "../../Sexy.TodLib/TodFoley.h"
 #include "../Plant.h"
 #include "../Zombie.h"
 #include "../Projectile.h"
@@ -28,9 +29,32 @@
 #include "NetZenGarden.h"
 #include "NetPresentation.h"
 #include "NetZombatar.h"
+#include "../Fusion/FusionNative.h"
+#include "../Fusion/FusionNativeWire.h"
+#include "../Fusion/FusionNativeVisual.h"
+#include "../Fusion/FusionNativeZombieVisual.h"
+#include "../Fusion/NativeSpecialZombie269.h"
+#include "../Fusion/FusionNativeGarlic.h"
+#include "../Fusion/FusionLobberRules.h"
+#include "../Fusion/FusionShooterTiming.h"
+#include "../Fusion/FusionStraightProjectileRules.h"
+#include "../Fusion/FusionSplitShooterRules.h"
+#include "../Fusion/FusionFireRules.h"
+#include "../Fusion/FusionProducerRules.h"
+#include "../Fusion/FusionChomperRules.h"
+#include "../Fusion/FusionMoneyRules.h"
+#include "../Fusion/FusionNativeProjectileMetadata.h"
+#include "../Fusion/FusionNativeCannon268.h"
+#include "../Fusion/FusionNativeEquipment268.h"
+#include "../Fusion/FusionNativeTools268.h"
+#include "../Fusion/FusionChomper268Rules.h"
+#include "../Fusion/FusionShulk268Rules.h"
+#include "../Fusion/FusionExtras268Rules.h"
 #include "../System/Music.h"
 #include <float.h>
 #include <limits.h>
+#include <algorithm>
+#include <set>
 
 using namespace LawnNet;
 
@@ -38,6 +62,17 @@ bool LawnNet::gNetSuppressSounds = false;
 
 namespace
 {
+bool NetCaptureReanimState(LawnApp*,ReanimationID,NetZombieAnimState&);
+void NetApplyReanimState(LawnApp*,ReanimationID,const NetZombieAnimState&);
+bool NetPaperHeadFitsNativeFrames(const NetZombieAnimState& state)
+{
+    if(!state.mPresent)return true;
+    ReanimatorEnsureDefinitionLoaded(REANIM_PEASHOOTER,false);
+    if(!gReanimatorDefArray||unsigned(REANIM_PEASHOOTER)>=gReanimatorDefCount)return false;
+    const auto& tracks=gReanimatorDefArray[REANIM_PEASHOOTER].mTracks;
+    if(!tracks.tracks||tracks.count<=0||tracks.tracks[0].mTransforms.count<=0)return false;
+    return NetZombieAnimStateFitsFrames(state,uint32_t(tracks.tracks[0].mTransforms.count));
+}
 enum NetDaveAnimKey : uint8_t
 {
 	NET_DAVE_ANIM_NONE = 0,
@@ -97,14 +132,617 @@ static const size_t NET_PLANT_WIRE_BYTES = 23 + NET_ZEN_PLANT_WIRE_BYTES +
 // Zombie: id/type/row/position(8), eight U32 health pools(32), phase/visual state(10),
 // velocity/altitude/original animation rate(12), and exact body animation(11).
 static const size_t NET_ZOMBIE_WIRE_BYTES = 68 + NET_ZOMBIE_ANIM_WIRE_BYTES + NET_ZOMBATAR_WIRE_BYTES;
+// id/type/row/from-wave/order/XY(14), exact health(32), then five phase/flags bytes.
+static const size_t NET_ZOMBIE_CHILLED_OFFSET = 14 + NET_ZOMBIE_HEALTH_WIRE_BYTES + 5;
+static const size_t NET_PLANT_STATE_OFFSET = 10; // After id/type/imitater/row/col/currentHP/maxHP.
+static const size_t NET_ZOMBIE_BUTTERED_OFFSET = NET_ZOMBIE_CHILLED_OFFSET + 1;
+static const size_t NET_ZOMBIE_FROZEN_OFFSET = NET_ZOMBIE_CHILLED_OFFSET + 2;
+static_assert(NET_ZOMBIE_FROZEN_OFFSET < NET_ZOMBIE_WIRE_BYTES);
 // Projectile: id(2), type/row(2), x/y/z/shadow(16), order(4),
-// rotation(4), motion/frame/high-ground(3).
-static const size_t NET_PROJECTILE_WIRE_BYTES = 31;
+// rotation(4), motion/frame/high-ground(3), actual native rotationSpeed(4).
+static const size_t NET_PROJECTILE_WIRE_BYTES = 35; // Protocol53 appends actual native mRotationSpeed.
 // Coin: id/type/motion(4), x/y(8), order(4), scale/collect(4),
-// flags/seed/fade(3), disappear(2), potted visual seed/garden/facing/variation/age(5).
-static const size_t NET_COIN_WIRE_BYTES = 30;
+// flags/seed/fade(3), disappear(2), potted visual seed/garden/facing/variation/age(5), exact age/full lifetimeI32(8).
+static const size_t NET_COIN_WIRE_BYTES = 39; // Native age/full lifetime plus typed world-card use count.
 // Mower records live in NetCommon so the strict transactional codec is covered
 // by the protocol-only test target.
+
+bool NetFusionPlantHealthValid(const LawnFusion::NativeSnapshotFrame* frame,uint16_t id,int health,int maximum)
+{
+    if(!maximum||health<0)return false;
+    if(frame)
+    {
+        const auto record=std::find_if(frame->plants.begin(),frame->plants.end(),[=](const auto& r){return r.id==id;});
+        if(record==frame->plants.end())return false;
+        const auto& d=record->data;
+        if(d.kind==255)
+        {const auto rolling=std::find_if(frame->rollingPlants269.begin(),frame->rollingPlants269.end(),[=](const auto& p){return p.id==id;});
+         return rolling!=frame->rollingPlants269.end()&&maximum==4000&&health==(std::max)(0,(std::min)(65535,rolling->data.health));}
+        if(const auto* strong=LawnFusion::FindFusionStrongChomperProfile(d.kind))
+        {int bounded=0;return maximum==strong->baseHealth&&(health==0||(LawnFusion::TryCapFusionStrongChomperHealth(d.kind,health,bounded)&&bounded==health));}
+        if(LawnFusion::IsFusionExtras268Kind(d.kind))return LawnFusion::FusionExtras268SnapshotValid(d.kind,health,maximum,d.damageStage,d.batchMode);
+    }
+    return health<=maximum;
+}
+bool NetFusionEquipmentCoinRawValid(const NetBuffer& bytes,size_t start,const LawnFusion::NativeEquipmentData& d)
+{
+    if(start>bytes.Size()||bytes.Size()-start<NET_COIN_WIRE_BYTES||!LawnFusion::NativeEquipmentDataValid(d))return false;
+    NetBuffer r=bytes;r.mReadPos=start;r.ReadU16Or();
+    const auto type=r.ReadU8Or(),motion=r.ReadU8Or();const float x=r.ReadF32Or(),y=r.ReadF32Or();
+    const int order=r.ReadI32Or();const auto scale=r.ReadU16Or(),distance=r.ReadU16Or();const auto flags=r.ReadU8Or(),seed=r.ReadU8Or(),fade=r.ReadU8Or();
+    const int shortLife=r.ReadU16Or();bool pottedEmpty=true;for(int j=0;j<5;++j)pottedEmpty&=r.ReadU8Or()==255;
+    const int age=r.ReadI32Or(),life=r.ReadI32Or();
+    if(type!=(uint8_t)COIN_NONE||motion!=(uint8_t)COIN_MOTION_COIN||!_finite(x)||!_finite(y)||x< -1024||x>2048||y< -1024||y>2048||
+       order< -1000000||order>2000000||scale!=4096||distance||flags&5||seed!=255||fade||!pottedEmpty||
+       !LawnFusion::NativeEquipmentRawClockValid(d,age,life,static_cast<uint16_t>(shortLife)))return false;
+    if(d.phase!=LawnFusion::NativeEquipmentPhase::Cursor&&bool(flags&2)!=(d.phase!=LawnFusion::NativeEquipmentPhase::Falling))return false;
+    return true;
+}
+void NetPruneNativeFusionBridgeMetadata(Board* board,LawnFusion::NativeContext& context)
+{
+    const auto prune=[](auto& metadata,auto& array)
+    {for(auto it=metadata.begin();it!=metadata.end();)if(!array.DataArrayTryToGet(it->first))it=metadata.erase(it);else ++it;};
+    // Retain metadata for dead-but-allocated presentation until the full
+    // DataArray generation is actually freed, matching existing native maps.
+    prune(context.equipmentCoins,board->mCoins);prune(context.equipmentPlants,board->mPlants);prune(context.zombieInstanceTokens,board->mZombies);
+    prune(context.star269Plants,board->mPlants);prune(context.star269Projectiles,board->mProjectiles);prune(context.doom269Plants,board->mPlants);
+    prune(context.companions269,board->mProjectiles);prune(context.companionPlants269,board->mPlants);
+    prune(context.worldPlants269,board->mPlants);prune(context.worldBeams269,board->mProjectiles);
+    prune(context.worldRemainder269Aux,board->mProjectiles);prune(context.worldRemainder269Shots,board->mProjectiles);
+    prune(context.droppedCards269,board->mCoins);prune(context.fertilizeCoins269,board->mCoins);prune(context.rollingPlants269,board->mPlants);prune(context.wheatPlants269,board->mPlants);
+}
+bool NetCaptureNativeFusionFrame(Board* board, LawnFusion::NativeSnapshotFrame& frame)
+{
+	auto* context = LawnFusion::GetNativeContext(board);
+	if (!context || !board->mSeedBank) return false;
+    NetPruneNativeFusionBridgeMetadata(board,*context);
+	frame.epoch = context->epoch;
+    frame.worldRemainder269Board=context->worldRemainder269Board;frame.goldHypnoSummoned=context->goldHypnoSummoned;
+	frame.background = static_cast<uint8_t>(board->mBackground);
+	frame.selectionCommitted = context->selectionCommitted;
+	frame.selection = context->selection.State();
+	frame.gloveHolds = context->gloveHolds;
+	frame.gloveCooldownTicks = context->gloveCooldownTicks;
+	for (int i = 0; i < board->mSeedBank->mNumPackets; ++i)
+	{
+		const SeedPacket& packet = board->mSeedBank->mSeedPackets[i];
+		if (const auto* data = LawnFusion::GetNativePacketData(&packet)) frame.packets.push_back({packet.mNetId, *data});
+	}
+	Plant* plant = nullptr;
+	while (board->mPlants.IterateNext(plant))
+		if (!plant->mDead && plant->mIsOnBoard)
+		{
+			const auto* data = LawnFusion::GetNativePlantData(plant);
+			if (!data) return false;
+            std::string visualStateError;
+            if(!LawnFusion::NativePlantVisualStateSupported(plant,&visualStateError))
+            {
+                NetTrace("Fusion native presentation state unavailable kind=%u error=%s",data->kind,visualStateError.c_str());
+                return false;
+            }
+			auto captured = *data;
+			if (captured.kind != 1000 && LawnFusion::IsNativeProducerKind(captured.kind))
+				captured.productionTicks = plant->mLaunchCounter;
+			frame.plants.push_back({plant->mNetId, captured});
+            if(const auto* equipment=LawnFusion::GetNativeEquipmentPlantState(plant))frame.equipmentPlants.push_back({plant->mNetId,*equipment});
+            if(const auto* star=LawnFusion::GetNativeStar269PlantState(plant))frame.star269Plants.push_back({plant->mNetId,*star});
+            if(const auto* doom=LawnFusion::GetNativeDoom269PlantState(plant))frame.doom269Plants.push_back({plant->mNetId,*doom});
+            if(const auto* companions=LawnFusion::GetNativeCompanions269PlantState(plant))frame.companionPlants269.push_back({plant->mNetId,*companions});
+            if(const auto* world=LawnFusion::GetNativeWorld269PlantState(plant))frame.worldPlants269.push_back({plant->mNetId,*world});
+            if(const auto* rolling=LawnFusion::GetNativeRollingActor269State(plant))
+            {LawnFusion::NativeRollingActor269Snapshot mirror;static_cast<LawnFusion::NativeRollingActor269State&>(mirror)=*rolling;mirror.health=plant->mPlantHealth;frame.rollingPlants269.push_back({plant->mNetId,mirror});}
+            if(const auto* wheat=LawnFusion::GetNativeWheat269State(plant))
+                frame.wheatPlants269.push_back({plant->mNetId,{wheat->isFromWheat,wheat->wheatTime}});
+		}
+	Projectile* projectile = nullptr;
+	while (board->mProjectiles.IterateNext(projectile))
+		if (!projectile->mDead)
+        {
+            if (const auto* data = LawnFusion::GetNativeProjectileData(projectile))
+            {
+                frame.projectiles.push_back({projectile->mNetId,*data});
+                if(const auto* star=LawnFusion::GetNativeStar269ProjectileState(projectile))frame.star269Projectiles.push_back({projectile->mNetId,*star});
+            }
+            if(const auto* companion=LawnFusion::GetNativeCompanion269State(projectile))
+            {auto captured=*companion;captured.ageTicks=projectile->mProjectileAge;frame.companions269.push_back({projectile->mNetId,captured});}
+            if(const auto* beam=LawnFusion::GetNativeWorld269BeamState(projectile))
+            {auto captured=*beam;captured.ageTicks=projectile->mProjectileAge;frame.worldBeams269.push_back({projectile->mNetId,captured});}
+            if(const auto* aux=LawnFusion::GetNativeWorldRemainder269AuxState(projectile))
+            {auto captured=*aux;captured.ageTicks=projectile->mProjectileAge;frame.worldRemainder269Aux.push_back({projectile->mNetId,captured});}
+            if(const auto* shot=LawnFusion::GetNativeWorldRemainder269ShotState(projectile))
+            {auto captured=*shot;captured.ageTicks=projectile->mProjectileAge;frame.worldRemainder269Shots.push_back({projectile->mNetId,captured});}
+        }
+	Zombie* zombie = nullptr;
+	while (board->mZombies.IterateNext(zombie))
+	{
+		if (!zombie->mDead)
+		{
+            const uint32_t token=board->mZombies.DataArrayGetID(zombie);
+            if(!zombie->mNetId||!token)return false;
+            frame.zombieIdentities.push_back({zombie->mNetId,token});
+            if (const auto* data = LawnFusion::GetNativeSourceZombieData(zombie))
+            {
+                auto captured=*data;
+                if(data->kind==18)captured.vehicleStopped=zombie->mFlatTires;
+                if(data->kind==104)
+                {
+                    if(zombie->mSummonCounter<0||zombie->mSummonCounter>75||
+                       zombie->mBossHeadCounter<0||zombie->mBossHeadCounter>2||
+                       !NetCaptureReanimState(board->mApp,zombie->mSpecialHeadReanimID,captured.paperHead))return false;
+                    captured.paperShootTicks=uint8_t(zombie->mSummonCounter);
+                    captured.paperShootEvent=uint8_t(zombie->mBossHeadCounter);
+                }
+                frame.sourceZombies.push_back({zombie->mNetId,captured});
+
+            }
+			if (const auto* data = LawnFusion::GetNativeZombieColdData(zombie))
+			{
+				auto captured = *data;
+				captured.chilledTicks = zombie->mChilledCounter;
+				captured.frozenTicks = zombie->mIceTrapCounter;
+				frame.coldZombies.push_back({zombie->mNetId, captured});
+			}
+			if (const auto* data = LawnFusion::GetNativeZombieButterData(zombie))
+			{
+				auto captured = *data;
+				captured.ticks = zombie->mButteredCounter;
+				captured.visible = captured.ticks > 0 && data->visible;
+				frame.butterZombies.push_back({zombie->mNetId,captured});
+			}
+			if (const auto* data = LawnFusion::GetNativeZombieActionData(zombie))
+			{
+				auto captured = *data; captured.scale = zombie->mScaleZombie;
+				frame.zombieActions.push_back({zombie->mNetId,captured});
+			}
+			if (const auto* data = LawnFusion::GetNativeZombieGarlicData(zombie))
+				if (LawnFusion::FusionGarlicActionActive(*data) && !zombie->IsDeadOrDying() && zombie->mHasHead &&
+					LawnFusion::IsNativeFusionGroundZombie(zombie) && zombie->mZombiePhase == PHASE_ZOMBIE_NORMAL && !zombie->mMindControlled)
+					frame.garlicZombies.push_back({zombie->mNetId,*data});
+		}
+	}
+	Coin* coin = nullptr;
+	while (board->mCoins.IterateNext(coin))
+		if (!coin->mDead)
+		{
+            if(const auto* equipment=LawnFusion::GetNativeEquipmentData(coin))
+            {frame.equipmentCoins.push_back({coin->mNetId,*equipment});continue;}
+            if(const auto* fertilizer=LawnFusion::GetNativeFertilize269Data(coin)){frame.fertilizeCoins269.push_back({coin->mNetId,*fertilizer});continue;}
+            if(const auto* card=LawnFusion::GetNativeDroppedCard269Data(coin))
+            {frame.droppedCards269.push_back({coin->mNetId,*card});continue;}
+			const int value = LawnFusion::GetNativeCoinValue(coin, -1);
+			if (value != -1) frame.coins.push_back({coin->mNetId, {value,LawnFusion::IsNativeMoneyCoin(coin)}});
+		}
+	frame.money = context->money;
+	frame.temporaryLightLevel = context->temporaryLightLevel;
+    LawnFusion::ProjectNativeStar269LiveTargets(frame);
+	return true;
+}
+
+// Structural preflight adds reference validation for Fusion metadata before the
+// existing native decoder touches the board. It deliberately does not recreate
+// that decoder's gameplay, animation or presentation validation.
+bool NetPreflightNativeFusionBody(const NetBuffer& body, const LawnFusion::NativeSnapshotFrame& frame)
+{
+	const size_t coreBytes = 43 + MAX_GRID_SIZE_Y * 4 + 9 + 10 +
+		NET_CHALLENGE_RUNTIME_WIRE_BYTES + NET_ENDLESS_WEATHER_WIRE_BYTES + NET_ZEN_GARDEN_WIRE_BYTES;
+	if (body.Size() < coreBytes + 7) return false;
+	NetBuffer scan = body;
+	scan.mReadPos = coreBytes + 6;
+	const uint8_t packetCount = scan.ReadU8Or();
+	if (packetCount > SEEDBANK_CAPACITY || scan.Remaining() < packetCount * NET_SEED_PACKET_WIRE_BYTES) return false;
+	std::set<uint16_t> allIds, packetIds, plantIds, zombieIds, projectileIds, coinIds;
+	for (int i = 0; i < packetCount; ++i)
+	{
+		const size_t start = scan.mReadPos;
+		const uint16_t id = scan.ReadU16Or();
+		const uint8_t type = scan.ReadU8Or();
+		const uint8_t owner = scan.mData[start + 5], origin = scan.mData[start + 16];
+		const auto metadata = std::find_if(frame.packets.begin(), frame.packets.end(), [=](const auto& r) { return r.id == id; });
+		if (id)
+		{
+			if (!allIds.insert(id).second || metadata == frame.packets.end()) return false;
+			packetIds.insert(id);
+			const auto& data = metadata->data;
+			const uint8_t nativeType = static_cast<uint8_t>(LawnFusion::GetNativeSeedForPlant(data.kind));
+			if (type != nativeType || owner != data.owner || origin != data.randomOrigin) return false;
+		}
+		else if (type != 255 || origin) return false;
+		scan.mReadPos = start + NET_SEED_PACKET_WIRE_BYTES;
+	}
+	if (packetIds.size() != frame.packets.size()) return false;
+	const size_t sizes[] = {NET_PLANT_WIRE_BYTES, NET_ZOMBIE_WIRE_BYTES, NET_PROJECTILE_WIRE_BYTES, NET_COIN_WIRE_BYTES, NET_MOWER_WIRE_BYTES, 37};
+	for (int section = 0; section < 6; ++section)
+	{
+		uint16_t count = 0;
+		if (!scan.ReadU16(&count) || count > (section == 4 ? NET_MOWER_MAX_COUNT : 1024) || count > scan.Remaining() / sizes[section]) return false;
+		for (int i = 0; i < count; ++i)
+		{
+			const size_t start = scan.mReadPos;
+			const uint16_t id = scan.ReadU16Or();
+			const uint8_t type = scan.ReadU8Or();
+			if (!id || !allIds.insert(id).second) return false;
+			if (section == 0)
+			{
+				if (scan.mData[start + 4] >= LawnFusion::NativeFusionRowsForBackground(frame.background) ||
+					scan.mData[start + 5] >= LawnFusion::kNativeFusionColumns) return false;
+				plantIds.insert(id);
+				const auto record = std::find_if(frame.plants.begin(), frame.plants.end(), [=](const auto& r) { return r.id == id; });
+				if (record == frame.plants.end() || type != static_cast<uint8_t>(LawnFusion::GetNativeSeedForPlant(record->data.kind)) ||
+					(record->data.packetId && !packetIds.contains(record->data.packetId))) return false;
+                NetBuffer plantBody=scan;plantBody.mReadPos=start+6;
+                const int current=plantBody.ReadU16Or(),maximum=plantBody.ReadU16Or();
+                const auto state=plantBody.ReadU8Or(),flags=plantBody.ReadU8Or();const int x=plantBody.ReadI16Or(),y=plantBody.ReadI16Or(),order=plantBody.ReadI32Or();
+                uint8_t maximumState=static_cast<uint8_t>(STATE_LILYPAD_INVULNERABLE);
+#ifdef _DS_MINIGAMES
+                maximumState=static_cast<uint8_t>(STATE_HEAT_WAVE_POWERED);
+#endif
+                if(scan.mData[start+3]!=255&&scan.mData[start+3]>=static_cast<uint8_t>(NUM_SEED_TYPES))return false;
+                if(state>maximumState||(flags&~3)||x< -2048||x>2048||y< -2048||y>2048||order<0||order>1000000)return false;
+                if(!NetFusionPlantHealthValid(&frame,id,current,maximum))return false;
+                if(const auto* cannon=LawnFusion::FindFusionCannon268Profile(record->data.kind);cannon&&cannon->manual)
+                {
+                    const auto mode=record->data.batchMode;
+                    const auto expected=mode==0?STATE_COBCANNON_ARMING:mode==1?STATE_COBCANNON_LOADING:mode==2?STATE_COBCANNON_READY:STATE_COBCANNON_FIRING;
+                    if(scan.mData[start+NET_PLANT_STATE_OFFSET]!=(uint8_t)expected)return false;
+                }
+                if(LawnFusion::FindFusionEquipmentProfile(record->data.kind)&&
+                    std::none_of(frame.equipmentPlants.begin(),frame.equipmentPlants.end(),[=](const auto& r){return r.id==id;}))return false;
+				if (record->data.shootSeconds >= 0 && !LawnFusion::FindFusionCannon268Profile(record->data.kind)&&
+                    !LawnFusion::IsFusionWater268Kind(record->data.kind)&&!LawnFusion::FindFusionEquipmentProfile(record->data.kind)&&
+                    !LawnFusion::FindFusionStrongChomperProfile(record->data.kind)&&!LawnFusion::IsFusionShulk268Kind(record->data.kind))
+				{
+					const bool digest=LawnFusion::FindFusionChomperProfile(record->data.kind)!=nullptr;
+					const auto* timing = digest?nullptr:LawnFusion::FindFusionShooterTimingProfile(record->data.kind);
+                    if(record->data.kind==924||record->data.kind==1026)
+                        timing=LawnFusion::FindFusionHypno269TimingProfile(record->data.kind,record->data.batchBagCount);
+					if (scan.mData[start + NET_PLANT_STATE_OFFSET] == static_cast<uint8_t>(STATE_KERNELPULT_BUTTER))
+						if (const auto* alternate = LawnFusion::FindFusionShooterTimingProfile(record->data.kind,
+							record->data.kind == 1025 ? "shoot1" : "shoot2")) timing = alternate;
+					const bool multiplePhases=!digest&&(LawnFusion::IsFusionShooterBatchKind(record->data.kind) ||
+                            LawnFusion::FindFusionExtendedLobberTimingProfile(record->data.kind)!=nullptr ||
+                            LawnFusion::FusionFireActionMaximumDuration(record->data.kind,record->data.animationSpeed)>0);
+                        const float duration=multiplePhases ? LawnFusion::FusionShooterMaximumDuration(record->data.kind,record->data.animationSpeed) :
+                            timing ? LawnFusion::FusionShooterDuration(*timing,record->data.animationSpeed) : 0;
+                        if (duration>0 && record->data.shootSeconds>=duration) return false;
+				}
+			}
+			else if (section == 1)
+			{
+				if (scan.mData[start + 3] >= LawnFusion::NativeFusionRowsForBackground(frame.background)) return false;
+				zombieIds.insert(id);
+                if(std::none_of(frame.zombieIdentities.begin(),frame.zombieIdentities.end(),[=](const auto& r){return r.id==id;}))return false;
+                const auto capture=std::find_if(frame.plants.begin(),frame.plants.end(),[=](const auto& p){return p.data.kind!=1175&&p.data.waterTargetId==id&&(p.data.batchMode==1||p.data.batchMode==2);});
+                NetBuffer capturedBody=scan;capturedBody.mReadPos=start+14;NetZombieHealthState capturedHealth;
+                if(!NetDecodeZombieHealthState(capturedBody,capturedHealth))return false;
+                capturedBody.ReadU8Or();const auto capturedHeight=capturedBody.ReadU8Or();
+                capturedBody.ReadU8Or();capturedBody.ReadU8Or();const auto capturedFlags=capturedBody.ReadU8Or();
+                if(capture!=frame.plants.end()&&(!capturedHealth.mBody||(capturedFlags&128)||
+                    capturedHeight!=(capture->data.batchMode==2?HEIGHT_DRAGGED_UNDER:HEIGHT_ZOMBIE_NORMAL)))return false;
+				const auto source = std::find_if(frame.sourceZombies.begin(),frame.sourceZombies.end(),[=](const auto& r) { return r.id == id; });
+				if (source != frame.sourceZombies.end())
+				{
+					NetBuffer sourceBody = scan; sourceBody.mReadPos = start+14;
+					NetZombieHealthState sourceHealth;
+					if (!NetDecodeZombieHealthState(sourceBody,sourceHealth) ||
+						!LawnFusion::NativeSourceZombieDataValid(source->data,static_cast<int>(sourceHealth.mBodyMax)) ||
+						type != static_cast<uint8_t>(LawnFusion::GetNativeSourceZombieCarrier(source->data.kind))) return false;
+					const auto* sourceProfile=LawnFusion::FindFusionZombieProfile(source->data.kind);
+                    if(!NetPaperHeadFitsNativeFrames(source->data.paperHead))return false;
+					const int sourceRow=scan.mData[start+3];
+					if(sourceProfile&&sourceProfile->waterOnly&&(LawnFusion::NativeFusionRowsForBackground(frame.background)!=6||(sourceRow!=2&&sourceRow!=3)))return false;
+					const auto sourcePhase = sourceBody.ReadU8Or(), sourceHeight = sourceBody.ReadU8Or();
+					const bool sourcePoolTransition=(sourceHeight==HEIGHT_IN_TO_POOL||sourceHeight==HEIGHT_OUT_OF_POOL)&&
+						LawnFusion::NativeFusionRowsForBackground(frame.background)==6&&(sourceRow==2||sourceRow==3);
+					if (sourcePhase == PHASE_ZOMBIE_NORMAL &&
+						((sourceHeight != HEIGHT_ZOMBIE_NORMAL&&!sourcePoolTransition&&!(capture!=frame.plants.end()&&capture->data.batchMode==2&&sourceHeight==HEIGHT_DRAGGED_UNDER)) || sourceHealth.mBody !=
+						 static_cast<uint32_t>(LawnFusion::NativeSourceZombieLivenessHealth(source->data.health)))) return false;
+				}
+				const auto record = std::find_if(frame.coldZombies.begin(), frame.coldZombies.end(), [=](const auto& r) { return r.id == id; });
+				if (record != frame.coldZombies.end() &&
+					(scan.mData[start + NET_ZOMBIE_CHILLED_OFFSET] != static_cast<uint8_t>(min(255, record->data.chilledTicks)) ||
+					 scan.mData[start + NET_ZOMBIE_FROZEN_OFFSET] != static_cast<uint8_t>(min(255, record->data.frozenTicks)))) return false;
+				const auto butter = std::find_if(frame.butterZombies.begin(), frame.butterZombies.end(), [=](const auto& r) { return r.id == id; });
+				if (butter != frame.butterZombies.end() && scan.mData[start + NET_ZOMBIE_BUTTERED_OFFSET] !=
+					static_cast<uint8_t>(min(255,butter->data.ticks))) return false;
+				const auto garlic = std::find_if(frame.garlicZombies.begin(),frame.garlicZombies.end(),[=](const auto& r) { return r.id == id; });
+				if (garlic != frame.garlicZombies.end())
+				{
+					NetBuffer body = scan; body.mReadPos = start+6;
+					const int renderOrder = body.ReadI32Or();
+					body.ReadI16Or(); const int y4 = body.ReadI16Or();
+					NetZombieHealthState health;
+					if (!NetDecodeZombieHealthState(body,health) || !health.mBody) return false;
+					const auto phase = body.ReadU8Or(), height = body.ReadU8Or();
+					body.ReadU8Or(); body.ReadU8Or(); const auto flags = body.ReadU8Or();
+					const auto& state = garlic->data;
+					const int row = scan.mData[start+3];
+					const bool sourceCarrier = source != frame.sourceZombies.end() && type == LawnFusion::GetNativeSourceZombieCarrier(source->data.kind);
+                    if ((type != ZOMBIE_NORMAL && !sourceCarrier) || phase != PHASE_ZOMBIE_NORMAL || height != HEIGHT_ZOMBIE_NORMAL ||
+                        !LawnFusion::NativeGarlicRawFlagsValid(frame.background,row,flags) || LawnFusion::FusionGarlicLogicalRow(state,row) != row)
+                    {
+                        NetTrace("Fusion garlic raw state rejected id=%u background=%u row=%d flags=%u type=%u phase=%u height=%u",id,frame.background,row,flags,type,phase,height);
+                        return false;
+                    }
+					if (state.phase == LawnFusion::GarlicActionPhase::Moving)
+					{
+						const float y = static_cast<float>(double(state.startY)+(double(state.targetY)-state.startY)*state.moveElapsedTicks/LawnFusion::kFusionGarlicMoveTicks);
+						if (y4 != static_cast<int16_t>(y*4) || (flags & 1) ||
+							renderOrder != Board::MakeRenderOrder(RENDER_LAYER_ZOMBIE,LawnFusion::FusionGarlicSortingRow(state,row),4)) return false;
+					}
+				}
+			}
+			else if (section == 2)
+			{
+				if (scan.mData[start + 3] >= LawnFusion::NativeFusionRowsForBackground(frame.background)) return false;
+				projectileIds.insert(id);
+                const auto companion=std::find_if(frame.companions269.begin(),frame.companions269.end(),[=](const auto& c){return c.id==id;});
+                if(companion!=frame.companions269.end()&&(type!=PROJECTILE_PEA||scan.mData[start+28]!=MOTION_STAR))return false;
+                const auto beam=std::find_if(frame.worldBeams269.begin(),frame.worldBeams269.end(),[=](const auto& c){return c.id==id;});
+                if(beam!=frame.worldBeams269.end()&&(type!=PROJECTILE_PEA||scan.mData[start+28]!=MOTION_STAR))return false;
+                const auto aux=std::find_if(frame.worldRemainder269Aux.begin(),frame.worldRemainder269Aux.end(),[=](const auto& c){return c.id==id;});
+                if(aux!=frame.worldRemainder269Aux.end()&&(type!=PROJECTILE_PEA||scan.mData[start+28]!=MOTION_STAR))return false;
+                NetBuffer rawSpin=scan;rawSpin.mReadPos=start+31;const float rotationSpeed=rawSpin.ReadF32Or();
+                if(!_finite(rotationSpeed)||rotationSpeed< -100000.f||rotationSpeed>100000.f)return false;
+				const auto record = std::find_if(frame.projectiles.begin(), frame.projectiles.end(), [=](const auto& r) { return r.id == id; });
+				if (record != frame.projectiles.end())
+				{
+					const auto& data = record->data;
+                    const auto state=std::find_if(frame.star269Projectiles.begin(),frame.star269Projectiles.end(),[=](const auto& s){return s.id==id;});
+                    const auto* star=state==frame.star269Projectiles.end()?nullptr:&state->data;
+                    NetBuffer rotation=scan;rotation.mReadPos=start+24;const float rootAngle=rotation.ReadF32Or();
+                    if(!LawnFusion::NativeProjectileRawRotationValid(data,static_cast<ProjectileType>(type),static_cast<ProjectileMotion>(scan.mData[start+28]),rootAngle,rotationSpeed,star))return false;
+					if (!LawnFusion::NativeProjectileMetadataValid(data,static_cast<ProjectileType>(type),
+						static_cast<ProjectileMotion>(scan.mData[start + 28]),star)) return false;
+				}
+			}
+			else if (section == 3)
+			{
+				coinIds.insert(id);
+                NetBuffer clock=scan;clock.mReadPos=start+30;const int age=clock.ReadI32Or(),lifetime=clock.ReadI32Or();
+                NetBuffer prefix=scan;prefix.mReadPos=start+23;
+                if(age<0||lifetime<0||prefix.ReadU16Or()!=(std::min)(65535,lifetime))return false;
+                const auto equipment=std::find_if(frame.equipmentCoins.begin(),frame.equipmentCoins.end(),[=](const auto& r){return r.id==id;});
+                const auto fertilizer=std::find_if(frame.fertilizeCoins269.begin(),frame.fertilizeCoins269.end(),[=](const auto& r){return r.id==id;});
+                if(type==(uint8_t)COIN_NONE?(equipment==frame.equipmentCoins.end()&&fertilizer==frame.fertilizeCoins269.end()):equipment!=frame.equipmentCoins.end()||fertilizer!=frame.fertilizeCoins269.end())return false;
+                if(fertilizer!=frame.fertilizeCoins269.end()&&(age<fertilizer->data.phaseStartAge||scan.mData[start+38]||scan.mData[start+21]!=255||(scan.mData[start+20]&5)))return false;
+                if(equipment!=frame.equipmentCoins.end()&&!NetFusionEquipmentCoinRawValid(body,start,equipment->data))return false;
+                const auto card=std::find_if(frame.droppedCards269.begin(),frame.droppedCards269.end(),[=](const auto& r){return r.id==id;});
+                if(card!=frame.droppedCards269.end())
+                {if(type!=COIN_USABLE_SEED_PACKET||scan.mData[start+21]!=LawnFusion::GetNativeSeedForPlant(card->data.kind)||
+                    !LawnFusion::NativeDroppedCard269CoinStateValid(card->data,age,scan.mData[start+38],lifetime)||
+                    bool(scan.mData[start+20]&2)!=card->data.landed||(scan.mData[start+20]&5))return false;}
+                else if(scan.mData[start+38])return false;
+				const auto record = std::find_if(frame.coins.begin(), frame.coins.end(), [=](const auto& r) { return r.id == id; });
+				if (type == (uint8_t)COIN_SMALLSUN && record == frame.coins.end()) return false;
+				if (record != frame.coins.end())
+				{
+					const auto& value = record->data;
+					if (value.money ? !LawnFusion::FusionMoneyCoinMetadataValid(static_cast<CoinType>(type),value.value) :
+						!LawnFusion::FusionSunCoinMetadataValid(type,value.value)) return false;
+				}
+			}
+			else if (section == 4)
+			{
+				if (scan.mData[start + 2] >= LawnFusion::NativeFusionRowsForBackground(frame.background)) return false;
+			}
+			else if (section == 5)
+			{
+				if (scan.mData[start + 4] >= LawnFusion::kNativeFusionColumns ||
+					scan.mData[start + 5] >= LawnFusion::NativeFusionRowsForBackground(frame.background)) return false;
+			}
+			scan.mReadPos = start + sizes[section];
+		}
+	}
+	if (scan.Remaining() || plantIds.size() != frame.plants.size()||zombieIds.size()!=frame.zombieIdentities.size()) return false;
+    for(const auto& r:frame.zombieIdentities)if(!zombieIds.contains(r.id))return false;
+    for(const auto& r:frame.equipmentCoins)
+    {
+        if(!coinIds.contains(r.id))return false;
+        if(r.data.sourcePlantId&&!r.data.weapon&&std::none_of(frame.equipmentPlants.begin(),frame.equipmentPlants.end(),[&](const auto& source)
+            {return source.id==r.data.sourcePlantId&&source.data.targetItemId==r.id&&source.data.targetItemToken==r.data.instanceToken;}))return false;
+    }
+    for(const auto& r:frame.equipmentPlants)if(!plantIds.contains(r.id))return false;
+	for (const auto& record : frame.projectiles) if (!projectileIds.contains(record.id)) return false;
+	for (const auto& record : frame.coldZombies) if (!zombieIds.contains(record.id)) return false;
+	for (const auto& record : frame.butterZombies) if (!zombieIds.contains(record.id)) return false;
+	for (const auto& record : frame.zombieActions) if (!zombieIds.contains(record.id)) return false;
+	for (const auto& record : frame.garlicZombies) if (!zombieIds.contains(record.id)) return false;
+	for (const auto& record : frame.sourceZombies) if (!zombieIds.contains(record.id)) return false;
+	for (const auto& record : frame.coins) if (!coinIds.contains(record.id)) return false;
+    for(const auto& record:frame.companions269)if(!projectileIds.contains(record.id))return false;
+    for(const auto& record:frame.companionPlants269)if(!plantIds.contains(record.id))return false;
+    for(const auto& record:frame.worldPlants269)if(!plantIds.contains(record.id))return false;
+    for(const auto& record:frame.worldBeams269)if(!projectileIds.contains(record.id))return false;
+    for(const auto& record:frame.worldRemainder269Aux)if(!projectileIds.contains(record.id))return false;
+    for(const auto& record:frame.worldRemainder269Shots)if(!projectileIds.contains(record.id))return false;
+    for(const auto& record:frame.droppedCards269)if(!coinIds.contains(record.id))return false;
+    for(const auto& record:frame.fertilizeCoins269)if(!coinIds.contains(record.id))return false;
+    for(const auto& record:frame.rollingPlants269)if(!plantIds.contains(record.id))return false;
+    for(const auto& record:frame.wheatPlants269)if(!plantIds.contains(record.id))return false;
+	return true;
+}
+
+bool NetBindNativeFusionFrame(Board* board, const LawnFusion::NativeSnapshotFrame& frame, const LawnFusion::FusionSeedBank& selection)
+{
+	auto* context = LawnFusion::GetNativeContext(board);
+	if (!context) return false;
+	// Missing native allocations cannot create an independent metadata actor.
+	for (const auto& record : frame.plants) if (!board->NetGetGhostPlant(record.id)) return false;
+	for (const auto& record : frame.projectiles) if (!board->NetGetGhostProjectile(record.id)) return false;
+    for(const auto& record:frame.companions269)if(!board->NetGetGhostProjectile(record.id))return false;
+    for(const auto& record:frame.companionPlants269)if(!board->NetGetGhostPlant(record.id))return false;
+    for(const auto& record:frame.worldPlants269)if(!board->NetGetGhostPlant(record.id))return false;
+    for(const auto& record:frame.worldBeams269)if(!board->NetGetGhostProjectile(record.id))return false;
+    for(const auto& record:frame.worldRemainder269Aux)if(!board->NetGetGhostProjectile(record.id))return false;
+    for(const auto& record:frame.worldRemainder269Shots)if(!board->NetGetGhostProjectile(record.id))return false;
+    for(const auto& record:frame.droppedCards269)if(!board->NetGetGhostCoin(record.id))return false;
+    for(const auto& record:frame.fertilizeCoins269)if(!board->NetGetGhostCoin(record.id))return false;
+    for(const auto& record:frame.rollingPlants269)if(!board->NetGetGhostPlant(record.id))return false;
+    for(const auto& record:frame.wheatPlants269)if(!board->NetGetGhostPlant(record.id))return false;
+	for (const auto& record : frame.coldZombies)
+	{
+		const Zombie* zombie = board->NetGetGhostZombie(record.id);
+		if (!zombie || zombie->mDead) return false;
+	}
+	for (const auto& record : frame.coins) if (!board->NetGetGhostCoin(record.id)) return false;
+	for (const auto& record : frame.butterZombies)
+	{
+		const Zombie* zombie = board->NetGetGhostZombie(record.id);
+		if (!zombie || zombie->mDead) return false;
+	}
+	for (const auto& record : frame.zombieActions)
+	{
+		const Zombie* zombie = board->NetGetGhostZombie(record.id);
+		if (!zombie || zombie->mDead) return false;
+	}
+	for (const auto& record : frame.garlicZombies)
+	{
+		const Zombie* zombie = board->NetGetGhostZombie(record.id);
+		if (!zombie || zombie->mDead) return false;
+	}
+	for (const auto& record : frame.sourceZombies)
+	{
+		const Zombie* zombie = board->NetGetGhostZombie(record.id);
+		if (!zombie || zombie->mDead ||
+			!LawnFusion::NativeSourceZombieDataValid(record.data,zombie->mBodyMaxHealth) ||
+			zombie->mZombieType != LawnFusion::GetNativeSourceZombieCarrier(record.data.kind)) return false;
+	}
+    for(const auto& record:frame.zombieIdentities)
+    {const auto* z=board->NetGetGhostZombie(record.id);if(!z||z->mDead)return false;}
+    for(const auto& record:frame.equipmentCoins)
+    {const auto* c=board->NetGetGhostCoin(record.id);if(!c||c->mDead||c->mType!=COIN_NONE||c->mCoinAge<record.data.phaseStartAge)return false;}
+    for(const auto& record:frame.equipmentPlants)if(!board->NetGetGhostPlant(record.id))return false;
+    for(const auto& record:frame.plants)if(record.data.waterTargetId)
+    {const auto* z=board->NetGetGhostZombie(record.data.waterTargetId);if(!z||z->mDead)return false;}
+	// Extensions follow native DataArray generations through retirement. A
+	// snapshot can mark a ghost dead before the array actually frees it; losing
+	// its metadata here would temporarily restore Classic values/appearance.
+	LawnFusion::PruneNativeMetadata(board);
+    NetPruneNativeFusionBridgeMetadata(board,*context);
+    for(const auto& record:frame.zombieIdentities)
+    {auto* z=board->NetGetGhostZombie(record.id);context->zombieInstanceTokens[board->mZombies.DataArrayGetID(z)]=record.data;}
+    context->star269Plants.clear();context->star269Projectiles.clear();context->doom269Plants.clear();
+    context->companions269.clear();context->companionPlants269.clear();
+    context->worldPlants269.clear();context->worldBeams269.clear();
+    context->worldRemainder269Aux.clear();context->worldRemainder269Shots.clear();
+    context->worldRemainder269Board=frame.worldRemainder269Board;context->goldHypnoSummoned=frame.goldHypnoSummoned;
+
+    context->droppedCards269.clear();context->rollingPlants269.clear();context->fertilizeCoins269.clear();context->wheatPlants269.clear();
+    for(const auto& record:frame.star269Plants)
+    {auto* p=board->NetGetGhostPlant(record.id);context->star269Plants[board->mPlants.DataArrayGetID(p)]=record.data;}
+    for(const auto& record:frame.star269Projectiles)
+    {auto* p=board->NetGetGhostProjectile(record.id);context->star269Projectiles[board->mProjectiles.DataArrayGetID(p)]=record.data;}
+    for(const auto& record:frame.doom269Plants)
+    {auto* p=board->NetGetGhostPlant(record.id);context->doom269Plants[board->mPlants.DataArrayGetID(p)]=record.data;}
+    for(const auto& record:frame.companions269)
+    {auto* p=board->NetGetGhostProjectile(record.id);context->companions269[board->mProjectiles.DataArrayGetID(p)]=record.data;p->mProjectileAge=record.data.ageTicks;}
+    for(const auto& record:frame.companionPlants269)
+    {auto* p=board->NetGetGhostPlant(record.id);context->companionPlants269[board->mPlants.DataArrayGetID(p)]=record.data;}
+    for(const auto& record:frame.worldPlants269)
+    {auto* p=board->NetGetGhostPlant(record.id);context->worldPlants269[board->mPlants.DataArrayGetID(p)]=record.data;}
+    for(const auto& record:frame.worldBeams269)
+    {auto* p=board->NetGetGhostProjectile(record.id);context->worldBeams269[board->mProjectiles.DataArrayGetID(p)]=record.data;p->mProjectileAge=record.data.ageTicks;}
+    for(const auto& record:frame.worldRemainder269Aux)
+    {auto* p=board->NetGetGhostProjectile(record.id);context->worldRemainder269Aux[board->mProjectiles.DataArrayGetID(p)]=record.data;p->mProjectileAge=record.data.ageTicks;}
+    for(const auto& record:frame.worldRemainder269Shots)
+    {auto* p=board->NetGetGhostProjectile(record.id);context->worldRemainder269Shots[board->mProjectiles.DataArrayGetID(p)]=record.data;p->mProjectileAge=record.data.ageTicks;}
+    for(const auto& record:frame.droppedCards269)
+    {auto* c=board->NetGetGhostCoin(record.id);context->droppedCards269[board->mCoins.DataArrayGetID(c)]=record.data;}
+    for(const auto& record:frame.fertilizeCoins269)
+    {auto* c=board->NetGetGhostCoin(record.id);context->fertilizeCoins269[board->mCoins.DataArrayGetID(c)]=record.data;}
+    for(const auto& record:frame.rollingPlants269)
+    {auto* p=board->NetGetGhostPlant(record.id);context->rollingPlants269[board->mPlants.DataArrayGetID(p)]=record.data;p->mPlantHealth=record.data.health;}
+    for(const auto& record:frame.wheatPlants269)
+    {
+        auto* p=board->NetGetGhostPlant(record.id);
+        auto& wheat=context->wheatPlants269[board->mPlants.DataArrayGetID(p)];
+        wheat.isFromWheat=record.data.isFromWheat;wheat.wheatTime=record.data.wheatTime;wheat.lastTick=-1;
+    }
+	context->packets.clear();
+	for (const auto& record : frame.packets) context->packets.emplace(record.id, record.data);
+	for (const auto& record : frame.plants)
+	{
+		Plant* plant = board->NetGetGhostPlant(record.id);
+		LawnFusion::AttachNativePlant(board, plant, record.data);
+        if(record.data.kind==909||record.data.kind==1104)plant->mDoSpecialCountdown=record.data.pendingProductionTicks;
+		if (record.data.kind != 1000 && LawnFusion::IsNativeProducerKind(record.data.kind))
+			plant->mLaunchCounter = record.data.productionTicks;
+	}
+    for(const auto& record:frame.plants)
+    {
+        const auto kind=record.data.kind;
+        if(kind==15||kind==1049||kind==1050||kind==1051||kind==1066||kind==1156)
+        {
+            auto* p=board->NetGetGhostPlant(record.id);auto* z=record.data.waterTargetId?board->NetGetGhostZombie(record.data.waterTargetId):nullptr;
+            p->mTargetZombieID=z?board->ZombieGetID(z):ZOMBIEID_NULL;
+        }
+    }
+    for(const auto& record:frame.equipmentPlants)
+    {auto* p=board->NetGetGhostPlant(record.id);context->equipmentPlants[board->mPlants.DataArrayGetID(p)]=record.data;}
+    for(const auto& record:frame.equipmentCoins)
+    {auto* c=board->NetGetGhostCoin(record.id);context->equipmentCoins[board->mCoins.DataArrayGetID(c)]=record.data;}
+	LawnFusion::RefreshNativeDroppedCard269Cursors(board);
+	for (const auto& record : frame.projectiles) LawnFusion::AttachNativeProjectile(board, board->NetGetGhostProjectile(record.id), record.data);
+	for (const auto& record : frame.sourceZombies)
+    {
+        auto* zombie=board->NetGetGhostZombie(record.id);
+        if(!LawnFusion::AttachNativeSourceZombieData(board,zombie,record.data))return false;
+        if(record.data.kind==18)zombie->mFlatTires=record.data.vehicleStopped;
+        if(record.data.kind==104)
+        {
+            if(!LawnFusion::InitializeNativeSpecialZombie269PaperAddon(zombie))return false;
+            zombie->mSummonCounter=record.data.paperShootTicks;
+            zombie->mBossHeadCounter=record.data.paperShootEvent;
+            NetApplyReanimState(board->mApp,zombie->mSpecialHeadReanimID,record.data.paperHead);
+        }
+
+    }
+	// Removing a metadata record never clears the counters already decoded from
+	// the ordinary body. Only records present in this frame restore exact values.
+	context->coldZombies.clear();
+	for (const auto& record : frame.coldZombies)
+	{
+		Zombie* zombie = board->NetGetGhostZombie(record.id);
+		if (!LawnFusion::AttachNativeZombieColdData(board, zombie, record.data)) return false;
+		zombie->mChilledCounter = record.data.chilledTicks;
+		zombie->mIceTrapCounter = record.data.frozenTicks;
+	}
+	for (const auto& record : frame.coins) LawnFusion::AttachNativeCoinValue(board, board->NetGetGhostCoin(record.id), record.data.value, record.data.money);
+	context->butterZombies.clear();
+	for (const auto& record : frame.butterZombies)
+	{
+		Zombie* zombie = board->NetGetGhostZombie(record.id);
+		if (!LawnFusion::AttachNativeZombieButterData(board,zombie,record.data)) return false;
+		zombie->mButteredCounter = record.data.ticks;
+	}
+	context->zombieActions.clear();
+	for (const auto& record : frame.zombieActions)
+	{
+		auto* zombie = board->NetGetGhostZombie(record.id);
+		if (!LawnFusion::AttachNativeZombieActionData(board,zombie,record.data)) return false;
+		zombie->mScaleZombie = record.data.scale;
+	}
+	for (const auto& [id,state] : context->garlicZombies)
+		if (auto* zombie = board->mZombies.DataArrayTryToGet(id))
+			if (std::none_of(frame.garlicZombies.begin(),frame.garlicZombies.end(),[&](const auto& r) { return r.id == zombie->mNetId; }))
+				LawnFusion::RestoreNativeGarlicPresentation(zombie,{});
+	context->garlicZombies.clear();
+	for (const auto& record : frame.garlicZombies)
+	{
+		auto* zombie = board->NetGetGhostZombie(record.id);
+		if (!LawnFusion::AttachNativeZombieGarlicData(board,zombie,record.data) ||
+			!LawnFusion::RestoreNativeGarlicPresentation(zombie,record.data)) return false;
+	}
+	context->money = frame.money;
+	context->temporaryLightLevel = frame.temporaryLightLevel;
+	context->selection = selection;
+	context->selectionCommitted = frame.selectionCommitted;
+	context->gloveHolds = frame.gloveHolds;
+	context->gloveCooldownTicks = frame.gloveCooldownTicks;
+	LawnFusion::ReleaseUnusedNativeVisuals(board);
+	LawnFusion::ReleaseUnusedNativeSourceZombieVisuals(board);
+	return true;
+}
 
 // A client ghost is only a presentation mirror. Calling Zombie::DieNoLoot on
 // it also awards challenge points, spawns level rewards, mutates linked
@@ -121,6 +759,96 @@ void NetRetireZombiePresentation(LawnApp* theApp, Zombie* theZombie)
 	theApp->RemoveReanimation(theZombie->mMoweredReanimID);
 	theApp->RemoveReanimation(theZombie->mSpecialHeadReanimID);
 	theZombie->mDead = true;
+}
+
+struct NetArmorVisual
+{
+	const char* mTrack = nullptr;
+	Image* mImages[3] = {};
+};
+
+NetArmorVisual NetGetHelmetVisual(HelmType theType)
+{
+	switch (theType)
+	{
+	case HELMTYPE_TRAFFIC_CONE: return { "anim_cone", { IMAGE_REANIM_ZOMBIE_CONE1, IMAGE_REANIM_ZOMBIE_CONE2, IMAGE_REANIM_ZOMBIE_CONE3 } };
+	case HELMTYPE_BUCKET: return { "anim_bucket", { IMAGE_REANIM_ZOMBIE_BUCKET1, IMAGE_REANIM_ZOMBIE_BUCKET2, IMAGE_REANIM_ZOMBIE_BUCKET3 } };
+	case HELMTYPE_FOOTBALL: return { "zombie_football_helmet", { IMAGE_REANIM_ZOMBIE_FOOTBALL_HELMET, IMAGE_REANIM_ZOMBIE_FOOTBALL_HELMET2, IMAGE_REANIM_ZOMBIE_FOOTBALL_HELMET3 } };
+	case HELMTYPE_BLACK_FOOTBALL: return { "zombie_football_helmet", { IMAGE_REANIM_ZOMBIE_BLACK_FOOTBALL_HELMET, IMAGE_REANIM_ZOMBIE_BLACK_FOOTBALL_HELMET2, IMAGE_REANIM_ZOMBIE_BLACK_FOOTBALL_HELMET3 } };
+	case HELMTYPE_DIGGER: return { "Zombie_digger_hardhat", { IMAGE_REANIM_ZOMBIE_DIGGER_HARDHAT, IMAGE_REANIM_ZOMBIE_DIGGER_HARDHAT2, IMAGE_REANIM_ZOMBIE_DIGGER_HARDHAT3 } };
+	default: return {};
+	}
+}
+
+NetArmorVisual NetGetShieldVisual(ShieldType theType)
+{
+	switch (theType)
+	{
+	case SHIELDTYPE_DOOR: return { "anim_screendoor", { IMAGE_REANIM_ZOMBIE_SCREENDOOR1, IMAGE_REANIM_ZOMBIE_SCREENDOOR2, IMAGE_REANIM_ZOMBIE_SCREENDOOR3 } };
+	case SHIELDTYPE_TRASHCAN: return { "anim_screendoor", { IMAGE_REANIM_ZOMBIE_TRASHCAN1, IMAGE_REANIM_ZOMBIE_TRASHCAN2, IMAGE_REANIM_ZOMBIE_TRASHCAN3 } };
+	case SHIELDTYPE_NEWSPAPER: return { "Zombie_paper_paper", { IMAGE_REANIM_ZOMBIE_PAPER_PAPER1, IMAGE_REANIM_ZOMBIE_PAPER_PAPER2, IMAGE_REANIM_ZOMBIE_PAPER_PAPER3 } };
+	case SHIELDTYPE_LADDER: return { "Zombie_ladder_1", { IMAGE_REANIM_ZOMBIE_LADDER_1, IMAGE_REANIM_ZOMBIE_LADDER_1_DAMAGE1, IMAGE_REANIM_ZOMBIE_LADDER_1_DAMAGE2 } };
+	default: return {};
+	}
+}
+
+// A ghost receives health/type state without running the host's damage code.
+// Reuse native attachments and damage stages to project adoption, loss and repair;
+// never replay damage, death, loot or shield-specific gameplay transitions here.
+void NetApplyZombieArmorPresentation(Zombie* theZombie, HelmType thePreviousHelmet,
+	ShieldType thePreviousShield, bool theHelmetChanged, bool theShieldChanged)
+{
+	Reanimation* aBody = theZombie->mApp->ReanimationTryToGet(theZombie->mBodyReanimID);
+	if (!aBody) return;
+	if (theHelmetChanged)
+	{
+		const auto aPrevious = NetGetHelmetVisual(thePreviousHelmet);
+		if (aPrevious.mTrack && aBody->TrackExists(aPrevious.mTrack))
+		{
+			aBody->AssignRenderGroupToPrefix(aPrevious.mTrack, RENDER_GROUP_HIDDEN);
+			if (theZombie->mHasHead)
+				aBody->AssignRenderGroupToPrefix("anim_hair", RENDER_GROUP_NORMAL);
+		}
+		const auto aCurrent = NetGetHelmetVisual(theZombie->mHelmType);
+		if (aCurrent.mTrack && aBody->TrackExists(aCurrent.mTrack))
+		{
+			if (theZombie->mHelmHealth > 0 && theZombie->mHasHead)
+			{
+				theZombie->AttachHelmet();
+				aBody->SetImageOverride(aCurrent.mTrack, aCurrent.mImages[theZombie->GetHelmDamageIndex()]);
+			}
+			else aBody->AssignRenderGroupToPrefix(aCurrent.mTrack, RENDER_GROUP_HIDDEN);
+		}
+	}
+	if (theShieldChanged)
+	{
+		const auto aPrevious = NetGetShieldVisual(thePreviousShield);
+		if (aPrevious.mTrack && aBody->TrackExists(aPrevious.mTrack))
+		{
+			aBody->AssignRenderGroupToPrefix(aPrevious.mTrack, RENDER_GROUP_HIDDEN);
+			if (thePreviousShield == SHIELDTYPE_DOOR || thePreviousShield == SHIELDTYPE_TRASHCAN)
+				theZombie->ShowDoorArms(false);
+			else if (thePreviousShield == SHIELDTYPE_NEWSPAPER)
+				aBody->AssignRenderGroupToPrefix("Zombie_paper_hands", RENDER_GROUP_NORMAL);
+			else if (thePreviousShield == SHIELDTYPE_LADDER)
+			{
+				aBody->AssignRenderGroupToPrefix("Zombie_outerarm", theZombie->mHasArm ? RENDER_GROUP_NORMAL : RENDER_GROUP_HIDDEN);
+				aBody->AssignRenderGroupToPrefix("Zombie_ladder_innerarm_hand2", RENDER_GROUP_HIDDEN);
+			}
+		}
+		const auto aCurrent = NetGetShieldVisual(theZombie->mShieldType);
+		if (aCurrent.mTrack && aBody->TrackExists(aCurrent.mTrack))
+		{
+			if (theZombie->mShieldHealth > 0)
+			{
+				theZombie->AttachShield();
+				aBody->SetImageOverride(aCurrent.mTrack, aCurrent.mImages[theZombie->GetShieldDamageIndex()]);
+			}
+			else aBody->AssignRenderGroupToPrefix(aCurrent.mTrack, RENDER_GROUP_HIDDEN);
+		}
+		if (!theZombie->mHasArm)
+			theZombie->SetupReanimForLostArm(1U << (int)DamageFlags::DAMAGE_DOESNT_LEAVE_BODY);
+	}
 }
 
 uint32_t NetGetReanimationFrameCapacity(const Reanimation* theReanim)
@@ -807,6 +1535,26 @@ void LawnNet::NetBroadcastReanimation(LawnApp* theApp, Reanimation* theReanim,
 		theApp->mNetManager->SendBoardEvent(anEvent, BOARDEV_PRESENTATION_REANIM);
 }
 
+void LawnNet::NetBroadcastFwoosh(LawnApp* theApp, int theRow)
+{
+	if (!theApp || !theApp->NetIsHost() || !theApp->mNetManager || !theApp->mBoard ||
+		theRow < 0 || theRow >= MAX_GRID_SIZE_Y) return;
+	NetBuffer anEvent;
+	anEvent.WriteU8(static_cast<uint8_t>(theRow));
+	for (int i=0;i<12;++i)
+	{
+		const auto id = theApp->mBoard->mFwooshID[theRow][i];
+		Reanimation* effect = theApp->ReanimationTryToGet(id);
+		NetZombieAnimState state;
+		if (!effect || !NetCaptureReanimState(theApp,id,state) || !state.mPresent || state.mDead) return;
+		anEvent.WriteF32(effect->mOverlayMatrix.m02); anEvent.WriteF32(effect->mOverlayMatrix.m12);
+		anEvent.WriteF32(effect->mOverlayMatrix.m00); anEvent.WriteF32(effect->mOverlayMatrix.m11);
+		anEvent.WriteI32(effect->mRenderOrder);
+		if (!NetEncodeZombieAnimState(state,anEvent)) return;
+	}
+	theApp->mNetManager->SendBoardEvent(anEvent,BOARDEV_PRESENTATION_FWOOSH);
+}
+
 void Board::NetCleanupCrazyDavePresentation()
 {
 	Reanimation* aBlinkReanim = mApp->ReanimationTryToGet(mApp->mCrazyDaveBlinkReanimID);
@@ -1398,6 +2146,7 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
                 aBody.WriteU8((uint8_t)aProjectile->mMotionType);
                 aBody.WriteU8((uint8_t)max(0, min(255, aProjectile->mFrame)));
                 aBody.WriteU8(aProjectile->mOnHighGround ? 1 : 0);
+                aBody.WriteF32(aProjectile->mRotationSpeed);
                 aCount++;
         }
 	TOD_ASSERT(aBody.Size() == (size_t)aCount * NET_PROJECTILE_WIRE_BYTES);
@@ -1437,6 +2186,8 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
                 aBody.WriteU8(aPottedPresent ? (uint8_t)aCoin->mPottedPlantSpec.mFacing : 255);
                 aBody.WriteU8(aPottedPresent ? (uint8_t)aCoin->mPottedPlantSpec.mDrawVariation : 255);
                 aBody.WriteU8(aPottedPresent ? (uint8_t)aCoin->mPottedPlantSpec.mPlantAge : 255);
+                aBody.WriteI32(aCoin->mCoinAge);aBody.WriteI32(aCoin->mDisappearCounter);
+                aBody.WriteU8(LawnFusion::IsNativeDroppedCard269(aCoin)?uint8_t(aCoin->mTimesDropped):0);
                 aCount++;
         }
 	TOD_ASSERT(aBody.Size() == (size_t)aCount * NET_COIN_WIRE_BYTES);
@@ -1518,6 +2269,35 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 	}
 	b.WriteU16(aCount);
 	b.WriteBytes(aBody.Data(), aBody.Size());
+	if (const auto* context = LawnFusion::GetNativeContext(this))
+	{
+		LawnFusion::NativeSnapshotFrame frame;
+        const bool captured=NetCaptureNativeFusionFrame(this,frame);
+        const bool metadata=captured && LawnFusion::ValidateNativeSnapshotFrame(frame,context->eligible);
+        const bool body=captured && NetPreflightNativeFusionBody(b,frame);
+        if (!captured || !metadata || !body || !LawnFusion::EncodeNativeSnapshot(frame,context->eligible,b))
+        {
+            NetTrace("native Fusion snapshot encode rejected epoch=%u capture=%d metadata=%d body=%d",context->epoch,captured?1:0,metadata?1:0,body?1:0);
+            if (captured && !metadata)
+            {
+                auto probe=frame;
+                probe.plants.clear();probe.projectiles.clear();probe.coldZombies.clear();probe.butterZombies.clear();
+                probe.zombieActions.clear();probe.coins.clear();probe.garlicZombies.clear();probe.sourceZombies.clear();
+                probe.equipmentCoins.clear();probe.equipmentPlants.clear();probe.zombieIdentities.clear();probe.gloveHolds={};
+                probe.star269Plants.clear();probe.star269Projectiles.clear();probe.doom269Plants.clear();
+                probe.companions269.clear();probe.companionPlants269.clear();
+                for(const auto& record:frame.plants)
+                {
+                    probe.plants={record};probe.zombieIdentities.clear();
+                    if(record.data.waterTargetId)
+                        for(const auto& identity:frame.zombieIdentities)if(identity.id==record.data.waterTargetId)probe.zombieIdentities.push_back(identity);
+                    if (!LawnFusion::ValidateNativeSnapshotFrame(probe,context->eligible))
+                        NetTrace("Fusion invalid plant record id=%u kind=%u parents=%u,%u owner=%u idle=%.9g shoot=%.9g speed=%.9g shots=%u rage=%u bag=%u mode=%u damageStage=%u production=%d pending=%d",record.id,record.data.kind,record.data.firstParent,record.data.secondParent,record.data.owner,record.data.idleSeconds,record.data.shootSeconds,record.data.animationSpeed,record.data.batchShotCount,record.data.batchRageTicks,record.data.batchBagCount,record.data.batchMode,record.data.damageStage,record.data.productionTicks,record.data.pendingProductionTicks);
+                }
+            }
+			b.Clear();
+		}
+	}
 }
 
 // ==========================================================================
@@ -1616,6 +2396,39 @@ void Board::NetApplyEvent(NetBuffer& b)
 	uint8_t aEvent = b.ReadU8Or();
 	switch (aEvent)
 	{
+	case BOARDEV_PRESENTATION_FWOOSH:
+	{
+		if (b.Remaining() != 1 + 12*(20 + NET_ZOMBIE_ANIM_WIRE_BYTES)) break;
+		const auto row = b.ReadU8Or();
+		if (row >= (StageHas6Rows() ? 6 : 5)) break;
+		struct Flame {float x,y,sx,sy;int order;NetZombieAnimState state;};
+		Flame flames[12]; bool valid = true;
+		ReanimatorEnsureDefinitionLoaded(REANIM_JALAPENO_FIRE,true);
+		if (!gReanimatorDefArray || REANIM_JALAPENO_FIRE >= gReanimatorDefCount) break;
+		const auto& definition = gReanimatorDefArray[REANIM_JALAPENO_FIRE];
+		if (!definition.mTracks.tracks || definition.mTracks.count <= 0) break;
+		for (auto& f : flames)
+		{
+			f.x=b.ReadF32Or();f.y=b.ReadF32Or();f.sx=b.ReadF32Or();f.sy=b.ReadF32Or();f.order=b.ReadI32Or();
+			valid = NetDecodeZombieAnimState(b,f.state) && f.state.mPresent && !f.state.mDead &&
+				_finite(f.x) && _finite(f.y) && _finite(f.sx) && _finite(f.sy) &&
+				fabsf(f.x)<=4096 && fabsf(f.y)<=4096 && fabsf(f.sx)<=4 && fabsf(f.sy)<=4 &&
+				fabsf(f.sx)>=.1f && fabsf(f.sy)>=.1f && f.order>=0 && f.order<=1000000 &&
+				NetZombieAnimStateFitsFrames(f.state,definition.mTracks.tracks[0].mTransforms.count) && valid;
+		}
+		if (!valid) break;
+		for (int i=0;i<12;++i)
+		{
+			if (auto* old=mApp->ReanimationTryToGet(mFwooshID[row][i])) old->ReanimationDie();
+			const auto& f=flames[i];
+			auto* effect=mApp->AddReanimation(f.x,f.y,f.order,REANIM_JALAPENO_FIRE);
+			mFwooshID[row][i]=effect ? mApp->ReanimationGetID(effect) : ReanimationID::REANIMATIONID_NULL;
+			if (effect) {effect->OverrideScale(f.sx,f.sy);NetApplyReanimState(mApp,mFwooshID[row][i],f.state);}
+		}
+		mFwooshCounterID[row]=100;mFwooshCountDown=100;
+		NetTrace("presentation fwoosh applied row=%u owned=12 nativeController=1",row);
+		break;
+	}
 	case BOARDEV_PRESENTATION_PARTICLE:
 	case BOARDEV_PRESENTATION_REANIM:
 	{
@@ -1632,13 +2445,23 @@ void Board::NetApplyEvent(NetBuffer& b)
 		const int aRenderOrder = b.ReadI32Or();
 		if (!_finite(aX) || !_finite(aY) || fabsf(aX) > 4096.0f || fabsf(aY) > 4096.0f ||
 			aRenderOrder < 0 || aRenderOrder > 1000000 ||
-			aType >= (aReanimation ? (int)ReanimationType::NUM_REANIMS : (int)ParticleEffect::NUM_PARTICLES))
+			(aReanimation ? aType >= (int)ReanimationType::NUM_REANIMS :
+			 (aType >= (int)ParticleEffect::NUM_PARTICLES &&
+			  !(LawnFusion::IsNativeFusionBoard(this) && (aType == PARTICLE_FUSION_SOURCE52||aType==PARTICLE_FUSION_SOURCE99||aType==PARTICLE_FUSION_SOURCE100||aType==PARTICLE_FUSION_SOURCE49||aType==PARTICLE_FUSION_SOURCE51||aType==PARTICLE_FUSION_SOURCE35||aType==PARTICLE_FUSION_SOURCE36)))))
 		{
 			NetTrace("presentation effect rejected type=%u pos=(%.2f,%.2f) order=%d", aType, aX, aY, aRenderOrder);
 			break;
 		}
 		if (!aReanimation)
+		{
 			mApp->AddTodParticle(aX, aY, aRenderOrder, (ParticleEffect)aType);
+			if (LawnFusion::IsNativeFusionBoard(this) && aType == ParticleEffect::PARTICLE_POWIE)
+			{
+				mApp->PlayFoley(FoleyType::FOLEY_CHERRYBOMB);
+				mApp->PlayFoley(FoleyType::FOLEY_JUICY);
+				ShakeBoard(3, -4);
+			}
+		}
 		else
 		{
 			NetZombieAnimState aState;
@@ -1669,7 +2492,7 @@ void Board::NetApplyEvent(NetBuffer& b)
 		SeedType anImitaterType = anImitater == 255 ? SeedType::SEED_NONE : (SeedType)anImitater;
 		if (anId == 0 || aType >= (uint8_t)SeedType::NUM_SEED_TYPES ||
 			(anImitater != 255 && anImitater >= (uint8_t)SeedType::NUM_SEED_TYPES) ||
-			aRow >= MAX_GRID_SIZE_Y || aCol >= MAX_GRID_SIZE_X)
+			!IsValidGridCell(aCol, aRow))
 		{
 			NetTrace("PLANT_ADDED rejected id=%u type=%u imitater=%u cell=(%u,%u)", anId, aType, anImitater, aCol, aRow);
 			break;
@@ -1735,11 +2558,16 @@ void Board::NetApplyEvent(NetBuffer& b)
 			 aPottedAge <= (uint8_t)PottedPlantAge::PLANTAGE_FULL) :
 			(aPottedSeed == 255 && aPottedGarden == 255 && aPottedFacing == 255 &&
 			 aPottedVariation == 255 && aPottedAge == 255);
+		const bool aNativeMoneyType = aCoinType == (uint8_t)COIN_SILVER || aCoinType == (uint8_t)COIN_GOLD || aCoinType == (uint8_t)COIN_DIAMOND;
+		const bool aNativeFusionValueValid = !LawnFusion::IsNativeFusionBoard(this) ||
+			((aCoinType != (uint8_t)COIN_SMALLSUN || aValue == 5 || aValue == 15) && (aCoinType != (uint8_t)COIN_SUN || aValue == 25) &&
+			 (aCoinType != (uint8_t)COIN_LARGESUN || aValue == 50) &&
+			 (!aNativeMoneyType || LawnFusion::FusionMoneyCoinMetadataValid(static_cast<CoinType>(aCoinType),aValue)));
 		if (anId == 0 || aCoinType < (uint8_t)CoinType::COIN_SILVER ||
 			aCoinType > (uint8_t)CoinType::COIN_PRESENT_SURVIVAL_MODE ||
 			aMotion > (uint8_t)CoinMotion::COIN_MOTION_FROM_BOSS ||
 			(aUsablePacket && aUsableSeed >= (uint8_t)SeedType::NUM_SEED_TYPES) ||
-			(!aUsablePacket && aUsableSeed != 255) || !aValidPottedVisual)
+			(!aUsablePacket && aUsableSeed != 255) || !aValidPottedVisual || !aNativeFusionValueValid)
 		{
 			NetTrace("SUN_ADDED rejected: id=%u coinType=%u seed=%u potted=(%u,%u,%u,%u,%u) value=%u",
 				anId, aCoinType, aUsableSeed, aPottedSeed, aPottedGarden,
@@ -1779,6 +2607,10 @@ void Board::NetApplyEvent(NetBuffer& b)
 		{
 			aCoin->mNetId = anId;
 			aCoin->mNetGhost = true;
+			if (LawnFusion::IsNativeFusionBoard(this) && LawnFusion::FusionSunCoinMetadataValid(aCoinType,aValue))
+				LawnFusion::AttachNativeCoinValue(this, aCoin, aValue);
+			else if (LawnFusion::IsNativeFusionBoard(this) && aNativeMoneyType)
+				LawnFusion::AttachNativeCoinValue(this,aCoin,aValue,true);
 			if (aCreatedFromEvent)
 			{
 				// AddCoin emits before some callers finish configuring velocity and
@@ -1941,8 +2773,17 @@ void Board::NetApplyEvent(NetBuffer& b)
 			Reanimation* aBodyReanim = mApp->ReanimationTryToGet(aPlant->mBodyReanimID);
 			if (aParticle && aBodyReanim && aBodyReanim->mFilterEffect != FilterEffect::FILTER_EFFECT_NONE)
 				aParticle->OverrideFilterEffect(nullptr, aBodyReanim->mFilterEffect);
-			aPlant->mDead = true;
-			aPlant->RemoveEffects();
+			if (LawnFusion::IsNativeFusionPotato(aPlant))
+			{
+				// Fusion keeps the real mine for its source .1s delayed death.
+				// Only authoritative snapshot omission retires this client ghost.
+				NetTrace("Fusion native Potato effect id=%u fxOnly=1 awaitHostRetirement=1", anId);
+			}
+			else
+			{
+				aPlant->mDead = true;
+				aPlant->RemoveEffects();
+			}
 		}
 		ShakeBoard(3, -4);
 		break;
@@ -2078,7 +2919,8 @@ void Board::NetApplyPlantPresentation(Plant* thePlant, PlantState thePreviousSta
 		aBodyReanim->SetFramesForLayer("anim_rise");
 	}
 
-	if (thePlant->mState != PlantState::STATE_POTATO_ARMED)
+	const bool aFusionDelayedPotato = thePlant->mState == PlantState::STATE_DOINGSPECIAL && LawnFusion::IsNativeFusionPotato(thePlant);
+	if (thePlant->mState != PlantState::STATE_POTATO_ARMED && !aFusionDelayedPotato)
 		return;
 
 	if (theCreatedOrAdopted || thePreviousState != PlantState::STATE_POTATO_ARMED)
@@ -2111,10 +2953,62 @@ void Board::NetApplyPlantPresentation(Plant* thePlant, PlantState thePreviousSta
 	}
 }
 
-void Board::NetApplySnapshot(NetBuffer& b)
+void Board::NetApplySnapshot(NetBuffer& b, bool* theApplied)
 {
+	if (theApplied) *theApplied = false;
 	const size_t aSmokeSnapshotBytes = b.Size();
 	const uint32_t aSmokeSnapshotHash = NetFnv1a32(b.Data(), b.Size());
+	LawnFusion::NativeSnapshotFrame aFusionFrame;
+	LawnFusion::FusionSeedBank aFusionSelection;
+	const bool aNativeFusion = LawnFusion::IsNativeFusionBoard(this);
+	bool aZombieTerrainChanged = false;
+	if (aNativeFusion)
+	{
+		const auto* context = LawnFusion::GetNativeContext(this);
+		NetBuffer wire = b, nativeBody;
+		aFusionSelection = context->selection;
+		if (!LawnFusion::DecodeNativeSnapshot(wire, context->eligible, context->epoch, aFusionFrame, nativeBody) ||
+			!aFusionSelection.ApplySnapshot(aFusionFrame.selection) ||
+			!NetPreflightNativeFusionBody(nativeBody, aFusionFrame))
+		{
+			NetTrace("native Fusion snapshot preflight rejected epoch=%u bytes=%zu", context->epoch, b.Remaining());
+			return;
+		}
+		std::vector<uint16_t> plantVisuals, projectileVisuals;
+		for (const auto& record : aFusionFrame.plants) plantVisuals.push_back(record.data.kind);
+		for (const auto& record : aFusionFrame.packets)
+			if (record.data.kind != LawnFusion::kFusionNoPlant) plantVisuals.push_back(record.data.kind);
+		for (const auto& record : aFusionFrame.projectiles) projectileVisuals.push_back(record.data.kind);
+		std::string visualError;
+		bool zombieVisualsReady = true;
+		for (const auto& record : aFusionFrame.sourceZombies)
+			if (!LawnFusion::EnsureNativeSourceZombieVisuals(this,record.data.kind,&visualError))
+			{ zombieVisualsReady = false; break; }
+        for(const auto& record:aFusionFrame.equipmentCoins)
+            if(!LawnFusion::CanCreateNativeEquipmentVisual(this,record.data.factoryType))
+            {zombieVisualsReady=false;visualError="Source equipment package unavailable";break;}
+        for(const auto& record:aFusionFrame.fertilizeCoins269)if(!LawnFusion::EnsureNativeFertilize269Visuals(this)){zombieVisualsReady=false;visualError="Source Fertilize resource unavailable";break;}
+        for(const auto& record:aFusionFrame.droppedCards269)
+            if(!LawnFusion::EnsureNativePortraitVisuals(this,record.data.kind,&visualError)){zombieVisualsReady=false;break;}
+        for(const auto& record:aFusionFrame.rollingPlants269)
+            if(!LawnFusion::EnsureNativePlantVisuals(this,record.data.factoryKind,&visualError)){zombieVisualsReady=false;break;}
+        for(const auto& record:aFusionFrame.companions269)
+            if(!LawnFusion::EnsureNativeCompanion269Visual(this,record.data.family,record.data.smallVariant,&visualError))
+            {zombieVisualsReady=false;break;}
+        for(const auto& record:aFusionFrame.worldRemainder269Aux)
+            if(!LawnFusion::EnsureNativeWorldRemainder269Assets(this,record.data.family,record.data.type))
+            {zombieVisualsReady=false;visualError="Source world auxiliary resource unavailable";break;}
+		if (!zombieVisualsReady || !LawnFusion::EnsureNativeVisuals(this,plantVisuals,projectileVisuals,&visualError))
+		{
+			NetTrace("native Fusion snapshot resources unavailable epoch=%u error=%s",context->epoch,visualError.c_str());
+			if (mApp && mApp->mNetManager)
+				mApp->mNetManager->ReportFusionResourceFailure("Fusion resources could not be loaded. Check your game installation.");
+			return;
+		}
+		aZombieTerrainChanged = static_cast<uint8_t>(mBackground) != aFusionFrame.background;
+		if (!LawnFusion::ConfigureNativeFusionBackground(this,aFusionFrame.background)) return;
+		b = std::move(nativeBody);
+	}
 	// Presentation baselines advance only after the entire snapshot validates.
 	// Core fields below are committed early, so using mChallenge here would let a
 	// later malformed section consume an edge-triggered Slot Machine animation.
@@ -2380,7 +3274,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	int aMismatchLocalIndex = -1;
 	for (int local = 0; local < aLocalPacketCount && local < SEEDBANK_CAPACITY; ++local)
 		for (const NetSeedPacketWire& wire : aSeedPackets)
-			if (mSeedBank->mSeedPackets[local].IsMysteryPending() && mSeedBank->mSeedPackets[local].mNetId == wire.mId && wire.mType != 255)
+			if (!aNativeFusion && mSeedBank->mSeedPackets[local].IsMysteryPending() && mSeedBank->mSeedPackets[local].mNetId == wire.mId && wire.mType != 255)
 			{ NetTrace("snapshot mystery reveal rejected outside START_PLAYING id=%u", wire.mId); return; }
 	if (anIdentityMultisetMatch)
 	{
@@ -2395,9 +3289,9 @@ void Board::NetApplySnapshot(NetBuffer& b)
 				{
 					if (!aWireUsed[aWireIndex] &&
 						aSeedPackets[aWireIndex].mId == aLocalPacket.mNetId &&
-						aSeedPackets[aWireIndex].mType == aLocalType &&
+						(aNativeFusion || (aSeedPackets[aWireIndex].mType == aLocalType &&
 						aSeedPackets[aWireIndex].mImitater == aLocalImitater &&
-						aSeedPackets[aWireIndex].mOriginLevel == aLocalPacket.mRandomDiscountLevel)
+						aSeedPackets[aWireIndex].mOriginLevel == aLocalPacket.mRandomDiscountLevel)))
 					{
 						aWireUsed[aWireIndex] = true;
 						aWireForLocal[aLocalIndex] = aWireIndex;
@@ -2407,6 +3301,14 @@ void Board::NetApplySnapshot(NetBuffer& b)
 			}
 			if (aWireForLocal[aLocalIndex] >= 0)
 				continue;
+			// Fusion aliases can represent normal/extra cards with different
+			// runtime state. Their validated stable IDs must never match by alias.
+			if (aNativeFusion)
+			{
+				anIdentityMultisetMatch = false;
+				aMismatchLocalIndex = aLocalIndex;
+				break;
+			}
 			for (int aWireIndex = 0; aWireIndex < aNumPackets; aWireIndex++)
 			{
 				const NetSeedPacketWire& aWire = aSeedPackets[aWireIndex];
@@ -2460,6 +3362,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	// An initial intro bank (including a late spectator's mixed-owner bank)
 	// may need adoption. A valid chosen bank already has viewer-relative order.
 	const bool aCanonicalFallback =
+		(aNativeFusion && !anIdentityMultisetMatch) ||
 		(!anIdentityMultisetMatch && mApp->mGameScene == GameScenes::SCENE_LEVEL_INTRO) ||
 		(aCanonicalOwnershipSafe &&
 		 (HasConveyorBeltSeedBank() || (!anIdentityMultisetMatch && aCanonicalFallbackMode)));
@@ -2549,7 +3452,8 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	mSeedBank->Move(aSeedBankX, aSeedBankY);
 	mSeedBank->mConveyorBeltCounter = aConveyorCounter;
 	mSeedBank->mCutSceneDarken = aSeedBankDarken;
-	if (HasConveyorBeltSeedBank())
+	if (aNativeFusion) mSeedBank->SortPacketsForViewer(mApp->mNetManager->GetMySlot());
+	if (HasConveyorBeltSeedBank() || aNativeFusion)
 	{
 		// A client starts with an empty/local bank in several challenge entry
 		// paths.  Canonical packet adoption changes the count but historically
@@ -2560,6 +3464,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		mSeedBank->mHeight = Sexy::IMAGE_SEEDBANK->GetHeight();
 		for (int i = 0; i < mSeedBank->mNumPackets; ++i)
 		{
+			if (aNativeFusion) mSeedBank->mSeedPackets[i].mIndex = i;
 			mSeedBank->mSeedPackets[i].mX = GetSeedPacketPositionX(i);
 			mSeedBank->mSeedPackets[i].mY = GetSeedPacketPositionY(i);
 		}
@@ -2643,8 +3548,8 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		const bool aValid = aWire.mId != 0 &&
 			aWire.mType < (uint8_t)SeedType::NUM_SEED_TYPES &&
 			(aWire.mImitater == 255 || aWire.mImitater < (uint8_t)SeedType::NUM_SEED_TYPES) &&
-			aWire.mRow < MAX_GRID_SIZE_Y && aWire.mCol < MAX_GRID_SIZE_X &&
-			aWire.mMaxHealth != 0 && aWire.mHealth <= aWire.mMaxHealth &&
+			IsValidGridCell(aWire.mCol, aWire.mRow) &&
+            NetFusionPlantHealthValid(aNativeFusion?&aFusionFrame:nullptr,aWire.mId,aWire.mHealth,aWire.mMaxHealth) &&
                         aWire.mState <= aMaxPlantState && (aWire.mFlags & ~3) == 0 &&
 			aWire.mPosX >= -2048 && aWire.mPosX <= 2048 &&
 			aWire.mPosY >= -2048 && aWire.mPosY <= 2048 &&
@@ -2697,7 +3602,14 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	{
 		SeedType anImitaterType = aWire.mImitater == 255 ? SeedType::SEED_NONE : (SeedType)aWire.mImitater;
 		Plant* aPlant = NetGetGhostPlant(aWire.mId);
-		if (aPlant && (aPlant->mSeedType != (SeedType)aWire.mType ||
+        bool fusionPlantReused=false;
+        if(aNativeFusion&&aPlant)
+        {
+            const auto incoming=std::find_if(aFusionFrame.plants.begin(),aFusionFrame.plants.end(),[&](const auto& r){return r.id==aWire.mId;});
+            const auto* previous=LawnFusion::GetNativePlantData(aPlant);
+            fusionPlantReused=previous&&incoming!=aFusionFrame.plants.end()&&previous->instanceToken!=incoming->data.instanceToken;
+        }
+		if (aPlant && (fusionPlantReused||aPlant->mSeedType != (SeedType)aWire.mType ||
 			aPlant->mImitaterType != anImitaterType))
 		{
 			// A wrapped wire id must never turn an older ghost into a different
@@ -2744,11 +3656,16 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		aPlant->mNetGhost = true;
 		if (aWire.mZen.mSeedType != 255)
 			aZenPlantStates[aWire.mId] = aWire.mZen;
+		// Native Fusion cell relocation is an instantaneous accepted placement.
+		// Commit the render origin with its logical cell, before presentation can
+		// observe the new support/light membership at the previous position.
+		const bool aNativeCellChanged = aNativeFusion &&
+			(aPlant->mRow != aWire.mRow || aPlant->mPlantCol != aWire.mCol);
 		aPlant->mRow = aWire.mRow;
 		aPlant->mPlantCol = aWire.mCol;
 		aPlant->mNetTargetX = (float)aWire.mPosX;
 		aPlant->mNetTargetY = (float)aWire.mPosY;
-		if (aCreatedOrAdopted)
+		if (aCreatedOrAdopted || aNativeCellChanged)
 		{
 			aPlant->mX = aWire.mPosX;
 			aPlant->mY = aWire.mPosY;
@@ -2763,6 +3680,20 @@ void Board::NetApplySnapshot(NetBuffer& b)
                 aPlant->mRecentlyEatenCountdown = aWire.mRecentlyEaten;
                 aPlant->mEatenFlashCountdown = aWire.mEatenFlash;
                 aPlant->mBeghouledFlashCountdown = aWire.mBeghouledFlash;
+                if (aNativeFusion)
+                {
+                        // Source identity must exist before resource-only hooks,
+                        // including a late first sample of an active ability.
+                        const auto record = std::find_if(aFusionFrame.plants.begin(), aFusionFrame.plants.end(),
+                                [&](const auto& item) { return item.id == aPlant->mNetId; });
+                        if (record == aFusionFrame.plants.end() ||
+                                LawnFusion::GetNativeSeedForPlant(record->data.kind) != aPlant->mSeedType ||
+                                !LawnFusion::AttachNativePlant(this, aPlant, record->data))
+                        {
+                                NetTrace("native Fusion plant presentation rejected: metadata binding id=%u", aPlant->mNetId);
+                                return;
+                        }
+                }
                 NetApplyPlantPresentation(aPlant, aPreviousState, aCreatedOrAdopted);
                 for (int aRole = 0; aRole < NET_PLANT_REANIM_ROLES; aRole++)
                         NetApplyReanimState(mApp, NetGetPlantReanimID(aPlant, aRole),
@@ -2930,7 +3861,15 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	for (const NetZombieWire& aWire : aZombieWires)
 	{
 		Zombie* aZombie = NetGetGhostZombie(aWire.mId);
-		if (aZombie && aZombie->mZombieType != (ZombieType)aWire.mType)
+        bool fusionZombieReused=false;
+        if(aNativeFusion&&aZombie)
+        {
+            const auto* context=LawnFusion::GetNativeContext(this);const auto generation=mZombies.DataArrayGetID(aZombie);
+            const auto previous=context->zombieInstanceTokens.find(generation);
+            const auto incoming=std::find_if(aFusionFrame.zombieIdentities.begin(),aFusionFrame.zombieIdentities.end(),[&](const auto& r){return r.id==aWire.mId;});
+            fusionZombieReused=previous!=context->zombieInstanceTokens.end()&&incoming!=aFusionFrame.zombieIdentities.end()&&previous->second!=incoming->data;
+        }
+		if (aZombie && (fusionZombieReused||aZombie->mZombieType != (ZombieType)aWire.mType))
 		{
 			NetRetireZombiePresentation(mApp, aZombie);
 			aZombie = nullptr;
@@ -2958,6 +3897,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 			aZombie->mNetAnimKey = 255;
 		}
 		const int aPreviousRow = aZombie->mRow;
+		const bool aWasInPool = aZombie->mInPool;
 		const float aTargetX = aWire.mPosX4 / 4.0f;
 		const float aTargetY = aWire.mPosY4 / 4.0f;
 		const bool aFirstAuthoritativeSample = aCreated || !aZombie->mVisible;
@@ -2983,6 +3923,12 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		aZombie->mFromWave = aWire.mFromWave;
 		aZombie->mRenderOrder = aWire.mRenderOrder;
 		aZombie->ApplyNetZombatar(aWire.mZombatar);
+		const HelmType aPreviousHelmet = aZombie->mHelmType;
+		const ShieldType aPreviousShield = aZombie->mShieldType;
+		const bool aHadHelmet = aZombie->mHelmHealth > 0;
+		const bool aHadShield = aZombie->mShieldHealth > 0;
+		const int aPreviousHelmetDamage = aZombie->GetHelmDamageIndex();
+		const int aPreviousShieldDamage = aZombie->GetShieldDamageIndex();
 		aZombie->mBodyHealth = (int)aWire.mHealth.mBody;
 		aZombie->mBodyMaxHealth = (int)aWire.mHealth.mBodyMax;
 		aZombie->mHelmHealth = (int)aWire.mHealth.mHelm;
@@ -3016,6 +3962,11 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		}
 		aZombie->mHasHead = aHasHead;
 		aZombie->mHasArm = aHasArm;
+		const bool aHelmetChanged = aCreated || aPreviousHelmet != aZombie->mHelmType ||
+			aHadHelmet != (aZombie->mHelmHealth > 0) || aPreviousHelmetDamage != aZombie->GetHelmDamageIndex();
+		const bool aShieldChanged = aCreated || aPreviousShield != aZombie->mShieldType ||
+			aHadShield != (aZombie->mShieldHealth > 0) || aPreviousShieldDamage != aZombie->GetShieldDamageIndex();
+		NetApplyZombieArmorPresentation(aZombie, aPreviousHelmet, aPreviousShield, aHelmetChanged, aShieldChanged);
 		aZombie->mHasObject = (aWire.mFlags & 32) != 0;
 		aZombie->mVariant = (aWire.mFlags & 64) != 0;
 		aZombie->mMindControlled = (aWire.mFlags & 128) != 0;
@@ -3027,6 +3978,11 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		aZombie->mVelX = aWire.mVelX;
 		aZombie->mAltitude = aWire.mAltitude;
 		aZombie->mOriginalAnimRate = aWire.mAnimRate;
+		// Creation can precede the client's playing scene. Hydrate the stock
+		// water tracks from authoritative terrain/state without replaying AI.
+		if ((aFirstAuthoritativeSample || aZombieTerrainChanged || aPreviousRow != aZombie->mRow || aWasInPool != aZombie->mInPool) &&
+			(mPlantRow[aZombie->mRow] == PLANTROW_POOL || aZombie->mInPool || aZombie->mZombieType == ZOMBIE_DUCKY_TUBE))
+			aZombie->SetupPoolReanim();
 
 		Reanimation* aBody = mApp->ReanimationTryToGet(aZombie->mBodyReanimID);
 		if (aBody)
@@ -3091,6 +4047,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		float mShadowY;
 		int32_t mRenderOrder;
 		float mRotation;
+        float mRotationSpeed;
 		uint8_t mMotion;
 		uint8_t mFrame;
 		uint8_t mFlags;
@@ -3113,6 +4070,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		aWire.mMotion = b.ReadU8Or();
 		aWire.mFrame = b.ReadU8Or();
 		aWire.mFlags = b.ReadU8Or();
+        aWire.mRotationSpeed=b.ReadF32Or();
 
 		const bool aFrameValid = NetProjectileFrameIsSafe(aWire.mType, aWire.mFrame);
 		const bool aValid = aWire.mId != 0 &&
@@ -3122,6 +4080,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 			(aWire.mFlags & ~1) == 0 && aFrameValid &&
 			_finite(aWire.mPosX) && _finite(aWire.mPosY) &&
 			_finite(aWire.mPosZ) && _finite(aWire.mShadowY) && _finite(aWire.mRotation) &&
+            _finite(aWire.mRotationSpeed)&&aWire.mRotationSpeed>= -100000.f&&aWire.mRotationSpeed<=100000.f&&
 			aWire.mPosX >= -1024.0f && aWire.mPosX <= 2048.0f &&
 			aWire.mPosY >= -1024.0f && aWire.mPosY <= 2048.0f &&
 			aWire.mPosZ >= -4096.0f && aWire.mPosZ <= 4096.0f &&
@@ -3144,7 +4103,12 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	for (const NetProjectileWire& aWire : aProjectileWires)
 	{
 		Projectile* aProjectile = NetGetGhostProjectile(aWire.mId);
-		if (aProjectile && aProjectile->mProjectileType != (ProjectileType)aWire.mType)
+        const auto worldAux=aNativeFusion?std::find_if(aFusionFrame.worldRemainder269Aux.begin(),aFusionFrame.worldRemainder269Aux.end(),[&](const auto& r){return r.id==aWire.mId;}):aFusionFrame.worldRemainder269Aux.end();
+        const bool typedWorldAux=worldAux!=aFusionFrame.worldRemainder269Aux.end();
+        const auto* previousWorldAux=aProjectile?LawnFusion::GetNativeWorldRemainder269AuxState(aProjectile):nullptr;
+        const bool worldAuxChanged=aProjectile&&(bool(previousWorldAux)!=typedWorldAux||
+            (previousWorldAux&&typedWorldAux&&previousWorldAux->instanceToken!=worldAux->data.instanceToken));
+		if (aProjectile && (worldAuxChanged||aProjectile->mProjectileType != (ProjectileType)aWire.mType))
 		{
 			// Torchwood conversion changes PEA into FIREBALL without changing the
 			// network identity.  Recreate the presentation object so FIREBALL gets
@@ -3176,7 +4140,12 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		aProjectile->mNetTargetY = aWire.mPosY;
 		aProjectile->mNetTargetZ = aWire.mPosZ;
 		aProjectile->mNetTargetRotation = aWire.mRotation;
-		if (aCreated || aPortalJump)
+        const auto incoming=aNativeFusion?std::find_if(aFusionFrame.projectiles.begin(),aFusionFrame.projectiles.end(),[&](const auto& r){return r.id==aWire.mId;}):aFusionFrame.projectiles.end();
+        const bool cannon=incoming!=aFusionFrame.projectiles.end()&&LawnFusion::IsFusionCannon268Way14(incoming->data.kind)&&incoming->data.specialType==14;
+        const bool cannonPhaseChanged=cannon&&aProjectile->mRotation!=aWire.mRotation;
+        if(aNativeFusion)aProjectile->mRotationSpeed=aWire.mRotationSpeed;
+        if(cannon)aProjectile->mRotation=aWire.mRotation;
+		if (aCreated || aPortalJump||cannonPhaseChanged||typedWorldAux)
 		{
 			aProjectile->mPosX = aWire.mPosX;
 			aProjectile->mPosY = aWire.mPosY;
@@ -3194,19 +4163,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		aProjectile->mMotionType = (ProjectileMotion)aWire.mMotion;
 		aProjectile->mFrame = aWire.mFrame;
 		aProjectile->mOnHighGround = (aWire.mFlags & 1) != 0;
-		if (aProjectile->mProjectileType == ProjectileType::PROJECTILE_FIREBALL)
-		{
-			const bool aBackwards = aProjectile->mMotionType == ProjectileMotion::MOTION_BACKWARDS;
-			Reanimation* aFirePeaReanim = FindReanimAttachment(aProjectile->mAttachmentID);
-			if (aFirePeaReanim)
-				aFirePeaReanim->OverrideScale(aBackwards ? -1.0f : 1.0f, 1.0f);
-			AttachEffect* aFirePeaEffect = FindFirstAttachment(aProjectile->mAttachmentID);
-			if (aFirePeaEffect && aFirePeaEffect->mEffectType == EffectType::EFFECT_REANIM)
-			{
-				aFirePeaEffect->mOffset.m02 = aBackwards ? 55.0f : -25.0f;
-				aFirePeaEffect->mOffset.m12 = -25.0f;
-			}
-		}
+		aProjectile->SyncFireballPresentationDirection();
 	}
 	{
 		Projectile* aProjectile = nullptr;
@@ -3242,6 +4199,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		uint8_t mUsableSeed;
 		uint8_t mFadeCount;
 		uint16_t mDisappearCounter;
+        int mCoinAge,mFullDisappearCounter,mCardUses;
 		uint8_t mPottedSeed;
 		uint8_t mPottedGarden;
 		uint8_t mPottedFacing;
@@ -3253,7 +4211,8 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	std::map<unsigned short, bool> aSeenCoins;
 	for (int i = 0; i < aCount; i++)
 	{
-		NetCoinWire aWire = {};
+		const size_t coinRecordStart=b.mReadPos;
+        NetCoinWire aWire = {};
 		aWire.mId = b.ReadU16Or();
 		aWire.mType = b.ReadU8Or();
 		aWire.mMotion = b.ReadU8Or();
@@ -3272,6 +4231,14 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		aWire.mPottedFacing = b.ReadU8Or();
 		aWire.mPottedVariation = b.ReadU8Or();
 		aWire.mPottedAge = b.ReadU8Or();
+        aWire.mCoinAge=b.ReadI32Or();aWire.mFullDisappearCounter=b.ReadI32Or();
+        aWire.mCardUses=b.ReadU8Or();
+        const auto equipment=aNativeFusion?std::find_if(aFusionFrame.equipmentCoins.begin(),aFusionFrame.equipmentCoins.end(),[&](const auto& r){return r.id==aWire.mId;}):aFusionFrame.equipmentCoins.end();
+        const bool typedEquipment=equipment!=aFusionFrame.equipmentCoins.end();
+        const auto card=aNativeFusion?std::find_if(aFusionFrame.droppedCards269.begin(),aFusionFrame.droppedCards269.end(),[&](const auto& r){return r.id==aWire.mId;}):aFusionFrame.droppedCards269.end();
+        const bool typedCard=card!=aFusionFrame.droppedCards269.end();
+        const auto fertilizer=aNativeFusion?std::find_if(aFusionFrame.fertilizeCoins269.begin(),aFusionFrame.fertilizeCoins269.end(),[&](const auto& r){return r.id==aWire.mId;}):aFusionFrame.fertilizeCoins269.end();
+        const bool typedFert=fertilizer!=aFusionFrame.fertilizeCoins269.end();
 		const bool aPottedPresent = aWire.mType == (uint8_t)CoinType::COIN_PRESENT_PLANT ||
 			aWire.mType == (uint8_t)CoinType::COIN_AWARD_PRESENT;
 		const bool aValidPottedVisual = aPottedPresent ?
@@ -3284,8 +4251,11 @@ void Board::NetApplySnapshot(NetBuffer& b)
 			 aWire.mPottedFacing == 255 && aWire.mPottedVariation == 255 &&
 			 aWire.mPottedAge == 255);
 		const bool aValid = aWire.mId != 0 &&
-			aWire.mType >= (uint8_t)CoinType::COIN_SILVER &&
-			aWire.mType <= (uint8_t)CoinType::COIN_PRESENT_SURVIVAL_MODE &&
+            (!typedEquipment||NetFusionEquipmentCoinRawValid(b,coinRecordStart,equipment->data))&&
+            (typedCard?LawnFusion::NativeDroppedCard269CoinStateValid(card->data,aWire.mCoinAge,aWire.mCardUses,aWire.mFullDisappearCounter):aWire.mCardUses==0)&&
+            ((typedEquipment||typedFert)?aWire.mType==(uint8_t)COIN_NONE:
+            aWire.mType >= (uint8_t)CoinType::COIN_SILVER && aWire.mType <= (uint8_t)CoinType::COIN_PRESENT_SURVIVAL_MODE) &&
+            aWire.mCoinAge>=0&&aWire.mFullDisappearCounter>=0&&aWire.mDisappearCounter==(std::min)(65535,aWire.mFullDisappearCounter)&&
 			aWire.mMotion <= (uint8_t)CoinMotion::COIN_MOTION_FROM_BOSS &&
 			(aWire.mFlags & ~7) == 0 &&
 			(aUsablePacket ? aWire.mUsableSeed < (uint8_t)SeedType::NUM_SEED_TYPES : aWire.mUsableSeed == 255) &&
@@ -3326,8 +4296,20 @@ void Board::NetApplySnapshot(NetBuffer& b)
 			aPottedVisualPtr = &aPottedVisual;
 		}
 		Coin* aCoin = NetGetGhostCoin(aWire.mId);
+        const auto incoming=aNativeFusion?std::find_if(aFusionFrame.equipmentCoins.begin(),aFusionFrame.equipmentCoins.end(),[&](const auto& r){return r.id==aWire.mId;}):aFusionFrame.equipmentCoins.end();
+        const bool typedEquipment=incoming!=aFusionFrame.equipmentCoins.end();
+        const auto incomingCard=aNativeFusion?std::find_if(aFusionFrame.droppedCards269.begin(),aFusionFrame.droppedCards269.end(),[&](const auto& r){return r.id==aWire.mId;}):aFusionFrame.droppedCards269.end();
+        const bool typedCard=incomingCard!=aFusionFrame.droppedCards269.end();
+        const auto incomingFert=aNativeFusion?std::find_if(aFusionFrame.fertilizeCoins269.begin(),aFusionFrame.fertilizeCoins269.end(),[&](const auto& r){return r.id==aWire.mId;}):aFusionFrame.fertilizeCoins269.end();
+        const bool typedFert=incomingFert!=aFusionFrame.fertilizeCoins269.end();
+        const auto* previousFert=aCoin?LawnFusion::GetNativeFertilize269Data(aCoin):nullptr;
+        const bool fertReused=typedFert&&previousFert&&previousFert->instanceToken!=incomingFert->data.instanceToken;
+        const auto* previousCard=aCoin?LawnFusion::GetNativeDroppedCard269Data(aCoin):nullptr;
+        const bool cardReused=typedCard&&previousCard&&previousCard->instanceToken!=incomingCard->data.instanceToken;
+        const auto* previousEquipment=aCoin?LawnFusion::GetNativeEquipmentData(aCoin):nullptr;
+        const bool equipmentReused=typedEquipment&&previousEquipment&&previousEquipment->instanceToken!=incoming->data.instanceToken;
 		bool aWasBeingCollected = aCoin && aCoin->mIsBeingCollected;
-		if (aCoin && aCoin->mType != (CoinType)aWire.mType)
+		if (aCoin && (equipmentReused||cardReused||fertReused||aCoin->mType != (CoinType)aWire.mType))
 		{
 			unsigned int aDataId = mCoins.DataArrayGetID(aCoin);
 			if (mCursorObject && mCursorObject->mCoinID == (CoinID)aDataId)
@@ -3363,7 +4345,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		const bool aFirstAuthoritativeSample = aCreated || !aCoin->mVisible;
 		aCoin->mNetTargetX = aWire.mPosX;
 		aCoin->mNetTargetY = aWire.mPosY;
-		if (aFirstAuthoritativeSample)
+		if (aFirstAuthoritativeSample||typedEquipment||typedCard||typedFert)
 		{
 			aCoin->mPosX = aWire.mPosX;
 			aCoin->mPosY = aWire.mPosY;
@@ -3392,8 +4374,10 @@ void Board::NetApplySnapshot(NetBuffer& b)
 			aCoin->mPottedPlantSpec.mPlantAge = aPottedVisual.mPlantAge;
 		}
 		aCoin->mFadeCount = aWire.mFadeCount;
-		aCoin->mDisappearCounter = aWire.mDisappearCounter;
-		aCoin->NetUpdatePresentation();
+		aCoin->mDisappearCounter = (typedEquipment||typedCard||typedFert)?aWire.mFullDisappearCounter:aWire.mDisappearCounter;
+        if(typedEquipment||typedCard||typedFert)aCoin->mCoinAge=aWire.mCoinAge;
+        if(typedCard)aCoin->mTimesDropped=aWire.mCardUses;
+		if(!typedEquipment&&!typedCard&&!typedFert)aCoin->NetUpdatePresentation();
 	}
 	{
 		Coin* aCoin = nullptr;
@@ -3608,7 +4592,8 @@ void Board::NetApplySnapshot(NetBuffer& b)
 		uint8_t aFlags = b.ReadU8Or();
 		bool aPortal = aType == (uint8_t)GridItemType::GRIDITEM_PORTAL_CIRCLE ||
 			aType == (uint8_t)GridItemType::GRIDITEM_PORTAL_SQUARE;
-		bool aValidCell = (aX < MAX_GRID_SIZE_X || (aPortal && aX == MAX_GRID_SIZE_X)) && aY < MAX_GRID_SIZE_Y;
+		bool aValidCell = IsValidGridCell(aX, aY) ||
+			(!LawnFusion::IsNativeFusionBoard(this) && aPortal && aX == MAX_GRID_SIZE_X && aY < MAX_GRID_SIZE_Y);
 		bool aValid = anId != 0 && aType >= (uint8_t)GridItemType::GRIDITEM_GRAVESTONE &&
 			aType <= (uint8_t)GridItemType::GRIDITEM_IZOMBIE_BRAIN &&
 			NetGridStateMatchesType(aType, aState) && aValidCell &&
@@ -3744,6 +4729,12 @@ void Board::NetApplySnapshot(NetBuffer& b)
 			}
 		}
 	}
+	if (aNativeFusion && !NetBindNativeFusionFrame(this, aFusionFrame, aFusionSelection))
+	{
+		NetTrace("native Fusion snapshot missing native allocation epoch=%u", aFusionFrame.epoch);
+		return;
+	}
+	if(aNativeFusion)LawnFusion::SyncNativeTools268Cursors(this);
 	// Commit the fog cache and weather together only after the complete snapshot
 	// validates. Drawing consumes this native grid directly; no local fog warmup.
 	mNetDayPhase = aWeather.mDayPhase;
@@ -3838,6 +4829,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 	}
 	if (mApp && mApp->CoopSmokeActive())
 		mApp->CoopSmokeOnSnapshotApplied(aSmokeSnapshotHash, aSmokeSnapshotBytes);
+	if (theApplied) *theApplied = true;
 }
 
 // ==========================================================================
@@ -3846,6 +4838,7 @@ void Board::NetApplySnapshot(NetBuffer& b)
 
 void Board::NetGhostUpdateZombie(Zombie* theZombie)
 {
+	if (mPaused) return;
 	// interpolate position toward the authoritative target
 	theZombie->mPosX += (theZombie->mNetTargetX - theZombie->mPosX) * 0.25f;
 	theZombie->mPosY += (theZombie->mNetTargetY - theZombie->mPosY) * 0.25f;
@@ -3885,7 +4878,8 @@ void Board::NetGhostUpdateOthers()
 		aProjectile->mPosX += (aProjectile->mNetTargetX - aProjectile->mPosX) * 0.35f;
 		aProjectile->mPosY += (aProjectile->mNetTargetY - aProjectile->mPosY) * 0.35f;
 		aProjectile->mPosZ += (aProjectile->mNetTargetZ - aProjectile->mPosZ) * 0.35f;
-		aProjectile->mRotation += (aProjectile->mNetTargetRotation - aProjectile->mRotation) * 0.35f;
+        if(LawnFusion::IsNativeCannon268Projectile(aProjectile))aProjectile->mRotation=aProjectile->mNetTargetRotation;
+        else aProjectile->mRotation += (aProjectile->mNetTargetRotation - aProjectile->mRotation) * 0.35f;
 		aProjectile->mX = (int)aProjectile->mPosX;
 		aProjectile->mY = (int)(aProjectile->mPosY + aProjectile->mPosZ);
 		AttachmentUpdateAndMove(aProjectile->mAttachmentID,
@@ -3900,8 +4894,8 @@ void Board::NetGhostUpdateOthers()
 	{
 		if (aCoin->mDead || !aCoin->mNetGhost)
 			continue;
-		aCoin->mPosX += (aCoin->mNetTargetX - aCoin->mPosX) * 0.35f;
-		aCoin->mPosY += (aCoin->mNetTargetY - aCoin->mPosY) * 0.35f;
+        if(LawnFusion::IsNativeEquipmentCoin(aCoin)){aCoin->mPosX=aCoin->mNetTargetX;aCoin->mPosY=aCoin->mNetTargetY;}
+        else {aCoin->mPosX += (aCoin->mNetTargetX - aCoin->mPosX) * 0.35f;aCoin->mPosY += (aCoin->mNetTargetY - aCoin->mPosY) * 0.35f;}
 		aCoin->mX = 0;
 		aCoin->mY = 0;
 		if (aCoin->mAttachmentID != AttachmentID::ATTACHMENTID_NULL)
@@ -4081,6 +5075,13 @@ bool Board::NetApplyCameraBootstrap(NetBuffer& b)
 
 void Board::NetEncodeStartPlaying(NetBuffer& b)
 {
+	if (LawnFusion::IsNativeFusionBoard(this))
+	{
+		// The existing ordered gameplay barrier carries the same native state
+		// as a snapshot, including the final reveal and stable packet identities.
+		NetEncodeSnapshot(b);
+		return;
+	}
 	const NetMysteryLimits limits = {(uint8_t)NUM_SEEDS_IN_CHOOSER, (uint8_t)SEED_IMITATER, (uint8_t)SEED_GATLINGPEA};
 	NetMysteryStart state;
 	state.mBoardX = (int16_t)max(-2048, min(2048, mX));
@@ -4117,6 +5118,24 @@ void Board::NetEncodeStartPlaying(NetBuffer& b)
 
 bool Board::NetApplyStartPlaying(NetBuffer& b)
 {
+	if (const auto* context = LawnFusion::GetNativeContext(this))
+	{
+		NetBuffer candidate = b, nativeBody;
+		LawnFusion::NativeSnapshotFrame frame;
+		if (!LawnFusion::DecodeNativeSnapshot(candidate, context->eligible, context->epoch, frame, nativeBody) ||
+			frame.selection.phase != LawnFusion::FusionBankPhase::Playing || !frame.selectionCommitted ||
+			!NetPreflightNativeFusionBody(nativeBody, frame)) return false;
+		bool applied = false;
+		NetApplySnapshot(b, &applied);
+		if (!applied) return false;
+		NetBuffer camera;
+		camera.WriteI16(mNetGameplayCameraTargets.mBoardX); camera.WriteI16(mNetGameplayCameraTargets.mBoardY);
+		camera.WriteI16(mNetGameplayCameraTargets.mTreeX); camera.WriteI16(mNetGameplayCameraTargets.mPoleX);
+		if (!NetApplyCameraBootstrap(camera)) return false;
+		mCutScene->mSeedChoosing = false;
+		NetTrace("native Fusion START_PLAYING applied epoch=%u packets=%zu revealAtomic=1", frame.epoch, frame.packets.size());
+		return true;
+	}
 	const size_t start = b.mReadPos;
 	const NetMysteryLimits limits = {(uint8_t)NUM_SEEDS_IN_CHOOSER, (uint8_t)SEED_IMITATER, (uint8_t)SEED_GATLINGPEA};
 	NetMysteryStart state;
@@ -4458,6 +5477,11 @@ void Board::NetClientTick()
 		}
 	}
 	NetGhostUpdateOthers();
+	if (!mPaused && mFwooshCountDown > 0)
+	{
+		UpdateFwoosh();
+		--mFwooshCountDown;
+	}
 
 	// Host Challenge::Update advances the Slot Machine's attachment-based handle.
 	// Clients do not run that gameplay update, so tick this presentation only.

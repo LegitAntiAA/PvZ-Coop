@@ -89,6 +89,7 @@ public:
     void                    UpdateNormalMotion();
     Plant*                  FindCollisionTargetPlant();
     void                    ConvertToFireball(int theGridX);
+    void                    SyncFireballPresentationDirection();
     void                    ConvertToPea(int theGridX);
     bool                    IsSplashDamage(Zombie* theZombie/* = nullptr*/);
     void                    PlayImpactSound(Zombie* theZombie);

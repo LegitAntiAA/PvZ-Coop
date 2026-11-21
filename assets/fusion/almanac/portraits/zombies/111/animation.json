@@ -1,0 +1,572 @@
+{
+  "anchors": {},
+  "applyRootMotion": false,
+  "clips": {},
+  "colliders": [],
+  "controller": {
+    "layers": [],
+    "serializedController": "",
+    "states": []
+  },
+  "deferredComponents": [],
+  "extraSpriteGuids": {},
+  "ignoredBindings": [],
+  "nodes": [
+    {
+      "active": true,
+      "name": "AlmanacZombie",
+      "parent": -1,
+      "path": "",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "ZombieGrop",
+      "parent": 0,
+      "path": "ZombieGrop",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "Grop2",
+      "parent": 1,
+      "path": "ZombieGrop/Grop2",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "Pages",
+      "parent": 2,
+      "path": "ZombieGrop/Grop2/Pages",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "Page1",
+      "parent": 3,
+      "path": "ZombieGrop/Grop2/Pages/Page1",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "Card",
+      "parent": 4,
+      "path": "ZombieGrop/Grop2/Pages/Page1/Card",
+      "position": {
+        "x": -0.29999924,
+        "y": 0.70000005,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0
+      },
+      "scale": {
+        "x": 2.0,
+        "y": 2.0,
+        "z": 2.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "Image",
+      "parent": 5,
+      "path": "ZombieGrop/Grop2/Pages/Page1/Card/Image",
+      "position": {
+        "x": 0.044,
+        "y": -0.089,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 0.21427487,
+        "y": 0.21427487,
+        "z": 0.21427487
+      },
+      "tag": "Untagged"
+    }
+  ],
+  "nonRenderingComponents": [],
+  "omittedInactiveNodes": [],
+  "root": 0,
+  "schema": 1,
+  "sourceHierarchy": null,
+  "sourcePrefab": "Resources/ui/almanac/AlmanacZombie.prefab",
+  "sources": [
+    {
+      "path": "Resources/image/zombiesidle/TallIceNutZombie.asset",
+      "sha256": "9427110f73e49d3a417331f964505d8a70b134cb09b086caa684a415565028e4"
+    },
+    {
+      "path": "Resources/image/zombiesidle/TallIceNutZombie.asset.meta",
+      "sha256": "9e7d930f3e39fb015473e5d3636a7fc731120776bd9b618781a747362d8aa4c8"
+    },
+    {
+      "path": "Resources/image/zombiesidle/TallIceNutZombie.png",
+      "sha256": "179c2796cf554a3dac06d05d8a95549a39d29d3a5aa567e74ad3781d97d81bee"
+    },
+    {
+      "path": "Resources/image/zombiesidle/TallIceNutZombie.png.meta",
+      "sha256": "e1b91c2fa0e776f1a3509fda0b02a338310c942f45be5447a48f865187832bad"
+    },
+    {
+      "path": "Resources/ui/almanac/AlmanacZombie.prefab",
+      "sha256": "3704e03391ea372601e15cf6ff49fe731500ffe92d998adfedb0e88b284862aa"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/AlmanacCardZombie.cs.meta",
+      "sha256": "faf8882f92625339ade5d8a2ce122f5a60ea07c1beef78676fc31bd10df144dd"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/AlmanacZombieCtrl.cs.meta",
+      "sha256": "319f4f60a393ede0ab9edf0b0157927d2087703afa027f6a777bf09ebcb81c5d"
+    }
+  ],
+  "spritePrefix": null,
+  "spriteVariants": {
+    "d06e29b0234137141900721938a075e7": {
+      "hasBoneMetadata": false,
+      "logicalSize": {
+        "height": 299.84778,
+        "width": 202.84775
+      },
+      "mesh": {
+        "indices": [
+          11,
+          10,
+          9,
+          7,
+          9,
+          10,
+          8,
+          9,
+          7,
+          5,
+          8,
+          7,
+          6,
+          5,
+          7,
+          3,
+          5,
+          6,
+          4,
+          5,
+          3,
+          1,
+          4,
+          3,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform",
+        "vertices": [
+          {
+            "u": 0.8795180694166437,
+            "v": 0.4895522387614891,
+            "x": 0.9449999928474426,
+            "y": 0.03500000014901161,
+            "z": 0.0
+          },
+          {
+            "u": 0.5742971897125244,
+            "v": 0.9552238734800425,
+            "x": 0.1850000023841858,
+            "y": -1.524999976158142,
+            "z": 0.0
+          },
+          {
+            "u": 0.8795180694166437,
+            "v": 0.9552238734800425,
+            "x": 0.9449999928474426,
+            "y": -1.524999976158142,
+            "z": 0.0
+          },
+          {
+            "u": 0.4538152602063604,
+            "v": 0.08656716702589351,
+            "x": -0.11500000208616257,
+            "y": 1.3849999904632568,
+            "z": 0.0
+          },
+          {
+            "u": 0.41767068344905195,
+            "v": 0.8985074740737232,
+            "x": -0.20499999821186066,
+            "y": -1.3350000381469727,
+            "z": 0.0
+          },
+          {
+            "u": 0.35341365078845655,
+            "v": 0.6208955227439084,
+            "x": -0.36500000953674316,
+            "y": -0.4050000011920929,
+            "z": 0.0
+          },
+          {
+            "u": 0.27309237043541595,
+            "v": 0.05970148542034093,
+            "x": -0.5649999976158142,
+            "y": 1.475000023841858,
+            "z": 0.0
+          },
+          {
+            "u": 0.1606425587910725,
+            "v": 0.05970148542034093,
+            "x": -0.8450000286102295,
+            "y": 1.475000023841858,
+            "z": 0.0
+          },
+          {
+            "u": 0.11244980972933483,
+            "v": 0.608955226727386,
+            "x": -0.9649999737739563,
+            "y": -0.36500000953674316,
+            "z": 0.0
+          },
+          {
+            "u": 0.08032130237564025,
+            "v": 0.4746268654047553,
+            "x": -1.0449999570846558,
+            "y": 0.08500000089406967,
+            "z": 0.0
+          },
+          {
+            "u": 0.06425701279238046,
+            "v": 0.12537313575175268,
+            "x": -1.0850000381469727,
+            "y": 1.2549999952316284,
+            "z": 0.0
+          },
+          {
+            "u": 0.06425701279238046,
+            "v": 0.3582089570031237,
+            "x": -1.0850000381469727,
+            "y": 0.4749999940395355,
+            "z": 0.0
+          }
+        ]
+      },
+      "pivot": {
+        "x": 0.5345087,
+        "y": 0.5083375
+      },
+      "pixelsPerUnit": 100.0,
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: TallIceNutZombie\n  m_Rect:\n    serializedVersion: 2\n    x: 16.07612\n    y: 15.07612\n    width: 202.84775\n    height: 299.84778\n  m_Offset: {x: 7.0000134, y: 2.4999802}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5345087, y: 0.5083375}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    2ffb4bd65c22bb64cbd4dcce880aab48: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 87116571cb826aa4b92fd4a3f6375feb, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 30\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 12\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 0b000a000900070009000a00080009000700050008000700060005000700030005000600040005000300010004000300000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 12\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 240\n      _typelessdata: 85eb713f295c0f3d00000000a4703d3e3333c3bf0000000085eb713f3333c3bf000000001f85ebbdae47b13f0000000085eb51be48e1aabf0000000048e1babe295ccfbe00000000d7a310bfcdccbc3f00000000ec5158bfcdccbc3f000000003d0a77bf48e1babe000000008fc285bf7b14ae3d0000000048e18abfd7a3a03f0000000048e18abf3333f33e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 16.07612\n      y: 15.07612\n      width: 202.84775\n      height: 299.84778\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 124.5, z: 100, w: 167.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape:\n  - - {x: 0.91499996, y: -1.025}\n    - {x: 0.715, y: -0.905}\n    - {x: 0.655, y: -0.78499997}\n    - {x: 0.715, y: -0.765}\n    - {x: 0.765, y: -0.745}\n    - {x: 0.755, y: -0.645}\n    - {x: 0.72499996, y: -0.305}\n    - {x: 0.745, y: -0.285}\n    - {x: 0.72499996, y: -0.225}\n    - {x: 0.42499998, y: 0.205}\n    - {x: 0.295, y: 0.355}\n    - {x: 0.205, y: 0.49499997}\n    - {x: 0.195, y: 0.53499997}\n    - {x: 0.065, y: 0.525}\n    - {x: 0.015, y: 0.695}\n    - {x: 0.055, y: 0.835}\n    - {x: 0.065, y: 0.885}\n    - {x: 0.065, y: 0.98499995}\n    - {x: -0.015, y: 1.0849999}\n    - {x: -0.055, y: 1.255}\n    - {x: -0.145, y: 1.2049999}\n    - {x: -0.21499999, y: 1.135}\n    - {x: -0.235, y: 1.295}\n    - {x: -0.255, y: 1.355}\n    - {x: -0.315, y: 1.405}\n    - {x: -0.385, y: 1.295}\n    - {x: -0.505, y: 1.305}\n    - {x: -0.615, y: 1.305}\n    - {x: -0.745, y: 1.4549999}\n    - {x: -0.765, y: 1.4549999}\n    - {x: -0.79499996, y: 1.4449999}\n    - {x: -0.85499996, y: 1.105}\n    - {x: -1.055, y: 1.2049999}\n    - {x: -1.0749999, y: 1.165}\n    - {x: -1.0749999, y: 1.125}\n    - {x: -1.025, y: 1.0849999}\n    - {x: -1.0649999, y: 0.935}\n    - {x: -1.0749999, y: 0.875}\n    - {x: -1.0749999, y: 0.765}\n    - {x: -0.995, y: 0.615}\n    - {x: -0.92499995, y: 0.275}\n    - {x: -0.97499996, y: 0.315}\n    - {x: -1.035, y: 0.105}\n    - {x: -0.98499995, y: 0.065}\n    - {x: -0.97499996, y: -0.035}\n    - {x: -0.935, y: -0.265}\n    - {x: -0.85499996, y: -0.305}\n    - {x: -0.59499997, y: -0.325}\n    - {x: -0.285, y: -0.265}\n    - {x: -0.185, y: -0.315}\n    - {x: -0.225, y: -0.415}\n    - {x: -0.255, y: -0.53499997}\n    - {x: -0.275, y: -0.775}\n    - {x: -0.095, y: -0.905}\n    - {x: -0.085, y: -0.995}\n    - {x: -0.035, y: -1.025}\n    - {x: 0.035, y: -1.025}\n    - {x: 0.055, y: -1.005}\n    - {x: 0.035, y: -1.035}\n    - {x: 0.015, y: -1.025}\n    - {x: -0.065, y: -1.105}\n    - {x: -0.035, y: -1.265}\n    - {x: 0.044999998, y: -1.345}\n    - {x: 0.235, y: -1.415}\n    - {x: 0.36499998, y: -1.475}\n    - {x: 0.475, y: -1.495}\n    - {x: 0.585, y: -1.495}\n    - {x: 0.685, y: -1.4449999}\n    - {x: 0.825, y: -1.405}\n    - {x: 0.885, y: -1.365}\n    - {x: 0.91499996, y: -1.355}\n  - - {x: 0.45499998, y: -1.155}\n    - {x: 0.45499998, y: -1.135}\n    - {x: 0.39499998, y: -1.0749999}\n    - {x: 0.36499998, y: -1.0749999}\n    - {x: 0.36499998, y: -1.035}\n    - {x: 0.375, y: -1.025}\n    - {x: 0.375, y: -1.005}\n    - {x: 0.405, y: -0.955}\n    - {x: 0.405, y: -0.935}\n    - {x: 0.45499998, y: -0.835}\n    - {x: 0.45499998, y: -0.78499997}\n    - {x: 0.42499998, y: -0.72499996}\n    - {x: 0.405, y: -0.635}\n    - {x: 0.42499998, y: -0.60499996}\n    - {x: 0.42499998, y: -0.655}\n    - {x: 0.435, y: -0.66499996}\n    - {x: 0.435, y: -0.685}\n    - {x: 0.465, y: -0.715}\n    - {x: 0.48499998, y: -0.715}\n    - {x: 0.49499997, y: -0.72499996}\n    - {x: 0.53499997, y: -0.755}\n    - {x: 0.545, y: -0.755}\n    - {x: 0.545, y: -0.825}\n    - {x: 0.505, y: -0.865}\n    - {x: 0.505, y: -0.905}\n    - {x: 0.555, y: -0.965}\n    - {x: 0.575, y: -0.97499996}\n    - {x: 0.585, y: -1.005}\n    - {x: 0.625, y: -1.045}\n    - {x: 0.59499997, y: -1.045}\n    - {x: 0.565, y: -1.055}\n    - {x: 0.53499997, y: -1.095}\n    - {x: 0.53499997, y: -1.125}\n    - {x: 0.505, y: -1.155}\n    - {x: 0.505, y: -1.1949999}\n    - {x: 0.505, y: -1.185}\n  - - {x: 0.035, y: -0.635}\n    - {x: 0.035, y: -0.60499996}\n    - {x: 0.005, y: -0.565}\n    - {x: 0.035, y: -0.565}\n    - {x: 0.065, y: -0.53499997}\n    - {x: 0.055, y: -0.565}\n    - {x: 0.044999998, y: -0.575}\n    - {x: 0.035, y: -0.66499996}\n    - {x: 0.015, y: -0.685}\n    - {x: 0.005, y: -0.685}\n  m_Bones: []\n  m_SpriteID:\n",
+      "sourceSprite": "Resources/image/zombiesidle/TallIceNutZombie.asset",
+      "texture": "../../textures/179c2796cf554a3dac06d05d8a95549a39d29d3a5aa567e74ad3781d97d81bee.png",
+      "textureRect": {
+        "height": 299.84778,
+        "width": 202.84775,
+        "x": 16.07612,
+        "y": 15.07612,
+        "yTop": 20.076099999999997
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      }
+    }
+  },
+  "sprites": [
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "enabled": true,
+      "flipX": false,
+      "flipY": false,
+      "guid": "d06e29b0234137141900721938a075e7",
+      "hasBoneMetadata": false,
+      "logicalSize": {
+        "height": 299.84778,
+        "width": 202.84775
+      },
+      "mesh": {
+        "indices": [
+          11,
+          10,
+          9,
+          7,
+          9,
+          10,
+          8,
+          9,
+          7,
+          5,
+          8,
+          7,
+          6,
+          5,
+          7,
+          3,
+          5,
+          6,
+          4,
+          5,
+          3,
+          1,
+          4,
+          3,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform",
+        "vertices": [
+          {
+            "u": 0.8795180694166437,
+            "v": 0.4895522387614891,
+            "x": 0.9449999928474426,
+            "y": 0.03500000014901161,
+            "z": 0.0
+          },
+          {
+            "u": 0.5742971897125244,
+            "v": 0.9552238734800425,
+            "x": 0.1850000023841858,
+            "y": -1.524999976158142,
+            "z": 0.0
+          },
+          {
+            "u": 0.8795180694166437,
+            "v": 0.9552238734800425,
+            "x": 0.9449999928474426,
+            "y": -1.524999976158142,
+            "z": 0.0
+          },
+          {
+            "u": 0.4538152602063604,
+            "v": 0.08656716702589351,
+            "x": -0.11500000208616257,
+            "y": 1.3849999904632568,
+            "z": 0.0
+          },
+          {
+            "u": 0.41767068344905195,
+            "v": 0.8985074740737232,
+            "x": -0.20499999821186066,
+            "y": -1.3350000381469727,
+            "z": 0.0
+          },
+          {
+            "u": 0.35341365078845655,
+            "v": 0.6208955227439084,
+            "x": -0.36500000953674316,
+            "y": -0.4050000011920929,
+            "z": 0.0
+          },
+          {
+            "u": 0.27309237043541595,
+            "v": 0.05970148542034093,
+            "x": -0.5649999976158142,
+            "y": 1.475000023841858,
+            "z": 0.0
+          },
+          {
+            "u": 0.1606425587910725,
+            "v": 0.05970148542034093,
+            "x": -0.8450000286102295,
+            "y": 1.475000023841858,
+            "z": 0.0
+          },
+          {
+            "u": 0.11244980972933483,
+            "v": 0.608955226727386,
+            "x": -0.9649999737739563,
+            "y": -0.36500000953674316,
+            "z": 0.0
+          },
+          {
+            "u": 0.08032130237564025,
+            "v": 0.4746268654047553,
+            "x": -1.0449999570846558,
+            "y": 0.08500000089406967,
+            "z": 0.0
+          },
+          {
+            "u": 0.06425701279238046,
+            "v": 0.12537313575175268,
+            "x": -1.0850000381469727,
+            "y": 1.2549999952316284,
+            "z": 0.0
+          },
+          {
+            "u": 0.06425701279238046,
+            "v": 0.3582089570031237,
+            "x": -1.0850000381469727,
+            "y": 0.4749999940395355,
+            "z": 0.0
+          }
+        ]
+      },
+      "node": 6,
+      "pivot": {
+        "x": 0.5345087,
+        "y": 0.5083375
+      },
+      "pixelsPerUnit": 100.0,
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: TallIceNutZombie\n  m_Rect:\n    serializedVersion: 2\n    x: 16.07612\n    y: 15.07612\n    width: 202.84775\n    height: 299.84778\n  m_Offset: {x: 7.0000134, y: 2.4999802}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5345087, y: 0.5083375}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    2ffb4bd65c22bb64cbd4dcce880aab48: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 87116571cb826aa4b92fd4a3f6375feb, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 30\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 12\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 0b000a000900070009000a00080009000700050008000700060005000700030005000600040005000300010004000300000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 12\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 240\n      _typelessdata: 85eb713f295c0f3d00000000a4703d3e3333c3bf0000000085eb713f3333c3bf000000001f85ebbdae47b13f0000000085eb51be48e1aabf0000000048e1babe295ccfbe00000000d7a310bfcdccbc3f00000000ec5158bfcdccbc3f000000003d0a77bf48e1babe000000008fc285bf7b14ae3d0000000048e18abfd7a3a03f0000000048e18abf3333f33e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 16.07612\n      y: 15.07612\n      width: 202.84775\n      height: 299.84778\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 124.5, z: 100, w: 167.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape:\n  - - {x: 0.91499996, y: -1.025}\n    - {x: 0.715, y: -0.905}\n    - {x: 0.655, y: -0.78499997}\n    - {x: 0.715, y: -0.765}\n    - {x: 0.765, y: -0.745}\n    - {x: 0.755, y: -0.645}\n    - {x: 0.72499996, y: -0.305}\n    - {x: 0.745, y: -0.285}\n    - {x: 0.72499996, y: -0.225}\n    - {x: 0.42499998, y: 0.205}\n    - {x: 0.295, y: 0.355}\n    - {x: 0.205, y: 0.49499997}\n    - {x: 0.195, y: 0.53499997}\n    - {x: 0.065, y: 0.525}\n    - {x: 0.015, y: 0.695}\n    - {x: 0.055, y: 0.835}\n    - {x: 0.065, y: 0.885}\n    - {x: 0.065, y: 0.98499995}\n    - {x: -0.015, y: 1.0849999}\n    - {x: -0.055, y: 1.255}\n    - {x: -0.145, y: 1.2049999}\n    - {x: -0.21499999, y: 1.135}\n    - {x: -0.235, y: 1.295}\n    - {x: -0.255, y: 1.355}\n    - {x: -0.315, y: 1.405}\n    - {x: -0.385, y: 1.295}\n    - {x: -0.505, y: 1.305}\n    - {x: -0.615, y: 1.305}\n    - {x: -0.745, y: 1.4549999}\n    - {x: -0.765, y: 1.4549999}\n    - {x: -0.79499996, y: 1.4449999}\n    - {x: -0.85499996, y: 1.105}\n    - {x: -1.055, y: 1.2049999}\n    - {x: -1.0749999, y: 1.165}\n    - {x: -1.0749999, y: 1.125}\n    - {x: -1.025, y: 1.0849999}\n    - {x: -1.0649999, y: 0.935}\n    - {x: -1.0749999, y: 0.875}\n    - {x: -1.0749999, y: 0.765}\n    - {x: -0.995, y: 0.615}\n    - {x: -0.92499995, y: 0.275}\n    - {x: -0.97499996, y: 0.315}\n    - {x: -1.035, y: 0.105}\n    - {x: -0.98499995, y: 0.065}\n    - {x: -0.97499996, y: -0.035}\n    - {x: -0.935, y: -0.265}\n    - {x: -0.85499996, y: -0.305}\n    - {x: -0.59499997, y: -0.325}\n    - {x: -0.285, y: -0.265}\n    - {x: -0.185, y: -0.315}\n    - {x: -0.225, y: -0.415}\n    - {x: -0.255, y: -0.53499997}\n    - {x: -0.275, y: -0.775}\n    - {x: -0.095, y: -0.905}\n    - {x: -0.085, y: -0.995}\n    - {x: -0.035, y: -1.025}\n    - {x: 0.035, y: -1.025}\n    - {x: 0.055, y: -1.005}\n    - {x: 0.035, y: -1.035}\n    - {x: 0.015, y: -1.025}\n    - {x: -0.065, y: -1.105}\n    - {x: -0.035, y: -1.265}\n    - {x: 0.044999998, y: -1.345}\n    - {x: 0.235, y: -1.415}\n    - {x: 0.36499998, y: -1.475}\n    - {x: 0.475, y: -1.495}\n    - {x: 0.585, y: -1.495}\n    - {x: 0.685, y: -1.4449999}\n    - {x: 0.825, y: -1.405}\n    - {x: 0.885, y: -1.365}\n    - {x: 0.91499996, y: -1.355}\n  - - {x: 0.45499998, y: -1.155}\n    - {x: 0.45499998, y: -1.135}\n    - {x: 0.39499998, y: -1.0749999}\n    - {x: 0.36499998, y: -1.0749999}\n    - {x: 0.36499998, y: -1.035}\n    - {x: 0.375, y: -1.025}\n    - {x: 0.375, y: -1.005}\n    - {x: 0.405, y: -0.955}\n    - {x: 0.405, y: -0.935}\n    - {x: 0.45499998, y: -0.835}\n    - {x: 0.45499998, y: -0.78499997}\n    - {x: 0.42499998, y: -0.72499996}\n    - {x: 0.405, y: -0.635}\n    - {x: 0.42499998, y: -0.60499996}\n    - {x: 0.42499998, y: -0.655}\n    - {x: 0.435, y: -0.66499996}\n    - {x: 0.435, y: -0.685}\n    - {x: 0.465, y: -0.715}\n    - {x: 0.48499998, y: -0.715}\n    - {x: 0.49499997, y: -0.72499996}\n    - {x: 0.53499997, y: -0.755}\n    - {x: 0.545, y: -0.755}\n    - {x: 0.545, y: -0.825}\n    - {x: 0.505, y: -0.865}\n    - {x: 0.505, y: -0.905}\n    - {x: 0.555, y: -0.965}\n    - {x: 0.575, y: -0.97499996}\n    - {x: 0.585, y: -1.005}\n    - {x: 0.625, y: -1.045}\n    - {x: 0.59499997, y: -1.045}\n    - {x: 0.565, y: -1.055}\n    - {x: 0.53499997, y: -1.095}\n    - {x: 0.53499997, y: -1.125}\n    - {x: 0.505, y: -1.155}\n    - {x: 0.505, y: -1.1949999}\n    - {x: 0.505, y: -1.185}\n  - - {x: 0.035, y: -0.635}\n    - {x: 0.035, y: -0.60499996}\n    - {x: 0.005, y: -0.565}\n    - {x: 0.035, y: -0.565}\n    - {x: 0.065, y: -0.53499997}\n    - {x: 0.055, y: -0.565}\n    - {x: 0.044999998, y: -0.575}\n    - {x: 0.035, y: -0.66499996}\n    - {x: 0.015, y: -0.685}\n    - {x: 0.005, y: -0.685}\n  m_Bones: []\n  m_SpriteID:\n",
+      "sortingLayerId": 0,
+      "sortingOrder": 1,
+      "sourceSprite": "Resources/image/zombiesidle/TallIceNutZombie.asset",
+      "texture": "../../textures/179c2796cf554a3dac06d05d8a95549a39d29d3a5aa567e74ad3781d97d81bee.png",
+      "textureRect": {
+        "height": 299.84778,
+        "width": 202.84775,
+        "x": 16.07612,
+        "y": 15.07612,
+        "yTop": 20.076099999999997
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      }
+    }
+  ],
+  "static": true,
+  "uiPortraitExtraction": {
+    "gameObjectFileId": 1702431833138108,
+    "originalRendererEnabled": true,
+    "sourceActivity": [
+      {
+        "gameObjectFileId": 1709254077376921,
+        "originalActive": true
+      },
+      {
+        "gameObjectFileId": 1724804207875695,
+        "originalActive": true
+      },
+      {
+        "gameObjectFileId": 1036828218548272,
+        "originalActive": false
+      },
+      {
+        "gameObjectFileId": 1777414246829702,
+        "originalActive": true
+      },
+      {
+        "gameObjectFileId": 1463579974499585,
+        "originalActive": true
+      },
+      {
+        "gameObjectFileId": 1604619800802695,
+        "originalActive": true
+      },
+      {
+        "gameObjectFileId": 1702431833138108,
+        "originalActive": true
+      }
+    ],
+    "sourceSpriteRenderer": "SpriteRenderer:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1702431833138108}\n  m_Enabled: 1\n  m_CastShadows: 0\n  m_ReceiveShadows: 0\n  m_DynamicOccludee: 1\n  m_StaticShadowCaster: 0\n  m_MotionVectors: 1\n  m_LightProbeUsage: 1\n  m_ReflectionProbeUsage: 1\n  m_RayTracingMode: 0\n  m_RayTraceProcedural: 0\n  m_RenderingLayerMask: 1\n  m_RendererPriority: 0\n  m_Materials:\n  - {fileID: 2100000, guid: 8fa820fab1c50434da82a0d53ec31815, type: 2}\n  m_StaticBatchInfo:\n    firstSubMesh: 0\n    subMeshCount: 0\n  m_StaticBatchRoot: {fileID: 0}\n  m_ProbeAnchor: {fileID: 0}\n  m_LightProbeVolumeOverride: {fileID: 0}\n  m_ScaleInLightmap: 1\n  m_ReceiveGI: 1\n  m_PreserveUVs: 0\n  m_IgnoreNormalsForChartDetection: 0\n  m_ImportantGI: 0\n  m_StitchLightmapSeams: 0\n  m_SelectedEditorRenderState: 3\n  m_MinimumChartSize: 4\n  m_AutoUVMaxDistance: 0.5\n  m_AutoUVMaxAngle: 89\n  m_LightmapParameters: {fileID: 0}\n  m_SortingLayerID: 0\n  m_SortingLayer: 0\n  m_SortingOrder: 1\n  m_Sprite: {fileID: 21300000, guid: d06e29b0234137141900721938a075e7, type: 2}\n  m_Color: {r: 1, g: 1, b: 1, a: 1}\n  m_FlipX: 0\n  m_FlipY: 0\n  m_DrawMode: 0\n  m_Size: {x: 3.79, y: 6.25}\n  m_AdaptiveModeThreshold: 0.5\n  m_SpriteTileMode: 0\n  m_WasSpriteAssigned: 1\n  m_MaskInteraction: 1\n  m_SpriteSortPoint: 0\n",
+    "spriteRendererFileId": 212427787752112280,
+    "uiVisiblePose": "selected portrait renderer and its retained ancestors active"
+  },
+  "unitsPerNativePixel": 0.01,
+  "unusedSpriteBonesExplicitlyAllowed": false,
+  "validation": "Exported source data. Native rendering and source-runtime comparison are separate verification steps.",
+  "visualBounds": {
+    "maxX": 0.19298026123477338,
+    "maxY": 1.154110926717422,
+    "minX": -0.6769757242478752,
+    "minY": -0.13153829328257804
+  }
+}

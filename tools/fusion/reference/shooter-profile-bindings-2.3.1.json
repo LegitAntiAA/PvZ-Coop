@@ -1,0 +1,1235 @@
+{
+  "schema": 1,
+  "sourceVersion": "Fusion 2.3.1",
+  "sourceBinarySha256": "b19cfc30b2061514689a93191a979e76335dd02f5c12e550e1bb62de9578b94f",
+  "proof": "Kinds and runtime classes follow audited loader result stores. Callback payloads are curated from source contracts NEXTBASE47, AUTOMATION56, DOUBLE58, SOURCE76, SOURCE94 and SOURCE104; timing numbers are deliberately absent and extracted from original CSV/controller/clip. SOURCE166 pins the three ordinary silver kinds and exact inherited callbacks; Gold and SuperSkill states are deliberately absent.",
+  "loaderBindings": {
+    "path": "tools/fusion/reference/loader-bindings-2.3.1.json",
+    "sha256": "ae6998bada9de659fabaa501b200576a94bdab5a3d7e5e8c3ddc15a169b6e7e0"
+  },
+  "sourceFiles": [
+    {
+      "path": "Resources/plant_data.txt",
+      "sha256": "b2d3032c2f53105e47c37d9fd0f2a644587f5dafe8271f65a7bd09195a1d286a"
+    },
+    {
+      "path": "Resources/plants/_mixer/cherrygatlingpea/CherryGatlingPea.controller",
+      "sha256": "9ea315ec85fd0ddd09c0347ae83b579851e721ccaed027bc5eb7d8aa0110f002"
+    },
+    {
+      "path": "Resources/plants/_mixer/cherrygatlingpea/CherryGatlingPea.controller.meta",
+      "sha256": "9e23dc499e93c985febc82964124d37598b0e5fee5260d6fb25f8768135db0ce"
+    },
+    {
+      "path": "Resources/plants/_mixer/cherrygatlingpea/CherryGatlingPrefab.prefab",
+      "sha256": "053d09ea8660ec9e7fd9c2508bdb88d0fdcc62297e7f8a41a7781a463f2e16ed"
+    },
+    {
+      "path": "Resources/plants/_mixer/cherrygatlingpea/shoot.anim",
+      "sha256": "e24d90c07f1d525aaaa9fc9d27c906af9da8301d2d5a89b27e05ae219bec0df0"
+    },
+    {
+      "path": "Resources/plants/_mixer/cherrygatlingpea/shoot.anim.meta",
+      "sha256": "21190370edacb78e57a1658cf1cf14b97b8aa01877c11c403971aa07d17e3d3a"
+    },
+    {
+      "path": "Resources/plants/_mixer/cherryshooter/CherryShooter.controller",
+      "sha256": "5979fa61e219227b86435779ce3c6fcab216abe40194b785769b537f1dcec6f5"
+    },
+    {
+      "path": "Resources/plants/_mixer/cherryshooter/CherryShooter.controller.meta",
+      "sha256": "5c593e46ea534057dad04ef9389181dbd772008ce986f05ecb79437da938ae1f"
+    },
+    {
+      "path": "Resources/plants/_mixer/cherryshooter/CherryshooterPrefab.prefab",
+      "sha256": "98b9ddb33f00fb70339a7ec3d1f4831c18219b5b943fe68bdf604d8c50812b8f"
+    },
+    {
+      "path": "Resources/plants/_mixer/cherryshooter/shoot.anim",
+      "sha256": "9a03cd4dcdee159c599dbaf225748960d7a18013a56e58cf14bbee1ec5daf27c"
+    },
+    {
+      "path": "Resources/plants/_mixer/cherryshooter/shoot.anim.meta",
+      "sha256": "59c91e449ae83dd521d44f7f34a335f180bd6dba328456306d2c34d4d8feb059"
+    },
+    {
+      "path": "Resources/plants/_mixer/doublecherry/DoubleCherry.controller",
+      "sha256": "a4cb0ed6196d203adab55dcc80226718b156e386aedbd186dcfda2b3cf95442d"
+    },
+    {
+      "path": "Resources/plants/_mixer/doublecherry/DoubleCherry.controller.meta",
+      "sha256": "365a0cfd28c0a03c83ef2d15de2d7f0621e24707bec7f2b591355b8abf7f1122"
+    },
+    {
+      "path": "Resources/plants/_mixer/doublecherry/DoubleCherryPrefab.prefab",
+      "sha256": "e7b8964c239062b5f97884347f084ea953f84cb7c32f3ab657958401e43fba71"
+    },
+    {
+      "path": "Resources/plants/_mixer/doublecherry/shoot.anim",
+      "sha256": "490273861951d21e66b8f30df3d557919e3f6fe51282ed92c2af5d093050b4de"
+    },
+    {
+      "path": "Resources/plants/_mixer/doublecherry/shoot.anim.meta",
+      "sha256": "765dc1c89b40bbec2ac21b8ef8b4aa4b6f068e87fd57d764f5f9f51c013facff"
+    },
+    {
+      "path": "Resources/plants/_mixer/doublepuff/DoublePuff.controller",
+      "sha256": "8584f91d24277894272aaa8d77c292753dd7cf8e74ef87d70319402cab29b8c4"
+    },
+    {
+      "path": "Resources/plants/_mixer/doublepuff/DoublePuff.controller.meta",
+      "sha256": "3c3784962c74c377da096e3646de795c056d68cd46254b94abb1c047029987cb"
+    },
+    {
+      "path": "Resources/plants/_mixer/doublepuff/DoublePuffPrefab.prefab",
+      "sha256": "21ec3a26ae4144cf23087fbdfd711d1d452311fa8f76c784df8dc4c76a012bca"
+    },
+    {
+      "path": "Resources/plants/_mixer/doublepuff/GatlingPuff.controller",
+      "sha256": "ba77243235a07fd7a906a8e346e322ef3df3c5666d01abdbcb487e77a5be1b88"
+    },
+    {
+      "path": "Resources/plants/_mixer/doublepuff/GatlingPuff.controller.meta",
+      "sha256": "5f60e5a17c3d081fdfbfe3aefa3a887015ea72b9c3b9fd358cd925efb1bbfd0b"
+    },
+    {
+      "path": "Resources/plants/_mixer/doublepuff/GatlingPuffPrefab.prefab",
+      "sha256": "509513d8cccab3f0dcaae0734db5ffadee0df15a4662a3f7cc42cd3eb80f9924"
+    },
+    {
+      "path": "Resources/plants/_mixer/doublepuff/shoot.anim",
+      "sha256": "5619b144f73b45c653d4e4bb851ddbf801c7f766fb495960c09d238b9507bc96"
+    },
+    {
+      "path": "Resources/plants/_mixer/doublepuff/shoot.anim.meta",
+      "sha256": "101e2ed0a767af93b2b68d6f93bd746d70963411d4d947febbd7326a47fcccd9"
+    },
+    {
+      "path": "Resources/plants/_mixer/doublepuff/shoot_g.anim",
+      "sha256": "bc7fae67857226413874e0226e762246645598c0c54503dad8f52e761559e4ce"
+    },
+    {
+      "path": "Resources/plants/_mixer/doublepuff/shoot_g.anim.meta",
+      "sha256": "518d0b14f2871c6ad25609baf5ab36ee8974b953234ceeb27ac2143ef5633c8f"
+    },
+    {
+      "path": "Resources/plants/_mixer/doublepuff/snowgatlingpuff/SnowGatlingPuffPrefab.prefab",
+      "sha256": "9bc280789bc1ea93caa2ad59bc714857c1a190338a1f0eb3bbb65251bfc0fefa"
+    },
+    {
+      "path": "Resources/plants/_mixer/icepuff/IcePuffPrefab.prefab",
+      "sha256": "9831ca18d755a9894ab47795019dbf2c4b41dd205eee72519a0ddc105d6786d8"
+    },
+    {
+      "path": "Resources/plants/_mixer/nutshooter/NutShooterPrefab.prefab",
+      "sha256": "eb8b6f2cb928f1405b255304aaacb0e6b5b4ec66ed5bff076dcdcf5f990bf792"
+    },
+    {
+      "path": "Resources/plants/_mixer/nutshooter/ctrl.controller",
+      "sha256": "16d29c887dde7adf6f16d3d6377f8ebac4c0a0e14eebe16f39896dab99ff0f57"
+    },
+    {
+      "path": "Resources/plants/_mixer/nutshooter/ctrl.controller.meta",
+      "sha256": "b60587df6f0f68727eb874c7eda405ef9501bd063c1e5ca272dd4c6db56598f2"
+    },
+    {
+      "path": "Resources/plants/_mixer/nutshooter/shoot.anim",
+      "sha256": "d12bb4e3129a210d386417028d10edbee0fc59b1f87a881a5711ca417db8601f"
+    },
+    {
+      "path": "Resources/plants/_mixer/nutshooter/shoot.anim.meta",
+      "sha256": "665104f6affe20e1d64664ead3ff20ed76031f852e9547157dddb40bbb291214"
+    },
+    {
+      "path": "Resources/plants/_mixer/peasmallpuff/PeaSmallPuff.controller",
+      "sha256": "8c4cb8832e7197a47166b7cc9167eefd157f9a87e078b1dfedfa3e3621562cad"
+    },
+    {
+      "path": "Resources/plants/_mixer/peasmallpuff/PeaSmallPuff.controller.meta",
+      "sha256": "ab8c4dc58b05709d3098b0c6a41e67768f9eea2baf320ab87d994920191584a9"
+    },
+    {
+      "path": "Resources/plants/_mixer/peasmallpuff/PeaSmallPuffPrefab.prefab",
+      "sha256": "56f207e5652d04188dd41d4170d76266e17f1bb41c26fed31aa622198675eb6f"
+    },
+    {
+      "path": "Resources/plants/_mixer/peasmallpuff/shoot.anim",
+      "sha256": "1317cefa1861c49066b39e2d0295a17192c6609272c4855e779cd7a766698ccc"
+    },
+    {
+      "path": "Resources/plants/_mixer/peasmallpuff/shoot.anim.meta",
+      "sha256": "ba4db503862e5d75e66de9398f6768a3570d9c89b24551c03935fd9daf1be51e"
+    },
+    {
+      "path": "Resources/plants/cabbagepult/Cabbagepult.controller",
+      "sha256": "01f55b6f4f933766698c24b33998673b91ba7f39f2a62f904c0869bf5a0d42e0"
+    },
+    {
+      "path": "Resources/plants/cabbagepult/Cabbagepult.controller.meta",
+      "sha256": "67135a6fefdd81be6762d1792b019587a06ee8559438adc030003cec838621fb"
+    },
+    {
+      "path": "Resources/plants/cabbagepult/CabbagepultPrefab.prefab",
+      "sha256": "52289088ab12a5608ecef836ff869b8f602505f09ef4a293709525e44ff3b20f"
+    },
+    {
+      "path": "Resources/plants/cabbagepult/corncabbage/CornCabbage.controller",
+      "sha256": "08dfae8d0c9c7b5435b596e06ec96e93999baae2e709a8938484870a37b38ceb"
+    },
+    {
+      "path": "Resources/plants/cabbagepult/corncabbage/CornCabbage.controller.meta",
+      "sha256": "1dd66ef542b65bf8a6e46de3da2fb5125925cd7a7798f2ec24ac85d01154559e"
+    },
+    {
+      "path": "Resources/plants/cabbagepult/corncabbage/CornCabbagePrefab.prefab",
+      "sha256": "90982bff7e9c39855090f5f1dadff51602f437bbd3e3fe6ffbaa24a5fba1236b"
+    },
+    {
+      "path": "Resources/plants/cabbagepult/corncabbage/shoot.anim",
+      "sha256": "498a17fb10aa857875c89a815704d7acf1697c28831ec8d37d0627ccfc5821d3"
+    },
+    {
+      "path": "Resources/plants/cabbagepult/corncabbage/shoot.anim.meta",
+      "sha256": "e7e38fd5fd512dae0d61c80f5ecc1984f70d438d00eb63f23bf366b9f8ecd10a"
+    },
+    {
+      "path": "Resources/plants/cabbagepult/corncabbage/shoot2.anim",
+      "sha256": "eb82fa78a9b4801241a6b327db5d34e0e9eab8becad33b3c09ee2e7556a2fd44"
+    },
+    {
+      "path": "Resources/plants/cabbagepult/corncabbage/shoot2.anim.meta",
+      "sha256": "6702724ca790a3d1db94469cc123bfdf09f5d507aba2801ad3db3f8fcd348b90"
+    },
+    {
+      "path": "Resources/plants/cabbagepult/moneycabbage/SilverCabbagePrefab.prefab",
+      "sha256": "3365ea58a189eba6de781efec469ce546d6918aaa9deef433467309f93eea50b"
+    },
+    {
+      "path": "Resources/plants/cabbagepult/shoot.anim",
+      "sha256": "f7085b9ac6d6405ea23d858cb7c97f53fe689ba5fad53f691e17dab1ffa03219"
+    },
+    {
+      "path": "Resources/plants/cabbagepult/shoot.anim.meta",
+      "sha256": "18d17136b637c5f4632fe991aa13ef1a287f8b4f2c0ba31dae357b7377eb9eef"
+    },
+    {
+      "path": "Resources/plants/cabbagepult/suncabbage/SunCabbagePrefab.prefab",
+      "sha256": "afb1521499daffc8c01ce539085ef384abd800e26ce91c4b76fc415bad160b5f"
+    },
+    {
+      "path": "Resources/plants/cornpult/Cornpult.controller",
+      "sha256": "5ea1d0de8ba4a37cc967601916d30a0169d7deaa9ec90abb62d8681316b461d9"
+    },
+    {
+      "path": "Resources/plants/cornpult/Cornpult.controller.meta",
+      "sha256": "27c30abf53df7bdaae044ffe1de0eeae9a45ac2ce504feb1c80ec4086e073a11"
+    },
+    {
+      "path": "Resources/plants/cornpult/CornpultPrefab.prefab",
+      "sha256": "0b98be3fa52336f40405ca40d93eb3d78a5fba4c23683790c57219e3843434af"
+    },
+    {
+      "path": "Resources/plants/cornpult/moneycorn/SilverCornPrefab.prefab",
+      "sha256": "d624b4cd169caba94d98b0f85b482746601e440dc35d73f763e45bf551ab556d"
+    },
+    {
+      "path": "Resources/plants/cornpult/shoot.anim",
+      "sha256": "4574c39913b1324cccb0bde81b0d6acacb6738dd6fa36bc35b7739940469bd27"
+    },
+    {
+      "path": "Resources/plants/cornpult/shoot.anim.meta",
+      "sha256": "925c1887ec15a2c5b2a44ebc0f7464a8711b91d57fd7fe71ea1a1b0576506c94"
+    },
+    {
+      "path": "Resources/plants/cornpult/shoot2.anim",
+      "sha256": "5f98545be7a706ed3dada414b3244592358915385d5f55137d80b9949464c872"
+    },
+    {
+      "path": "Resources/plants/cornpult/shoot2.anim.meta",
+      "sha256": "1cf57059b71fb6345caf4bb9b5d994a586c2f8df87788a90cececa2b33e4cdeb"
+    },
+    {
+      "path": "Resources/plants/doublepea/DoubleShooter.controller",
+      "sha256": "c92ff536c33e44c0b89e9233af41cbaabdc7622927d59cf3718b2c4c78eac289"
+    },
+    {
+      "path": "Resources/plants/doublepea/DoubleShooter.controller.meta",
+      "sha256": "7023f43a638930fb98ea6fdee46b6667627ae90f202636ca71cf36617e24bd11"
+    },
+    {
+      "path": "Resources/plants/doublepea/DoubleShooterPrefab.prefab",
+      "sha256": "d14c04fde1ddb8ed3a5b8df229ec742b879a47abfe17d0b04d2cc70bb5e7142b"
+    },
+    {
+      "path": "Resources/plants/doublepea/shoot.anim",
+      "sha256": "490273861951d21e66b8f30df3d557919e3f6fe51282ed92c2af5d093050b4de"
+    },
+    {
+      "path": "Resources/plants/doublepea/shoot.anim.meta",
+      "sha256": "733fe5cfe602422ee09ac2455e40228c993788b5625b0c4d68ef9329708b4f05"
+    },
+    {
+      "path": "Resources/plants/fumeshroom/FumeShroom.controller",
+      "sha256": "8d4d4abb84fb4d05399080da8f73b07b271a85a68b9788e737b9f3c373fbf0eb"
+    },
+    {
+      "path": "Resources/plants/fumeshroom/FumeShroom.controller.meta",
+      "sha256": "9ec0d8b7bc50f029efdaa712133f1c2742a0ada94edc2fa6b4c56e50e92d43c1"
+    },
+    {
+      "path": "Resources/plants/fumeshroom/FumeShroomPrefab.prefab",
+      "sha256": "a36c5bbc02663c8355cf433ea34095bbf2b5fb2d7004683af78c53c623f048dc"
+    },
+    {
+      "path": "Resources/plants/fumeshroom/shoot.anim",
+      "sha256": "4607f536b2074f88c9be88cb27d88a06e1e39fa52a7c15de6ccd063ce13f2e57"
+    },
+    {
+      "path": "Resources/plants/fumeshroom/shoot.anim.meta",
+      "sha256": "a0e3df8d3008225430cf542a0cef966c614c9f4393ee530f34a1176b5f20b361"
+    },
+    {
+      "path": "Resources/plants/gatlingpea/GatlingPea.controller",
+      "sha256": "2870cc138037f598c467fda3b802b4493de5bc20fce34dc430d490bfd0beaae2"
+    },
+    {
+      "path": "Resources/plants/gatlingpea/GatlingPea.controller.meta",
+      "sha256": "4837543106f31ff2af38e810927332f434403ffee6e1d9a9544153882b7f0322"
+    },
+    {
+      "path": "Resources/plants/gatlingpea/GatlingPeaPrefab.prefab",
+      "sha256": "cabb641bf989cb587e3e784d769782feff71badfdad6d0d1a60b8269b7be71cd"
+    },
+    {
+      "path": "Resources/plants/gatlingpea/shoot.anim",
+      "sha256": "e24d90c07f1d525aaaa9fc9d27c906af9da8301d2d5a89b27e05ae219bec0df0"
+    },
+    {
+      "path": "Resources/plants/gatlingpea/shoot.anim.meta",
+      "sha256": "bcc2d1ae1ec26cb54f2c8fbbdd55e3e9814ff7f3939eb21b8e055481a6ffe0be"
+    },
+    {
+      "path": "Resources/plants/melonpult/Melonpult.controller",
+      "sha256": "55928d0a8409d29f3b9e0c39948097a12ca70e770d42448dc3bcea6c358170ce"
+    },
+    {
+      "path": "Resources/plants/melonpult/Melonpult.controller.meta",
+      "sha256": "3253c125aac7d844c6b391491040754419f321a7950f2f690183820147cd6119"
+    },
+    {
+      "path": "Resources/plants/melonpult/MelonpultPrefab.prefab",
+      "sha256": "39b6e53f29f47aa16f811ecc4ffccf30d5a363469574f1566ce346cd4114a89a"
+    },
+    {
+      "path": "Resources/plants/melonpult/cabbagemelon/CabbageMelonPrefab.prefab",
+      "sha256": "4dfd17b760d013faae2be9756da38b48751c22b50ef17337b186258cb954de21"
+    },
+    {
+      "path": "Resources/plants/melonpult/cornmelon/CornMelon.controller",
+      "sha256": "a0db45b5218889481ded49fa5428e9f6545ae40b31b230e52e0160326a95667c"
+    },
+    {
+      "path": "Resources/plants/melonpult/cornmelon/CornMelon.controller.meta",
+      "sha256": "6d4d031e748551c5589c8303a59357b2682235e32b6106fa173bcdd041a8494a"
+    },
+    {
+      "path": "Resources/plants/melonpult/cornmelon/CornMelonPrefab.prefab",
+      "sha256": "c71bbadd9b1d0888285203d6522fdc16987f1f55807ec5665c2789d24bd637f7"
+    },
+    {
+      "path": "Resources/plants/melonpult/cornmelon/shoot2.anim",
+      "sha256": "09602702ad9c47aedf61cc04657bb1e89400f808b7e06a3294e5dff4bee7e41c"
+    },
+    {
+      "path": "Resources/plants/melonpult/cornmelon/shoot2.anim.meta",
+      "sha256": "93526af1919707dabf04d7850b22106205f5e6a2ec724c2e0a596b3681dcee5b"
+    },
+    {
+      "path": "Resources/plants/melonpult/moneymelon/SilverMelonPrefab.prefab",
+      "sha256": "467ea36f13da0a049be62edc016f1205bf81f38641ba5857961fc72c7506b390"
+    },
+    {
+      "path": "Resources/plants/melonpult/shoot.anim",
+      "sha256": "9de1d26eca6049c266708a43bde99ca60193954bdd582bc1cfa54655ee290c11"
+    },
+    {
+      "path": "Resources/plants/melonpult/shoot.anim.meta",
+      "sha256": "301fb7e58679ac91074fb850d0d6d5ffb70331dfe0893221950b422e17d41826"
+    },
+    {
+      "path": "Resources/plants/melonpult/wintermelon/WinterMelonPrefab.prefab",
+      "sha256": "736cf2e656f4b1de147ea20d25ee594e4327b529e6e91199db53509a50a02ec7"
+    },
+    {
+      "path": "Resources/plants/peashooter/splitpea/SplitPea.controller",
+      "sha256": "50755f43a0d48eb15b469c6c2857b6b50ead73ad5dcac052da2a7335a4b780c2"
+    },
+    {
+      "path": "Resources/plants/peashooter/splitpea/SplitPea.controller.meta",
+      "sha256": "3c22ae415a159692b5752ba3d4654075c20f5f946583b3207a817de7f1513b4c"
+    },
+    {
+      "path": "Resources/plants/peashooter/splitpea/SplitPeaPrefab.prefab",
+      "sha256": "d634710e936fe554a8e2fb1514e005924b7f89276ed0d63f17a26d6c4d92bfda"
+    },
+    {
+      "path": "Resources/plants/peashooter/splitpea/cherrysplit/CherrySplit.controller",
+      "sha256": "4d869dad6964847da0b0526b572ff795d902535cd23808570d6d0c00f631c69c"
+    },
+    {
+      "path": "Resources/plants/peashooter/splitpea/cherrysplit/CherrySplit.controller.meta",
+      "sha256": "93b3753c1ddbf2b83d778474baf42e1a4e4d0719c3b1903052e5262d543845fe"
+    },
+    {
+      "path": "Resources/plants/peashooter/splitpea/cherrysplit/CherrySplitPrefab.prefab",
+      "sha256": "083dff6cc25c8b7806b82b7580a91911e2065a862a89b80124f781715c9d1743"
+    },
+    {
+      "path": "Resources/plants/peashooter/splitpea/cherrysplit/shoot.anim",
+      "sha256": "7cc1f537056111fc973d86b237eb53204b2ee5d5b4fc0d3b7152ce3c02fd86f9"
+    },
+    {
+      "path": "Resources/plants/peashooter/splitpea/cherrysplit/shoot.anim.meta",
+      "sha256": "0027984527fe1b66c59ebd2cdd0e35f110490f538dafae14dc16e41643eb076f"
+    },
+    {
+      "path": "Resources/plants/peashooter/splitpea/shoot.anim",
+      "sha256": "7cc1f537056111fc973d86b237eb53204b2ee5d5b4fc0d3b7152ce3c02fd86f9"
+    },
+    {
+      "path": "Resources/plants/peashooter/splitpea/shoot.anim.meta",
+      "sha256": "9e55b249eeb3c01ceab37a1ab46b9b5d50c8324facd0150e4b8e3c2a93d9f0b7"
+    },
+    {
+      "path": "Resources/plants/showpeashooter/SnowPeaShooter.controller",
+      "sha256": "8ede0e698f545e5e8052009279a40fb07cc67502bd824964f05311af34ed707f"
+    },
+    {
+      "path": "Resources/plants/showpeashooter/SnowPeaShooter.controller.meta",
+      "sha256": "27317d73c52180056c6be56a13d7dff4a9d85b1af93cd8ef545d520ddd65b5ee"
+    },
+    {
+      "path": "Resources/plants/showpeashooter/SnowPeashooterPrefab.prefab",
+      "sha256": "d468612f18cca6029cd3fc29c19d1be90de14d563aa9532aa023d59174ec8341"
+    },
+    {
+      "path": "Resources/plants/showpeashooter/doublesnow/DoubleSnow.controller",
+      "sha256": "c7c02e62a4d4c2ca73d16b9211ab4359008946715bcda93e467b1c410bdb6654"
+    },
+    {
+      "path": "Resources/plants/showpeashooter/doublesnow/DoubleSnow.controller.meta",
+      "sha256": "601e87f7aa7d43df1451c1408cbc412266c9a9b7e7e97c6a257b160c84f4ec53"
+    },
+    {
+      "path": "Resources/plants/showpeashooter/doublesnow/DoubleSnowPrefab.prefab",
+      "sha256": "383bd2a4dfc89824c38e50f32d721ba06a4ac67b988d8283672949209af2a086"
+    },
+    {
+      "path": "Resources/plants/showpeashooter/doublesnow/shoot.anim",
+      "sha256": "490273861951d21e66b8f30df3d557919e3f6fe51282ed92c2af5d093050b4de"
+    },
+    {
+      "path": "Resources/plants/showpeashooter/doublesnow/shoot.anim.meta",
+      "sha256": "3846055667fd72f31c0ff6dba019268a9cdc5ca5e56d0812f0ae21a9a3630f90"
+    },
+    {
+      "path": "Resources/plants/showpeashooter/shoot.anim",
+      "sha256": "e3dce76782a763c341318bcc669005c7eee085c5a701a7f2fca3954868db6292"
+    },
+    {
+      "path": "Resources/plants/showpeashooter/shoot.anim.meta",
+      "sha256": "89ca7ad842ccf28c5733a9f6f144e9c8c8cb4e945f4a050b7f779442485fd109"
+    },
+    {
+      "path": "Resources/plants/showpeashooter/snowgatling/SnowGatlingPrefab.prefab",
+      "sha256": "4a34b8cce7c6e053ad68748ac85cd463e534e7ed3c44e68af8c5a83553466584"
+    },
+    {
+      "path": "Resources/plants/smallpuff/SmallPuff.controller",
+      "sha256": "23af107846752a8c720fbadf376550726f1cb09107fcff9b08cd08d949701928"
+    },
+    {
+      "path": "Resources/plants/smallpuff/SmallPuff.controller.meta",
+      "sha256": "27d9c8b0aa5d941f3da2806e11603d9c2dd90d1e6380173af194f47c30982560"
+    },
+    {
+      "path": "Resources/plants/smallpuff/SmallPuffPrefab.prefab",
+      "sha256": "460454babd9f3794c7a7e13ae71b2232a38d6b8f25ae0b06eff48626eab4d885"
+    },
+    {
+      "path": "Resources/plants/smallpuff/shoot.anim",
+      "sha256": "a4b15b87c2cbfde5d6d9c7628c61cc6535838323185e20ed75e0b91057c01dc8"
+    },
+    {
+      "path": "Resources/plants/smallpuff/shoot.anim.meta",
+      "sha256": "1c7740a2bc408ff42b37817a166262dbc4febed1207c48ece997bc003c1c37b9"
+    },
+    {
+      "path": "Resources/plants/smallpuff/splitpuff/SplitPuff.controller",
+      "sha256": "5504eb5e1f9fac121f15a5202d4f739893246f5b4dc77a37b0cd05a432ee1569"
+    },
+    {
+      "path": "Resources/plants/smallpuff/splitpuff/SplitPuff.controller.meta",
+      "sha256": "207b29643da693b0f2352469bf3088c8d3c0856372674a93d940fc62902ce2f1"
+    },
+    {
+      "path": "Resources/plants/smallpuff/splitpuff/SplitPuffPrefab.prefab",
+      "sha256": "357956e4358789862857282cbaf724b58f00d34e5e818c6c5779fcf08bb464cb"
+    },
+    {
+      "path": "Resources/plants/smallpuff/splitpuff/shoot.anim",
+      "sha256": "712cbc80c7a104748f3a32c4a61c0f18dd887e00f641c4036e70fc3202ad06ce"
+    },
+    {
+      "path": "Resources/plants/smallpuff/splitpuff/shoot.anim.meta",
+      "sha256": "038b32d39cf5763c1aa53a366846a1f9025e7c5457bc314aef29426290e16274"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/Cabbage.cs",
+      "sha256": "09fb5a2f0b4718ba86b95bfa6346d7d83fbad1ae7513aab5e79971d48c319f00"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/Cabbage.cs.meta",
+      "sha256": "48d88cd4f07c4709e1bfd9e59cabfc6c649281d06e1a3edb628de2fd2d9f1085"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/CabbageMelon.cs",
+      "sha256": "564b62d5652597f2b79e986ba703bbcab2a805fcb2a71b040b5f0491738ae5cc"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/CabbageMelon.cs.meta",
+      "sha256": "9ffd372db89634c1075636dc9ad6d095ae72e06f2795fe0efd6c6c0499c7fb94"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/CherryGatling.cs",
+      "sha256": "a3b8830872d931ef1cbfc1f04352573b2e98d58793734046fedc7d862b6c5c0b"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/CherryGatling.cs.meta",
+      "sha256": "ac921e35277233bbcb97d26951dbacc447b0b92c8e48fdd4e0791133c8317300"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/CherryPeaShooter.cs",
+      "sha256": "95d653013f06d97f3ea3a73276cc20926d3841187d2c3ff3a3a36eec3035edaf"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/CherryPeaShooter.cs.meta",
+      "sha256": "6a053ff03b8f69edd33edbd3e18ed8e0ac3e196abaffa3048551a4e20e7f9619"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/CherrySplit.cs",
+      "sha256": "23f2da0f0cdac56fd9b35b8fe649bc81f470e1508f7a4df2cb2c01fc5a5bcfa5"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/CherrySplit.cs.meta",
+      "sha256": "c151da147cf5382a2b142f939e12d35737ed257aec55c9a2b8171416603d8edc"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/CornCabbage.cs",
+      "sha256": "d53b1d9c06376a7f0366a769ce6165e064f51f40e895c18a0b351b5c076bcbfb"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/CornCabbage.cs.meta",
+      "sha256": "946078edf29a5145f5a1961dfecea2af1bd1d5fb411d1c38cdc6ee1ebfbbfff4"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/CornMelon.cs",
+      "sha256": "11a681615d2accab56dcd6fd6ecb77a7f9a2633cc386e1df9b6a113bff30b9aa"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/CornMelon.cs.meta",
+      "sha256": "bfe0a490b65b7ec0b0ab5933b45639d7e7fdb63622c7d122ce9284bd8fdb1749"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/Cornpult.cs",
+      "sha256": "bf953b2b44cffd840f516dc160947af17f4fb88b9e1404e030c041513881e3b2"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/Cornpult.cs.meta",
+      "sha256": "e6e213767ab46ca7591b5314f17f5ac8a431add39345c04a008d8029c9d5cb3e"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/FumeShroom.cs",
+      "sha256": "42c64e5eeec27b496e83c318052fcfc3d2858e1f100e8eb3f169afd197275f91"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/FumeShroom.cs.meta",
+      "sha256": "e513ac64cf36d40c0902444dcb795b70b04803df8dd170b8c0a6d2c02262c51e"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/GatlingPea.cs",
+      "sha256": "ab6210576c9c87d2df430d863c7883a8d27628daf984851d08fe98b4282ce98f"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/GatlingPea.cs.meta",
+      "sha256": "a5edb0610a0a6e6f931492536334f80f3963a931a18dd53f12d722e4a038ee6d"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/IcePuff.cs",
+      "sha256": "991f1774ea87e905f0712d037947b142f1bf30ddce30396efd09ab0bcfbb0dbf"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/IcePuff.cs.meta",
+      "sha256": "c2895ceb7a90b83132b00c01ce97693935e78cff16bb72589291bf59960d037f"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/Melonpult.cs",
+      "sha256": "d8805270de6bbf70a3013d6e7f697b59ad14721325671fb2be9be71c5e365637"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/Melonpult.cs.meta",
+      "sha256": "a7bfb0dc1c48e3ef778e57a277a1d0064462bdcb2f62c9350d3c30babc3a6ce1"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/MoneyCabbage.cs",
+      "sha256": "37ec87abacfa8aae417f7e5a125c7d1bacace132d69300b8af676ee54fd9ff09"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/MoneyCabbage.cs.meta",
+      "sha256": "9e857d0074fa38384e5ad0de0789e8f6ff25434ab243199f4fea2f66949d9098"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/MoneyCorn.cs",
+      "sha256": "b1b8fbbcaaad822e0029c70b6bf5789475d62ef9b8728dc413c168cb7289bbf0"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/MoneyCorn.cs.meta",
+      "sha256": "904d5a1edcc3a5f7ea1d58cb0e9cbe40df50d9473bd8e03b03432f946efc6892"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/MoneyMelon.cs",
+      "sha256": "377fbd28592a2aa0b8a094232e6b264b0cec921180ad23877395f39a88747582"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/MoneyMelon.cs.meta",
+      "sha256": "6500d7f05f8582a0f57999bd058e8bfb930d527be1954a35dadf3fd613a7f7c1"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/NutShooter.cs",
+      "sha256": "ce9f17e415a7e8f878157b7423d4058ec93daabfeeee7185845f71a9b6fa40a0"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/NutShooter.cs.meta",
+      "sha256": "b9c8108142bc1054f41c4dd630d56adf86ff72d2641d1e768fed363823eef0d0"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/PeaShooter.cs",
+      "sha256": "c4d1fe2f9a85d973ee27b012fb30e84d4e87fc6e840a883c831685eee13dd897"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/PeaShooter.cs.meta",
+      "sha256": "f90972572af393390f902ec917533ad3e1b64cacc3aa30407b3c0cb136e9e403"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/PeaSmallPuff.cs",
+      "sha256": "8892b21a7e8ed470b1494559243f5b57f6e40b8864f30f1addcb01c30aa214dd"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/PeaSmallPuff.cs.meta",
+      "sha256": "2bb5841b24d776d9de753fcb881809feaf3d16a7ebfda26e239639751f66fe90"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/SmallPuff.cs",
+      "sha256": "1a944f72d75d79c2333198efaa96de859731e6dfc89f13f9421f2489d250d930"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/SmallPuff.cs.meta",
+      "sha256": "208d30e4326cd3864b3e4493f788df1e474a57998f9ca45440678b5dbf00419c"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/SnowGatlingPuff.cs",
+      "sha256": "f91a75c55da0b140814b5375559858e79a7bc2cd9cc90e787f758bcd25a35c07"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/SnowGatlingPuff.cs.meta",
+      "sha256": "151daf723cb1916f4780b95fd54b31845422e50ab7f418463298654adbf3b548"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/SnowPeaShooter.cs",
+      "sha256": "de806e53898593e8e61b7b049e9d44e313486298186d875d94c301f3a9ca6edd"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/SnowPeaShooter.cs.meta",
+      "sha256": "c4b2abc572695554b6aa91566435b752cde2ad5390ef5fb3e1997458efbe9124"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/SplitPea.cs",
+      "sha256": "29752031ec9b50e2b15e37db11c7e5bfb0109982527ac4a1bca6542ea73b00b4"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/SplitPea.cs.meta",
+      "sha256": "ca625524e98849417a0b3f7496c092368110b106ca2f043bba52bae35421b7ce"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/SplitPuff.cs",
+      "sha256": "ad299531f8d50d4c849a7a046d3eca4f887ede24e7bdf6f4fabfb6bf578426ae"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/SplitPuff.cs.meta",
+      "sha256": "d419dc78aab1c4d59b210a7eadf61efd93f32c8c8116b452f7e1333182a2c7b3"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/SunCabbage.cs",
+      "sha256": "54aa842d9643ae12dc1ac0297147930299d09015669609116661e4d55d4188c4"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/SunCabbage.cs.meta",
+      "sha256": "aa6e26ea00ff26f7baa49433ae0f896fa47d7661a076687b182e0a037fe8a1fd"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/Thrower.cs",
+      "sha256": "bfa99bf9476c09e894602addbb6a8b4c12bb1db6ebecc5aa06b76b9dddc81bd7"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/Thrower.cs.meta",
+      "sha256": "0a9005e92bab1553f9d41c19366c873af33bd98ea11793876ee4181442e6ae83"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/WinterMelon.cs",
+      "sha256": "b97b8cfd9043c7c21eb4d3c9abffb79a2724948e7b3e99e1c385d57e6a69f392"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/WinterMelon.cs.meta",
+      "sha256": "7a1b00947544668cc640d9383939f2c344f8aea8abdbb6599fff1bac3bceba9c"
+    }
+  ],
+  "profiles": [
+    {
+      "kind": 6,
+      "scriptClass": "SmallPuff",
+      "state": "shoot",
+      "callback": "AnimShoot",
+      "projectileKind": 9,
+      "precision": {
+        "events": "decimal-double",
+        "duration": "decimal-double"
+      }
+    },
+    {
+      "kind": 7,
+      "scriptClass": "FumeShroom",
+      "state": "shoot",
+      "callback": "AnimShoot",
+      "projectileKind": 65535,
+      "precision": {
+        "events": "decimal-double",
+        "duration": "decimal-double"
+      }
+    },
+    {
+      "kind": 1001,
+      "scriptClass": "CherryPeaShooter",
+      "state": "shoot",
+      "callback": "AnimShoot",
+      "projectileKind": 1,
+      "precision": {
+        "events": "float32-promoted",
+        "duration": "float32-promoted"
+      }
+    },
+    {
+      "kind": 1004,
+      "scriptClass": "NutShooter",
+      "state": "shoot",
+      "callback": "AnimShoot",
+      "projectileKind": 2,
+      "precision": {
+        "events": "float32-promoted",
+        "duration": "float32-promoted"
+      }
+    },
+    {
+      "kind": 1030,
+      "scriptClass": "PeaShooter",
+      "state": "shoot",
+      "callback": "AnimShoot",
+      "projectileKind": 0,
+      "precision": {
+        "events": "float32-promoted",
+        "duration": "float32-promoted"
+      }
+    },
+    {
+      "kind": 1008,
+      "scriptClass": "CherryPeaShooter",
+      "state": "shoot",
+      "callback": "AnimShoot",
+      "projectileKind": 1,
+      "precision": {
+        "events": "float32-promoted",
+        "duration": "float32-promoted"
+      }
+    },
+    {
+      "kind": 1032,
+      "scriptClass": "GatlingPea",
+      "state": "shoot",
+      "callback": "AnimShoot",
+      "projectileKind": 0,
+      "precision": {
+        "events": "float32-promoted",
+        "duration": "float32-promoted"
+      }
+    },
+    {
+      "kind": 1017,
+      "scriptClass": "CherryGatling",
+      "state": "shoot",
+      "callback": "AnimShoot",
+      "projectileKind": 1,
+      "precision": {
+        "events": "float32-promoted",
+        "duration": "float32-promoted"
+      }
+    },
+    {
+      "kind": 1018,
+      "scriptClass": "PeaSmallPuff",
+      "state": "shoot",
+      "callback": "AnimShoot",
+      "projectileKind": 10,
+      "precision": {
+        "events": "float32-promoted",
+        "duration": "float32-promoted"
+      }
+    },
+    {
+      "kind": 1019,
+      "scriptClass": "PeaSmallPuff",
+      "state": "shoot",
+      "callback": "AnimShoot",
+      "projectileKind": 10,
+      "precision": {
+        "events": "float32-promoted",
+        "duration": "float32-promoted"
+      }
+    },
+    {
+      "kind": 1065,
+      "scriptClass": "PeaSmallPuff",
+      "state": "shoot_g",
+      "callback": "AnimShoot",
+      "projectileKind": 10,
+      "precision": {
+        "events": "float32-promoted",
+        "duration": "float32-promoted"
+      },
+      "expectedSerializedKind": 0,
+      "runtimeKindOverrideEvidence": {
+        "method": "CreatePlant.SetPlant",
+        "methodVA": "0x18044C950",
+        "sourceBinarySha256": "b19cfc30b2061514689a93191a979e76335dd02f5c12e550e1bb62de9578b94f",
+        "assignment": "Writes requested runtime PlantType to Plant+0xDC before TypeMgr.GetPlantTag; source76 live body."
+      }
+    },
+    {
+      "kind": 1090,
+      "scriptClass": "SplitPea",
+      "state": "shoot",
+      "callbacks": [
+        "AnimShoot",
+        "AnimShoot2"
+      ],
+      "projectileKind": 0,
+      "precision": {
+        "events": "float32-promoted",
+        "duration": "float32-promoted"
+      },
+      "expectedSerializedKind": 0,
+      "runtimeKindOverrideEvidence": {
+        "method": "CreatePlant.SetPlant",
+        "methodVA": "0x18044C950",
+        "sourceBinarySha256": "b19cfc30b2061514689a93191a979e76335dd02f5c12e550e1bb62de9578b94f",
+        "assignment": "SetPlant writes requested runtime PlantType to Plant+0xDC before TypeMgr.GetPlantTag; SOURCE94 reuses pinned factory evidence fromSOURCE76."
+      }
+    },
+    {
+      "kind": 1108,
+      "scriptClass": "CherrySplit",
+      "state": "shoot",
+      "callbacks": [
+        "AnimShoot",
+        "AnimShoot2"
+      ],
+      "projectileKind": 1,
+      "precision": {
+        "events": "float32-promoted",
+        "duration": "float32-promoted"
+      },
+      "expectedSerializedKind": 0,
+      "runtimeKindOverrideEvidence": {
+        "method": "CreatePlant.SetPlant",
+        "methodVA": "0x18044C950",
+        "sourceBinarySha256": "b19cfc30b2061514689a93191a979e76335dd02f5c12e550e1bb62de9578b94f",
+        "assignment": "SetPlant writes requested runtime PlantType to Plant+0xDC before TypeMgr.GetPlantTag; SOURCE94 reuses pinned factory evidence fromSOURCE76."
+      }
+    },
+    {
+      "kind": 1153,
+      "scriptClass": "SplitPuff",
+      "state": "shoot",
+      "callbacks": [
+        "AnimShoot",
+        "AnimShoot2"
+      ],
+      "projectileKind": 10,
+      "precision": {
+        "events": "float32-promoted",
+        "duration": "float32-promoted"
+      },
+      "expectedSerializedKind": 0,
+      "runtimeKindOverrideEvidence": {
+        "method": "CreatePlant.SetPlant",
+        "methodVA": "0x18044C950",
+        "sourceBinarySha256": "b19cfc30b2061514689a93191a979e76335dd02f5c12e550e1bb62de9578b94f",
+        "assignment": "SetPlant writes requested runtime PlantType to Plant+0xDC before TypeMgr.GetPlantTag; SOURCE94 reuses pinned factory evidence fromSOURCE76."
+      }
+    },
+    {
+      "kind": 1034,
+      "scriptClass": "SnowPeaShooter",
+      "state": "shoot",
+      "callback": "AnimShoot",
+      "projectileKind": 15,
+      "precision": {
+        "events": "float32-promoted",
+        "duration": "float32-promoted"
+      }
+    },
+    {
+      "kind": 1105,
+      "scriptClass": "SnowPeaShooter",
+      "state": "shoot",
+      "callback": "AnimShoot",
+      "projectileKind": 15,
+      "precision": {
+        "events": "float32-promoted",
+        "duration": "float32-promoted"
+      },
+      "expectedSerializedKind": 1034,
+      "runtimeKindOverrideEvidence": {
+        "method": "CreatePlant.SetPlant",
+        "methodVA": "0x18044C950",
+        "sourceBinarySha256": "b19cfc30b2061514689a93191a979e76335dd02f5c12e550e1bb62de9578b94f",
+        "assignment": "SetPlant writes requested runtime PlantType to Plant+0xDC before TypeMgr.GetPlantTag; SOURCE104 reuses pinned primary factory evidence from SOURCE76."
+      }
+    },
+    {
+      "kind": 1106,
+      "scriptClass": "SnowPeaShooter",
+      "state": "shoot",
+      "callback": "AnimShoot",
+      "projectileKind": 15,
+      "precision": {
+        "events": "float32-promoted",
+        "duration": "float32-promoted"
+      },
+      "expectedSerializedKind": 0,
+      "runtimeKindOverrideEvidence": {
+        "method": "CreatePlant.SetPlant",
+        "methodVA": "0x18044C950",
+        "sourceBinarySha256": "b19cfc30b2061514689a93191a979e76335dd02f5c12e550e1bb62de9578b94f",
+        "assignment": "SetPlant writes requested runtime PlantType to Plant+0xDC before TypeMgr.GetPlantTag; SOURCE104 reuses pinned primary factory evidence from SOURCE76."
+      }
+    },
+    {
+      "kind": 1035,
+      "scriptClass": "IcePuff",
+      "state": "shoot",
+      "callback": "AnimShoot",
+      "projectileKind": 18,
+      "precision": {
+        "events": "float32-promoted",
+        "duration": "float32-promoted"
+      }
+    },
+    {
+      "kind": 908,
+      "scriptClass": "SnowGatlingPuff",
+      "state": "shoot_g",
+      "callback": "AnimShoot",
+      "projectileKind": 18,
+      "precision": {
+        "events": "float32-promoted",
+        "duration": "float32-promoted"
+      },
+      "expectedSerializedKind": 0,
+      "runtimeKindOverrideEvidence": {
+        "method": "CreatePlant.SetPlant",
+        "methodVA": "0x18044C950",
+        "sourceBinarySha256": "b19cfc30b2061514689a93191a979e76335dd02f5c12e550e1bb62de9578b94f",
+        "assignment": "SetPlant writes requested runtime PlantType to Plant+0xDC before TypeMgr.GetPlantTag; SOURCE104 reuses pinned primary factory evidence from SOURCE76."
+      }
+    },
+    {
+      "kind": 26,
+      "scriptClass": "Cabbage",
+      "state": "shoot",
+      "callback": "AnimShoot",
+      "projectileKind": 52,
+      "precision": {
+        "events": "float32-promoted",
+        "duration": "float32-promoted"
+      },
+      "expectedSerializedKind": 0,
+      "runtimeKindOverrideEvidence": {
+        "method": "CreatePlant.SetPlant",
+        "methodVA": "0x18044C950",
+        "sourceBinarySha256": "b19cfc30b2061514689a93191a979e76335dd02f5c12e550e1bb62de9578b94f",
+        "assignment": "Pinned CreatePlant.SetPlant writes requested PlantType to Plant+0xDC before runtime tag lookup; SOURCE139 verifies the actual loader slot/root script."
+      }
+    },
+    {
+      "kind": 32,
+      "scriptClass": "Melonpult",
+      "state": "shoot",
+      "callback": "AnimShoot",
+      "projectileKind": 59,
+      "precision": {
+        "events": "float32-promoted",
+        "duration": "float32-promoted"
+      },
+      "expectedSerializedKind": 0,
+      "runtimeKindOverrideEvidence": {
+        "method": "CreatePlant.SetPlant",
+        "methodVA": "0x18044C950",
+        "sourceBinarySha256": "b19cfc30b2061514689a93191a979e76335dd02f5c12e550e1bb62de9578b94f",
+        "assignment": "Pinned CreatePlant.SetPlant writes requested PlantType to Plant+0xDC before runtime tag lookup; SOURCE139 verifies the actual loader slot/root script."
+      }
+    },
+    {
+      "kind": 1116,
+      "scriptClass": "WinterMelon",
+      "state": "shoot",
+      "callback": "AnimShoot",
+      "projectileKind": 60,
+      "precision": {
+        "events": "float32-promoted",
+        "duration": "float32-promoted"
+      },
+      "expectedSerializedKind": 0,
+      "runtimeKindOverrideEvidence": {
+        "method": "CreatePlant.SetPlant",
+        "methodVA": "0x18044C950",
+        "sourceBinarySha256": "b19cfc30b2061514689a93191a979e76335dd02f5c12e550e1bb62de9578b94f",
+        "assignment": "Pinned CreatePlant.SetPlant writes requested PlantType to Plant+0xDC before runtime tag lookup; SOURCE139 verifies the actual loader slot/root script."
+      }
+    },
+    {
+      "kind": 28,
+      "scriptClass": "Cornpult",
+      "state": "shoot",
+      "callback": "AnimShoot",
+      "projectileKind": 54,
+      "precision": {
+        "events": "float32-promoted",
+        "duration": "float32-promoted"
+      },
+      "expectedSerializedKind": 0,
+      "runtimeKindOverrideEvidence": {
+        "method": "CreatePlant.SetPlant",
+        "methodVA": "0x18044C950",
+        "sourceBinarySha256": "b19cfc30b2061514689a93191a979e76335dd02f5c12e550e1bb62de9578b94f",
+        "assignment": "Pinned CreatePlant.SetPlant writes requested PlantType to Plant+0xDC before runtime tag lookup; SOURCE139 verifies the actual loader slot/root script."
+      }
+    },
+    {
+      "kind": 28,
+      "scriptClass": "Cornpult",
+      "state": "shoot2",
+      "callback": "AnimShoot2",
+      "projectileKind": 55,
+      "precision": {
+        "events": "float32-promoted",
+        "duration": "float32-promoted"
+      },
+      "expectedSerializedKind": 0,
+      "runtimeKindOverrideEvidence": {
+        "method": "CreatePlant.SetPlant",
+        "methodVA": "0x18044C950",
+        "sourceBinarySha256": "b19cfc30b2061514689a93191a979e76335dd02f5c12e550e1bb62de9578b94f",
+        "assignment": "Pinned CreatePlant.SetPlant writes requested PlantType to Plant+0xDC before runtime tag lookup; SOURCE139 verifies the actual loader slot/root script."
+      }
+    },
+    {
+      "kind": 1113,
+      "scriptClass": "CornCabbage",
+      "state": "shoot",
+      "callback": "AnimShoot",
+      "projectileKind": 56,
+      "precision": {
+        "events": "float32-promoted",
+        "duration": "float32-promoted"
+      },
+      "expectedSerializedKind": 0,
+      "runtimeKindOverrideEvidence": {
+        "method": "CreatePlant.SetPlant",
+        "methodVA": "0x18044C950",
+        "sourceBinarySha256": "b19cfc30b2061514689a93191a979e76335dd02f5c12e550e1bb62de9578b94f",
+        "assignment": "Pinned CreatePlant.SetPlant writes requested PlantType to Plant+0xDC before runtime tag lookup; SOURCE139 verifies the actual loader slot/root script."
+      }
+    },
+    {
+      "kind": 1113,
+      "scriptClass": "CornCabbage",
+      "state": "shoot2",
+      "callback": "AnimShoot2",
+      "projectileKind": 57,
+      "precision": {
+        "events": "float32-promoted",
+        "duration": "float32-promoted"
+      },
+      "expectedSerializedKind": 0,
+      "runtimeKindOverrideEvidence": {
+        "method": "CreatePlant.SetPlant",
+        "methodVA": "0x18044C950",
+        "sourceBinarySha256": "b19cfc30b2061514689a93191a979e76335dd02f5c12e550e1bb62de9578b94f",
+        "assignment": "Pinned CreatePlant.SetPlant writes requested PlantType to Plant+0xDC before runtime tag lookup; SOURCE139 verifies the actual loader slot/root script."
+      }
+    },
+    {
+      "kind": 1121,
+      "scriptClass": "CornMelon",
+      "state": "shoot",
+      "callback": "AnimShoot",
+      "projectileKind": 66,
+      "precision": {
+        "events": "float32-promoted",
+        "duration": "float32-promoted"
+      },
+      "expectedSerializedKind": 0,
+      "runtimeKindOverrideEvidence": {
+        "method": "CreatePlant.SetPlant",
+        "methodVA": "0x18044C950",
+        "sourceBinarySha256": "b19cfc30b2061514689a93191a979e76335dd02f5c12e550e1bb62de9578b94f",
+        "assignment": "Pinned CreatePlant.SetPlant writes requested PlantType to Plant+0xDC before runtime tag lookup; SOURCE139 verifies the actual loader slot/root script."
+      }
+    },
+    {
+      "kind": 1121,
+      "scriptClass": "CornMelon",
+      "state": "shoot2",
+      "callback": "AnimShoot2",
+      "projectileKind": 67,
+      "precision": {
+        "events": "float32-promoted",
+        "duration": "float32-promoted"
+      },
+      "expectedSerializedKind": 0,
+      "runtimeKindOverrideEvidence": {
+        "method": "CreatePlant.SetPlant",
+        "methodVA": "0x18044C950",
+        "sourceBinarySha256": "b19cfc30b2061514689a93191a979e76335dd02f5c12e550e1bb62de9578b94f",
+        "assignment": "Pinned CreatePlant.SetPlant writes requested PlantType to Plant+0xDC before runtime tag lookup; SOURCE139 verifies the actual loader slot/root script."
+      }
+    },
+    {
+      "kind": 1111,
+      "scriptClass": "SunCabbage",
+      "state": "shoot",
+      "callback": "AnimShoot",
+      "projectileKind": 53,
+      "precision": {
+        "events": "float32-promoted",
+        "duration": "float32-promoted"
+      },
+      "expectedSerializedKind": 0,
+      "runtimeKindOverrideEvidence": {
+        "method": "CreatePlant.SetPlant",
+        "methodVA": "0x18044C950",
+        "sourceBinarySha256": "b19cfc30b2061514689a93191a979e76335dd02f5c12e550e1bb62de9578b94f",
+        "assignment": "Pinned CreatePlant.SetPlant writes requested PlantType to Plant+0xDC before runtime tag lookup; SOURCE139 verifies the actual loader slot/root script."
+      }
+    },
+    {
+      "kind": 1124,
+      "scriptClass": "CabbageMelon",
+      "state": "shoot",
+      "callback": "AnimShoot",
+      "projectileKind": 70,
+      "precision": {
+        "events": "float32-promoted",
+        "duration": "float32-promoted"
+      },
+      "expectedSerializedKind": 0,
+      "runtimeKindOverrideEvidence": {
+        "method": "CreatePlant.SetPlant",
+        "methodVA": "0x18044C950",
+        "sourceBinarySha256": "b19cfc30b2061514689a93191a979e76335dd02f5c12e550e1bb62de9578b94f",
+        "assignment": "Pinned CreatePlant.SetPlant writes requested PlantType to Plant+0xDC before runtime tag lookup; SOURCE139 verifies the actual loader slot/root script."
+      }
+    },
+    {
+      "kind": 1134,
+      "scriptClass": "MoneyCabbage",
+      "state": "shoot",
+      "callback": "AnimShoot",
+      "projectileKind": 74,
+      "precision": {
+        "events": "float32-promoted",
+        "duration": "float32-promoted"
+      },
+      "expectedSerializedKind": 0,
+      "runtimeKindOverrideEvidence": {
+        "method": "CreatePlant.SetPlant",
+        "methodVA": "0x18044C950",
+        "sourceBinarySha256": "b19cfc30b2061514689a93191a979e76335dd02f5c12e550e1bb62de9578b94f",
+        "assignment": "Audited CreatePlant.SetPlant writes requested PlantType to Plant+0xDC before tag lookup; SOURCE166 verifies this loader slot/root script with serialized kind0."
+      }
+    },
+    {
+      "kind": 1138,
+      "scriptClass": "MoneyCorn",
+      "state": "shoot",
+      "callback": "AnimShoot",
+      "projectileKind": 76,
+      "precision": {
+        "events": "float32-promoted",
+        "duration": "float32-promoted"
+      },
+      "expectedSerializedKind": 0,
+      "runtimeKindOverrideEvidence": {
+        "method": "CreatePlant.SetPlant",
+        "methodVA": "0x18044C950",
+        "sourceBinarySha256": "b19cfc30b2061514689a93191a979e76335dd02f5c12e550e1bb62de9578b94f",
+        "assignment": "Audited CreatePlant.SetPlant writes requested PlantType to Plant+0xDC before tag lookup; SOURCE166 verifies this loader slot/root script with serialized kind0."
+      }
+    },
+    {
+      "kind": 1138,
+      "scriptClass": "MoneyCorn",
+      "state": "shoot2",
+      "callback": "AnimShoot2",
+      "projectileKind": 78,
+      "precision": {
+        "events": "float32-promoted",
+        "duration": "float32-promoted"
+      },
+      "expectedSerializedKind": 0,
+      "runtimeKindOverrideEvidence": {
+        "method": "CreatePlant.SetPlant",
+        "methodVA": "0x18044C950",
+        "sourceBinarySha256": "b19cfc30b2061514689a93191a979e76335dd02f5c12e550e1bb62de9578b94f",
+        "assignment": "Audited CreatePlant.SetPlant writes requested PlantType to Plant+0xDC before tag lookup; SOURCE166 verifies this loader slot/root script with serialized kind0."
+      }
+    },
+    {
+      "kind": 1141,
+      "scriptClass": "MoneyMelon",
+      "state": "shoot",
+      "callback": "AnimShoot",
+      "projectileKind": 81,
+      "precision": {
+        "events": "float32-promoted",
+        "duration": "float32-promoted"
+      },
+      "expectedSerializedKind": 0,
+      "runtimeKindOverrideEvidence": {
+        "method": "CreatePlant.SetPlant",
+        "methodVA": "0x18044C950",
+        "sourceBinarySha256": "b19cfc30b2061514689a93191a979e76335dd02f5c12e550e1bb62de9578b94f",
+        "assignment": "Audited CreatePlant.SetPlant writes requested PlantType to Plant+0xDC before tag lookup; SOURCE166 verifies this loader slot/root script with serialized kind0."
+      }
+    }
+  ]
+}

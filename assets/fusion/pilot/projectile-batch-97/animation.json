@@ -1,0 +1,816 @@
+{
+  "schema": 1,
+  "sourcePrefab": "Resources/bullet/prefabs/ExtremeSnowPea.prefab",
+  "unitsPerNativePixel": 0.01,
+  "applyRootMotion": false,
+  "static": true,
+  "root": 0,
+  "nodes": [
+    {
+      "name": "ExtremeSnowPea",
+      "active": true,
+      "tag": "Untagged",
+      "parent": -1,
+      "path": "",
+      "position": {
+        "x": -2.8256,
+        "y": 0.69715,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.5062028,
+        "y": 1.5062028,
+        "z": 1.5062028
+      }
+    },
+    {
+      "name": "Particle System",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "Particle System",
+      "position": {
+        "x": -0.161,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 0.76135,
+        "y": 0.76135,
+        "z": 0.76135
+      }
+    },
+    {
+      "name": "Sprite",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "Sprite",
+      "position": {
+        "x": -0.008,
+        "y": 0.005,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 0.2,
+        "y": 0.2,
+        "z": 0.2
+      }
+    },
+    {
+      "name": "Shadow",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "Shadow",
+      "position": {
+        "x": 0.0,
+        "y": -0.621,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 0.39097324,
+        "y": 0.3890281,
+        "z": 1.5561124
+      }
+    }
+  ],
+  "sourceHierarchy": null,
+  "sprites": [
+    {
+      "texture": "../projectile-pea/textures/cfbfebf76995.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: ExtremeSnowPea\n  m_Rect:\n    serializedVersion: 2\n    x: 176\n    y: 1899\n    width: 303\n    height: 121\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    a8c63eff880d8d5489382210c3f8408e: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 2be43b649cd811049b3a36efc777b799, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 69\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 17\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 0600040010000300100004000f001000030001000f0003000e000f00010002000e0001000600100005000c00050010000f000c0010000e000c000f0002000c000e0000000c0002000b000c0000000d000c000b000a0009000800000008000900070008000000040007000000050007000400060005000400030004000000010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 17\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 344\n      _typelessdata: 295c0fbd48e11a3f00000000c3f528beb81ec5be0000000052b81ebe713dcabe00000000f6289cbeb81ec5be00000000b81ec5bee17ad4be000000009a99d9be48e11abf00000000b81ec5bec3f5e8be00000000e17a34bfd7a310bf000000007b14bebfa4703dbe0000000085ebc1bf295c0f3d0000000085ebc1bfe17a14be000000001f85bb3f48e11a3f0000000085ebc13f48e11abf0000000085ebc13fb81ec53e0000000052b81ebe52b8debe00000000666666be3333f3be000000000000c0be3333f3be000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 176\n      y: 1899\n      width: 303\n      height: 121\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 176, y: 1899}\n    settingsRaw: 65\n    uvTransform: {x: 100, y: 327.5, z: 100, w: 1959.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape:\n  - - {x: 1.515, y: -0.155}\n    - {x: 1.515, y: 0.095}\n    - {x: 1.415, y: 0.295}\n    - {x: 1.305, y: 0.39499998}\n    - {x: 0.945, y: 0.53499997}\n    - {x: 0.815, y: 0.505}\n    - {x: 0.36499998, y: 0.585}\n    - {x: 0.275, y: 0.59499997}\n    - {x: 0.24499999, y: 0.59499997}\n    - {x: 0.21499999, y: 0.555}\n    - {x: 0.205, y: 0.525}\n    - {x: 0.295, y: 0.45499998}\n    - {x: 0.415, y: 0.39499998}\n    - {x: 0.275, y: 0.45499998}\n    - {x: 0.185, y: 0.465}\n    - {x: 0.105, y: 0.405}\n    - {x: -0.055, y: 0.36499998}\n    - {x: -0.13499999, y: 0.315}\n    - {x: -0.095, y: 0.255}\n    - {x: -0.675, y: 0.255}\n    - {x: -0.72499996, y: 0.16499999}\n    - {x: -0.655, y: 0.125}\n    - {x: -0.515, y: 0.085}\n    - {x: -1.405, y: 0.015}\n    - {x: -1.495, y: -0.065}\n    - {x: -1.495, y: -0.114999995}\n    - {x: -1.405, y: -0.16499999}\n    - {x: -0.42499998, y: -0.265}\n    - {x: -0.225, y: -0.265}\n    - {x: -0.114999995, y: -0.355}\n    - {x: 0.195, y: -0.36499998}\n    - {x: 0.114999995, y: -0.375}\n    - {x: 0.035, y: -0.49499997}\n    - {x: 0.114999995, y: -0.545}\n    - {x: 0.355, y: -0.555}\n    - {x: 0.615, y: -0.505}\n    - {x: 0.835, y: -0.515}\n    - {x: 0.945, y: -0.565}\n    - {x: 1.095, y: -0.565}\n    - {x: 1.305, y: -0.465}\n    - {x: 1.405, y: -0.375}\n    - {x: 1.495, y: -0.24499999}\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -0.03500000014901161,
+            "y": 0.6050000190734863,
+            "z": 0.0,
+            "u": 0.15820312499272404,
+            "v": 0.013671874068677425
+          },
+          {
+            "x": -0.16500000655651093,
+            "y": -0.38499999046325684,
+            "z": 0.0,
+            "u": 0.15185546842985786,
+            "v": 0.06201171828433871
+          },
+          {
+            "x": -0.1550000011920929,
+            "y": -0.39500001072883606,
+            "z": 0.0,
+            "u": 0.15234374994179234,
+            "v": 0.06250000052386895
+          },
+          {
+            "x": -0.3050000071525574,
+            "y": -0.38499999046325684,
+            "z": 0.0,
+            "u": 0.14501953090075403,
+            "v": 0.06201171828433871
+          },
+          {
+            "x": -0.38499999046325684,
+            "y": -0.41499999165534973,
+            "z": 0.0,
+            "u": 0.1411132817156613,
+            "v": 0.06347656209254637
+          },
+          {
+            "x": -0.42500001192092896,
+            "y": -0.6050000190734863,
+            "z": 0.0,
+            "u": 0.1391601556679234,
+            "v": 0.07275390718132257
+          },
+          {
+            "x": -0.38499999046325684,
+            "y": -0.45500001311302185,
+            "z": 0.0,
+            "u": 0.1411132817156613,
+            "v": 0.06542968814028427
+          },
+          {
+            "x": -0.7049999833106995,
+            "y": -0.5649999976158142,
+            "z": 0.0,
+            "u": 0.12548828206490725,
+            "v": 0.07080078113358468
+          },
+          {
+            "x": -1.4850000143051147,
+            "y": -0.1850000023841858,
+            "z": 0.0,
+            "u": 0.08740234305150807,
+            "v": 0.05224609386641532
+          },
+          {
+            "x": -1.5149999856948853,
+            "y": 0.03500000014901161,
+            "z": 0.0,
+            "u": 0.08593750069849193,
+            "v": 0.04150390624272404
+          },
+          {
+            "x": -1.5149999856948853,
+            "y": -0.14499999582767487,
+            "z": 0.0,
+            "u": 0.08593750069849193,
+            "v": 0.05029296854627319
+          },
+          {
+            "x": 1.465000033378601,
+            "y": 0.6050000190734863,
+            "z": 0.0,
+            "u": 0.2314453141298145,
+            "v": 0.013671874068677425
+          },
+          {
+            "x": 1.5149999856948853,
+            "y": -0.6050000190734863,
+            "z": 0.0,
+            "u": 0.23388671805150807,
+            "v": 0.07275390718132257
+          },
+          {
+            "x": 1.5149999856948853,
+            "y": 0.38499999046325684,
+            "z": 0.0,
+            "u": 0.23388671805150807,
+            "v": 0.024414062965661287
+          },
+          {
+            "x": -0.1550000011920929,
+            "y": -0.4350000023841858,
+            "z": 0.0,
+            "u": 0.15234374994179234,
+            "v": 0.06445312511641532
+          },
+          {
+            "x": -0.22499999403953552,
+            "y": -0.4749999940395355,
+            "z": 0.0,
+            "u": 0.1489257815410383,
+            "v": 0.0664062497089617
+          },
+          {
+            "x": -0.375,
+            "y": -0.4749999940395355,
+            "z": 0.0,
+            "u": 0.1416015625,
+            "v": 0.0664062497089617
+          }
+        ],
+        "indices": [
+          6,
+          4,
+          16,
+          3,
+          16,
+          4,
+          15,
+          16,
+          3,
+          1,
+          15,
+          3,
+          14,
+          15,
+          1,
+          2,
+          14,
+          1,
+          6,
+          16,
+          5,
+          12,
+          5,
+          16,
+          15,
+          12,
+          16,
+          14,
+          12,
+          15,
+          2,
+          12,
+          14,
+          0,
+          12,
+          2,
+          11,
+          12,
+          0,
+          13,
+          12,
+          11,
+          10,
+          9,
+          8,
+          0,
+          8,
+          9,
+          7,
+          8,
+          0,
+          4,
+          7,
+          0,
+          5,
+          7,
+          4,
+          6,
+          5,
+          4,
+          3,
+          4,
+          0,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/bullet/bulletspirtes/ExtremeSnowPea.asset",
+      "textureRect": {
+        "x": 176.0,
+        "y": 1899.0,
+        "width": 303.0,
+        "height": 121.0,
+        "yTop": 28.0
+      },
+      "logicalSize": {
+        "width": 303.0,
+        "height": 121.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "f0540055851f55140a01d6f780eb1534",
+      "node": 2,
+      "sortingOrder": 0,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    },
+    {
+      "texture": "../cactus/textures/7924e0d6960d.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: plantshadow\n  m_Rect:\n    serializedVersion: 2\n    x: 0\n    y: 0\n    width: 86\n    height: 36\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    b79a0977f249dd948866a2f5a914ba3a: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 0286c7c34d435bf4694be6a09458c445, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: f628dcbeec51383e00000000f628dc3eec51383e00000000f628dcbeec5138be00000000f628dc3eec5138be000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 86\n      height: 36\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 0\n    uvTransform: {x: 100, y: 43, z: 100, w: 18}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -0.4300000071525574,
+            "y": 0.18000000715255737,
+            "z": 0.0,
+            "u": -8.316927177961482e-09,
+            "v": -1.986821485111534e-08
+          },
+          {
+            "x": 0.4300000071525574,
+            "y": 0.18000000715255737,
+            "z": 0.0,
+            "u": 1.0000000083169271,
+            "v": -1.986821485111534e-08
+          },
+          {
+            "x": -0.4300000071525574,
+            "y": -0.18000000715255737,
+            "z": 0.0,
+            "u": -8.316927177961482e-09,
+            "v": 1.0000000198682149
+          },
+          {
+            "x": 0.4300000071525574,
+            "y": -0.18000000715255737,
+            "z": 0.0,
+            "u": 1.0000000083169271,
+            "v": 1.0000000198682149
+          }
+        ],
+        "indices": [
+          0,
+          1,
+          2,
+          2,
+          1,
+          3
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/board/plantshadow.asset",
+      "textureRect": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 86.0,
+        "height": 36.0,
+        "yTop": 0.0
+      },
+      "logicalSize": {
+        "width": 86.0,
+        "height": 36.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "e741cea7caea00248903707884a3228b",
+      "node": 3,
+      "sortingOrder": 0,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    }
+  ],
+  "spriteVariants": {
+    "f0540055851f55140a01d6f780eb1534": {
+      "texture": "../projectile-pea/textures/cfbfebf76995.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: ExtremeSnowPea\n  m_Rect:\n    serializedVersion: 2\n    x: 176\n    y: 1899\n    width: 303\n    height: 121\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    a8c63eff880d8d5489382210c3f8408e: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 2be43b649cd811049b3a36efc777b799, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 69\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 17\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 0600040010000300100004000f001000030001000f0003000e000f00010002000e0001000600100005000c00050010000f000c0010000e000c000f0002000c000e0000000c0002000b000c0000000d000c000b000a0009000800000008000900070008000000040007000000050007000400060005000400030004000000010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 17\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 344\n      _typelessdata: 295c0fbd48e11a3f00000000c3f528beb81ec5be0000000052b81ebe713dcabe00000000f6289cbeb81ec5be00000000b81ec5bee17ad4be000000009a99d9be48e11abf00000000b81ec5bec3f5e8be00000000e17a34bfd7a310bf000000007b14bebfa4703dbe0000000085ebc1bf295c0f3d0000000085ebc1bfe17a14be000000001f85bb3f48e11a3f0000000085ebc13f48e11abf0000000085ebc13fb81ec53e0000000052b81ebe52b8debe00000000666666be3333f3be000000000000c0be3333f3be000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 176\n      y: 1899\n      width: 303\n      height: 121\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 176, y: 1899}\n    settingsRaw: 65\n    uvTransform: {x: 100, y: 327.5, z: 100, w: 1959.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape:\n  - - {x: 1.515, y: -0.155}\n    - {x: 1.515, y: 0.095}\n    - {x: 1.415, y: 0.295}\n    - {x: 1.305, y: 0.39499998}\n    - {x: 0.945, y: 0.53499997}\n    - {x: 0.815, y: 0.505}\n    - {x: 0.36499998, y: 0.585}\n    - {x: 0.275, y: 0.59499997}\n    - {x: 0.24499999, y: 0.59499997}\n    - {x: 0.21499999, y: 0.555}\n    - {x: 0.205, y: 0.525}\n    - {x: 0.295, y: 0.45499998}\n    - {x: 0.415, y: 0.39499998}\n    - {x: 0.275, y: 0.45499998}\n    - {x: 0.185, y: 0.465}\n    - {x: 0.105, y: 0.405}\n    - {x: -0.055, y: 0.36499998}\n    - {x: -0.13499999, y: 0.315}\n    - {x: -0.095, y: 0.255}\n    - {x: -0.675, y: 0.255}\n    - {x: -0.72499996, y: 0.16499999}\n    - {x: -0.655, y: 0.125}\n    - {x: -0.515, y: 0.085}\n    - {x: -1.405, y: 0.015}\n    - {x: -1.495, y: -0.065}\n    - {x: -1.495, y: -0.114999995}\n    - {x: -1.405, y: -0.16499999}\n    - {x: -0.42499998, y: -0.265}\n    - {x: -0.225, y: -0.265}\n    - {x: -0.114999995, y: -0.355}\n    - {x: 0.195, y: -0.36499998}\n    - {x: 0.114999995, y: -0.375}\n    - {x: 0.035, y: -0.49499997}\n    - {x: 0.114999995, y: -0.545}\n    - {x: 0.355, y: -0.555}\n    - {x: 0.615, y: -0.505}\n    - {x: 0.835, y: -0.515}\n    - {x: 0.945, y: -0.565}\n    - {x: 1.095, y: -0.565}\n    - {x: 1.305, y: -0.465}\n    - {x: 1.405, y: -0.375}\n    - {x: 1.495, y: -0.24499999}\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -0.03500000014901161,
+            "y": 0.6050000190734863,
+            "z": 0.0,
+            "u": 0.15820312499272404,
+            "v": 0.013671874068677425
+          },
+          {
+            "x": -0.16500000655651093,
+            "y": -0.38499999046325684,
+            "z": 0.0,
+            "u": 0.15185546842985786,
+            "v": 0.06201171828433871
+          },
+          {
+            "x": -0.1550000011920929,
+            "y": -0.39500001072883606,
+            "z": 0.0,
+            "u": 0.15234374994179234,
+            "v": 0.06250000052386895
+          },
+          {
+            "x": -0.3050000071525574,
+            "y": -0.38499999046325684,
+            "z": 0.0,
+            "u": 0.14501953090075403,
+            "v": 0.06201171828433871
+          },
+          {
+            "x": -0.38499999046325684,
+            "y": -0.41499999165534973,
+            "z": 0.0,
+            "u": 0.1411132817156613,
+            "v": 0.06347656209254637
+          },
+          {
+            "x": -0.42500001192092896,
+            "y": -0.6050000190734863,
+            "z": 0.0,
+            "u": 0.1391601556679234,
+            "v": 0.07275390718132257
+          },
+          {
+            "x": -0.38499999046325684,
+            "y": -0.45500001311302185,
+            "z": 0.0,
+            "u": 0.1411132817156613,
+            "v": 0.06542968814028427
+          },
+          {
+            "x": -0.7049999833106995,
+            "y": -0.5649999976158142,
+            "z": 0.0,
+            "u": 0.12548828206490725,
+            "v": 0.07080078113358468
+          },
+          {
+            "x": -1.4850000143051147,
+            "y": -0.1850000023841858,
+            "z": 0.0,
+            "u": 0.08740234305150807,
+            "v": 0.05224609386641532
+          },
+          {
+            "x": -1.5149999856948853,
+            "y": 0.03500000014901161,
+            "z": 0.0,
+            "u": 0.08593750069849193,
+            "v": 0.04150390624272404
+          },
+          {
+            "x": -1.5149999856948853,
+            "y": -0.14499999582767487,
+            "z": 0.0,
+            "u": 0.08593750069849193,
+            "v": 0.05029296854627319
+          },
+          {
+            "x": 1.465000033378601,
+            "y": 0.6050000190734863,
+            "z": 0.0,
+            "u": 0.2314453141298145,
+            "v": 0.013671874068677425
+          },
+          {
+            "x": 1.5149999856948853,
+            "y": -0.6050000190734863,
+            "z": 0.0,
+            "u": 0.23388671805150807,
+            "v": 0.07275390718132257
+          },
+          {
+            "x": 1.5149999856948853,
+            "y": 0.38499999046325684,
+            "z": 0.0,
+            "u": 0.23388671805150807,
+            "v": 0.024414062965661287
+          },
+          {
+            "x": -0.1550000011920929,
+            "y": -0.4350000023841858,
+            "z": 0.0,
+            "u": 0.15234374994179234,
+            "v": 0.06445312511641532
+          },
+          {
+            "x": -0.22499999403953552,
+            "y": -0.4749999940395355,
+            "z": 0.0,
+            "u": 0.1489257815410383,
+            "v": 0.0664062497089617
+          },
+          {
+            "x": -0.375,
+            "y": -0.4749999940395355,
+            "z": 0.0,
+            "u": 0.1416015625,
+            "v": 0.0664062497089617
+          }
+        ],
+        "indices": [
+          6,
+          4,
+          16,
+          3,
+          16,
+          4,
+          15,
+          16,
+          3,
+          1,
+          15,
+          3,
+          14,
+          15,
+          1,
+          2,
+          14,
+          1,
+          6,
+          16,
+          5,
+          12,
+          5,
+          16,
+          15,
+          12,
+          16,
+          14,
+          12,
+          15,
+          2,
+          12,
+          14,
+          0,
+          12,
+          2,
+          11,
+          12,
+          0,
+          13,
+          12,
+          11,
+          10,
+          9,
+          8,
+          0,
+          8,
+          9,
+          7,
+          8,
+          0,
+          4,
+          7,
+          0,
+          5,
+          7,
+          4,
+          6,
+          5,
+          4,
+          3,
+          4,
+          0,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/bullet/bulletspirtes/ExtremeSnowPea.asset",
+      "textureRect": {
+        "x": 176.0,
+        "y": 1899.0,
+        "width": 303.0,
+        "height": 121.0,
+        "yTop": 28.0
+      },
+      "logicalSize": {
+        "width": 303.0,
+        "height": 121.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "e741cea7caea00248903707884a3228b": {
+      "texture": "../cactus/textures/7924e0d6960d.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: plantshadow\n  m_Rect:\n    serializedVersion: 2\n    x: 0\n    y: 0\n    width: 86\n    height: 36\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    b79a0977f249dd948866a2f5a914ba3a: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 0286c7c34d435bf4694be6a09458c445, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: f628dcbeec51383e00000000f628dc3eec51383e00000000f628dcbeec5138be00000000f628dc3eec5138be000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 86\n      height: 36\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 0\n    uvTransform: {x: 100, y: 43, z: 100, w: 18}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -0.4300000071525574,
+            "y": 0.18000000715255737,
+            "z": 0.0,
+            "u": -8.316927177961482e-09,
+            "v": -1.986821485111534e-08
+          },
+          {
+            "x": 0.4300000071525574,
+            "y": 0.18000000715255737,
+            "z": 0.0,
+            "u": 1.0000000083169271,
+            "v": -1.986821485111534e-08
+          },
+          {
+            "x": -0.4300000071525574,
+            "y": -0.18000000715255737,
+            "z": 0.0,
+            "u": -8.316927177961482e-09,
+            "v": 1.0000000198682149
+          },
+          {
+            "x": 0.4300000071525574,
+            "y": -0.18000000715255737,
+            "z": 0.0,
+            "u": 1.0000000083169271,
+            "v": 1.0000000198682149
+          }
+        ],
+        "indices": [
+          0,
+          1,
+          2,
+          2,
+          1,
+          3
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/board/plantshadow.asset",
+      "textureRect": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 86.0,
+        "height": 36.0,
+        "yTop": 0.0
+      },
+      "logicalSize": {
+        "width": 86.0,
+        "height": 36.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    }
+  },
+  "extraSpriteGuids": {},
+  "anchors": {
+    "shadow": {
+      "path": "Shadow",
+      "x": 0.0,
+      "y": -0.9353519388,
+      "relativeToRuntimeRoot": true
+    }
+  },
+  "visualBounds": {
+    "minX": -0.4684290664907193,
+    "maxX": 0.4443298216907193,
+    "minY": -1.0408238814208406,
+    "maxY": 0.18978155854570775
+  },
+  "clips": {},
+  "controller": {
+    "states": [],
+    "layers": [],
+    "serializedController": ""
+  },
+  "nonRenderingComponents": [
+    {
+      "typeId": 61,
+      "fileId": 61884547391421755,
+      "serializedComponent": "BoxCollider2D:\n  serializedVersion: 2\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1709254077376921}\n  m_Enabled: 1\n  m_Density: 1\n  m_Material: {fileID: 0}\n  m_IncludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_ExcludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_LayerOverridePriority: 0\n  m_ForceSendLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_ForceReceiveLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_ContactCaptureLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_CallbackLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_IsTrigger: 1\n  m_UsedByEffector: 0\n  m_UsedByComposite: 0\n  m_Offset: {x: -0.0044807494, y: 0.007438913}\n  m_SpriteTilingProperty:\n    border: {x: 0, y: 0, z: 0, w: 0}\n    pivot: {x: 0.5, y: 0.5}\n    oldSize: {x: 0.28, y: 0.28}\n    newSize: {x: 0.32, y: 0.27}\n    adaptiveTilingThreshold: 0.5\n    drawMode: 0\n    adaptiveTiling: 0\n  m_AutoTiling: 0\n  m_Size: {x: 0.48764962, y: 0.19262436}\n  m_EdgeRadius: 0\n"
+    },
+    {
+      "typeId": 198,
+      "fileId": 198243736805655561,
+      "serializedComponent": "ParticleSystem:\n  serializedVersion: 8\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1730242686860875}\n  lengthInSec: 0.5\n  simulationSpeed: 1\n  stopAction: 0\n  cullingMode: 0\n  ringBufferMode: 0\n  ringBufferLoopRange: {x: 0, y: 1}\n  emitterVelocityMode: 1\n  looping: 1\n  prewarm: 0\n  playOnAwake: 1\n  useUnscaledTime: 0\n  autoRandomSeed: 1\n  startDelay:\n    serializedVersion: 2\n    minMaxState: 0\n    scalar: 0\n    minScalar: 0\n    maxCurve:\n      serializedVersion: 2\n      m_Curve: []\n      m_PreInfinity: 2\n      m_PostInfinity: 2\n      m_RotationOrder: 4\n    minCurve:\n      serializedVersion: 2\n      m_Curve: []\n      m_PreInfinity: 2\n      m_PostInfinity: 2\n      m_RotationOrder: 4\n  moveWithTransform: 0\n  moveWithCustomTransform: {fileID: 0}\n  scalingMode: 1\n  randomSeed: 0\n  InitialModule:\n    serializedVersion: 3\n    enabled: 1\n    startLifetime:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0.5\n      minScalar: 5\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    startSpeed:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 1\n      minScalar: 5\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    startColor:\n      serializedVersion: 2\n      minMaxState: 0\n      minColor: {r: 1, g: 1, b: 1, a: 1}\n      maxColor: {r: 1, g: 1, b: 1, a: 1}\n      maxGradient:\n        serializedVersion: 2\n        key0: {r: 1, g: 1, b: 1, a: 1}\n        key1: {r: 1, g: 1, b: 1, a: 1}\n        key2: {r: 0, g: 0, b: 0, a: 0}\n        key3: {r: 0, g: 0, b: 0, a: 0}\n        key4: {r: 0, g: 0, b: 0, a: 0}\n        key5: {r: 0, g: 0, b: 0, a: 0}\n        key6: {r: 0, g: 0, b: 0, a: 0}\n        key7: {r: 0, g: 0, b: 0, a: 0}\n        ctime0: 0\n        ctime1: 65535\n        ctime2: 0\n        ctime3: 0\n        ctime4: 0\n        ctime5: 0\n        ctime6: 0\n        ctime7: 0\n        atime0: 0\n        atime1: 65535\n        atime2: 0\n        atime3: 0\n        atime4: 0\n        atime5: 0\n        atime6: 0\n        atime7: 0\n        m_Mode: 0\n        m_ColorSpace: -1\n        m_NumColorKeys: 2\n        m_NumAlphaKeys: 2\n      minGradient:\n        serializedVersion: 2\n        key0: {r: 1, g: 1, b: 1, a: 1}\n        key1: {r: 1, g: 1, b: 1, a: 1}\n        key2: {r: 0, g: 0, b: 0, a: 0}\n        key3: {r: 0, g: 0, b: 0, a: 0}\n        key4: {r: 0, g: 0, b: 0, a: 0}\n        key5: {r: 0, g: 0, b: 0, a: 0}\n        key6: {r: 0, g: 0, b: 0, a: 0}\n        key7: {r: 0, g: 0, b: 0, a: 0}\n        ctime0: 0\n        ctime1: 65535\n        ctime2: 0\n        ctime3: 0\n        ctime4: 0\n        ctime5: 0\n        ctime6: 0\n        ctime7: 0\n        atime0: 0\n        atime1: 65535\n        atime2: 0\n        atime3: 0\n        atime4: 0\n        atime5: 0\n        atime6: 0\n        atime7: 0\n        m_Mode: 0\n        m_ColorSpace: -1\n        m_NumColorKeys: 2\n        m_NumAlphaKeys: 2\n    startSize:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0.2\n      minScalar: 1\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    startSizeY:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 1\n      minScalar: 1\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    startSizeZ:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 1\n      minScalar: 1\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    startRotationX:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    startRotationY:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    startRotation:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    randomizeRotationDirection: 0\n    gravitySource: 0\n    maxNumParticles: 1000\n    customEmitterVelocity: {x: 0, y: 0, z: 0}\n    size3D: 0\n    rotation3D: 0\n    gravityModifier:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n  ShapeModule:\n    serializedVersion: 6\n    enabled: 1\n    type: 4\n    angle: 25\n    length: 5\n    boxThickness: {x: 0, y: 0, z: 0}\n    radiusThickness: 1\n    donutRadius: 0.2\n    m_Position: {x: 0, y: 0, z: 0}\n    m_Rotation: {x: 0, y: 0, z: 0}\n    m_Scale: {x: 1, y: 1, z: 1}\n    placementMode: 0\n    m_MeshMaterialIndex: 0\n    m_MeshNormalOffset: 0\n    m_MeshSpawn:\n      mode: 0\n      spread: 0\n      speed:\n        serializedVersion: 2\n        minMaxState: 0\n        scalar: 1\n        minScalar: 1\n        maxCurve:\n          serializedVersion: 2\n          m_Curve: []\n          m_PreInfinity: 2\n          m_PostInfinity: 2\n          m_RotationOrder: 4\n        minCurve:\n          serializedVersion: 2\n          m_Curve: []\n          m_PreInfinity: 2\n          m_PostInfinity: 2\n          m_RotationOrder: 4\n    m_Mesh: {fileID: 0}\n    m_MeshRenderer: {fileID: 0}\n    m_SkinnedMeshRenderer: {fileID: 0}\n    m_Sprite: {fileID: 0}\n    m_SpriteRenderer: {fileID: 0}\n    m_UseMeshMaterialIndex: 0\n    m_UseMeshColors: 1\n    alignToDirection: 0\n    m_Texture: {fileID: 0}\n    m_TextureClipChannel: 3\n    m_TextureClipThreshold: 0\n    m_TextureUVChannel: 0\n    m_TextureColorAffectsParticles: 1\n    m_TextureAlphaAffectsParticles: 1\n    m_TextureBilinearFiltering: 0\n    randomDirectionAmount: 0\n    sphericalDirectionAmount: 0\n    randomPositionAmount: 0\n    radius:\n      value: 0.14984193\n      mode: 0\n      spread: 0\n      speed:\n        serializedVersion: 2\n        minMaxState: 0\n        scalar: 1\n        minScalar: 1\n        maxCurve:\n          serializedVersion: 2\n          m_Curve: []\n          m_PreInfinity: 2\n          m_PostInfinity: 2\n          m_RotationOrder: 4\n        minCurve:\n          serializedVersion: 2\n          m_Curve: []\n          m_PreInfinity: 2\n          m_PostInfinity: 2\n          m_RotationOrder: 4\n    arc:\n      value: 360\n      mode: 0\n      spread: 0\n      speed:\n        serializedVersion: 2\n        minMaxState: 0\n        scalar: 1\n        minScalar: 1\n        maxCurve:\n          serializedVersion: 2\n          m_Curve: []\n          m_PreInfinity: 2\n          m_PostInfinity: 2\n          m_RotationOrder: 4\n        minCurve:\n          serializedVersion: 2\n          m_Curve: []\n          m_PreInfinity: 2\n          m_PostInfinity: 2\n          m_RotationOrder: 4\n  EmissionModule:\n    serializedVersion: 4\n    enabled: 1\n    rateOverTime:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 10\n      minScalar: 10\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    rateOverDistance:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    m_BurstCount: 0\n    m_Bursts: []\n  SizeModule:\n    enabled: 1\n    curve:\n      serializedVersion: 2\n      minMaxState: 1\n      scalar: 1\n      minScalar: 1\n      maxCurve:\n        serializedVersion: 2\n        m_Curve:\n        - serializedVersion: 3\n          time: 0\n          value: 1\n          inSlope: -1\n          outSlope: -1\n          tangentMode: 0\n          weightedMode: 0\n          inWeight: 0.33333334\n          outWeight: 0.33333334\n        - serializedVersion: 3\n          time: 1\n          value: 0\n          inSlope: -1\n          outSlope: -1\n          tangentMode: 0\n          weightedMode: 0\n          inWeight: 0.33333334\n          outWeight: 0.33333334\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    y:\n      serializedVersion: 2\n      minMaxState: 1\n      scalar: 1\n      minScalar: 1\n      maxCurve:\n        serializedVersion: 2\n        m_Curve:\n        - serializedVersion: 3\n          time: 0\n          value: 0\n          inSlope: 0\n          outSlope: 1\n          tangentMode: 0\n          weightedMode: 0\n          inWeight: 0.33333334\n          outWeight: 0.33333334\n        - serializedVersion: 3\n          time: 1\n          value: 1\n          inSlope: 1\n          outSlope: 0\n          tangentMode: 0\n          weightedMode: 0\n          inWeight: 0.33333334\n          outWeight: 0.33333334\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    z:\n      serializedVersion: 2\n      minMaxState: 1\n      scalar: 1\n      minScalar: 1\n      maxCurve:\n        serializedVersion: 2\n        m_Curve:\n        - serializedVersion: 3\n          time: 0\n          value: 0\n          inSlope: 0\n          outSlope: 1\n          tangentMode: 0\n          weightedMode: 0\n          inWeight: 0.33333334\n          outWeight: 0.33333334\n        - serializedVersion: 3\n          time: 1\n          value: 1\n          inSlope: 1\n          outSlope: 0\n          tangentMode: 0\n          weightedMode: 0\n          inWeight: 0.33333334\n          outWeight: 0.33333334\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    separateAxes: 0\n  RotationModule:\n    enabled: 0\n    x:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    y:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    curve:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0.7853982\n      minScalar: 0.7853982\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    separateAxes: 0\n  ColorModule:\n    enabled: 0\n    gradient:\n      serializedVersion: 2\n      minMaxState: 1\n      minColor: {r: 1, g: 1, b: 1, a: 1}\n      maxColor: {r: 1, g: 1, b: 1, a: 1}\n      maxGradient:\n        serializedVersion: 2\n        key0: {r: 1, g: 1, b: 1, a: 1}\n        key1: {r: 1, g: 1, b: 1, a: 1}\n        key2: {r: 0, g: 0, b: 0, a: 0}\n        key3: {r: 0, g: 0, b: 0, a: 0}\n        key4: {r: 0, g: 0, b: 0, a: 0}\n        key5: {r: 0, g: 0, b: 0, a: 0}\n        key6: {r: 0, g: 0, b: 0, a: 0}\n        key7: {r: 0, g: 0, b: 0, a: 0}\n        ctime0: 0\n        ctime1: 65535\n        ctime2: 0\n        ctime3: 0\n        ctime4: 0\n        ctime5: 0\n        ctime6: 0\n        ctime7: 0\n        atime0: 0\n        atime1: 65535\n        atime2: 0\n        atime3: 0\n        atime4: 0\n        atime5: 0\n        atime6: 0\n        atime7: 0\n        m_Mode: 0\n        m_ColorSpace: -1\n        m_NumColorKeys: 2\n        m_NumAlphaKeys: 2\n      minGradient:\n        serializedVersion: 2\n        key0: {r: 1, g: 1, b: 1, a: 1}\n        key1: {r: 1, g: 1, b: 1, a: 1}\n        key2: {r: 0, g: 0, b: 0, a: 0}\n        key3: {r: 0, g: 0, b: 0, a: 0}\n        key4: {r: 0, g: 0, b: 0, a: 0}\n        key5: {r: 0, g: 0, b: 0, a: 0}\n        key6: {r: 0, g: 0, b: 0, a: 0}\n        key7: {r: 0, g: 0, b: 0, a: 0}\n        ctime0: 0\n        ctime1: 65535\n        ctime2: 0\n        ctime3: 0\n        ctime4: 0\n        ctime5: 0\n        ctime6: 0\n        ctime7: 0\n        atime0: 0\n        atime1: 65535\n        atime2: 0\n        atime3: 0\n        atime4: 0\n        atime5: 0\n        atime6: 0\n        atime7: 0\n        m_Mode: 0\n        m_ColorSpace: -1\n        m_NumColorKeys: 2\n        m_NumAlphaKeys: 2\n  UVModule:\n    serializedVersion: 2\n    enabled: 1\n    mode: 1\n    timeMode: 0\n    fps: 30\n    frameOverTime:\n      serializedVersion: 2\n      minMaxState: 1\n      scalar: 0.9999\n      minScalar: 0.9999\n      maxCurve:\n        serializedVersion: 2\n        m_Curve:\n        - serializedVersion: 3\n          time: 0\n          value: 0\n          inSlope: 0\n          outSlope: 1\n          tangentMode: 0\n          weightedMode: 0\n          inWeight: 0.33333334\n          outWeight: 0.33333334\n        - serializedVersion: 3\n          time: 1\n          value: 1\n          inSlope: 1\n          outSlope: 0\n          tangentMode: 0\n          weightedMode: 0\n          inWeight: 0.33333334\n          outWeight: 0.33333334\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    startFrame:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    speedRange: {x: 0, y: 1}\n    tilesX: 1\n    tilesY: 1\n    animationType: 0\n    rowIndex: 0\n    cycles: 1\n    uvChannelMask: -1\n    rowMode: 1\n    sprites:\n    - sprite: {fileID: 21300000, guid: 819992691577c9b4bb3bcfd46a57b92f, type: 2}\n    flipU: 0\n    flipV: 0\n  VelocityModule:\n    enabled: 0\n    x:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    y:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    z:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    orbitalX:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    orbitalY:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    orbitalZ:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    orbitalOffsetX:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    orbitalOffsetY:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    orbitalOffsetZ:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    radial:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    speedModifier:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 1\n      minScalar: 1\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    inWorldSpace: 0\n  InheritVelocityModule:\n    enabled: 0\n    m_Mode: 0\n    m_Curve:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n  LifetimeByEmitterSpeedModule:\n    enabled: 0\n    m_Curve:\n      serializedVersion: 2\n      minMaxState: 1\n      scalar: 1\n      minScalar: 1\n      maxCurve:\n        serializedVersion: 2\n        m_Curve:\n        - serializedVersion: 3\n          time: 0\n          value: 1\n          inSlope: 0\n          outSlope: -0.8\n          tangentMode: 0\n          weightedMode: 0\n          inWeight: 0.33333334\n          outWeight: 0.33333334\n        - serializedVersion: 3\n          time: 1\n          value: 0.2\n          inSlope: -0.8\n          outSlope: 0\n          tangentMode: 0\n          weightedMode: 0\n          inWeight: 0.33333334\n          outWeight: 0.33333334\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    m_Range: {x: 0, y: 1}\n  ForceModule:\n    enabled: 1\n    x:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: -2\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    y:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: -0.5\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    z:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    inWorldSpace: 0\n    randomizePerFrame: 0\n  ExternalForcesModule:\n    serializedVersion: 2\n    enabled: 0\n    multiplierCurve:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 1\n      minScalar: 1\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    influenceFilter: 0\n    influenceMask:\n      serializedVersion: 2\n      m_Bits: 4294967295\n    influenceList: []\n  ClampVelocityModule:\n    enabled: 0\n    x:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 1\n      minScalar: 1\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    y:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 1\n      minScalar: 1\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    z:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 1\n      minScalar: 1\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    magnitude:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 1\n      minScalar: 1\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    separateAxis: 0\n    inWorldSpace: 0\n    multiplyDragByParticleSize: 1\n    multiplyDragByParticleVelocity: 1\n    dampen: 0\n    drag:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n  NoiseModule:\n    enabled: 0\n    strength:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 1\n      minScalar: 1\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    strengthY:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 1\n      minScalar: 1\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    strengthZ:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 1\n      minScalar: 1\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    separateAxes: 0\n    frequency: 0.5\n    damping: 1\n    octaves: 1\n    octaveMultiplier: 0.5\n    octaveScale: 2\n    quality: 1\n    scrollSpeed:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    remap:\n      serializedVersion: 2\n      minMaxState: 1\n      scalar: 1\n      minScalar: 1\n      maxCurve:\n        serializedVersion: 2\n        m_Curve:\n        - serializedVersion: 3\n          time: 0\n          value: -1\n          inSlope: 0\n          outSlope: 2\n          tangentMode: 0\n          weightedMode: 0\n          inWeight: 0.33333334\n          outWeight: 0.33333334\n        - serializedVersion: 3\n          time: 1\n          value: 1\n          inSlope: 2\n          outSlope: 0\n          tangentMode: 0\n          weightedMode: 0\n          inWeight: 0.33333334\n          outWeight: 0.33333334\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    remapY:\n      serializedVersion: 2\n      minMaxState: 1\n      scalar: 1\n      minScalar: 1\n      maxCurve:\n        serializedVersion: 2\n        m_Curve:\n        - serializedVersion: 3\n          time: 0\n          value: -1\n          inSlope: 0\n          outSlope: 2\n          tangentMode: 0\n          weightedMode: 0\n          inWeight: 0.33333334\n          outWeight: 0.33333334\n        - serializedVersion: 3\n          time: 1\n          value: 1\n          inSlope: 2\n          outSlope: 0\n          tangentMode: 0\n          weightedMode: 0\n          inWeight: 0.33333334\n          outWeight: 0.33333334\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    remapZ:\n      serializedVersion: 2\n      minMaxState: 1\n      scalar: 1\n      minScalar: 1\n      maxCurve:\n        serializedVersion: 2\n        m_Curve:\n        - serializedVersion: 3\n          time: 0\n          value: -1\n          inSlope: 0\n          outSlope: 2\n          tangentMode: 0\n          weightedMode: 0\n          inWeight: 0.33333334\n          outWeight: 0.33333334\n        - serializedVersion: 3\n          time: 1\n          value: 1\n          inSlope: 2\n          outSlope: 0\n          tangentMode: 0\n          weightedMode: 0\n          inWeight: 0.33333334\n          outWeight: 0.33333334\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    remapEnabled: 0\n    positionAmount:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 1\n      minScalar: 1\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    rotationAmount:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    sizeAmount:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n  SizeBySpeedModule:\n    enabled: 0\n    curve:\n      serializedVersion: 2\n      minMaxState: 1\n      scalar: 1\n      minScalar: 1\n      maxCurve:\n        serializedVersion: 2\n        m_Curve:\n        - serializedVersion: 3\n          time: 0\n          value: 0\n          inSlope: 0\n          outSlope: 1\n          tangentMode: 0\n          weightedMode: 0\n          inWeight: 0.33333334\n          outWeight: 0.33333334\n        - serializedVersion: 3\n          time: 1\n          value: 1\n          inSlope: 1\n          outSlope: 0\n          tangentMode: 0\n          weightedMode: 0\n          inWeight: 0.33333334\n          outWeight: 0.33333334\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    y:\n      serializedVersion: 2\n      minMaxState: 1\n      scalar: 1\n      minScalar: 1\n      maxCurve:\n        serializedVersion: 2\n        m_Curve:\n        - serializedVersion: 3\n          time: 0\n          value: 0\n          inSlope: 0\n          outSlope: 1\n          tangentMode: 0\n          weightedMode: 0\n          inWeight: 0.33333334\n          outWeight: 0.33333334\n        - serializedVersion: 3\n          time: 1\n          value: 1\n          inSlope: 1\n          outSlope: 0\n          tangentMode: 0\n          weightedMode: 0\n          inWeight: 0.33333334\n          outWeight: 0.33333334\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    z:\n      serializedVersion: 2\n      minMaxState: 1\n      scalar: 1\n      minScalar: 1\n      maxCurve:\n        serializedVersion: 2\n        m_Curve:\n        - serializedVersion: 3\n          time: 0\n          value: 0\n          inSlope: 0\n          outSlope: 1\n          tangentMode: 0\n          weightedMode: 0\n          inWeight: 0.33333334\n          outWeight: 0.33333334\n        - serializedVersion: 3\n          time: 1\n          value: 1\n          inSlope: 1\n          outSlope: 0\n          tangentMode: 0\n          weightedMode: 0\n          inWeight: 0.33333334\n          outWeight: 0.33333334\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    range: {x: 0, y: 1}\n    separateAxes: 0\n  RotationBySpeedModule:\n    enabled: 0\n    x:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    y:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    curve:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0.7853982\n      minScalar: 0.7853982\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    separateAxes: 0\n    range: {x: 0, y: 1}\n  ColorBySpeedModule:\n    enabled: 0\n    gradient:\n      serializedVersion: 2\n      minMaxState: 1\n      minColor: {r: 1, g: 1, b: 1, a: 1}\n      maxColor: {r: 1, g: 1, b: 1, a: 1}\n      maxGradient:\n        serializedVersion: 2\n        key0: {r: 1, g: 1, b: 1, a: 1}\n        key1: {r: 1, g: 1, b: 1, a: 1}\n        key2: {r: 0, g: 0, b: 0, a: 0}\n        key3: {r: 0, g: 0, b: 0, a: 0}\n        key4: {r: 0, g: 0, b: 0, a: 0}\n        key5: {r: 0, g: 0, b: 0, a: 0}\n        key6: {r: 0, g: 0, b: 0, a: 0}\n        key7: {r: 0, g: 0, b: 0, a: 0}\n        ctime0: 0\n        ctime1: 65535\n        ctime2: 0\n        ctime3: 0\n        ctime4: 0\n        ctime5: 0\n        ctime6: 0\n        ctime7: 0\n        atime0: 0\n        atime1: 65535\n        atime2: 0\n        atime3: 0\n        atime4: 0\n        atime5: 0\n        atime6: 0\n        atime7: 0\n        m_Mode: 0\n        m_ColorSpace: -1\n        m_NumColorKeys: 2\n        m_NumAlphaKeys: 2\n      minGradient:\n        serializedVersion: 2\n        key0: {r: 1, g: 1, b: 1, a: 1}\n        key1: {r: 1, g: 1, b: 1, a: 1}\n        key2: {r: 0, g: 0, b: 0, a: 0}\n        key3: {r: 0, g: 0, b: 0, a: 0}\n        key4: {r: 0, g: 0, b: 0, a: 0}\n        key5: {r: 0, g: 0, b: 0, a: 0}\n        key6: {r: 0, g: 0, b: 0, a: 0}\n        key7: {r: 0, g: 0, b: 0, a: 0}\n        ctime0: 0\n        ctime1: 65535\n        ctime2: 0\n        ctime3: 0\n        ctime4: 0\n        ctime5: 0\n        ctime6: 0\n        ctime7: 0\n        atime0: 0\n        atime1: 65535\n        atime2: 0\n        atime3: 0\n        atime4: 0\n        atime5: 0\n        atime6: 0\n        atime7: 0\n        m_Mode: 0\n        m_ColorSpace: -1\n        m_NumColorKeys: 2\n        m_NumAlphaKeys: 2\n    range: {x: 0, y: 1}\n  CollisionModule:\n    serializedVersion: 4\n    enabled: 0\n    type: 0\n    collisionMode: 0\n    colliderForce: 0\n    multiplyColliderForceByParticleSize: 0\n    multiplyColliderForceByParticleSpeed: 0\n    multiplyColliderForceByCollisionAngle: 1\n    m_Planes: []\n    m_Dampen:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    m_Bounce:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 1\n      minScalar: 1\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    m_EnergyLossOnCollision:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    minKillSpeed: 0\n    maxKillSpeed: 10000\n    radiusScale: 1\n    collidesWith:\n      serializedVersion: 2\n      m_Bits: 4294967295\n    maxCollisionShapes: 256\n    quality: 0\n    voxelSize: 0.5\n    collisionMessages: 0\n    collidesWithDynamic: 1\n    interiorCollisions: 0\n  TriggerModule:\n    serializedVersion: 2\n    enabled: 0\n    inside: 1\n    outside: 0\n    enter: 0\n    exit: 0\n    colliderQueryMode: 0\n    radiusScale: 1\n    primitives: []\n  SubModule:\n    serializedVersion: 2\n    enabled: 0\n    subEmitters:\n    - serializedVersion: 3\n      emitter: {fileID: 0}\n      type: 0\n      properties: 0\n      emitProbability: 1\n  LightsModule:\n    enabled: 0\n    ratio: 0\n    light: {fileID: 0}\n    randomDistribution: 1\n    color: 1\n    range: 1\n    intensity: 1\n    rangeCurve:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 1\n      minScalar: 1\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    intensityCurve:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 1\n      minScalar: 1\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    maxLights: 20\n  TrailModule:\n    enabled: 0\n    mode: 0\n    ratio: 1\n    lifetime:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 1\n      minScalar: 1\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    minVertexDistance: 0.2\n    textureMode: 0\n    textureScale: {x: 1, y: 1}\n    ribbonCount: 1\n    shadowBias: 0.5\n    worldSpace: 0\n    dieWithParticles: 1\n    sizeAffectsWidth: 1\n    sizeAffectsLifetime: 0\n    inheritParticleColor: 1\n    generateLightingData: 0\n    splitSubEmitterRibbons: 0\n    attachRibbonsToTransform: 0\n    colorOverLifetime:\n      serializedVersion: 2\n      minMaxState: 0\n      minColor: {r: 1, g: 1, b: 1, a: 1}\n      maxColor: {r: 1, g: 1, b: 1, a: 1}\n      maxGradient:\n        serializedVersion: 2\n        key0: {r: 1, g: 1, b: 1, a: 1}\n        key1: {r: 1, g: 1, b: 1, a: 1}\n        key2: {r: 0, g: 0, b: 0, a: 0}\n        key3: {r: 0, g: 0, b: 0, a: 0}\n        key4: {r: 0, g: 0, b: 0, a: 0}\n        key5: {r: 0, g: 0, b: 0, a: 0}\n        key6: {r: 0, g: 0, b: 0, a: 0}\n        key7: {r: 0, g: 0, b: 0, a: 0}\n        ctime0: 0\n        ctime1: 65535\n        ctime2: 0\n        ctime3: 0\n        ctime4: 0\n        ctime5: 0\n        ctime6: 0\n        ctime7: 0\n        atime0: 0\n        atime1: 65535\n        atime2: 0\n        atime3: 0\n        atime4: 0\n        atime5: 0\n        atime6: 0\n        atime7: 0\n        m_Mode: 0\n        m_ColorSpace: -1\n        m_NumColorKeys: 2\n        m_NumAlphaKeys: 2\n      minGradient:\n        serializedVersion: 2\n        key0: {r: 1, g: 1, b: 1, a: 1}\n        key1: {r: 1, g: 1, b: 1, a: 1}\n        key2: {r: 0, g: 0, b: 0, a: 0}\n        key3: {r: 0, g: 0, b: 0, a: 0}\n        key4: {r: 0, g: 0, b: 0, a: 0}\n        key5: {r: 0, g: 0, b: 0, a: 0}\n        key6: {r: 0, g: 0, b: 0, a: 0}\n        key7: {r: 0, g: 0, b: 0, a: 0}\n        ctime0: 0\n        ctime1: 65535\n        ctime2: 0\n        ctime3: 0\n        ctime4: 0\n        ctime5: 0\n        ctime6: 0\n        ctime7: 0\n        atime0: 0\n        atime1: 65535\n        atime2: 0\n        atime3: 0\n        atime4: 0\n        atime5: 0\n        atime6: 0\n        atime7: 0\n        m_Mode: 0\n        m_ColorSpace: -1\n        m_NumColorKeys: 2\n        m_NumAlphaKeys: 2\n    widthOverTrail:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 1\n      minScalar: 1\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    colorOverTrail:\n      serializedVersion: 2\n      minMaxState: 0\n      minColor: {r: 1, g: 1, b: 1, a: 1}\n      maxColor: {r: 1, g: 1, b: 1, a: 1}\n      maxGradient:\n        serializedVersion: 2\n        key0: {r: 1, g: 1, b: 1, a: 1}\n        key1: {r: 1, g: 1, b: 1, a: 1}\n        key2: {r: 0, g: 0, b: 0, a: 0}\n        key3: {r: 0, g: 0, b: 0, a: 0}\n        key4: {r: 0, g: 0, b: 0, a: 0}\n        key5: {r: 0, g: 0, b: 0, a: 0}\n        key6: {r: 0, g: 0, b: 0, a: 0}\n        key7: {r: 0, g: 0, b: 0, a: 0}\n        ctime0: 0\n        ctime1: 65535\n        ctime2: 0\n        ctime3: 0\n        ctime4: 0\n        ctime5: 0\n        ctime6: 0\n        ctime7: 0\n        atime0: 0\n        atime1: 65535\n        atime2: 0\n        atime3: 0\n        atime4: 0\n        atime5: 0\n        atime6: 0\n        atime7: 0\n        m_Mode: 0\n        m_ColorSpace: -1\n        m_NumColorKeys: 2\n        m_NumAlphaKeys: 2\n      minGradient:\n        serializedVersion: 2\n        key0: {r: 1, g: 1, b: 1, a: 1}\n        key1: {r: 1, g: 1, b: 1, a: 1}\n        key2: {r: 0, g: 0, b: 0, a: 0}\n        key3: {r: 0, g: 0, b: 0, a: 0}\n        key4: {r: 0, g: 0, b: 0, a: 0}\n        key5: {r: 0, g: 0, b: 0, a: 0}\n        key6: {r: 0, g: 0, b: 0, a: 0}\n        key7: {r: 0, g: 0, b: 0, a: 0}\n        ctime0: 0\n        ctime1: 65535\n        ctime2: 0\n        ctime3: 0\n        ctime4: 0\n        ctime5: 0\n        ctime6: 0\n        ctime7: 0\n        atime0: 0\n        atime1: 65535\n        atime2: 0\n        atime3: 0\n        atime4: 0\n        atime5: 0\n        atime6: 0\n        atime7: 0\n        m_Mode: 0\n        m_ColorSpace: -1\n        m_NumColorKeys: 2\n        m_NumAlphaKeys: 2\n  CustomDataModule:\n    enabled: 0\n    mode0: 0\n    vectorComponentCount0: 4\n    color0:\n      serializedVersion: 2\n      minMaxState: 0\n      minColor: {r: 1, g: 1, b: 1, a: 1}\n      maxColor: {r: 1, g: 1, b: 1, a: 1}\n      maxGradient:\n        serializedVersion: 2\n        key0: {r: 1, g: 1, b: 1, a: 1}\n        key1: {r: 1, g: 1, b: 1, a: 1}\n        key2: {r: 0, g: 0, b: 0, a: 0}\n        key3: {r: 0, g: 0, b: 0, a: 0}\n        key4: {r: 0, g: 0, b: 0, a: 0}\n        key5: {r: 0, g: 0, b: 0, a: 0}\n        key6: {r: 0, g: 0, b: 0, a: 0}\n        key7: {r: 0, g: 0, b: 0, a: 0}\n        ctime0: 0\n        ctime1: 65535\n        ctime2: 0\n        ctime3: 0\n        ctime4: 0\n        ctime5: 0\n        ctime6: 0\n        ctime7: 0\n        atime0: 0\n        atime1: 65535\n        atime2: 0\n        atime3: 0\n        atime4: 0\n        atime5: 0\n        atime6: 0\n        atime7: 0\n        m_Mode: 0\n        m_ColorSpace: -1\n        m_NumColorKeys: 2\n        m_NumAlphaKeys: 2\n      minGradient:\n        serializedVersion: 2\n        key0: {r: 1, g: 1, b: 1, a: 1}\n        key1: {r: 1, g: 1, b: 1, a: 1}\n        key2: {r: 0, g: 0, b: 0, a: 0}\n        key3: {r: 0, g: 0, b: 0, a: 0}\n        key4: {r: 0, g: 0, b: 0, a: 0}\n        key5: {r: 0, g: 0, b: 0, a: 0}\n        key6: {r: 0, g: 0, b: 0, a: 0}\n        key7: {r: 0, g: 0, b: 0, a: 0}\n        ctime0: 0\n        ctime1: 65535\n        ctime2: 0\n        ctime3: 0\n        ctime4: 0\n        ctime5: 0\n        ctime6: 0\n        ctime7: 0\n        atime0: 0\n        atime1: 65535\n        atime2: 0\n        atime3: 0\n        atime4: 0\n        atime5: 0\n        atime6: 0\n        atime7: 0\n        m_Mode: 0\n        m_ColorSpace: -1\n        m_NumColorKeys: 2\n        m_NumAlphaKeys: 2\n    colorLabel0:\n    vector0_0:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    vectorLabel0_0:\n    vector0_1:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    vectorLabel0_1:\n    vector0_2:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    vectorLabel0_2:\n    vector0_3:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    vectorLabel0_3:\n    mode1: 0\n    vectorComponentCount1: 4\n    color1:\n      serializedVersion: 2\n      minMaxState: 0\n      minColor: {r: 1, g: 1, b: 1, a: 1}\n      maxColor: {r: 1, g: 1, b: 1, a: 1}\n      maxGradient:\n        serializedVersion: 2\n        key0: {r: 1, g: 1, b: 1, a: 1}\n        key1: {r: 1, g: 1, b: 1, a: 1}\n        key2: {r: 0, g: 0, b: 0, a: 0}\n        key3: {r: 0, g: 0, b: 0, a: 0}\n        key4: {r: 0, g: 0, b: 0, a: 0}\n        key5: {r: 0, g: 0, b: 0, a: 0}\n        key6: {r: 0, g: 0, b: 0, a: 0}\n        key7: {r: 0, g: 0, b: 0, a: 0}\n        ctime0: 0\n        ctime1: 65535\n        ctime2: 0\n        ctime3: 0\n        ctime4: 0\n        ctime5: 0\n        ctime6: 0\n        ctime7: 0\n        atime0: 0\n        atime1: 65535\n        atime2: 0\n        atime3: 0\n        atime4: 0\n        atime5: 0\n        atime6: 0\n        atime7: 0\n        m_Mode: 0\n        m_ColorSpace: -1\n        m_NumColorKeys: 2\n        m_NumAlphaKeys: 2\n      minGradient:\n        serializedVersion: 2\n        key0: {r: 1, g: 1, b: 1, a: 1}\n        key1: {r: 1, g: 1, b: 1, a: 1}\n        key2: {r: 0, g: 0, b: 0, a: 0}\n        key3: {r: 0, g: 0, b: 0, a: 0}\n        key4: {r: 0, g: 0, b: 0, a: 0}\n        key5: {r: 0, g: 0, b: 0, a: 0}\n        key6: {r: 0, g: 0, b: 0, a: 0}\n        key7: {r: 0, g: 0, b: 0, a: 0}\n        ctime0: 0\n        ctime1: 65535\n        ctime2: 0\n        ctime3: 0\n        ctime4: 0\n        ctime5: 0\n        ctime6: 0\n        ctime7: 0\n        atime0: 0\n        atime1: 65535\n        atime2: 0\n        atime3: 0\n        atime4: 0\n        atime5: 0\n        atime6: 0\n        atime7: 0\n        m_Mode: 0\n        m_ColorSpace: -1\n        m_NumColorKeys: 2\n        m_NumAlphaKeys: 2\n    colorLabel1:\n    vector1_0:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    vectorLabel1_0:\n    vector1_1:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    vectorLabel1_1:\n    vector1_2:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    vectorLabel1_2:\n    vector1_3:\n      serializedVersion: 2\n      minMaxState: 0\n      scalar: 0\n      minScalar: 0\n      maxCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n      minCurve:\n        serializedVersion: 2\n        m_Curve: []\n        m_PreInfinity: 2\n        m_PostInfinity: 2\n        m_RotationOrder: 4\n    vectorLabel1_3:\n"
+    },
+    {
+      "typeId": 199,
+      "fileId": 199061268324235159,
+      "serializedComponent": "ParticleSystemRenderer:\n  serializedVersion: 6\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1730242686860875}\n  m_Enabled: 1\n  m_CastShadows: 0\n  m_ReceiveShadows: 0\n  m_DynamicOccludee: 1\n  m_StaticShadowCaster: 0\n  m_MotionVectors: 1\n  m_LightProbeUsage: 0\n  m_ReflectionProbeUsage: 0\n  m_RayTracingMode: 0\n  m_RayTraceProcedural: 0\n  m_RenderingLayerMask: 1\n  m_RendererPriority: 0\n  m_Materials:\n  - {fileID: 2100000, guid: 8fa820fab1c50434da82a0d53ec31815, type: 2}\n  m_StaticBatchInfo:\n    firstSubMesh: 0\n    subMeshCount: 0\n  m_StaticBatchRoot: {fileID: 0}\n  m_ProbeAnchor: {fileID: 0}\n  m_LightProbeVolumeOverride: {fileID: 0}\n  m_ScaleInLightmap: 1\n  m_ReceiveGI: 1\n  m_PreserveUVs: 0\n  m_IgnoreNormalsForChartDetection: 0\n  m_ImportantGI: 0\n  m_StitchLightmapSeams: 0\n  m_SelectedEditorRenderState: 3\n  m_MinimumChartSize: 4\n  m_AutoUVMaxDistance: 0.5\n  m_AutoUVMaxAngle: 89\n  m_LightmapParameters: {fileID: 0}\n  m_SortingLayerID: 0\n  m_SortingLayer: 0\n  m_SortingOrder: 1\n  m_RenderMode: 0\n  m_MeshDistribution: 0\n  m_SortMode: 0\n  m_MinParticleSize: 0\n  m_MaxParticleSize: 0.5\n  m_CameraVelocityScale: 0\n  m_VelocityScale: 0\n  m_LengthScale: 2\n  m_SortingFudge: 0\n  m_NormalDirection: 1\n  m_ShadowBias: 0\n  m_RenderAlignment: 0\n  m_Pivot: {x: 0, y: 0, z: 0}\n  m_Flip: {x: 0, y: 0, z: 0}\n  m_EnableGPUInstancing: 1\n  m_ApplyActiveColorSpace: 1\n  m_AllowRoll: 1\n  m_FreeformStretching: 0\n  m_RotateWithStretchDirection: 1\n  m_UseCustomVertexStreams: 0\n  m_VertexStreams: 00010304\n  m_UseCustomTrailVertexStreams: 0\n  m_TrailVertexStreams: 00010304\n  m_Mesh: {fileID: 0}\n  m_Mesh1: {fileID: 0}\n  m_Mesh2: {fileID: 0}\n  m_Mesh3: {fileID: 0}\n  m_MeshWeighting: 1\n  m_MeshWeighting1: 1\n  m_MeshWeighting2: 1\n  m_MeshWeighting3: 1\n  m_MaskInteraction: 0\n"
+    },
+    {
+      "typeId": 210,
+      "fileId": 210587765826080250,
+      "serializedComponent": "SortingGroup:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1730242686860875}\n  m_Enabled: 1\n  m_SortingLayerID: 0\n  m_SortingLayer: 0\n  m_SortingOrder: 0\n  m_SortAtRoot: 1\n"
+    }
+  ],
+  "colliders": [
+    {
+      "type": "box",
+      "node": 0,
+      "fileId": 61884547391421755,
+      "enabled": true,
+      "trigger": true,
+      "offset": {
+        "x": -0.0044807494,
+        "y": 0.007438913
+      },
+      "size": {
+        "x": 0.48764962,
+        "y": 0.19262436
+      }
+    }
+  ],
+  "ignoredBindings": [],
+  "omittedInactiveNodes": [],
+  "spritePrefix": null,
+  "unusedSpriteBonesExplicitlyAllowed": false,
+  "sources": [
+    {
+      "path": "Resources/board/plantshadow.asset",
+      "sha256": "e02e122cb3bfb8765afedad2150f3172d60feb8f549356312efca74dce78ae71"
+    },
+    {
+      "path": "Resources/board/plantshadow.asset.meta",
+      "sha256": "08bf3a1a85aabd4284a5755b459880ee4aa2b4575ccdb802a5fcaa2d0ecd462a"
+    },
+    {
+      "path": "Resources/board/plantshadow.png",
+      "sha256": "7924e0d6960dcba0b775b7ebc7d6a49ecb82b27b55b3216f4f6d83f04492a45a"
+    },
+    {
+      "path": "Resources/board/plantshadow.png.meta",
+      "sha256": "901cd63206d878ad5e0556c56e9691ee440a48dddb2a45971ee256b0e139c923"
+    },
+    {
+      "path": "Resources/bullet/bulletspirtes/ExtremeSnowPea.asset",
+      "sha256": "554d173f3e85fcb8bab306404f20b253e9bb4305bce0372cdb12920ded7b7ed8"
+    },
+    {
+      "path": "Resources/bullet/bulletspirtes/ExtremeSnowPea.asset.meta",
+      "sha256": "5d6824926350e796b94c2387f590de6335c806cdf00510a7de79a9e179d45f8e"
+    },
+    {
+      "path": "Resources/bullet/prefabs/ExtremeSnowPea.prefab",
+      "sha256": "ef48311f94bb9b45450c3d49ac352b2d5a85862f56f577072dfd666ad53e5841"
+    },
+    {
+      "path": "Texture2D/sactx-0-2048x2048-DXT5_BC3-bullets-75988085.png",
+      "sha256": "cfbfebf76995deb93f8f8cbd6da703477bdf3dac26ebcf747bbfb3aa799fc8f9"
+    },
+    {
+      "path": "Texture2D/sactx-0-2048x2048-DXT5_BC3-bullets-75988085.png.meta",
+      "sha256": "861517b544a980fb9772f2d0200eddbcb1df31fe18211ed12353b07327456af5"
+    }
+  ],
+  "deferredComponents": [
+    198,
+    199
+  ],
+  "validation": "Exported source data. Native rendering and source-runtime comparison are separate verification steps."
+}

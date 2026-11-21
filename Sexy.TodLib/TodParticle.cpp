@@ -287,6 +287,11 @@ void TodParticleEmitter::TodEmitterInitialize(float theX, float theY, TodParticl
 	mEmitterDef = theEmitterDef;
 	mParticleList.SetAllocator(&theSystem->mParticleHolder->mEmitterListNodeAllocator);
 	mFilterEffect = FilterEffect::FILTER_EFFECT_NONE;
+	mFusionCollisionData = nullptr;
+	mFusionCollisionUpdate = nullptr;
+	mFusionCollisionGroundY = 0;
+	mFusionCollisionZombieHead = false;
+	mFusionCollisionLatched = false;
 
 	if (FloatTrackIsSet(mEmitterDef->mSystemDuration))
 		mSystemDuration = FloatTrackEvaluate(mEmitterDef->mSystemDuration, 0.0f, Sexy::Rand(1.0f));
@@ -643,11 +648,14 @@ bool TodParticleEmitter::UpdateParticle(TodParticle* theParticle)
 	for (int i = 0; i < mEmitterDef->mParticleFieldCount; i++)  // 更新粒子受到每个粒子场的作用
 		UpdateParticleField(theParticle, &mEmitterDef->mParticleFields[i], theParticle->mParticleTimeValue, i);
 	theParticle->mPosition += theParticle->mVelocity;
+	if (mFusionCollisionUpdate && !mFusionCollisionUpdate(this, theParticle))
+		return false;
 	float aSpinSpeed = ParticleTrackEvaluate(mEmitterDef->mParticleSpinSpeed, theParticle, ParticleTracks::TRACK_PARTICLE_SPIN_SPEED) * 0.01;
 	float aSpinAngle = ParticleTrackEvaluate(mEmitterDef->mParticleSpinAngle, theParticle, ParticleTracks::TRACK_PARTICLE_SPIN_ANGLE);
 	float aLastSpinAngle = FloatTrackEvaluateFromLastTime(
 		mEmitterDef->mParticleSpinAngle, theParticle->mParticleLastTimeValue, theParticle->mParticleInterp[ParticleTracks::TRACK_PARTICLE_SPIN_ANGLE]);
-	theParticle->mSpinPosition += DEG_TO_RAD(aSpinSpeed + aSpinAngle - aLastSpinAngle) + theParticle->mSpinVelocity;  // 更新粒子旋转角度
+	if (!mFusionCollisionUpdate || !mFusionCollisionZombieHead || !mFusionCollisionLatched)
+		theParticle->mSpinPosition += DEG_TO_RAD(aSpinSpeed + aSpinAngle - aLastSpinAngle) + theParticle->mSpinVelocity;  // 更新粒子旋转角度
 
 	if (FloatTrackIsSet(mEmitterDef->mAnimationRate))  // 如果定义了动画速率
 	{
@@ -667,6 +675,8 @@ bool TodParticleEmitter::UpdateParticle(TodParticle* theParticle)
 //0x517160
 void TodParticleEmitter::UpdateSpawning()
 {
+	if (mFusionCollisionUpdate && mFusionCollisionZombieHead && mFusionCollisionLatched)
+		return;
 	TodParticleEmitter* aCrossFadeEmitter = mParticleSystem->mParticleHolder->mEmitters.DataArrayTryToGet((unsigned int)mCrossFadeEmitterID);
 	TodParticleEmitter* aSpawningEmitter = !aCrossFadeEmitter ? this : aCrossFadeEmitter;  // 各项数据的计算均以此“主发射器”为准
 	mSpawnAccum += aSpawningEmitter->SystemTrackEvaluate(aSpawningEmitter->mEmitterDef->mSpawnRate, ParticleSystemTracks::TRACK_SPAWN_RATE) * 0.01;

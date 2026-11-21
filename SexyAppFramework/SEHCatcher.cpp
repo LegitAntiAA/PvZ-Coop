@@ -2,6 +2,8 @@
 #include "SexyAppBase.h"
 #include <fstream>
 #include <process.h>
+#include <cstdlib>
+#include <cstring>
 
 #ifdef ZYLOM
 #include "zylomso.h"
@@ -9,6 +11,18 @@ using namespace zylom::zylomso;
 #endif
 
 using namespace Sexy;
+
+namespace
+{
+bool OwnedBackgroundSmoke()
+{
+    const char* background=std::getenv("PVZ_COOP_SMOKE_BACKGROUND");
+    const char* run=std::getenv("PVZ_COOP_SMOKE_RUN_ID");
+    const char* role=std::getenv("PVZ_COOP_SMOKE_ROLE");
+    return background&&std::strcmp(background,"1")==0&&run&&*run&&role&&
+        (std::strcmp(role,"host")==0||std::strcmp(role,"client")==0||std::strcmp(role,"spectator")==0);
+}
+}
 
 LPTOP_LEVEL_EXCEPTION_FILTER SEHCatcher::mPreviousFilter;
 SexyAppBase*				SEHCatcher::mApp = NULL;
@@ -95,6 +109,7 @@ SEHCatcher::~SEHCatcher()
 
 long __stdcall SEHCatcher::UnhandledExceptionFilter(LPEXCEPTION_POINTERS lpExceptPtr)
 {
+	if (OwnedBackgroundSmoke()) mShowUI = false;
 	if (mApp != NULL)
 		mApp->SEHOccured();	
 
@@ -902,7 +917,9 @@ LRESULT CALLBACK SEHCatcher::SubmitInfoWindowProc(HWND hWnd, UINT uMsg, WPARAM w
 
 void SEHCatcher::WriteToFile(const std::string& theErrorText)
 {
-	std::fstream aStream("crash.txt", std::ios::out);
+	const char* capture=OwnedBackgroundSmoke()?std::getenv("PVZ_COOP_SMOKE_CAPTURE_DIR"):nullptr;
+	const std::string path=capture&&*capture?std::string(capture)+"\\crash.txt":"crash.txt";
+	std::fstream aStream(path, std::ios::out);
 	aStream << theErrorText.c_str() << std::endl;
 }
 

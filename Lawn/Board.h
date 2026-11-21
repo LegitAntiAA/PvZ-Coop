@@ -19,6 +19,9 @@
 #include "../SexyAppFramework/SexyMatrix.h"
 
 #include "../SexyAppFramework/SDL3Font.h"
+#include <memory>
+
+namespace LawnFusion { struct NativeContext; struct NativePlantData; }
 
 using namespace Sexy;
 
@@ -66,6 +69,7 @@ public:
 	RenderObjectType				mRenderObjectType;
 	int								mZPos;
 	ZombieID						mBossID; // @inliothixie
+	int                             mSourceRow = -1; // Optional row filter for native Fusion overlay render items.
 	union
 	{
 		GameObject* mGameObject;
@@ -163,6 +167,7 @@ public:
 	float                           mNetVisualNightBlend = 0.0f;
 	uint8_t                         mNetWeatherLastStormKind = 0;
 	uint16_t                        mNetWeatherLastStormCounter = 0;
+	std::unique_ptr<LawnFusion::NativeContext> mFusionNative; // outside the native raw save range
 	std::vector<uint16_t>			mNetMysteryRevealIds;
 	bool							mDrawOnlyCamera;
 	bool							mPaused;												//+0x164
@@ -311,10 +316,11 @@ public:
 	void							DisplayAdvice(const SexyString& theAdvice, MessageStyle theMessageStyle, AdviceType theHelpIndex);
 	void							StartLevel();
 	void							StartLevelClientPresentation();
-	Plant*							AddPlant(int theGridX, int theGridY, SeedType theSeedType, SeedType theImitaterType = SeedType::SEED_NONE);
+	Plant*							AddPlant(int theGridX, int theGridY, SeedType theSeedType, SeedType theImitaterType = SeedType::SEED_NONE,
+								const LawnFusion::NativePlantData* theFusionData = nullptr);
 	Projectile*						AddProjectile(int theX, int theY, int theRenderOrder, int theRow, ProjectileType theProjectileType);
 	Coin*							AddCoin(int theX, int theY, CoinType theCoinType, CoinMotion theCoinMotion,
-								SeedType theUsableSeedType = SeedType::SEED_NONE);
+								SeedType theUsableSeedType = SeedType::SEED_NONE, int theSunValueOverride = 0, bool theFusionMoney = false);
 	void							RefreshSeedPacketFromCursor();
 	ZombieType						PickGraveRisingZombieType(int theZombiePoints);
 	ZombieType						PickZombieType(int theZombiePoints, int theWaveIndex, ZombiePicker* theZombiePicker);
@@ -359,6 +365,15 @@ public:
 	/*inline*/ bool					StageIsDayWithPool();
 	bool							StageHasGraveStones();
 	int								PixelToGridX(int theX, int theY);
+	int GetColumnCount() const;
+	int GetCellPitchX() const;
+	bool IsValidGridCell(int theColumn, int theRow) const;
+	GridSquareType& GetGridSquareTypeAt(int theColumn, int theRow);
+	const GridSquareType& GetGridSquareTypeAt(int theColumn, int theRow) const;
+	int& GetGridCelOffsetAt(int theColumn, int theRow, int theAxis);
+	const int& GetGridCelOffsetAt(int theColumn, int theRow, int theAxis) const;
+	int GetCellCenterX(int theColumn, int theRow);
+	int GetPlantOriginX(int theColumn, int theRow);
 	int								PixelToGridY(int theX, int theY);
 	/*inline*/ int					GridToPixelX(int theGridX, int theGridY);
 	int								GridToPixelY(int theGridX, int theGridY);
@@ -452,6 +467,9 @@ public:
 	/*inline*/ int					PlantingPixelToGridY(int theX, int theY, SeedType theSeedType);
 	Plant*							FindUmbrellaPlant(int theGridX, int theGridY);
 	void							SetTutorialState(TutorialState theTutorialState);
+	SeedPacket*					GetTutorialSeedPacket(SeedType theSeedType);
+	void							OnSeedPacketPickedUp(SeedType theSeedType);
+	void							OnSeedPacketPlanted(SeedType theSeedType);
 	void							DoFwoosh(int theRow);
 	void							UpdateFwoosh();
 	Plant*							SpecialPlantHitTest(int x, int y);
@@ -472,7 +490,7 @@ public:
 	bool							IsValidCobCannonSpot(int theGridX, int theGridY);
 	bool							IsValidCobCannonSpotHelper(int theGridX, int theGridY);
 	void							MouseDownCobcannonFire(int x, int y, int theClickCount);
-	int								KillAllZombiesInRadius(int theRow, int theX, int theY, int theRadius, int theRowRange, bool theBurn, int theDamageRangeFlags); // @Patoke: modified function prototype	
+	int								KillAllZombiesInRadius(int theRow, int theX, int theY, int theRadius, int theRowRange, bool theBurn, int theDamageRangeFlags, const Plant* theSourcePlant = nullptr); // @Patoke: modified function prototype
 	/*inline*/ int					GetSeedBankExtraWidth();
 	bool							IsFlagWave(int theWaveNumber);
 	void							DrawHouseDoorTop(Graphics* g);
@@ -492,7 +510,8 @@ public:
 	/*inline*/ void					PutInMissingZombies(int theWaveNumber, ZombiePicker* theZombiePicker);
 	Rect							GetShovelButtonRect();
 	void							GetZenButtonRect(GameObjectType theObjectType, Rect& theRect);
-	Plant*							NewPlant(int theGridX, int theGridY, SeedType theSeedType, SeedType theImitaterType = SeedType::SEED_NONE);
+	Plant*							NewPlant(int theGridX, int theGridY, SeedType theSeedType, SeedType theImitaterType = SeedType::SEED_NONE,
+								const LawnFusion::NativePlantData* theFusionData = nullptr);
 	void							DoPlantingEffects(int theGridX, int theGridY, Plant* thePlant);
 	bool							IsFinalSurvivalStage();
 	void							SurvivalSaveScore();
@@ -559,7 +578,7 @@ public:
 	static /*inline*/ bool			IsZombieTypeSpawnedOnly(ZombieType theZombieType);
 
 	int								NukeBoard();
-	int								GetKilledlZombiesInRadius(int theRow, int theX, int theY, int theRadius, int theRowRange, bool theBurn, int theDamageRangeFlags);
+	int								GetKilledlZombiesInRadius(int theRow, int theX, int theY, int theRadius, int theRowRange, bool theBurn, int theDamageRangeFlags, const Plant* theSourcePlant = nullptr);
 
 	void							MovePlant(Plant* thePlant, int theGridX, int theGridY);
 	void							DrawCover(Graphics* g);
@@ -668,7 +687,7 @@ public:
 	void							NetClientTick();			// client: drain + apply + ghosts
 	void							NetDrainMessages();
 	void							NetApplyEvent(LawnNet::NetBuffer& thePayload);
-	void							NetApplySnapshot(LawnNet::NetBuffer& thePayload);
+	void							NetApplySnapshot(LawnNet::NetBuffer& thePayload, bool* theApplied = nullptr);
 	void							NetBroadcastPotatoExplosion(Plant* thePlant);
 	void							NetApplyPlantPresentation(Plant* thePlant, PlantState thePreviousState, bool theCreatedOrAdopted);
 	Plant*							NetGetGhostPlant(unsigned short theId);

@@ -1,6 +1,13 @@
 #include <time.h>
 #include "LawnApp.h"
 #include "Lawn/Board.h"
+#include "Lawn/Fusion/FusionRuntime.h"
+#include "Lawn/Fusion/FusionNative.h"
+#include "Lawn/Fusion/FusionNativeEffects269.h"
+#include "Lawn/Net/NetFusion269Smoke.h"
+#include "Lawn/Net/NetFusion270Smoke.h"
+#include "Lawn/Net/NetFusionEmperor270Smoke.h"
+#include "Lawn/Net/NetFusionCampaign270Smoke.h"
 #include "Lawn/CursorObject.h"
 #include "Lawn/Plant.h"
 #include "Lawn/Zombie.h"
@@ -74,6 +81,55 @@ namespace LawnNet
 	bool NetSpectatorSmokeRunBaseline(LawnApp* theApp);
 	bool NetSmokeUpdateNativeUi(LawnApp* theApp);
 	bool NetSmokeUpdateHelp(LawnApp* theApp);
+	bool NetSmokeUpdateGameModes(LawnApp* theApp);
+	bool NetSmokeUpdateFusionAlmanac(LawnApp* theApp);
+	bool NetSmokeUpdateFusionAlmanacMode(LawnApp* theApp);
+	bool NetSmokeUpdateFusion(LawnApp* theApp);
+	bool NetSmokeUpdateNativeFusion(LawnApp* theApp);
+	bool NetSmokeUpdateFusionCherry(LawnApp* theApp);
+	bool NetSmokeUpdateFusionPotato(LawnApp* theApp);
+	bool NetSmokeUpdateFusionWallnut(LawnApp* theApp);
+	bool NetSmokeUpdateFusionCherryShooter(LawnApp* theApp);
+	bool NetSmokeUpdateFusionBaseBatch(LawnApp* theApp);
+	bool NetSmokeUpdateFusionDouble(LawnApp* theApp);
+	bool NetSmokeUpdateFusionNut(LawnApp* theApp);
+	bool NetSmokeUpdateFusionGlove(LawnApp* theApp);
+	bool NetSmokeUpdateFusionPuffPea(LawnApp* theApp);
+	bool NetSmokeUpdateFusionProducer(LawnApp* theApp);
+	bool NetSmokeUpdateFusionSplit(LawnApp* theApp);
+	bool NetSmokeUpdateFusionCold(LawnApp* theApp);
+	bool NetSmokeUpdateFusionFire(LawnApp* theApp);
+	bool NetSmokeUpdateFusionDeath(LawnApp* theApp);
+	bool NetSmokeUpdateFusionChomper(LawnApp* theApp);
+	bool NetSmokeUpdateFusionLobber(LawnApp* theApp);
+	bool NetSmokeUpdateFusionCorn(LawnApp* theApp);
+	bool NetSmokeUpdateFusionBulk(LawnApp* theApp);
+	bool NetSmokeUpdateFusionDefenderMoney(LawnApp* theApp);
+	bool NetSmokeUpdateFusionAction(LawnApp* theApp);
+	bool NetSmokeUpdateFusionRecipient(LawnApp* theApp);
+	bool NetSmokeUpdateFusionGarlic(LawnApp* theApp);
+	bool NetSmokeUpdateFusionPaidBatch(LawnApp* theApp);
+	bool NetSmokeUpdateFusionExtendedShooter40(LawnApp* theApp);
+	bool NetSmokeUpdateFusionAction266(LawnApp* theApp);
+	bool HandleFusionEconomy266Smoke(LawnApp* theApp);
+	bool NetSmokeUpdateFusionEquipment268(LawnApp* theApp);
+	bool NetSmokeUpdateFusionCombat268(LawnApp* theApp);
+	bool NetSmokeUpdateFusionCannon268(LawnApp* theApp);
+	bool NetSmokeUpdateFusionShooter267(LawnApp* theApp);
+	bool NetSmokeUpdateFusionUmbrella267(LawnApp* theApp);
+	bool HandleFusionPotStar267Smoke(LawnApp* theApp);
+	bool NetSmokeUpdateFusionCold40(LawnApp* theApp);
+	bool NetSmokeUpdateFusionShooter40(LawnApp* theApp);
+	bool NetSmokeUpdateFusionFire40(LawnApp* theApp);
+
+	bool NetSmokeUpdateFusionMoneyBatch(LawnApp* theApp);
+	bool NetSmokeUpdateFusionRoster(LawnApp* theApp);
+	bool NetSmokeUpdateFusionSilverSunflower(LawnApp* theApp);
+	bool NetSmokeUpdateFusionIceCaltrop(LawnApp* theApp);
+	bool NetSmokeUpdateFusionSourceZombie(LawnApp* theApp);
+	bool NetSmokeUpdateFusionAnimationProbe(LawnApp* theApp);
+	bool NetSmokeUpdateNativeFusionMystery(LawnApp* theApp);
+	bool NetSmokeFusionResourceHostLost(LawnApp* theApp, const std::string& theReason);
 	bool NetSmokeUpdateCommunications(LawnApp* theApp);
 	bool NetSmokeControlsComplete(LawnApp* theApp);
 	bool NetSmokeUpdateZenGarden(LawnApp* theApp);
@@ -216,259 +272,12 @@ SDL_Cursor* LawnApp::mSDLNoCursor = nullptr;
 #include <backends/imgui_impl_sdl3.h>
 #include <backends/imgui_impl_sdlrenderer3.h>
 
-extern "C" {
-#include <libavformat/avformat.h>
-#include <libavcodec/avcodec.h>
-}
-
 #include <SDL3_ttf/SDL_ttf.h>
 
 #include <cstdio>
 #include <stdexcept>
-#include <thread>
 
 bool LawnApp::mIsPlayingVideo = false;
-
-// I wouldn't be able to make this without Codotaku. Huge W for them
-bool LawnApp::PlayVideo(std::string url, bool isSkipable, Color bgColor)
-{
-	mIsPlayingVideo = true;
-
-	AVFormatContext* format_context = NULL;
-	const int ret = avformat_open_input(&format_context, url.c_str(), NULL, NULL);
-	if (ret < 0) 
-	{
-		TodTrace("Video: %s is missing or corrupted!\n", url.c_str());
-		return false;
-	}
-
-	SDL_HideCursor();
-
-	const AVCodec* video_codec = NULL;
-	const int video_stream_index = av_find_best_stream(format_context, AVMEDIA_TYPE_VIDEO, -1, -1, &video_codec, 0);
-	const AVStream* video_stream = format_context->streams[video_stream_index];
-
-	const AVCodec* audio_codec = NULL;
-	const int  audio_stream_index = av_find_best_stream(format_context, AVMEDIA_TYPE_AUDIO, -1, video_stream_index, &audio_codec, 0);
-	const AVStream* audio_stream = format_context->streams[audio_stream_index];
-
-	AVCodecContext* video_decoder = avcodec_alloc_context3(video_codec);
-	video_decoder->thread_count = 0;
-	avcodec_parameters_to_context(video_decoder, video_stream->codecpar);
-	avcodec_open2(video_decoder, video_codec, NULL);
-
-	AVCodecContext* audio_decoder = avcodec_alloc_context3(audio_codec);
-	audio_decoder->thread_count = 0;
-	avcodec_parameters_to_context(audio_decoder, audio_stream->codecpar);
-	avcodec_open2(audio_decoder, audio_codec, NULL);
-
-	AVPacket* packet = av_packet_alloc();
-	AVFrame* frame = av_frame_alloc();
-
-	SDL_AudioSpec audio_spec = { SDL_AUDIO_F32, audio_decoder->ch_layout.nb_channels, audio_decoder->sample_rate };
-	SDL_AudioStream* audio_playback_stream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &audio_spec, NULL, NULL);
-	SDL_ResumeAudioStreamDevice(audio_playback_stream);
-
-	SDL_Texture* texture = SDL_CreateTexture(mSDLRenderer, SDL_PIXELFORMAT_YV12, SDL_TEXTUREACCESS_STREAMING, video_decoder->width, video_decoder->height);
-	SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
-
-	SDL_SetRenderDrawColor(mSDLRenderer, bgColor.mRed, bgColor.mGreen, bgColor.mBlue, bgColor.mAlpha);
-	SDL_RenderClear(mSDLRenderer);
-
-	bool willShutdown = false;
-
-	Uint64 start_ns = 0;
-	Uint64 curElapsed = 0;
-
-	while (av_read_frame(format_context, packet) >= 0) {
-		mLastUserInputTick = mLastTimerTime;
-
-		SDL_Event event;
-		while (SDL_PollEvent(&event))
-		{
-			switch (event.type)
-			{
-			case SDL_EVENT_QUIT:
-				willShutdown = true;
-				break;
-			case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
-				if (!mSDLWindow || event.window.windowID == SDL_GetWindowID(mSDLWindow))
-					willShutdown = true;
-				break;
-			case SDL_EVENT_WINDOW_FOCUS_GAINED:
-				mActive = true;
-				RehupFocus();
-				EnforceCursor();
-				break;
-			case SDL_EVENT_WINDOW_FOCUS_LOST:
-				mActive = false;
-				RehupFocus();
-				break;
-			case SDL_EVENT_KEY_DOWN:
-			{
-				mLastUserInputTick = mLastTimerTime;
-				if (mDebugKeysEnabled)
-				{
-					if (DebugKeyDown(GetKeyCodeFromCodeSDL(event.key.key)))
-						break;
-				}
-				else
-				{
-					KeyCode theKey = GetKeyCodeFromCodeSDL(event.key.key);
-					if (theKey == KEYCODE_F10)
-					{
-						TakeScreenshot();
-						break;
-					}
-					else if (theKey == KeyCode::KEYCODE_F11)
-					{
-						gLawnApp->SwitchScreenMode(!gLawnApp->mIsWindowed, true);
-						break;
-					}
-				}
-
-				if (isSkipable && event.key.key == SDLK_ESCAPE)
-				{
-					mIsPlayingVideo = false;
-					break;
-				}
-
-				int theChar = GetKeyCodeFromCodeSDL(event.key.key);
-
-				if ((theChar < KEYCODE_ASCIIBEGIN || theChar > KEYCODE_ASCIIEND) && (theChar < KEYCODE_ASCIIBEGIN2 || theChar > KEYCODE_ASCIIEND2))
-				{
-					theChar = -1;
-				}
-
-				switch (event.key.key)
-				{
-				case SDLK_KP_PLUS:   theChar = '+'; break;
-				case SDLK_KP_MINUS:  theChar = '-'; break;
-				case SDLK_KP_MULTIPLY: theChar = '*'; break;
-				case SDLK_SLASH:
-				case SDLK_KP_DIVIDE: theChar = '/'; break;
-				case SDLK_KP_PERIOD: theChar = '.'; break;
-
-				case SDLK_KP_0: theChar = '0'; break;
-				case SDLK_KP_1: theChar = '1'; break;
-				case SDLK_KP_2: theChar = '2'; break;
-				case SDLK_KP_3: theChar = '3'; break;
-				case SDLK_KP_4: theChar = '4'; break;
-				case SDLK_KP_5: theChar = '5'; break;
-				case SDLK_KP_6: theChar = '6'; break;
-				case SDLK_KP_7: theChar = '7'; break;
-				case SDLK_KP_8: theChar = '8'; break;
-				case SDLK_KP_9: theChar = '9'; break;
-				}
-
-				if (theChar == 'D' && (mWidgetManager != NULL) && (mWidgetManager->mKeyDown[KEYCODE_CONTROL]) && (mWidgetManager->mKeyDown[KEYCODE_MENU]))
-				{
-					PlaySoundA("c:\\windows\\media\\Windows XP Menu Command.wav", NULL, SND_ASYNC);
-					mDebugKeysEnabled = !mDebugKeysEnabled;
-				}
-
-				mWidgetManager->KeyDown(GetKeyCodeFromCodeSDL(event.key.key));
-
-				if (!SDL_TextInputActive(mSDLWindow)) {
-
-					bool shift = (event.key.mod & SDL_KMOD_SHIFT) != 0;
-					bool caps = (event.key.mod & SDL_KMOD_CAPS) != 0;
-
-					SexyChar c = theChar;
-
-					if (isalpha(c))
-					{
-						if (shift ^ caps)
-							c = toupper(c);
-						else
-							c = tolower(c);
-					}
-					mWidgetManager->KeyChar(c);
-				}
-
-				break;
-			}
-			case SDL_EVENT_KEY_UP:
-				mLastUserInputTick = mLastTimerTime;
-				mWidgetManager->KeyUp(GetKeyCodeFromCodeSDL(event.key.key));
-				break;
-			}
-		}
-
-		if (!mIsPlayingVideo || willShutdown)
-		{
-			SDL_RenderClear(mSDLRenderer);
-			av_packet_unref(packet);
-			break;
-		}
-
-		std::vector<std::thread> _jobs;
-
-		curElapsed = SDL_GetTicksNS();
-
-		if (packet->stream_index == video_stream_index && start_ns != 0) {
-			const int width = mWidth;
-			const int height = mHeight;
-
-			_jobs.emplace_back(std::thread([video_decoder, packet, frame, &start_ns, video_stream, texture, width, height, curElapsed]() {
-				avcodec_send_packet(video_decoder, packet);					
-				while (avcodec_receive_frame(video_decoder, frame) == 0) {
-					const double frame_time_s = (double)frame->pts * av_q2d(video_stream->time_base);
-					const Uint64 elapsed_time_ns = curElapsed - start_ns;
-					const double elapsed_time_s = (double)elapsed_time_ns / SDL_NS_PER_SECOND;
-					const double delay_s = frame_time_s - elapsed_time_s;
-					if (delay_s > 0) SDL_Delay((Uint32)(delay_s * SDL_MS_PER_SECOND));
-					else if (delay_s < -0.5) continue;
-
-					SDL_UpdateYUVTexture(texture, NULL,
-						frame->data[0], frame->linesize[0],
-						frame->data[1], frame->linesize[1],
-						frame->data[2], frame->linesize[2]);
-
-					const float frame_width = (float)video_decoder->width;
-					const float frame_height = (float)video_decoder->height;
-					const float scale_w = (float)width / frame_width;
-					const float scale_h = (float)height / frame_height;
-					const float scale = SDL_max(scale_w, scale_h);
-					SDL_FRect dstrect;
-					dstrect.w = frame_width * scale;
-					dstrect.h = frame_height * scale;
-					dstrect.x = ((float)width - dstrect.w) / 2;
-					dstrect.y = ((float)height - dstrect.h) / 2;
-
-					SDL_RenderTexture(mSDLRenderer, texture, NULL, &dstrect);
-					SDL_RenderPresent(mSDLRenderer);
-				}
-				av_packet_unref(packet);
-			}));
-		}
-		else if (packet->stream_index == audio_stream_index) {
-			_jobs.emplace_back(std::thread([audio_decoder, packet, frame, audio_playback_stream, &start_ns, curElapsed]() {
-				avcodec_send_packet(audio_decoder, packet);
-				while (avcodec_receive_frame(audio_decoder, frame) == 0) {
-					if (start_ns == 0) start_ns = curElapsed;
-
-					SDL_PutAudioStreamPlanarData(audio_playback_stream, (const void* const*)frame->data, audio_decoder->ch_layout.nb_channels, frame->nb_samples);
-				}
-				av_packet_unref(packet);
-			}));
-		}
-
-		for (auto& job : _jobs) {
-			job.join();
-		}
-	}
-	
-	SDL_DestroyTexture(texture);
-
-	mIsPlayingVideo = false;
-
-	SDL_ShowCursor();
-
-	if (willShutdown) Shutdown();
-
-	return true;
-}
 
 void LawnApp::MakeWindow()
 {
@@ -577,6 +386,22 @@ bool LawnApp::DrawDirtyStuff()
 	return SexyAppBase::DrawDirtyStuff();
 }
 
+bool LawnApp::CoopSmokeEnsureFreshFrameAfterDraw(int theMinDrawCount)
+{
+	const char* dir = CoopSmokeActive() ? getenv("PVZ_COOP_SMOKE_CAPTURE_DIR") : nullptr;
+	if (!dir || theMinDrawCount < 0) return false;
+	if (mCoopSmokeFrame && mCoopSmokeFrameDrawCount >= theMinDrawCount) return true;
+	if (theMinDrawCount > mCoopSmokeFrameRequestedDrawCount)
+	{
+		mCoopSmokeFrameRequestedDrawCount = theMinDrawCount;
+		LawnNet::NetTrace("SMOKE_FRAME_REQUEST requestedDraw=%d capturedDraw=%d currentDraw=%d", theMinDrawCount, mCoopSmokeFrameDrawCount, mDrawCount);
+	}
+	// The request is completed by the ordinary draw path, never by drawing
+	// reentrantly during Update or reading an already-presented backbuffer.
+	if (mWidgetManager) mWidgetManager->MarkAllDirty();
+	return false;
+}
+
 bool LawnApp::CoopSmokeCaptureFrame(const char* theBasename)
 {
 	const char* dir = CoopSmokeActive() ? getenv("PVZ_COOP_SMOKE_CAPTURE_DIR") : nullptr;
@@ -585,6 +410,23 @@ bool LawnApp::CoopSmokeCaptureFrame(const char* theBasename)
 	if (name.empty() || name.size() > 96 || name.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-") != std::string::npos) return false;
 	const std::string path = std::string(dir) + "\\" + name + ".bmp";
 	return SDL_SaveBMP(mCoopSmokeFrame.get(),path.c_str());
+}
+
+bool LawnApp::CoopSmokeFailMysteryRngOnce()
+{
+	static bool aConsumed = false;
+	if (aConsumed || !CoopSmokeActive()) return false;
+	const char* aFault = getenv("PVZ_COOP_SMOKE_MYSTERY_FAULT");
+	if (!aFault || strcmp(aFault, "RngFailure") != 0) return false;
+	const char* aClassic = getenv("PVZ_COOP_SMOKE_MYSTERY");
+	const char* aNative = getenv("PVZ_COOP_SMOKE_FUSION_NATIVE");
+	const bool aClassicFixture = mCoopSmokeManifest.mScenario == LawnNet::NETSMOKE_SCENARIO_ADVENTURE_8_SOAK &&
+		aClassic && strcmp(aClassic, "1") == 0;
+	const bool aNativeFixture = mCoopSmokeManifest.mScenario == LawnNet::NETSMOKE_SCENARIO_FUSION_VALIDATION &&
+		aNative && strcmp(aNative, "1") == 0;
+	if (!aClassicFixture && !aNativeFixture) return false;
+	aConsumed = true;
+	return true;
 }
 
 void LawnApp::Redraw(Rect* theClipRect)
@@ -608,13 +450,21 @@ void LawnApp::Redraw(Rect* theClipRect)
 	static uint32_t aLastFrameTick = 0;
 	static int aLastFrameScene = -1;
 	static int aLastCaptureScene = -1;
+	const bool aRequestedFrame = mCoopSmokeFrameRequestedDrawCount >= 0 &&
+		mDrawCount >= mCoopSmokeFrameRequestedDrawCount;
 	if (aCaptureDir && mLoadingThreadCompleted &&
-		(aLastFrameScene != (int)mGameScene || GetTickCount() - aLastFrameTick >= 100U))
+		(aRequestedFrame || aLastFrameScene != (int)mGameScene || GetTickCount() - aLastFrameTick >= 100U))
 	{
 		SDL_Surface* aFrame = SDL_RenderReadPixels(mSDLRenderer, nullptr);
 		if (aFrame)
 		{
 			mCoopSmokeFrame.reset(aFrame,SDL_DestroySurface);
+			mCoopSmokeFrameDrawCount = mDrawCount;
+			if (aRequestedFrame)
+			{
+				LawnNet::NetTrace("SMOKE_FRAME_CAPTURE requestedDraw=%d capturedDraw=%d", mCoopSmokeFrameRequestedDrawCount, mCoopSmokeFrameDrawCount);
+				mCoopSmokeFrameRequestedDrawCount = -1;
+			}
 			aLastFrameTick = GetTickCount(); aLastFrameScene = (int)mGameScene;
 		}
 	}
@@ -744,8 +594,10 @@ bool LawnApp::UpdateAppStep(bool* updated)
 						}
 
 						// co-op client: during play all board clicks go to the host
+						if (LawnFusion::HandleNativeFieldPointer(mBoard, true, buttonTrans(event.button.button), x, y)) break;
 						if (NetHandlePointerInput(LawnNet::NETINPUT_MOUSE_DOWN, buttonTrans(event.button.button), x, y)) break;
-						if (NetIsClient() && mBoard && mGameScene == GameScenes::SCENE_PLAYING && GetDialogCount() == 0)
+						if (NativeFusionPointerDown(buttonTrans(event.button.button), x, y)) break;
+							if (NetIsClient() && !mFusionRuntime && mBoard && mGameScene == GameScenes::SCENE_PLAYING && GetDialogCount() == 0)
 							mNetManager->SendInput(true, buttonTrans(event.button.button), x, y);
 						else
 							// Use the same remapped logical coordinates as MouseMove and
@@ -770,8 +622,9 @@ bool LawnApp::UpdateAppStep(bool* updated)
 						}
 
 						// co-op client: during play all board clicks go to the host
+						if (LawnFusion::HandleNativeFieldPointer(mBoard, false, buttonTrans(event.button.button), x, y)) break;
 						if (NetHandlePointerInput(LawnNet::NETINPUT_MOUSE_UP, buttonTrans(event.button.button), x, y)) break;
-						if (NetIsClient() && mBoard && mGameScene == GameScenes::SCENE_PLAYING && GetDialogCount() == 0)
+							if (NetIsClient() && !mFusionRuntime && mBoard && mGameScene == GameScenes::SCENE_PLAYING && GetDialogCount() == 0)
 							mNetManager->SendInput(false, buttonTrans(event.button.button), x, y);
 						else
 							mWidgetManager->MouseUp(x, y, buttonTrans(event.button.button));
@@ -786,7 +639,7 @@ bool LawnApp::UpdateAppStep(bool* updated)
 						mLastUserInputTick = mLastTimerTime;
 						mWidgetManager->MouseMove(x, y);
 						if (NetHandlePointerInput(LawnNet::NETINPUT_MOUSE_MOVE, 0, x, y)) break;
-						if (NetIsClient() && mBoard && mGameScene == GameScenes::SCENE_PLAYING && GetDialogCount() == 0)
+							if (NetIsClient() && !mFusionRuntime && mBoard && mGameScene == GameScenes::SCENE_PLAYING && GetDialogCount() == 0)
 						{
 							int aDragButton = 0;
 							if (event.motion.state & SDL_BUTTON_LMASK)
@@ -841,7 +694,9 @@ bool LawnApp::UpdateAppStep(bool* updated)
 						mLastUserInputTick = mLastTimerTime;
 						if (NetHandleChatKey(GetKeyCodeFromCodeSDL(event.key.key)))
 							break;
-						if (mBoard && mBoard->HandleHotbarKey(GetKeyCodeFromCodeSDL(event.key.key), event.key.repeat))
+						if (mFusionRuntime && GetDialogCount() == 0 && mFusionRuntime->OnKeyDown(GetKeyCodeFromCodeSDL(event.key.key), event.key.repeat))
+							break;
+						if (!mFusionRuntime && mBoard && mBoard->HandleHotbarKey(GetKeyCodeFromCodeSDL(event.key.key), event.key.repeat))
 							break;
 						if (NetIsClient() && mNetManager && event.key.key == SDLK_Q)
 							mNetManager->SendHeatWaveShoutKey(true);
@@ -922,7 +777,7 @@ bool LawnApp::UpdateAppStep(bool* updated)
 						}
 
 						// co-op client: no pause/options/cheat keys during play (host-only control)
-						bool aClientBlockKeys = NetIsClient() && mBoard && mGameScene == GameScenes::SCENE_PLAYING && GetDialogCount() == 0;
+						bool aClientBlockKeys = NetIsClient() && !mFusionRuntime && mBoard && mGameScene == GameScenes::SCENE_PLAYING && GetDialogCount() == 0;
 						if (!aClientBlockKeys)
 						{
 							if (aShortcutChar != 0)
@@ -1094,6 +949,9 @@ LawnApp::LawnApp()
 	mPlayerInfo = nullptr;
 	mNetManager = nullptr;
 	mNetLobbyPanel = nullptr;
+	mContentMode = LawnFusion::ContentMode::Classic;
+	mLocalContentModeBackup = LawnFusion::ContentMode::Classic;
+	mHasRemoteContentMode = false;
 	mNetBoardSeed = 0;
 	mNetBlockProfileSave = false;
 	mNetLocalProfileBackup = nullptr;
@@ -1386,6 +1244,8 @@ void LawnApp::Shutdown()
 //0x44F380
 void LawnApp::KillBoard()
 {
+	mFusionRuntime.reset();
+	if (mNetManager) mNetManager->ClearFusionTraffic();
 	// A remote Board callback may synchronously tear the board down while its
 	// per-player cursor is temporarily installed as mCursorObject.  Restore the
 	// actual owned host cursor before disposal so Board::~Board cannot delete a
@@ -1461,6 +1321,7 @@ void LawnApp::GotFocus()
 //0x44F460
 void LawnApp::LostFocus()
 {
+	if (auto* context = LawnFusion::GetNativeContext(mBoard)) context->fieldButtonPressed = false;
 	// co-op client never pauses on its own (host controls pausing)
 	if (NetIsClient())
 		return;
@@ -1524,12 +1385,23 @@ bool LawnApp::WriteCurrentUserConfig()
 //0x44F560
 void LawnApp::PreNewGame(GameMode theGameMode, bool theLookForSavedGame)
 {
+	if (GetContentMode()==LawnFusion::ContentMode::Fusion && !CanStartFusionClassicCampaign())
+	{
+		if (!mGameSelector && !mBoard) ShowGameSelector();
+		DoDialog(DIALOG_INFO,true,_S("Fusion"),_S("Кампания Fusion пока недоступна."),_S("[OK_LABEL]"),Dialog::BUTTONS_FOOTER);
+		return;
+	}
+	if(GetContentMode()==LawnFusion::ContentMode::Fusion&&theGameMode!=GAMEMODE_ADVENTURE)
+	{DoDialog(DIALOG_INFO,true,_S("Fusion"),_S("В Fusion пока доступно приключение."),_S("[OK_LABEL]"),Dialog::BUTTONS_FOOTER);return;}
+	if(GetContentMode()==LawnFusion::ContentMode::Fusion&&theGameMode==GAMEMODE_ADVENTURE)
+	{PreNewGame(theGameMode,false,GetFusionAdventureLevel());return;}
 	if (NetIsClient())
 	{
 		LawnNet::NetTrace("client PreNewGame rejected mode=%d saved=%d", (int)theGameMode, theLookForSavedGame ? 1 : 0);
 		return;
 	}
 
+	if (GetContentMode() == LawnFusion::ContentMode::Fusion) mNativeFusionEpoch = mFusionNextEpoch++;
 	if (NetIsHost()) mNetManager->PromoteSpectatorsAtLevelBoundary("PRE_NEW_GAME");
 	if (theGameMode == GAMEMODE_COOP_PVP && NetIsHost() && !mNetPvpTeamsConfirmed)
 	{
@@ -1569,12 +1441,20 @@ void LawnApp::PreNewGame(GameMode theGameMode, bool theLookForSavedGame)
 		return;
 
 	SexyString aFileName = GetSavedGameName(mGameMode, mPlayerInfo->mId);
-	EraseFile(aFileName);
+	if(GetContentMode()!=LawnFusion::ContentMode::Fusion)EraseFile(aFileName);
 	NewGame();
 }
 
 void LawnApp::PreNewGame(GameMode theGameMode, bool theLookForSavedGame, int theLevel)
 {
+	if (GetContentMode()==LawnFusion::ContentMode::Fusion && !CanStartFusionClassicCampaign())
+	{
+		if (!mGameSelector && !mBoard) ShowGameSelector();
+		DoDialog(DIALOG_INFO,true,_S("Fusion"),_S("Кампания Fusion пока недоступна."),_S("[OK_LABEL]"),Dialog::BUTTONS_FOOTER);
+		return;
+	}
+	if(GetContentMode()==LawnFusion::ContentMode::Fusion&&theGameMode!=GAMEMODE_ADVENTURE)
+	{DoDialog(DIALOG_INFO,true,_S("Fusion"),_S("В Fusion пока доступно приключение."),_S("[OK_LABEL]"),Dialog::BUTTONS_FOOTER);return;}
 	if (NetIsClient())
 	{
 		LawnNet::NetTrace("client PreNewGame(level) rejected mode=%d level=%d saved=%d",
@@ -1582,6 +1462,7 @@ void LawnApp::PreNewGame(GameMode theGameMode, bool theLookForSavedGame, int the
 		return;
 	}
 
+	if (GetContentMode() == LawnFusion::ContentMode::Fusion) mNativeFusionEpoch = mFusionNextEpoch++;
 	if (NetIsHost()) mNetManager->PromoteSpectatorsAtLevelBoundary("PRE_NEW_GAME_LEVEL");
 	if (theGameMode == GAMEMODE_COOP_PVP && NetIsHost() && !mNetPvpTeamsConfirmed)
 	{
@@ -1616,17 +1497,18 @@ void LawnApp::PreNewGame(GameMode theGameMode, bool theLookForSavedGame, int the
 	}
 
 	mGameMode = theGameMode;
+	if(GetContentMode()==LawnFusion::ContentMode::Fusion)theLookForSavedGame=false;
 	if (theLookForSavedGame && TryLoadGame(theLevel))
 		return;
 
 	SexyString aFileName = GetSavedGameName(mGameMode, mPlayerInfo->mId, theLevel);
-	EraseFile(aFileName);
+	if(GetContentMode()!=LawnFusion::ContentMode::Fusion)EraseFile(aFileName);
 	int thePlayerLevel = mPlayerInfo->mLevel;
-	bool isReplaying = mPlayerLevelRef > theLevel;
+	bool isReplaying = GetContentMode()!=LawnFusion::ContentMode::Fusion&&mPlayerLevelRef > theLevel;
 	mPlayerLevelRef = isReplaying ? thePlayerLevel : -1;
 	mPlayerInfo->mLevel = theLevel;
 	NewGame();
-	mBoard->mIsReplay = isReplaying;
+	if (mBoard) mBoard->mIsReplay = isReplaying;
 	mPlayerInfo->mLevel = thePlayerLevel;
 }
 
@@ -1666,19 +1548,31 @@ void LawnApp::MakeNewBoard()
 //0x44F6B0
 void LawnApp::StartPlaying()
 {
+	if (mFusionRuntime) return;
+	if (const auto* context = LawnFusion::GetNativeContext(mBoard); context && context->restartChooserRequested) return;
 	if (NetIsClient() && mBoard)
 		mBoard->NetUpdateIntroPresentation(true);
-	if (mNetManager && mNetManager->IsHosting() && mBoard)
+	if (mBoard && ((mNetManager && mNetManager->IsHosting()) ||
+		(!NetActive() && LawnFusion::IsNativeFusionBoard(mBoard))))
 	{
 		// No hidden plant type exists during picking or the intro. Resolve only
 		// at this gameplay boundary while the chooser's eligibility rules live.
 		mGameScene = GameScenes::SCENE_PLAYING;
-		if (!mBoard->ResolveMysteryPackets())
+		if (!(LawnFusion::IsNativeFusionBoard(mBoard) ? LawnFusion::BeginNativePlaying(mBoard) : mBoard->ResolveMysteryPackets()))
 		{
 			mGameScene = GameScenes::SCENE_LEVEL_INTRO;
-			mNetManager->ResetReadyState();
-			if (mBoard->mCutScene) mBoard->mCutScene->RestartSeedChooser();
-			mNetManager->SendSystemChat("Random plants could not be prepared. Please choose again.");
+			if (auto* context = LawnFusion::GetNativeContext(mBoard))
+			{
+				context->restartChooserRequested = true;
+				LawnNet::NetTrace("Fusion chooser restart requested epoch=%u inputEpoch=%u depth=%d",
+					context->epoch, mNetManager ? mNetManager->GetInputEpoch() : 0U, mUpdateAppDepth);
+			}
+			else
+			{
+				if (mNetManager) mNetManager->ResetReadyState();
+				if (mBoard->mCutScene) mBoard->mCutScene->RestartSeedChooser();
+			}
+			if (mNetManager) mNetManager->SendSystemChat("Random plants could not be prepared. Please choose again.");
 			LawnNet::NetTrace("mystery resolution blocked: insufficient eligible cards");
 			return;
 		}
@@ -1725,6 +1619,11 @@ bool LawnApp::TryLoadGame()
 
 bool LawnApp::TryLoadGame(int theLevel)
 {
+	if (GetContentMode()==LawnFusion::ContentMode::Fusion && !CanStartFusionClassicCampaign())
+	{
+		LawnNet::NetTrace("Fusion Classic campaign TryLoadGame rejected: public entry disabled");
+		return false;
+	}
 	SexyString aSaveName = GetSavedGameName(mGameMode, mPlayerInfo->mId, theLevel);
 	mMusic->StopAllMusic();
 
@@ -1748,6 +1647,11 @@ bool LawnApp::TryLoadGame(int theLevel)
 //0x44F890
 void LawnApp::NewGame()
 {
+	if (GetContentMode()==LawnFusion::ContentMode::Fusion && !CanStartFusionClassicCampaign())
+	{
+		LawnNet::NetTrace("Fusion Classic campaign NewGame rejected: public entry disabled");
+		return;
+	}
 	NetCloseTransientScreens();
 	mFirstTimeGameSelector = false;
 
@@ -1755,6 +1659,12 @@ void LawnApp::NewGame()
 	if (!mBoard) return;
 	mBoard->InitLevel();
 	mBoardResult = BoardResult::BOARDRESULT_NONE;
+	if (GetContentMode() == LawnFusion::ContentMode::Fusion && !LawnFusion::IsNativeFusionBoard(mBoard))
+	{
+		KillBoard();
+		if (CoopSmokeActive()) CoopSmokeFail("native Fusion context or resources failed to initialize");
+		return;
+	}
 	mGameScene = GameScenes::SCENE_LEVEL_INTRO;
 
 	ShowSeedChooserScreen();
@@ -1800,6 +1710,7 @@ void LawnApp::ShowGameSelector()
 //0x44F9E0
 void LawnApp::KillGameSelector()
 {
+	KillDialog(DIALOG_GAME_MODES);
 	if (auto* aHelp = dynamic_cast<CoopHelpDialog*>(GetDialog(DIALOG_COOP_HELP))) aHelp->Close();
 	if (mGameSelector)
 	{
@@ -1935,6 +1846,12 @@ void LawnApp::ShowSeedChooserScreen()
 	mSeedChooserScreen->Resize(0, 0, mWidth, mHeight);
 	mWidgetManager->AddWidget(mSeedChooserScreen);
 	mWidgetManager->BringToBack(mSeedChooserScreen);
+	if (mSeedChooserScreen->mNativeFusionChooser)
+	{
+		if (mNetManager && mNetManager->IsHosting())
+			mNetManager->AdvanceInputPhase(LawnNet::NETINPUT_CHOOSER, "NATIVE_FUSION_CHOOSER");
+		return;
+	}
 
 	// co-op: tell everyone the chooser is open + the split
 	if (mNetManager && mNetManager->IsActive())
@@ -2947,7 +2864,10 @@ void LawnApp::Init()
 	if (!(CoopSmokeActive() && getenv("PVZ_COOP_SMOKE_BACKGROUND") &&
 		strcmp(getenv("PVZ_COOP_SMOKE_BACKGROUND"), "1") == 0))
 		SDL_RaiseWindow(LawnApp::mSDLWindow);
-	if (!IsScreenSaver() && !IsParticleEditor() && !CoopSmokeActive() &&
+	const char* aVideoSmoke = getenv("PVZ_COOP_SMOKE_STARTUP_VIDEO");
+	const bool aRunVideoSmoke = CoopSmokeActive() && aVideoSmoke && strcmp(aVideoSmoke, "1") == 0 &&
+		mCoopSmokeManifest.mScenario == LawnNet::NETSMOKE_SCENARIO_ADVENTURE_1;
+	if (!IsScreenSaver() && !IsParticleEditor() && (!CoopSmokeActive() || aRunVideoSmoke) &&
 		!(mNetManager && mNetManager->mConfig.mSkipIntro))
 		PlayVideo(StrFormat("%svideos/intro.mp4", SDL_GetBasePath()).c_str(), true);
 }
@@ -3035,6 +2955,12 @@ void LawnApp::HandleCmdLineParam(const std::string& theParamName, const std::str
 //0x452310
 bool LawnApp::UpdatePlayerProfileForFinishingLevel()
 {
+	if(IsFusionAdventure()&&mBoard)
+	{
+		SetFusionAdventureLevel(mBoard->mLevel>=FINAL_LEVEL?1:mBoard->mLevel+1);
+		LawnNet::NetTrace("Fusion campaign progress completed=%d next=%d classicLevel=%d",mBoard->mLevel,GetFusionAdventureLevel(),mPlayerInfo->mLevel);
+		NetBroadcastProfile();return false;
+	}
 	bool aUnlockedNewChallenge = false;
 
 	if (IsAdventureMode())
@@ -3182,6 +3108,7 @@ bool LawnApp::UpdatePlayerProfileForFinishingLevel()
 // GOTY @Patoke: 0x4558E0
 void LawnApp::CheckForGameEnd()
 {
+	if (mFusionRuntime) return;
 	// co-op client: the host drives all end-of-game transitions
 	if (NetIsClient())
 		return;
@@ -3350,6 +3277,19 @@ void LawnApp::UpdatePlayTimeStats()
 //0x452650
 void LawnApp::UpdateFrames()
 {
+	if (auto* context = LawnFusion::GetNativeContext(mBoard);
+		context && context->restartChooserRequested && !NetIsClient() && mUpdateAppDepth <= 1)
+	{
+		const uint32_t aOldEpoch = context->epoch;
+		const int aLevel = context->level;
+		context->restartChooserRequested = false;
+		LawnNet::NetTrace("Fusion chooser restart consuming epoch=%u inputEpoch=%u depth=%d board=%p",
+			aOldEpoch, mNetManager ? mNetManager->GetInputEpoch() : 0U, mUpdateAppDepth, (void*)mBoard);
+		PreNewGame(mGameMode, false, aLevel);
+		const auto* aFresh = LawnFusion::GetNativeContext(mBoard);
+		LawnNet::NetTrace("Fusion chooser restart completed oldEpoch=%u newEpoch=%u inputEpoch=%u board=%p",
+			aOldEpoch, aFresh ? aFresh->epoch : 0U, mNetManager ? mNetManager->GetInputEpoch() : 0U, (void*)mBoard);
+	}
 	if ((!mActive || mMinimized) && mBoard)
 	{
 		mBoard->ResetFPSStats();
@@ -4184,13 +4124,14 @@ bool LawnApp::IsShovelLevel()
 //0x453840
 bool LawnApp::IsWallnutBowlingLevel()
 {
+	if(IsFusionAdventure())return false;
 	if (mBoard == nullptr)
 		return false;
 
 	if (mGameMode == GameMode::GAMEMODE_CHALLENGE_WALLNUT_BOWLING || mGameMode == GameMode::GAMEMODE_CHALLENGE_WALLNUT_BOWLING_2)
 		return true;
 
-	return IsAdventureMode() && mPlayerInfo->mLevel == 5;
+	return IsAdventureMode() && GetActiveAdventureLevel() == 5;
 }
 
 //0x453870
@@ -4202,13 +4143,14 @@ bool LawnApp::IsSlotMachineLevel()
 //0x453890
 bool LawnApp::IsWhackAZombieLevel()
 {
+	if(IsFusionAdventure())return false;
 	if (mBoard == nullptr)
 		return false;
 
 	if (mGameMode == GameMode::GAMEMODE_CHALLENGE_WHACK_A_ZOMBIE)
 		return true;
 
-	return IsAdventureMode() && mPlayerInfo->mLevel == 15;
+	return IsAdventureMode() && GetActiveAdventureLevel() == 15;
 }
 
 //0x4538C0
@@ -4217,12 +4159,13 @@ bool LawnApp::IsLittleTroubleLevel()
 	if (mBoard == nullptr)
 		return false;
 
-	return mGameMode == GameMode::GAMEMODE_CHALLENGE_LITTLE_TROUBLE || (mGameMode == GameMode::GAMEMODE_ADVENTURE && mPlayerInfo->mLevel == 25);
+	return mGameMode == GameMode::GAMEMODE_CHALLENGE_LITTLE_TROUBLE || (mGameMode == GameMode::GAMEMODE_ADVENTURE && GetActiveAdventureLevel() == 25);
 }
 
 //0x4538F0
 bool LawnApp::IsScaryPotterLevel()
 {
+	if(IsFusionAdventure())return false;
 	if (mGameMode >= GameMode::GAMEMODE_SCARY_POTTER_1 && mGameMode <= GameMode::GAMEMODE_SCARY_POTTER_ENDLESS)
 		return true;
 
@@ -4234,7 +4177,7 @@ bool LawnApp::IsScaryPotterLevel()
 	if (mBoard == nullptr)
 		return false;
 
-	return IsAdventureMode() && mPlayerInfo->mLevel == 35;
+	return IsAdventureMode() && GetActiveAdventureLevel() == 35;
 }
 
 //0x453920
@@ -4246,7 +4189,7 @@ bool LawnApp::IsStormyNightLevel()
 	if (mGameMode == GameMode::GAMEMODE_CHALLENGE_STORMY_NIGHT)
 		return true;
 
-	return IsAdventureMode() && mPlayerInfo->mLevel == 40;
+	return IsAdventureMode() && GetActiveAdventureLevel() == 40;
 }
 
 //0x453950
@@ -4258,7 +4201,7 @@ bool LawnApp::IsBungeeBlitzLevel()
 	if (mGameMode == GameMode::GAMEMODE_CHALLENGE_BUNGEE_BLITZ)
 		return true;
 
-	return IsAdventureMode() && mPlayerInfo->mLevel == 45;
+	return IsAdventureMode() && GetActiveAdventureLevel() == 45;
 }
 
 //0x453980
@@ -4268,10 +4211,10 @@ bool LawnApp::IsMiniBossLevel()
 		return false;
 
 	return
-		(IsAdventureMode() && mPlayerInfo->mLevel == 10) ||
-		(IsAdventureMode() && mPlayerInfo->mLevel == 20) ||
-		(IsAdventureMode() && mPlayerInfo->mLevel == 30) ||
-		(IsAdventureMode() && mPlayerInfo->mLevel == 40);
+		(IsAdventureMode() && GetActiveAdventureLevel() == 10) ||
+		(IsAdventureMode() && GetActiveAdventureLevel() == 20) ||
+		(IsAdventureMode() && GetActiveAdventureLevel() == 30) ||
+		(IsAdventureMode() && GetActiveAdventureLevel() == 40);
 }
 
 //0x4539D0
@@ -4283,7 +4226,7 @@ bool LawnApp::IsFinalBossLevel()
 	if (mGameMode == GameMode::GAMEMODE_CHALLENGE_FINAL_BOSS)
 		return true;
 
-	return IsAdventureMode() && mPlayerInfo->mLevel == 50;
+	return IsAdventureMode() && GetActiveAdventureLevel() == 50;
 }
 
 //0x453A00
@@ -4316,7 +4259,7 @@ bool LawnApp::IsNight()
 	if (mBoard)
 		return (mBoard->mLevel >= 11 && mBoard->mLevel <= 20) || (mBoard->mLevel >= 31 && mBoard->mLevel <= 40) || mBoard->mLevel == 50;
 
-	return (mPlayerInfo->mLevel >= 11 && mPlayerInfo->mLevel <= 20) || (mPlayerInfo->mLevel >= 31 && mPlayerInfo->mLevel <= 40) || mPlayerInfo->mLevel == 50;
+	return (GetActiveAdventureLevel() >= 11 && GetActiveAdventureLevel() <= 20) || (GetActiveAdventureLevel() >= 31 && GetActiveAdventureLevel() <= 40) || GetActiveAdventureLevel() == 50;
 }
 
 int LawnApp::GetCurrentChallengeIndex()
@@ -4408,6 +4351,7 @@ bool LawnApp::IsCoopEndlessRepick(GameMode theGameMode)
 
 int LawnApp::GetSeedsAvailable()
 {
+	if(IsFusionAdventure())return GetAwardSeedForLevel(GetActiveAdventureLevel());
 	// co-op custom modes: every seed is available
 	if (IsCoopCustomMode())
 		return NUM_SEEDS_IN_CHOOSER;
@@ -4493,6 +4437,12 @@ Reanimation* LawnApp::AddReanimation(float theX, float theY, int theRenderOrder,
 //0x453C80
 TodParticleSystem* LawnApp::AddTodParticle(float theX, float theY, int theRenderOrder, ParticleEffect theEffect)
 {
+	if (theEffect == PARTICLE_FUSION_SOURCE52)
+		return LawnFusion::SpawnNativeSourceEffect269(mBoard,52,theX,theY,theRenderOrder,false);
+    if(theEffect==PARTICLE_FUSION_SOURCE35||theEffect==PARTICLE_FUSION_SOURCE36)
+        return LawnFusion::SpawnNativeSourceEffect269(mBoard,theEffect==PARTICLE_FUSION_SOURCE35?35:36,theX,theY,theRenderOrder,false);
+    if(theEffect==PARTICLE_FUSION_SOURCE99||theEffect==PARTICLE_FUSION_SOURCE100||theEffect==PARTICLE_FUSION_SOURCE49||theEffect==PARTICLE_FUSION_SOURCE51)
+        return LawnFusion::SpawnNativeSourceEffect269(mBoard,theEffect==PARTICLE_FUSION_SOURCE99?99:theEffect==PARTICLE_FUSION_SOURCE100?100:theEffect==PARTICLE_FUSION_SOURCE49?49:51,theX,theY,theRenderOrder,false);
 	return mEffectSystem->mParticleHolder->AllocParticleSystem(theX, theY, theRenderOrder, theEffect);
 }
 
@@ -4595,7 +4545,10 @@ bool LawnApp::CanShowAlmanac()
 	if (mPlayerInfo == nullptr)
 		return false;
 
-	return HasFinishedAdventure() || mPlayerInfo->mLevel >= 15;
+	if (GetContentMode() == LawnFusion::ContentMode::Fusion)
+		return true;
+
+	return HasFinishedAdventure() || GetActiveAdventureLevel() >= 15;
 }
 
 //0x454090
@@ -4607,7 +4560,7 @@ bool LawnApp::CanShowStore()
 	if (mPlayerInfo == nullptr)
 		return false;
 
-	return HasFinishedAdventure() || mPlayerInfo->mHasSeenUpsell || mPlayerInfo->mLevel >= 25;
+	return HasFinishedAdventure() || mPlayerInfo->mHasSeenUpsell || GetActiveAdventureLevel() >= 25;
 }
 
 //0x4540C0
@@ -4619,13 +4572,13 @@ bool LawnApp::CanShowZenGarden()
 	if (IsTrialStageLocked())
 		return false;
 
-	return HasFinishedAdventure() || mPlayerInfo->mLevel >= 45;
+	return HasFinishedAdventure() || GetActiveAdventureLevel() >= 45;
 }
 
 bool LawnApp::CanSpawnYetis()
 {
 	const ZombieDefinition& aZombieDef = GetZombieDefinition(ZombieType::ZOMBIE_YETI);
-	return HasFinishedAdventure() && (mPlayerInfo->mFinishedAdventure >= 2 || mPlayerInfo->mLevel >= aZombieDef.mStartingLevel);
+	return HasFinishedAdventure() && (mPlayerInfo->mFinishedAdventure >= 2 || GetActiveAdventureLevel() >= aZombieDef.mStartingLevel);
 }
 
 //0x454120
@@ -4664,6 +4617,7 @@ bool LawnApp::HasFinishedAdventure()
 //0x454190
 bool LawnApp::IsFirstTimeAdventureMode()
 {
+	if (GetContentMode() == LawnFusion::ContentMode::Fusion) return IsFusionAdventure();
 	return IsAdventureMode() && !HasFinishedAdventure();
 }
 
@@ -5875,6 +5829,7 @@ void LawnApp::CoopSmokeStartLifecycle()
 	if (!CoopSmokeActive() || mCoopSmokeLifecycleStarted || !mNetManager)
 		return;
 	mCoopSmokeLifecycleStarted = true;
+	if (IsFusionValidationFixture()||(CoopSmokeActive()&&getenv("PVZ_COOP_SMOKE_FUSION_CAMPAIGN270"))) mContentMode = LawnFusion::ContentMode::Fusion;
 	mCoopSmokeScenarioRuntime.Reset(mCoopSmokeManifest.mScenario);
 	if (!LawnNet::NetSmokeAvatarBeforeConnect(this)) return;
 	const char* aReplayChooser = getenv("PVZ_COOP_SMOKE_REPLAY_CHOOSER");
@@ -6028,6 +5983,105 @@ void LawnApp::CoopSmokeUpdate()
 	if (!mCoopSmokeLifecycleStarted || !mNetManager)
 		return;
 	if (LawnNet::NetSmokeUpdateHelp(this))
+		return;
+	if (LawnNet::NetSmokeUpdateGameModes(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionAnimationProbe(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionAlmanacMode(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionAlmanac(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionPotato(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionWallnut(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionCherryShooter(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionBaseBatch(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionDouble(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionNut(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionGlove(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionPuffPea(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionProducer(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionSplit(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionCold(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionFire(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionDeath(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionChomper(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionBulk(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionDefenderMoney(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionAction(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionRecipient(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionGarlic(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionExtendedShooter40(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionAction266(this))
+		return;
+	if (LawnNet::HandleFusionEconomy266Smoke(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusion269(this))
+		return;
+    if(LawnNet::NetSmokeUpdateFusionCampaign270(this))return;
+    if(LawnNet::NetSmokeUpdateFusion270(this))return;
+    if(LawnNet::NetSmokeUpdateFusionEmperor270(this))return;
+	if (LawnNet::NetSmokeUpdateFusionEquipment268(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionCombat268(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionCannon268(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionShooter267(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionUmbrella267(this))
+		return;
+	if (LawnNet::HandleFusionPotStar267Smoke(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionCold40(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionShooter40(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionFire40(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionPaidBatch(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionMoneyBatch(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionRoster(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionSilverSunflower(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionIceCaltrop(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionSourceZombie(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionCorn(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionLobber(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionCherry(this))
+		return;
+	if (LawnNet::NetSmokeUpdateNativeFusionMystery(this))
+		return;
+	if (LawnNet::NetSmokeUpdateNativeFusion(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusion(this))
 		return;
 	if (LawnNet::NetSmokeUpdateZenGarden(this))
 		return;
@@ -6319,55 +6373,65 @@ void LawnApp::NetHostStartGame(GameMode theGameMode, int theLevel)
 
 void LawnApp::NetOnStartGame(LawnNet::NetBuffer& thePayload)
 {
+	LawnNet::NetBuffer aCheck = thePayload;
+	LawnNet::NetStartGameState aStart;
+	std::string aContentError;
+	if (!LawnNet::NetDecodeStartGame(aCheck, aStart, (int)GameMode::NUM_GAME_MODES,
+		(int)GameMode::GAMEMODE_COOP_TOWER_DEFENSE) ||
+		aStart.mContentMode != GetContentMode() || !IsContentModeAvailable(aStart.mContentMode, &aContentError))
+	{
+		LawnNet::NetTrace("START_GAME rejected before app mutation bytes=%zu content=%u reason=%s",
+			thePayload.Size(), (unsigned)aStart.mContentMode, aContentError.c_str());
+		if (CoopSmokeActive()) CoopSmokeFail("malformed or unavailable START_GAME content");
+		return;
+	}
+	const uint8_t aMode = aStart.mGameMode;
+	if (aStart.mContentMode==LawnFusion::ContentMode::Fusion && !CanStartFusionClassicCampaign())
+	{
+		LawnNet::NetTrace("START_GAME rejected before app mutation: Fusion Classic campaign disabled");
+		return;
+	}
+	const int aLevel = aStart.mLevel;
+	const uint8_t aPlayerCount = aStart.mPlayerCount;
+	const uint32_t aBoardSeed = aStart.mBoardSeed;
+	const auto& aPath = aStart.mTDPath;
+	const size_t aPathLen = aPath.size();
 	if (CoopSmokeActive())
 	{
-		LawnNet::NetBuffer aCheck = thePayload;
-		uint8_t aMode = 0, aPlayerCount = 0, aPathLength = 0;
-		int32_t aLevel = 0;
-		uint32_t aSeed = 0;
-		bool aValid = aCheck.ReadU8(&aMode) && aCheck.ReadI32(&aLevel) &&
-			aCheck.ReadU8(&aPlayerCount) && aCheck.ReadU32(&aSeed) &&
-			aCheck.ReadU8(&aPathLength);
-                for (uint8_t i = 0; aValid && i < aPathLength; ++i)
-                {
-                        uint8_t aCell = 0;
-                        aValid = aCheck.ReadU8(&aCell);
-                }
-		const bool aTowerDefenseStart =
-			mCoopSmokeManifest.mGameMode ==
-				(uint8_t)GameMode::GAMEMODE_COOP_TOWER_DEFENSE;
-		const bool aPathShapeValid = aTowerDefenseStart ?
-			(aPathLength >= 4 && (aPathLength & 1U) == 0U) :
-			(aPathLength == 0);
-                aValid = aValid && aCheck.Remaining() == 0 &&
-                        ((aMode == mCoopSmokeManifest.mGameMode && aLevel == mCoopSmokeManifest.mLevel) ||
+		const char* aNativeFixture = getenv("PVZ_COOP_SMOKE_FUSION_NATIVE");
+		const char* aRosterFixture = getenv("PVZ_COOP_SMOKE_FUSION_ROSTER");
+		const bool aFusionCampaign=getenv("PVZ_COOP_SMOKE_FUSION_CAMPAIGN270")!=nullptr;
+		const char* aFusionWavesFixture=getenv("PVZ_COOP_SMOKE_FUSION_WAVES271");
+		const char* aFusionVehiclesFixture=getenv("PVZ_COOP_SMOKE_FUSION_WAVES272");
+		const bool aNativeRoster = aStart.mContentMode == LawnFusion::ContentMode::Fusion &&
+			IsFusionValidationFixture() && aNativeFixture && strcmp(aNativeFixture, "1") == 0 &&
+			aRosterFixture && strcmp(aRosterFixture, "1") == 0;
+		bool aValid = (aStart.mContentMode == LawnFusion::ContentMode::Classic ||
+			(aStart.mContentMode == LawnFusion::ContentMode::Fusion && (IsFusionValidationFixture()||aFusionCampaign) &&
+			 aNativeFixture && strcmp(aNativeFixture, "1") == 0 && aStart.mContentEpoch)) &&
+			((aMode == mCoopSmokeManifest.mGameMode && aLevel == mCoopSmokeManifest.mLevel) ||
+			 (aFusionCampaign&&aMode==GAMEMODE_ADVENTURE&&aLevel>=1&&aLevel<=2) ||
+			 (aFusionCampaign&&aMode==GAMEMODE_ADVENTURE&&aLevel==11&&aFusionWavesFixture&&strcmp(aFusionWavesFixture,"1")==0) ||
+			 (aFusionCampaign&&aMode==GAMEMODE_ADVENTURE&&(aLevel==21||aLevel==31)&&aFusionVehiclesFixture&&atoi(aFusionVehiclesFixture)==aLevel) ||
 			 CoopSmokeFirstAdventureAllowsStart(aMode, aLevel) ||
 			 LawnNet::NetSmokeNativeUiAllowsStart(this, aMode, aLevel) ||
-			 LawnNet::NetSmokeZenGardenAllowsStart(this, aMode, aLevel)) && aSeed == mCoopSmokeManifest.mSeed &&
-			(aPlayerCount == 2 || (aPlayerCount == 3 &&
+			 LawnNet::NetSmokeZenGardenAllowsStart(this, aMode, aLevel)) && aBoardSeed == mCoopSmokeManifest.mSeed &&
+			(aPlayerCount == 2 || (aPlayerCount == 3 && aNativeRoster) || (aPlayerCount == 3 &&
 				getenv("PVZ_COOP_SMOKE_SPECTATOR") && strcmp(getenv("PVZ_COOP_SMOKE_SPECTATOR"), "1") == 0 &&
 				((getenv("PVZ_COOP_SMOKE_SPECTATOR_ROLE") && strcmp(getenv("PVZ_COOP_SMOKE_SPECTATOR_ROLE"), "spectator") == 0) ||
-				 (getenv("PVZ_COOP_SMOKE_SPECTATOR_PROMOTE") && strcmp(getenv("PVZ_COOP_SMOKE_SPECTATOR_PROMOTE"), "1") == 0)))) && aPathShapeValid;
+				 (getenv("PVZ_COOP_SMOKE_SPECTATOR_PROMOTE") && strcmp(getenv("PVZ_COOP_SMOKE_SPECTATOR_PROMOTE"), "1") == 0))));
 		if (!aValid)
 		{
 			LawnNet::NetTrace("SMOKE START_GAME malformed/mismatch bytes=%zu mode=%u level=%d players=%u seed=%u path=%u trailing=%zu",
-				thePayload.Size(), aMode, aLevel, aPlayerCount, aSeed, aPathLength,
+				thePayload.Size(), aMode, aLevel, aPlayerCount, aBoardSeed, (unsigned)aPathLen,
 				aCheck.Remaining());
 			CoopSmokeFail("malformed or mismatched deterministic START_GAME");
 			return;
 		}
 	}
-	GameMode aMode = (GameMode)thePayload.ReadU8Or();
-	int aLevel = thePayload.ReadI32Or();
-	/*uint8_t aPlayerCount =*/ thePayload.ReadU8Or();
-	uint32_t aBoardSeed = thePayload.ReadU32Or();
-	uint8_t aPathLen = thePayload.ReadU8Or();
-
-	std::vector<uint8_t> aPath;
-	for (int i = 0; i < aPathLen; i++)
-		aPath.push_back(thePayload.ReadU8Or());
+	thePayload.mReadPos = aCheck.mReadPos;
 	LawnNet::NetTrace("client START_GAME decoded mode=%d level=%d seed=%u tdPathCells=%u size=%dx%d selector=%p challenge=%p board=%p",
-		(int)aMode, aLevel, aBoardSeed, aPathLen, mWidth, mHeight,
+		(int)aMode, aLevel, aBoardSeed, (unsigned)aPathLen, mWidth, mHeight,
 		(void*)mGameSelector, (void*)mChallengeScreen, (void*)mBoard);
 
 	if (mGameSelector)
@@ -6375,12 +6439,14 @@ void LawnApp::NetOnStartGame(LawnNet::NetBuffer& thePayload)
 	NetCloseTransientScreens();
 
 	mNetBoardSeed = aBoardSeed;
-	mGameMode = aMode;
+	mNativeFusionEpoch = aStart.mContentEpoch;
+	mGameMode = (GameMode)aMode;
 	mNetCoopGameOverHandled = false;
 
 	// client always runs with the host's adventure level
 	if (mPlayerInfo && aMode == GameMode::GAMEMODE_ADVENTURE)
 		mPlayerInfo->mLevel = aLevel;
+	if(GetContentMode()==LawnFusion::ContentMode::Fusion)SetFusionAdventureLevel(aLevel,false);
 
 	// picked up by Board::InitLevel (the board is recreated below)
 	if (mNetManager)
@@ -6407,7 +6473,8 @@ void LawnApp::NetOnHostLost()
 		return;
 	const std::string aDisconnectReason = mNetManager->GetDisconnectReason();
 	const bool aMysteryKickExpected = LawnNet::NetSmokeMysteryObserverHostLost(this, aDisconnectReason);
-	if (CoopSmokeActive() && !aMysteryKickExpected && !CoopSmokeExpectedSpectatorKick(aDisconnectReason))
+	const bool aResourceFailureExpected = LawnNet::NetSmokeFusionResourceHostLost(this, aDisconnectReason);
+	if (CoopSmokeActive() && !aMysteryKickExpected && !aResourceFailureExpected && !CoopSmokeExpectedSpectatorKick(aDisconnectReason))
 		CoopSmokeFail("connection to smoke host was lost");
 
 	// Tear down the board while NetIsClient() and the profile-save guard still
@@ -6441,6 +6508,13 @@ void LawnApp::NetOnBackToMenu()
 
 void LawnApp::NetRestoreLocalProfile()
 {
+	if (mHasRemoteContentMode)
+	{
+		if (mContentMode != mLocalContentModeBackup) KillAlmanacDialog();
+		mContentMode = mLocalContentModeBackup;
+		mHasRemoteContentMode = false;
+		LawnNet::NetTrace("local content mode restored mode=%u", (unsigned)mContentMode);
+	}
 	if (!mNetBlockProfileSave && !mNetLocalProfileBackup)
 		return;
 	if (!mNetLocalProfileBackup)
@@ -6563,6 +6637,7 @@ void LawnApp::NetTickPvpTeamSelection()
 
 void LawnApp::NetCloseTransientScreens()
 {
+	KillDialog(DIALOG_GAME_MODES);
 	if (auto* aHelp = dynamic_cast<CoopHelpDialog*>(GetDialog(DIALOG_COOP_HELP))) aHelp->Close();
 	KillDialog(Dialogs::DIALOG_COOP_TEAMS);
 	KillAwardScreen();
@@ -6575,6 +6650,8 @@ void LawnApp::NetCloseTransientScreens()
 
 bool LawnApp::NetOnSceneCmd(uint8_t aCmd, uint32_t aParam)
 {
+	if (IsFusionValidationFixture() && aCmd != LawnNet::SCENECMD_SHOW_GAME_SELECTOR &&
+		aCmd != LawnNet::SCENECMD_KILL_BOARD) return false;
 	if (auto* aHelp = dynamic_cast<CoopHelpDialog*>(GetDialog(DIALOG_COOP_HELP))) aHelp->Close();
 	switch (aCmd)
 	{
@@ -6653,12 +6730,13 @@ bool LawnApp::NetUnlockAllMinigames() const
 
 void LawnApp::NetBroadcastProfile(bool theForce)
 {
+	if (IsFusionValidationFixture()) return;
 	if (!mNetManager || !mNetManager->IsHosting() || !mPlayerInfo)
 		return;
 
 	LawnNet::NetBuffer aMsg;
 	PlayerInfo* aP = mPlayerInfo;
-	aMsg.WriteI32(aP->mLevel);
+	aMsg.WriteI32(GetContentMode()==LawnFusion::ContentMode::Fusion?GetFusionAdventureLevel():aP->mLevel);
 	aMsg.WriteI32(aP->mCoins);
 	aMsg.WriteI32(aP->mFinishedAdventure);
 	aMsg.WriteI32(aP->mHasUnlockedMinigames);
@@ -6731,6 +6809,7 @@ void LawnApp::NetOnProfileSync(LawnNet::NetBuffer& thePayload)
 		LawnNet::NetTrace("PROFILE_SYNC rejected: level=%d trailing=%zu", aLevel, aCandidate.Remaining());
 		return;
 	}
+	if(GetContentMode()==LawnFusion::ContentMode::Fusion)SetFusionAdventureLevel(aLevel,false);
 
 	if (!mNetBlockProfileSave)
 	{
@@ -6773,6 +6852,7 @@ void LawnApp::NetOnProfileSync(LawnNet::NetBuffer& thePayload)
 
 void LawnApp::NetHandleRemoteInputs()
 {
+	if (mFusionRuntime) return;
 	if (!mNetManager || !mBoard || mNetManager->GetInputPhase() != LawnNet::NETINPUT_PLAYING)
 		return;
 

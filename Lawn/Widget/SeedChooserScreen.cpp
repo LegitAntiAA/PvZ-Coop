@@ -25,6 +25,9 @@
 #include "../Challenge.h"
 #include "../Net/NetMystery.h"
 #include "NetUi.h"
+#include "../Fusion/FusionNative.h"
+#include "../Fusion/FusionWire.h"
+#include <algorithm>
 
 using namespace LawnNet;
 //0x483380
@@ -48,6 +51,7 @@ SeedChooserScreen::SeedChooserScreen()
 
 	mApp = (LawnApp*)gSexyAppBase;
 	mBoard = mApp->mBoard;
+	mNativeFusionChooser = LawnFusion::IsNativeFusionBoard(mBoard);
 	mClip = false;
 	mSeedChooserAge = 0;
 	mSeedsInFlight = 0;
@@ -153,11 +157,17 @@ SeedChooserScreen::SeedChooserScreen()
 	mImitaterButton->mParentWidget = this;
 
 	mScrollbar = new ScrollbarWidget(mApp, ScrollbarMode::VERTICAL);
-	mScrollbar->mScrollRange = 70 * max(0, ceil((mApp->GetSeedsAvailable() - 49) / 8.0f));
+	mScrollbar->mScrollRange = mNativeFusionChooser ? 0 : 70 * max(0, ceil((mApp->GetSeedsAvailable() - 49) / 8.0f));
 	mScrollbar->Resize(445, 123, 8, 420);
-	int offsetY = Has7Rows() || mAllowBetaSeedpackets ? 0 : 40;
+	int offsetY = mNativeFusionChooser || Has7Rows() || mAllowBetaSeedpackets ? 0 : 40;
 	int startY = 123 + offsetY;
-	mScrollbar->mViewport = Rect(22, startY, 443, 528);
+	mScrollbar->mViewport = Rect(22, startY, 443, mNativeFusionChooser ? 528 - startY : 528);
+	if (mNativeFusionChooser)
+	{
+		const auto* aContext = LawnFusion::GetNativeContext(mBoard);
+		const int aRows = aContext ? ((int)aContext->eligible.size() + 7) / 8 : 0;
+		mScrollbar->mScrollRange = max(0, aRows * 70 - mScrollbar->mViewport.mHeight);
+	}
 	mScrollbar->mButtonNoDraw = mScrollbar->mScrollRange == 0;
 	mScrollbar->mDisabled = mScrollbar->mButtonNoDraw;
 
@@ -172,8 +182,22 @@ SeedChooserScreen::SeedChooserScreen()
 		mStoreButton->mDisabled = true;
 	}
 
-	DBG_ASSERT(mApp->GetSeedsAvailable() <= NUM_SEED_TYPES);
 	memset(mChosenSeeds, 0, sizeof(mChosenSeeds));
+	if (mNativeFusionChooser)
+	{
+		mCoopChooserActive = true;
+		for (GameButton* aButton : {mViewLawnButton, mAlmanacButton, mStoreButton, mImitaterButton})
+		{
+			aButton->mBtnNoDraw = true;
+			aButton->SetDisabled(true);
+		}
+		mAllowBetaSeedpackets = false;
+		mRandomButton->mBtnNoDraw = false;
+		mRandomButton->Resize(332 + mApp->mDDInterface->mWideScreenOffsetX, 545 + mApp->mDDInterface->mWideScreenOffsetY, 100, 42);
+		NativeFusionSync();
+		return;
+	}
+	DBG_ASSERT(mApp->GetSeedsAvailable() <= NUM_SEED_TYPES);
 	for (SeedType aSeedType = SEED_PEASHOOTER; aSeedType < NUM_SEEDS_IN_CHOOSER; aSeedType = (SeedType)(aSeedType + 1))
 	{
 		ChosenSeed& aChosenSeed = mChosenSeeds[aSeedType];
@@ -350,6 +374,7 @@ void SeedChooserScreen::CrazyDavePickSeeds()
 //0x484220
 bool SeedChooserScreen::Has7Rows()
 {
+	if (mNativeFusionChooser) return false;
 	for (SeedType aSeedType = SEED_GATLINGPEA; aSeedType <= SEED_COBCANNON; aSeedType = (SeedType)(aSeedType + 1))
 	{
 		if (aSeedType != SEED_SPIKEROCK && mApp->SeedTypeAvailable(aSeedType))
@@ -364,6 +389,12 @@ bool SeedChooserScreen::Has7Rows()
 //0x484400
 void SeedChooserScreen::GetSeedPositionInChooser(int theIndex, int& x, int& y)
 {
+	if (mNativeFusionChooser)
+	{
+		x = (theIndex % 8) * 53 + 22;
+		y = (theIndex / 8) * 70 + 123;
+		return;
+	}
 	if (theIndex == SEED_IMITATER)
 	{
 		x = mImitaterButton->mX;
@@ -408,6 +439,204 @@ SeedChooserScreen::~SeedChooserScreen()
 	if (mMenuButton) delete mMenuButton;
 	if (mScrollbar) delete mScrollbar;
 	delete mCoopWaitingPaper;
+}
+
+static bool AdvanceChosenSeedMotion(ChosenSeed& theSeed, int theAge)
+{
+	if (theSeed.mSeedState != SEED_FLYING_TO_BANK && theSeed.mSeedState != SEED_SHIFTING_IN_BANK && theSeed.mSeedState != SEED_FLYING_TO_CHOOSER)
+		return false;
+	theSeed.mX = TodAnimateCurve(theSeed.mTimeStartMotion, theSeed.mTimeEndMotion, theAge, theSeed.mStartX, theSeed.mEndX, CURVE_EASE_IN_OUT);
+	theSeed.mY = TodAnimateCurve(theSeed.mTimeStartMotion, theSeed.mTimeEndMotion, theAge, theSeed.mStartY, theSeed.mEndY, CURVE_EASE_IN_OUT);
+	return theAge >= theSeed.mTimeEndMotion;
+}
+
+int SeedChooserScreen::NativeFusionLocalSlot() const
+{
+	if (!mApp->NetActive()) return 0;
+	if (!mApp->mNetManager || mApp->mNetManager->IsSpectator()) return -1;
+	return mApp->mNetManager->GetMySlot();
+}
+
+void SeedChooserScreen::NativeFusionSync()
+{
+	const auto* aContext = LawnFusion::GetNativeContext(mBoard);
+	if (!aContext) return;
+	const auto& aState = aContext->selection.State();
+	if (mNativeFusionEpoch != aState.epoch)
+	{
+		mNativeFusionChoices.clear();
+		mNativeFusionEpoch = aState.epoch;
+		mNativeFusionRevision = 0xffffffffu;
+		mNativeFusionMysteryMask = 0;
+		mCoopMysteryRequestPending = false;
+	}
+	if (mNativeFusionRevision != aState.revision)
+	{
+		mNativeFusionRevision = aState.revision;
+		const int aLocalSlot = NativeFusionLocalSlot();
+		if (aLocalSlot >= 0 && ((mNativeFusionMysteryMask ^ aState.mysteryMask) & (1u << aLocalSlot)))
+			mCoopMysteryRequestPending = false;
+		mNativeFusionMysteryMask = aState.mysteryMask;
+		mCoopPicksPerPlayer = aLocalSlot >= 0 ? aState.quotas[aLocalSlot] : 0;
+		mNumSeedsToChoose = aState.targetCount;
+		std::vector<LawnFusion::FusionBankPacket> aPackets = aState.packets;
+		std::stable_sort(aPackets.begin(), aPackets.end(), [](const auto& a, const auto& b) { return a.owner < b.owner || (a.owner == b.owner && a.id < b.id); });
+		for (auto& aChoice : mNativeFusionChoices)
+		{
+			if (aChoice.removed || std::any_of(aPackets.begin(), aPackets.end(), [&](const auto& p) { return p.id == aChoice.packetId; })) continue;
+			aChoice.removed = true;
+			if (aChoice.pending) continue;
+			for (size_t i = 0; i < aContext->eligible.size(); ++i)
+			{
+				const auto& aCard = aContext->eligible[i];
+				if (aCard.kind != aChoice.kind || aCard.isExtra != aChoice.extra) continue;
+				auto& aMotion = aChoice.motion;
+				aMotion.mStartX = aMotion.mX; aMotion.mStartY = aMotion.mY;
+				GetSeedPositionInChooser((int)i, aMotion.mEndX, aMotion.mEndY);
+				aMotion.mEndY -= (int)mScrollbar->mScrollValue;
+				aMotion.mTimeStartMotion = mSeedChooserAge; aMotion.mTimeEndMotion = mSeedChooserAge + 25;
+				aMotion.mSeedState = SEED_FLYING_TO_CHOOSER;
+				break;
+			}
+		}
+		int aBankIndex = 0;
+		const int aViewer = mApp->mNetManager ? mApp->mNetManager->GetMySlot() : 0;
+		for (int anOffset = 0; anOffset < NET_MAX_PLAYERS; ++anOffset)
+		{
+			const int aSlot = NetSeedBankOwnerAt(aViewer, anOffset);
+			int aSlotIndex = 0;
+			for (const auto& aPacket : aPackets)
+			{
+				if (aPacket.owner != aSlot) continue;
+				auto aFound = std::find_if(mNativeFusionChoices.begin(), mNativeFusionChoices.end(), [&](const auto& c) { return !c.removed && c.packetId == aPacket.id; });
+				const bool aNew = aFound == mNativeFusionChoices.end();
+				if (aNew)
+				{
+					mNativeFusionChoices.emplace_back();
+					aFound = mNativeFusionChoices.end() - 1;
+				}
+				auto& aChoice = *aFound;
+				aChoice.kind = aPacket.kind; aChoice.extra = aPacket.isExtra; aChoice.packetId = aPacket.id;
+				aChoice.owner = aPacket.owner; aChoice.pending = aPacket.mysteryPending; aChoice.price = aPacket.price;
+				auto& aMotion = aChoice.motion;
+				int aX, aY;
+				GetSeedPositionInBank(aBankIndex + aSlotIndex, aX, aY);
+				if (aNew)
+				{
+					aMotion.mX = aX; aMotion.mY = aY;
+					if (!aChoice.pending)
+						for (size_t i = 0; i < aContext->eligible.size(); ++i)
+							if (aContext->eligible[i].kind == aChoice.kind && aContext->eligible[i].isExtra == aChoice.extra)
+							{
+								GetSeedPositionInChooser((int)i, aMotion.mX, aMotion.mY);
+								aMotion.mY -= (int)mScrollbar->mScrollValue;
+								break;
+							}
+				}
+				if (aNew || aMotion.mEndX != aX || aMotion.mEndY != aY)
+				{
+					aMotion.mStartX = aMotion.mX; aMotion.mStartY = aMotion.mY;
+					aMotion.mEndX = aX; aMotion.mEndY = aY;
+					aMotion.mTimeStartMotion = mSeedChooserAge; aMotion.mTimeEndMotion = mSeedChooserAge + (aNew ? 25 : 15);
+					aMotion.mSeedState = aNew ? SEED_FLYING_TO_BANK : SEED_SHIFTING_IN_BANK;
+				}
+				aMotion.mSeedIndexInBank = aBankIndex + aSlotIndex;
+				++aSlotIndex;
+			}
+			aBankIndex += aState.quotas[aSlot];
+		}
+		mSeedsInBank = (int)aState.packets.size();
+	}
+	mSeedsInFlight = 0;
+	for (auto& aChoice : mNativeFusionChoices)
+	{
+		auto& aMotion = aChoice.motion;
+		if (AdvanceChosenSeedMotion(aMotion, mSeedChooserAge))
+		{
+			aMotion.mX = aMotion.mEndX; aMotion.mY = aMotion.mEndY;
+			aMotion.mSeedState = aChoice.removed ? SEED_IN_CHOOSER : SEED_IN_BANK;
+		}
+		if (aMotion.mSeedState == SEED_FLYING_TO_BANK || aMotion.mSeedState == SEED_SHIFTING_IN_BANK || aMotion.mSeedState == SEED_FLYING_TO_CHOOSER) ++mSeedsInFlight;
+	}
+	std::erase_if(mNativeFusionChoices, [](const auto& c) { return c.removed && (c.pending || c.motion.mSeedState == SEED_IN_CHOOSER); });
+	CoopRefreshStartButton();
+}
+
+void SeedChooserScreen::NativeFusionDrawCards(Graphics* g)
+{
+	const auto* aContext = LawnFusion::GetNativeContext(mBoard);
+	if (!aContext) return;
+	for (size_t i = 0; i < aContext->eligible.size(); ++i)
+	{
+		const auto& aCard = aContext->eligible[i];
+		int x, y; GetSeedPositionInChooser((int)i, x, y); y -= (int)mScrollbar->mScrollValue;
+		const bool aPicked = std::any_of(mNativeFusionChoices.begin(), mNativeFusionChoices.end(), [&](const auto& c) { return !c.removed && !c.pending && c.kind == aCard.kind && c.extra == aCard.isExtra; });
+		Graphics aCardG(*g);
+		aCardG.ClipRect(22, 123, 443, 405);
+		DrawNativeFusionSeedPacket(&aCardG, (float)x, (float)y, aCard.kind, aCard.isExtra, aCard.baseCost, 0, aPicked ? 55 : 255);
+	}
+	const auto& aState = aContext->selection.State();
+	const int aMySlot = NativeFusionLocalSlot();
+	const int aViewer = mApp->mNetManager ? mApp->mNetManager->GetMySlot() : 0;
+	int aBankIndex = 0;
+	for (int anOffset = 0; anOffset < NET_MAX_PLAYERS; ++anOffset)
+	{
+		const int aSlot = NetSeedBankOwnerAt(aViewer, anOffset);
+		for (int i = 0; i < aState.quotas[aSlot]; ++i, ++aBankIndex)
+		{
+			if (std::any_of(mNativeFusionChoices.begin(), mNativeFusionChoices.end(), [&](const auto& c) { return !c.removed && c.motion.mSeedIndexInBank == aBankIndex; })) continue;
+			int x, y; GetSeedPositionInBank(aBankIndex, x, y);
+			g->DrawImage(IMAGE_SEEDPACKETSILHOUETTE, x, y);
+			if (aSlot != aMySlot)
+			{
+				const auto aColor = GetRelativePlayerColor(aMySlot < 0 ? 0 : aMySlot, aSlot);
+				g->PushState(); g->SetColor(Color(aColor.r, aColor.g, aColor.b, 55));
+				g->FillRect(x + 2, y + 2, 46, 66); g->PopState();
+			}
+		}
+	}
+	for (const auto& aChoice : mNativeFusionChoices)
+	{
+		if (!mBoard->mCutScene->mSeedChoosing && !aChoice.removed) continue;
+		const auto& aMotion = aChoice.motion;
+		if (aChoice.pending) DrawMysterySeedPacket(g, (float)aMotion.mX, (float)aMotion.mY);
+		else DrawNativeFusionSeedPacket(g, (float)aMotion.mX, (float)aMotion.mY, aChoice.kind, aChoice.extra, aChoice.price);
+		if (aChoice.owner != aMySlot)
+		{
+			const auto aColor = GetRelativePlayerColor(aMySlot < 0 ? 0 : aMySlot, aChoice.owner);
+			g->PushState(); g->SetColor(Color(aColor.r, aColor.g, aColor.b, mApp->mNetManager ? mApp->mNetManager->mConfig.mHotbarTintAlpha : 55));
+			g->FillRect(aMotion.mX + 2, aMotion.mY + 2, 46, 66); g->PopState();
+		}
+	}
+}
+
+bool SeedChooserScreen::NativeFusionMouseDown(int x, int y, int theClickCount)
+{
+	const auto* aContext = LawnFusion::GetNativeContext(mBoard);
+	const int aSlot = NativeFusionLocalSlot();
+	if (!aContext || aSlot < 0 || aSlot >= 4 || !mMouseVisible || mCoopMysteryRequestPending || theClickCount != 1 || mApp->GetDialogCount()) return false;
+	const auto& aState = aContext->selection.State();
+	if (aState.phase != LawnFusion::FusionBankPhase::Choosing || (aState.mysteryMask & (1u << aSlot))) return false;
+	LawnFusion::FusionCommand aCommand; aCommand.epoch = aState.epoch;
+	for (const auto& aChoice : mNativeFusionChoices)
+	{
+		if (aChoice.removed || aChoice.owner != aSlot || aChoice.pending || aChoice.motion.mSeedState != SEED_IN_BANK) continue;
+		if (Rect(aChoice.motion.mX, aChoice.motion.mY, 50, 70).Contains(x, y))
+		{
+			aCommand.action = LawnFusion::FusionCommandKind::Unchoose; aCommand.packetId = aChoice.packetId;
+			return mApp->SubmitNativeFusionCommand(aCommand);
+		}
+	}
+	if (y < 123 || y >= 528) return false;
+	for (size_t i = 0; i < aContext->eligible.size(); ++i)
+	{
+		int aX, aY; GetSeedPositionInChooser((int)i, aX, aY); aY -= (int)mScrollbar->mScrollValue;
+		if (!Rect(aX, aY, 50, 70).Contains(x, y)) continue;
+		const auto& aCard = aContext->eligible[i];
+		aCommand.action = LawnFusion::FusionCommandKind::Choose; aCommand.kind = aCard.kind; aCommand.isExtra = aCard.isExtra;
+		return mApp->SubmitNativeFusionCommand(aCommand);
+	}
+	return false;
 }
 
 //0x4845E0
@@ -476,15 +705,19 @@ void SeedChooserScreen::Draw(Graphics* g)
 	}
 
 	g->SetLinearBlend(true);
-	if (!mBoard->ChooseSeedsOnCurrentLevel() || (mBoard->mCutScene && mBoard->mCutScene->IsBeforePreloading()))
+	if ((!mNativeFusionChooser && !mBoard->ChooseSeedsOnCurrentLevel()) || (mBoard->mCutScene && mBoard->mCutScene->IsBeforePreloading()))
 		return;
 
 	g->DrawImage(Sexy::IMAGE_SEEDCHOOSER_BACKGROUND, 0, 87);
-	if (mApp->SeedTypeAvailable(SEED_IMITATER))
+	if (!mNativeFusionChooser && mApp->SeedTypeAvailable(SEED_IMITATER))
 	{
 		g->DrawImage(Sexy::IMAGE_SEEDCHOOSER_IMITATERADDON, 459, 503);
 	}
 	TodDrawString(g, _S("[CHOOSE_YOUR_PLANTS]"), 229, 110, Sexy::FONT_DWARVENTODCRAFT18YELLOW, Color::White, DS_ALIGN_CENTER);
+	if (mNativeFusionChooser)
+		NativeFusionDrawCards(g);
+	else
+	{
 
 	int aNumSeeds = Has7Rows() ? 49 : 41;
 	if (mAllowBetaSeedpackets) 
@@ -619,6 +852,7 @@ void SeedChooserScreen::Draw(Graphics* g)
 		}
 	}
 
+	}
 	if (!mScrollbar->mDisabled)
 	{
 		mScrollbar->mButtonNoDraw = false;
@@ -654,7 +888,7 @@ void SeedChooserScreen::Draw(Graphics* g)
 	mMenuButton->Draw(&aBoardFrameG);
 	mToolTip->Draw(g);
 
-	CoopDrawRemotePicks(g);
+	if (!mNativeFusionChooser) CoopDrawRemotePicks(g);
 }
 
 //0x484C30
@@ -727,6 +961,11 @@ void SeedChooserScreen::UpdateCursor()
 	if (mApp->GetDialogCount() || mBoard->mCutScene->IsInShovelTutorial() || mApp->mGameMode == GAMEMODE_UPSELL || !mApp->mWidgetManager->mOverWidget) return;
 
 	mApp->mWidgetManager->SetFocus(this);
+	if (mNativeFusionChooser)
+	{
+		mApp->SetCursor(mMouseVisible && (mStartButton->IsMouseOver() || mRandomButton->IsMouseOver() || mMenuButton->IsMouseOver()) ? CURSOR_HAND : CURSOR_POINTER);
+		return;
+	}
 	if (CoopIsPvpZombieWaiting())
 	{
 		mApp->SetCursor(mMouseVisible && (mMenuButton->IsMouseOver() || mStartButton->IsMouseOver()) ? CURSOR_HAND : CURSOR_POINTER);
@@ -756,7 +995,7 @@ void SeedChooserScreen::UpdateCursor()
 //0x4851A0
 void SeedChooserScreen::Update()
 {
-	CoopPollNetwork();
+	if (!mNativeFusionChooser) CoopPollNetwork();
 
 	Widget::Update();
 
@@ -776,6 +1015,13 @@ void SeedChooserScreen::Update()
 
 	mSeedChooserAge++;
 	mToolTip->Update();
+	if (mNativeFusionChooser)
+	{
+		NativeFusionSync();
+		mStartButton->Update(); mRandomButton->Update(); mMenuButton->Update(); mScrollbar->Update();
+		UpdateCursor(); MarkDirty();
+		return;
+	}
 
 	for (SeedType aSeedType = SEED_PEASHOOTER; aSeedType < NUM_SEEDS_IN_CHOOSER; aSeedType = (SeedType)(aSeedType + 1))
 	{
@@ -784,11 +1030,7 @@ void SeedChooserScreen::Update()
 			ChosenSeed& aChosenSeed = mChosenSeeds[aSeedType];
 			if (aChosenSeed.mSeedState == SEED_FLYING_TO_BANK || aChosenSeed.mSeedState == SEED_SHIFTING_IN_BANK || aChosenSeed.mSeedState == SEED_FLYING_TO_CHOOSER)
 			{
-				int aTimeStart = aChosenSeed.mTimeStartMotion;
-				int aTimeEnd = aChosenSeed.mTimeEndMotion;
-				aChosenSeed.mX = TodAnimateCurve(aTimeStart, aTimeEnd, mSeedChooserAge, aChosenSeed.mStartX, aChosenSeed.mEndX, CURVE_EASE_IN_OUT);
-				aChosenSeed.mY = TodAnimateCurve(aTimeStart, aTimeEnd, mSeedChooserAge, aChosenSeed.mStartY, aChosenSeed.mEndY, CURVE_EASE_IN_OUT);
-				if (mSeedChooserAge >= aChosenSeed.mTimeEndMotion)
+				if (AdvanceChosenSeedMotion(aChosenSeed, mSeedChooserAge))
 				{
 					LandFlyingSeed(aChosenSeed);
 				}
@@ -881,6 +1123,11 @@ bool SeedChooserScreen::CheckSeedUpgrade(SeedType theSeedTypeTo, SeedType theSee
 //0x485600
 void SeedChooserScreen::OnStartButton()
 {
+	if (mNativeFusionChooser)
+	{
+		ButtonDepress(SeedChooserScreen_Start);
+		return;
+	}
 	if (mSeedsInFlight != 0)
 		return;
 	if (mCoopChooserActive && mApp->mNetManager)
@@ -1069,6 +1316,7 @@ void SeedChooserScreen::PickRandomSeeds()
 //0x485BB0
 void SeedChooserScreen::ButtonDepress(int theId)
 {
+	if (mNativeFusionChooser && theId != SeedChooserScreen_Start && theId != SeedChooserScreen_Random && theId != SeedChooserScreen_Menu) return;
 	if (CoopIsPvpZombieWaiting() && theId != SeedChooserScreen_Start && theId != SeedChooserScreen_Menu)
 		return;
 	if (mSeedsInFlight > 0 || mChooseState == CHOOSE_VIEW_LAWN || !mMouseVisible)
@@ -1132,6 +1380,7 @@ void SeedChooserScreen::ButtonDepress(int theId)
 //0x485D80
 SeedType SeedChooserScreen::SeedHitTest(int x, int y)
 {
+	if (mNativeFusionChooser) return SEED_NONE;
 	if (CoopIsPvpZombieWaiting()) return SEED_NONE;
 	x -= mApp->mDDInterface->mWideScreenOffsetX;
 	y -= mApp->mDDInterface->mWideScreenOffsetY;
@@ -1165,6 +1414,7 @@ SeedType SeedChooserScreen::SeedHitTest(int x, int y)
 //0x485E20
 SeedType SeedChooserScreen::FindSeedInBank(int theIndexInBank) const
 {
+	if (mNativeFusionChooser) return SEED_NONE;
 	for (SeedType aSeedType = SEED_PEASHOOTER; aSeedType < NUM_SEEDS_IN_CHOOSER; aSeedType = (SeedType)(aSeedType + 1))
 	{
 		if (mApp->SeedTypeAvailable(aSeedType))
@@ -1212,6 +1462,15 @@ int SeedChooserScreen::CoopExpectedGlobalFixedPicks(LawnApp* theApp, Board* theB
 
 int SeedChooserScreen::CoopGetLocalQuotaPickCount() const
 {
+	if (mNativeFusionChooser)
+	{
+		const auto* aContext = LawnFusion::GetNativeContext(mBoard);
+		const int aSlot = NativeFusionLocalSlot();
+		int aCount = 0;
+		if (aContext && aSlot >= 0)
+			for (const auto& aPacket : aContext->selection.State().packets) if (aPacket.owner == aSlot) ++aCount;
+		return aCount;
+	}
 	int aCount = mSeedsInBank;
 	// Every chooser mirrors fixed cards for presentation, but only the host
 	// serializes/owns them.  Client quotas therefore count mutable picks only.
@@ -1281,6 +1540,17 @@ bool SeedChooserScreen::CoopApplyMysteryRequest(int theSlot, bool theEnabled)
 
 bool SeedChooserScreen::CoopCanReady() const
 {
+    if (mNativeFusionChooser)
+    {
+        const auto* context = LawnFusion::GetNativeContext(mBoard);
+        const int slot = NativeFusionLocalSlot();
+        return context && slot >= 0 && slot < NET_MAX_PLAYERS &&
+            context->selection.State().phase == LawnFusion::FusionBankPhase::Choosing &&
+            (context->selection.State().activeMask & (1u << slot)) && mCoopChooserActive &&
+            mBoard->mCutScene && mMouseVisible && mBoard->mCutScene->mSeedChoosing &&
+            !mSeedsInFlight && !mCoopMysteryRequestPending &&
+            CoopGetLocalQuotaPickCount() == context->selection.State().quotas[slot];
+    }
     const NetManager* aNet = mApp ? mApp->mNetManager : nullptr;
     if (!aNet || !aNet->IsActive() || aNet->IsSpectator() || !mCoopChooserActive ||
         !mBoard || !mBoard->mSeedBank || !mBoard->mCutScene || !mMouseVisible ||
@@ -1343,7 +1613,7 @@ void SeedChooserScreen::CoopRefreshStartButton()
         mScrollAmount = 0.0f;
         RemoveToolTip();
     }
-    if (!mCoopChooserActive || !aNet || !aNet->IsActive())
+    if (!mCoopChooserActive || !aNet || (!aNet->IsActive() && !mNativeFusionChooser))
         return;
     const bool aCanReady = CoopCanReady();
     EnableStartButton(aCanReady);
@@ -1358,6 +1628,16 @@ void SeedChooserScreen::CoopRefreshStartButton()
     mRandomButton->mBtnNoDraw = CoopIsPvpZombieWaiting();
     mRandomButton->Resize(332 + mApp->mDDInterface->mWideScreenOffsetX, 545 + mApp->mDDInterface->mWideScreenOffsetY, 100, 42);
     mRandomButton->SetLabel(mCoopMysteryRequestPending ? _S("WAIT...") : aNet->IsChooserMystery(aSlot) ? _S("MANUAL") : _S("MYSTERY ?"));
+    if (mNativeFusionChooser)
+    {
+        const auto* context = LawnFusion::GetNativeContext(mBoard);
+        const int slot = NativeFusionLocalSlot();
+        mRandomButton->SetDisabled(!context || slot < 0 || slot >= NET_MAX_PLAYERS || mCoopMysteryRequestPending ||
+            context->selection.State().phase != LawnFusion::FusionBankPhase::Choosing || !mMouseVisible ||
+            !mBoard->mCutScene->mSeedChoosing || mSeedsInFlight != 0 || !context->selection.State().quotas[slot] ||
+            (!aNet->IsChooserMystery(slot) && context->selection.State().quotas[slot] > context->eligible.size()));
+        return;
+    }
     mRandomButton->SetDisabled(mCoopMysteryRequestPending || aNet->IsSpectator() || !mMouseVisible ||
         !mBoard->mCutScene->mSeedChoosing || mSeedsInFlight != 0 ||
         aNet->mChooserPickQuota[aSlot] <= (aSlot == 0 ? CoopCountGlobalFixedPicks() : 0) ||
@@ -1484,6 +1764,7 @@ void SeedChooserScreen::ClickedSeedInChooser(ChosenSeed& theChosenSeed)
 //0x486150
 void SeedChooserScreen::ShowToolTip()
 {
+	if (mNativeFusionChooser) { RemoveToolTip(); return; }
 	if (CoopIsPvpZombieWaiting()) { RemoveToolTip(); return; }
 	int aMysterySlot = 0;
 	if (mCoopChooserActive && mMouseVisible && mApp->GetDialogCount() == 0 &&
@@ -1629,6 +1910,7 @@ void SeedChooserScreen::MouseMove(int theX, int theY)
 //0x4866E0
 void SeedChooserScreen::UpdateImitaterButton()
 {
+	if (mNativeFusionChooser) return;
 	if (CoopIsPvpZombieWaiting())
 	{
 		mImitaterButton->mBtnNoDraw = true;
@@ -1657,6 +1939,16 @@ void SeedChooserScreen::UpdateImitaterButton()
 void SeedChooserScreen::MouseDown(int x, int y, int theClickCount)
 {
 	Widget::MouseDown(x, y, theClickCount);
+	if (mNativeFusionChooser)
+	{
+		if (mRandomButton->IsMouseOver() && theClickCount == 1) ButtonDepress(SeedChooserScreen_Random);
+		else if (!mMenuButton->IsMouseOver() && !mStartButton->IsMouseOver())
+		{
+			if (mScrollbar->isThumbOver()) mScrollbar->MouseDown(x, y, theClickCount);
+			else if (NativeFusionMouseDown(x, y, theClickCount)) mApp->PlaySample(SOUND_TAP);
+		}
+		return;
+	}
 	if (CoopIsPvpZombieWaiting())
 	{
 		if (mMenuButton->IsMouseOver() || mStartButton->IsMouseOver()) mApp->PlaySample(SOUND_TAP);
@@ -1814,6 +2106,12 @@ bool SeedChooserScreen::PickedPlantType(SeedType theSeedType)
 //0x486D20
 void SeedChooserScreen::CloseSeedChooser()
 {
+	if (mNativeFusionChooser)
+	{
+		for (GameButton* aButton : {mStartButton, mRandomButton, mMenuButton}) aButton->SetDisabled(true);
+		mBoard->mCutScene->EndSeedChooser();
+		return;
+	}
 	DBG_ASSERT(mBoard->mSeedBank->mNumPackets == mBoard->GetNumSeedsInBank());
 	for (int anIndex = 0; anIndex < mBoard->mSeedBank->mNumPackets; anIndex++)
 	{
@@ -1842,6 +2140,11 @@ void SeedChooserScreen::CloseSeedChooser()
 //0x486E80
 void SeedChooserScreen::KeyDown(KeyCode theKey)
 {
+	if (mNativeFusionChooser)
+	{
+		if (theKey == KEYCODE_ESCAPE && !mMenuButton->mDisabled) ButtonDepress(SeedChooserScreen_Menu);
+		return;
+	}
 	mBoard->DoTypingCheck(theKey);
 
 	if (theKey == KeyCode::KEYCODE_ESCAPE && !mMenuButton->mDisabled && mBoard->mCutScene->mCutsceneTime >= 4250 + mBoard->mCutScene->mCrazyDaveTime)
@@ -1853,6 +2156,7 @@ void SeedChooserScreen::KeyDown(KeyCode theKey)
 //0x486EA0
 void SeedChooserScreen::KeyChar(SexyChar theChar)
 {
+	if (mNativeFusionChooser) return;
 	if (CoopIsPvpZombieWaiting()) return;
 	if (mChooseState == CHOOSE_VIEW_LAWN && mViewLawnTime > 251 && (theChar == ' ' || theChar == '\r' || theChar == '\u001B'))
 		CancelLawnView();
@@ -1864,6 +2168,7 @@ void SeedChooserScreen::KeyChar(SexyChar theChar)
 //0x486F10
 void SeedChooserScreen::UpdateAfterPurchase()
 {
+	if (mNativeFusionChooser) { NativeFusionSync(); return; }
 	for (SeedType aSeedType = SEED_PEASHOOTER; aSeedType < NUM_SEEDS_IN_CHOOSER; aSeedType = (SeedType)(aSeedType + 1))
 	{
 		ChosenSeed& aChosenSeed = mChosenSeeds[aSeedType];
@@ -2017,6 +2322,7 @@ static bool CoopCollectChoices(const SeedChooserScreen* theChooser, int thePicks
 
 void SeedChooserScreen::CoopBroadcastChooserState(bool theForce)
 {
+	if (mNativeFusionChooser) return;
 	LawnNet::NetManager* aNet = mApp->mNetManager;
 	if (!aNet || !aNet->IsHosting() || !mApp->mSeedChooserScreen ||
 		!mMouseVisible || !mBoard->mCutScene->mSeedChoosing)
@@ -2053,7 +2359,7 @@ void SeedChooserScreen::CoopBroadcastChooserState(bool theForce)
 
 bool SeedChooserScreen::CoopCanPingSeed(int theSeedType)
 {
-    return mCoopChooserActive && mMouseVisible && mChooseState == CHOOSE_NORMAL &&
+    return !mNativeFusionChooser && mCoopChooserActive && mMouseVisible && mChooseState == CHOOSE_NORMAL &&
         !CoopIsPvpZombieWaiting() && theSeedType >= 0 && theSeedType < NUM_SEEDS_IN_CHOOSER &&
         mApp->SeedTypeAvailable((SeedType)theSeedType) && !SeedNotAllowedToPick((SeedType)theSeedType) &&
         !SeedNotAllowedDuringTrial((SeedType)theSeedType);
@@ -2061,6 +2367,7 @@ bool SeedChooserScreen::CoopCanPingSeed(int theSeedType)
 
 bool SeedChooserScreen::CoopCursorTargetRect(const NetCursorTarget& theTarget, Rect& theCanonicalRect)
 {
+    if (mNativeFusionChooser) return false;
     NetManager* net = mApp ? mApp->mNetManager : nullptr;
     if (!net || !mCoopChooserActive || !mMouseVisible || mChooseState != CHOOSE_NORMAL ||
         CoopIsPvpZombieWaiting() || mApp->GetDialogCount() ||
@@ -2110,6 +2417,7 @@ bool SeedChooserScreen::CoopCursorTargetRect(const NetCursorTarget& theTarget, R
 bool SeedChooserScreen::CoopCursorTargetAt(int theCanonicalX, int theCanonicalY,
     NetCursorTarget& theTarget, int16_t& theOffsetX, int16_t& theOffsetY)
 {
+    if (mNativeFusionChooser) return false;
     NetManager* net = mApp ? mApp->mNetManager : nullptr;
     if (!net) return false;
     auto Hit = [&](const NetCursorTarget& target)
@@ -2228,6 +2536,7 @@ bool SeedChooserScreen::CoopMysteryHitTest(int x, int y, int& theSlot)
 // --------------------------------------------------------------------------
 bool SeedChooserScreen::CoopBroadcastChooserStart()
 {
+    if (mNativeFusionChooser) return false;
     NetManager* aNet = mApp->mNetManager;
     if (!aNet || !aNet->IsHosting() || !CoopAllPicksComplete()) return false;
     int aPicks[4][12] = {}, aCounts[4] = {}, aTotal = 0;
@@ -2312,7 +2621,7 @@ static void CoopBuildBankInternal(SeedBank* theBank, int theMySlot,
 	int aPos = 0;
 	for (int anOffset = 0; anOffset < 4; anOffset++)
 	{
-		int aSlot = (theMySlot + anOffset) % 4;
+		int aSlot = NetSeedBankOwnerAt(theMySlot, anOffset);
 		if (aPvP && aNet && aNet->GetPlayer(aSlot).mTeam != NETTEAM_PLANTS)
 			continue;
 		for (int j = 0; j < theCounts[aSlot] && j < 12 && aPos < aTotal; j++)
@@ -2363,6 +2672,7 @@ static void CoopBuildBankInternal(SeedBank* theBank, int theMySlot,
 
 void SeedChooserScreen::CoopBuildBankFromLocalState()
 {
+	if (mNativeFusionChooser) return;
 	LawnNet::NetManager* aNet = mApp->mNetManager;
 	if (!aNet || !mBoard)
 		return;
@@ -2456,12 +2766,14 @@ bool CoopDecodeChoices(SeedChooserScreen* chooser, const NetBuffer& payload, boo
 
 bool SeedChooserScreen::CoopValidateBankPayload(const NetBuffer& thePayload)
 {
+    if (mNativeFusionChooser) return false;
     CoopDecodedChoices aState;
     return CoopDecodeChoices(this, thePayload, true, aState);
 }
 
 bool SeedChooserScreen::CoopBuildBankFromPayload(NetBuffer& thePayload)
 {
+    if (mNativeFusionChooser) return false;
     CoopDecodedChoices aState;
     if (!CoopDecodeChoices(this, thePayload, true, aState)) return false;
     NetManager* aNet = mApp->mNetManager;
@@ -2476,6 +2788,7 @@ bool SeedChooserScreen::CoopBuildBankFromPayload(NetBuffer& thePayload)
 // Client state is committed only after the entire candidate has validated.
 bool SeedChooserScreen::CoopApplyChooserState(NetBuffer& thePayload)
 {
+    if (mNativeFusionChooser) return false;
     NetManager* aNet = mApp ? mApp->mNetManager : nullptr;
     if (!aNet || !aNet->IsClient() || !mCoopChooserActive || !mBoard) return false;
     CoopDecodedChoices aState;

@@ -8,6 +8,71 @@
 #include "NetGameplayPolicyTests.h"
 #include "NetMysteryTests.h"
 #include "NetEndlessWeatherTests.h"
+#include "FusionCatalogTests.h"
+#include "FusionCherryTests.h"
+#include "FusionPotatoTests.h"
+#include "FusionCherryShooterTests.h"
+#include "FusionBasePlantTests.h"
+#include "FusionShooterTimingTests.h"
+#include "FusionDoubleShooterTests.h"
+#include "FusionRollingProjectileTests.h"
+#include "FusionGloveTests.h"
+#include "FusionStraightProjectileTests.h"
+#include "FusionProducerTests.h"
+#include "FusionSplitShooterTests.h"
+#include "FusionColdTests.h"
+#include "FusionFireTests.h"
+#include "FusionDeathTests.h"
+#include "FusionChomperTests.h"
+#include "FusionLobberTests.h"
+#include "FusionButterTests.h"
+#include "FusionAlternateTimingTests.h"
+#include "FusionMoneyTests.h"
+#include "FusionDefenderTests.h"
+#include "FusionBatchActionTests.h"
+#include "FusionExtendedShooterTests.h"
+#include "FusionAction266Tests.h"
+#include "FusionEconomyTests.h"
+#include "FusionPoisonTests.h"
+#include "FusionCannon268Tests.h"
+#include "ChomperShulk268Tests.h"
+#include "Water268Tests.h"
+#include "FusionStar269Tests.h"
+#include "FusionSummon269Tests.h"
+#include "FusionDoom269Tests.h"
+#include "FusionSolar269Tests.h"
+#include "FusionDeform269Tests.h"
+#include "FusionWorldActors269Tests.h"
+#include "FusionWorldParticle269Tests.h"
+#include "FusionParticleCollision269Tests.h"
+#include "SpecialZombie269Tests.h"
+#include "More269Tests.h"
+#include "SoftwareTrianglePixelTests.h"
+#include "WorldRemainder269StateTests.h"
+int RunFusionEquipmentRulesTests(int& checks);
+int RunFusionNativeEquipment268Tests(int& checks);
+int RunFusionExtras268RulesTests(int& checks);
+int RunFusionTools268CommandTests(int& checks);
+#include "FusionShooter267Tests.h"
+#include "FusionAction267Tests.h"
+#include "FusionSeaLantern267Tests.h"
+#include "FusionHostilePhysicsTests.h"
+#include "FusionFireActionBatchTests.h"
+#include "FusionShooterBatchTests.h"
+#include "FusionGarlicTests.h"
+#include "FusionRecipientShooterTests.h"
+#include "FusionUmbrellaTests.h"
+#include "FusionZombieTests.h"
+#include "FusionZombieMotionTests.h"
+#include "FusionSourceZombieWireTests.h"
+#include "FusionModeTests.h"
+#include "FusionCampaign272Tests.h"
+#include "FusionSimulationTests.h"
+#include "FusionWireTests.h"
+#include "FusionRoomWireTests.h"
+#include "FusionNativeWireTests.h"
+#include "FusionBankTests.h"
+#include "FusionTutorialTests.h"
 
 #include <chrono>
 #include <cstdio>
@@ -798,6 +863,7 @@ void TestConfigRoundTripInIsolatedDirectory()
 	aSaved.mUnlockAllMinigames = true;
 	aSaved.mEnableCoop = false;
 	aSaved.mSkipIntro = true;
+	aSaved.mFusionClassicField = true;
 	aSaved.mBaseSnapshotHz = 29;
 	aSaved.mWindowWidth = 1920;
         aSaved.mWindowHeight = 1080;
@@ -814,6 +880,7 @@ void TestConfigRoundTripInIsolatedDirectory()
 	CHECK(aLoaded.mUnlockAllMinigames);
 	CHECK(!aLoaded.mEnableCoop);
 	CHECK(aLoaded.mSkipIntro);
+	CHECK(aLoaded.mFusionClassicField);
 	CHECK(aLoaded.mBaseSnapshotHz == 29);
 	CHECK(aLoaded.mWindowWidth == 1920);
         CHECK(aLoaded.mWindowHeight == 1080);
@@ -828,12 +895,14 @@ void TestConfigRoundTripInIsolatedDirectory()
 		LawnNet::NetConfig aReloaded;
 		CHECK(LawnNet::NetLoadConfig(aReloaded));
 		CHECK(aReloaded.mUnlockAllMinigames && aReloaded.mHeldPlantTintAlpha == 201);
+		CHECK(aReloaded.mFusionClassicField);
 		aReloaded.mHotbarTintAlpha = 77;
 		CHECK(LawnNet::NetSaveConfig(aReloaded));
 		CHECK(!std::filesystem::exists("coop.ini"));
 	}
 	CHECK(LawnNet::NetLoadConfig(aLoaded));
 	CHECK(aLoaded.mHotbarTintAlpha == 77);
+	CHECK(aLoaded.mFusionClassicField);
 	CHECK(aLoaded.mSkipIntro);
 	CHECK(WriteSmokeTestFile("coop.ini", "skipIntro=0\n"));
 	CHECK(LawnNet::NetLoadConfig(aLoaded) && !aLoaded.mSkipIntro);
@@ -842,6 +911,20 @@ void TestConfigRoundTripInIsolatedDirectory()
 }
 
 } // namespace
+
+void TestViewerFirstSeedBankOrder()
+{
+	const int expected[4][4] = {{0, 1, 2, 3}, {1, 2, 3, 0}, {2, 3, 0, 1}, {3, 0, 1, 2}};
+	for (int viewer = 0; viewer < 4; ++viewer)
+		for (int position = 0; position < 4; ++position)
+		{
+			CHECK(LawnNet::NetSeedBankOwnerAt(viewer, position) == expected[viewer][position]);
+			CHECK(LawnNet::NetSeedBankOwnerRank(viewer, expected[viewer][position]) == position);
+		}
+	CHECK(LawnNet::NetSeedBankOwnerAt(-1, 0) == 0);
+	CHECK(LawnNet::NetSeedBankOwnerRank(-1, 1) == 1);
+	CHECK(LawnNet::NetSeedBankOwnerRank(0, LawnNet::NET_SHARED_OWNER) == 4);
+}
 
 void TestFairFixedSeedQuotas()
 {
@@ -899,6 +982,7 @@ int main(int argc, char** argv)
 	RunTest("Frame.RejectsMalformedSizes", TestFrameRejectsMalformedSizes);
 	RunTest("Frame.MaximumPayload", TestFrameMaximumPayload);
 	RunTest("Players.RelativeColors", TestRelativePlayerColors);
+	RunTest("Chooser.ViewerFirstBankOrder", TestViewerFirstSeedBankOrder);
 	RunTest("Chooser.FixedCardsFairQuotas", TestFairFixedSeedQuotas);
 	RunTest("Spectator.AuthorityAndStrokeLifetime", TestSpectatorAuthorityAndStrokeLifetime);
 	RunTest("Config.Defaults", TestConfigDefaults);
@@ -944,6 +1028,182 @@ int main(int argc, char** argv)
 	const auto aZenResult = RunNetZenGardenTests();
 	gChecks += aZenResult.mChecks;
 	gFailures += aZenResult.mFailures;
+	const auto aFusionCatalogResult = RunFusionCatalogTests();
+	gChecks += aFusionCatalogResult.mChecks;
+	gFailures += aFusionCatalogResult.mFailures;
+	const auto aFusionCherryResult = RunFusionCherryTests();
+	gChecks += aFusionCherryResult.mChecks;
+	gFailures += aFusionCherryResult.mFailures;
+	const auto aFusionPotatoResult = RunFusionPotatoTests();
+	gChecks += aFusionPotatoResult.mChecks;
+	gFailures += aFusionPotatoResult.mFailures;
+	const auto aFusionCherryShooterResult = RunFusionCherryShooterTests();
+	gChecks += aFusionCherryShooterResult.mChecks;
+	gFailures += aFusionCherryShooterResult.mFailures;
+	const auto aFusionBasePlantResult = RunFusionBasePlantTests();
+	gChecks += aFusionBasePlantResult.mChecks;
+	gFailures += aFusionBasePlantResult.mFailures;
+	const auto aFusionShooterTimingResult = RunFusionShooterTimingTests();
+	gChecks += aFusionShooterTimingResult.mChecks;
+	gFailures += aFusionShooterTimingResult.mFailures;
+	const auto aFusionDoubleShooterResult = RunFusionDoubleShooterTests();
+	gChecks += aFusionDoubleShooterResult.mChecks;
+	gFailures += aFusionDoubleShooterResult.mFailures;
+	const auto aFusionRollingProjectileResult = RunFusionRollingProjectileTests();
+	gChecks += aFusionRollingProjectileResult.mChecks;
+	gFailures += aFusionRollingProjectileResult.mFailures;
+	const auto aFusionGloveResult = RunFusionGloveTests();
+	gChecks += aFusionGloveResult.mChecks;
+	gFailures += aFusionGloveResult.mFailures;
+	const auto aFusionStraightProjectileResult = RunFusionStraightProjectileTests();
+	gChecks += aFusionStraightProjectileResult.mChecks;
+	gFailures += aFusionStraightProjectileResult.mFailures;
+	const auto aFusionProducerResult = RunFusionProducerTests();
+	gChecks += aFusionProducerResult.mChecks;
+	gFailures += aFusionProducerResult.mFailures;
+	const auto aFusionSplitShooterResult = RunFusionSplitShooterTests();
+	gChecks += aFusionSplitShooterResult.mChecks;
+	gFailures += aFusionSplitShooterResult.mFailures;
+	const auto aFusionColdResult = RunFusionColdTests();
+	gChecks += aFusionColdResult.mChecks;
+	gFailures += aFusionColdResult.mFailures;
+	const auto aFusionFireResult = RunFusionFireTests();
+	gChecks += aFusionFireResult.mChecks;
+	gFailures += aFusionFireResult.mFailures;
+	const auto aFusionDeathResult = RunFusionDeathTests();
+	gChecks += aFusionDeathResult.mChecks;
+	gFailures += aFusionDeathResult.mFailures;
+	const auto aFusionChomperResult = RunFusionChomperTests();
+	gChecks += aFusionChomperResult.mChecks;
+	gFailures += aFusionChomperResult.mFailures;
+	const auto aFusionLobberResult = RunFusionLobberTests();
+	gChecks += aFusionLobberResult.mChecks;
+	gFailures += aFusionLobberResult.mFailures;
+	const auto aFusionButterResult = RunFusionButterTests();
+	gChecks += aFusionButterResult.mChecks;
+	gFailures += aFusionButterResult.mFailures;
+	const auto aFusionAlternateTimingResult = RunFusionAlternateTimingTests();
+	gChecks += aFusionAlternateTimingResult.mChecks;
+	gFailures += aFusionAlternateTimingResult.mFailures;
+	const auto aFusionMoneyResult = RunFusionMoneyTests();
+	gChecks += aFusionMoneyResult.mChecks;
+	gFailures += aFusionMoneyResult.mFailures;
+	const auto aFusionDefenderResult = RunFusionDefenderTests();
+	gChecks += aFusionDefenderResult.mChecks;
+	gFailures += aFusionDefenderResult.mFailures;
+	const auto aFusionBatchActionResult = RunFusionBatchActionTests();
+	gChecks += aFusionBatchActionResult.mChecks;
+	gFailures += aFusionBatchActionResult.mFailures;
+	const auto aFusionShooterBatchResult = RunFusionShooterBatchTests();
+	gChecks += aFusionShooterBatchResult.mChecks;
+	gFailures += aFusionShooterBatchResult.mFailures;
+	const auto aFusionExtendedShooterTestsResult = RunFusionExtendedShooterTests();
+	gChecks += aFusionExtendedShooterTestsResult.mChecks;
+	gFailures += aFusionExtendedShooterTestsResult.mFailures;
+	const auto aFusionAction266TestsResult = RunFusionAction266Tests();
+	gChecks += aFusionAction266TestsResult.mChecks;
+	gFailures += aFusionAction266TestsResult.mFailures;
+	const auto aFusionEconomyTestsResult = RunFusionEconomyTests();
+	gChecks += aFusionEconomyTestsResult.mChecks;
+	gFailures += aFusionEconomyTestsResult.mFailures;
+	const auto aFusionPoisonTestsResult = RunFusionPoisonTests();
+	gChecks += aFusionPoisonTestsResult.mChecks;
+	gFailures += aFusionPoisonTestsResult.mFailures;
+	const auto aFusionCannon268TestsResult = RunFusionCannon268Tests();
+	gChecks += aFusionCannon268TestsResult.mChecks;
+	gFailures += aFusionCannon268TestsResult.mFailures;
+	const auto aChomperShulk268TestsResult = RunChomperShulk268Tests();
+	gChecks += aChomperShulk268TestsResult.mChecks;
+	gFailures += aChomperShulk268TestsResult.mFailures;
+	gSkipped += aChomperShulk268TestsResult.mSkipped;
+	const auto aWater268TestsResult = RunWater268Tests();
+	gChecks += aWater268TestsResult.mChecks;
+	gFailures += aWater268TestsResult.mFailures;
+	gSkipped += aWater268TestsResult.mSkipped;
+	{int checks=0;gFailures += RunFusionEquipmentRulesTests(checks);gChecks += checks;}
+	{int checks=0;gFailures += RunFusionNativeEquipment268Tests(checks);gChecks += checks;}
+	{int checks=0;gFailures += RunFusionExtras268RulesTests(checks);gChecks += checks;}
+	{int checks=0;gFailures += RunFusionTools268CommandTests(checks);gChecks += checks;}
+	const auto aFusionShooter267TestsResult = RunFusionShooter267Tests();
+	gChecks += aFusionShooter267TestsResult.mChecks;
+	gFailures += aFusionShooter267TestsResult.mFailures;
+	const auto aFusionAction267TestsResult = RunFusionAction267Tests();
+	gChecks += aFusionAction267TestsResult.mChecks;
+	gFailures += aFusionAction267TestsResult.mFailures;
+	const auto aFusionSeaLantern267TestsResult = RunFusionSeaLantern267Tests();
+	gChecks += aFusionSeaLantern267TestsResult.mChecks;
+	gFailures += aFusionSeaLantern267TestsResult.mFailures;
+	const auto aFusionHostilePhysicsTestsResult = RunFusionHostilePhysicsTests();
+	gChecks += aFusionHostilePhysicsTestsResult.mChecks;
+	gFailures += aFusionHostilePhysicsTestsResult.mFailures;
+	const auto aFusionFireActionBatchResult = RunFusionFireActionBatchTests();
+	gChecks += aFusionFireActionBatchResult.mChecks;
+	gFailures += aFusionFireActionBatchResult.mFailures;
+	const auto aFusionGarlicResult = RunFusionGarlicTests();
+	gChecks += aFusionGarlicResult.mChecks;
+	gFailures += aFusionGarlicResult.mFailures;
+	const auto aFusionRecipientShooterResult = RunFusionRecipientShooterTests();
+	gChecks += aFusionRecipientShooterResult.mChecks;
+	gFailures += aFusionRecipientShooterResult.mFailures;
+	const auto aFusionUmbrellaResult = RunFusionUmbrellaTests();
+	gChecks += aFusionUmbrellaResult.mChecks;
+	gFailures += aFusionUmbrellaResult.mFailures;
+	const auto aFusionZombieResult = RunFusionZombieTests();
+	const auto aStar269 = RunFusionStar269Tests();
+	gChecks += aStar269.mChecks; gFailures += aStar269.mFailures;
+	const auto aSummon269 = RunFusionSummon269Tests();
+	gChecks += aSummon269.mChecks; gFailures += aSummon269.mFailures;
+	const auto aDoom269 = RunFusionDoom269Tests();
+	gChecks += aDoom269.mChecks; gFailures += aDoom269.mFailures;
+	const auto aSolar269 = RunFusionSolar269Tests();
+	gChecks += aSolar269.mChecks; gFailures += aSolar269.mFailures;
+	const auto aDeform269 = RunFusionDeform269Tests();
+	gChecks += aDeform269.mChecks; gFailures += aDeform269.mFailures;
+	int aWorld269Checks=0;
+	gFailures += RunFusionWorldActors269Tests(aWorld269Checks); gChecks += aWorld269Checks;
+	int aWorldParticle269Checks=0,aMore269Checks=0;
+	gFailures += RunFusionWorldParticle269Tests(aWorldParticle269Checks); gChecks += aWorldParticle269Checks;
+    int aParticleCollision269Checks=0;
+    gFailures+=RunFusionParticleCollision269Tests(aParticleCollision269Checks);gChecks+=aParticleCollision269Checks;
+    int aSpecialZombie269Checks=0;
+    gFailures+=RunSpecialZombie269Tests(aSpecialZombie269Checks);gChecks+=aSpecialZombie269Checks;
+	gFailures += RunMore269Tests(aMore269Checks); gChecks += aMore269Checks;
+	int aSoftwareTriangleChecks=0;
+	gFailures += RunSoftwareTrianglePixelTests(aSoftwareTriangleChecks);gChecks += aSoftwareTriangleChecks;
+	int aWorldRemainder269Checks=0;
+	gFailures += RunWorldRemainder269StateTests(aWorldRemainder269Checks);gChecks += aWorldRemainder269Checks;
+	gChecks += aFusionZombieResult.mChecks;
+	gFailures += aFusionZombieResult.mFailures;
+	const auto aFusionZombieMotionResult = RunFusionZombieMotionTests();
+	gChecks += aFusionZombieMotionResult.mChecks;
+	gFailures += aFusionZombieMotionResult.mFailures;
+	const auto aFusionSourceZombieWireResult = RunFusionSourceZombieWireTests();
+	gChecks += aFusionSourceZombieWireResult.mChecks;
+	gFailures += aFusionSourceZombieWireResult.mFailures;
+	const auto aFusionModeResult = RunFusionModeTests();
+	const auto aFusionCampaign272Result = RunFusionCampaign272Tests();
+	gChecks += aFusionCampaign272Result.mChecks;
+	gFailures += aFusionCampaign272Result.mFailures;
+	gChecks += aFusionModeResult.mChecks;
+	gFailures += aFusionModeResult.mFailures;
+	const auto aFusionSimulationResult = RunFusionSimulationTests();
+	gChecks += aFusionSimulationResult.checks;
+	gFailures += aFusionSimulationResult.failures;
+	const auto aFusionWireResult = RunFusionWireTests();
+	gChecks += aFusionWireResult.mChecks;
+	gFailures += aFusionWireResult.mFailures;
+	const auto aFusionRoomWireResult = RunFusionRoomWireTests();
+	gChecks += aFusionRoomWireResult.mChecks;
+	gFailures += aFusionRoomWireResult.mFailures;
+	const auto aFusionNativeWireResult = RunFusionNativeWireTests();
+	gChecks += aFusionNativeWireResult.mChecks;
+	gFailures += aFusionNativeWireResult.mFailures;
+	const auto aFusionBankResult = RunFusionBankTests();
+	gChecks += aFusionBankResult.mChecks;
+	gFailures += aFusionBankResult.mFailures;
+	const auto aFusionTutorialResult = RunFusionTutorialTests();
+	gChecks += aFusionTutorialResult.checks;
+	gFailures += aFusionTutorialResult.failures;
 
 	std::printf("\nchecks=%d failures=%d skipped=%d\n", gChecks, gFailures, gSkipped);
 	return gFailures == 0 ? 0 : 1;

@@ -7,6 +7,11 @@
 		if (alpha > 0x08)
 		{
 			#include "SWTri_TexelARGB.cpp"
+			// Modulation can round a visible texel's alpha down to zero. Such
+			// a sample must not change the destination (or divide by its zero
+			// finalAlpha when the destination is transparent too).
+			if (alpha != 0)
+			{
 				
 			#if defined(GLOBAL_ARGB) || defined (TEX_ALPHA) || defined(MOD_ARGB)
 			{
@@ -51,6 +56,7 @@
 				*pix = tex | 0xFF000000;
 			}
 			#endif
+			}
 		}
 	}
 	#elif defined(MOD_ARGB)

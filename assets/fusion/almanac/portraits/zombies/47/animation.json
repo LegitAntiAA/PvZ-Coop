@@ -1,0 +1,748 @@
+{
+  "anchors": {},
+  "applyRootMotion": false,
+  "clips": {},
+  "colliders": [],
+  "controller": {
+    "layers": [],
+    "serializedController": "",
+    "states": []
+  },
+  "deferredComponents": [],
+  "extraSpriteGuids": {},
+  "ignoredBindings": [],
+  "nodes": [
+    {
+      "active": true,
+      "name": "AlmanacZombie",
+      "parent": -1,
+      "path": "",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "ZombieGrop",
+      "parent": 0,
+      "path": "ZombieGrop",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "Grop1",
+      "parent": 1,
+      "path": "ZombieGrop/Grop1",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "Pages",
+      "parent": 2,
+      "path": "ZombieGrop/Grop1/Pages",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "Page2",
+      "parent": 3,
+      "path": "ZombieGrop/Grop1/Pages/Page2",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "Card",
+      "parent": 4,
+      "path": "ZombieGrop/Grop1/Pages/Page2/Card",
+      "position": {
+        "x": -2.099999,
+        "y": -1.1000001,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0
+      },
+      "scale": {
+        "x": 2.0,
+        "y": 2.0,
+        "z": 2.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "QingZombie",
+      "parent": 5,
+      "path": "ZombieGrop/Grop1/Pages/Page2/Card/QingZombie",
+      "position": {
+        "x": 0.0,
+        "y": -0.12,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0
+      },
+      "scale": {
+        "x": 0.32585955,
+        "y": 0.32585955,
+        "z": 0.32585955
+      },
+      "tag": "Untagged"
+    }
+  ],
+  "nonRenderingComponents": [],
+  "omittedInactiveNodes": [],
+  "root": 0,
+  "schema": 1,
+  "sourceHierarchy": null,
+  "sourcePrefab": "Resources/ui/almanac/AlmanacZombie.prefab",
+  "sources": [
+    {
+      "path": "Resources/image/zombiesidle/SnowZombie.asset",
+      "sha256": "b61d108f7b943de6eda01fe9d944c7f1c4401bb2d4fdb9451faeb8f037132533"
+    },
+    {
+      "path": "Resources/image/zombiesidle/SnowZombie.asset.meta",
+      "sha256": "b851bac5fc06f1056548c112efdb96b50bc4c53d49c9e141b20b1e689d9a2d15"
+    },
+    {
+      "path": "Resources/image/zombiesidle/SnowZombie.png",
+      "sha256": "f35eaea87793c68f515156d7aa947beced1aa0d55b05a2695abe14fa018de04f"
+    },
+    {
+      "path": "Resources/image/zombiesidle/SnowZombie.png.meta",
+      "sha256": "66e9eee0db4b6fb271d16fe9e90e5ad81ee28b8aa8ed72cb4191872d215d6a08"
+    },
+    {
+      "path": "Resources/ui/almanac/AlmanacZombie.prefab",
+      "sha256": "3704e03391ea372601e15cf6ff49fe731500ffe92d998adfedb0e88b284862aa"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/AlmanacCardZombie.cs.meta",
+      "sha256": "faf8882f92625339ade5d8a2ce122f5a60ea07c1beef78676fc31bd10df144dd"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/AlmanacZombieCtrl.cs.meta",
+      "sha256": "319f4f60a393ede0ab9edf0b0157927d2087703afa027f6a777bf09ebcb81c5d"
+    }
+  ],
+  "spritePrefix": null,
+  "spriteVariants": {
+    "60321f77d8815f94cae2d4520dd99f4f": {
+      "hasBoneMetadata": false,
+      "logicalSize": {
+        "height": 215.0,
+        "width": 136.0
+      },
+      "mesh": {
+        "indices": [
+          12,
+          11,
+          15,
+          14,
+          15,
+          11,
+          10,
+          14,
+          11,
+          9,
+          14,
+          10,
+          18,
+          17,
+          16,
+          13,
+          16,
+          17,
+          12,
+          16,
+          13,
+          8,
+          16,
+          12,
+          15,
+          8,
+          12,
+          14,
+          8,
+          15,
+          9,
+          8,
+          14,
+          13,
+          3,
+          12,
+          11,
+          12,
+          3,
+          10,
+          11,
+          3,
+          9,
+          10,
+          3,
+          8,
+          9,
+          3,
+          7,
+          8,
+          3,
+          1,
+          7,
+          3,
+          5,
+          7,
+          1,
+          4,
+          5,
+          1,
+          6,
+          5,
+          4,
+          3,
+          0,
+          1,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform",
+        "vertices": [
+          {
+            "u": 1.0000000052592333,
+            "v": 0.14418605316516964,
+            "x": 0.6800000071525574,
+            "y": 0.7649999856948853,
+            "z": 0.0
+          },
+          {
+            "u": 0.955882356447332,
+            "v": 0.8744186079779337,
+            "x": 0.6200000047683716,
+            "y": -0.8050000071525574,
+            "z": 0.0
+          },
+          {
+            "u": 1.0000000052592333,
+            "v": 0.8325581273367239,
+            "x": 0.6800000071525574,
+            "y": -0.7149999737739563,
+            "z": 0.0
+          },
+          {
+            "u": 0.823529410011628,
+            "v": -2.2178472391942705e-08,
+            "x": 0.4399999976158142,
+            "y": 1.0750000476837158,
+            "z": 0.0
+          },
+          {
+            "u": 1.0000000052592333,
+            "v": 0.8883720830429432,
+            "x": 0.6800000071525574,
+            "y": -0.8349999785423279,
+            "z": 0.0
+          },
+          {
+            "u": 0.9852941369309145,
+            "v": 0.9720930166022722,
+            "x": 0.6600000262260437,
+            "y": -1.0149999856948853,
+            "z": 0.0
+          },
+          {
+            "u": 1.0000000052592333,
+            "v": 0.9488371971041657,
+            "x": 0.6800000071525574,
+            "y": -0.9649999737739563,
+            "z": 0.0
+          },
+          {
+            "u": 0.7867646953638863,
+            "v": 1.0000000221784724,
+            "x": 0.38999998569488525,
+            "y": -1.0750000476837158,
+            "z": 0.0
+          },
+          {
+            "u": 0.2499999973703833,
+            "v": 1.0000000221784724,
+            "x": -0.3400000035762787,
+            "y": -1.0750000476837158,
+            "z": 0.0
+          },
+          {
+            "u": 0.12500000701231115,
+            "v": 0.6046511600183886,
+            "x": -0.5099999904632568,
+            "y": -0.22499999403953552,
+            "z": 0.0
+          },
+          {
+            "u": 0.11764707284815171,
+            "v": 0.5906976710918338,
+            "x": -0.5199999809265137,
+            "y": -0.19499999284744263,
+            "z": 0.0
+          },
+          {
+            "u": 0.09558822652872871,
+            "v": 0.5906976710918338,
+            "x": -0.550000011920929,
+            "y": -0.19499999284744263,
+            "z": 0.0
+          },
+          {
+            "u": 0.08088235820040983,
+            "v": 0.6000000016633855,
+            "x": -0.5699999928474426,
+            "y": -0.2150000035762787,
+            "z": 0.0
+          },
+          {
+            "u": 0.03676470938850852,
+            "v": -2.2178472391942705e-08,
+            "x": -0.6299999952316284,
+            "y": 1.0750000476837158,
+            "z": 0.0
+          },
+          {
+            "u": 0.11029413868399228,
+            "v": 0.6139534905899402,
+            "x": -0.5299999713897705,
+            "y": -0.24500000476837158,
+            "z": 0.0
+          },
+          {
+            "u": 0.08823529236456927,
+            "v": 0.6139534905899402,
+            "x": -0.5600000023841858,
+            "y": -0.24500000476837158,
+            "z": 0.0
+          },
+          {
+            "u": 0.02941177522434908,
+            "v": 0.967441858247269,
+            "x": -0.6399999856948853,
+            "y": -1.0049999952316284,
+            "z": 0.0
+          },
+          {
+            "u": -5.259233362534467e-09,
+            "v": 0.013953508332718245,
+            "x": -0.6800000071525574,
+            "y": 1.0449999570846558,
+            "z": 0.0
+          },
+          {
+            "u": -5.259233362534467e-09,
+            "v": 0.7023255825042725,
+            "x": -0.6800000071525574,
+            "y": -0.4350000023841858,
+            "z": 0.0
+          }
+        ]
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "pixelsPerUnit": 100.0,
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: SnowZombie\n  m_Rect:\n    serializedVersion: 2\n    x: 0\n    y: 0\n    width: 136\n    height: 215\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    2c0477aa17eccac42bb5831a217e0952: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 3c4cf0488d14d694486a5e163c20860f, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 69\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 19\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 0c000b000f000e000f000b000a000e000b0009000e000a001200110010000d00100011000c0010000d00080010000c000f0008000c000e0008000f00090008000e000d0003000c000b000c0003000a000b00030009000a000300080009000300070008000300010007000300050007000100040005000100060005000400030000000100020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 19\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 392\n      _typelessdata: 7b142e3f0ad7433f0000000052b81e3f7b144ebf000000007b142e3f3d0a37bf00000000ae47e13e9a99893f000000007b142e3f8fc255bf00000000c3f5283f85eb81bf000000007b142e3f3d0a77bf0000000014aec73e9a9989bf000000007b14aebe9a9989bf000000005c8f02bf666666be00000000b81e05bf14ae47be00000000cdcc0cbf14ae47be0000000085eb11bff6285cbe00000000ae4721bf9a99893f0000000014ae07bf48e17abe00000000295c0fbf48e17abe000000000ad723bfd7a380bf000000007b142ebf8fc2853f000000007b142ebf52b8debe000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 136\n      height: 215\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 68, z: 100, w: 107.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape:\n  - - {x: 0.68, y: -0.875}\n    - {x: 0.66999996, y: -0.84499997}\n    - {x: 0.62, y: -0.825}\n    - {x: 0.53999996, y: -0.815}\n    - {x: 0.55, y: -0.645}\n    - {x: 0.57, y: -0.475}\n    - {x: 0.5, y: -0.42499998}\n    - {x: 0.53, y: -0.375}\n    - {x: 0.61, y: -0.265}\n    - {x: 0.63, y: -0.044999998}\n    - {x: 0.66999996, y: 0.095}\n    - {x: 0.65999997, y: 0.225}\n    - {x: 0.62, y: 0.36499998}\n    - {x: 0.64, y: 0.49499997}\n    - {x: 0.56, y: 0.625}\n    - {x: 0.45, y: 0.685}\n    - {x: 0.39, y: 0.765}\n    - {x: 0.26, y: 0.805}\n    - {x: 0.17999999, y: 0.815}\n    - {x: 0.16, y: 0.935}\n    - {x: 0.099999994, y: 1.035}\n    - {x: 0, y: 1.0649999}\n    - {x: -0.08, y: 1.0649999}\n    - {x: -0.099999994, y: 1.055}\n    - {x: -0.32, y: 0.955}\n    - {x: -0.45999998, y: 0.895}\n    - {x: -0.58, y: 0.825}\n    - {x: -0.64, y: 0.775}\n    - {x: -0.68, y: 0.655}\n    - {x: -0.68, y: 0.59499997}\n    - {x: -0.56, y: 0.49499997}\n    - {x: -0.57, y: 0.45499998}\n    - {x: -0.52, y: 0.065}\n    - {x: -0.48999998, y: -0.074999996}\n    - {x: -0.47, y: -0.21499999}\n    - {x: -0.53, y: -0.285}\n    - {x: -0.55, y: -0.36499998}\n    - {x: -0.53, y: -0.505}\n    - {x: -0.48, y: -0.53499997}\n    - {x: -0.45, y: -0.545}\n    - {x: -0.37, y: -0.515}\n    - {x: -0.32, y: -0.645}\n    - {x: -0.25, y: -0.775}\n    - {x: -0.35999998, y: -0.805}\n    - {x: -0.45, y: -0.85499996}\n    - {x: -0.38, y: -0.965}\n    - {x: -0.32999998, y: -0.995}\n    - {x: -0.12, y: -0.98499995}\n    - {x: -0.07, y: -1.015}\n    - {x: 0.04, y: -1.0649999}\n    - {x: 0.099999994, y: -1.0749999}\n    - {x: 0.34, y: -1.0749999}\n    - {x: 0.41, y: -1.055}\n    - {x: 0.64, y: -0.965}\n    - {x: 0.68, y: -0.935}\n  - - {x: 0.14999999, y: -0.775}\n    - {x: 0.12, y: -0.745}\n    - {x: 0.099999994, y: -0.745}\n    - {x: 0.089999996, y: -0.73499995}\n    - {x: 0.08, y: -0.695}\n    - {x: 0.11, y: -0.73499995}\n    - {x: 0.11, y: -0.745}\n    - {x: 0.13, y: -0.775}\n    - {x: 0.14999999, y: -0.79499996}\n  m_Bones: []\n  m_SpriteID:\n",
+      "sourceSprite": "Resources/image/zombiesidle/SnowZombie.asset",
+      "texture": "../../textures/f35eaea87793c68f515156d7aa947beced1aa0d55b05a2695abe14fa018de04f.png",
+      "textureRect": {
+        "height": 215.0,
+        "width": 136.0,
+        "x": 0.0,
+        "y": 0.0,
+        "yTop": 0.0
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      }
+    }
+  },
+  "sprites": [
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "enabled": true,
+      "flipX": false,
+      "flipY": false,
+      "guid": "60321f77d8815f94cae2d4520dd99f4f",
+      "hasBoneMetadata": false,
+      "logicalSize": {
+        "height": 215.0,
+        "width": 136.0
+      },
+      "mesh": {
+        "indices": [
+          12,
+          11,
+          15,
+          14,
+          15,
+          11,
+          10,
+          14,
+          11,
+          9,
+          14,
+          10,
+          18,
+          17,
+          16,
+          13,
+          16,
+          17,
+          12,
+          16,
+          13,
+          8,
+          16,
+          12,
+          15,
+          8,
+          12,
+          14,
+          8,
+          15,
+          9,
+          8,
+          14,
+          13,
+          3,
+          12,
+          11,
+          12,
+          3,
+          10,
+          11,
+          3,
+          9,
+          10,
+          3,
+          8,
+          9,
+          3,
+          7,
+          8,
+          3,
+          1,
+          7,
+          3,
+          5,
+          7,
+          1,
+          4,
+          5,
+          1,
+          6,
+          5,
+          4,
+          3,
+          0,
+          1,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform",
+        "vertices": [
+          {
+            "u": 1.0000000052592333,
+            "v": 0.14418605316516964,
+            "x": 0.6800000071525574,
+            "y": 0.7649999856948853,
+            "z": 0.0
+          },
+          {
+            "u": 0.955882356447332,
+            "v": 0.8744186079779337,
+            "x": 0.6200000047683716,
+            "y": -0.8050000071525574,
+            "z": 0.0
+          },
+          {
+            "u": 1.0000000052592333,
+            "v": 0.8325581273367239,
+            "x": 0.6800000071525574,
+            "y": -0.7149999737739563,
+            "z": 0.0
+          },
+          {
+            "u": 0.823529410011628,
+            "v": -2.2178472391942705e-08,
+            "x": 0.4399999976158142,
+            "y": 1.0750000476837158,
+            "z": 0.0
+          },
+          {
+            "u": 1.0000000052592333,
+            "v": 0.8883720830429432,
+            "x": 0.6800000071525574,
+            "y": -0.8349999785423279,
+            "z": 0.0
+          },
+          {
+            "u": 0.9852941369309145,
+            "v": 0.9720930166022722,
+            "x": 0.6600000262260437,
+            "y": -1.0149999856948853,
+            "z": 0.0
+          },
+          {
+            "u": 1.0000000052592333,
+            "v": 0.9488371971041657,
+            "x": 0.6800000071525574,
+            "y": -0.9649999737739563,
+            "z": 0.0
+          },
+          {
+            "u": 0.7867646953638863,
+            "v": 1.0000000221784724,
+            "x": 0.38999998569488525,
+            "y": -1.0750000476837158,
+            "z": 0.0
+          },
+          {
+            "u": 0.2499999973703833,
+            "v": 1.0000000221784724,
+            "x": -0.3400000035762787,
+            "y": -1.0750000476837158,
+            "z": 0.0
+          },
+          {
+            "u": 0.12500000701231115,
+            "v": 0.6046511600183886,
+            "x": -0.5099999904632568,
+            "y": -0.22499999403953552,
+            "z": 0.0
+          },
+          {
+            "u": 0.11764707284815171,
+            "v": 0.5906976710918338,
+            "x": -0.5199999809265137,
+            "y": -0.19499999284744263,
+            "z": 0.0
+          },
+          {
+            "u": 0.09558822652872871,
+            "v": 0.5906976710918338,
+            "x": -0.550000011920929,
+            "y": -0.19499999284744263,
+            "z": 0.0
+          },
+          {
+            "u": 0.08088235820040983,
+            "v": 0.6000000016633855,
+            "x": -0.5699999928474426,
+            "y": -0.2150000035762787,
+            "z": 0.0
+          },
+          {
+            "u": 0.03676470938850852,
+            "v": -2.2178472391942705e-08,
+            "x": -0.6299999952316284,
+            "y": 1.0750000476837158,
+            "z": 0.0
+          },
+          {
+            "u": 0.11029413868399228,
+            "v": 0.6139534905899402,
+            "x": -0.5299999713897705,
+            "y": -0.24500000476837158,
+            "z": 0.0
+          },
+          {
+            "u": 0.08823529236456927,
+            "v": 0.6139534905899402,
+            "x": -0.5600000023841858,
+            "y": -0.24500000476837158,
+            "z": 0.0
+          },
+          {
+            "u": 0.02941177522434908,
+            "v": 0.967441858247269,
+            "x": -0.6399999856948853,
+            "y": -1.0049999952316284,
+            "z": 0.0
+          },
+          {
+            "u": -5.259233362534467e-09,
+            "v": 0.013953508332718245,
+            "x": -0.6800000071525574,
+            "y": 1.0449999570846558,
+            "z": 0.0
+          },
+          {
+            "u": -5.259233362534467e-09,
+            "v": 0.7023255825042725,
+            "x": -0.6800000071525574,
+            "y": -0.4350000023841858,
+            "z": 0.0
+          }
+        ]
+      },
+      "node": 6,
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "pixelsPerUnit": 100.0,
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: SnowZombie\n  m_Rect:\n    serializedVersion: 2\n    x: 0\n    y: 0\n    width: 136\n    height: 215\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    2c0477aa17eccac42bb5831a217e0952: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 3c4cf0488d14d694486a5e163c20860f, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 69\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 19\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 0c000b000f000e000f000b000a000e000b0009000e000a001200110010000d00100011000c0010000d00080010000c000f0008000c000e0008000f00090008000e000d0003000c000b000c0003000a000b00030009000a000300080009000300070008000300010007000300050007000100040005000100060005000400030000000100020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 19\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 392\n      _typelessdata: 7b142e3f0ad7433f0000000052b81e3f7b144ebf000000007b142e3f3d0a37bf00000000ae47e13e9a99893f000000007b142e3f8fc255bf00000000c3f5283f85eb81bf000000007b142e3f3d0a77bf0000000014aec73e9a9989bf000000007b14aebe9a9989bf000000005c8f02bf666666be00000000b81e05bf14ae47be00000000cdcc0cbf14ae47be0000000085eb11bff6285cbe00000000ae4721bf9a99893f0000000014ae07bf48e17abe00000000295c0fbf48e17abe000000000ad723bfd7a380bf000000007b142ebf8fc2853f000000007b142ebf52b8debe000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 136\n      height: 215\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 68, z: 100, w: 107.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape:\n  - - {x: 0.68, y: -0.875}\n    - {x: 0.66999996, y: -0.84499997}\n    - {x: 0.62, y: -0.825}\n    - {x: 0.53999996, y: -0.815}\n    - {x: 0.55, y: -0.645}\n    - {x: 0.57, y: -0.475}\n    - {x: 0.5, y: -0.42499998}\n    - {x: 0.53, y: -0.375}\n    - {x: 0.61, y: -0.265}\n    - {x: 0.63, y: -0.044999998}\n    - {x: 0.66999996, y: 0.095}\n    - {x: 0.65999997, y: 0.225}\n    - {x: 0.62, y: 0.36499998}\n    - {x: 0.64, y: 0.49499997}\n    - {x: 0.56, y: 0.625}\n    - {x: 0.45, y: 0.685}\n    - {x: 0.39, y: 0.765}\n    - {x: 0.26, y: 0.805}\n    - {x: 0.17999999, y: 0.815}\n    - {x: 0.16, y: 0.935}\n    - {x: 0.099999994, y: 1.035}\n    - {x: 0, y: 1.0649999}\n    - {x: -0.08, y: 1.0649999}\n    - {x: -0.099999994, y: 1.055}\n    - {x: -0.32, y: 0.955}\n    - {x: -0.45999998, y: 0.895}\n    - {x: -0.58, y: 0.825}\n    - {x: -0.64, y: 0.775}\n    - {x: -0.68, y: 0.655}\n    - {x: -0.68, y: 0.59499997}\n    - {x: -0.56, y: 0.49499997}\n    - {x: -0.57, y: 0.45499998}\n    - {x: -0.52, y: 0.065}\n    - {x: -0.48999998, y: -0.074999996}\n    - {x: -0.47, y: -0.21499999}\n    - {x: -0.53, y: -0.285}\n    - {x: -0.55, y: -0.36499998}\n    - {x: -0.53, y: -0.505}\n    - {x: -0.48, y: -0.53499997}\n    - {x: -0.45, y: -0.545}\n    - {x: -0.37, y: -0.515}\n    - {x: -0.32, y: -0.645}\n    - {x: -0.25, y: -0.775}\n    - {x: -0.35999998, y: -0.805}\n    - {x: -0.45, y: -0.85499996}\n    - {x: -0.38, y: -0.965}\n    - {x: -0.32999998, y: -0.995}\n    - {x: -0.12, y: -0.98499995}\n    - {x: -0.07, y: -1.015}\n    - {x: 0.04, y: -1.0649999}\n    - {x: 0.099999994, y: -1.0749999}\n    - {x: 0.34, y: -1.0749999}\n    - {x: 0.41, y: -1.055}\n    - {x: 0.64, y: -0.965}\n    - {x: 0.68, y: -0.935}\n  - - {x: 0.14999999, y: -0.775}\n    - {x: 0.12, y: -0.745}\n    - {x: 0.099999994, y: -0.745}\n    - {x: 0.089999996, y: -0.73499995}\n    - {x: 0.08, y: -0.695}\n    - {x: 0.11, y: -0.73499995}\n    - {x: 0.11, y: -0.745}\n    - {x: 0.13, y: -0.775}\n    - {x: 0.14999999, y: -0.79499996}\n  m_Bones: []\n  m_SpriteID:\n",
+      "sortingLayerId": 0,
+      "sortingOrder": 1,
+      "sourceSprite": "Resources/image/zombiesidle/SnowZombie.asset",
+      "texture": "../../textures/f35eaea87793c68f515156d7aa947beced1aa0d55b05a2695abe14fa018de04f.png",
+      "textureRect": {
+        "height": 215.0,
+        "width": 136.0,
+        "x": 0.0,
+        "y": 0.0,
+        "yTop": 0.0
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      }
+    }
+  ],
+  "static": true,
+  "uiPortraitExtraction": {
+    "gameObjectFileId": 1415925016355036,
+    "originalRendererEnabled": true,
+    "sourceActivity": [
+      {
+        "gameObjectFileId": 1709254077376921,
+        "originalActive": true
+      },
+      {
+        "gameObjectFileId": 1724804207875695,
+        "originalActive": true
+      },
+      {
+        "gameObjectFileId": 1618682377417806,
+        "originalActive": true
+      },
+      {
+        "gameObjectFileId": 1703437598541787,
+        "originalActive": true
+      },
+      {
+        "gameObjectFileId": 1784622213810434,
+        "originalActive": false
+      },
+      {
+        "gameObjectFileId": 1960577952585462,
+        "originalActive": true
+      },
+      {
+        "gameObjectFileId": 1415925016355036,
+        "originalActive": true
+      }
+    ],
+    "sourceSpriteRenderer": "SpriteRenderer:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1415925016355036}\n  m_Enabled: 1\n  m_CastShadows: 0\n  m_ReceiveShadows: 0\n  m_DynamicOccludee: 1\n  m_StaticShadowCaster: 0\n  m_MotionVectors: 1\n  m_LightProbeUsage: 1\n  m_ReflectionProbeUsage: 1\n  m_RayTracingMode: 0\n  m_RayTraceProcedural: 0\n  m_RenderingLayerMask: 1\n  m_RendererPriority: 0\n  m_Materials:\n  - {fileID: 2100000, guid: 8fa820fab1c50434da82a0d53ec31815, type: 2}\n  m_StaticBatchInfo:\n    firstSubMesh: 0\n    subMeshCount: 0\n  m_StaticBatchRoot: {fileID: 0}\n  m_ProbeAnchor: {fileID: 0}\n  m_LightProbeVolumeOverride: {fileID: 0}\n  m_ScaleInLightmap: 1\n  m_ReceiveGI: 1\n  m_PreserveUVs: 0\n  m_IgnoreNormalsForChartDetection: 0\n  m_ImportantGI: 0\n  m_StitchLightmapSeams: 0\n  m_SelectedEditorRenderState: 3\n  m_MinimumChartSize: 4\n  m_AutoUVMaxDistance: 0.5\n  m_AutoUVMaxAngle: 89\n  m_LightmapParameters: {fileID: 0}\n  m_SortingLayerID: 0\n  m_SortingLayer: 0\n  m_SortingOrder: 1\n  m_Sprite: {fileID: 21300000, guid: 60321f77d8815f94cae2d4520dd99f4f, type: 2}\n  m_Color: {r: 1, g: 1, b: 1, a: 1}\n  m_FlipX: 0\n  m_FlipY: 0\n  m_DrawMode: 0\n  m_Size: {x: 5.18, y: 7.04}\n  m_AdaptiveModeThreshold: 0.5\n  m_SpriteTileMode: 0\n  m_WasSpriteAssigned: 1\n  m_MaskInteraction: 1\n  m_SpriteSortPoint: 0\n",
+    "spriteRendererFileId": 212814728068931148,
+    "uiVisiblePose": "selected portrait renderer and its retained ancestors active"
+  },
+  "unitsPerNativePixel": 0.01,
+  "unusedSpriteBonesExplicitlyAllowed": false,
+  "validation": "Exported source data. Native rendering and source-runtime comparison are separate verification steps.",
+  "visualBounds": {
+    "maxX": -1.6568300073385416,
+    "maxY": -0.6394020364236116,
+    "minX": -2.5431679926614583,
+    "minY": -2.040598163576388
+  }
+}

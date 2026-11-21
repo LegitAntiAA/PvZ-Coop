@@ -336,6 +336,12 @@ public:
 	float							mTrackInterp[ParticleSystemTracks::NUM_SYSTEM_TRACKS];			//+0x64
 	float							mSystemFieldInterp[MAX_PARTICLE_FIELDS][2];						//+0x8C
     FilterEffect                    mFilterEffect;
+    // Optional Fusion source collision adapter. Null preserves the stock update path.
+    const void*                     mFusionCollisionData;
+    bool (*mFusionCollisionUpdate)(TodParticleEmitter*, TodParticle*);
+    float                           mFusionCollisionGroundY;
+    bool                            mFusionCollisionZombieHead;
+    bool                            mFusionCollisionLatched;
 
 public:
 	void							TodEmitterInitialize(float theX, float theY, TodParticleSystem* theSystem, TodEmitterDefinition* theEmitterDef);

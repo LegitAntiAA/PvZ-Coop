@@ -1,0 +1,754 @@
+{
+  "anchors": {},
+  "applyRootMotion": false,
+  "clips": {},
+  "colliders": [],
+  "controller": {
+    "layers": [],
+    "serializedController": "",
+    "states": []
+  },
+  "deferredComponents": [],
+  "extraSpriteGuids": {},
+  "ignoredBindings": [],
+  "nodes": [
+    {
+      "active": true,
+      "name": "AlmanacZombie",
+      "parent": -1,
+      "path": "",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "ZombieGrop",
+      "parent": 0,
+      "path": "ZombieGrop",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "Grop1",
+      "parent": 1,
+      "path": "ZombieGrop/Grop1",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "Pages",
+      "parent": 2,
+      "path": "ZombieGrop/Grop1/Pages",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "Page1",
+      "parent": 3,
+      "path": "ZombieGrop/Grop1/Pages/Page1",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "Card_5",
+      "parent": 4,
+      "path": "ZombieGrop/Grop1/Pages/Page1/Card_5",
+      "position": {
+        "x": 1.5,
+        "y": 2.5,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0
+      },
+      "scale": {
+        "x": 2.0,
+        "y": 2.0,
+        "z": 2.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "Image",
+      "parent": 5,
+      "path": "ZombieGrop/Grop1/Pages/Page1/Card_5/Image",
+      "position": {
+        "x": 0.039,
+        "y": -0.117,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 0.3961,
+        "y": 0.3961,
+        "z": 0.3961
+      },
+      "tag": "Untagged"
+    }
+  ],
+  "nonRenderingComponents": [],
+  "omittedInactiveNodes": [],
+  "root": 0,
+  "schema": 1,
+  "sourceHierarchy": null,
+  "sourcePrefab": "Resources/ui/almanac/AlmanacZombie.prefab",
+  "sources": [
+    {
+      "path": "Resources/image/zombiesidle/DancePol.asset",
+      "sha256": "ed80f40693eba2dddf2b2b40cfb23c51ffd2f0f535bb51e3978cd0ec8e60dadf"
+    },
+    {
+      "path": "Resources/image/zombiesidle/DancePol.asset.meta",
+      "sha256": "ceb2acb335eaf204ea62fec2ecdab0f825e8e8ede975d538a976d6880a4d47f2"
+    },
+    {
+      "path": "Resources/image/zombiesidle/DancePol.png",
+      "sha256": "94cb2298ec9896c4f8efaf6c6dfcec2da31abac69dc5ea28a6449907b28daeaa"
+    },
+    {
+      "path": "Resources/image/zombiesidle/DancePol.png.meta",
+      "sha256": "ffb3c7237fe7fcdd32c6f55c5fb8f56c4f6bd94a368b20f3ab1bd9ebf250c141"
+    },
+    {
+      "path": "Resources/ui/almanac/AlmanacZombie.prefab",
+      "sha256": "3704e03391ea372601e15cf6ff49fe731500ffe92d998adfedb0e88b284862aa"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/AlmanacCardZombie.cs.meta",
+      "sha256": "faf8882f92625339ade5d8a2ce122f5a60ea07c1beef78676fc31bd10df144dd"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/AlmanacZombieCtrl.cs.meta",
+      "sha256": "319f4f60a393ede0ab9edf0b0157927d2087703afa027f6a777bf09ebcb81c5d"
+    }
+  ],
+  "spritePrefix": null,
+  "spriteVariants": {
+    "ef2849c73753fba4a9ad57d31e2801ec": {
+      "hasBoneMetadata": false,
+      "logicalSize": {
+        "height": 172.93034,
+        "width": 208.84775
+      },
+      "mesh": {
+        "indices": [
+          13,
+          11,
+          16,
+          10,
+          16,
+          11,
+          15,
+          16,
+          10,
+          9,
+          15,
+          10,
+          8,
+          15,
+          9,
+          18,
+          17,
+          7,
+          12,
+          7,
+          17,
+          13,
+          7,
+          12,
+          16,
+          7,
+          13,
+          15,
+          7,
+          16,
+          8,
+          7,
+          15,
+          6,
+          4,
+          14,
+          3,
+          10,
+          12,
+          11,
+          12,
+          10,
+          13,
+          12,
+          11,
+          9,
+          10,
+          3,
+          8,
+          9,
+          3,
+          7,
+          8,
+          3,
+          5,
+          7,
+          3,
+          4,
+          5,
+          3,
+          6,
+          5,
+          4,
+          1,
+          4,
+          3,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform",
+        "vertices": [
+          {
+            "u": 0.8066666722297668,
+            "v": 0.22916667660077417,
+            "x": 0.9200000166893005,
+            "y": 0.6499999761581421,
+            "z": 0.0
+          },
+          {
+            "u": 0.799999992052714,
+            "v": 0.28333334128061927,
+            "x": 0.8999999761581421,
+            "y": 0.5199999809265137,
+            "z": 0.0
+          },
+          {
+            "u": 0.8066666722297668,
+            "v": 0.2708333283662796,
+            "x": 0.9200000166893005,
+            "y": 0.550000011920929,
+            "z": 0.0
+          },
+          {
+            "u": 0.6566666662693024,
+            "v": 0.11666665971279144,
+            "x": 0.4699999988079071,
+            "y": 0.9200000166893005,
+            "z": 0.0
+          },
+          {
+            "u": 0.6433333357175192,
+            "v": 0.42916666592160857,
+            "x": 0.4300000071525574,
+            "y": 0.17000000178813934,
+            "z": 0.0
+          },
+          {
+            "u": 0.5633333325386047,
+            "v": 0.8375000009934107,
+            "x": 0.1899999976158142,
+            "y": -0.8100000023841858,
+            "z": 0.0
+          },
+          {
+            "u": 0.6433333357175192,
+            "v": 0.8375000009934107,
+            "x": 0.4300000071525574,
+            "y": -0.8100000023841858,
+            "z": 0.0
+          },
+          {
+            "u": 0.5,
+            "v": 0.833333338300387,
+            "x": 0.0,
+            "y": -0.800000011920929,
+            "z": 0.0
+          },
+          {
+            "u": 0.38333333532015484,
+            "v": 0.42499999701976776,
+            "x": -0.3499999940395355,
+            "y": 0.18000000715255737,
+            "z": 0.0
+          },
+          {
+            "u": 0.3766666650772095,
+            "v": 0.41666666542490327,
+            "x": -0.3700000047683716,
+            "y": 0.20000000298023224,
+            "z": 0.0
+          },
+          {
+            "u": 0.3733333349227905,
+            "v": 0.41666666542490327,
+            "x": -0.3799999952316284,
+            "y": 0.20000000298023224,
+            "z": 0.0
+          },
+          {
+            "u": 0.3633333345254262,
+            "v": 0.42916666592160857,
+            "x": -0.4099999964237213,
+            "y": 0.17000000178813934,
+            "z": 0.0
+          },
+          {
+            "u": 0.2233333388964335,
+            "v": 0.11666665971279144,
+            "x": -0.8299999833106995,
+            "y": 0.9200000166893005,
+            "z": 0.0
+          },
+          {
+            "u": 0.3633333345254262,
+            "v": 0.4333333348234495,
+            "x": -0.4099999964237213,
+            "y": 0.1599999964237213,
+            "z": 0.0
+          },
+          {
+            "u": 0.7200000087420145,
+            "v": 0.800000011920929,
+            "x": 0.6600000262260437,
+            "y": -0.7200000286102295,
+            "z": 0.0
+          },
+          {
+            "u": 0.38333333532015484,
+            "v": 0.4458333353201548,
+            "x": -0.3499999940395355,
+            "y": 0.12999999523162842,
+            "z": 0.0
+          },
+          {
+            "u": 0.3733333349227905,
+            "v": 0.4500000011175871,
+            "x": -0.3799999952316284,
+            "y": 0.11999999731779099,
+            "z": 0.0
+          },
+          {
+            "u": 0.11000001430511475,
+            "v": 0.1624999990065893,
+            "x": -1.1699999570846558,
+            "y": 0.8100000023841858,
+            "z": 0.0
+          },
+          {
+            "u": 0.11000001430511475,
+            "v": 0.30416666716337204,
+            "x": -1.1699999570846558,
+            "y": 0.4699999988079071,
+            "z": 0.0
+          }
+        ]
+      },
+      "pivot": {
+        "x": 0.55985224,
+        "y": 0.46824202
+      },
+      "pixelsPerUnit": 100.0,
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: DancePol\n  m_Rect:\n    serializedVersion: 2\n    x: 33.076122\n    y: 39.026752\n    width: 208.84775\n    height: 172.93034\n  m_Offset: {x: 12.500006, y: -5.4919186}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.55985224, y: 0.46824202}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    462b3b9c827ba2a43aeb585b1b8e3bed: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 29c46e1dc1e9b464a85e4e31be0f0741, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 72\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 19\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 0d000b0010000a0010000b000f0010000a0009000f000a0008000f0009001200110007000c00070011000d0007000c00100007000d000f0007001000080007000f00060004000e0003000a000c000b000c000a000d000c000b0009000a000300080009000300070008000300050007000300040005000300060005000400010004000300000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 19\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 392\n      _typelessdata: 1f856b3f6666263f000000006666663fb81e053f000000001f856b3fcdcc0c3f00000000d7a3f03e1f856b3f00000000f628dc3e7b142e3e000000005c8f423e295c4fbf00000000f628dc3e295c4fbf0000000000000000cdcc4cbf000000003333b3beec51383e00000000a470bdbecdcc4c3e000000005c8fc2becdcc4c3e0000000085ebd1be7b142e3e00000000e17a54bf1f856b3f0000000085ebd1be0ad7233e00000000c3f5283fec5138bf000000003333b3beb81e053e000000005c8fc2be8fc2f53d000000008fc295bf295c4f3f000000008fc295bfd7a3f03e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 33.076122\n      y: 39.026752\n      width: 208.84775\n      height: 172.93034\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 150, z: 100, w: 120}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape:\n  - - {x: 0.42, y: -0.35}\n    - {x: 0.51, y: -0.22999999}\n    - {x: 0.42999998, y: -0.11}\n    - {x: 0.45999998, y: 0.01}\n    - {x: 0.34, y: 0.31}\n    - {x: 0.25, y: 0.45}\n    - {x: 0.24, y: 0.52}\n    - {x: 0.89, y: 0.53}\n    - {x: 0.90999997, y: 0.55}\n    - {x: 0.90999997, y: 0.59999996}\n    - {x: 0.87, y: 0.63}\n    - {x: 0.22, y: 0.63}\n    - {x: 0.19, y: 0.78}\n    - {x: -0.02, y: 0.88}\n    - {x: -0.17, y: 0.90999997}\n    - {x: -0.29, y: 0.90999997}\n    - {x: -0.48, y: 0.71}\n    - {x: -0.45999998, y: 0.63}\n    - {x: -1.13, y: 0.63}\n    - {x: -1.16, y: 0.59}\n    - {x: -1.16, y: 0.55}\n    - {x: -1.14, y: 0.53}\n    - {x: -0.47, y: 0.53}\n    - {x: -0.48999998, y: 0.39999998}\n    - {x: -0.38, y: 0.29999998}\n    - {x: -0.35999998, y: 0.14999999}\n    - {x: -0.24, y: 0.07}\n    - {x: -0.14, y: 0.06}\n    - {x: -0.04, y: 0}\n    - {x: 0.04, y: -0.24}\n    - {x: -0.04, y: -0.44}\n    - {x: -0.01, y: -0.56}\n    - {x: -0.07, y: -0.63}\n    - {x: -0.07, y: -0.69}\n    - {x: 0.11, y: -0.77}\n    - {x: 0.22999999, y: -0.81}\n    - {x: 0.41, y: -0.81}\n    - {x: 0.63, y: -0.71999997}\n    - {x: 0.56, y: -0.55}\n    - {x: 0.47, y: -0.39999998}\n  - - {x: 0.24, y: -0.56}\n    - {x: 0.14, y: -0.56}\n    - {x: 0.19, y: -0.57}\n    - {x: 0.22999999, y: -0.53999996}\n    - {x: 0.26999998, y: -0.45999998}\n    - {x: 0.26999998, y: -0.42999998}\n    - {x: 0.32999998, y: -0.48}\n    - {x: 0.37, y: -0.55}\n    - {x: 0.39, y: -0.58}\n    - {x: 0.35, y: -0.59}\n    - {x: 0.34, y: -0.59999996}\n    - {x: 0.29, y: -0.59}\n  m_Bones: []\n  m_SpriteID:\n",
+      "sourceSprite": "Resources/image/zombiesidle/DancePol.asset",
+      "texture": "../../textures/94cb2298ec9896c4f8efaf6c6dfcec2da31abac69dc5ea28a6449907b28daeaa.png",
+      "textureRect": {
+        "height": 172.93034,
+        "width": 208.84775,
+        "x": 33.076122,
+        "y": 39.026752,
+        "yTop": 28.04290800000001
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      }
+    }
+  },
+  "sprites": [
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "enabled": true,
+      "flipX": false,
+      "flipY": false,
+      "guid": "ef2849c73753fba4a9ad57d31e2801ec",
+      "hasBoneMetadata": false,
+      "logicalSize": {
+        "height": 172.93034,
+        "width": 208.84775
+      },
+      "mesh": {
+        "indices": [
+          13,
+          11,
+          16,
+          10,
+          16,
+          11,
+          15,
+          16,
+          10,
+          9,
+          15,
+          10,
+          8,
+          15,
+          9,
+          18,
+          17,
+          7,
+          12,
+          7,
+          17,
+          13,
+          7,
+          12,
+          16,
+          7,
+          13,
+          15,
+          7,
+          16,
+          8,
+          7,
+          15,
+          6,
+          4,
+          14,
+          3,
+          10,
+          12,
+          11,
+          12,
+          10,
+          13,
+          12,
+          11,
+          9,
+          10,
+          3,
+          8,
+          9,
+          3,
+          7,
+          8,
+          3,
+          5,
+          7,
+          3,
+          4,
+          5,
+          3,
+          6,
+          5,
+          4,
+          1,
+          4,
+          3,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform",
+        "vertices": [
+          {
+            "u": 0.8066666722297668,
+            "v": 0.22916667660077417,
+            "x": 0.9200000166893005,
+            "y": 0.6499999761581421,
+            "z": 0.0
+          },
+          {
+            "u": 0.799999992052714,
+            "v": 0.28333334128061927,
+            "x": 0.8999999761581421,
+            "y": 0.5199999809265137,
+            "z": 0.0
+          },
+          {
+            "u": 0.8066666722297668,
+            "v": 0.2708333283662796,
+            "x": 0.9200000166893005,
+            "y": 0.550000011920929,
+            "z": 0.0
+          },
+          {
+            "u": 0.6566666662693024,
+            "v": 0.11666665971279144,
+            "x": 0.4699999988079071,
+            "y": 0.9200000166893005,
+            "z": 0.0
+          },
+          {
+            "u": 0.6433333357175192,
+            "v": 0.42916666592160857,
+            "x": 0.4300000071525574,
+            "y": 0.17000000178813934,
+            "z": 0.0
+          },
+          {
+            "u": 0.5633333325386047,
+            "v": 0.8375000009934107,
+            "x": 0.1899999976158142,
+            "y": -0.8100000023841858,
+            "z": 0.0
+          },
+          {
+            "u": 0.6433333357175192,
+            "v": 0.8375000009934107,
+            "x": 0.4300000071525574,
+            "y": -0.8100000023841858,
+            "z": 0.0
+          },
+          {
+            "u": 0.5,
+            "v": 0.833333338300387,
+            "x": 0.0,
+            "y": -0.800000011920929,
+            "z": 0.0
+          },
+          {
+            "u": 0.38333333532015484,
+            "v": 0.42499999701976776,
+            "x": -0.3499999940395355,
+            "y": 0.18000000715255737,
+            "z": 0.0
+          },
+          {
+            "u": 0.3766666650772095,
+            "v": 0.41666666542490327,
+            "x": -0.3700000047683716,
+            "y": 0.20000000298023224,
+            "z": 0.0
+          },
+          {
+            "u": 0.3733333349227905,
+            "v": 0.41666666542490327,
+            "x": -0.3799999952316284,
+            "y": 0.20000000298023224,
+            "z": 0.0
+          },
+          {
+            "u": 0.3633333345254262,
+            "v": 0.42916666592160857,
+            "x": -0.4099999964237213,
+            "y": 0.17000000178813934,
+            "z": 0.0
+          },
+          {
+            "u": 0.2233333388964335,
+            "v": 0.11666665971279144,
+            "x": -0.8299999833106995,
+            "y": 0.9200000166893005,
+            "z": 0.0
+          },
+          {
+            "u": 0.3633333345254262,
+            "v": 0.4333333348234495,
+            "x": -0.4099999964237213,
+            "y": 0.1599999964237213,
+            "z": 0.0
+          },
+          {
+            "u": 0.7200000087420145,
+            "v": 0.800000011920929,
+            "x": 0.6600000262260437,
+            "y": -0.7200000286102295,
+            "z": 0.0
+          },
+          {
+            "u": 0.38333333532015484,
+            "v": 0.4458333353201548,
+            "x": -0.3499999940395355,
+            "y": 0.12999999523162842,
+            "z": 0.0
+          },
+          {
+            "u": 0.3733333349227905,
+            "v": 0.4500000011175871,
+            "x": -0.3799999952316284,
+            "y": 0.11999999731779099,
+            "z": 0.0
+          },
+          {
+            "u": 0.11000001430511475,
+            "v": 0.1624999990065893,
+            "x": -1.1699999570846558,
+            "y": 0.8100000023841858,
+            "z": 0.0
+          },
+          {
+            "u": 0.11000001430511475,
+            "v": 0.30416666716337204,
+            "x": -1.1699999570846558,
+            "y": 0.4699999988079071,
+            "z": 0.0
+          }
+        ]
+      },
+      "node": 6,
+      "pivot": {
+        "x": 0.55985224,
+        "y": 0.46824202
+      },
+      "pixelsPerUnit": 100.0,
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: DancePol\n  m_Rect:\n    serializedVersion: 2\n    x: 33.076122\n    y: 39.026752\n    width: 208.84775\n    height: 172.93034\n  m_Offset: {x: 12.500006, y: -5.4919186}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.55985224, y: 0.46824202}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    462b3b9c827ba2a43aeb585b1b8e3bed: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 29c46e1dc1e9b464a85e4e31be0f0741, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 72\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 19\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 0d000b0010000a0010000b000f0010000a0009000f000a0008000f0009001200110007000c00070011000d0007000c00100007000d000f0007001000080007000f00060004000e0003000a000c000b000c000a000d000c000b0009000a000300080009000300070008000300050007000300040005000300060005000400010004000300000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 19\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 392\n      _typelessdata: 1f856b3f6666263f000000006666663fb81e053f000000001f856b3fcdcc0c3f00000000d7a3f03e1f856b3f00000000f628dc3e7b142e3e000000005c8f423e295c4fbf00000000f628dc3e295c4fbf0000000000000000cdcc4cbf000000003333b3beec51383e00000000a470bdbecdcc4c3e000000005c8fc2becdcc4c3e0000000085ebd1be7b142e3e00000000e17a54bf1f856b3f0000000085ebd1be0ad7233e00000000c3f5283fec5138bf000000003333b3beb81e053e000000005c8fc2be8fc2f53d000000008fc295bf295c4f3f000000008fc295bfd7a3f03e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 33.076122\n      y: 39.026752\n      width: 208.84775\n      height: 172.93034\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 150, z: 100, w: 120}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape:\n  - - {x: 0.42, y: -0.35}\n    - {x: 0.51, y: -0.22999999}\n    - {x: 0.42999998, y: -0.11}\n    - {x: 0.45999998, y: 0.01}\n    - {x: 0.34, y: 0.31}\n    - {x: 0.25, y: 0.45}\n    - {x: 0.24, y: 0.52}\n    - {x: 0.89, y: 0.53}\n    - {x: 0.90999997, y: 0.55}\n    - {x: 0.90999997, y: 0.59999996}\n    - {x: 0.87, y: 0.63}\n    - {x: 0.22, y: 0.63}\n    - {x: 0.19, y: 0.78}\n    - {x: -0.02, y: 0.88}\n    - {x: -0.17, y: 0.90999997}\n    - {x: -0.29, y: 0.90999997}\n    - {x: -0.48, y: 0.71}\n    - {x: -0.45999998, y: 0.63}\n    - {x: -1.13, y: 0.63}\n    - {x: -1.16, y: 0.59}\n    - {x: -1.16, y: 0.55}\n    - {x: -1.14, y: 0.53}\n    - {x: -0.47, y: 0.53}\n    - {x: -0.48999998, y: 0.39999998}\n    - {x: -0.38, y: 0.29999998}\n    - {x: -0.35999998, y: 0.14999999}\n    - {x: -0.24, y: 0.07}\n    - {x: -0.14, y: 0.06}\n    - {x: -0.04, y: 0}\n    - {x: 0.04, y: -0.24}\n    - {x: -0.04, y: -0.44}\n    - {x: -0.01, y: -0.56}\n    - {x: -0.07, y: -0.63}\n    - {x: -0.07, y: -0.69}\n    - {x: 0.11, y: -0.77}\n    - {x: 0.22999999, y: -0.81}\n    - {x: 0.41, y: -0.81}\n    - {x: 0.63, y: -0.71999997}\n    - {x: 0.56, y: -0.55}\n    - {x: 0.47, y: -0.39999998}\n  - - {x: 0.24, y: -0.56}\n    - {x: 0.14, y: -0.56}\n    - {x: 0.19, y: -0.57}\n    - {x: 0.22999999, y: -0.53999996}\n    - {x: 0.26999998, y: -0.45999998}\n    - {x: 0.26999998, y: -0.42999998}\n    - {x: 0.32999998, y: -0.48}\n    - {x: 0.37, y: -0.55}\n    - {x: 0.39, y: -0.58}\n    - {x: 0.35, y: -0.59}\n    - {x: 0.34, y: -0.59999996}\n    - {x: 0.29, y: -0.59}\n  m_Bones: []\n  m_SpriteID:\n",
+      "sortingLayerId": 0,
+      "sortingOrder": 1,
+      "sourceSprite": "Resources/image/zombiesidle/DancePol.asset",
+      "texture": "../../textures/94cb2298ec9896c4f8efaf6c6dfcec2da31abac69dc5ea28a6449907b28daeaa.png",
+      "textureRect": {
+        "height": 172.93034,
+        "width": 208.84775,
+        "x": 33.076122,
+        "y": 39.026752,
+        "yTop": 28.04290800000001
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      }
+    }
+  ],
+  "static": true,
+  "uiPortraitExtraction": {
+    "gameObjectFileId": 1302127217294661,
+    "originalRendererEnabled": true,
+    "sourceActivity": [
+      {
+        "gameObjectFileId": 1709254077376921,
+        "originalActive": true
+      },
+      {
+        "gameObjectFileId": 1724804207875695,
+        "originalActive": true
+      },
+      {
+        "gameObjectFileId": 1618682377417806,
+        "originalActive": true
+      },
+      {
+        "gameObjectFileId": 1703437598541787,
+        "originalActive": true
+      },
+      {
+        "gameObjectFileId": 1884547391421755,
+        "originalActive": true
+      },
+      {
+        "gameObjectFileId": 1634108722742392,
+        "originalActive": true
+      },
+      {
+        "gameObjectFileId": 1302127217294661,
+        "originalActive": true
+      }
+    ],
+    "sourceSpriteRenderer": "SpriteRenderer:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1302127217294661}\n  m_Enabled: 1\n  m_CastShadows: 0\n  m_ReceiveShadows: 0\n  m_DynamicOccludee: 1\n  m_StaticShadowCaster: 0\n  m_MotionVectors: 1\n  m_LightProbeUsage: 1\n  m_ReflectionProbeUsage: 1\n  m_RayTracingMode: 0\n  m_RayTraceProcedural: 0\n  m_RenderingLayerMask: 1\n  m_RendererPriority: 0\n  m_Materials:\n  - {fileID: 2100000, guid: 8fa820fab1c50434da82a0d53ec31815, type: 2}\n  m_StaticBatchInfo:\n    firstSubMesh: 0\n    subMeshCount: 0\n  m_StaticBatchRoot: {fileID: 0}\n  m_ProbeAnchor: {fileID: 0}\n  m_LightProbeVolumeOverride: {fileID: 0}\n  m_ScaleInLightmap: 1\n  m_ReceiveGI: 1\n  m_PreserveUVs: 0\n  m_IgnoreNormalsForChartDetection: 0\n  m_ImportantGI: 0\n  m_StitchLightmapSeams: 0\n  m_SelectedEditorRenderState: 3\n  m_MinimumChartSize: 4\n  m_AutoUVMaxDistance: 0.5\n  m_AutoUVMaxAngle: 89\n  m_LightmapParameters: {fileID: 0}\n  m_SortingLayerID: 0\n  m_SortingLayer: 0\n  m_SortingOrder: 1\n  m_Sprite: {fileID: 21300000, guid: ef2849c73753fba4a9ad57d31e2801ec, type: 2}\n  m_Color: {r: 1, g: 1, b: 1, a: 1}\n  m_FlipX: 0\n  m_FlipY: 0\n  m_DrawMode: 0\n  m_Size: {x: 3.79, y: 6.25}\n  m_AdaptiveModeThreshold: 0.5\n  m_SpriteTileMode: 0\n  m_WasSpriteAssigned: 1\n  m_MaskInteraction: 1\n  m_SpriteSortPoint: 0\n",
+    "spriteRendererFileId": 212058318715168512,
+    "uiVisiblePose": "selected portrait renderer and its retained ancestors active"
+  },
+  "unitsPerNativePixel": 0.01,
+  "unusedSpriteBonesExplicitlyAllowed": false,
+  "validation": "Exported source data. Native rendering and source-runtime comparison are separate verification steps.",
+  "visualBounds": {
+    "maxX": 2.306824013221264,
+    "maxY": 2.994824013221264,
+    "minX": 0.6511260339975358,
+    "minY": 1.6243179981112479
+  }
+}

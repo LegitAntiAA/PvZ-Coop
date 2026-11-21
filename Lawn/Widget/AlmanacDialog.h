@@ -4,6 +4,8 @@
 #include "LawnDialog.h"
 #include "../../ConstEnums.h"
 #include "ScrollbarWidget.h"
+#include <cstdint>
+#include <memory>
 
 #define NUM_ALMANAC_SEEDS NUM_SEEDS_IN_CHOOSER
 #define NUM_ALMANAC_ZOMBIES 26 //NUM_ZOMBIE_TYPES - 1 // 26
@@ -49,6 +51,16 @@ public:
 	vector<Zombie*>				mFollowersList;	
 	ScrollbarWidget*			mScrollbar;
 	float						mScrollAmount;
+
+private:
+	struct FusionState;
+	std::unique_ptr<FusionState> mFusion;
+	void SetupFusionEntry();
+	bool DrawFusionPortrait(Graphics* g, bool plants, uint16_t id, const Rect& bounds, bool* modelPortrait = nullptr);
+	void DrawFusionPage(Graphics* g, bool plants);
+	int FusionHitTest(int x, int y) const;
+	void ChangeFusionPage(int direction);
+	void UpdateFusionPageButtons();
 	
 public:
 	AlmanacDialog(LawnApp* theApp);
@@ -78,6 +90,11 @@ public:
 	static ZombieType			GetZombieType(int theIndex);
 	/*inline*/ void				ShowPlant(SeedType theSeedType);
 	/*inline*/ void				ShowZombie(ZombieType theZombieType);
+	bool ShowFusionPlant(uint16_t sourceId);
+	bool ShowFusionZombie(uint16_t sourceId);
+	bool GetFusionUiSelection(uint16_t& sourceId, size_t& page, bool& plants) const;
+	bool GetFusionNameLayout(int& fontHeight, int& requiredHeight, int& boxHeight) const;
+	bool GetFusionRenderedEntryStatus(bool& russian, bool& portrait, bool& modelPortrait) const;
 
 	virtual void				MouseWheel(int theDelta);
 	virtual void				AddedToManager(WidgetManager* theWidgetManager);

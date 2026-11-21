@@ -1,6 +1,8 @@
 #include "Plant.h"
+#include <cmath>
 #include "Board.h"
 #include "Zombie.h"
+#include "Fusion/NativeSpecialZombie269.h"
 #include "Cutscene.h"
 #include "GridItem.h"
 #include "LawnMower.h"
@@ -20,6 +22,21 @@
 #include "../Sexy.TodLib/EffectSystem.h"
 #include "Net/NetPresentation.h"
 #include "Net/NetManager.h"
+#include "Fusion/FusionNative.h"
+#include "Fusion/FusionNativeZombieVisual.h"
+#include "Fusion/FusionNativeDefender.h"
+#include "Fusion/FusionNativePlantDamage.h"
+#include "Fusion/FusionNativeBatchActions.h"
+#include "Fusion/FusionNativeFireActionBatch.h"
+#include "Fusion/FusionNativeShooterBatch.h"
+#include "Fusion/FusionNativeGarlic.h"
+#include "Fusion/FusionNativeCold.h"
+#include "Fusion/FusionNativeButter.h"
+#include "Fusion/FusionNativePoison.h"
+#include "Fusion/FusionNativeWater268.h"
+#include "Fusion/FusionNativeSummon269.h"
+#include "Fusion/FusionNativeSummonPlants269.h"
+#include "Fusion/FusionNativeRemainingPlants269.h"
 #ifdef _HAS_ZOMBATAR
 #include "Widget/ZombatarScreen.h"
 #endif
@@ -292,7 +309,7 @@ void Zombie::ZombieInitialize(int theRow, ZombieType theType, bool theVariant, Z
         {
             // Player-placed bungees bind their cell before the spawn event.
             // An empty cell is intentional and must not trigger a random pick.
-            if (mBoard->IsPvPMode() && theBungeeTargetCol >= 0 && theBungeeTargetCol < MAX_GRID_SIZE_X)
+            if (mBoard->IsPvPMode() && theBungeeTargetCol >= 0 && theBungeeTargetCol < mBoard->GetColumnCount())
             {
                 mTargetCol = theBungeeTargetCol;
                 SetRow(theRow);
@@ -1269,12 +1286,7 @@ void Zombie::LoadPlainZombieReanim()
 
     if ((mBoard && mBoard->mPlantRow[mRow] == PlantRowType::PLANTROW_POOL) && (mApp->mGameScene == GameScenes::SCENE_PLAYING || mApp->mGameMode == GameMode::GAMEMODE_INTRO || mApp->mGameMode == GameMode::GAMEMODE_UPSELL) || mZombieType == ZombieType::ZOMBIE_DUCKY_TUBE)
     {
-        ReanimShowPrefix("zombie_duckytube", RENDER_GROUP_NORMAL);
-        ReanimIgnoreClipRect("Zombie_duckytube", true);
-        ReanimIgnoreClipRect("Zombie_outerarm_hand", true);
-        ReanimIgnoreClipRect("Zombie_innerarm3", true);
-        SetupWaterTrack("Zombie_whitewater");
-        SetupWaterTrack("Zombie_whitewater2");
+        SetupPoolReanim();
     }
 }
 
@@ -1339,17 +1351,19 @@ void Zombie::PickBungeeZombieTarget(int theColumn)
         aAllowSunFlowerTarget = false;
     }
 
+    // Existing capacity covers Classic9x6 and native Fusion10x5.
     TodWeightedGridArray aPicks[MAX_GRID_SIZE_X * MAX_GRID_SIZE_Y];
     int aPickCount = 0;
 
-    for (int x = 0; x < MAX_GRID_SIZE_X; x++)
+    for (int x = 0; x < mBoard->GetColumnCount(); x++)
     {
         if (theColumn == -1 || theColumn == x)  // 限制仅能在 theColumn 列寻找目标，除非 theColumn 为 -1
         {
             for (int y = 0; y < MAX_GRID_SIZE_Y; y++)
             {
+                if (!mBoard->IsValidGridCell(x, y)) continue;
                 int aWeight = 1;
-                if (mBoard->GetGraveStoneAt(x, y) || mBoard->mGridSquareType[x][y] == GridSquareType::GRIDSQUARE_DIRT)
+                if (mBoard->GetGraveStoneAt(x, y) || mBoard->GetGridSquareTypeAt(x, y) == GridSquareType::GRIDSQUARE_DIRT)
                 {
                     continue;
                 }
@@ -3868,9 +3882,7 @@ void Zombie::UpdateZombiePool()
         }
         else if (mAltitude <= aDepth)
         {
-            mAltitude = aDepth;
-            mZombieHeight = ZombieHeight::HEIGHT_ZOMBIE_NORMAL;
-            StartWalkAnim(0);
+            CompletePoolEntry();
         }
     }
     else if (mZombieHeight == ZombieHeight::HEIGHT_DRAGGED_UNDER)
@@ -4562,18 +4574,22 @@ void Zombie::UpdateDamageStates(unsigned int theDamageFlags)
     if (!CanLoseBodyParts())
         return;
 
-    if (mHasArm && mBodyHealth < 2 * mBodyMaxHealth / 3 && mBodyHealth > 0)
+    const auto* source = LawnFusion::GetNativeSourceZombieData(this);
+    float sourceArm = 0, sourceHead = 0;
+    const bool sourceThresholds = source &&
+        LawnFusion::TryGetFusionZombieLimbThresholds(source->kind,mBodyMaxHealth,sourceArm,sourceHead);
+    if (mHasArm && (sourceThresholds ? source->health < sourceArm : mBodyHealth < 2 * mBodyMaxHealth / 3) && mBodyHealth > 0)
     {
         DropArm(theDamageFlags);
     }
 
-    if (mHasHead && mBodyHealth < mBodyMaxHealth / 3)
+    if (mHasHead && (sourceThresholds ? source->health < sourceHead : mBodyHealth < mBodyMaxHealth / 3))
     {
         DropHead(theDamageFlags);
         DropLoot();
         StopZombieSound();
 
-        if (mBoard->HasLevelAwardDropped())
+        if (mBoard->HasLevelAwardDropped() && !LawnFusion::IsNativeSourceZombie(this))
         {
             PlayDeathAnim(theDamageFlags);
         }
@@ -4589,6 +4605,7 @@ void Zombie::UpdateDamageStates(unsigned int theDamageFlags)
 float Zombie::ZombieTargetLeadX(float theTime)
 {
     float aSpeed = mVelX;
+    aSpeed *= LawnFusion::GetNativeWater268GrapSpeedFactor(this);
     if (mBoard && !mMindControlled) aSpeed *= mBoard->GetPvPZombieSpeedMultiplier();
     if (mChilledCounter > 0)
     {
@@ -4612,6 +4629,8 @@ float Zombie::ZombieTargetLeadX(float theTime)
 //0x52A610
 bool Zombie::ZombieNotWalking()
 {
+    if (const auto* garlic = LawnFusion::GetNativeZombieGarlicData(this))
+        if (LawnFusion::FusionGarlicStopsWalking(*garlic)) return true;
     if (mIsEating || IsImmobilizied())
     {
         return true;
@@ -4804,6 +4823,8 @@ void Zombie::UpdateLadder()
 //0x52AA40
 void Zombie::UpdateZombieWalking()
 {
+    if (LawnFusion::NativeWater268ZombieCaptured(this)) return;
+    if (LawnFusion::UpdateNativeSourceZombieWalking(this)) return;
     if (ZombieNotWalking())
         return;
 
@@ -5016,7 +5037,7 @@ Plant* Zombie::IsStandingOnSpikeweed()
             Rect aPlantAttackRect = aPlant->GetPlantAttackRect(PlantWeapon::WEAPON_PRIMARY);
             if (GetRectOverlap(aPlantAttackRect, aZombieRect) > 0)
             {
-                return aPlant;
+                return LawnFusion::NativeSummonPlants269EatingCover(this,aPlant);
             }
         }
     }
@@ -5026,6 +5047,9 @@ Plant* Zombie::IsStandingOnSpikeweed()
 
 void Zombie::CheckForZombieStep()
 {
+    // Typed source vehicles already resolve their exact collider and allegiance
+    // in UpdateNativeSpecialZombie269VehicleContacts; do not crush twice here.
+    if (LawnFusion::IsNativeSpecialZombie269Vehicle(this)) return;
     if ((mZombieType == ZombieType::ZOMBIE_ZAMBONI || mZombieType == ZombieType::ZOMBIE_CATAPULT) && !mFlatTires)
     {
         CheckSquish(ZombieAttackType::ATTACKTYPE_DRIVE_OVER);
@@ -5041,6 +5065,8 @@ void Zombie::UpdateZombiePosition()
 
     float aPreviousX = mPosX;
     UpdateZombieWalking();
+    const float grapFactor=LawnFusion::GetNativeWater268GrapSpeedFactor(this);
+    if (grapFactor!=1.f) mPosX = aPreviousX + (mPosX-aPreviousX)*grapFactor;
 
     // Keep all of the original zombie state, speed, chill/freeze and animation
     // handling.  Tower defense only projects the distance that the stock
@@ -5071,7 +5097,9 @@ void Zombie::UpdateZombiePosition()
     // UpdateTowerDefense already supplied the stock anchor for both horizontal
     // and vertical road segments.  The usual lane correction would otherwise
     // pull a zombie off every vertical segment toward the centre of mRow.
-    if (!aUseTowerDefensePath && mZombieHeight == ZombieHeight::HEIGHT_ZOMBIE_NORMAL)
+    const auto* aGarlicAction = LawnFusion::GetNativeZombieGarlicData(this);
+    if (!aUseTowerDefensePath && mZombieHeight == ZombieHeight::HEIGHT_ZOMBIE_NORMAL &&
+        !(aGarlicAction && aGarlicAction->phase == LawnFusion::GarlicActionPhase::Moving))
     {
         float aDesiredY = GetPosYBasedOnRow(mRow);
         if (mPosY < aDesiredY)
@@ -5252,6 +5280,7 @@ void Zombie::UpdateClimbingLadder()
 //0x52B110
 void Zombie::UpdateActions()
 {
+    if(LawnFusion::UpdateNativeSpecialZombie269(this))return;
     if (mZombieHeight == ZombieHeight::HEIGHT_UP_LADDER)
     {
         UpdateClimbingLadder();
@@ -5476,6 +5505,15 @@ void Zombie::CheckForBoardEdge()
 //0x52B340
 void Zombie::UpdatePlaying()
 {
+    LawnFusion::UpdateNativeSpecialZombie269VehiclePendingDeath(this,LawnFusion::EmitNativeSpecialZombie269VehicleFx);
+    if(mDead)return;
+    LawnFusion::TickNativeWater268ZombieState(this);
+    if (LawnFusion::UpdateNativeSourceZombieHealth(this)) return;
+    if (LawnFusion::IsNativeFusionBoard(mBoard))
+    {
+        LawnFusion::UpdateNativePoison(this);
+        if (IsDeadOrDying()) return;
+    }
     TOD_ASSERT(mBodyHealth > 0 || mZombiePhase == ZombiePhase::PHASE_BOBSLED_CRASHING);
 
     mGroanCounter--;
@@ -5513,6 +5551,7 @@ void Zombie::UpdatePlaying()
         mIceTrapCounter--;
         if (mIceTrapCounter == 0)
         {
+            LawnFusion::NativeColdFreezeExpired(this);
             RemoveIceTrap();
             AddAttachedParticle(75, 106, ParticleEffect::PARTICLE_ICE_TRAP_RELEASE);
         }
@@ -5533,6 +5572,7 @@ void Zombie::UpdatePlaying()
             RemoveButter();
         }
     }
+    if (LawnFusion::NativeWater268ZombieCaptured(this)) { StopEating(); mVelX=0; ApplyAnimRate(0); return; }
     if (mYampolineCounter > 0)
     {
         mPosX -= mYampolineVelX;
@@ -5575,7 +5615,23 @@ void Zombie::UpdatePlaying()
         UpdateZombiePool();
     }
 
-    if (!IsImmobilizied())
+    if (auto* garlic = LawnFusion::GetNativeZombieGarlicData(this))
+    {
+        const auto previousPhase = garlic->phase;
+        const float speed = mVelX * (IsMovingAtChilledSpeed() ? CHILLED_SPEED_FACTOR : 1.0f) * mBoard->GetPvPZombieSpeedMultiplier() * LawnFusion::GetNativeWater268GrapSpeedFactor(this);
+        if (LawnFusion::UpdateNativeGarlicAction(this,*garlic,speed) && previousPhase != garlic->phase)
+            UpdateAnimSpeed();
+    }
+    LawnFusion::UpdateNativeSpecialZombie269PaperShoot(this,LawnFusion::GetNativeSourceZombie269NodePoint);
+    if(LawnFusion::IsNativeSpecialZombie269Vehicle(this))
+    {
+        LawnFusion::MoveNativeSpecialZombie269Vehicle(this,LawnFusion::GetNativeSourceZombie269NodePoint);
+        LawnFusion::UpdateNativeSpecialZombie269VehicleContacts(this,LawnFusion::GetNativeSourceZombie269NodePoint,
+            LawnFusion::GetNativeSpecialZombie269PlantTraits);
+        if(mDead)return;
+        UpdateZombiePosition();CheckForBoardEdge();
+    }
+    else if (!IsImmobilizied())
     {
         UpdateActions();
         UpdateZombiePosition();
@@ -5586,13 +5642,14 @@ void Zombie::UpdatePlaying()
         CheckForHighGround();
         CheckForBoardEdge();
     }
+    LawnFusion::FinishNativeSummon269ZombiePosition(this);
 
     if (mZombieType == ZombieType::ZOMBIE_BOSS)
     {
         UpdateBoss();
     }
 
-    if (!IsDeadOrDying() && mFromWave != Zombie::ZOMBIE_WAVE_WINNER)
+    if (!IsDeadOrDying() && mFromWave != Zombie::ZOMBIE_WAVE_WINNER && !LawnFusion::IsNativeSourceZombie(this))
     {
         bool isDying = !mHasHead;
         if (mZombieType == ZombieType::ZOMBIE_ZAMBONI || mZombieType == ZombieType::ZOMBIE_CATAPULT)
@@ -5773,6 +5830,7 @@ void Zombie::AnimateChewSound()
     Plant* aPlant = FindPlantTarget(ZombieAttackType::ATTACKTYPE_CHEW);
     if (aPlant)
     {
+        if (LawnFusion::HandleNativeBatchPlantEaten(this,aPlant)) return;
         if (aPlant->mSeedType == SeedType::SEED_HYPNOSHROOM && !aPlant->mIsAsleep)
         {
             mApp->PlayFoley(FoleyType::FOLEY_FLOOP);
@@ -5786,7 +5844,7 @@ void Zombie::AnimateChewSound()
             mAnimTicksPerFrame = 18;
             UpdateAnimSpeed();
         }
-        else if (aPlant->mSeedType == SeedType::SEED_GARLIC)
+        else if (aPlant->mSeedType == SeedType::SEED_GARLIC && !LawnFusion::IsNativeGarlicPlant(aPlant))
         {
             if (!mYuckyFace)
             {
@@ -5975,7 +6033,7 @@ void Zombie::Animate()
         UpdateYuckyFace();
     }
 
-    if (mIsEating && mHasHead)
+    if (mIsEating && mHasHead && !LawnFusion::IsNativeSourceZombie(this))
     {
         int aFrameLength = 6;
         if (mChilledCounter > 0)
@@ -6946,7 +7004,7 @@ int Zombie::GetHelmDamageIndex()
         return 2;
     }
 
-    if (mHelmHealth < mHelmMaxHealth * 2 / 3)
+    if (mHelmHealth < mHelmMaxHealth * 2LL / 3)
     {
         return 1;
     }
@@ -6995,7 +7053,7 @@ int Zombie::GetShieldDamageIndex()
         return 2;
     }
 
-    if (mShieldHealth < mShieldMaxHealth * 2 / 3)
+    if (mShieldHealth < mShieldMaxHealth * 2LL / 3)
     {
         return 1;
     }
@@ -7508,7 +7566,8 @@ void Zombie::Draw(Graphics* g)
     {
         DrawIceTrap(g, aDrawPos, false);
     }
-    if (mApp->mGameMode != GameMode::GAMEMODE_CHALLENGE_INVISIGHOUL || mFromWave == Zombie::ZOMBIE_WAVE_UI)
+    if ((mApp->mGameMode != GameMode::GAMEMODE_CHALLENGE_INVISIGHOUL || mFromWave == Zombie::ZOMBIE_WAVE_UI) &&
+        !LawnFusion::DrawNativeSourceZombie(g,this))
     {
         if (mBodyReanimID != ReanimationID::REANIMATIONID_NULL)
         {
@@ -7523,7 +7582,7 @@ void Zombie::Draw(Graphics* g)
     {
         DrawIceTrap(g, aDrawPos, true);
     }
-    if (mButteredCounter > 0)
+    if (mButteredCounter > 0 && LawnFusion::ShouldDrawNativeButter(this))
     {
         DrawButter(g, aDrawPos);
     }
@@ -7546,8 +7605,10 @@ void Zombie::Draw(Graphics* g)
 
     g->ClearClipRect();
 
-    if (mZombieType != ZombieType::ZOMBIE_BOSS && IsOnBoard() && mApp->mShowHealthBar && mHasHead && !IsDeadOrDying() && !mApp->IsWhackAZombieLevel() &&
-        (EffectedByDamage(1U) || EffectedByDamage(2U) || EffectedByDamage(4U) || EffectedByDamage(8U) || EffectedByDamage(129U) && mMindControlled)
+    const auto* sourceHealth = LawnFusion::GetNativeSourceZombieData(this);
+    if (mZombieType != ZombieType::ZOMBIE_BOSS && IsOnBoard() && mApp->mShowHealthBar && (mHasHead || sourceHealth) && !IsDeadOrDying() && !mApp->IsWhackAZombieLevel() &&
+        (!sourceHealth || mBodyMaxHealth > 0 || mHelmMaxHealth > 0) &&
+        (sourceHealth || EffectedByDamage(1U) || EffectedByDamage(2U) || EffectedByDamage(4U) || EffectedByDamage(8U) || EffectedByDamage(129U) && mMindControlled)
         ) {
 
         float aScale = mScaleZombie;
@@ -7582,9 +7643,12 @@ void Zombie::Draw(Graphics* g)
 
         float HP_OFFSET = mBodyMaxHealth / 3.0f; 
 
-        if (!CanLoseBodyParts()) HP_OFFSET = 0;
+        if (sourceHealth || !CanLoseBodyParts()) HP_OFFSET = 0;
 
-        float HPpercent = (mBodyHealth + mHelmHealth - HP_OFFSET) / (float)(mBodyMaxHealth + mHelmMaxHealth - HP_OFFSET);
+        float HPpercent = sourceHealth ?
+            (sourceHealth->health + float(mHelmHealth)) / (float(mBodyMaxHealth) + float(mHelmMaxHealth)) :
+            (mBodyHealth + mHelmHealth - HP_OFFSET) / (float)(mBodyMaxHealth + mHelmMaxHealth - HP_OFFSET);
+        if (sourceHealth) HPpercent = (std::clamp)(HPpercent,0.0f,1.0f);
         g->FillRect(HEALTH_POSX, HEALTH_POSY, (int)(50 * HPpercent), 5);
 
         g->SetColor(Color::Black);
@@ -7654,6 +7718,7 @@ void Zombie::Draw(Graphics* g)
 //0x52E4C0
 bool Zombie::CanTargetPlant(Plant* thePlant, ZombieAttackType theAttackType)
 {
+    if (LawnFusion::NativeBatchPlantUntargetable(thePlant) || LawnFusion::NativeFireActionUntargetable(thePlant)) return false;
     if (mApp->IsWallnutBowlingLevel() && theAttackType != ZombieAttackType::ATTACKTYPE_VAULT)
         return false;
 
@@ -7869,6 +7934,7 @@ void Zombie::ZamboniDeath(unsigned int theDamageFlags)
             mFlatTires = true;
             mApp->PlayFoley(FoleyType::FOLEY_TIRE_POP);
             mZombiePhase = ZombiePhase::PHASE_ZOMBIE_DYING;
+            LawnFusion::NativeBatchZombieDying(this);
             mApp->AddTodParticle(mPosX + 29.0f, mPosY + 114.0f, mRenderOrder + 1, ParticleEffect::PARTICLE_ZAMBONI_TIRE);
             if (Rand(4) == 0 && mPosX < 600.0f)
             {
@@ -7904,6 +7970,7 @@ void Zombie::CatapultDeath(unsigned int theDamageFlags)
     {
         mApp->PlayFoley(FoleyType::FOLEY_TIRE_POP);
         mZombiePhase = ZombiePhase::PHASE_ZOMBIE_DYING;
+        LawnFusion::NativeBatchZombieDying(this);
         mApp->AddTodParticle(mPosX + 29.0f, mPosY + 114.0f, mRenderOrder + 1, ParticleEffect::PARTICLE_ZAMBONI_TIRE);
         mVelX = 0.0f;
 
@@ -8042,6 +8109,7 @@ void Zombie::ApplyAnimRate(float theAnimRate)
 //0x52F050
 void Zombie::UpdateAnimSpeed()
 {
+    if (LawnFusion::UpdateNativeSourceZombieAnimation(this)) return;
     if (!IsOnBoard())
         return;
 
@@ -8049,7 +8117,8 @@ void Zombie::UpdateAnimSpeed()
     if (aBodyReanim == nullptr)
         return;
 
-    if (IsImmobilizied() || (mYuckyFace && mYuckyFaceCounter < 170))
+    const auto* aGarlicAction = LawnFusion::GetNativeZombieGarlicData(this);
+    if (IsImmobilizied() || (aGarlicAction && LawnFusion::FusionGarlicStopsWalking(*aGarlicAction)) || (mYuckyFace && mYuckyFaceCounter < 170))
     {
         ApplyAnimRate(0.0f);
        /* if (mZombieType == ZombieType::ZOMBIE_FLAG && mHasObject) {
@@ -8182,6 +8251,7 @@ void Zombie::StartEating()
 //0x52F2E0
 void Zombie::StartWalkAnim(int theBlendTime)
 {
+    if (LawnFusion::StartNativeSourceZombieWalk(this,theBlendTime)) return;
     Reanimation* aBodyReanim = mApp->ReanimationTryToGet(mBodyReanimID);
     if (aBodyReanim == nullptr)
         return;
@@ -8282,6 +8352,9 @@ void Zombie::StopEating()
 //0x52F4C0
 void Zombie::CheckIfPreyCaught()
 {
+    if (LawnFusion::UpdateNativeSourceZombieAttack(this)) return;
+    if (const auto* garlic = LawnFusion::GetNativeZombieGarlicData(this))
+        if (LawnFusion::FusionGarlicPreventsEating(*garlic)) return;
     if (mZombieType == ZombieType::ZOMBIE_BUNGEE ||
         mZombieType == ZombieType::ZOMBIE_GARGANTUAR ||
         mZombieType == ZombieType::ZOMBIE_REDEYE_GARGANTUAR ||
@@ -8407,10 +8480,12 @@ void Zombie::CheckForPool()
         return;
     }
 
+    const int aPoolEntryRight = LawnFusion::IsNativeFusionBoard(mBoard) ?
+        LawnFusion::NativeFusionPoolEntryRight(mBoard->GetColumnCount()) : 680;
     bool aIsPoolSquare = 
         mBoard->IsPoolSquare(mBoard->PixelToGridX(mX + 75, mY), mRow) && 
         mBoard->IsPoolSquare(mBoard->PixelToGridX(mX + 45, mY), mRow) && 
-        mX < 680;
+        mX < aPoolEntryRight;
 
     if (!mInPool && aIsPoolSquare)
     {
@@ -8445,7 +8520,7 @@ void Zombie::CheckForPool()
 //0x52F9C0
 bool Zombie::IsOnHighGround()
 {
-    return IsOnBoard() && mBoard->mGridSquareType[mBoard->PixelToGridXKeepOnBoard(mX + 75, mY)][mRow] == GridSquareType::GRIDSQUARE_HIGH_GROUND;
+    return IsOnBoard() && mBoard->GetGridSquareTypeAt(mBoard->PixelToGridXKeepOnBoard(mX + 75, mY), mRow) == GridSquareType::GRIDSQUARE_HIGH_GROUND;
 }
 
 //0x52FA20
@@ -8469,6 +8544,7 @@ void Zombie::CheckForHighGround()
 //0x52FA60
 void Zombie::StartMindControlled()
 {
+    if (LawnFusion::NativeSummon269RejectStatus(this)) return;
     mApp->PlaySample(SOUND_MINDCONTROLLED);
     mMindControlled = true;
     mLastPortalX = -1;
@@ -8527,6 +8603,9 @@ void Zombie::StartMindControlled()
 //0x52FB40
 void Zombie::EatPlant(Plant* thePlant)
 {
+    if (LawnFusion::NativeWater268ZombieCaptured(this)) return;
+    if (const auto* garlic = LawnFusion::GetNativeZombieGarlicData(this))
+        if (LawnFusion::FusionGarlicPreventsEating(*garlic)) return;
     if (mZombiePhase == ZombiePhase::PHASE_DANCER_DANCING_IN)
     {
         mPhaseCounter = 1;
@@ -8551,10 +8630,14 @@ void Zombie::EatPlant(Plant* thePlant)
 
     StartEating();
 
+    // Source10 remains a live target while its fuse runs, but is invincible.
+    if (LawnFusion::IsNativeIceShroom(thePlant) || LawnFusion::NativeBatchPlantInvincible(thePlant) ||
+        LawnFusion::NativeFireActionInvincible(thePlant) || LawnFusion::NativeShooterBatchInvulnerable(thePlant)) return;
+
     if (mZombiePhase == ZombiePhase::PHASE_SQUASH_PRE_LAUNCH)
         return;
 
-    if (thePlant->mSeedType == SeedType::SEED_JALAPENO || 
+    if ((thePlant->mSeedType == SeedType::SEED_JALAPENO && !LawnFusion::IsNativeFireAction(thePlant)) ||
         thePlant->mSeedType == SeedType::SEED_CHERRYBOMB || 
         thePlant->mSeedType == SeedType::SEED_DOOMSHROOM ||
         thePlant->mSeedType == SeedType::SEED_ICESHROOM || 
@@ -8594,7 +8677,7 @@ void Zombie::EatPlant(Plant* thePlant)
         return;
     }
 
-    if (mChilledCounter > 0 && mZombieAge % 2 == 1)
+    if (mChilledCounter > 0 && mZombieAge % 2 == 1 && !LawnFusion::IsNativeSourceZombie(this))
         return;
 
     if (mApp->IsIZombieLevel() && thePlant->mSeedType == SeedType::SEED_SUNFLOWER)
@@ -8607,16 +8690,27 @@ void Zombie::EatPlant(Plant* thePlant)
         }
     }
 
-    thePlant->mPlantHealth -= DAMAGE_PER_EAT;
+    int aBiteDamage = LawnFusion::GetNativeSourceZombieBiteDamage(this,DAMAGE_PER_EAT);
+    if (LawnFusion::IsNativeGarlicPlant(thePlant))
+    {
+        auto* garlic = LawnFusion::GetOrCreateNativeZombieGarlicData(this);
+        if (!garlic || LawnFusion::BeginNativeGarlicBite(this,thePlant,*garlic,aBiteDamage) != LawnFusion::NativeGarlicBiteResult::Started) return;
+        UpdateAnimSpeed();
+    }
+    LawnFusion::NativeDefenderBeforeBite(this,thePlant,aBiteDamage);
+    if (!LawnFusion::AdjustNativeSourcePlantDamage(thePlant,aBiteDamage,0))
+        thePlant->mPlantHealth -= aBiteDamage;
     thePlant->mRecentlyEatenCountdown = 50;
     if (mApp->IsIZombieLevel() && mJustGotShotCounter < -500)
     {
         if (thePlant->mSeedType == SeedType::SEED_WALLNUT || thePlant->mSeedType == SeedType::SEED_TALLNUT || thePlant->mSeedType == SeedType::SEED_PUMPKINSHELL)
         {
-            thePlant->mPlantHealth -= DAMAGE_PER_EAT;
+            int extraDamage=DAMAGE_PER_EAT;
+            if (!LawnFusion::AdjustNativeSourcePlantDamage(thePlant,extraDamage,0)) thePlant->mPlantHealth-=extraDamage;
         }
     }
 
+    LawnFusion::NativePlantHealthChanged(thePlant);
     if (thePlant->mPlantHealth <= 0)
     {
         if (thePlant->mSeedType == SeedType::SEED_EXPLODE_O_NUT)
@@ -8644,7 +8738,9 @@ void Zombie::EatPlant(Plant* thePlant)
 //0x52FE10
 void Zombie::EatZombie(Zombie* theZombie)
 {
-    if (theZombie->mShieldType != ShieldType::SHIELDTYPE_NONE && theZombie->mShieldHealth > 0) {
+    if (LawnFusion::IsNativeSourceZombie(this)) {
+        theZombie->TakeDamage(LawnFusion::GetNativeSourceZombieBiteDamage(this,DAMAGE_PER_EAT),1U);
+    } else if (theZombie->mShieldType != ShieldType::SHIELDTYPE_NONE && theZombie->mShieldHealth > 0) {
         theZombie->TakeShieldDamage(DAMAGE_PER_EAT, 9U);
     } else if (theZombie->mHelmType != HelmType::HELMTYPE_NONE && theZombie->mHelmHealth > 0) {
         theZombie->TakeHelmDamage(DAMAGE_PER_EAT, 9U);
@@ -8866,6 +8962,11 @@ bool Zombie::TrySpawnLevelAward()
 //0x530170
 void Zombie::DropLoot()
 {
+    if (LawnFusion::NativeSummon269RejectStatus(this))
+    {
+        LawnFusion::NativeSummon269MoneyDied(this);
+        return;
+    }
     if (!IsOnBoard())
         return;
 
@@ -8911,6 +9012,7 @@ void Zombie::DropLoot()
 //0x5302F0
 void Zombie::DieWithLoot()
 {
+    LawnFusion::NativeSummon269MoneyDied(this);
     DieNoLoot();
     DropLoot();
 }
@@ -9021,6 +9123,11 @@ void Zombie::BungeeDie()
 //0x530510
 void Zombie::DieNoLoot()
 {
+    LawnFusion::NativeSpecialZombie269Removing(this);
+    LawnFusion::NativeSummon269ZombieRemoving(this);
+    LawnFusion::NativeRemaining269ZombieRemoving(this);
+    LawnFusion::NativeWater268ZombieRemoving(this);
+    LawnFusion::NativeBatchZombieDying(this);
     if (mBoard)
         mBoard->NetPvPZombieKilled(this);
     if (IsOnBoard() && !mApp->GetDialog(DIALOG_ALMANAC) && mApp->ChallengeHasScores(mApp->mGameMode) && (mApp->IsScaryPotterLevel() || mApp->IsSurvivalMode() || mApp->IsLastStandEndless(mApp->mGameMode))) {
@@ -9187,26 +9294,36 @@ void Zombie::ApplyChill(bool theIsIceTrap)
     if (!CanBeChilled())
         return;
 
+    int aChillTime = theIsIceTrap ? 2000 : 1000;
+    SetColdCounters(max(aChillTime,mChilledCounter),mIceTrapCounter);
+}
+
+void Zombie::SetColdCounters(int theChilledTicks, int theFrozenTicks)
+{
+    if ((theChilledTicks > 0 || theFrozenTicks > 0) && LawnFusion::NativeSummon269RejectCold(this)) return;
+    if (theChilledTicks < 0 || theFrozenTicks < 0) return;
+    const bool wasFrozen = mIceTrapCounter > 0;
     if (mChilledCounter == 0)
     {
-        mApp->PlayFoley(FoleyType::FOLEY_FROZEN);
-        mJustGotShotCounter = 25;
-        mHelmetJustGotShotCounter = 25;
-        mShieldJustGotShotCounter = 25;
+        if (theChilledTicks > 0)
+        {
+            mApp->PlayFoley(FoleyType::FOLEY_FROZEN);
+            mJustGotShotCounter = 25;
+            mHelmetJustGotShotCounter = 25;
+            mShieldJustGotShotCounter = 25;
+        }
     }
-
-    int aChillTime = 1000;
-    if (theIsIceTrap)
-    {
-        aChillTime = 2000;
-    }
-    mChilledCounter = max(aChillTime, mChilledCounter);
+    mChilledCounter = theChilledTicks;
+    mIceTrapCounter = theFrozenTicks;
+    if (!wasFrozen && theFrozenTicks > 0) StartIceTrapEffects();
+    else if (wasFrozen && theFrozenTicks == 0) { RemoveIceTrap(); return; }
     UpdateAnimSpeed();
 }
 
 //0x530A00
 void Zombie::DropShield(unsigned int theDamageFlags)
 {
+    if(LawnFusion::BeginNativeSpecialZombie269PaperFall(this))return;
     if (mShieldType == ShieldType::SHIELDTYPE_NONE)
         return;
 
@@ -9379,6 +9496,7 @@ int Zombie::TakeShieldDamage(int theDamage, unsigned int theDamageFlags)
     int aDamageActual = min(mShieldHealth, theDamage);
     int aDamageRemaining = theDamage - aDamageActual;
     mShieldHealth -= aDamageActual;
+    LawnFusion::RefreshNativeSpecialZombie269PaperArmor(this);
     if (mShieldHealth == 0)
     {
         DropShield(theDamageFlags);
@@ -9570,6 +9688,7 @@ void Zombie::DropHelm(unsigned int theDamageFlags)
 //0x530FE0
 int Zombie::TakeHelmDamage(int theDamage, unsigned int theDamageFlags)
 {
+    int sourceRemaining=theDamage;if(LawnFusion::ApplyNativeSourceZombie111Armor(this,theDamage,sourceRemaining))return sourceRemaining;
     if (!TestBit(theDamageFlags, (int)DamageFlags::DAMAGE_DOESNT_CAUSE_FLASH))
     {
         if (mHelmType != HelmType::HELMTYPE_WALLNUT && mHelmType != HelmType::HELMTYPE_TALLNUT)
@@ -9726,6 +9845,10 @@ int Zombie::TakeFlyingDamage(int theDamage, unsigned int theDamageFlags)
 //0x5312D0
 void Zombie::TakeBodyDamage(int theDamage, unsigned int theDamageFlags)
 {
+    if(LawnFusion::ApplyNativeSpecialZombie269VehicleBodyDamage(this,theDamage,LawnFusion::EmitNativeSpecialZombie269VehicleFx))return;
+    // Direct source Real6/native body callers must retain Money's same
+    // body-only override, without native limbs/death animation callbacks.
+    if (LawnFusion::NativeSummon269MoneyDamage(this,theDamage)) return;
     if (!TestBit(theDamageFlags, (int)DamageFlags::DAMAGE_DOESNT_CAUSE_FLASH))
     {
         mJustGotShotCounter = 25;
@@ -9738,7 +9861,7 @@ void Zombie::TakeBodyDamage(int theDamage, unsigned int theDamageFlags)
 
     int aBodyHealthOrigin = mBodyHealth;
     int aDamageIndexBeforeDamage = GetBodyDamageIndex();
-    mBodyHealth -= theDamage;
+    if (!LawnFusion::ApplyNativeSourceZombieBodyDamage(this,theDamage)) mBodyHealth -= theDamage;
     int aDamageIndexAfterDamage = GetBodyDamageIndex();
     if (mZombieType == ZombieType::ZOMBIE_ZAMBONI)
     {
@@ -9896,8 +10019,9 @@ void Zombie::TakeBodyDamage(int theDamage, unsigned int theDamageFlags)
 }
 
 //0x5317C0
-void Zombie::TakeDamage(int theDamage, unsigned int theDamageFlags)
+void Zombie::TakeDamage(int theDamage, unsigned int theDamageFlags, const LawnFusion::FusionColdDamageContext* theColdContext)
 {
+    if (LawnFusion::NativeSummon269MoneyDamage(this,theDamage)) return;
     if (mZombiePhase == ZombiePhase::PHASE_JACK_IN_THE_BOX_POPPING && !TestBit(theDamageFlags, 18)  || IsDeadOrDying())
         return;
 
@@ -9915,6 +10039,7 @@ void Zombie::TakeDamage(int theDamage, unsigned int theDamageFlags)
             aDamageRemaining = theDamage;
         }
     }
+    if (theColdContext) LawnFusion::NativeColdDamageAfterShield(this,*theColdContext,aDamageRemaining > 0);
     if (aDamageRemaining > 0 && mHelmType != HelmType::HELMTYPE_NONE)
     {
         aDamageRemaining = TakeHelmDamage(aDamageRemaining, theDamageFlags);
@@ -9963,7 +10088,8 @@ Zombie::~Zombie()
 //0x531990
 bool Zombie::CanBeChilled()
 {
-    if (mZombieType == ZombieType::ZOMBIE_ZAMBONI || IsBobsledTeamWithSled())
+    if (LawnFusion::NativeSummon269RejectStatus(this)) return false;
+    if ((mZombieType == ZombieType::ZOMBIE_ZAMBONI&&LawnFusion::GetNativeFusionZombieKind(this)!=14) || IsBobsledTeamWithSled())
         return false;
 
     if (IsDeadOrDying())
@@ -9990,6 +10116,8 @@ bool Zombie::CanBeChilled()
 //0x531A10
 bool Zombie::CanBeFrozen()
 {
+    if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);source&&
+       LawnFusion::SpecialZombie269RejectEffect(source->kind,LawnFusion::GetNativeFusionZombieStatus(this),LawnFusion::SpecialZombie269StatusEffect::Freeze))return false;
     if (!CanBeChilled())
         return false;
 
@@ -10015,6 +10143,9 @@ bool Zombie::CanBeFrozen()
 //0x531A80
 bool Zombie::EffectedByDamage(unsigned int theDamageRangeFlags)
 {
+    // Physics acquisition/collision only. Direct TakeDamage and status clocks
+    // deliberately remain available to effects applied before capture.
+    if (LawnFusion::NativeWater268ZombieCaptured(this)) return false;
     if (!TestBit(theDamageRangeFlags, (int)DamageRangeFlags::DAMAGES_DYING) && IsDeadOrDying())
     {
         return false;
@@ -10353,6 +10484,7 @@ void Zombie::RemoveIceTrap()
 //0x5323C0
 void Zombie::HitIceTrap()
 {
+    if (LawnFusion::NativeSummon269RejectStatus(this)) return;
     bool cold = false;
     if (mChilledCounter > 0 || mIceTrapCounter != 0)
     {
@@ -10376,6 +10508,13 @@ void Zombie::HitIceTrap()
         mIceTrapCounter = RandRangeInt(400, 600);
     }
 
+    StartIceTrapEffects();
+    TakeDamage(20, 1U);
+    UpdateAnimSpeed();
+}
+
+void Zombie::StartIceTrapEffects()
+{
     StopZombieSound();
     if (mZombieType == ZombieType::ZOMBIE_BALLOON)
     {
@@ -10386,8 +10525,6 @@ void Zombie::HitIceTrap()
         mBoard->RemoveParticleByType(ParticleEffect::PARTICLE_ZOMBIE_BOSS_FIREBALL);
     }
 
-    TakeDamage(20, 1U);
-    UpdateAnimSpeed();
 }
 
 //0x5324B0
@@ -10488,15 +10625,17 @@ void Zombie::RemoveButter()
 }
 
 //0x5326D0
-void Zombie::ApplyButter()
+void Zombie::ApplyButter(int theTicks)
 {
+    if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);source&&
+       LawnFusion::SpecialZombie269RejectEffect(source->kind,LawnFusion::GetNativeFusionZombieStatus(this),LawnFusion::SpecialZombie269StatusEffect::Butter))return;
     if (!mHasHead || !CanBeFrozen())
         return;
 
-    if (mZombieType == ZombieType::ZOMBIE_ZAMBONI || mZombieType == ZombieType::ZOMBIE_BOSS || IsTangleKelpTarget() || IsBobsledTeamWithSled() || IsFlying())
+    if ((mZombieType == ZombieType::ZOMBIE_ZAMBONI&&LawnFusion::GetNativeFusionZombieKind(this)!=14) || mZombieType == ZombieType::ZOMBIE_BOSS || IsTangleKelpTarget() || IsBobsledTeamWithSled() || IsFlying())
         return;
 
-    mButteredCounter = 400;
+    mButteredCounter = theTicks;
     Zombie* aZombie = mBoard->ZombieTryToGet(mRelatedZombieID);
     if (aZombie && aZombie->mZombieType != ZombieType::ZOMBIE_DANCER && aZombie->mZombieType != ZombieType::ZOMBIE_BACKUP_DANCER 
 #ifdef _HAS_BLOOM_AND_DOOM_CONTENTS
@@ -10622,6 +10761,7 @@ void Zombie::MowDown()
     aMoweredReanim->mLoopType = ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD;
     mMoweredReanimID = mApp->ReanimationGetID(aMoweredReanim);
     mZombiePhase = ZombiePhase::PHASE_ZOMBIE_MOWERED;
+    LawnFusion::NativeBatchZombieDying(this);
     DropLoot();
 }
 
@@ -10641,14 +10781,14 @@ void Zombie::RemoveColdEffects()
 }
 
 //0x532B70
-void Zombie::ApplyBurn()
+void Zombie::ApplyBurn(bool forceDeath)
 {
     if (mDead || mZombiePhase == ZombiePhase::PHASE_ZOMBIE_BURNED)
         return;
 
     int currentHealth = mBodyHealth + mHelmHealth + mShieldHealth + mFlyingHealth;
 
-    if (currentHealth >= 1800 && mZombieType != ZombieType::ZOMBIE_TALLNUT_HEAD || mZombieType == ZombieType::ZOMBIE_BOSS)
+    if (!forceDeath && (currentHealth >= 1800 && mZombieType != ZombieType::ZOMBIE_TALLNUT_HEAD || mZombieType == ZombieType::ZOMBIE_BOSS))
     {
         TakeDamage(1800, 18U);
         return;
@@ -10711,6 +10851,7 @@ void Zombie::ApplyBurn()
             aHeadReanim->mAnimRate = 0.0f;
         }
 
+        LawnFusion::NativeBatchZombieDying(this);
         mZombiePhase = ZombiePhase::PHASE_ZOMBIE_BURNED;
         mPhaseCounter = 300;
         mJustGotShotCounter = 0;
@@ -10813,6 +10954,9 @@ void Zombie::ApplyBurn()
         if (!mInPool)
             DropAllParticles();
         
+        if (forceDeath)
+            LawnNet::NetBroadcastReanimation(mApp, aCharredReanim, aCharredPosX, aCharredPosY,
+                mRenderOrder, aReanimType);
         DieWithLoot();
     }
 
@@ -10820,6 +10964,9 @@ void Zombie::ApplyBurn()
     {
         BobsledBurn();
     }
+    // Source Charred has already committed an immediate death. Headless native
+    // actors use a lingering burned phase; retire that actor without new loot.
+    if (forceDeath && !mDead) DieNoLoot();
 }
 
 void Zombie::AttachHelmet()
@@ -11025,6 +11172,7 @@ void Zombie::PlayDeathAnim(unsigned int theDamageFlags)
     mVelX = 0.0f;
     ZombiePhase mPrevPhase = mZombiePhase;
     mZombiePhase = ZombiePhase::PHASE_ZOMBIE_DYING;
+    LawnFusion::NativeBatchZombieDying(this);
     if (mZombieHeight == ZombieHeight::HEIGHT_ZOMBIQUARIUM)
     {
         PlayZombieReanim("anim_aquarium_death", ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD, 20, 14.0f);
@@ -11510,13 +11658,8 @@ bool Zombie::SetupDrawZombieWon(Graphics* g)
 }
 
 //0x5340C0
-void Zombie::DrawShadow(Graphics* g)
+void Zombie::GetShadowDrawParams(const ZombieDrawPosition& aDrawPos, ShadowDrawParams& theParams)
 {
-    ZombieDrawPosition aDrawPos;
-    GetDrawPos(aDrawPos);
-    if (mApp->mGameScene == GameScenes::SCENE_ZOMBIES_WON && !SetupDrawZombieWon(g) || mZombiePhase == ZombiePhase::PHASE_ZOMBIE_BURNED)
-        return;
-
     int aShadowType = 0;
     float aShadowOffsetX = aDrawPos.mImageOffsetX;
     float aShadowOffsetY = aDrawPos.mImageOffsetY + aDrawPos.mBodyY;
@@ -11713,14 +11856,39 @@ void Zombie::DrawShadow(Graphics* g)
         aShadowOffsetX += aBodyReanim->mOffsetX;
     }
 
-    if (mInPool)
-    {
-        TodDrawImageCenterScaledF(g, IMAGE_WHITEWATER_SHADOW, aShadowOffsetX, aShadowOffsetY + 67.0f, aScale, aScale);
-    }
-    else
-    {
-        TodDrawImageCenterScaledF(g, (aShadowType == 0 ? IMAGE_PLANTSHADOW : IMAGE_PLANTSHADOW2), aShadowOffsetX, aShadowOffsetY + 92.0f, aScale, aScale);
-    }
+    theParams.image = mInPool ? IMAGE_WHITEWATER_SHADOW : (aShadowType == 0 ? IMAGE_PLANTSHADOW : IMAGE_PLANTSHADOW2);
+    theParams.x = aShadowOffsetX;
+    theParams.y = aShadowOffsetY + (mInPool ? 67.0f : 92.0f);
+    theParams.scale = aScale;
+}
+
+void Zombie::DrawShadow(Graphics* g)
+{
+    ZombieDrawPosition aDrawPos;
+    GetDrawPos(aDrawPos);
+    if (mApp->mGameScene == GameScenes::SCENE_ZOMBIES_WON && !SetupDrawZombieWon(g) || mZombiePhase == ZombiePhase::PHASE_ZOMBIE_BURNED)
+        return;
+
+    ShadowDrawParams params;
+    GetShadowDrawParams(aDrawPos, params);
+    TodDrawImageCenterScaledF(g, params.image, params.x, params.y, params.scale, params.scale);
+}
+
+bool Zombie::GetShadowCenter(float& theX, float& theY)
+{
+    // Terminal-win rendering mutates Graphics through SetupDrawZombieWon.
+    // It has no stable Board-space shadow query; ordinary gameplay never calls it.
+    if (!mApp || mApp->mGameScene == GameScenes::SCENE_ZOMBIES_WON || mZombiePhase == ZombiePhase::PHASE_ZOMBIE_BURNED) return false;
+    ZombieDrawPosition pos;
+    GetDrawPos(pos);
+    ShadowDrawParams params;
+    GetShadowDrawParams(pos, params);
+    if (!params.image) return false;
+    const float x = mX + params.x + params.image->mWidth * 0.5f;
+    const float y = mY + params.y + params.image->mHeight * 0.5f;
+    if (!std::isfinite(x) || !std::isfinite(y)) return false;
+    theX = x; theY = y;
+    return true;
 }
 
 //0x5345F0
@@ -11795,6 +11963,9 @@ bool Zombie::IsBobsledTeamWithSled()
 //0x534700
 bool Zombie::IsDeadOrDying()
 {
+    // Source18's beforeDying disables its collider during the native-age
+    // two-second tail. The existing live Update owns that retirement clock.
+    if(mFlatTires&&LawnFusion::IsNativeSpecialZombie269Vehicle(this))return true;
     return 
         mDead || 
         mZombiePhase == ZombiePhase::PHASE_ZOMBIE_DYING || 
@@ -13077,6 +13248,25 @@ void Zombie::EnableDance(bool theEnableDance)
             }
         }
     }
+}
+
+void Zombie::CompletePoolEntry()
+{
+    if (!mInPool || mZombieHeight != ZombieHeight::HEIGHT_IN_TO_POOL) return;
+    mAltitude = int(-40 * mScaleZombie);
+    mZombieHeight = ZombieHeight::HEIGHT_ZOMBIE_NORMAL;
+    StartWalkAnim(0);
+}
+
+void Zombie::SetupPoolReanim()
+{
+    Reanimation* aBodyReanim = mApp->ReanimationTryToGet(mBodyReanimID);
+    if (!aBodyReanim) return;
+    ReanimShowPrefix("zombie_duckytube", RENDER_GROUP_NORMAL);
+    for (const char* aTrack : {"Zombie_duckytube", "Zombie_outerarm_hand", "Zombie_innerarm3"})
+        if (aBodyReanim->TrackExists(aTrack)) ReanimIgnoreClipRect(aTrack, true);
+    for (const char* aTrack : {"Zombie_whitewater", "Zombie_whitewater2"})
+        if (aBodyReanim->TrackExists(aTrack)) SetupWaterTrack(aTrack);
 }
 
 //0x536EA0

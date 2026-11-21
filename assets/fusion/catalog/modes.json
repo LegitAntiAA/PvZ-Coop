@@ -1,0 +1,696 @@
+{
+  "LevelType": [
+    {
+      "name": "Advanture",
+      "value": 0
+    },
+    {
+      "name": "Challenge",
+      "value": 1
+    },
+    {
+      "name": "IZ",
+      "value": 2
+    },
+    {
+      "name": "Survival",
+      "value": 3
+    },
+    {
+      "name": "Explore",
+      "value": 4
+    },
+    {
+      "name": "TravelAdvanture",
+      "value": 5
+    }
+  ],
+  "SceneType": [
+    {
+      "name": "Day",
+      "value": 0
+    },
+    {
+      "name": "Night",
+      "value": 1
+    },
+    {
+      "name": "Pool",
+      "value": 2
+    },
+    {
+      "name": "NightPool",
+      "value": 3
+    },
+    {
+      "name": "Roof",
+      "value": 4
+    },
+    {
+      "name": "NightRoof",
+      "value": 5
+    },
+    {
+      "name": "Day_6",
+      "value": 6
+    },
+    {
+      "name": "Night_6",
+      "value": 7
+    },
+    {
+      "name": "BigDay",
+      "value": 8
+    },
+    {
+      "name": "BigPool",
+      "value": 9
+    },
+    {
+      "name": "Travel_roof",
+      "value": 10
+    },
+    {
+      "name": "Test_green",
+      "value": 11
+    },
+    {
+      "name": "Travel_roof_dusk",
+      "value": 12
+    },
+    {
+      "name": "Travel_roof_night",
+      "value": 13
+    },
+    {
+      "name": "MidDay",
+      "value": 14
+    },
+    {
+      "name": "BilliardBallDay",
+      "value": 15
+    },
+    {
+      "name": "BilliardBallMidDay",
+      "value": 16
+    },
+    {
+      "name": "PVPScaryPot",
+      "value": 17
+    }
+  ],
+  "ChallengeLevel": [
+    {
+      "name": "Travel1",
+      "value": 1
+    },
+    {
+      "name": "Travel2",
+      "value": 2
+    },
+    {
+      "name": "Travel3",
+      "value": 3
+    },
+    {
+      "name": "Travel4",
+      "value": 4
+    },
+    {
+      "name": "Travel5",
+      "value": 5
+    },
+    {
+      "name": "Travel6",
+      "value": 6
+    },
+    {
+      "name": "SuperCherryShooter",
+      "value": 7
+    },
+    {
+      "name": "SuperCherryShooter2",
+      "value": 8
+    },
+    {
+      "name": "SuperCherryShooter3",
+      "value": 9
+    },
+    {
+      "name": "SuperChomper",
+      "value": 10
+    },
+    {
+      "name": "SuperChomper2",
+      "value": 11
+    },
+    {
+      "name": "SuperChomper3",
+      "value": 12
+    },
+    {
+      "name": "FlagDay",
+      "value": 13
+    },
+    {
+      "name": "FlagPlantZombie",
+      "value": 14
+    },
+    {
+      "name": "FlagRandomPlant",
+      "value": 15
+    },
+    {
+      "name": "FlagRandomZombie",
+      "value": 16
+    },
+    {
+      "name": "FlagRandomAll",
+      "value": 17
+    },
+    {
+      "name": "FlagNight",
+      "value": 18
+    },
+    {
+      "name": "SuperHypno",
+      "value": 19
+    },
+    {
+      "name": "SuperHypno2",
+      "value": 20
+    },
+    {
+      "name": "SuperHypno3",
+      "value": 21
+    },
+    {
+      "name": "SuperFume",
+      "value": 22
+    },
+    {
+      "name": "SuperFume2",
+      "value": 23
+    },
+    {
+      "name": "SuperFume3",
+      "value": 24
+    },
+    {
+      "name": "ScaredDream",
+      "value": 25
+    },
+    {
+      "name": "FlagDream",
+      "value": 26
+    },
+    {
+      "name": "FlagElite",
+      "value": 27
+    },
+    {
+      "name": "PolDance",
+      "value": 28
+    },
+    {
+      "name": "PuffTime",
+      "value": 29
+    },
+    {
+      "name": "PaperBattle",
+      "value": 30
+    },
+    {
+      "name": "SuperTorch",
+      "value": 31
+    },
+    {
+      "name": "SuperKelp",
+      "value": 32
+    },
+    {
+      "name": "FlagPool",
+      "value": 33
+    },
+    {
+      "name": "DriverBattle",
+      "value": 34
+    },
+    {
+      "name": "TowerDefense",
+      "value": 35
+    },
+    {
+      "name": "TowerDefense2",
+      "value": 36
+    },
+    {
+      "name": "Doll",
+      "value": 37
+    },
+    {
+      "name": "Column",
+      "value": 38
+    },
+    {
+      "name": "SuperPresent",
+      "value": 39
+    },
+    {
+      "name": "Shooting",
+      "value": 40
+    },
+    {
+      "name": "FlagShooting",
+      "value": 41
+    },
+    {
+      "name": "SeedRain",
+      "value": 42
+    },
+    {
+      "name": "Indestructible",
+      "value": 43
+    },
+    {
+      "name": "AirBattle",
+      "value": 44
+    },
+    {
+      "name": "Travel7",
+      "value": 45
+    },
+    {
+      "name": "Travel8",
+      "value": 46
+    },
+    {
+      "name": "BigMapDay",
+      "value": 47
+    },
+    {
+      "name": "UltimatePresent",
+      "value": 48
+    },
+    {
+      "name": "BigMapPool",
+      "value": 49
+    },
+    {
+      "name": "TowerDefense3",
+      "value": 50
+    },
+    {
+      "name": "Travel9",
+      "value": 51
+    },
+    {
+      "name": "CustomMapEditor",
+      "value": 52
+    },
+    {
+      "name": "CustomMap",
+      "value": 53
+    },
+    {
+      "name": "SuperStar",
+      "value": 54
+    },
+    {
+      "name": "SuperPumpkin",
+      "value": 55
+    },
+    {
+      "name": "RandomTower",
+      "value": 56
+    },
+    {
+      "name": "FlagFog",
+      "value": 57
+    },
+    {
+      "name": "Explosion",
+      "value": 58
+    },
+    {
+      "name": "PogoParty",
+      "value": 59
+    },
+    {
+      "name": "Travel10",
+      "value": 60
+    },
+    {
+      "name": "Garden1",
+      "value": 61
+    },
+    {
+      "name": "Gargantuar",
+      "value": 62
+    },
+    {
+      "name": "ZumaGame",
+      "value": 63
+    },
+    {
+      "name": "WheatProtection",
+      "value": 64
+    },
+    {
+      "name": "Squalour",
+      "value": 65
+    },
+    {
+      "name": "Mirror",
+      "value": 66
+    },
+    {
+      "name": "HypnoNut",
+      "value": 67
+    },
+    {
+      "name": "FlagExchange",
+      "value": 68
+    },
+    {
+      "name": "FlagExchange2",
+      "value": 69
+    },
+    {
+      "name": "Travel11",
+      "value": 70
+    },
+    {
+      "name": "Travel12",
+      "value": 71
+    },
+    {
+      "name": "Shooting2",
+      "value": 72
+    },
+    {
+      "name": "FlagShooting2",
+      "value": 73
+    },
+    {
+      "name": "SuperMelon",
+      "value": 74
+    },
+    {
+      "name": "SuperUmbrella",
+      "value": 75
+    },
+    {
+      "name": "Loon",
+      "value": 76
+    },
+    {
+      "name": "Boss",
+      "value": 77
+    },
+    {
+      "name": "GoldMagnet",
+      "value": 78
+    },
+    {
+      "name": "Travel13",
+      "value": 79
+    },
+    {
+      "name": "FlagConvey",
+      "value": 80
+    },
+    {
+      "name": "TowerDefense4",
+      "value": 81
+    },
+    {
+      "name": "PuffTime2",
+      "value": 82
+    },
+    {
+      "name": "TowerDefense5",
+      "value": 83
+    },
+    {
+      "name": "Shooting3",
+      "value": 84
+    },
+    {
+      "name": "FlagShooting3",
+      "value": 85
+    },
+    {
+      "name": "ObsidianImp",
+      "value": 86
+    },
+    {
+      "name": "FlagRoof",
+      "value": 87
+    },
+    {
+      "name": "ShootingAll",
+      "value": 88
+    },
+    {
+      "name": "Garden2",
+      "value": 89
+    },
+    {
+      "name": "Garden3",
+      "value": 90
+    },
+    {
+      "name": "Garden4",
+      "value": 91
+    },
+    {
+      "name": "Garden5",
+      "value": 92
+    },
+    {
+      "name": "ImitaterRandom",
+      "value": 93
+    },
+    {
+      "name": "Travel14",
+      "value": 94
+    },
+    {
+      "name": "ImitaterRandom2",
+      "value": 95
+    },
+    {
+      "name": "DisMix",
+      "value": 96
+    },
+    {
+      "name": "TowerDefense6",
+      "value": 97
+    },
+    {
+      "name": "Single",
+      "value": 98
+    },
+    {
+      "name": "BungiBattle",
+      "value": 99
+    },
+    {
+      "name": "Bejeweled",
+      "value": 100
+    },
+    {
+      "name": "Travel15",
+      "value": 101
+    },
+    {
+      "name": "ScaryPot",
+      "value": 102
+    },
+    {
+      "name": "ScaryPot2",
+      "value": 103
+    },
+    {
+      "name": "NewGarden",
+      "value": 104
+    },
+    {
+      "name": "TravelAll",
+      "value": 105
+    },
+    {
+      "name": "UltimateBattle",
+      "value": 106
+    },
+    {
+      "name": "LookStar",
+      "value": 107
+    },
+    {
+      "name": "Travel16",
+      "value": 108
+    },
+    {
+      "name": "RandomMix",
+      "value": 109
+    },
+    {
+      "name": "RandomMix2",
+      "value": 110
+    },
+    {
+      "name": "GloveZombie",
+      "value": 111
+    },
+    {
+      "name": "UltimateRandom",
+      "value": 112
+    },
+    {
+      "name": "Shooting4",
+      "value": 113
+    },
+    {
+      "name": "HappyRandom",
+      "value": 114
+    },
+    {
+      "name": "ScaryPot3",
+      "value": 115
+    },
+    {
+      "name": "BilliardBall",
+      "value": 116
+    },
+    {
+      "name": "BilliardBall2",
+      "value": 117
+    },
+    {
+      "name": "BilliardBall3",
+      "value": 118
+    },
+    {
+      "name": "OppositeRandom",
+      "value": 119
+    },
+    {
+      "name": "UltimateRandom2",
+      "value": 120
+    },
+    {
+      "name": "Shooting5",
+      "value": 121
+    },
+    {
+      "name": "PVPScaryPot",
+      "value": 122
+    }
+  ],
+  "ExploreLevel": [
+    {
+      "name": "BigGatling",
+      "value": 1
+    },
+    {
+      "name": "MorePotatoMine",
+      "value": 2
+    },
+    {
+      "name": "BigPumpkin",
+      "value": 3
+    },
+    {
+      "name": "PotatoPuff",
+      "value": 4
+    },
+    {
+      "name": "ScaredyPotato",
+      "value": 5
+    },
+    {
+      "name": "BigChomper",
+      "value": 6
+    },
+    {
+      "name": "GarlicFume",
+      "value": 7
+    },
+    {
+      "name": "HypnoBlover",
+      "value": 8
+    },
+    {
+      "name": "CherryTorch",
+      "value": 9
+    },
+    {
+      "name": "CherryJalapeno",
+      "value": 10
+    },
+    {
+      "name": "CaltropNut",
+      "value": 11
+    },
+    {
+      "name": "BigSeashroom",
+      "value": 12
+    }
+  ],
+  "TravelAdvanture": [
+    {
+      "name": "DoomGatling",
+      "value": 1
+    },
+    {
+      "name": "SuperSunNut",
+      "value": 2
+    },
+    {
+      "name": "SnowGatlingPuff",
+      "value": 3
+    },
+    {
+      "name": "HypnoEmperor",
+      "value": 4
+    },
+    {
+      "name": "SuperHypnoDoom",
+      "value": 5
+    },
+    {
+      "name": "SuperThreePeater",
+      "value": 6
+    },
+    {
+      "name": "ObsidianSpike",
+      "value": 7
+    },
+    {
+      "name": "CattailLour",
+      "value": 8
+    },
+    {
+      "name": "IFVPumpkin",
+      "value": 9
+    },
+    {
+      "name": "EmeraldUmbrella",
+      "value": 10
+    },
+    {
+      "name": "GoldThreeTorch",
+      "value": 11
+    },
+    {
+      "name": "SolarPot",
+      "value": 12
+    },
+    {
+      "name": "LaserUmbrella",
+      "value": 13
+    }
+  ]
+}

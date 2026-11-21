@@ -1,0 +1,329 @@
+{
+  "schema": 1,
+  "sourcePrefab": "Resources/plants/lilypad/LilyPadPreview.prefab",
+  "unitsPerNativePixel": 0.01,
+  "applyRootMotion": false,
+  "static": true,
+  "root": 0,
+  "nodes": [
+    {
+      "name": "LilyPadPreview",
+      "active": true,
+      "tag": "Preview",
+      "parent": -1,
+      "path": "",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.3,
+        "y": 1.3,
+        "z": 1.3
+      }
+    }
+  ],
+  "sourceHierarchy": null,
+  "sprites": [
+    {
+      "texture": "../batch-12/textures/b86a76b76190.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: LilyPad_body\n  m_Rect:\n    serializedVersion: 2\n    x: 0.076120496\n    y: 16.07612\n    width: 99.89713\n    height: 73.880974\n  m_Offset: {x: -0.024689643, y: -3.0166054}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.49975285, y: 0.4591694}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    4088fb5753f950244a145181785380b8: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: da5c8b7cc0dc9d043a22c1516b50676f, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 21\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 9\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 080007000600050006000700040006000500000004000500030004000000010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 9\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 184\n      _typelessdata: 0ad7a33ecdcccc3e000000000000003f0ad723be000000000000003f7b14ae3e000000009a99993e7b14aebe000000003d0a57be7b14aebe00000000ae47e1becdcccc3e000000008fc2f5be9a9919be00000000000000bf295c8f3e00000000000000bfec51b8bd0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0.076120496\n      y: 16.07612\n      width: 99.89713\n      height: 73.880974\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 50, z: 100, w: 50}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape:\n  - - {x: 0.45999998, y: 0.19999999}\n    - {x: 0.32999998, y: 0.32999998}\n    - {x: 0.11, y: 0.39999998}\n    - {x: -0.24, y: 0.39999998}\n    - {x: -0.5, y: 0.25}\n    - {x: -0.5, y: -0.04}\n    - {x: -0.45999998, y: -0.14}\n    - {x: -0.17, y: -0.34}\n    - {x: 0.19999999, y: -0.34}\n    - {x: 0.39, y: -0.28}\n    - {x: 0.5, y: -0.13}\n    - {x: 0.5, y: 0.06}\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.3199999928474426,
+            "y": 0.4000000059604645,
+            "z": 0.0,
+            "u": 0.8199999928474426,
+            "v": 0.09999999403953552
+          },
+          {
+            "x": 0.5,
+            "y": -0.1599999964237213,
+            "z": 0.0,
+            "u": 1.0,
+            "v": 0.6599999964237213
+          },
+          {
+            "x": 0.5,
+            "y": 0.3400000035762787,
+            "z": 0.0,
+            "u": 1.0,
+            "v": 0.1599999964237213
+          },
+          {
+            "x": 0.30000001192092896,
+            "y": -0.3400000035762787,
+            "z": 0.0,
+            "u": 0.800000011920929,
+            "v": 0.8400000035762787
+          },
+          {
+            "x": -0.20999999344348907,
+            "y": -0.3400000035762787,
+            "z": 0.0,
+            "u": 0.2900000065565109,
+            "v": 0.8400000035762787
+          },
+          {
+            "x": -0.4399999976158142,
+            "y": 0.4000000059604645,
+            "z": 0.0,
+            "u": 0.06000000238418579,
+            "v": 0.09999999403953552
+          },
+          {
+            "x": -0.47999998927116394,
+            "y": -0.15000000596046448,
+            "z": 0.0,
+            "u": 0.02000001072883606,
+            "v": 0.6500000059604645
+          },
+          {
+            "x": -0.5,
+            "y": 0.2800000011920929,
+            "z": 0.0,
+            "u": 0.0,
+            "v": 0.2199999988079071
+          },
+          {
+            "x": -0.5,
+            "y": -0.09000000357627869,
+            "z": 0.0,
+            "u": 0.0,
+            "v": 0.5900000035762787
+          }
+        ],
+        "indices": [
+          8,
+          7,
+          6,
+          5,
+          6,
+          7,
+          4,
+          6,
+          5,
+          0,
+          4,
+          5,
+          3,
+          4,
+          0,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/lilypad/LilyPad_body.asset",
+      "textureRect": {
+        "x": 0.076120496,
+        "y": 16.07612,
+        "width": 99.89713,
+        "height": 73.880974,
+        "yTop": 10.042906000000002
+      },
+      "logicalSize": {
+        "width": 99.89713,
+        "height": 73.880974
+      },
+      "pivot": {
+        "x": 0.49975285,
+        "y": 0.4591694
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "3522c96f223d53742a714bc97d9ad1ca",
+      "node": 0,
+      "sortingOrder": 0,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    }
+  ],
+  "spriteVariants": {
+    "3522c96f223d53742a714bc97d9ad1ca": {
+      "texture": "../batch-12/textures/b86a76b76190.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: LilyPad_body\n  m_Rect:\n    serializedVersion: 2\n    x: 0.076120496\n    y: 16.07612\n    width: 99.89713\n    height: 73.880974\n  m_Offset: {x: -0.024689643, y: -3.0166054}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.49975285, y: 0.4591694}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    4088fb5753f950244a145181785380b8: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: da5c8b7cc0dc9d043a22c1516b50676f, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 21\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 9\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 080007000600050006000700040006000500000004000500030004000000010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 9\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 184\n      _typelessdata: 0ad7a33ecdcccc3e000000000000003f0ad723be000000000000003f7b14ae3e000000009a99993e7b14aebe000000003d0a57be7b14aebe00000000ae47e1becdcccc3e000000008fc2f5be9a9919be00000000000000bf295c8f3e00000000000000bfec51b8bd0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0.076120496\n      y: 16.07612\n      width: 99.89713\n      height: 73.880974\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 50, z: 100, w: 50}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape:\n  - - {x: 0.45999998, y: 0.19999999}\n    - {x: 0.32999998, y: 0.32999998}\n    - {x: 0.11, y: 0.39999998}\n    - {x: -0.24, y: 0.39999998}\n    - {x: -0.5, y: 0.25}\n    - {x: -0.5, y: -0.04}\n    - {x: -0.45999998, y: -0.14}\n    - {x: -0.17, y: -0.34}\n    - {x: 0.19999999, y: -0.34}\n    - {x: 0.39, y: -0.28}\n    - {x: 0.5, y: -0.13}\n    - {x: 0.5, y: 0.06}\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.3199999928474426,
+            "y": 0.4000000059604645,
+            "z": 0.0,
+            "u": 0.8199999928474426,
+            "v": 0.09999999403953552
+          },
+          {
+            "x": 0.5,
+            "y": -0.1599999964237213,
+            "z": 0.0,
+            "u": 1.0,
+            "v": 0.6599999964237213
+          },
+          {
+            "x": 0.5,
+            "y": 0.3400000035762787,
+            "z": 0.0,
+            "u": 1.0,
+            "v": 0.1599999964237213
+          },
+          {
+            "x": 0.30000001192092896,
+            "y": -0.3400000035762787,
+            "z": 0.0,
+            "u": 0.800000011920929,
+            "v": 0.8400000035762787
+          },
+          {
+            "x": -0.20999999344348907,
+            "y": -0.3400000035762787,
+            "z": 0.0,
+            "u": 0.2900000065565109,
+            "v": 0.8400000035762787
+          },
+          {
+            "x": -0.4399999976158142,
+            "y": 0.4000000059604645,
+            "z": 0.0,
+            "u": 0.06000000238418579,
+            "v": 0.09999999403953552
+          },
+          {
+            "x": -0.47999998927116394,
+            "y": -0.15000000596046448,
+            "z": 0.0,
+            "u": 0.02000001072883606,
+            "v": 0.6500000059604645
+          },
+          {
+            "x": -0.5,
+            "y": 0.2800000011920929,
+            "z": 0.0,
+            "u": 0.0,
+            "v": 0.2199999988079071
+          },
+          {
+            "x": -0.5,
+            "y": -0.09000000357627869,
+            "z": 0.0,
+            "u": 0.0,
+            "v": 0.5900000035762787
+          }
+        ],
+        "indices": [
+          8,
+          7,
+          6,
+          5,
+          6,
+          7,
+          4,
+          6,
+          5,
+          0,
+          4,
+          5,
+          3,
+          4,
+          0,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/lilypad/LilyPad_body.asset",
+      "textureRect": {
+        "x": 0.076120496,
+        "y": 16.07612,
+        "width": 99.89713,
+        "height": 73.880974,
+        "yTop": 10.042906000000002
+      },
+      "logicalSize": {
+        "width": 99.89713,
+        "height": 73.880974
+      },
+      "pivot": {
+        "x": 0.49975285,
+        "y": 0.4591694
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    }
+  },
+  "extraSpriteGuids": {},
+  "anchors": {},
+  "visualBounds": {
+    "minX": -0.65,
+    "maxX": 0.65,
+    "minY": -0.4420000046491623,
+    "maxY": 0.5200000077486039
+  },
+  "clips": {},
+  "controller": {
+    "states": [],
+    "layers": [],
+    "serializedController": ""
+  },
+  "nonRenderingComponents": [],
+  "colliders": [],
+  "ignoredBindings": [],
+  "omittedInactiveNodes": [],
+  "spritePrefix": null,
+  "unusedSpriteBonesExplicitlyAllowed": false,
+  "sources": [
+    {
+      "path": "Resources/plants/lilypad/LilyPad_body.asset",
+      "sha256": "7952391ced1ef080dbadbfae660b65243afa870600c8392a739b3d19010a32cd"
+    },
+    {
+      "path": "Resources/plants/lilypad/LilyPad_body.asset.meta",
+      "sha256": "6db328f58f67e4013d6d2d1a14f614f34d5513848b3f8dc5af8a3f56fa44a701"
+    },
+    {
+      "path": "Resources/plants/lilypad/LilyPad_body.png",
+      "sha256": "b86a76b761904ea96ac4bbf5498f318d07b5dc4db1a0e2edd91af8643d9a779a"
+    },
+    {
+      "path": "Resources/plants/lilypad/LilyPad_body.png.meta",
+      "sha256": "9b2b1d64f4e8b966f688a227981c8531680c4869d8b64a192c454f513d7c2dd0"
+    },
+    {
+      "path": "Resources/plants/lilypad/LilyPadPreview.prefab",
+      "sha256": "9bc3ba94ef50707820ed98fa6df9ef2635d306cd87f9ac2324643569c61f2587"
+    }
+  ],
+  "deferredComponents": [],
+  "validation": "Exported source data. Native rendering and source-runtime comparison are separate verification steps."
+}

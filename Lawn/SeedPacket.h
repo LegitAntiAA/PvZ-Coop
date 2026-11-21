@@ -9,6 +9,7 @@ constexpr const int SLOT_MACHINE_TIME = 400;
 constexpr const int CONVEYOR_SPEED = 4;
 
 class HitResult;
+namespace LawnFusion { class FusionPortraitCache; }
 class SeedPacket : public GameObject
 {
 public:
@@ -71,11 +72,13 @@ public:
     void			    UpdateConveyorBelt();
     void			    UpdateWidth();
     void			    RefreshAllPackets();
+    void                SortPacketsForViewer(int theViewerSlot);
 };
 
 void				    SeedPacketDrawSeed(Graphics* g, float x, float y, SeedType theSeedType, SeedType theImitaterType, float theOffsetX, float theOffsetY, float theScale);
 void				    DrawSeedPacket(Graphics* g, float x, float y, SeedType theSeedType, SeedType theImitaterType, float thePercentDark, int theGrayness, bool theDrawCost, bool theUseCurrentCost);
 void                    DrawMysterySeedPacket(Graphics* g, float x, float y, int theGrayness = 255);
+void                    DrawNativeFusionSeedPacket(Graphics* g, float x, float y, uint16_t theKind, bool theExtra, int theCost, float thePercentDark = 0.0f, int theGrayness = 255, bool theDrawCost = true, LawnFusion::FusionPortraitCache* thePortraitCache = nullptr);
 
 
 #endif

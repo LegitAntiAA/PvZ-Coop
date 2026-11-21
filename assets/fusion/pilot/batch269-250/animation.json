@@ -1,0 +1,1972 @@
+{
+  "schema": 1,
+  "sourcePrefab": "Resources/plants/present/PresentPrefab2.prefab",
+  "unitsPerNativePixel": 0.01,
+  "applyRootMotion": false,
+  "static": false,
+  "root": 0,
+  "nodes": [
+    {
+      "name": "PresentPrefab2",
+      "active": true,
+      "tag": "Plant",
+      "parent": -1,
+      "path": "",
+      "position": {
+        "x": -1.354,
+        "y": 0.703,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.6,
+        "y": 1.6,
+        "z": 1.6
+      }
+    },
+    {
+      "name": "Shadow",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "Shadow",
+      "position": {
+        "x": -0.005,
+        "y": -0.275,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 0.14285715
+      }
+    },
+    {
+      "name": "PresentBody",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "PresentBody",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5
+      }
+    }
+  ],
+  "sourceHierarchy": null,
+  "sprites": [
+    {
+      "texture": "../cactus/textures/7924e0d6960d.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: plantshadow\n  m_Rect:\n    serializedVersion: 2\n    x: 0\n    y: 0\n    width: 86\n    height: 36\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    b79a0977f249dd948866a2f5a914ba3a: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 0286c7c34d435bf4694be6a09458c445, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: f628dcbeec51383e00000000f628dc3eec51383e00000000f628dcbeec5138be00000000f628dc3eec5138be000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 86\n      height: 36\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 0\n    uvTransform: {x: 100, y: 43, z: 100, w: 18}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -0.4300000071525574,
+            "y": 0.18000000715255737,
+            "z": 0.0,
+            "u": -8.316927177961482e-09,
+            "v": -1.986821485111534e-08
+          },
+          {
+            "x": 0.4300000071525574,
+            "y": 0.18000000715255737,
+            "z": 0.0,
+            "u": 1.0000000083169271,
+            "v": -1.986821485111534e-08
+          },
+          {
+            "x": -0.4300000071525574,
+            "y": -0.18000000715255737,
+            "z": 0.0,
+            "u": -8.316927177961482e-09,
+            "v": 1.0000000198682149
+          },
+          {
+            "x": 0.4300000071525574,
+            "y": -0.18000000715255737,
+            "z": 0.0,
+            "u": 1.0000000083169271,
+            "v": 1.0000000198682149
+          }
+        ],
+        "indices": [
+          0,
+          1,
+          2,
+          2,
+          1,
+          3
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/board/plantshadow.asset",
+      "textureRect": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 86.0,
+        "height": 36.0,
+        "yTop": 0.0
+      },
+      "logicalSize": {
+        "width": 86.0,
+        "height": 36.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "e741cea7caea00248903707884a3228b",
+      "node": 1,
+      "sortingOrder": 0,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    },
+    {
+      "texture": "textures/6598c5cb8a8d.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: PresentZ\n  m_Rect:\n    serializedVersion: 2\n    x: 0\n    y: 0\n    width: 150\n    height: 152\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    5ed2502b6f3367340b9b215d53362e4f: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 99c4687931ed5784abb1754b7c96ceed, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 81\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 23\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 1600150014001100140015001200140011001300120011000b0009000e0008000e0009000d000e00080007000d0008000c000d00070006000c0007000f000b0010000e0010000b00050010000e000a000b000f000d0005000e000c0005000d00060005000c00040009000a000b000a000900080009000400070008000400060007000400050006000400030005000400000003000400010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 23\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 472\n      _typelessdata: ec51383f48e13a3f000000009a99193f000040bf00000000ec51383f3333b3be00000000713d0a3f5c8f42bf00000000cdcccc3e5c8f423f00000000295c8fbe5c8f42bf00000000d7a3f0be9a9919bf0000000048e1fabee17a14bf000000005c8f02bfe17a14bf0000000014ae07bf9a9919bf00000000333333bf5c8f423f0000000014ae07bf52b81ebf00000000d7a3f0be52b81ebf0000000048e1fabe0ad723bf000000005c8f02bf0ad723bf00000000000040bf3333333f00000000000040bfae4721bf0000000048e13a3f1f85ebbe000000000000403fb81e05bf000000000000403f1f85ebbe0000000048e13a3fb81e05bf000000008fc2353f8fc2f5be000000008fc2353f000000bf0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 150\n      height: 152\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 75, z: 100, w: 76}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape:\n  - - {x: 0.69, y: 0.049999997}\n    - {x: 0.69, y: 0.62}\n    - {x: 0.64, y: 0.65}\n    - {x: 0.5, y: 0.63}\n    - {x: 0.35999998, y: 0.59}\n    - {x: 0.16, y: 0.48999998}\n    - {x: 0.049999997, y: 0.57}\n    - {x: -0.099999994, y: 0.76}\n    - {x: -0.21, y: 0.76}\n    - {x: -0.32, y: 0.71999997}\n    - {x: -0.51, y: 0.71999997}\n    - {x: -0.58, y: 0.65999997}\n    - {x: -0.55, y: 0.44}\n    - {x: -0.65, y: 0.29999998}\n    - {x: -0.66999996, y: 0.16}\n    - {x: -0.75, y: 0}\n    - {x: -0.75, y: -0.07}\n    - {x: -0.74, y: -0.11}\n    - {x: -0.65, y: -0.089999996}\n    - {x: -0.65, y: -0.41}\n    - {x: -0.59, y: -0.48999998}\n    - {x: -0.34, y: -0.63}\n    - {x: -0.049999997, y: -0.75}\n    - {x: 0.06, y: -0.75}\n    - {x: 0.5, y: -0.53999996}\n    - {x: 0.64, y: -0.44}\n    - {x: 0.65, y: -0.13}\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.7200000286102295,
+            "y": 0.7300000190734863,
+            "z": 0.0,
+            "u": 0.9800000190734863,
+            "v": 0.019736829556916913
+          },
+          {
+            "x": 0.6000000238418579,
+            "y": -0.75,
+            "z": 0.0,
+            "u": 0.9000000158945719,
+            "v": 0.993421052631579
+          },
+          {
+            "x": 0.7200000286102295,
+            "y": -0.3499999940395355,
+            "z": 0.0,
+            "u": 0.9800000190734863,
+            "v": 0.7302631539733786
+          },
+          {
+            "x": 0.5400000214576721,
+            "y": -0.7599999904632568,
+            "z": 0.0,
+            "u": 0.8600000143051147,
+            "v": 0.9999999937258268
+          },
+          {
+            "x": 0.4000000059604645,
+            "y": 0.7599999904632568,
+            "z": 0.0,
+            "u": 0.7666666706403097,
+            "v": 6.274173180997877e-09
+          },
+          {
+            "x": -0.2800000011920929,
+            "y": -0.7599999904632568,
+            "z": 0.0,
+            "u": 0.31333333253860474,
+            "v": 0.9999999937258268
+          },
+          {
+            "x": -0.4699999988079071,
+            "y": -0.6000000238418579,
+            "z": 0.0,
+            "u": 0.18666666746139526,
+            "v": 0.894736857790696
+          },
+          {
+            "x": -0.49000000953674316,
+            "y": -0.5799999833106995,
+            "z": 0.0,
+            "u": 0.17333332697550455,
+            "v": 0.8815789363886181
+          },
+          {
+            "x": -0.5099999904632568,
+            "y": -0.5799999833106995,
+            "z": 0.0,
+            "u": 0.16000000635782877,
+            "v": 0.8815789363886181
+          },
+          {
+            "x": -0.5299999713897705,
+            "y": -0.6000000238418579,
+            "z": 0.0,
+            "u": 0.14666668574015299,
+            "v": 0.894736857790696
+          },
+          {
+            "x": -0.699999988079071,
+            "y": 0.7599999904632568,
+            "z": 0.0,
+            "u": 0.0333333412806193,
+            "v": 6.274173180997877e-09
+          },
+          {
+            "x": -0.5299999713897705,
+            "y": -0.6200000047683716,
+            "z": 0.0,
+            "u": 0.14666668574015299,
+            "v": 0.9078947399791918
+          },
+          {
+            "x": -0.4699999988079071,
+            "y": -0.6200000047683716,
+            "z": 0.0,
+            "u": 0.18666666746139526,
+            "v": 0.9078947399791918
+          },
+          {
+            "x": -0.49000000953674316,
+            "y": -0.6399999856948853,
+            "z": 0.0,
+            "u": 0.17333332697550455,
+            "v": 0.9210526221676877
+          },
+          {
+            "x": -0.5099999904632568,
+            "y": -0.6399999856948853,
+            "z": 0.0,
+            "u": 0.16000000635782877,
+            "v": 0.9210526221676877
+          },
+          {
+            "x": -0.75,
+            "y": 0.699999988079071,
+            "z": 0.0,
+            "u": 0.0,
+            "v": 0.03947369205324269
+          },
+          {
+            "x": -0.75,
+            "y": -0.6299999952316284,
+            "z": 0.0,
+            "u": 0.0,
+            "v": 0.9144736810734397
+          },
+          {
+            "x": 0.7300000190734863,
+            "y": -0.46000000834465027,
+            "z": 0.0,
+            "u": 0.9866666793823242,
+            "v": 0.8026315844372699
+          },
+          {
+            "x": 0.75,
+            "y": -0.5199999809265137,
+            "z": 0.0,
+            "u": 1.0,
+            "v": 0.8421052506095484
+          },
+          {
+            "x": 0.75,
+            "y": -0.46000000834465027,
+            "z": 0.0,
+            "u": 1.0,
+            "v": 0.8026315844372699
+          },
+          {
+            "x": 0.7300000190734863,
+            "y": -0.5199999809265137,
+            "z": 0.0,
+            "u": 0.9866666793823242,
+            "v": 0.8421052506095484
+          },
+          {
+            "x": 0.7099999785423279,
+            "y": -0.47999998927116394,
+            "z": 0.0,
+            "u": 0.9733333190282186,
+            "v": 0.8157894666257658
+          },
+          {
+            "x": 0.7099999785423279,
+            "y": -0.5,
+            "z": 0.0,
+            "u": 0.9733333190282186,
+            "v": 0.8289473684210527
+          }
+        ],
+        "indices": [
+          22,
+          21,
+          20,
+          17,
+          20,
+          21,
+          18,
+          20,
+          17,
+          19,
+          18,
+          17,
+          11,
+          9,
+          14,
+          8,
+          14,
+          9,
+          13,
+          14,
+          8,
+          7,
+          13,
+          8,
+          12,
+          13,
+          7,
+          6,
+          12,
+          7,
+          15,
+          11,
+          16,
+          14,
+          16,
+          11,
+          5,
+          16,
+          14,
+          10,
+          11,
+          15,
+          13,
+          5,
+          14,
+          12,
+          5,
+          13,
+          6,
+          5,
+          12,
+          4,
+          9,
+          10,
+          11,
+          10,
+          9,
+          8,
+          9,
+          4,
+          7,
+          8,
+          4,
+          6,
+          7,
+          4,
+          5,
+          6,
+          4,
+          3,
+          5,
+          4,
+          0,
+          3,
+          4,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/image/PresentZ.asset",
+      "textureRect": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 150.0,
+        "height": 152.0,
+        "yTop": 0.0
+      },
+      "logicalSize": {
+        "width": 150.0,
+        "height": 152.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "ff23291beba190642b8466146a13b889",
+      "node": 2,
+      "sortingOrder": 1,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    }
+  ],
+  "spriteVariants": {
+    "e741cea7caea00248903707884a3228b": {
+      "texture": "../cactus/textures/7924e0d6960d.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: plantshadow\n  m_Rect:\n    serializedVersion: 2\n    x: 0\n    y: 0\n    width: 86\n    height: 36\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    b79a0977f249dd948866a2f5a914ba3a: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 0286c7c34d435bf4694be6a09458c445, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: f628dcbeec51383e00000000f628dc3eec51383e00000000f628dcbeec5138be00000000f628dc3eec5138be000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 86\n      height: 36\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 0\n    uvTransform: {x: 100, y: 43, z: 100, w: 18}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -0.4300000071525574,
+            "y": 0.18000000715255737,
+            "z": 0.0,
+            "u": -8.316927177961482e-09,
+            "v": -1.986821485111534e-08
+          },
+          {
+            "x": 0.4300000071525574,
+            "y": 0.18000000715255737,
+            "z": 0.0,
+            "u": 1.0000000083169271,
+            "v": -1.986821485111534e-08
+          },
+          {
+            "x": -0.4300000071525574,
+            "y": -0.18000000715255737,
+            "z": 0.0,
+            "u": -8.316927177961482e-09,
+            "v": 1.0000000198682149
+          },
+          {
+            "x": 0.4300000071525574,
+            "y": -0.18000000715255737,
+            "z": 0.0,
+            "u": 1.0000000083169271,
+            "v": 1.0000000198682149
+          }
+        ],
+        "indices": [
+          0,
+          1,
+          2,
+          2,
+          1,
+          3
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/board/plantshadow.asset",
+      "textureRect": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 86.0,
+        "height": 36.0,
+        "yTop": 0.0
+      },
+      "logicalSize": {
+        "width": 86.0,
+        "height": 36.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "ff23291beba190642b8466146a13b889": {
+      "texture": "textures/6598c5cb8a8d.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: PresentZ\n  m_Rect:\n    serializedVersion: 2\n    x: 0\n    y: 0\n    width: 150\n    height: 152\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    5ed2502b6f3367340b9b215d53362e4f: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 99c4687931ed5784abb1754b7c96ceed, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 81\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 23\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 1600150014001100140015001200140011001300120011000b0009000e0008000e0009000d000e00080007000d0008000c000d00070006000c0007000f000b0010000e0010000b00050010000e000a000b000f000d0005000e000c0005000d00060005000c00040009000a000b000a000900080009000400070008000400060007000400050006000400030005000400000003000400010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 23\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 472\n      _typelessdata: ec51383f48e13a3f000000009a99193f000040bf00000000ec51383f3333b3be00000000713d0a3f5c8f42bf00000000cdcccc3e5c8f423f00000000295c8fbe5c8f42bf00000000d7a3f0be9a9919bf0000000048e1fabee17a14bf000000005c8f02bfe17a14bf0000000014ae07bf9a9919bf00000000333333bf5c8f423f0000000014ae07bf52b81ebf00000000d7a3f0be52b81ebf0000000048e1fabe0ad723bf000000005c8f02bf0ad723bf00000000000040bf3333333f00000000000040bfae4721bf0000000048e13a3f1f85ebbe000000000000403fb81e05bf000000000000403f1f85ebbe0000000048e13a3fb81e05bf000000008fc2353f8fc2f5be000000008fc2353f000000bf0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 150\n      height: 152\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 75, z: 100, w: 76}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape:\n  - - {x: 0.69, y: 0.049999997}\n    - {x: 0.69, y: 0.62}\n    - {x: 0.64, y: 0.65}\n    - {x: 0.5, y: 0.63}\n    - {x: 0.35999998, y: 0.59}\n    - {x: 0.16, y: 0.48999998}\n    - {x: 0.049999997, y: 0.57}\n    - {x: -0.099999994, y: 0.76}\n    - {x: -0.21, y: 0.76}\n    - {x: -0.32, y: 0.71999997}\n    - {x: -0.51, y: 0.71999997}\n    - {x: -0.58, y: 0.65999997}\n    - {x: -0.55, y: 0.44}\n    - {x: -0.65, y: 0.29999998}\n    - {x: -0.66999996, y: 0.16}\n    - {x: -0.75, y: 0}\n    - {x: -0.75, y: -0.07}\n    - {x: -0.74, y: -0.11}\n    - {x: -0.65, y: -0.089999996}\n    - {x: -0.65, y: -0.41}\n    - {x: -0.59, y: -0.48999998}\n    - {x: -0.34, y: -0.63}\n    - {x: -0.049999997, y: -0.75}\n    - {x: 0.06, y: -0.75}\n    - {x: 0.5, y: -0.53999996}\n    - {x: 0.64, y: -0.44}\n    - {x: 0.65, y: -0.13}\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.7200000286102295,
+            "y": 0.7300000190734863,
+            "z": 0.0,
+            "u": 0.9800000190734863,
+            "v": 0.019736829556916913
+          },
+          {
+            "x": 0.6000000238418579,
+            "y": -0.75,
+            "z": 0.0,
+            "u": 0.9000000158945719,
+            "v": 0.993421052631579
+          },
+          {
+            "x": 0.7200000286102295,
+            "y": -0.3499999940395355,
+            "z": 0.0,
+            "u": 0.9800000190734863,
+            "v": 0.7302631539733786
+          },
+          {
+            "x": 0.5400000214576721,
+            "y": -0.7599999904632568,
+            "z": 0.0,
+            "u": 0.8600000143051147,
+            "v": 0.9999999937258268
+          },
+          {
+            "x": 0.4000000059604645,
+            "y": 0.7599999904632568,
+            "z": 0.0,
+            "u": 0.7666666706403097,
+            "v": 6.274173180997877e-09
+          },
+          {
+            "x": -0.2800000011920929,
+            "y": -0.7599999904632568,
+            "z": 0.0,
+            "u": 0.31333333253860474,
+            "v": 0.9999999937258268
+          },
+          {
+            "x": -0.4699999988079071,
+            "y": -0.6000000238418579,
+            "z": 0.0,
+            "u": 0.18666666746139526,
+            "v": 0.894736857790696
+          },
+          {
+            "x": -0.49000000953674316,
+            "y": -0.5799999833106995,
+            "z": 0.0,
+            "u": 0.17333332697550455,
+            "v": 0.8815789363886181
+          },
+          {
+            "x": -0.5099999904632568,
+            "y": -0.5799999833106995,
+            "z": 0.0,
+            "u": 0.16000000635782877,
+            "v": 0.8815789363886181
+          },
+          {
+            "x": -0.5299999713897705,
+            "y": -0.6000000238418579,
+            "z": 0.0,
+            "u": 0.14666668574015299,
+            "v": 0.894736857790696
+          },
+          {
+            "x": -0.699999988079071,
+            "y": 0.7599999904632568,
+            "z": 0.0,
+            "u": 0.0333333412806193,
+            "v": 6.274173180997877e-09
+          },
+          {
+            "x": -0.5299999713897705,
+            "y": -0.6200000047683716,
+            "z": 0.0,
+            "u": 0.14666668574015299,
+            "v": 0.9078947399791918
+          },
+          {
+            "x": -0.4699999988079071,
+            "y": -0.6200000047683716,
+            "z": 0.0,
+            "u": 0.18666666746139526,
+            "v": 0.9078947399791918
+          },
+          {
+            "x": -0.49000000953674316,
+            "y": -0.6399999856948853,
+            "z": 0.0,
+            "u": 0.17333332697550455,
+            "v": 0.9210526221676877
+          },
+          {
+            "x": -0.5099999904632568,
+            "y": -0.6399999856948853,
+            "z": 0.0,
+            "u": 0.16000000635782877,
+            "v": 0.9210526221676877
+          },
+          {
+            "x": -0.75,
+            "y": 0.699999988079071,
+            "z": 0.0,
+            "u": 0.0,
+            "v": 0.03947369205324269
+          },
+          {
+            "x": -0.75,
+            "y": -0.6299999952316284,
+            "z": 0.0,
+            "u": 0.0,
+            "v": 0.9144736810734397
+          },
+          {
+            "x": 0.7300000190734863,
+            "y": -0.46000000834465027,
+            "z": 0.0,
+            "u": 0.9866666793823242,
+            "v": 0.8026315844372699
+          },
+          {
+            "x": 0.75,
+            "y": -0.5199999809265137,
+            "z": 0.0,
+            "u": 1.0,
+            "v": 0.8421052506095484
+          },
+          {
+            "x": 0.75,
+            "y": -0.46000000834465027,
+            "z": 0.0,
+            "u": 1.0,
+            "v": 0.8026315844372699
+          },
+          {
+            "x": 0.7300000190734863,
+            "y": -0.5199999809265137,
+            "z": 0.0,
+            "u": 0.9866666793823242,
+            "v": 0.8421052506095484
+          },
+          {
+            "x": 0.7099999785423279,
+            "y": -0.47999998927116394,
+            "z": 0.0,
+            "u": 0.9733333190282186,
+            "v": 0.8157894666257658
+          },
+          {
+            "x": 0.7099999785423279,
+            "y": -0.5,
+            "z": 0.0,
+            "u": 0.9733333190282186,
+            "v": 0.8289473684210527
+          }
+        ],
+        "indices": [
+          22,
+          21,
+          20,
+          17,
+          20,
+          21,
+          18,
+          20,
+          17,
+          19,
+          18,
+          17,
+          11,
+          9,
+          14,
+          8,
+          14,
+          9,
+          13,
+          14,
+          8,
+          7,
+          13,
+          8,
+          12,
+          13,
+          7,
+          6,
+          12,
+          7,
+          15,
+          11,
+          16,
+          14,
+          16,
+          11,
+          5,
+          16,
+          14,
+          10,
+          11,
+          15,
+          13,
+          5,
+          14,
+          12,
+          5,
+          13,
+          6,
+          5,
+          12,
+          4,
+          9,
+          10,
+          11,
+          10,
+          9,
+          8,
+          9,
+          4,
+          7,
+          8,
+          4,
+          6,
+          7,
+          4,
+          5,
+          6,
+          4,
+          3,
+          5,
+          4,
+          0,
+          3,
+          4,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/image/PresentZ.asset",
+      "textureRect": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 150.0,
+        "height": 152.0,
+        "yTop": 0.0
+      },
+      "logicalSize": {
+        "width": 150.0,
+        "height": 152.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "ffb5731ef6b0fa7468435467229075ca": {
+      "texture": "textures/4497b90e1ff6.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: PresentOpenZ\n  m_Rect:\n    serializedVersion: 2\n    x: 0\n    y: 0\n    width: 170\n    height: 194\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    8cf8daef340edbc4c8c245603b63e866: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 229ba823b50aa0148b0c152841ce7fc3, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 75\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 21\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 1400130012000f0012001300100012000f00110010000f00060004000e0003000e00040001000e0003000d000e0001000c000d00010002000c00010006000e0005000a0005000e000d000a000e000c000a000d0002000a000c0000000a00020009000a0000000b000a000900080007000500000005000700040005000000060005000400030004000000010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 21\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 424\n      _typelessdata: c3f5a8beec51783f000000005c8fc2be14ae47bf00000000ec51b8be713d4abf00000000f628dcbe14ae47bf00000000ae47e1becdcc4cbf0000000014ae47bfec5178bf00000000ae47e1be9a9959bf000000009a9959bfcdcc4c3f000000009a9959bf295c4fbf000000001f85eb3eec51783f00000000a4703d3fec5178bf00000000a4703d3fb81e453f00000000ec51b8bee17a54bf000000005c8fc2bef6285cbf0000000085ebd1bef6285cbf00000000e17a543fc3f528bf000000009a99593fa4703dbf000000009a99593fc3f528bf00000000e17a543fa4703dbf00000000cdcc4c3fd7a330bf00000000cdcc4c3f8fc235bf0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 170\n      height: 194\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 85, z: 100, w: 97}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape:\n  - - {x: 0.71999997, y: -0.13}\n    - {x: 0.42999998, y: 0}\n    - {x: 0.57, y: 0}\n    - {x: 0.62, y: 0.02}\n    - {x: 0.62, y: 0.06}\n    - {x: 0.61, y: 0.089999996}\n    - {x: 0.58, y: 0.26999998}\n    - {x: 0.47, y: 0.31}\n    - {x: 0.51, y: 0.53999996}\n    - {x: 0.17, y: 0.96}\n    - {x: 0.14999999, y: 0.96999997}\n    - {x: 0.06, y: 0.96999997}\n    - {x: -0.099999994, y: 0.75}\n    - {x: -0.22, y: 0.5}\n    - {x: -0.55, y: 0.53}\n    - {x: -0.59999996, y: 0.53}\n    - {x: -0.84999996, y: 0.22999999}\n    - {x: -0.84999996, y: 0.14}\n    - {x: -0.66999996, y: -0.02}\n    - {x: -0.68, y: -0.12}\n    - {x: -0.66999996, y: -0.17999999}\n    - {x: -0.55, y: -0.32}\n    - {x: -0.55, y: -0.63}\n    - {x: -0.52, y: -0.66999996}\n    - {x: -0.35999998, y: -0.78}\n    - {x: 0.02, y: -0.96}\n    - {x: 0.14999999, y: -0.96}\n    - {x: 0.61, y: -0.75}\n    - {x: 0.71999997, y: -0.66999996}\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -0.33000001311302185,
+            "y": 0.9700000286102295,
+            "z": 0.0,
+            "u": 0.3058823452276342,
+            "v": -1.4747540966197903e-08
+          },
+          {
+            "x": -0.3799999952316284,
+            "y": -0.7799999713897705,
+            "z": 0.0,
+            "u": 0.2764705910402186,
+            "v": 0.9020618409225621
+          },
+          {
+            "x": -0.36000001430511475,
+            "y": -0.7900000214576721,
+            "z": 0.0,
+            "u": 0.28823528570287366,
+            "v": 0.9072165059060165
+          },
+          {
+            "x": -0.4300000071525574,
+            "y": -0.7799999713897705,
+            "z": 0.0,
+            "u": 0.24705881932202509,
+            "v": 0.9020618409225621
+          },
+          {
+            "x": -0.4399999976158142,
+            "y": -0.800000011920929,
+            "z": 0.0,
+            "u": 0.24117647199069753,
+            "v": 0.9123711401654273
+          },
+          {
+            "x": -0.7799999713897705,
+            "y": -0.9700000286102295,
+            "z": 0.0,
+            "u": 0.04117648741778206,
+            "v": 1.000000014747541
+          },
+          {
+            "x": -0.4399999976158142,
+            "y": -0.8500000238418579,
+            "z": 0.0,
+            "u": 0.24117647199069753,
+            "v": 0.9381443421865246
+          },
+          {
+            "x": -0.8500000238418579,
+            "y": 0.800000011920929,
+            "z": 0.0,
+            "u": -1.4024622300091912e-08,
+            "v": 0.08762885983457269
+          },
+          {
+            "x": -0.8500000238418579,
+            "y": -0.8100000023841858,
+            "z": 0.0,
+            "u": -1.4024622300091912e-08,
+            "v": 0.9175257744248381
+          },
+          {
+            "x": 0.46000000834465027,
+            "y": 0.9700000286102295,
+            "z": 0.0,
+            "u": 0.7705882402027354,
+            "v": -1.4747540966197903e-08
+          },
+          {
+            "x": 0.7400000095367432,
+            "y": -0.9700000286102295,
+            "z": 0.0,
+            "u": 0.9352941232569078,
+            "v": 1.000000014747541
+          },
+          {
+            "x": 0.7400000095367432,
+            "y": 0.7699999809265137,
+            "z": 0.0,
+            "u": 0.9352941232569078,
+            "v": 0.10309279333684862
+          },
+          {
+            "x": -0.36000001430511475,
+            "y": -0.8299999833106995,
+            "z": 0.0,
+            "u": 0.28823528570287366,
+            "v": 0.9278350429436595
+          },
+          {
+            "x": -0.3799999952316284,
+            "y": -0.8600000143051147,
+            "z": 0.0,
+            "u": 0.2764705910402186,
+            "v": 0.9432989764459354
+          },
+          {
+            "x": -0.4099999964237213,
+            "y": -0.8600000143051147,
+            "z": 0.0,
+            "u": 0.25882353151545806,
+            "v": 0.9432989764459354
+          },
+          {
+            "x": 0.8299999833106995,
+            "y": -0.6600000262260437,
+            "z": 0.0,
+            "u": 0.9882352843004114,
+            "v": 0.8402061990855896
+          },
+          {
+            "x": 0.8500000238418579,
+            "y": -0.7400000095367432,
+            "z": 0.0,
+            "u": 1.0000000140246224,
+            "v": 0.8814433038849192
+          },
+          {
+            "x": 0.8500000238418579,
+            "y": -0.6600000262260437,
+            "z": 0.0,
+            "u": 1.0000000140246224,
+            "v": 0.8402061990855896
+          },
+          {
+            "x": 0.8299999833106995,
+            "y": -0.7400000095367432,
+            "z": 0.0,
+            "u": 0.9882352843004114,
+            "v": 0.8814433038849192
+          },
+          {
+            "x": 0.800000011920929,
+            "y": -0.6899999976158142,
+            "z": 0.0,
+            "u": 0.9705882423064288,
+            "v": 0.8556701018638218
+          },
+          {
+            "x": 0.800000011920929,
+            "y": -0.7099999785423279,
+            "z": 0.0,
+            "u": 0.9705882423064288,
+            "v": 0.8659793703826433
+          }
+        ],
+        "indices": [
+          20,
+          19,
+          18,
+          15,
+          18,
+          19,
+          16,
+          18,
+          15,
+          17,
+          16,
+          15,
+          6,
+          4,
+          14,
+          3,
+          14,
+          4,
+          1,
+          14,
+          3,
+          13,
+          14,
+          1,
+          12,
+          13,
+          1,
+          2,
+          12,
+          1,
+          6,
+          14,
+          5,
+          10,
+          5,
+          14,
+          13,
+          10,
+          14,
+          12,
+          10,
+          13,
+          2,
+          10,
+          12,
+          0,
+          10,
+          2,
+          9,
+          10,
+          0,
+          11,
+          10,
+          9,
+          8,
+          7,
+          5,
+          0,
+          5,
+          7,
+          4,
+          5,
+          0,
+          6,
+          5,
+          4,
+          3,
+          4,
+          0,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/image/PresentOpenZ.asset",
+      "textureRect": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 170.0,
+        "height": 194.0,
+        "yTop": 0.0
+      },
+      "logicalSize": {
+        "width": 170.0,
+        "height": 194.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    }
+  },
+  "extraSpriteGuids": {},
+  "anchors": {
+    "shadow": {
+      "path": "Shadow",
+      "x": -0.008,
+      "y": -0.44000000000000006,
+      "relativeToRuntimeRoot": true
+    }
+  },
+  "visualBounds": {
+    "minX": -0.6960000114440918,
+    "maxX": 0.6800000114440918,
+    "minY": -0.7280000114440919,
+    "maxY": 0.6079999923706055
+  },
+  "clips": {
+    "idleAlmanac2": {
+      "name": "idleAlmanac2",
+      "duration": 2.0,
+      "additiveReferencePoseTime": 0.0,
+      "hasAdditiveReferencePose": false,
+      "loop": true,
+      "sourceSampleRate": 60.0,
+      "curves": [
+        {
+          "kind": "position",
+          "path": "PresentBody",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.5,
+              "value": {
+                "x": 0.0,
+                "y": -0.025249993,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 7.450581e-09,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": -7.450581e-09,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.5,
+              "value": {
+                "x": 0.0,
+                "y": -0.025249993,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 7.450581e-09,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 2.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": -7.450581e-09,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "PresentBody"
+        },
+        {
+          "kind": "scale",
+          "path": "PresentBody",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.5,
+                "y": 0.5,
+                "z": 0.5
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.5,
+              "value": {
+                "x": 0.55,
+                "y": 0.4625,
+                "z": 0.5
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "x": 0.5,
+                "y": 0.5,
+                "z": 0.5
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.5,
+              "value": {
+                "x": 0.55,
+                "y": 0.4625,
+                "z": 0.5
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 2.0,
+              "value": {
+                "x": 0.5,
+                "y": 0.5,
+                "z": 0.5
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "PresentBody"
+        }
+      ],
+      "events": []
+    },
+    "idle2": {
+      "name": "idle2",
+      "duration": 1.2666667,
+      "additiveReferencePoseTime": 0.0,
+      "hasAdditiveReferencePose": false,
+      "loop": true,
+      "sourceSampleRate": 60.0,
+      "curves": [
+        {
+          "kind": "position",
+          "path": "PresentBody",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.25,
+              "value": {
+                "x": 0.0,
+                "y": -0.025249993,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 1.4901161e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.5,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": -1.4901161e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.75,
+              "value": {
+                "x": 0.0,
+                "y": -0.025249993,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 1.4901161e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": -1.4901161e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.0166667,
+              "value": {
+                "x": -0.038,
+                "y": 0.054,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 7.883328e-07,
+                "y": 2.289344e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.25,
+              "value": {
+                "x": -0.038,
+                "y": 0.015249994,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 3.4497717e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "PresentBody"
+        },
+        {
+          "kind": "scale",
+          "path": "PresentBody",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.5,
+                "y": 0.5,
+                "z": 0.5
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.25,
+              "value": {
+                "x": 0.55,
+                "y": 0.4625,
+                "z": 0.5
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.5,
+              "value": {
+                "x": 0.5,
+                "y": 0.5,
+                "z": 0.5
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.75,
+              "value": {
+                "x": 0.55,
+                "y": 0.4625,
+                "z": 0.5
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "x": 0.5,
+                "y": 0.5,
+                "z": 0.5
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.0166667,
+              "value": {
+                "x": 0.5,
+                "y": 0.43125,
+                "z": 0.5
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": -3.2441037e-09,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.25,
+              "value": {
+                "x": 0.5,
+                "y": 0.39351565,
+                "z": 0.5
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 3.271866e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "PresentBody"
+        },
+        {
+          "kind": "sprite",
+          "path": "PresentBody",
+          "keys": [
+            {
+              "time": 0.0,
+              "spriteGuid": "ff23291beba190642b8466146a13b889"
+            },
+            {
+              "time": 1.0166667,
+              "spriteGuid": "ffb5731ef6b0fa7468435467229075ca"
+            },
+            {
+              "time": 1.25,
+              "spriteGuid": "ffb5731ef6b0fa7468435467229075ca"
+            }
+          ],
+          "sourceBindingPath": "PresentBody"
+        }
+      ],
+      "events": [
+        {
+          "time": 1.25,
+          "functionName": "AnimEvent",
+          "intParameter": 0,
+          "floatParameter": 0.0,
+          "stringParameter": ""
+        }
+      ]
+    }
+  },
+  "controller": {
+    "states": [
+      {
+        "id": 1102730242686860875,
+        "name": "idleAlmanac",
+        "clip": "idleAlmanac2",
+        "speed": 1.0,
+        "speedParameterActive": false,
+        "speedParameter": ""
+      },
+      {
+        "id": 1102724804207875695,
+        "name": "idle",
+        "clip": "idle2",
+        "speed": 1.0,
+        "speedParameterActive": true,
+        "speedParameter": "Speed"
+      }
+    ],
+    "layers": [
+      {
+        "name": "Base Layer",
+        "blendingMode": 0,
+        "defaultState": 1102730242686860875,
+        "states": [
+          1102730242686860875,
+          1102724804207875695
+        ],
+        "defaultWeight": 0.0
+      }
+    ],
+    "serializedController": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!91 &9100000\nAnimatorController:\n  serializedVersion: 5\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: PresentAnim2\n  m_AnimatorParameters:\n  - m_Name: Speed\n    m_Type: 1\n    m_DefaultFloat: 1\n    m_DefaultInt: 0\n    m_DefaultBool: 0\n    m_Controller: {fileID: 9100000}\n  m_AnimatorLayers:\n  - serializedVersion: 5\n    m_Name: Base Layer\n    m_StateMachine: {fileID: 1107709254077376921}\n    m_Mask: {fileID: 0}\n    m_Motions: []\n    m_Behaviours: []\n    m_BlendingMode: 0\n    m_SyncedLayerIndex: -1\n    m_DefaultWeight: 0\n    m_IKPass: 0\n    m_SyncedLayerAffectsTiming: 0\n    m_Controller: {fileID: 9100000}\n--- !u!1107 &1107709254077376921\nAnimatorStateMachine:\n  serializedVersion: 6\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Base Layer\n  m_ChildStates:\n  - m_State: {fileID: 1102730242686860875}\n    m_Position: {x: 0, y: 0, z: 0}\n  - m_State: {fileID: 1102724804207875695}\n    m_Position: {x: 250, y: 0, z: 0}\n  m_ChildStateMachines: []\n  m_AnyStateTransitions: []\n  m_EntryTransitions: []\n  m_StateMachineTransitions: {}\n  m_StateMachineBehaviours: []\n  m_AnyStatePosition: {x: 0, y: -100, z: 0}\n  m_EntryPosition: {x: 250, y: -100, z: 0}\n  m_ExitPosition: {x: 500, y: -100, z: 0}\n  m_ParentStateMachinePosition: {x: 0, y: -200, z: 0}\n  m_DefaultState: {fileID: 1102730242686860875}\n--- !u!1102 &1102730242686860875\nAnimatorState:\n  serializedVersion: 6\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: idleAlmanac\n  m_Speed: 1\n  m_CycleOffset: 0\n  m_Transitions: []\n  m_StateMachineBehaviours: []\n  m_Position: {x: 0, y: 0, z: 0}\n  m_IKOnFeet: 0\n  m_WriteDefaultValues: 1\n  m_Mirror: 0\n  m_SpeedParameterActive: 0\n  m_MirrorParameterActive: 0\n  m_CycleOffsetParameterActive: 0\n  m_TimeParameterActive: 0\n  m_Motion: {fileID: 7400000, guid: c97e77969052b21419ac306c77d1137b, type: 2}\n  m_Tag:\n  m_SpeedParameter:\n  m_MirrorParameter:\n  m_CycleOffsetParameter:\n  m_TimeParameter:\n--- !u!1102 &1102724804207875695\nAnimatorState:\n  serializedVersion: 6\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: idle\n  m_Speed: 1\n  m_CycleOffset: 0\n  m_Transitions: []\n  m_StateMachineBehaviours: []\n  m_Position: {x: 250, y: 0, z: 0}\n  m_IKOnFeet: 0\n  m_WriteDefaultValues: 1\n  m_Mirror: 0\n  m_SpeedParameterActive: 1\n  m_MirrorParameterActive: 0\n  m_CycleOffsetParameterActive: 0\n  m_TimeParameterActive: 0\n  m_Motion: {fileID: 7400000, guid: 26e5c35ed3ef61643942f08efcd5b446, type: 2}\n  m_Tag:\n  m_SpeedParameter: Speed\n  m_MirrorParameter:\n  m_CycleOffsetParameter:\n  m_TimeParameter:\n"
+  },
+  "nonRenderingComponents": [
+    {
+      "typeId": 114,
+      "fileId": 114884547391421755,
+      "serializedComponent": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1709254077376921}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: bb7722d70c0425cccb6d4444dbf1b432, type: 3}\n  m_Name:\n  m_EditorClassIdentifier:\n  mouseCollider: {fileID: 0}\n  thePlantMaxHealth: 300\n  thePlantHealth: 300\n  attackDamage: 20\n  thePlantAttackInterval: 0\n  thePlantProduceInterval: 0\n  isLily: 0\n  invincible: 0\n  isShort: 0\n  board: {fileID: 0}\n  pumpkin: {fileID: 0}\n  shadow: {fileID: 0}\n  startPos: {x: 0, y: 0, z: 0}\n  thePlantColumn: 0\n  thePlantRow: 0\n  magnetCount: 0\n  theLevel: 0\n  thePlantSpeed: 1\n  thePlantAttackCountDown: 0\n  thePlantProduceCountDown: 0\n  attributeCountdown: 0\n  lightCountDown: 0\n  flashCountDown: 0\n  wheatTime: 0\n  brightness: 1\n  lastTakeDamgeTime: 0\n  disappearTime: 0\n  isFlashing: 0\n  isFromWheat: 0\n  alwaysLightUp: 0\n  isCrashed: 0\n  melonSputter: 0\n  dieMeansLose: 0\n  isGray: 0\n  isConnected: 0\n  keepShooting: 0\n  waitingDestory: 0\n  targetBox: {x: 0, y: 0}\n  moveTime: 0\n  timers:\n  - 0\n  - 0\n  - 0\n  disableCount: 0\n  attributeCount: 0\n  puffPlace: 0\n  baseLayer: 0\n  currentLightLevel: 0\n  p: 4\n  thePlantStage: 0\n  thePlantType: 0\n  theLilyType: -1\n  firstParent: -1\n  secondParent: -1\n  zombieLayer:\n    serializedVersion: 2\n    m_Bits: 0\n  plantLayer:\n    serializedVersion: 2\n    m_Bits: 0\n  theStatus: 0\n  next: {fileID: 0}\n  pre: {fileID: 0}\n  bulletLayer:\n    serializedVersion: 2\n    m_Bits: 0\n  plantTag:\n    flyingPlant: 0\n    hardLandPlant: 0\n    waterPlant: 0\n    pumpkinPlant: 0\n    lanternPlant: 0\n    smallLanternPlant: 0\n    puffPlant: 0\n    nutPlant: 0\n    tallNutPlant: 0\n    potatoPlant: 0\n    caltropPlant: 0\n    tanglekelpPlant: 0\n    magnetPlant: 0\n    potPlant: 0\n    doubleBoxPlant: 0\n    spickRockPlant: 0\n    icePlant: 0\n    firePlant: 0\n  anim: {fileID: 0}\n  healthText: {fileID: 0}\n  healthTextShadow: {fileID: 0}\n  levelIcon: {fileID: 0}\n  targetPlant: {fileID: 0}\n  targetZombie: {fileID: 0}\n  falling: 0\n  regeneration: 0\n  shoot: {fileID: 0}\n  connectPlant: {fileID: 0}\n"
+    }
+  ],
+  "colliders": [],
+  "ignoredBindings": [],
+  "omittedInactiveNodes": [],
+  "spritePrefix": null,
+  "unusedSpriteBonesExplicitlyAllowed": false,
+  "sources": [
+    {
+      "path": "Resources/board/plantshadow.asset",
+      "sha256": "e02e122cb3bfb8765afedad2150f3172d60feb8f549356312efca74dce78ae71"
+    },
+    {
+      "path": "Resources/board/plantshadow.asset.meta",
+      "sha256": "08bf3a1a85aabd4284a5755b459880ee4aa2b4575ccdb802a5fcaa2d0ecd462a"
+    },
+    {
+      "path": "Resources/board/plantshadow.png",
+      "sha256": "7924e0d6960dcba0b775b7ebc7d6a49ecb82b27b55b3216f4f6d83f04492a45a"
+    },
+    {
+      "path": "Resources/board/plantshadow.png.meta",
+      "sha256": "901cd63206d878ad5e0556c56e9691ee440a48dddb2a45971ee256b0e139c923"
+    },
+    {
+      "path": "Resources/image/PresentOpenZ.asset",
+      "sha256": "8213b7b8dad0779f769d2727025d00ffd26b1a02205b24e58d7279ba379efd15"
+    },
+    {
+      "path": "Resources/image/PresentOpenZ.asset.meta",
+      "sha256": "eef2827499a7f50407a4318b8f87aa99ec00871e4e8800f27de9d5db4ff0976a"
+    },
+    {
+      "path": "Resources/image/PresentOpenZ.png",
+      "sha256": "4497b90e1ff60eb20a3352612ce404e9ee9bbc2bc244e76d9529f2f6c6095fad"
+    },
+    {
+      "path": "Resources/image/PresentOpenZ.png.meta",
+      "sha256": "0ecb5c451d3be72adafa42778b0826490fcc6e2b07f583ecfb4dd0e35f95e5cf"
+    },
+    {
+      "path": "Resources/image/PresentZ.asset",
+      "sha256": "f47a294834f0bc8f03912377e8e7a7e54e185bc0a43f574f9b2b4a3b4ee413da"
+    },
+    {
+      "path": "Resources/image/PresentZ.asset.meta",
+      "sha256": "8d5d9f0c1173c7f9e95d6f8b9378514e6a2181895eda64e983aa5aca9ba06d04"
+    },
+    {
+      "path": "Resources/image/PresentZ.png",
+      "sha256": "6598c5cb8a8db64228d3a82a7876ae3e951b00caf1a55dea97a54797b4b3ce52"
+    },
+    {
+      "path": "Resources/image/PresentZ.png.meta",
+      "sha256": "29626705496927ec43161c725943bac8942835e61ea77f41aa7123cd0e655c1a"
+    },
+    {
+      "path": "Resources/plants/present/idle2.anim",
+      "sha256": "e4d998f5bd16a7eec655f7fd2aa4aedc19dbe4c1c5bc3543ba767ff1dac2b2f9"
+    },
+    {
+      "path": "Resources/plants/present/idle2.anim.meta",
+      "sha256": "56f2d1db67fdbbe91bb32b29a1850a4820714680e00a77c6a7d85eb1245c7b32"
+    },
+    {
+      "path": "Resources/plants/present/idleAlmanac2.anim",
+      "sha256": "e36c954b58108331b0b1cff27cbf70524ea9d4020aac602f5f04bac866333495"
+    },
+    {
+      "path": "Resources/plants/present/idleAlmanac2.anim.meta",
+      "sha256": "3d336ce5feecd24d80cda3d11eb228a88705f34852c9bea81be84a769cdc21fd"
+    },
+    {
+      "path": "Resources/plants/present/PresentAnim2.controller",
+      "sha256": "a035f7d191bca5c07b6c481deee49289d6c450fd2f2a1df5cdc06a94ded7386e"
+    },
+    {
+      "path": "Resources/plants/present/PresentAnim2.controller.meta",
+      "sha256": "8eaeb02a089bff99c8e96eeb722c0500b6ce1fae73dc360a40259cb8f021ebc1"
+    },
+    {
+      "path": "Resources/plants/present/PresentPrefab2.prefab",
+      "sha256": "bb8163f4752f300d73dd6c38773ea67719b9fb994b96da9232fe408cce8ff2eb"
+    }
+  ],
+  "deferredComponents": [],
+  "validation": "Exported source data. Native rendering and source-runtime comparison are separate verification steps."
+}
