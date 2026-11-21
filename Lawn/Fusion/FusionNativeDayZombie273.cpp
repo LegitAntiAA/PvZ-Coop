@@ -146,7 +146,12 @@ void Pole(Zombie* z,NativeDayZombie273State& state,const NativeDayZombie273Hooks
             LandPole(z,state);hooks.poleEvent(z,Day273JumpFail);break;
         }
     }
-    if(state.status==3&&(events&Day273JumpOver))LandPole(z,state);
+    if(state.status==3&&(events&Day273JumpOver))
+    {
+        LandPole(z,state);
+        // DancePole6 override calls base JumpOver first, then births real kind7.
+        if(Kind(z)==6&&!z->IsDeadOrDying()&&z->mHasHead)hooks.poleEvent(z,Day273JumpOver);
+    }
 }
 }
 bool IsNativeDayZombie273(const Zombie* z)
@@ -155,7 +160,7 @@ bool InitializeNativeDayZombie273(Zombie* z)
 {
     if(!IsNativeDayZombie273(z))return false;if(!Host(z))return true;
     auto* s=EditNativeDayZombie273(z,true);if(!s)return false;
-    *s=NativeDayZombie273State{};s->status=Kind(z)==3?2:0;
+    *s=NativeDayZombie273State{};s->status=FusionDayZombie273Pole(Kind(z))?2:0;
     z->mZombiePhase=PHASE_ZOMBIE_NORMAL;
     if(FusionDayZombie273Shooter(Kind(z))&&!Head(z))return false;
     if(!FusionDayZombie273Doll(Kind(z)))return StartNativeDayZombie273Walk(z);
@@ -170,7 +175,11 @@ bool UpdateNativeDayZombie273Animation(Zombie* z)
     const auto* s=GetNativeDayZombie273(z);auto* body=Body(z);FusionDayZombie273Clip clip;float factor=1;
     const bool dying=z->IsDeadOrDying();
     if(!s||!body||!TryGetFusionDayZombie273Clip(Kind(z),dying?1:s->status,z->mIsEating,clip)||(!dying&&!Factor(z,factor)))return true;
-    z->mOriginalAnimRate=body->mFrameCount*clip.multiplier*GetNativeSourceZombieData(z)->originSpeed*factor/clip.seconds;
+    // Pole jump disables Animator's Speed parameter; origin/chill/freeze only
+    // affect the run/walk/eat states. Native Board pause still stops its clock.
+    const float speed=FusionDayZombie273Pole(Kind(z))&&s->status==3&&!dying?1.f:
+        GetNativeSourceZombieData(z)->originSpeed*factor;
+    z->mOriginalAnimRate=body->mFrameCount*clip.multiplier*speed/clip.seconds;
     body->mAnimRate=z->mOriginalAnimRate;return true;
 }
 bool StartNativeDayZombie273Walk(Zombie* z,int blend)
@@ -193,14 +202,14 @@ bool MoveNativeDayZombie273(Zombie* z)
     double delta=0;
     if(moving&&cursor->motionValid&&cursor->motionFrameStart==body->mFrameStart&&std::isfinite(z->mScaleZombie)&&z->mScaleZombie>0&&
         TryGetFusionDayZombie273RootDelta(Kind(z),s->status,cursor->motion,now,z->mMindControlled,
-            (Kind(z)==3?1.25:.31)*kFusionBasePixelsX*z->mScaleZombie,delta)&&std::isfinite(z->mPosX+delta))z->mPosX+=float(delta);
+            (FusionDayZombie273Pole(Kind(z))?1.25:.31)*kFusionBasePixelsX*z->mScaleZombie,delta)&&std::isfinite(z->mPosX+delta))z->mPosX+=float(delta);
     cursor->motion=now;cursor->motionFrameStart=body->mFrameStart;cursor->motionValid=moving;return true;
 }
 bool UpdateNativeDayZombie273(Zombie* z,const NativeDayZombie273Hooks& hooks)
 {
     if(!IsNativeDayZombie273(z))return false;if(!Host(z)||z->mDead||z->IsDeadOrDying())return true;
     auto* s=EditNativeDayZombie273(z);if(!s)return true;
-    if(Kind(z)==3){Pole(z,*s,hooks);return true;}
+    if(FusionDayZombie273Pole(Kind(z))){Pole(z,*s,hooks);return true;}
     if(!FusionDayZombie273Shooter(Kind(z)))return true;
     auto* head=z->mApp->ReanimationTryToGet(z->mSpecialHeadReanimID);float factor=0;
     if(!head||!Factor(z,factor))return true;
@@ -238,7 +247,7 @@ bool GetNativeDayZombie273HeadPose(const Zombie* z,const char*& clip,float& phas
     clip="shoot";phase=head->mAnimTime;return true;
 }
 bool NativeDayZombie273CanUseSharedBite(const Zombie* z)
-{const auto* s=GetNativeDayZombie273(z);return Kind(z)!=3||(s&&s->status==0);}
+{const auto* s=GetNativeDayZombie273(z);return !FusionDayZombie273Pole(Kind(z))||(s&&s->status==0);}
 bool ApplyNativeDayZombie273Armor(Zombie* z,int damage,int& overkill,const NativeDayZombie273Hooks& hooks)
 {
     const auto kind=Kind(z);if(!IsNativeDayZombie273(z)||(!FusionDayZombie273Doll(kind)&&kind!=106&&kind!=107))return false;

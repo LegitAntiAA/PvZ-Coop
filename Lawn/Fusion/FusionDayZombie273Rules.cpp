@@ -8,10 +8,11 @@ namespace LawnFusion
 namespace
 {
 constexpr FusionZombieProfile profiles[]={
-    {3,720,0,0,50,false},{21,2000,4400,0,50,false},
+    {3,720,0,0,50,false},{6,720,0,0,50,false},{7,270,0,0,50,false},{21,2000,4400,0,50,false},
     {22,2000,2200,0,50,false},{23,2000,1100,0,50,false},
     {100,270,0,0,50,false},{106,270,2200,0,50,false},
     {107,270,1100,0,50,false},{108,1350,0,0,50,false}};
+constexpr uint16_t danceDeps[]={7},jacksonDeps[]={6,7};
 constexpr uint16_t diamondDeps[]={22,23,2},goldDeps[]={23,2},silverDeps[]={2};
 struct RootKey {float time,value,inSlope,outSlope;};
 // Actual Pole controller10f6cfec... clips. Values and Hermite slopes are from
@@ -25,6 +26,21 @@ constexpr RootKey walk[]={
     {2.0333333f,4.7128f,-.33726257f,-.33726266f},{2.3166666f,4.6152f,-.28676912f,-.2867691f},
     {2.6833334f,4.5264f,4.0772832e-8f,0},{2.8333333f,4.5344f,.10666531f,.106665306f},
     {2.9833333f,4.5592f,.0064011076f,.0064010634f},{3.3333333f,4.56f,4.191303e-10f,0}};
+
+// Actual DancePole6 walk uses its own source root curve; kind7 shares Pole3.
+constexpr RootKey danceWalk[]={
+    {0,5.131f,0,0},
+    {0.35f,5.0512f,-0.26923028f,-0.26923034f},
+    {0.65f,4.9560003f,-0.3155994f,-0.31559947f},
+    {1.0166667f,4.8408003f,4.5058783e-08f,0},
+    {1.3f,4.8888f,2.6227122e-08f,0},
+    {1.6833333f,4.7784f,-0.303273f,-0.303273f},
+    {2.0333333f,4.6664f,-0.35494748f,-0.35494754f},
+    {2.3166666f,4.5536f,-0.36685672f,-0.3668567f},
+    {2.5f,4.4952f,-0.24436378f,-0.24436378f},
+    {2.6833334f,4.4639997f,-5.983824e-10f,0},
+    {2.9833333f,4.4751997f,0.046769667f,0.046769667f},
+    {3.3333333f,4.4944f,-1.0605386e-08f,0}};
 bool SpanValid(FusionZombieClipPosition a,FusionZombieClipPosition b,float duration,bool loop=true)
 {
     return std::isfinite(a.seconds)&&std::isfinite(b.seconds)&&a.seconds>=0&&b.seconds>=0&&
@@ -58,18 +74,19 @@ int WrappedTwoThirds(int maximum)
 }
 const FusionZombieProfile* FindFusionDayZombie273Profile(uint16_t kind)
 {for(const auto& p:profiles)if(p.kind==kind)return &p;return nullptr;}
+bool FusionDayZombie273Pole(uint16_t kind){return kind==3||kind==6||kind==7;}
 bool FusionDayZombie273Doll(uint16_t kind){return kind==21||kind==22||kind==23;}
 bool FusionDayZombie273Shooter(uint16_t kind){return kind==100||kind==108;}
 std::span<const uint16_t> FusionDayZombie273NpcDependencies(uint16_t kind)
 {
-    if(kind==21)return diamondDeps;if(kind==22)return goldDeps;if(kind==23)return silverDeps;
+    if(kind==10)return jacksonDeps;if(kind==6)return danceDeps;if(kind==21)return diamondDeps;if(kind==22)return goldDeps;if(kind==23)return silverDeps;
     return {};
 }
 uint32_t FusionDayZombie273RequiredCapabilities(uint16_t kind)
 {
     if(!FindFusionDayZombie273Profile(kind))return 0;
     uint32_t result=Day273Model|Day273Wire|Day273SharedBody|Day273BodyParts;
-    if(kind==3)return result|Day273Pole|Day273PlantContact|Day273Fx;
+    if(FusionDayZombie273Pole(kind))return result|Day273Pole|Day273PlantContact|Day273Fx;
     if(FusionDayZombie273Doll(kind))return result|Day273Armor|Day273DollFall|Day273Fx|Day273HeadClock;
     if(kind==106||kind==107)return result|Day273Armor|(kind==106?Day273BucketItem:0);
     return result|Day273HeadClock|Day273PlantContact|Day273Fx|(kind==100?Day273Bullet0:Day273Bullet11|Day273BucketItem);
@@ -89,14 +106,18 @@ bool FusionDayZombie273Ready(uint16_t kind,uint32_t actual,std::span<const uint1
 bool TryGetFusionDayZombie273Clip(uint16_t kind,int status,bool eating,FusionDayZombie273Clip& out)
 {
     FusionDayZombie273Clip c;
-    if(kind==3)
+    if(FusionDayZombie273Pole(kind))
     {
         if(status==2)c={"walk","anim_run",3,2.5f,true};
         else if(status==3)c={"jump","anim_jump",3.5f,2,false};
         else if(status==0)c=eating?FusionDayZombie273Clip{"attack","anim_eat",2.25f,1,true}:
             FusionDayZombie273Clip{"walk2","anim_walk",3.3333333f,.5f,true};
-        else if(status==1)c={"die","anim_death",2.1666667f,1.8f,false};
+        else if(status==1)c={"die","anim_death",2.1666667f,kind==6?2.f:1.8f,false};
         else return false;
+        // The staged Pole6/7 Animator serializes original clip names.
+        if(kind!=3)c.sourceName=status==2?"Zombie_polevaulter_run":status==3?
+            (kind==6?"Zombie_polevaulter_jump 1":"Zombie_polevaulter_jump"):status==1?
+            "Zombie_polevaulter_die":eating?"Zombie_polevaulter_eat":"Zombie_polevaulter_walk";
     }
     else if(FusionDayZombie273Shooter(kind)||kind==106||kind==107)
     {
@@ -114,10 +135,10 @@ bool TryGetFusionDayZombie273RootDelta(uint16_t kind,int status,FusionZombieClip
     if(!std::isfinite(projection)||projection<0)return false;
     if(FusionDayZombie273Shooter(kind)||kind==106||kind==107)
         return status==0&&TryGetFusionZombieRootDelta(0,true,before,after,right,out,projection);
-    if(kind!=3)return false;
+    if(!FusionDayZombie273Pole(kind))return false;
     std::span<const RootKey> keys;float duration=0;
     if(status==2){keys=run;duration=3;}else if(status==3){keys=jump;duration=3.5f;}
-    else if(status==0){keys=walk;duration=3.3333333f;}else return false;
+    else if(status==0){keys=kind==6?std::span<const RootKey>(danceWalk):std::span<const RootKey>(walk);duration=3.3333333f;}else return false;
     // A native PLAY_ONCE carrier may report loopCount1 at its final held frame.
     if(status==3&&after.loop==1&&after.seconds==duration)after.loop=0;
     if(!SpanValid(before,after,duration,status!=3))return false;
@@ -128,7 +149,7 @@ bool TryGetFusionDayZombie273RootDelta(uint16_t kind,int status,FusionZombieClip
 }
 bool TryCountFusionDayZombie273Bites(uint16_t kind,FusionZombieClipPosition a,FusionZombieClipPosition b,uint32_t& count)
 {
-    if(kind!=3)return false;
+    if(!FusionDayZombie273Pole(kind))return false;
     constexpr float events[]={.98333335f,2.f};return Count(a,b,2.25f,events,count);
 }
 bool TryGetFusionDayZombie273PoleEvents(FusionZombieClipPosition a,FusionZombieClipPosition b,uint8_t& out)

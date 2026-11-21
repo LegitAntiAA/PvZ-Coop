@@ -7,7 +7,7 @@ namespace LawnFusion
 namespace
 {
 constexpr FusionZombieProfile profiles[]={
-    {14,1350,0,0,500,true,true,true},{15,720,0,1100,400,true},
+    {5,270,0,200,50,true},{14,1350,0,0,500,true,true,true},{15,720,0,1100,400,true},
     {18,2700,0,0,500,true,false,true},{104,1500,0,200,50,true}};
 struct RootKey {float time,x,inSlope,outSlope;};
 // Actual npc900-models/{15,104}: walk and walk2 have the SAME root curve.
@@ -17,10 +17,11 @@ constexpr RootKey paperRoot[]={
     {.78333336f,-.81851846f,-.8502418f,-.85024196f},{.95f,-.9f,-.85024226f,-.850242f},
     {1.1666666f,-1.2111111f,-2.1623929f,-2.162393f},{1.3833333f,-1.837037f,-2.4362125f,-2.4362137f},
     {1.6166667f,-2.3074074f,5.0790953e-7f,0},{1.7833333f,-2.1259258f,1.08889f,0}};
-bool PaperKind(uint16_t kind){return kind==15||kind==104;}
+
 bool Position(FusionZombieClipPosition p,float duration)
 {return std::isfinite(p.seconds)&&p.seconds>=0&&p.seconds<=duration;}
 }
+bool SpecialZombie269PaperKind(uint16_t kind){return kind==5||kind==15||kind==104;}
 const FusionZombieProfile* FindSpecialZombie269Profile(uint16_t kind)
 {for(const auto& p:profiles)if(p.kind==kind)return &p;return nullptr;}
 bool SpecialZombie269RejectEffect(uint16_t kind,int status,SpecialZombie269StatusEffect effect)
@@ -31,7 +32,7 @@ uint32_t SpecialZombie269RequiredCapabilities(uint16_t kind)
     {
     case 14:return Special269Model|Special269Crash|Special269BodyParts|Special269DeathEffect|
         Special269VehicleMotion|Special269VehicleContacts|Special269IncomingDamage|Special269Water;
-    case 15:return Special269Model|Special269PaperTransition|Special269PaperMotion|Special269PaperBite;
+    case 5:case 15:return Special269Model|Special269PaperTransition|Special269PaperMotion|Special269PaperBite;
     case 18:return Special269Model|Special269Crash|Special269BodyParts|Special269DeathEffect|Special269DriverTerrain|
         Special269VehicleMotion|Special269VehicleContacts|Special269IncomingDamage|Special269DeathClock;
     case 104:return Special269Model|Special269PaperTransition|Special269PaperShot|Special269PaperMotion|Special269PaperBite;
@@ -52,11 +53,11 @@ bool TryGetSpecialZombie269BodyStage(uint16_t kind,float hp,int maximum,uint8_t&
 }
 bool TryGetSpecialZombie269PaperClip(uint16_t kind,int status,bool eating,SpecialZombie269PaperClip& out)
 {
-    if((kind!=15&&kind!=104)||(status!=4&&status!=5&&status!=6))return false;
+    if(!SpecialZombie269PaperKind(kind)||(status!=4&&status!=5&&status!=6))return false;
     SpecialZombie269PaperClip p;
     if(status==5)p={"losePaper",2,1};
     else if(eating)p={status==6?"attack2":"attack",2,status==6?(kind==15?6.f:3.f):2.f};
-    else if(status==6)p={"walk2",kind==15?2.0166667f:2.f,kind==15?4.f:1.f};
+    else if(status==6)p={"walk2",kind!=104?2.0166667f:2.f,kind==15?4.f:1.f};
     else p={"walk",2,.4f};
     out=p;return true;
 }
@@ -64,7 +65,7 @@ bool SpecialZombie269PaperAngryDue(float phase)
 {return std::isfinite(phase)&&phase>=1.9166666f/2&&phase<=1;}
 bool TrySampleSpecialZombie269PaperRoot(uint16_t kind,float seconds,float& out)
 {
-    if(!PaperKind(kind)||!std::isfinite(seconds)||seconds<0||seconds>2.0166667f)return false;
+    if(!SpecialZombie269PaperKind(kind)||!std::isfinite(seconds)||seconds<0||seconds>2.0166667f)return false;
     if(seconds<=paperRoot[0].time){out=paperRoot[0].x;return true;}
     if(seconds>=paperRoot[9].time){out=paperRoot[9].x;return true;}
     unsigned i=1;while(paperRoot[i].time<=seconds)++i;
@@ -85,7 +86,7 @@ bool TryGetSpecialZombie269PaperRootDelta(uint16_t kind,int status,FusionZombieC
 }
 bool TryCountSpecialZombie269PaperBites(uint16_t kind,FusionZombieClipPosition before,FusionZombieClipPosition after,uint32_t& out)
 {
-    if(!PaperKind(kind)||!Position(before,2)||!Position(after,2)||after.loop<before.loop||
+    if(!SpecialZombie269PaperKind(kind)||!Position(before,2)||!Position(after,2)||after.loop<before.loop||
        (after.loop==before.loop&&after.seconds<before.seconds))return false;
     constexpr float event=1.0833334f;
     const uint64_t b=uint64_t(before.loop)+(before.seconds>=event),a=uint64_t(after.loop)+(after.seconds>=event);

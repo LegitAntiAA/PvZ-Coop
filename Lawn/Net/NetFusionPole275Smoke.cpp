@@ -34,7 +34,9 @@
 namespace
 {
 using namespace LawnFusion;using LawnNet::NetTrace;
-constexpr std::array<uint16_t,2> plantKinds={3,243};
+// Genuine passive TallNut1027 isolates the blocked vault from an active
+// Hamburger's unrelated projectiles; both intact-state assertions remain.
+constexpr std::array<uint16_t,2> plantKinds={3,1027};
 struct Ref{uint16_t id=0;uint32_t token=0;};
 struct Case
 {
@@ -179,11 +181,23 @@ bool Observe(LawnApp* a,bool baseline)
     {
         auto& c=s.cases[i];p=plants[i];z=poles[i];const auto* pd=GetNativePlantData(p);const auto* zd=GetNativeSourceZombieData(z);const auto* day=GetNativeDayZombie273(z);
         auto* body=a->ReanimationTryToGet(z->mBodyReanimID);const auto* definition=FusionFindPlant(plantKinds[i]);
-        if(!Require(a,pd&&zd&&day&&definition&&body&&NativeDayZombie273StateValid(3,*day)&&
+        const bool canonical=pd&&zd&&day&&definition&&body&&NativeDayZombie273StateValid(3,*day)&&
             z->mZombieType==ZOMBIE_POLEVAULTER&&z->mBodyMaxHealth==720&&z->mBodyHealth>0&&z->mHasHead&&z->mHasArm&&
             p->mPlantHealth>0&&p->mPlantMaxHealth==definition->maxHealth&&pd->owner==LawnNet::NET_SHARED_OWNER&&
-            !pd->packetId&&!pd->randomOrigin&&pd->firstParent==kFusionNoPlant&&pd->secondParent==kFusionNoPlant,
-            "Pole275 canonical actual plant/Pole/controller state differs"))return false;
+            !pd->packetId&&!pd->randomOrigin&&pd->firstParent==kFusionNoPlant&&pd->secondParent==kFusionNoPlant;
+        if(!canonical)
+            NetTrace("SMOKE_POLE275_CANONICAL_FAILED role=%s case=%zu snapshot=%u tick=%d plantId=%u plantToken=%u plantKind=%u plantHP=%d/%d expectedMax=%d owner=%u packet=%u random=%u parents=%u/%u poleId=%u poleToken=%u poleKind=%u carrier=%d poleHP=%d/%d sourceHP=%.9g hasHead=%d hasArm=%d dayPresent=%d controllerValid=%d wireStateValid=%d status=%u shadow=%d armor=%u shootEvent=%u shootCountdown=%.9g headPresent=%d bodyPresent=%d bodyFrame=%d+%d bodyTime=%.9g bodyRate=%.9g bodyLoops=%d",
+                Role(a),i,Samples(a),b->mMainCounter,p->mNetId,pd?pd->instanceToken:0,pd?pd->kind:0xffff,
+                p->mPlantHealth,p->mPlantMaxHealth,definition?definition->maxHealth:0,pd?unsigned(pd->owner):0xffff,
+                pd?pd->packetId:0,pd?unsigned(pd->randomOrigin):0,pd?pd->firstParent:0xffff,pd?pd->secondParent:0xffff,
+                z->mNetId,zd?zd->instanceToken:0,zd?zd->kind:0xffff,int(z->mZombieType),z->mBodyHealth,z->mBodyMaxHealth,
+                zd?zd->health:0.f,z->mHasHead?1:0,z->mHasArm?1:0,day?1:0,
+                day&&NativeDayZombie273ControllerValid(3,*day)?1:0,day&&NativeDayZombie273StateValid(3,*day)?1:0,
+                day?unsigned(day->status):0xffff,day&&day->shadowEnabled?1:0,day?unsigned(day->armorStage):0xffff,
+                day?unsigned(day->shootEvent):0xffff,day?day->shootCountdown:0.f,day&&day->head.mPresent?1:0,
+                body?1:0,body?body->mFrameStart:0,body?body->mFrameCount:0,body?body->mAnimTime:0.f,
+                body?body->mAnimRate:0.f,body?body->mLoopCount:0);
+        if(!Require(a,canonical,"Pole275 canonical actual plant/Pole/controller state differs"))return false;
         if(!c.plant.id)
         {c.plant={p->mNetId,pd->instanceToken};c.pole={z->mNetId,zd->instanceToken};c.initialHP=p->mPlantHealth;}
         if(!Require(a,p->mNetId==c.plant.id&&pd->instanceToken==c.plant.token&&z->mNetId==c.pole.id&&zd->instanceToken==c.pole.token&&
@@ -351,7 +365,7 @@ bool NetSmokeUpdateFusionPole275(LawnApp* a)
     else if(s.stage==7&&Samples(a)-s.samples>=2)
     {
         if(!b->mPaused||!Observe(a,false)||!Capture(a,"paused")||!Proof(a,"PAUSED",true)||!Barrier(a,"FINAL"))return true;
-        NetTrace("SMOKE_POLE275_COMPLETE role=%s sourceLevel=1 wave=0 tutorialActive=1 actors=2 generations=4 successfulVault=1 blocked243=1 transitions2to3to0=2 actualShadowNode=1 sourceNativePose=1 contactDamageBeforeLanding=0 Star23=1 reliableClientFX=1 sourceSoundEventFamilies=2 soundPlayback=NotExecuted postBirthActorWrites=0 clockWrites=0 acquisition=NotExecuted allocatorExhaustion=NotExecuted",Role(a));
+        NetTrace("SMOKE_POLE275_COMPLETE role=%s sourceLevel=1 wave=0 tutorialActive=1 actors=2 generations=4 successfulVault=1 blocked1027=1 transitions2to3to0=2 actualShadowNode=1 sourceNativePose=1 contactDamageBeforeLanding=0 Star23=1 reliableClientFX=1 sourceSoundEventFamilies=2 soundPlayback=NotExecuted postBirthActorWrites=0 clockWrites=0 acquisition=NotExecuted allocatorExhaustion=NotExecuted",Role(a));
         a->CoopSmokeWriteResult(true,nullptr);
     }
     return true;

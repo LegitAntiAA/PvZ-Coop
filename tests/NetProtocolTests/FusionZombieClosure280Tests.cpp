@@ -17,10 +17,10 @@ int RunFusionZombieClosure280Tests(int& checks)
     // Caller may reuse the output as input; failure must not invalidate aliases.
     result={21,21,23};CHECK(BuildFusionSourceZombieClosure280(result,result,&error));
     CHECK(result==std::vector<uint16_t>({21,22,23,2}));
-    const auto before=result;const uint16_t partial[]={0,21,5};
+    const auto before=result;const uint16_t partial[]={0,21,1};
     CHECK(!BuildFusionSourceZombieClosure280(partial,result,&error));CHECK(result==before);
-    CHECK(error.find("rootKind=5")!=std::string::npos&&error.find("dependencyKind=5")!=std::string::npos);
-    // Source Paper5 is not the implemented SuperPaper15; no carrier fallback.
+    CHECK(error.find("rootKind=1")!=std::string::npos&&error.find("dependencyKind=1")!=std::string::npos);
+    // Paper family members retain distinct source identities.
     const uint16_t paper[]={15,104};CHECK(BuildFusionSourceZombieClosure280(paper,result,&error));CHECK(result==std::vector<uint16_t>({15,104}));
     CHECK(GetNativeSourceZombieCarrier(203)<0);
     const uint16_t staged[]={203};const auto saved=result;CHECK(!BuildFusionSourceZombieClosure280(staged,result,&error));CHECK(result==saved);

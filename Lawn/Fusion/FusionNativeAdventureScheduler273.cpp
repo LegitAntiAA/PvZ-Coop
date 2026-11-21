@@ -28,12 +28,7 @@ struct Adapter
 bool Reject(Adapter& a,const char* message)
 {if(a.error)*a.error=message;return false;}
 bool Current(Board* b)
-{
-    if(!b||!b->mApp||b->mApp->mBoard!=b||!IsNativeFusionBoard(b)||
-        b->mBackground!=BACKGROUND_1_DAY||b->GetColumnCount()!=10||GetNativeFusionRowCount(b)!=5)return false;
-    for(int row=0;row<5;++row)if(b->mPlantRow[row]!=PLANTROW_NORMAL)return false;
-    return true;
-}
+{return IsNativeSourceAdventureGrassWorld281(b);}
 bool Ready(void* user,uint16_t kind)
 {
     auto& a=*static_cast<Adapter*>(user);
@@ -95,7 +90,7 @@ Result InitializeNativeAdventureScheduler273(Board* board,FusionAdventureSchedul
     if(!board||!board->mApp||board->mApp->NetIsClient())return Result::NotHost;
     Adapter adapter{board,error};
     if(!Current(board)||!NativeSourceAdventureLevelReady273(level,uint32_t(cycle)))
-    {Reject(adapter,"Source scheduler requires the shared admitted ordinary Day campaign policy.");return Result::NotReady;}
+    {Reject(adapter,"Source scheduler requires the shared admitted ordinary grass campaign policy.");return Result::NotReady;}
     const auto* config=FindFusionSourceAdventure272(level);
     if(!config){Reject(adapter,"Source scheduler descriptor is unavailable.");return Result::NotReady;}
     std::vector<uint16_t> roots(config->allowedZombieKinds.begin(),config->allowedZombieKinds.end());
@@ -112,7 +107,7 @@ Result UpdateNativeAdventureScheduler273(Board* board,FusionAdventureScheduler27
     if(!board||!board->mApp||board->mApp->NetIsClient())return Result::NotHost;
     Adapter adapter{board,error};
     if(!Current(board)||!NativeSourceAdventureLevelReady273(state.level,uint32_t(state.cycle)))
-    {Reject(adapter,"Source scheduler lost its admitted native Day Board.");return Result::NotReady;}
+    {Reject(adapter,"Source scheduler lost its admitted native grass Board.");return Result::NotReady;}
     auto effective=input;effective.host=input.host&&!board->mApp->NetIsClient();
     effective.paused=input.paused||board->mPaused||board->mApp->mGameScene!=SCENE_PLAYING;
     FusionAdventureScheduler273Callbacks callbacks;

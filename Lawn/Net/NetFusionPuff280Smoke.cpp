@@ -6,6 +6,8 @@
 #include "../Plant.h"
 #include "../Zombie.h"
 #include "../Projectile.h"
+#include "../Coin.h"
+#include "../MessageWidget.h"
 #include "../SeedPacket.h"
 #include "../CursorObject.h"
 #include "../Cutscene.h"
@@ -16,6 +18,7 @@
 #include "../Fusion/FusionNativeAdventure273.h"
 #include "../Fusion/FusionNativeZombies.h"
 #include "../Fusion/FusionNativeDayZombie273.h"
+#include "../Fusion/FusionNativeVisual.h"
 #include "../../Resources.h"
 #include "../../Sexy.TodLib/Reanimator.h"
 #include "../../SexyAppFramework/ScrollbarWidget.h"
@@ -26,6 +29,8 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include <cstdio>
+#include <algorithm>
 #include <map>
 #include <set>
 #include <string>
@@ -44,6 +49,14 @@ struct State
     std::set<std::string> frames;std::map<std::string,int> draws;
 }s;
 bool Enabled(const char* k){const auto* v=std::getenv(k);return v&&std::strcmp(v,"1")==0;}
+bool Night(){return Enabled("PVZ_COOP_SMOKE_FUSION_PUFF280_NIGHT281");}
+struct NightState
+{
+    std::array<Ref,3> stack{},mixed{};unsigned messages=0;
+    int playingTick=-1,introTick=-1,stackTick=-1,mixTick=-1,readyTick=-1;
+    uint32_t playingAt=0;bool stackLogged=false,mixedLogged=false,completionObserved=false;
+    float initialCountdown=0;
+}night;
 int Slot(LawnApp* a){return a->mNetManager->GetMySlot();}
 const char* Role(LawnApp* a){return a->NetIsHost()?"host":"client";}
 uint32_t Samples(LawnApp* a){return a->NetIsHost()?a->mCoopSmokeSnapshotsSent:a->mCoopSmokeSnapshotsApplied;}
@@ -80,15 +93,29 @@ bool Escape(LawnApp* a)
 }
 bool Capture(LawnApp* a,const char* suffix)
 {
-    const auto name="fusion_puff280_"+std::string(suffix);if(s.frames.contains(name))return true;
+    const auto name="fusion_puff280_"+std::string(Night()?"night_":"")+suffix;if(s.frames.contains(name))return true;
     if(!s.draws.contains(name))s.draws[name]=a->mDrawCount;const int draw=s.draws[name]+2;
     if(!a->CoopSmokeEnsureFreshFrameAfterDraw(draw))return false;
     if(!Require(a,a->CoopSmokeCaptureFrame(name.c_str()),"Puff280 fresh BMP failed"))return false;
     s.frames.insert(name);NetTrace("SMOKE_PUFF280_RENDER role=%s frame=%s requestedDraw=%d capturedDraw=%d",Role(a),name.c_str(),draw,a->mCoopSmokeFrameDrawCount);return true;
 }
 bool Profile(const FusionAdventureProfile273& p){return p.completedLevels==511&&p.cycle==1&&p.frontierLevel==10;}
+bool NightWorld(LawnApp* a)
+{
+    auto* b=a->mBoard;const auto* c=GetNativeContext(b);if(!c||!c->adventure.enabled)return false;const auto& v=c->adventure;
+    int waves=0;
+    if(!Require(a,TryGetFusionSourceAdventureWaves272(10,1,waves)&&IsNativeSourceAdventure273(b)&&!c->validation&&!a->mFusionRuntime&&
+        v.run.level==10&&v.run.cycle==1&&!v.run.replay&&!v.run.over&&!v.schedulerFailed&&v.maximumWaves==waves&&v.sourceDifficulty==2&&
+        Profile(v.profile)&&Profile(a->mNetManager->mConfig.mFusionSourceProfile)&&c->money==3000&&
+        b->mBackground==BACKGROUND_2_NIGHT&&b->GetColumnCount()==10&&GetNativeFusionRowCount(b)==5&&b->mGridItems.mSize==0&&
+        a->mPlayerInfo&&a->mPlayerInfo->mLevel==s.classicLevel&&a->mPlayerInfo->mFinishedAdventure==s.classicFinished,
+        "Puff280 Night10 source world/economy/no-Classic-graves/profile differs"))return false;
+    for(int row=0;row<5;++row)if(!Require(a,b->mPlantRow[row]==PLANTROW_NORMAL,"Puff280 Night has non-grass row"))return false;
+    if(!s.epoch)s.epoch=c->epoch;return Require(a,s.epoch==c->epoch,"Puff280 Night epoch changed");
+}
 bool World(LawnApp* a)
 {
+    if(Night())return NightWorld(a);
     auto* b=a->mBoard;const auto* c=GetNativeContext(b);if(!c||!c->adventure.enabled)return false;const auto& v=c->adventure;
     if(!Require(a,IsNativeSourceAdventure273(b)&&!c->validation&&!a->mFusionRuntime&&v.run.level==9&&v.run.cycle==1&&v.run.replay&&
         !v.run.tutorial.active&&!v.run.tutorial.stage&&!v.run.over&&!v.schedulerFailed&&v.maximumWaves==30&&v.sourceDifficulty==2&&
@@ -103,8 +130,8 @@ SeedPacket* Packet(Board* b,int owner)
 bool PacketRules(LawnApp* a,int owner)
 {
     auto* p=Packet(a->mBoard,owner);const auto* d=GetNativePacketData(p);
-    return Require(a,p&&d&&d->price==(owner?175:75)&&std::abs(d->rechargeSeconds-7.5f)<.0001f,
-        "Puff280 Day normal75/extra175/CD7.5 metadata differs");
+    return Require(a,p&&d&&d->price==(Night()?(owner?25:0):(owner?175:75))&&std::abs(d->rechargeSeconds-7.5f)<.0001f,
+        "Puff280 scene normal/extra price or CD7.5 metadata differs");
 }
 bool Choose(LawnApp* a)
 {
@@ -234,6 +261,149 @@ bool ShotProof(LawnApp* a)
     if(!s.proposedShot||!s.shots.contains(s.proposedShot))return false;
     return Barrier(a,"OBSERVED_"+std::to_string(s.proposedShot));
 }
+bool NightSky(LawnApp* a)
+{
+    auto* b=a->mBoard;const auto* c=GetNativeContext(b);
+    if(!Require(a,c->adventureSkySunTicks==750&&b->mSunCountDown==750&&b->mNumSunsFallen==0,
+        "Puff280 Night advanced a source sky-Sun clock/count"))return false;
+    Coin* coin=nullptr;while(b->IterateCoins(coin))if(coin->IsSun()&&
+        (coin->mCoinMotion==COIN_MOTION_FROM_SKY||coin->mCoinMotion==COIN_MOTION_FROM_SKY_SLOW))
+        return Require(a,false,"Puff280 Night created an actual sky Sun; producer Sun is allowed");
+    return true;
+}
+bool NightAdvice(LawnApp* a)
+{
+    const auto& t=GetNativeContext(a->mBoard)->adventure.run.tutorial;SexyString text;unsigned bit=0;
+    switch(t.message)
+    {
+    case FusionAdventureMessage273::None:return true;
+    case FusionAdventureMessage273::PuffIntro:text=_S("Малый Пыхтун очень важен ночью (туториал)");bit=1;break;
+    case FusionAdventureMessage273::PuffStack:text=_S("В одну клетку помещаются 3 Малых Пыхтуна");bit=2;break;
+    case FusionAdventureMessage273::PuffMix:text=_S("Фьюжн внутрь «поселения» пыхтунов даёт сразу тройной фьюжн");bit=4;break;
+    case FusionAdventureMessage273::PuffReady:text=_S("Высаживайте растения и защищайтесь от зомби!");bit=8;break;
+    default:return Require(a,false,"Puff280 Night received an unrelated tutorial message");
+    }
+    if(!t.messageTicks)return true;const auto* w=a->mBoard->mAdvice;
+    if(!Require(a,w&&w->mLabel==text&&w->mDuration>0&&w->mDisplayTime==FusionAdventureMessageDuration273(t.message),
+        "Puff280 Night native Advice differs from replicated source message"))return false;
+    if(!(night.messages&bit))
+    {
+        const int tick=a->mBoard->mMainCounter;
+        NetTrace("SMOKE_PUFF280_NIGHT_MESSAGE role=%s stage=%u message=%u ticks=%u timer=%u nativeTick=%d nativeAdvice=1",
+            Role(a),unsigned(t.stage),unsigned(t.message),unsigned(t.messageTicks),unsigned(t.timerTicks),tick);
+        if(bit==1)night.introTick=tick;else if(bit==2)night.stackTick=tick;
+        else if(bit==4)night.mixTick=tick;else night.readyTick=tick;
+    }
+    night.messages|=bit;return true;
+}
+bool NightPlants(LawnApp* a,uint16_t kind,std::array<Ref,3>& refs)
+{
+    auto* b=a->mBoard;std::array<Plant*,3> plants{};int count=0;Plant* p=nullptr;
+    while(b->IteratePlants(p))
+    {
+        if(!Require(a,count<3,"Puff280 Night gained an unrelated fourth live plant"))return false;
+        plants[size_t(count++)]=p;
+    }
+    if(!Require(a,count==3,"Puff280 Night source demonstration does not have exactly three plants"))return false;
+    std::sort(plants.begin(),plants.end(),[](const Plant* x,const Plant* y){return x->mNetId<y->mNetId;});
+    const auto* def=FusionFindPlant(kind);
+    for(size_t i=0;i<plants.size();++i)
+    {
+        p=plants[i];const auto* d=GetNativePlantData(p);const auto uid=b->mPlants.DataArrayGetID(p);
+        if(!Require(a,def&&d&&d->kind==kind&&p->mNetId&&d->instanceToken&&p->mPlantCol==2&&p->mRow==2&&
+            p->mSeedType==GetNativeSeedForPlant(kind)&&p->mNetGhost==a->NetIsClient()&&p->mIsOnBoard&&!p->mIsAsleep&&!p->mWakeUpCounter&&
+            p->mPlantMaxHealth==def->maxHealth&&p->mPlantHealth>0&&p->mPlantHealth<=p->mPlantMaxHealth&&
+            d->owner==LawnNet::NET_SHARED_OWNER&&!d->packetId&&!d->randomOrigin&&
+            d->firstParent==(kind==6?kFusionNoPlant:uint16_t(6))&&d->secondParent==(kind==6?kFusionNoPlant:uint16_t(1))&&
+            a->ReanimationTryToGet(p->mBodyReanimID)&&(!a->NetIsHost()||d->instanceToken==uid),
+            "Puff280 Night source factory/cell/awake/HP/default/provenance differs"))return false;
+        if(!refs[i].id)refs[i]={p->mNetId,d->instanceToken,uid};
+        if(!Require(a,refs[i].id==p->mNetId&&refs[i].token==d->instanceToken&&refs[i].localUID==uid,
+            "Puff280 Night replaced an observed exact native generation"))return false;
+    }
+    return true;
+}
+std::string NightDigest(const std::array<Ref,3>& refs)
+{
+    LawnNet::NetBuffer data;for(const auto& r:refs){data.WriteU16(r.id);data.WriteU32(r.token);}
+    char digest[16];sprintf_s(digest,"%08x",LawnNet::NetFnv1a32(data.Data(),data.Size()));return digest;
+}
+bool UpdateNight(LawnApp* a)
+{
+    auto* b=a->mBoard;const auto* c=GetNativeContext(b);const auto& t=c->adventure.run.tutorial;const auto phase=c->selection.State().phase;
+    if(!NightSky(a)||!NightAdvice(a))return true;
+    if(phase==FusionBankPhase::Playing&&night.playingTick<0)
+    {night.playingTick=b->mMainCounter;night.playingAt=GetTickCount();}
+    if(!t.active&&t.stage==3)
+    {
+        if(!night.completionObserved)
+        {
+            night.completionObserved=true;night.initialCountdown=c->adventure.countdown;
+            if(a->NetIsHost()&&!Require(a,night.initialCountdown>=0&&night.initialCountdown<=5.f,
+                "Puff280 Night TutorOver did not enter the source five-second wave gate"))return true;
+        }
+        // Pause at the actual completion edge, independent of BMP/chat timing.
+        // Normal wave actors are allowed if presentation catches this later.
+        if(a->NetIsHost()&&!s.paused)s.paused=Escape(a);
+    }
+    if(s.stage==3)
+    {
+        if(phase==FusionBankPhase::Intro)
+        {if(!s.introStart)s.introStart=GetTickCount();s.introLast=GetTickCount();++s.introChecks;return true;}
+        if(phase!=FusionBankPhase::Playing||a->mSeedChooserScreen||a->mGameScene!=SCENE_PLAYING)return true;
+        NativeFieldView277 field;
+        if(!QueryNativeFusionField277(b,field)||!field.artReady)return true;
+        if(!Require(a,s.introChecks>=10&&s.introLast-s.introStart>=1000&&t.active&&b->mSunMoney==150&&
+            field.background==BACKGROUND_2_NIGHT&&field.sourceSelected,"Puff280 Night native intro/source backdrop differs"))return true;
+        NetTrace("SMOKE_PUFF280_NIGHT_ECONOMY role=%s initialSun=%d sourceMoney=%d normalPrice=0 extraPrice=25 CDSeconds=7.5 packetMetadata=1 purchases=0 sourceBackdrop=1 noClassicGraves=1",
+            Role(a),b->mSunMoney,c->money);
+        Advance(a,4);
+    }
+    else if(s.stage==4)
+    {
+        if(t.stage<2)return true;
+        if(!Require(a,t.stage==2&&t.active,"Puff280 Night missed the actual three-Puff source stage")||!NightPlants(a,6,night.stack))return true;
+        if(a->NetIsHost()&&!Require(a,night.introTick>=0&&night.stackTick-night.introTick>=399,"Puff280 Night skipped the first four-second source timer"))return true;
+        if(!night.stackLogged)
+        {night.stackLogged=true;NetTrace("SMOKE_PUFF280_NIGHT_STACK role=%s ids=%u,%u,%u tokens=%u,%u,%u localUIDs=%u,%u,%u kinds=6,6,6 column=2 row=2 sharedDefault=1 fixtureFactoryCalls=0",
+            Role(a),night.stack[0].id,night.stack[1].id,night.stack[2].id,night.stack[0].token,night.stack[1].token,night.stack[2].token,
+            night.stack[0].localUID,night.stack[1].localUID,night.stack[2].localUID);}
+        if(Capture(a,"stack")&&Barrier(a,"NIGHT_STACK_"+NightDigest(night.stack)))Advance(a,5);
+    }
+    else if(s.stage==5)
+    {
+        if(t.stage<3)return true;if(!NightPlants(a,1031,night.mixed))return true;
+        for(const auto& old:night.stack)
+        {
+            if(!Require(a,old.id&&old.token&&old.localUID,"Puff280 Night mixed without observing original three generations"))return true;
+            for(const auto& fresh:night.mixed)if(!Require(a,old.id!=fresh.id&&old.token!=fresh.token,"Puff280 Night reused an original Puff identity during fusion"))return true;
+            if(b->mPlants.DataArrayTryToGet(old.localUID))return true; // Await actual retirement, not a guessed mDead bit.
+        }
+        if(a->NetIsHost()&&!Require(a,night.stackTick>=0&&night.mixTick-night.stackTick>=399,"Puff280 Night skipped the second four-second source timer"))return true;
+        if(!night.mixedLogged)
+        {night.mixedLogged=true;NetTrace("SMOKE_PUFF280_NIGHT_MIXED role=%s ids=%u,%u,%u tokens=%u,%u,%u kinds=1031,1031,1031 parents=6/1 sharedDefault=1 oldFullGenerationsRetired=3 sharedMultiPuff=1 fixtureFactoryCalls=0",
+            Role(a),night.mixed[0].id,night.mixed[1].id,night.mixed[2].id,night.mixed[0].token,night.mixed[1].token,night.mixed[2].token);}
+        if(Capture(a,"mixed")&&Barrier(a,"NIGHT_MIXED_"+NightDigest(night.mixed)))Advance(a,6);
+    }
+    else if(s.stage==6)
+    {
+        if(t.active)return true;
+        if(!Require(a,night.completionObserved&&night.messages==15&&t.stage==3&&t.message==FusionAdventureMessage273::PuffReady&&t.timerTicks==0&&
+            (!a->NetIsHost()||(night.mixTick>=0&&night.readyTick-night.mixTick>=399&&night.readyTick-night.playingTick>750))&&
+            GetTickCount()-night.playingAt>7500,"Puff280 Night source timer/Advice/TutorOver/no-sky observation interval differs"))return true;
+        if(!b->mPaused)return true;s.samples=Samples(a);Advance(a,7);
+    }
+    else if(s.stage==7&&Samples(a)-s.samples>=2)
+    {
+        if(!Require(a,b->mPaused&&night.messages==15,"Puff280 Night final pause/Advice proof differs")||
+            !PacketRules(a,0)||!PacketRules(a,1)||!NightPlants(a,1031,night.mixed)||!Capture(a,"paused"))return true;
+        if(!s.logged)
+        {s.logged=true;NetTrace("SMOKE_PUFF280_NIGHT_COMPLETE role=%s epoch=%u sourceLevel=10 replay=0 initialSun=150 sourceMoney=3000 normal=0 extra=25 CDSeconds=7.5 packetMetadata=1 purchases=0 sourceMessages=4 timedPreparation=4/4/4 oldRetired=3 fresh1031=3 parents=6/1 owner=Shared packet=0 noClassicGraves=1 noSkySun=1 sourceSkyTicks=750 numSunsFallen=0 observationOver750ticksHost=1 producerSunAllowed=1 nativeChooser=1 nativeReady=1 nativeIntro=1 nativePause=1 frames=4 fixtureFactoryCalls=0 progressionEarned=0 Full10Victory=NotExecuted NightCampaign=NotExecuted HPWrites=0 clockWrites=0 RNGWrites=0",
+            Role(a),s.epoch);}
+        if(Barrier(a,"NIGHT_FINAL_"+NightDigest(night.mixed)))a->CoopSmokeWriteResult(true,nullptr);
+    }
+    return true;
+}
 }
 namespace LawnNet
 {
@@ -250,11 +420,13 @@ bool NetSmokeUpdateFusionPuff280(LawnApp* a)
         if(a->mNetManager->GetPlayerCount()!=2||(a->NetIsClient()&&!a->mNetManager->IsConnectedToHost()))return true;
         if(!Require(a,Slot(a)>=0&&Slot(a)<2&&a->mNetManager->GetDifficulty()==1&&a->mPlayerInfo&&Profile(a->mNetManager->mConfig.mFusionSourceProfile),"Puff280 private replay profile/peers differ"))return true;
         if(s.classicLevel<0){s.classicLevel=a->mPlayerInfo->mLevel;s.classicFinished=a->mPlayerInfo->mFinishedAdventure;}
-        if(a->NetIsClient()){if(Send(a,"PUFF280_BEGIN"))Advance(a,1);return true;}
-        if(!Has(a,1,"PUFF280_BEGIN"))return true;
-        if(Require(a,a->StartFusionSourceAdventure(9,false),"Puff280 source replay9 production entry rejected"))Advance(a,1);return true;
+        const char* begin=Night()?"PUFF280_NIGHT_BEGIN":"PUFF280_BEGIN";
+        if(a->NetIsClient()){if(Send(a,begin))Advance(a,1);return true;}
+        if(!Has(a,1,begin))return true;
+        if(Require(a,a->StartFusionSourceAdventure(Night()?10:9,false),"Puff280 source production entry rejected"))Advance(a,1);return true;
     }
     if(!a->mBoard||!World(a))return true;auto* b=a->mBoard;const auto* c=GetNativeContext(b);const auto phase=c->selection.State().phase;
+    if(Night()&&s.stage>=3)return UpdateNight(a);
     if(s.stage>=4)ObserveShots(a);
     if(s.stage==1){if(Choose(a))Advance(a,2);}
     else if(s.stage==2)

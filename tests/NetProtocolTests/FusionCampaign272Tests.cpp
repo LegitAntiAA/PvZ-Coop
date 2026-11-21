@@ -34,10 +34,13 @@ FusionCampaign272TestResult RunFusionCampaign272Tests()
         std::string readinessError="old error";
         const bool ready=NativeSourceAdventureLevelReady280(level,1,&readinessError);
         CHECK(ready==readinessError.empty());
-        if(source->scene==0)
+        const bool grassWorld=source->scene==0||source->scene==1;
+        const bool lessonSupported=source->tutorialId==0||source->tutorialId==1||source->tutorialId==4||
+            source->tutorialId==7||source->tutorialId==8||source->tutorialId==10;
+        if(grassWorld&&lessonSupported)
         {
-            // All nine Day descriptors share implemented world/NPC mechanisms;
-            // source9 must not fail because of the old level<=8 admission list.
+            // Configuration/closure readiness has no integer level cutoff.
+            // Actual models/controllers/pools are still checked at native entry.
             CHECK(ready);
             std::vector<uint16_t> closure;
             CHECK(BuildFusionSourceZombieClosure280(source->allowedZombieKinds,closure));
@@ -77,7 +80,9 @@ FusionCampaign272TestResult RunFusionCampaign272Tests()
     CHECK(!NativeSourceAdventureLevelReady280(1,(std::numeric_limits<uint32_t>::max)(),&readinessError)&&readinessError.starts_with("cycle:"));
     CHECK(NativeSourceAdventureLevelReady280(9,1,&readinessError)&&readinessError.empty());
     CHECK(NativeSourceAdventureLevelReady280(9,1));
-    CHECK(!NativeSourceAdventureLevelReady280(10,1)&&!NativeSourceAdventureLevelReady280(19,1));
+    CHECK(NativeSourceAdventureLevelReady280(10,1)&&NativeSourceAdventureLevelReady280(11,1));
+    CHECK(!NativeSourceAdventureLevelReady280(13,1)&&!NativeSourceAdventureLevelReady280(15,1));
+    CHECK(!NativeSourceAdventureLevelReady280(19,1));
     CHECK(!NativeSourceAdventureLevelReady280(28,1)&&!NativeSourceAdventureLevelReady280(37,1));
     CHECK(FindFusionSourceAdventure272(1)->initialSun==500);
     CHECK(FindFusionSourceAdventure272(10)->initialSun==150);

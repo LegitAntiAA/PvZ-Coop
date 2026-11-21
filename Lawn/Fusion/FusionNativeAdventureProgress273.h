@@ -6,12 +6,14 @@ namespace LawnFusion
 {
 // Root owns the NativeContext member/save/snapshot codec. Each adapter receives
 // that one room state by reference; clients never step it or mutate the profile.
-// Native lessons1/4/7/8. Prepare4/7 currently support
+// Native lessons1/4/7/8/10. Prepare4/7 currently support
 // empty cells or audited removal-only kinds0/1/2/3/1000/1030/1032/1033; other
 // occupants refuse before mutation until their source callback budgets/order
 // are closed. Root keeps public/campaign admission separate from this adapter.
 // Resource/allocation preflight for the exact mission actions; no RNG or world
 // actors are created. This does not admit the separate Present256 chooser flow.
+// Source10 is the timed Night Puff demonstration; its followup uses the shared
+// multi-Puff placement operation, never a lesson-specific clone/fusion loop.
 bool PreflightNativeFusionAdventureLesson278(Board*,int sourceLevel,std::string* error=nullptr);
 bool UpdateNativeFusionAdventureTutorial273(Board*,FusionAdventureRun273&,FusionAdventureTutorialEffects273&);
 void PresentNativeFusionAdventureTutorial273(Board*,const FusionAdventureRun273&);

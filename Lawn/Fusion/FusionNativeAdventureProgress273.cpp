@@ -1,4 +1,5 @@
 #include "FusionNativeAdventureProgress273.h"
+#include "FusionNativeAdventure273.h"
 #include "FusionNative.h"
 #include "FusionNativeVisual.h"
 #include "FusionNativeGlove.h"
@@ -8,6 +9,7 @@
 #include "FusionNativeZombieVisual.h"
 #include "FusionNativeDayZombie273Bridge.h"
 #include "FusionNativeProjectileMetadata.h"
+#include "FusionNativePlacement.h"
 #include "FusionBasePlantRules.h"
 #include "../Board.h"
 #include "../Coin.h"
@@ -66,6 +68,11 @@ SexyString Text(FusionAdventureMessage273 message)
     case FusionAdventureMessage273::UseBucket:return _S("Подбери выпавшее ведро и надень на горохострел или орех");
     case FusionAdventureMessage273::IronPlants:return _S("Железные растения — лучшие друзья ранней игры!");
     case FusionAdventureMessage273::EquipmentReady:return _S("Высаживайте растения и защищайтесь от зомби!");
+    // Existing translated source literal IDs7422/6286/7630 (zero-based).
+    case FusionAdventureMessage273::PuffIntro:return _S("Малый Пыхтун очень важен ночью (туториал)");
+    case FusionAdventureMessage273::PuffStack:return _S("В одну клетку помещаются 3 Малых Пыхтуна");
+    case FusionAdventureMessage273::PuffMix:return _S("Фьюжн внутрь «поселения» пыхтунов даёт сразу тройной фьюжн");
+    case FusionAdventureMessage273::PuffReady:return _S("Высаживайте растения и защищайтесь от зомби!");
     default:return _S("");
     }
 }
@@ -314,6 +321,100 @@ bool SpawnLessonEnemyAndCards278(Board* b,int level,uint32_t& mission)
     LawnNet::NetTrace("Fusion source Tutor%d batch committed mission=%u uid=%u kind=%u row=0 rootX=%.9g sourceX=sentinel9.9 fromWave=0 cards=%zu cost=0 way=0 tick=%d",level,zombie->mNetId,mission,kind,target,cards.size(),b->mMainCounter);
     return true;
 }
+bool Lesson10World281(Board* b,std::string* error)
+{
+    const auto* c=GetNativeContext(b);
+    if(!Host(b)||!c||!c->adventure.enabled||c->adventure.run.level!=10||c->adventure.run.cycle!=1||
+        b->mBackground!=BACKGROUND_2_NIGHT||!IsNativeSourceAdventureGrassWorld281(b))
+    {if(error)*error="Source Tutor10 requires its ordinary cycle1 Night grass world.";return false;}
+    return true;
+}
+bool Lesson10Peak281(Board* b,int count,std::string* error)
+{
+    const auto reject=[&](const char* why){if(error)*error=why;return false;};
+    // Genuine source kinds, one ordinary native body each in Night; no sleep,
+    // heads or attachments. Loading/probing finishes before any actor RNG.
+    const uint16_t kinds[]={6,1,1031};
+    const SeedType seeds[]={SEED_PUFFSHROOM,SEED_SUNFLOWER,SEED_SUNSHROOM};
+    const ReanimationType types[]={REANIM_PUFFSHROOM,REANIM_SUNFLOWER,REANIM_SUNSHROOM};
+    for(int i=0;i<3;++i)
+    {
+        const auto* definition=FusionFindPlant(kinds[i]);
+        if(!definition||!definition->hasStats||definition->maxHealth<=0||GetNativeSeedForPlant(kinds[i])!=seeds[i]||
+            GetPlantDefinition(seeds[i]).mReanimationType!=types[i]||!EnsureNativePlantVisuals(b,kinds[i],error))
+            return reject("Source Tutor10 plant/model/native carrier unavailable.");
+        ReanimatorEnsureDefinitionLoaded(types[i],false);
+        if(!gReanimatorDefArray||unsigned(types[i])>=gReanimatorDefCount)return reject("Source Tutor10 native definition unavailable.");
+        const auto& tracks=gReanimatorDefArray[int(types[i])].mTracks;
+        if(!tracks.tracks||tracks.count<=0)return reject("Source Tutor10 native definition has no tracks.");
+        for(int track=0;track<tracks.count;++track)
+            if(tracks.tracks[track].mName&&strnicmp(tracks.tracks[track].mName,"attacher__",10)==0)
+                return reject("Source Tutor10 native definition has an unbudgeted dynamic attacher.");
+    }
+    auto* effects=b->mApp->mEffectSystem;
+    if(!effects||effects!=gEffectSystem||!effects->mReanimationHolder)return reject("Source Tutor10 native effect pools unavailable.");
+    const auto& p=b->mPlants;const auto& r=effects->mReanimationHolder->mReanimations;
+    if(count<0||!p.mBlock||!r.mBlock||p.mSize>p.mMaxSize||r.mSize>r.mMaxSize||
+        p.mMaxSize-p.mSize<count||r.mMaxSize-r.mSize<count)
+        return reject("Source Tutor10 whole batch has insufficient native Plant/Reanimation capacity.");
+    return true;
+}
+bool PrepareLesson10(Board* b)
+{
+    std::string error;
+    const auto reject=[&](const char* why)
+    {if(b->mMainCounter%100==0)LawnNet::NetTrace("Fusion source Tutor10 prepare blocked reason=%s tick=%d",why,b->mMainCounter);return false;};
+    if(!Lesson10World281(b,&error)||!CanApplyNativeFusionGameplay(b)||
+        GetNativeContext(b)->selection.State().phase!=FusionBankPhase::Playing)return reject(error.c_str());
+    std::vector<uint32_t> old;Plant* p=nullptr;
+    while(b->mPlants.IterateNext(p))if(!p->mDead&&p->mIsOnBoard&&p->mPlantCol==2&&p->mRow==2)
+    {
+        const auto* d=GetNativePlantData(p);const auto uid=b->mPlants.DataArrayGetID(p);
+        // SmallPuff inherits Plant's empty DieEvent; SunPuff has no producer
+        // death reward. Other removal callbacks retain the audited4/7 gate.
+        if(p->mNetGhost||!d||d->instanceToken!=uid||(!Lesson4OldKind(d->kind)&&d->kind!=6&&d->kind!=1031)||
+            p->mSeedType!=GetNativeSeedForPlant(d->kind)||IsNativeGlovePlantReserved(b,p,-1))
+            return reject("uncovered cell occupant/removal callback or glove lease");
+        old.push_back(uid);
+    }
+    if(!Lesson10Peak281(b,3,&error))return reject(error.c_str());
+    // Source ClearPlant(reason0) precedes the three ordinary SetPlant calls.
+    // The complete peak was checked without crediting any of these removals.
+    for(uint32_t uid:old)if(auto* actor=b->mPlants.DataArrayTryToGet(uid);actor&&!actor->mDead)actor->Die(0);
+    NativePlantData fresh;fresh.kind=6;fresh.owner=LawnNet::NET_SHARED_OWNER;
+    std::array<Plant*,3> made{};
+    for(size_t i=0;i<made.size();++i)
+    {
+        made[i]=TrySpawnNativeFusionPlant(b,2,2,fresh);const auto* d=GetNativePlantData(made[i]);
+        if(!made[i]||made[i]->mDead||!d||d->kind!=6||!d->instanceToken||!made[i]->mNetId||
+            b->mPlants.DataArrayTryToGet(d->instanceToken)!=made[i]||d->owner!=LawnNet::NET_SHARED_OWNER||
+            d->packetId||d->randomOrigin||d->firstParent!=kFusionNoPlant||d->secondParent!=kFusionNoPlant||
+            made[i]->mPlantCol!=2||made[i]->mRow!=2||made[i]->mSeedType!=SEED_PUFFSHROOM||made[i]->mIsAsleep)
+        {
+            for(auto* actor:made)if(actor&&!actor->mDead)actor->Die(255);
+            return reject("source Puff factory failed; partial batch retired without stage commit");
+        }
+    }
+    LawnNet::NetTrace("Fusion source Tutor10 prepare committed old=%zu kinds=6,6,6 ids=%u,%u,%u tokens=%u,%u,%u col=2 row=2 defaultShared=1 peakP=3 peakR=3 peakA=0 tick=%d",
+        old.size(),made[0]->mNetId,made[1]->mNetId,made[2]->mNetId,
+        b->mPlants.DataArrayGetID(made[0]),b->mPlants.DataArrayGetID(made[1]),b->mPlants.DataArrayGetID(made[2]),b->mMainCounter);
+    return true;
+}
+bool MixLesson10(Board* b)
+{
+    std::string error;
+    if(!Lesson10World281(b,&error)||!CanApplyNativeFusionGameplay(b)||
+        GetNativeContext(b)->selection.State().phase!=FusionBankPhase::Playing||!Lesson10Peak281(b,3,&error))return false;
+    // Source SetPlant(1) uses CheckBox/CheckMix. Root's common multi-Puff
+    // operation snapshots recipients and handles each ByMix removal/child;
+    // this caller must not clone one arbitrary body or replace the whole cell.
+    NativePlantData fresh;fresh.kind=1;fresh.owner=LawnNet::NET_SHARED_OWNER;
+    auto* made=TrySpawnNativeFusionPlant(b,2,2,fresh);const auto* d=GetNativePlantData(made);
+    if(!made||made->mDead||!d||!d->instanceToken||!made->mNetId||
+        b->mPlants.DataArrayTryToGet(d->instanceToken)!=made||d->owner!=LawnNet::NET_SHARED_OWNER||d->packetId||d->randomOrigin)return false;
+    LawnNet::NetTrace("Fusion source Tutor10 followup committed incoming=1 firstChild=%u token=%u kind=%u sharedMultiPuff=1 col=2 row=2 tick=%d",
+        made->mNetId,d->instanceToken,d->kind,b->mMainCounter);return true;
+}
 bool Active(Board* b,int slot)
 {
     const auto* c=GetNativeContext(b);
@@ -326,6 +427,9 @@ bool Active(Board* b,int slot)
 bool PreflightNativeFusionAdventureLesson278(Board* b,int level,std::string* error)
 {
     if(error)error->clear();
+    // Six bodies cover the fresh3-Puff preparation plus the later3-child
+    // replacement peak; no old actor/animation is credited as already freed.
+    if(level==10)return Lesson10World281(b,error)&&Lesson10Peak281(b,6,error);
     return LessonWorld278(b,level,error)&&(level!=7||RepeaterPeak278(b,error))&&MissionBatchReady278(b,level,error);
 }
 void PresentNativeFusionAdventureTutorial273(Board* b,const FusionAdventureRun273& r)
@@ -355,14 +459,14 @@ bool UpdateNativeFusionAdventureTutorial273(Board* b,FusionAdventureRun273& r,Fu
 {
     out={};
     if(!Playing(b)||!FusionAdventureRunValid273(r)||!r.level||
-        (r.tutorial.active&&r.level!=1&&r.level!=4&&r.level!=7&&r.level!=8))return false;
+        (r.tutorial.active&&r.level!=1&&r.level!=4&&r.level!=7&&r.level!=8&&r.level!=10))return false;
     auto* context=GetNativeContext(b);if(!context)return false;
     if(!r.tutorial.active||(r.level!=4&&r.level!=7)||(r.level==4&&r.tutorial.stage<3)||
         (r.level==7&&r.tutorial.stage!=2))context->adventureMissionPlantUID=0;
     if(!r.tutorial.active||(r.level!=7&&r.level!=8)||(r.level==7&&r.tutorial.stage<4)||
         (r.level==8&&r.tutorial.stage<2))context->adventureMissionZombieUID=0;
     auto candidate=r;FusionAdventureTutorialEffects273 effects;
-    if(r.level==4||r.level==7||r.level==8)
+    if(r.level==4||r.level==7||r.level==8||r.level==10)
     {
         FusionAdventureLessonInput274 input;
         auto* mission=b->mPlants.DataArrayTryToGet(context->adventureMissionPlantUID);
@@ -391,6 +495,8 @@ bool UpdateNativeFusionAdventureTutorial273(Board* b,FusionAdventureRun273& r,Fu
         case FusionAdventureMissionAction274::Prepare7:if(!PrepareLesson7(b,context->adventureMissionPlantUID))return false;break;
         case FusionAdventureMissionAction274::Spawn7EnemyAndCard:if(!SpawnLessonEnemyAndCards278(b,7,context->adventureMissionZombieUID))return false;break;
         case FusionAdventureMissionAction274::Prepare8:if(!SpawnLessonEnemyAndCards278(b,8,context->adventureMissionZombieUID))return false;break;
+        case FusionAdventureMissionAction274::Prepare10:if(!PrepareLesson10(b))return false;break;
+        case FusionAdventureMissionAction274::Mix10:if(!MixLesson10(b))return false;break;
         }
     }
     else

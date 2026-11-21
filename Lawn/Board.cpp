@@ -6429,6 +6429,9 @@ void Board::SpawnZombiesFromSky()
 //0x412CE0
 void Board::SpawnZombiesFromGraves()
 {
+	// Ordinary source Day/Night owns every typed enemy birth. Stock grave/sky/
+	// pool reinforcements are not source wave or controller dependencies.
+	if (mApp->IsFusionSourceAdventure()) return;
 	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_WAR_AND_PEAS || mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_WAR_AND_PEAS_2)
 		return;
 
@@ -12349,6 +12352,9 @@ bool Board::StageIsNight()
 //0x41C040
 bool Board::StageHasGraveStones()
 {
+	// This predicate is queried during stock InitLevel before NativeContext
+	// exists. Ordinary source Night has no Classic grave bootstrap.
+	if (mApp->IsFusionSourceAdventure()) return false;
 	if (mApp->IsWallnutBowlingLevel() ||
 		mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_POGO_PARTY ||
 		mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_BEGHOULED ||

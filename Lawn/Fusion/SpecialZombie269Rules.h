@@ -9,6 +9,7 @@ enum SpecialZombie269Capability:uint32_t
  Special269PaperMotion=128,Special269PaperBite=256,Special269VehicleMotion=512,
  Special269VehicleContacts=1024,Special269IncomingDamage=2048,Special269DeathClock=4096,Special269Water=8192};
 const FusionZombieProfile* FindSpecialZombie269Profile(uint16_t kind);
+bool SpecialZombie269PaperKind(uint16_t kind);
 enum class SpecialZombie269StatusEffect:uint8_t {Cold,Freeze,Butter};
 bool SpecialZombie269RejectEffect(uint16_t kind,int sourceStatus,SpecialZombie269StatusEffect);
 uint32_t SpecialZombie269RequiredCapabilities(uint16_t kind);

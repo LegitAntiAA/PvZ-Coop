@@ -130,8 +130,8 @@ FusionAdventureProgress273TestResult RunFusionAdventureProgress273Tests()
     invalid=profile;invalid.cycle=0;CHECK(!FusionAdventureProfileValid273(invalid));
     invalid=profile;invalid.cycle=uint32_t((std::numeric_limits<int32_t>::max)())+1;CHECK(!FusionAdventureProfileValid273(invalid));
     // Capability admission does not award a frontier or completion. Fresh9
-    // shares the Day mechanisms; its earned10 transition still has no Night
-    // world/tutorial capability even though pure source progression permits it.
+    // shares the Day mechanisms; Night capability does not grant its frontier
+    // or unlock Puff before the actual earned9 trophy transition.
     FusionAdventureProfile273 dayBoundary;dayBoundary.frontierLevel=9;dayBoundary.completedLevels=0xff;
     CHECK(CanEnterFusionAdventureLevel273(dayBoundary,9)&&NativeSourceAdventureLevelReady280(9,dayBoundary.cycle));
     CHECK(!CanEnterFusionAdventureLevel273(dayBoundary,10));
@@ -141,7 +141,7 @@ FusionAdventureProgress273TestResult RunFusionAdventureProgress273Tests()
     CHECK(TryArmFusionAdventureReward273(boundaryRun,30,30,0,false)&&BindFusionAdventureTrophy273(boundaryRun,91,910));
     CHECK(TryCollectFusionAdventureReward273(dayBoundary,boundaryRun,91,910));
     CHECK(dayBoundary.frontierLevel==10&&dayBoundary.completedLevels==0x1ff&&FusionAdventureBaseUnlocked273(dayBoundary,6));
-    CHECK(CanEnterFusionAdventureLevel273(dayBoundary,10)&&!NativeSourceAdventureLevelReady280(10,dayBoundary.cycle));
+    CHECK(CanEnterFusionAdventureLevel273(dayBoundary,10)&&NativeSourceAdventureLevelReady280(10,dayBoundary.cycle));
     CHECK(BeginFusionAdventureRun273(dayBoundary,9,false,boundaryRun)&&boundaryRun.replay&&NativeSourceAdventureLevelReady280(9,dayBoundary.cycle));
     CHECK(BeginFusionAdventureRun273(profile,1,false,run));
     run.tutorial.timerTicks=1;CHECK(!FusionAdventureRunValid273(run));

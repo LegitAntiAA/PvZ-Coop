@@ -11,10 +11,10 @@ constexpr uint64_t mask=(uint64_t{1}<<kFusionAdventureLevels273)-1;
 bool Level(int level){return level>=1&&level<=kFusionAdventureLevels273;}
 bool Cycle(uint32_t cycle){return cycle>0&&cycle<=uint32_t((std::numeric_limits<int32_t>::max)());}
 uint16_t Minus(uint16_t value,uint32_t ticks){return ticks>=value?0:uint16_t(value-ticks);}
-bool TutorialLevel(int level){return level==1||level==4||level==7||level==8;}
+bool TutorialLevel(int level){return level==1||level==4||level==7||level==8||level==10;}
 bool TutorialValid(const FusionAdventureTutorial273& t,int level)
 {
-    if(uint8_t(t.message)>uint8_t(FusionAdventureMessage273::EquipmentReady)||
+    if(uint8_t(t.message)>uint8_t(FusionAdventureMessage273::PuffReady)||
         t.messageTicks>FusionAdventureMessageDuration273(t.message))return false;
     if(t.stage==0)return t.timerTicks==0&&t.message==FusionAdventureMessage273::None&&t.messageTicks==0;
     if(level==1)
@@ -27,7 +27,8 @@ bool TutorialValid(const FusionAdventureTutorial273& t,int level)
     if(!t.active)return t.timerTicks==0&&
         ((level==4&&t.stage==3&&t.message==M::GloveReady)||
          (level==7&&t.stage==4&&t.message==M::PresentDefenseReady)||
-         (level==8&&t.stage==4&&t.message==M::EquipmentReady));
+         (level==8&&t.stage==4&&t.message==M::EquipmentReady)||
+         (level==10&&t.stage==3&&t.message==M::PuffReady));
     M expected=M::None;uint16_t maximumTimer=0;
     switch(level)
     {
@@ -42,6 +43,10 @@ bool TutorialValid(const FusionAdventureTutorial273& t,int level)
     case 8:
         switch(t.stage){case 1:expected=M::EquipmentIntro;maximumTimer=400;break;case 2:expected=M::BucketNutWarning;break;
         case 3:expected=M::UseBucket;break;case 4:expected=M::IronPlants;maximumTimer=300;break;}
+        break;
+    case 10:
+        switch(t.stage){case 1:expected=M::PuffIntro;maximumTimer=400;break;
+        case 2:expected=M::PuffStack;maximumTimer=400;break;case 3:expected=M::PuffMix;maximumTimer=400;break;}
         break;
     }
     return expected!=M::None&&t.message==expected&&t.timerTicks<=maximumTimer;
@@ -93,13 +98,14 @@ uint16_t FusionAdventureMessageDuration273(FusionAdventureMessage273 message)
     case FusionAdventureMessage273::BuildGatling:return 60000;
     case FusionAdventureMessage273::Ready:return 500;
     case FusionAdventureMessage273::GloveUnlocked:case FusionAdventureMessage273::EquipmentIntro:return 400;
+    case FusionAdventureMessage273::PuffIntro:case FusionAdventureMessage273::PuffStack:case FusionAdventureMessage273::PuffMix:return 400;
     case FusionAdventureMessage273::PresentIntro:return 600;
     case FusionAdventureMessage273::PresentReady:case FusionAdventureMessage273::IronPlants:return 300;
     case FusionAdventureMessage273::MoveTwinFlower:case FusionAdventureMessage273::UsePresent:
     case FusionAdventureMessage273::BucketNutWarning:case FusionAdventureMessage273::UseBucket:return 6000;
     case FusionAdventureMessage273::GloveMove:case FusionAdventureMessage273::GloveReady:
     case FusionAdventureMessage273::CherryPaperWarning:case FusionAdventureMessage273::PresentDefenseReady:
-    case FusionAdventureMessage273::EquipmentReady:return 500;
+    case FusionAdventureMessage273::EquipmentReady:case FusionAdventureMessage273::PuffReady:return 500;
     }
     return 0;
 }
@@ -176,6 +182,15 @@ bool StepFusionAdventureTutorial273(FusionAdventureRun273& r,uint32_t ticks,
                     {message=M::UseBucket;++t.stage;}break;
                 case 3:if(input.hasBucketPlant1020or1029){message=M::IronPlants;t.timerTicks=300;++t.stage;}break;
                 case 4:message=M::EquipmentReady;t.active=false;e.completed=true;break;
+                }
+                break;
+            case 10:
+                switch(t.stage)
+                {
+                case 0:message=M::PuffIntro;t.timerTicks=400;++t.stage;break;
+                case 1:message=M::PuffStack;e.missionAction=A::Prepare10;t.timerTicks=400;++t.stage;break;
+                case 2:message=M::PuffMix;e.missionAction=A::Mix10;t.timerTicks=400;++t.stage;break;
+                case 3:message=M::PuffReady;t.active=false;e.completed=true;break;
                 }
                 break;
             }

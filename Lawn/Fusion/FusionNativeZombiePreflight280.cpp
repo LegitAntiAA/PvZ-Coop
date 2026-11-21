@@ -1,6 +1,7 @@
 #include "FusionNativeZombiePreflight280.h"
 #include "FusionSourceZombieClosure280.h"
 #include "FusionNative.h"
+#include "FusionNativeAdventure273.h"
 #include "FusionNativeZombies.h"
 #include "FusionNativeZombieVisual.h"
 #include "FusionNativeDayZombie273Bridge.h"
@@ -79,7 +80,8 @@ bool EnsureNativeSourceZombieClosure280(Board* board,std::span<const uint16_t> r
                 return Reject(kind,"actual native head attachment/anim_shooting track is unavailable",error);
             if(!ShotReady(board,kind,false,detail)||!ShotReady(board,kind,true,detail))
                 return Reject(kind,"actual hostile/friendly source projectile metadata/resource is unavailable: "+detail,error);
-            if(kind==104&&!board->mApp->NetIsClient()&&board->mBackground==BACKGROUND_1_DAY&&GetNativeFusionRowCount(board)==5)
+            if(kind==104&&!board->mApp->NetIsClient()&&GetNativeFusionRowCount(board)==5&&
+                (board->mBackground==BACKGROUND_1_DAY||IsNativeSourceAdventureGrassWorld281(board)))
             {
                 const uint16_t one[]={kind};
                 if(!CanAllocateNativeSourceDayBatch274(board,one,&detail))return Reject(kind,detail,error);

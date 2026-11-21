@@ -32,12 +32,13 @@ FusionAdventureLessons274TestResult RunFusionAdventureLessons274Tests()
     result={};std::printf("[ RUN      ] Fusion.AdventureLessons274\n");
     static_assert(std::is_trivially_copyable_v<FusionAdventureRun273>);
     static_assert(uint8_t(M::Ready)==7); // Existing source1 message wire values stay unchanged.
+    static_assert(uint8_t(M::EquipmentReady)==21&&uint8_t(M::PuffIntro)==22&&uint8_t(M::PuffReady)==25);
     static_assert(sizeof(M)==1&&sizeof(A)==1);
     FusionAdventureLessonInput274 input;FusionAdventureTutorialEffects273 e;
     // The full source activation subset, independently from public campaign admission.
     for(int level=1;level<=45;++level)
     {
-        const bool lesson=level==1||level==4||level==7||level==8;
+        const bool lesson=level==1||level==4||level==7||level==8||level==10;
         auto run=Begin(level);CHECK(run.tutorial.active==lesson);
         run=Begin(level,true);CHECK(!run.tutorial.active&&run.tutorial.stage==0);
         run=Begin(level,false,2);CHECK(!run.tutorial.active&&run.tutorial.message==M::None);
@@ -123,8 +124,33 @@ FusionAdventureLessons274TestResult RunFusionAdventureLessons274Tests()
     Step(run,100000,input,e);CHECK(run.tutorial.stage==3&&NoAction(e));
     input.hasBucketPlant1020or1029=true;Step(run,0,input,e);CHECK(run.tutorial.stage==4&&run.tutorial.timerTicks==300);
 
+    // Source10 is a timed demonstration: one case per update, even with a
+    // large delta. Native actions must commit before the candidate is adopted.
+    input={};run=Begin(10);Step(run,0,input,e);
+    CHECK(run.tutorial.stage==1&&run.tutorial.timerTicks==400&&run.tutorial.message==M::PuffIntro);
+    CHECK(NoAction(e)&&e.messageChanged&&FusionAdventureCardsIgnoreExpiry273(run));
+    Step(run,399,input,e);CHECK(run.tutorial.stage==1&&run.tutorial.timerTicks==1&&NoAction(e));
+    Step(run,1,input,e);
+    CHECK(run.tutorial.stage==2&&run.tutorial.timerTicks==400&&run.tutorial.message==M::PuffStack&&run.tutorial.messageTicks==400);
+    CHECK(e.missionAction==A::Prepare10&&!e.grantMissionCards&&!e.completed&&!e.nextWaveTicks);
+    auto beforeNativeCommit=run;auto candidate=run;Step(candidate,400,input,e);
+    CHECK(e.missionAction==A::Mix10&&candidate.tutorial.stage==3&&candidate.tutorial.timerTicks==400);
+    CHECK(run.tutorial.stage==beforeNativeCommit.tutorial.stage&&run.tutorial.timerTicks==400);
+    run=candidate;CHECK(run.tutorial.message==M::PuffMix&&run.tutorial.messageTicks==400&&run.tutorial.active);
+    Step(run,399,input,e);CHECK(run.tutorial.stage==3&&run.tutorial.timerTicks==1&&NoAction(e));
+    Step(run,1,input,e);
+    CHECK(!run.tutorial.active&&run.tutorial.stage==3&&run.tutorial.timerTicks==0&&run.tutorial.message==M::PuffReady);
+    CHECK(run.tutorial.messageTicks==500&&e.completed&&e.nextWaveTicks==500&&e.missionAction==A::None&&!e.grantMissionCards);
+    CHECK(!FusionAdventureCardsIgnoreExpiry273(run));Step(run,500,input,e);CHECK(!run.tutorial.messageTicks&&NoAction(e));
+    run=Begin(10);Step(run,100000,input,e);
+    CHECK(run.tutorial.stage==1&&run.tutorial.timerTicks==400&&NoAction(e));
+    Step(run,100000,input,e);CHECK(run.tutorial.stage==2&&run.tutorial.timerTicks==400&&e.missionAction==A::Prepare10);
+    Step(run,100000,input,e);CHECK(run.tutorial.stage==3&&run.tutorial.timerTicks==400&&e.missionAction==A::Mix10);
+    Step(run,100000,input,e);CHECK(!run.tutorial.active&&run.tutorial.messageTicks==500&&e.completed&&e.nextWaveTicks==500);
+    for(const auto message:{M::PuffIntro,M::PuffStack,M::PuffMix})CHECK(FusionAdventureMessageDuration273(message)==400);
+    CHECK(FusionAdventureMessageDuration273(M::PuffReady)==500);
     // Level-aware validation rejects wrong stage/message/timer combinations.
-    for(int level:{4,7,8})
+    for(int level:{4,7,8,10})
     {
         input={};auto valid=Begin(level);Step(valid,0,input,e);
         auto bad=valid;bad.tutorial.message=M::Welcome;CHECK(!FusionAdventureRunValid273(bad));

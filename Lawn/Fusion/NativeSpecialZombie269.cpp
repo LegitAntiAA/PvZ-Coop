@@ -30,7 +30,7 @@ bool Host(Zombie* z)
 {return IsNativeSpecialZombie269(z)&&!z->mDead&&!z->mNetGhost&&!z->mApp->NetIsClient()&&
     z->mApp->mBoard==z->mBoard&&!z->mBoard->mPaused&&CanApplyNativeFusionGameplay(z->mBoard);}
 bool Paper(const Zombie* z)
-{const auto* d=GetNativeSourceZombieData(z);return d&&(d->kind==15||d->kind==104);}
+{const auto* d=GetNativeSourceZombieData(z);return d&&SpecialZombie269PaperKind(d->kind);}
 int PaperStatus(const Zombie* z)
 {return z->mZombiePhase==PHASE_NEWSPAPER_MADDENING?5:z->mZombiePhase==PHASE_NEWSPAPER_MAD?6:4;}
 Reanimation* Body(const Zombie* z)

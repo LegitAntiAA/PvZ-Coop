@@ -80,12 +80,29 @@ void Banners(Board* b,const FusionAdventureScheduler273Events& events)
 }
 bool IsNativeSourceAdventure273(const Board* board)
 {const auto* c=GetNativeContext(board);return Current(board)&&c&&c->adventure.enabled;}
+bool IsNativeSourceAdventureGrassWorld281(const Board* b)
+{
+    const auto* c=GetNativeContext(b);
+    const auto* source=c?FindFusionSourceAdventure272(c->adventure.run.level):nullptr;
+    if(!Current(b)||!c||!c->adventure.enabled||!b->mApp->IsFusionSourceAdventure()||
+        !c->epoch||c->epoch!=b->mApp->mNativeFusionEpoch||
+        !source||(source->scene!=0&&source->scene!=1)||source->rows!=5||source->columns!=10||
+        int(b->mBackground)!=source->scene||b->GetColumnCount()!=10||GetNativeFusionRowCount(b)!=5||
+        !b->mTDPath.empty()||b->mGridItems.mSize)return false;
+    for(int row=0;row<5;++row)
+    {
+        if(b->mPlantRow[row]!=PLANTROW_NORMAL)return false;
+        for(int col=0;col<10;++col)if(b->GetGridSquareTypeAt(col,row)!=GRIDSQUARE_GRASS)return false;
+    }
+    return true;
+}
 bool InitializeNativeSourceAdventure273(Board* b,const FusionAdventureSession273& boot,std::string* error)
 {
     if(error)error->clear();
     const auto* level=FindFusionSourceAdventure272(boot.run.level);auto* c=GetNativeContext(b);
     if(!Current(b)||!c||!boot.enabled||!FusionAdventureSessionValid273(boot)||!level||
-        !NativeSourceAdventureLevelReady273(boot.run.level,boot.run.cycle)||level->scene!=0||level->rows!=5||level->columns!=10)
+        !NativeSourceAdventureLevelReady273(boot.run.level,boot.run.cycle)||
+        (level->scene!=0&&level->scene!=1)||level->rows!=5||level->columns!=10)
     {if(error)*error="Source Adventure boot is invalid or outside supported scene/controller capabilities.";return false;}
     const bool host=!b->mApp->NetIsClient();
     if(host&&(boot.wave||boot.run.over||boot.run.rewardCollected||boot.schedulerFailed||
@@ -111,8 +128,10 @@ bool InitializeNativeSourceAdventure273(Board* b,const FusionAdventureSession273
         for(int col=0;col<b->GetColumnCount();++col)
             b->GetGridSquareTypeAt(col,row)=row<level->rows?GRIDSQUARE_GRASS:GRIDSQUARE_NONE;
     }
+    if(!IsNativeSourceAdventureGrassWorld281(b))
+    {if(error)*error="Source Adventure requires its current Day/Night five-grass world without foreign grid/Tower initializers.";return false;}
     FusionAdventureScheduler273State scheduler;
-    if(host&&(boot.run.level==7||boot.run.level==8)&&
+    if(host&&(level->tutorialId==7||level->tutorialId==8||level->tutorialId==10)&&
         !PreflightNativeFusionAdventureLesson278(b,boot.run.level,error))return false;
     if(host&&InitializeNativeAdventureScheduler273(b,scheduler,boot.run.level,int(boot.run.cycle),
         boot.sourceDifficulty,BoardRandom(b),error)!=Result::Okay)return false;
@@ -149,8 +168,8 @@ bool UpdateNativeSourceAdventure273(Board* b)
     {Failed(b,"source TutorOver could not set the five-second wave countdown");return true;}
     FusionAdventureScheduler273Input input;input.host=true;input.deltaSeconds=.01f;
     input.tutorial=view.run.tutorial.active;
-    // Ordinary source Day1..8 has allowSummon=true and no Boss/ScaryPot/IceDoom
-    // controller. These worlds must be gated before widening native admission.
+    // Admitted ordinary grass worlds have allowSummon=true and no
+    // Boss/ScaryPot/IceDoom controller; shared capability admission owns this.
     FusionAdventureScheduler273Events events;std::string error;
     const auto status=UpdateNativeAdventureScheduler273(b,c->adventureScheduler,input,BoardRandom(b),events,&error);
     if(status!=Result::Okay)
@@ -163,6 +182,11 @@ bool UpdateNativeSourceAdventureSun273(Board* b)
     if(!IsNativeSourceAdventure273(b))return false;
     auto* c=GetNativeContext(b);
     if(b->mApp->NetIsClient()||!Playing(b)||c->adventure.run.over||c->adventure.schedulerFailed)return true;
+    const auto* source=FindFusionSourceAdventure272(c->adventure.run.level);
+    // Source LevelUpdate1803189F0 requires !isNight/!isConvey and fallSun.
+    // This ordinary world excludes Tower/Indestructible/SeedRain controllers;
+    // they must provide their own source policy before native admission.
+    if(!source||!IsNativeSourceAdventureGrassWorld281(b)||source->scene==1||source->conveyor)return true;
     if(c->adventureSkySunTicks>0)--c->adventureSkySunTicks;
     b->mSunCountDown=c->adventureSkySunTicks;
     if(c->adventureSkySunTicks>0)return true;

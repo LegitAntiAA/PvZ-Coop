@@ -27,6 +27,9 @@
 #include "../Net/NetManager.h"
 #include "../../LawnApp.h"
 #include "../../Resources.h"
+#include "../../Sexy.TodLib/EffectSystem.h"
+#include "../../Sexy.TodLib/Reanimator.h"
+#include "../../Sexy.TodLib/Attachment.h"
 #include "../../SexyAppFramework/Image.h"
 #include <algorithm>
 #include <cmath>
@@ -89,7 +92,42 @@ struct PlacementPlan
 {
     Plant* parent = nullptr;
     uint16_t kind = kFusionNoPlant, firstParent = kFusionNoPlant;
+    std::vector<Plant*> puffParents;
 };
+bool PuffMixCapacity(Board* board,uint16_t kind,size_t count)
+{
+    // Legacy Bowling adds a native blink/attachment during PlantInitialize.
+    // Its different initializer peak is outside this grass-placement proof.
+    if(board->mApp->IsWallnutBowlingLevel())return false;
+    const SeedType seed=GetNativeSeedForPlant(kind);
+    unsigned heads=0;
+    switch(seed)
+    {
+    case SEED_PEASHOOTER:heads=1;break;
+    case SEED_WALLNUT:case SEED_PUFFSHROOM:case SEED_SUNSHROOM:case SEED_HYPNOSHROOM:break;
+    default:return false; // Other initializers need their own proven peak.
+    }
+    const auto plain=[](ReanimationType type)
+    {
+        ReanimatorEnsureDefinitionLoaded(type,false);
+        if(!gReanimatorDefArray||unsigned(type)>=gReanimatorDefCount)return false;
+        const auto& tracks=gReanimatorDefArray[int(type)].mTracks;
+        if(!tracks.tracks||tracks.count<=0)return false;
+        for(int i=0;i<tracks.count;++i)
+            if(tracks.tracks[i].mName&&strnicmp(tracks.tracks[i].mName,"attacher__",10)==0)return false;
+        return true;
+    };
+    const bool sleep=Plant::IsNocturnal(seed)&&!board->StageIsNight();
+    if(!plain(GetPlantDefinition(seed).mReanimationType)||(heads&&!plain(REANIM_PEASHOOTER))||
+        (sleep&&!plain(REANIM_SLEEPING)))return false;
+    auto* effects=board->mApp->mEffectSystem;
+    if(!effects||effects!=gEffectSystem||!effects->mReanimationHolder||!effects->mAttachmentHolder)return false;
+    const auto room=[](const auto& pool,size_t need)
+    {return pool.mBlock&&pool.mSize<=pool.mMaxSize&&need<=size_t(pool.mMaxSize-pool.mSize);};
+    return room(board->mPlants,count)&&
+        room(effects->mReanimationHolder->mReanimations,count*(1+heads+unsigned(sleep)))&&
+        room(effects->mAttachmentHolder->mAttachments,count*heads);
+}
 bool WaterKind(uint16_t kind)
 { return kind==12||kind==19||kind==1077||kind==1078||kind==1086||kind==1101||IsFusionWater268WaterPlant(kind); }
 bool TerrainAllows(Board* board,int column,int row,uint16_t kind,const PlantsOnLawn& cell,const Plant* replaced=nullptr)
@@ -224,7 +262,31 @@ bool MakePlacementPlan(Board* board, int column, int row, uint16_t incoming, Pla
         if (occupant && occupant != parent) return RecipeChoice::Rejected;
         if(!TerrainAllows(board,column,row,recipe->result,cell,parent)||
             (recipe->result==900&&!CanPlaceNativeEmperor269(board,row)))return RecipeChoice::Rejected;
-        plan = {parent,recipe->result,data->kind}; return RecipeChoice::Selected;
+        plan = {parent,recipe->result,data->kind};
+        if(layer==PlacementLayer::Body&&IsFusionSourcePuffKind(data->kind)&&IsFusionSourcePuffKind(recipe->result))
+        {
+            // CheckMix snapshots old recipients; newly born Puff results must
+            // never become the next parent of the same incoming card.
+            Plant* old=nullptr;
+            while(board->mPlants.IterateNext(old))
+            {
+                if(old==moving||old->mDead||!old->mIsOnBoard||old->mPlantCol!=column||old->mRow!=row)continue;
+                const auto* d=GetNativePlantData(old);PlacementLayer oldLayer;
+                if(!d||!LayerForKind(d->kind,oldLayer))return RecipeChoice::Rejected;
+                if(oldLayer!=PlacementLayer::Body)continue;
+                if(!CurrentLayerActor(board,old,oldLayer)||!IsFusionSourcePuffKind(d->kind))return RecipeChoice::Rejected;
+                plan.puffParents.push_back(old);
+            }
+            if(plan.puffParents.size()>1)
+            {
+                // Base SmallPuff has an empty DieEvent and no source temporary
+                // or dieMeansLose flag. Hybrid removal callbacks need their
+                // own batch proof before they can mutate additional recipients.
+                for(auto* old:plan.puffParents)
+                    if(GetNativePlantData(old)->kind!=6||NativeBatchPlantUntargetable(old))return RecipeChoice::Rejected;
+            }
+        }
+        return RecipeChoice::Selected;
     };
     // Source-directed recipes, first the incoming layer, then a fixed order.
     // A known blocked/unsupported recipe rejects the action, rather than
@@ -491,6 +553,48 @@ Plant* TryPlaceNativeFusionPlant(Board* board, int column, int row,
     {
         LawnNet::NetTrace("Fusion native placement resource admission rejected kind=%u error=%s",result,visualError.c_str());
         return nullptr;
+    }
+    if(!plan.puffParents.empty()&&plan.firstParent==6)
+    {
+        for(auto* old:plan.puffParents)
+        {
+            const auto* d=GetNativePlantData(old);
+            if(!CurrentLayerActor(board,old,PlacementLayer::Body)||!d||d->kind!=plan.firstParent||
+                IsNativeGlovePlantReserved(board,old,requestingSlot))return nullptr;
+        }
+        if(!PuffMixCapacity(board,result,plan.puffParents.size()))
+        {LawnNet::NetTrace("Fusion native multi-Puff deferred result=%u count=%zu reason=whole-initializer-peak",result,plan.puffParents.size());return nullptr;}
+        Plant* first=nullptr;
+        for(auto* old:plan.puffParents)
+        {
+            const auto oldId=old->mNetId;
+            old->Die(2); // Source CheckMix removes this old recipient BEFORE SetPlant.
+            auto* child=board->AddPlant(column,row,GetNativeSeedForPlant(result),SEED_NONE,&fresh);
+            const auto* bound=GetNativePlantData(child);
+            if(!child||child->mDead||!child->mNetId||!bound||!bound->instanceToken||
+                board->mPlants.DataArrayTryToGet(bound->instanceToken)!=child||
+                child->mSeedType!=GetNativeSeedForPlant(result)||bound->kind!=fresh.kind||
+                bound->firstParent!=fresh.firstParent||bound->secondParent!=fresh.secondParent||
+                bound->packetId!=fresh.packetId||bound->owner!=fresh.owner||bound->randomOrigin!=fresh.randomOrigin)
+            {
+                if(child&&!child->mDead)child->Die(255);
+                // A post-preflight factory failure is not a capacity retry:
+                // source parents have already been consumed. Stop the source
+                // controller instead of replaying a partially committed group.
+                if(context->adventure.enabled)
+                {context->adventure.schedulerFailed=true;context->adventureScheduler.failed=true;}
+                RebuildNativeEquipmentGraph(board);
+                LawnNet::NetTrace("Fusion native multi-Puff failed after mutation result=%u old=%u partial=%d",result,oldId,first!=nullptr);
+                return nullptr;
+            }
+            if(!first)first=child;
+            NativeBatchPlantPlaced(child);
+            LawnNet::NetTrace("Fusion native multi-Puff child incoming=%u result=%u old=%u child=%u token=%u first=%u second=%u column=%d row=%d slot=%d",
+                incoming.kind,result,oldId,child->mNetId,bound->instanceToken,fresh.firstParent,fresh.secondParent,column,row,requestingSlot);
+        }
+        if(movingSource)movingSource->Die(2);
+        RebuildNativeEquipmentGraph(board);
+        return first; // PlantPacket charges/recharges the one incoming card once.
     }
     Plant* plant = board->AddPlant(column, row, GetNativeSeedForPlant(result), SEED_NONE, &fresh);
     if (!plant) return nullptr;

@@ -155,10 +155,12 @@ bool CanAllocateNativeSourceDayBatch274(Board* board,std::span<const uint16_t> k
 {
     if(error)error->clear();
     const auto reject=[&](const char* why){if(error)*error=why;return false;};
-    if(!CurrentBoard(board)||board->mApp->NetIsClient()||board->mBackground!=BACKGROUND_1_DAY||GetNativeFusionRowCount(board)!=5)
-        return reject("Source Day allocation requires the host ordinary Day Board.");
+    if(!CurrentBoard(board)||board->mApp->NetIsClient()||GetNativeFusionRowCount(board)!=5||
+        (board->mBackground!=BACKGROUND_1_DAY&&
+            !(board->mBackground==BACKGROUND_2_NIGHT&&IsNativeSourceAdventureGrassWorld281(board))))
+        return reject("Source grass allocation requires the host Day Board or actual source Night world.");
     for(int row=0;row<5;++row)if(board->mPlantRow[row]!=PLANTROW_NORMAL)
-        return reject("Source Day allocation does not cover a pool or dirt initializer.");
+        return reject("Source grass allocation does not cover a pool or dirt initializer.");
     size_t reanimations=0,attachments=0;
     for(auto kind:kinds)
     {
@@ -313,7 +315,8 @@ Zombie* SpawnNativeSourceZombie(Board* board,const NativeSourceZombieSpawnReques
         return nullptr;
     }
     const int nativeCarrier=GetNativeSourceZombieCarrier(kind);
-    if(board->mBackground==BACKGROUND_1_DAY&&GetNativeFusionRowCount(board)==5&&
+    if((board->mBackground==BACKGROUND_1_DAY||
+        (board->mBackground==BACKGROUND_2_NIGHT&&IsNativeSourceAdventureGrassWorld281(board)))&&GetNativeFusionRowCount(board)==5&&
         (nativeCarrier==ZOMBIE_NORMAL||nativeCarrier==ZOMBIE_TRAFFIC_CONE||nativeCarrier==ZOMBIE_PAIL||
          nativeCarrier==ZOMBIE_DOOR||nativeCarrier==ZOMBIE_POLEVAULTER||nativeCarrier==ZOMBIE_NEWSPAPER))
     {

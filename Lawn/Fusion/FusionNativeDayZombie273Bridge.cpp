@@ -1,5 +1,5 @@
 #include "FusionNativeDayZombie273Bridge.h"
-#include "FusionCampaign272Rules.h"
+#include "FusionNativeAdventure273.h"
 #include "FusionNative.h"
 #include "FusionNativeBasePlants.h"
 #include "FusionBasePlantRules.h"
@@ -32,12 +32,7 @@ bool Current(const Board* b)
 {return b&&b->mApp&&b->mApp->mBoard==b&&IsNativeFusionBoard(b)&&!GetNativeContext(b)->adventureTeardown;}
 bool OrdinarySourceDay(Board* b)
 {
-    const auto* c=GetNativeContext(b);
-    const auto* level=c?FindFusionSourceAdventure272(c->adventure.run.level):nullptr;
-    if(!Current(b)||!c->adventure.enabled||!level||level->scene!=0||level->rows!=5||level->columns!=10||
-        b->mBackground!=BACKGROUND_1_DAY||b->GetColumnCount()!=10||GetNativeFusionRowCount(b)!=5||
-        !b->mTDPath.empty()||b->mGridItems.mSize)return false;
-    for(int row=0;row<5;++row)if(b->mPlantRow[row]!=PLANTROW_NORMAL)return false;
+    if(!IsNativeSourceAdventureGrassWorld281(b))return false;
     Zombie* actor=nullptr;
     while(b->IterateZombies(actor))
     {

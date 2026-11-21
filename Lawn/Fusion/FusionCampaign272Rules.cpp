@@ -27,11 +27,11 @@ bool NativeSourceAdventureLevelReady280(int level,uint32_t cycle,std::string* er
     if(source->roofPreplantColumns)return reject("preplants: source Roof Pot27 initialization is not implemented.");
     switch(source->tutorialId)
     {
-    case 0:case 1:case 4:case 7:case 8:break;
+    case 0:case 1:case 4:case 7:case 8:case 10:break;
     default:return reject("tutorial: source lesson has no native implementation.");
     }
-    if(source->scene!=0||source->rows!=5)
-        return reject("world: native source actor world requires Day with five normal grass rows.");
+    if((source->scene!=0&&source->scene!=1)||source->rows!=5)
+        return reject("world: native source actor world requires Day/Night with five normal grass rows.");
     std::vector<uint16_t> closure;std::string dependencyError;
     if(!BuildFusionSourceZombieClosure280(source->allowedZombieKinds,closure,&dependencyError))
     {if(error)*error="npc: "+dependencyError;return false;}

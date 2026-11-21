@@ -8,6 +8,7 @@ namespace LawnFusion
 // Proposed profiles only. Root admits each family after its real dependencies,
 // model, native hooks and wire state are present on both peers.
 const FusionZombieProfile* FindFusionDayZombie273Profile(uint16_t kind);
+bool FusionDayZombie273Pole(uint16_t kind);
 bool FusionDayZombie273Doll(uint16_t kind);
 bool FusionDayZombie273Shooter(uint16_t kind);
 std::span<const uint16_t> FusionDayZombie273NpcDependencies(uint16_t kind);

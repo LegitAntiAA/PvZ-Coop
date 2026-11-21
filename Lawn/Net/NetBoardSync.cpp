@@ -34,6 +34,7 @@
 #include "../Fusion/FusionNativeWire.h"
 #include "../Fusion/FusionNativeEffects269.h"
 #include "../Fusion/FusionNativeAdventureProgress273.h"
+#include "../Fusion/FusionNativeAdventure273.h"
 #include "../Fusion/FusionNativeVisual.h"
 #include "../Fusion/FusionNativeZombieVisual.h"
 #include "../Fusion/NativeSpecialZombie269.h"
@@ -905,17 +906,16 @@ uint32_t NetGetReanimationFrameCapacity(const Reanimation* theReanim)
 
 bool NetDay273AllocationCapacity(Board* board,const NetBuffer& body,const LawnFusion::NativeSnapshotFrame& frame)
 {
-    if(frame.dayZombies273.empty())return true;
+    if(frame.dayZombies273.empty()&&!(frame.adventure.enabled&&frame.background==BACKGROUND_2_NIGHT))return true;
     const auto reject=[](const char* reason,int section=-1,unsigned type=0)
     {
         NetTrace("Day274 snapshot allocation rejected reason=%s section=%d type=%u",reason,section,type);return false;
     };
     if(!board||!board->mApp||!LawnFusion::GetNativeContext(board))return reject("no-board-context");
     auto* app=board->mApp;auto* effects=app->mEffectSystem;
-    if(!frame.adventure.enabled||frame.adventure.run.level<1||frame.adventure.run.level>9||
-        app->mGameMode!=GAMEMODE_ADVENTURE||frame.background!=BACKGROUND_1_DAY||
-        board->mBackground!=BACKGROUND_1_DAY||app->mUpdateAppDepth>1)
-        return reject("only-nonreentrant-source-Day1-through9");
+    if(!frame.adventure.enabled||!LawnFusion::IsNativeSourceAdventureGrassWorld281(board)||
+        app->mGameMode!=GAMEMODE_ADVENTURE||frame.background!=board->mBackground||app->mUpdateAppDepth>1)
+        return reject("only-nonreentrant-source-Day-or-Night-grass-world");
     if(!effects||effects!=gEffectSystem||!effects->mReanimationHolder||!effects->mAttachmentHolder||!effects->mParticleHolder)
         return reject("no-effect-pools");
     if(board->mMustacheMode||board->mFutureMode||board->mPinataMode)return reject("extra-native-limb-FX-modes-not-budgeted");
@@ -998,7 +998,8 @@ bool NetDay273AllocationCapacity(Board* board,const NetBuffer& body,const LawnFu
                 case SEED_PUMPKINSHELL:case SEED_FLOWERPOT:case SEED_POTATOMINE:case SEED_GARLIC:case SEED_BLOVER:
                 case SEED_JALAPENO:case SEED_SQUASH:case SEED_TORCHWOOD:case SEED_CHOMPER:case SEED_CABBAGEPULT:
                 case SEED_KERNELPULT:case SEED_MELONPULT:case SEED_WINTERMELON:case SEED_CATTAIL:case SEED_CACTUS:
-                case SEED_MARIGOLD:case SEED_SPIKEWEED:case SEED_SPIKEROCK:case SEED_FUMESHROOM:case SEED_PUFFSHROOM:case SEED_IMITATER:break;
+                case SEED_MARIGOLD:case SEED_SPIKEWEED:case SEED_SPIKEROCK:case SEED_FUMESHROOM:case SEED_PUFFSHROOM:
+                case SEED_SUNSHROOM:case SEED_HYPNOSHROOM:case SEED_IMITATER:break;
                 default:return reject("plant-factory-not-budgeted",section,type);
                 }
                 const auto reanim=GetPlantDefinition(SeedType(type)).mReanimationType;
@@ -1009,7 +1010,8 @@ bool NetDay273AllocationCapacity(Board* board,const NetBuffer& body,const LawnFu
                 reanims+=1+heads;attachments+=heads; // Each Attach call can require at most one container.
                 // A raw daytime mushroom initializes before Fusion metadata
                 // is bound and can allocate its sleep reanimation (PlantInitialize).
-                if(type==SEED_FUMESHROOM||type==SEED_PUFFSHROOM){++reanims;if(!plainDefinition(REANIM_SLEEPING))return reject("mushroom-initial-sleep-definition",section,type);}
+                if(!board->StageIsNight()&&(type==SEED_FUMESHROOM||type==SEED_PUFFSHROOM||type==SEED_SUNSHROOM||type==SEED_HYPNOSHROOM))
+                {++reanims;if(!plainDefinition(REANIM_SLEEPING))return reject("mushroom-initial-sleep-definition",section,type);}
                 if(scan.mData[start+11]&1){++reanims;if(!plainDefinition(REANIM_SLEEPING))return reject("sleep-definition",section,type);}
                 if(type==SEED_POTATOMINE)
                 {

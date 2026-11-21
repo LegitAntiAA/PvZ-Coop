@@ -13,6 +13,7 @@ constexpr FusionZombieProfile profiles[] = {
     {0,270,0,0,50},{2,270,370,0,50},{4,270,1100,0,50},
     {8,270,0,1100,50,true},{11,270,0,0,50,true,true},{12,270,370,0,50,true,true},
     {13,270,1100,0,50,true,true},{41,200,0,0,50,true,false,true},{42,300,0,0,50,true,false,true},
+    {9,270,1400,0,50,false},{10,720,0,0,50,false},
     {111,270,2200,0,50,false},{109,270,4400,0,50,false}};
 bool ProjectSourceHealth(float health, int& output)
 {
@@ -33,10 +34,10 @@ const FusionZombieProfile* FindFusionZombieProfile(uint16_t kind)
 int GetNativeSourceZombieCarrier(uint16_t kind)
 {
     switch(kind){case 0:case 11:case 41:case 42:return ZOMBIE_NORMAL;case 2:case 12:return ZOMBIE_TRAFFIC_CONE;
-    case 4:case 13:case 111:return ZOMBIE_PAIL;case 109:return ZOMBIE_FOOTBALL;case 8:return ZOMBIE_DOOR;
-    case 15:case 104:return ZOMBIE_NEWSPAPER;case 14:case 18:return ZOMBIE_ZAMBONI;
-    case 3:return ZOMBIE_POLEVAULTER;case 21:case 22:case 23:return ZOMBIE_TRAFFIC_CONE;
-    case 100:case 106:case 107:case 108:return ZOMBIE_NORMAL;default:return -1;}
+    case 4:case 13:case 111:return ZOMBIE_PAIL;case 9:case 109:return ZOMBIE_FOOTBALL;case 8:return ZOMBIE_DOOR;
+    case 5:case 15:case 104:return ZOMBIE_NEWSPAPER;case 14:case 18:return ZOMBIE_ZAMBONI;
+    case 3:case 6:case 7:return ZOMBIE_POLEVAULTER;case 21:case 22:case 23:return ZOMBIE_TRAFFIC_CONE;
+    case 10:case 100:case 106:case 107:case 108:return ZOMBIE_NORMAL;default:return -1;}
 }
 
 bool TryPrepareFusionZombieSpawn(uint16_t kind, int sourcePreset, float draw, FusionZombieSpawn& output)
@@ -45,7 +46,7 @@ bool TryPrepareFusionZombieSpawn(uint16_t kind, int sourcePreset, float draw, Fu
     if (!profile || sourcePreset!=kFusionZombieSourcePreset || !std::isfinite(draw) ||
         draw<kFusionZombieMinimumOriginSpeed || draw>kFusionZombieMaximumOriginSpeed) return false;
     output={kind,profile->maxHealth,profile->firstArmor,profile->secondArmor,profile->biteDamage,draw,
-        kind!=111&&kind!=109&&draw>kFusionZombieWalk2Threshold};
+        kind!=111&&kind!=109&&kind!=9&&kind!=10&&draw>kFusionZombieWalk2Threshold};
     return true;
 }
 
@@ -60,13 +61,14 @@ bool TryGetFusionZombieStatusSpeedFactor(uint16_t kind, bool chilled, bool froze
 bool TryCountFusionZombieAttackEvents(uint16_t kind, FusionZombieClipPosition previous,
     FusionZombieClipPosition current, uint32_t& output)
 {
-    if(kind==3)return TryCountFusionDayZombie273Bites(kind,previous,current,output);
+    if(FusionDayZombie273Pole(kind))return TryCountFusionDayZombie273Bites(kind,previous,current,output);
     const auto* profile=FindFusionZombieProfile(kind);
-    const float duration=kind==109?2.9166667f:kFusionZombieAttackClipSeconds;
+    const float duration=(kind==9||kind==109)?2.9166667f:kind==10?2.7333333f:kFusionZombieAttackClipSeconds;
     if (!profile || profile->noAttack || !ClipPositionValid(previous,duration) || !ClipPositionValid(current,duration) ||
         current.loop<previous.loop || (current.loop==previous.loop && current.seconds<previous.seconds)) return false;
     uint64_t count=0;
-    const std::array<float,2> callbacks=kind==109?std::array<float,2>{1.0166667f,2.4833333f}:
+    const std::array<float,2> callbacks=(kind==9||kind==109)?std::array<float,2>{1.0166667f,2.4833333f}:
+        kind==10?std::array<float,2>{1.0833334f,2.4f}:
         profile->waterOnly?std::array<float,2>{.33333334f,.96666664f}:kFusionZombieAttackEvents;
     for (float event:callbacks)
     {
