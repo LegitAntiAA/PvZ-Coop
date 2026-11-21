@@ -1,3 +1,10 @@
+## ROOT 274A — 2026-11-21
+
+- PUBLISH273: DONE. main c5f3837, GitHub author/committer LegitAntiAA, direct push through gh.
+- ASSET-GIT274: IN_REVIEW, Root. Preserve exact exported resource bytes with -text;153 corrected index blobs, no logical content change.2859/0 byte audit and14/0 autocrlf filtered-checkout comparisons Passed. Commit/push next.
+- BUCKET-SMOKE274: IN_PROGRESS, E3 fixture only; Root runtime. Optional existing equipment cohort must prove actual host/client clicks on0->1020 and3->1029, fresh identity/HP/shared owner and consume-once. No runtime proof yet.
+- DAY-ALLOC274: IN_PROGRESS, E1 read-only source-proven minimal budget contract; Root implementation. Day8 network admission remains blocked. No NPC count increase.
+
 ## ROOT 273C — verified checkpoint, 2026-11-21
 
 - PUBLICATION: main; user-requested branch merge/deletion DONE. Parent merge bab92d7; authenticated gh account and GitHub author/committer LegitAntiAA. This checkpoint is prepared for direct-main commit/push; consult git HEAD/origin for the resulting SHA. No release creation.

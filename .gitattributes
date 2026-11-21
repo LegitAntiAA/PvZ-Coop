@@ -1,6 +1,9 @@
 ###############################################################################
 # Set default behavior to automatically normalize line endings.
 * text=auto
+# Exported Fusion packages contain byte-exact SHA256 references. Keep their
+# original bytes on every platform, including mixed LF/CRLF package exports.
+assets/fusion/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
 # Set default behavior for command prompt diff.
 #
 # This is need for earlier builds of msysgit that does not have it on by

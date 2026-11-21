@@ -1,3 +1,9 @@
+## ROOT 274A — 2026-11-21: byte-exact Git packaging, then Bucket and Day admission
+
+Published main c5f383791238138bc05101defd4730ebf539b02c (GitHub author/committer LegitAntiAA), containing the verified273C checkpoint below. No gameplay edits since app66l. Packaging bug confirmed: text=auto normalized153/2859 Fusion resource blobs, invalidating pinned raw SHA256 on another checkout. assets/fusion now -text; staged153 original-byte restorations have no logical content changes. check_asset_git_bytes.py Passed2859/0; seven pinned files filtered with core.autocrlf true/false Passed14/0; staged whitespace check Passed. Separate direct-main packaging commit pending; no rebuild needed for unchanged runtime bytes.
+
+Active274 tasks: E3 owns only NetFusionEquipment268Smoke.cpp for optional real Bucket0 clicks on both peers (0->1020,3->1029), fresh identity/HP/shared owner/consume-once proof; Root owns runner/build/runtime. E1 read-only smallest source-proven whole-snapshot reanimation/attachment capacity contract. Root integrates/publishes packaging then tackles native Day resource safety/admission. E2 idle. Historical accepted plants280/281, NPC15, campaign1/45 unchanged. All owned game/build processes closed at resumption; do not infer agent implementation as runtime proof.
+
 ## ROOT 273C — 2026-11-21: verified Source1 cycle and Solar fix, publish then continue
 
 Branch main, parent published merge bab92d7. gh account and GitHub author/committer verified LegitAntiAA; local author/committer configured LegitAA <rostov20172017@gmail.com>. codex/fusion-coop-20261113 deleted remotely/locally. This checkpoint is ready for direct-main commit/push via gh; resolve current published SHA from git rather than the historical entries below. No release. User wants continued full Fusion work, not a checkpoint-only final.

@@ -1,3 +1,7 @@
+## FUSION-ASSET-GIT274 — VERIFIED packaging
+
+MEDIUM, exported Fusion packages. Git text=auto changed raw JSON line endings, breaking pinned SHA256 after checkout despite valid working packages. Confirmed153 staged/working mismatches among2859 assets. assets/fusion -text and renormalization preserve exact original bytes; audit now2859/0, filtered checkout of seven pinned files with autocrlf true/false14/0 Passed. Logical asset content unchanged. Game behavior was not rerun for this packaging-only change; app66l runtime evidence remains separate.
+
 ## FUSION-HP-272 / FUSION-MONEY-272 — VERIFIED bounded
 
 Fusion plant drawing returned before the native HP tail, and Classic zombie head/damage-target eligibility suppressed typed source/friendly/vehicle actors. Shared Plant::DrawHealthBar is called from both paths; typed source health uses safe float sums and retained native bar UI. Money source1 was misleadingly highlighted although absent from the actual source reinforcement whitelist. Shared quote/availability now governs hover/action, and rejected client clicks use native advice.65g owned paired smoke Passed107common/5frames: actual host Tab propagated, client HP frame inspected, actual client Z/hover/LMB preserved source1 ID/token/HP and wallet3000 with no highlight and exact advice. Full NPC AI and all Money skills are not established by this bounded case.
