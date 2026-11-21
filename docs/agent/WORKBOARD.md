@@ -1,3 +1,19 @@
+## ROOT 280 USER STEERING — 2026-11-22 Moscow
+
+- BATCH280:IN_PROGRESS Rootcontract/integration; ArchitectE2maps45levels/sharedreadiness; Engineer1sharedNPCpreflight; QA/ReviewerE3minimalrepresentativemechanismmatrix. Initialreadonlyaudit5–8min, reuseexistingcode/evidence, nofullrunperlevel.
+- OLD279:registration/runCANCELEDperuseracceleration; preserve2untrackedfrozenfixturefilesunregistered. No new per-levelfixturework.
+- App67iBUILD:DONE exit0 marker-onlyfix SHA DF4ECB26F7FF4B13D0AC604A5C6A97AFEEF302F23DE595F24F8C59057EA6300F. Publish278verifiedbefore280writes, userghmain/noRelease.
+
+## ROOT 278E — 2026-11-22 Moscow
+
+- PUBLISH277:DONE main7772f49/allCIgreen/useridentityconfirmed.
+- FULL4-VICTORY278:DONE boundedD2/cycle1 app67h6120common/24BMP/20waves/255NPC/53purchases4650Sun/clienttrophy/earned15frontier5+INI+real5chooser. Fullcampaign2/45(source1,4); notperfectdefense/no-mowerclaim.
+- LESSON7/8-278:DONE BOUNDEDLESSONS app67h2673common/28BMP/bothnativePASS; originalwrapperCASE7markerFAILpreserved, separateRootread-onlyrevalidationPassed+independentE3QA. Futuremarker-orderfixcompilepending/runtimeNotExecuted. Full7/8victoryNotExecuted.
+- PRESENT278:DONE boundedsource7normalpacket100/CD15/unlockcompleted6/actualRNG1090; source1008outcomealsoobservedonpriorbuildsameproduction. Overlay/debit/freshdefaultprovenanceverified. GlovePresentexceptioncompiled/runtimeNOTEXECUTED; allGiftoutcomesnotclaimed.
+- PROTOCOL64/UNIT5:DONE actual72529/0/0,145newboundaryassertions+unchangedFNS26; app67e/fbuildsPassed.
+- PUBLISH278:IN_PROGRESS Rootapp67imarker-onlycompilethenprotecteduserghmainpush; excludeunregistered279fixture. Allgamesclosed. NoRelease.
+- NEXT279:READY E1full5/6fixturefrozenunregistered/unbuilt/unrun; E2source9auditfrozen/gate9closed107+104closure+rawPuff+Daypricesgaps. E3independentreviewscomplete. Plants280/281(missing938),historicalNPC15unchanged.
+
 ## ROOT 277C — 2026-11-21
 
 - BG277-NIGHT/POOL + DUPPATH277 + FIELD277: DONE bounded app67c111common/22BMP +34actualnativeLoadchecks/peer; sourcewaterlocalpause/teardown/prefs/Dayregressionverifiedandviewed. FogRoof/fullPoolcampaignNotExecuted.

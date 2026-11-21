@@ -44,6 +44,8 @@ bool TryGetFusionSourceAdventureWaves272(int level,int cycle,int& waves);
 // Native layout reuse only. This number must NOT determine source progress,
 // unlocks, source wave generation, source tutorial or reward completion.
 bool TryProjectFusionSourceAdventure272(int level,FusionSourceNativeProjection272& projection);
+// Source base and sparse special-card IDs; challenge/achievement-only rules
+// require their own completion state and are not inferred from Adventure.
 bool TryGetFusionSourceBaseUnlock272(uint16_t kind,int& completedAdventureLevel);
 bool FusionSourceAdventureAllowsZombie272(int level,uint16_t kind);
 bool TryGetFusionSourceWaveBudget272(int level,int cycle,int wave,int sourceDifficulty,int& budget);

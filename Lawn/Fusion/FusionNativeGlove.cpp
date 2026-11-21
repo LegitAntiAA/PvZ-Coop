@@ -83,7 +83,11 @@ bool SupportedPlantCell(Board* board, Plant* plant)
     if (!Live(plant) || !SupportedTerrainCell(board, plant->mPlantCol, plant->mRow)) return false;
     PlantsOnLawn cell;
     board->GetPlantsOnLawn(plant->mPlantCol, plant->mRow, &cell);
-    return !cell.mFlyingPlant && (cell.mNormalPlant == plant || cell.mUnderPlant == plant || cell.mPumpkinPlant == plant);
+    const auto* data=GetNativePlantData(plant);
+    const bool overlay=data&&IsFusionSourcePresentOverlayKind(data->kind);
+    // The command already resolved this actor's full generation. A transient
+    // Present is intentionally absent from the persistent occupancy summary.
+    return !cell.mFlyingPlant && (overlay || cell.mNormalPlant == plant || cell.mUnderPlant == plant || cell.mPumpkinPlant == plant);
 }
 
 void HoldCursor(Board* board, int slot, Plant* plant)

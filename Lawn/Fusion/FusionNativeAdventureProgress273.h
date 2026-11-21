@@ -1,14 +1,18 @@
 #pragma once
 #include "FusionAdventureProgress273.h"
+#include <string>
 class Board;class Coin;
 namespace LawnFusion
 {
 // Root owns the NativeContext member/save/snapshot codec. Each adapter receives
 // that one room state by reference; clients never step it or mutate the profile.
-// Native lessons1/4 only. Active7/8 fail closed. Prepare4 currently supports
+// Native lessons1/4/7/8. Prepare4/7 currently support
 // empty cells or audited removal-only kinds0/1/2/3/1000/1030/1032/1033; other
 // occupants refuse before mutation until their source callback budgets/order
 // are closed. Root keeps public/campaign admission separate from this adapter.
+// Resource/allocation preflight for the exact mission actions; no RNG or world
+// actors are created. This does not admit the separate Present256 chooser flow.
+bool PreflightNativeFusionAdventureLesson278(Board*,int sourceLevel,std::string* error=nullptr);
 bool UpdateNativeFusionAdventureTutorial273(Board*,FusionAdventureRun273&,FusionAdventureTutorialEffects273&);
 void PresentNativeFusionAdventureTutorial273(Board*,const FusionAdventureRun273&);
 // Real non-friendly Zombie::Die, after source enemy-count decrement. Root must

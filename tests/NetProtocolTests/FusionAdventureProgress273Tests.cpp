@@ -23,6 +23,16 @@ FusionAdventureProgress273TestResult RunFusionAdventureProgress273Tests()
     CHECK(!CanEnterFusionAdventureLevel273(profile,0)&&!CanEnterFusionAdventureLevel273(profile,46));
     CHECK(FusionAdventureBaseUnlocked273(profile,0)&&FusionAdventureBaseUnlocked273(profile,1));
     CHECK(!FusionAdventureBaseUnlocked273(profile,2)&&!FusionAdventureBaseUnlocked273(profile,1000));
+    CHECK(!FusionAdventureBaseUnlocked273(profile,256));
+    auto presentProfile=profile;presentProfile.frontierLevel=7;
+    CHECK(!FusionAdventureBaseUnlocked273(presentProfile,256)); // Frontier alone never grants the card.
+    for(int completed=1;completed<=45;++completed)
+    {
+        presentProfile.completedLevels=uint64_t{1}<<(completed-1);
+        CHECK(FusionAdventureBaseUnlocked273(presentProfile,256)==(completed==6));
+        CHECK(FusionAdventureBaseUnlocked273(presentProfile,250)==(completed==16));
+        CHECK(FusionAdventureBaseUnlocked273(presentProfile,254)==(completed==13));
+    }
     CHECK(!BeginFusionAdventureRun273(profile,2,false,run)&&run.level==0);
     CHECK(BeginFusionAdventureRun273(profile,1,false,run)&&run.tutorial.active&&!run.replay);
     CHECK(FusionAdventureCardsIgnoreExpiry273(run));

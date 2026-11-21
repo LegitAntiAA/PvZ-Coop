@@ -28,8 +28,11 @@ bool TryProjectFusionSourceAdventure272(int level,FusionSourceNativeProjection27
 }
 bool TryGetFusionSourceBaseUnlock272(uint16_t kind,int& completed)
 {
-    if(kind>=std::size(baseUnlocks272))return false;
-    completed=baseUnlocks272[kind];return true;
+    if(kind<std::size(baseUnlocks272)){completed=baseUnlocks272[kind];return true;}
+    const auto rule=std::find_if(std::begin(adventureSpecialUnlocks272),std::end(adventureSpecialUnlocks272),
+        [=](const auto& entry){return entry.kind==kind;});
+    if(rule==std::end(adventureSpecialUnlocks272))return false;
+    completed=rule->completed;return true;
 }
 bool FusionSourceAdventureAllowsZombie272(int level,uint16_t kind)
 {

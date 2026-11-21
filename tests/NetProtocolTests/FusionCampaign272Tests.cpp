@@ -58,6 +58,11 @@ FusionCampaign272TestResult RunFusionCampaign272Tests()
     CHECK(TryGetFusionSourceBaseUnlock272(3,completed)&&completed==2);
     CHECK(TryGetFusionSourceBaseUnlock272(6,completed)&&completed==9);
     CHECK(TryGetFusionSourceBaseUnlock272(34,completed)&&completed==45);
+    CHECK(TryGetFusionSourceBaseUnlock272(250,completed)&&completed==16);
+    CHECK(TryGetFusionSourceBaseUnlock272(254,completed)&&completed==13);
+    CHECK(TryGetFusionSourceBaseUnlock272(256,completed)&&completed==6);
+    for(uint16_t unknown:{35,249,255,257,65535})
+    {completed=97;CHECK(!TryGetFusionSourceBaseUnlock272(unknown,completed)&&completed==97);}
     completed=97;CHECK(!TryGetFusionSourceBaseUnlock272(1000,completed)&&completed==97);
     int total=0;uint16_t chosen=999;
     CHECK(TryGetFusionSourceZombieWeightTotal272(2,total)&&total==7000);

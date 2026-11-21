@@ -3273,6 +3273,8 @@ void Board::GetPlantsOnLawn(int theGridX, int theGridY, PlantsOnLawn* thePlantOn
 	{
 		if (aPlant->mBurnedCounter != -1) continue;
 		if (LawnFusion::NativeFireActionUntargetable(aPlant)) continue;
+		if (const auto* fusion=LawnFusion::GetNativePlantData(aPlant);fusion&&LawnFusion::IsNativeFusionBoard(this)&&
+			LawnFusion::IsFusionSourcePresentOverlayKind(fusion->kind)) continue;
 
 		SeedType aSeedType = aPlant->mSeedType;
 		if (aSeedType == SeedType::SEED_IMITATER && aPlant->mImitaterType != SeedType::SEED_NONE)

@@ -43,6 +43,10 @@
     {
       "path": "assets/fusion/catalog/modes.json",
       "sha256": "5856d8e78bbee4c7ecfb1461a25f1d19cdfe8d75230271efa90b4ca71781d132"
+    },
+    {
+      "path": "work/fusion/stage272/modes/unlock-primary.c",
+      "sha256": "c4ff45b2786c7909f818966b1a4eb8a8362d01ec52b53fe3acba959473659c1e"
     }
   ],
   "adventure": [
@@ -2267,6 +2271,20 @@
     {
       "kind": 34,
       "requiredAdventureCompleted": 45
+    }
+  ],
+  "adventureSpecialUnlocks": [
+    {
+      "kind": 250,
+      "requiredAdventureCompleted": 16
+    },
+    {
+      "kind": 254,
+      "requiredAdventureCompleted": 13
+    },
+    {
+      "kind": 256,
+      "requiredAdventureCompleted": 6
     }
   ],
   "zombieSelectionInSourceDictionaryOrder": [

@@ -14,6 +14,7 @@
 #include "FusionNativeRemainingPlants269.h"
 #include "FusionNativeWorldRemainder269.h"
 #include "FusionNativeLastPlants269.h"
+#include "FusionMorePlants269Rules.h"
 #include "FusionRecipe.h"
 #include "FusionWire.h"
 #include "../Board.h"
@@ -123,7 +124,33 @@ bool CurrentMovingActor(Board* board, const Plant* moving)
         NativeBatchPlantUntargetable(moving) || !CurrentLayerActor(board,moving,layer)) return false;
     PlantsOnLawn source;
     board->GetPlantsOnLawn(moving->mPlantCol,moving->mRow,&source);
-    return !source.mFlyingPlant && LayerActor(source,layer) == moving;
+    return !source.mFlyingPlant &&
+        (IsFusionSourcePresentOverlayKind(data->kind)||LayerActor(source,layer)==moving);
+}
+bool PresentAllowsCell(Board* board,int column,int row,const Plant* moving)
+{
+    bool recipient=false,recipe=false;Plant* other=nullptr;
+    while(board->IteratePlants(other))
+    {
+        if(other==moving||other->mDead||!other->mIsOnBoard||other->mPlantCol!=column||other->mRow!=row)continue;
+        const auto* data=GetNativePlantData(other);PlacementLayer layer;
+        if(!data||!LayerForKind(data->kind,layer)||!CurrentLayerActor(board,other,layer))return false;
+        bool flying=false,pumpkin=false,pot=false,lily=false;
+        if(!GetNativeRemaining269PlantTags(other,flying,pumpkin,pot,lily))return false;
+        if(flying||pumpkin||pot||lily)continue;
+        recipient=true;
+        for(uint16_t base:FusionPresent269AllCandidates())if(FindFusionRecipe(data->kind,base)){recipe=true;break;}
+    }
+    // PresentCheck44AB50: empty/excluded-only cell, or at least one real
+    // recipient with a base0..32 recipe. No selection RNG or recipient removal.
+    return !recipient||recipe;
+}
+bool CellHasPresent(Board* board,int column,int row)
+{
+    Plant* plant=nullptr;
+    while(board->IteratePlants(plant))if(!plant->mDead&&plant->mIsOnBoard&&plant->mPlantCol==column&&plant->mRow==row)
+        if(const auto* data=GetNativePlantData(plant);data&&IsFusionSourcePresentOverlayKind(data->kind))return true;
+    return false;
 }
 bool MakePlacementPlan(Board* board, int column, int row, uint16_t incoming, PlacementPlan& plan,
     const Plant* moving = nullptr, bool worldSpawn = false)
@@ -144,6 +171,14 @@ bool MakePlacementPlan(Board* board, int column, int row, uint16_t incoming, Pla
      plan={nullptr,incoming,kFusionNoPlant};return true;}
     PlantsOnLawn cell;
     board->GetPlantsOnLawn(column,row,&cell);
+    if(IsFusionSourcePresentOverlayKind(incoming))
+    {
+        if(!PresentAllowsCell(board,column,row,moving))return false;
+        plan={nullptr,incoming,kFusionNoPlant};return true;
+    }
+    // Source CheckMix445B60 refuses a body mix while a live Present owns its
+    // pending same-cell event. Other native support/layer policies stay intact.
+    if(incomingLayer==PlacementLayer::Body&&CellHasPresent(board,column,row))return false;
     if(!moving&&cell.mNormalPlant)
         if(const auto* d=GetNativePlantData(cell.mNormalPlant);d&&d->kind==243)
         {

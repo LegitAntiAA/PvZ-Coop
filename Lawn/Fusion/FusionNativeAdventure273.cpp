@@ -86,7 +86,7 @@ bool InitializeNativeSourceAdventure273(Board* b,const FusionAdventureSession273
     const auto* level=FindFusionSourceAdventure272(boot.run.level);auto* c=GetNativeContext(b);
     if(!Current(b)||!c||!boot.enabled||!FusionAdventureSessionValid273(boot)||!level||
         !NativeSourceAdventureLevelReady273(boot.run.level,boot.run.cycle)||level->scene!=0||level->rows!=5||level->columns!=10)
-    {if(error)*error="Source Adventure boot is invalid or outside the admitted Day1..4 world.";return false;}
+    {if(error)*error="Source Adventure boot is invalid or outside the admitted Day1..8 world.";return false;}
     const bool host=!b->mApp->NetIsClient();
     if(host&&(boot.wave||boot.run.over||boot.run.rewardCollected||boot.schedulerFailed||
         b->mZombies.mSize||b->mPlants.mSize))
@@ -112,6 +112,8 @@ bool InitializeNativeSourceAdventure273(Board* b,const FusionAdventureSession273
             b->GetGridSquareTypeAt(col,row)=row<level->rows?GRIDSQUARE_GRASS:GRIDSQUARE_NONE;
     }
     FusionAdventureScheduler273State scheduler;
+    if(host&&(boot.run.level==7||boot.run.level==8)&&
+        !PreflightNativeFusionAdventureLesson278(b,boot.run.level,error))return false;
     if(host&&InitializeNativeAdventureScheduler273(b,scheduler,boot.run.level,int(boot.run.cycle),
         boot.sourceDifficulty,BoardRandom(b),error)!=Result::Okay)return false;
     c->adventure=boot;c->adventureScheduler=std::move(scheduler);c->adventureTick=-1;
@@ -147,7 +149,7 @@ bool UpdateNativeSourceAdventure273(Board* b)
     {Failed(b,"source TutorOver could not set the five-second wave countdown");return true;}
     FusionAdventureScheduler273Input input;input.host=true;input.deltaSeconds=.01f;
     input.tutorial=view.run.tutorial.active;
-    // Ordinary source Day1..4 has allowSummon=true and no Boss/ScaryPot/IceDoom
+    // Ordinary source Day1..8 has allowSummon=true and no Boss/ScaryPot/IceDoom
     // controller. These worlds must be gated before widening native admission.
     FusionAdventureScheduler273Events events;std::string error;
     const auto status=UpdateNativeAdventureScheduler273(b,c->adventureScheduler,input,BoardRandom(b),events,&error);

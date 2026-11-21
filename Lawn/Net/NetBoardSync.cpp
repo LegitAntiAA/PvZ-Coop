@@ -998,10 +998,13 @@ bool NetDay273AllocationCapacity(Board* board,const NetBuffer& body,const LawnFu
                 case SEED_PUMPKINSHELL:case SEED_FLOWERPOT:case SEED_POTATOMINE:case SEED_GARLIC:case SEED_BLOVER:
                 case SEED_JALAPENO:case SEED_SQUASH:case SEED_TORCHWOOD:case SEED_CHOMPER:case SEED_CABBAGEPULT:
                 case SEED_KERNELPULT:case SEED_MELONPULT:case SEED_WINTERMELON:case SEED_CATTAIL:case SEED_CACTUS:
-                case SEED_MARIGOLD:case SEED_SPIKEWEED:case SEED_SPIKEROCK:case SEED_FUMESHROOM:break;
+                case SEED_MARIGOLD:case SEED_SPIKEWEED:case SEED_SPIKEROCK:case SEED_FUMESHROOM:case SEED_IMITATER:break;
                 default:return reject("plant-factory-not-budgeted",section,type);
                 }
                 const auto reanim=GetPlantDefinition(SeedType(type)).mReanimationType;
+                // Present's IMITATER carrier initializes one body. Its typed
+                // controller intercepts stock morph; the definition must still
+                // pass the same no-dynamic-attacher proof as every carrier.
                 if(!plainDefinition(reanim))return reject("plant-definition-or-attacher",section,type);
                 reanims+=1+heads;attachments+=heads; // Each Attach call can require at most one container.
                 // A raw daytime Fume carrier initializes before Fusion metadata

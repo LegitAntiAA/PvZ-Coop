@@ -4,6 +4,8 @@
 #include "NetCommon.h"
 #include "../Board.h"
 #include "../Plant.h"
+#include "../Zombie.h"
+#include "../Coin.h"
 #include "../CursorObject.h"
 #include "../Cutscene.h"
 #include "../MessageWidget.h"
@@ -13,11 +15,18 @@
 #include "../Widget/GameButton.h"
 #include "../Fusion/FusionNative.h"
 #include "../Fusion/FusionNativeAdventure273.h"
+#include "../Fusion/FusionNativeAdventureProgress273.h"
+#include "../Fusion/FusionNativeZombies.h"
+#include "../Fusion/FusionNativeDayZombie273.h"
+#include "../Fusion/FusionCampaign272Rules.h"
+#include "../Fusion/FusionRecipe.h"
 #include "../Fusion/FusionNativeGloveUI.h"
 #include "../Fusion/FusionBasePlantRules.h"
 #include "../../Sexy.TodLib/Reanimator.h"
 #include "../../SexyAppFramework/ScrollbarWidget.h"
 #include "../../SexyAppFramework/DDInterface.h"
+#include "../../SexyAppFramework/WidgetManager.h"
+#include "../../SexyAppFramework/Dialog.h"
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -33,6 +42,8 @@ namespace
 {
 using namespace LawnFusion;using LawnNet::NetTrace;
 struct Ref{uint16_t id=0;uint32_t token=0,localUID=0;ReanimationID body=REANIMATIONID_NULL;};
+struct Enemy278
+{uint16_t id=0,kind=0;uint8_t wave=0;uint32_t localUID=0;ReanimationID body=REANIMATIONID_NULL;unsigned poleStates=0;};
 struct State
 {
     int stage=0,waitingOwn=0,classicLevel=-1,classicFinished=-1,lessonStartTick=-1,preparedTick=-1;
@@ -40,9 +51,16 @@ struct State
     unsigned introChecks=0,messages=0;FusionAdventureProfile273 profile;
     std::array<Ref,2> plants{};bool toolClicked=false,pickupClicked=false,placeClicked=false,pause=false;
     bool preparedLogged=false,heldLogged=false,movedLogged=false,completedLogged=false;
+    int farmInput=0,farmKind=0,farmCol=0,farmRow=0,farmResult=0,farmCost=0,farmBefore=0;
+    int purchases=0,spent=0,collected=0,sunBefore=0,sunValue=0,speedRequests=0,speedMode=0;
+    uint32_t inputAt=0,speedAt=0,diagnostic=0,sunUID=0;
+    uint16_t sunId=0;bool resume=false,commitObserved=false,trophyClicked=false,speedLogged=false,planChecked=false,sunBlockedLogged=false;
+    int sunClickX=0,sunClickY=0;
+    Ref trophy;std::map<uint32_t,Enemy278> enemies;
     std::set<std::string> frames;std::map<std::string,int> draws;
 }s;
 bool Enabled(const char* key){const auto* v=std::getenv(key);return v&&std::strcmp(v,"1")==0;}
+bool Victory(){return Enabled("PVZ_COOP_SMOKE_FUSION_LESSON4_VICTORY278");}
 int Slot(LawnApp* a){return a->mNetManager->GetMySlot();}
 const char* Role(LawnApp* a){return a->NetIsHost()?"host":"client";}
 uint32_t Samples(LawnApp* a){return a->NetIsHost()?a->mCoopSmokeSnapshotsSent:a->mCoopSmokeSnapshotsApplied;}
@@ -177,6 +195,7 @@ bool Plants(LawnApp* a,bool moved,bool bind=false)
     while(b->IteratePlants(p))
     {
         const auto* d=GetNativePlantData(p);const int i=d&&d->kind==1033?0:d&&d->kind==1003?1:-1;
+        if(i<0&&Victory()&&s.stage>=5)continue; // Purchased defenses are proved separately.
         if(!Require(a,i>=0,"Lesson4 gained an unexpected plant"))return false;
         const auto* def=FusionFindPlant(kinds[i]);const int column=i?5:moved?4:9;
         if(!Require(a,def&&p->mNetId&&d->instanceToken&&!p->mDead&&p->mIsOnBoard&&!p->mSquished&&
@@ -235,6 +254,302 @@ bool FinalProof(LawnApp* a)
     uint32_t hash=2166136261U;for(size_t i=0;i<bytes.Size();++i){hash^=bytes.Data()[i];hash*=16777619U;}
     char label[64];sprintf_s(label,"FINAL_%08x",hash);return Barrier(a,label);
 }
+Plant* At278(Board* b,int col,int row,uint16_t kind)
+{Plant* p=nullptr;while(b->IteratePlants(p))if(p->mPlantCol==col&&p->mRow==row)if(const auto* d=GetNativePlantData(p);d&&d->kind==kind&&!p->mDead)return p;return nullptr;}
+SeedPacket* Packet278(Board* b,uint16_t kind)
+{for(int i=0;i<b->mSeedBank->mNumPackets;++i){auto* p=&b->mSeedBank->mSeedPackets[i];if(const auto* d=GetNativePacketData(p);d&&d->owner==0&&d->kind==kind&&!d->isExtra)return p;}return nullptr;}
+struct Cell278{int col,row;uint16_t kind;};
+std::vector<Cell278> Defenses278()
+{
+    std::vector<Cell278> cells;
+    for(int row=0;row<4;++row)for(int col=0;col<2;++col)cells.push_back({col,row,1});
+    for(int row=0;row<5;++row)cells.push_back({7,row,3});
+    for(int row=0;row<5;++row)for(int col:{2,3,4,6})if(row!=2||col!=4)cells.push_back({col,row,1030});
+    cells.push_back({5,4,1030}); // Keep mission9,2, CherryNut5,2 and glove destination4,2 free.
+    return cells;
+}
+bool Speed278(LawnApp* a)
+{
+    auto* b=a->mBoard;
+    const auto policyPrefix="L4275_"+std::to_string(s.epoch)+"_SPEED_POLICY_";
+    if(!s.speedMode)
+    {
+        if(a->NetIsHost())
+        {
+            if(!Require(a,b->GetSpeedValue(b->mSpeedMod)==1.f,"Lesson4 victory initial host speed differs before policy negotiation"))return false;
+            s.speedMode=b->mAllowSpeedMod?1:2;
+        }
+        else if(Has(a,0,policyPrefix+"HOST2500_CLIENT1000"))s.speedMode=1;
+        else if(Has(a,0,policyPrefix+"HOST1000_CLIENT1000"))s.speedMode=2;
+        else return false;
+    }
+    const char* policy=s.speedMode==1?"HOST2500_CLIENT1000":"HOST1000_CLIENT1000";
+    // Agree the host's capability before any key. A snapshot client deliberately
+    // has no local gameplay acceleration; its measured native speed stays1x.
+    if(!Barrier(a,std::string("SPEED_POLICY_")+policy))return false;
+    if(a->NetIsHost()&&s.speedMode==1&&b->GetSpeedValue(b->mSpeedMod)<2.5f&&s.speedRequests<3)
+    {
+        if(s.speedAt&&GetTickCount()-s.speedAt<300)return false;
+        SDL_Event event{};event.type=SDL_EVENT_TEXT_INPUT;event.text.windowID=SDL_GetWindowID(a->mSDLWindow);event.text.text="e";
+        if(Require(a,SDL_PushEvent(&event),"Lesson4 victory native speed input failed")){++s.speedRequests;s.speedAt=GetTickCount();}
+        return false;
+    }
+    const float speed=b->GetSpeedValue(b->mSpeedMod);
+    const float expected=a->NetIsHost()&&s.speedMode==1?2.5f:1.f;
+    if(!Require(a,speed==expected&&(a->NetIsHost()||!b->mAllowSpeedMod),"Lesson4 victory measured role-specific native speed/capability differs"))return false;
+    if(!s.speedLogged)
+    {s.speedLogged=true;NetTrace("SMOKE_LESSON4_VICTORY278_SPEED role=%s actual=%.3f allowSpeedMod=%d nativeOwnedText=e requests=%d hostAccelerationOnly=%d clientGhostPresentation=1 speedWireSync=NotPresent policy=%s directSetter=0",Role(a),speed,b->mAllowSpeedMod?1:0,s.speedRequests,s.speedMode==1?1:0,policy);}
+    return Barrier(a,policy);
+}
+bool Sun278(LawnApp* a)
+{
+    if(!a->NetIsHost())return false;auto* b=a->mBoard;
+    if(s.sunId)
+    {
+        Coin* coin=nullptr;Coin* candidate=nullptr;
+        while(b->mCoins.IterateNext(candidate))if(candidate->mNetId==s.sunId&&b->mCoins.DataArrayGetID(candidate)==s.sunUID){coin=candidate;break;}
+        if(b->mSunMoney==s.sunBefore+s.sunValue)
+        {
+            s.collected+=s.sunValue;
+            NetTrace("SMOKE_LESSON4_VICTORY278_SUN id=%u localUID=%u value=%d before=%d after=%d collected=%d actualNativeScore=1 input=SDL",s.sunId,s.sunUID,s.sunValue,s.sunBefore,b->mSunMoney,s.collected);
+            s.sunId=0;s.sunUID=0;return true;
+        }
+        if(!Require(a,b->mSunMoney==s.sunBefore,"Lesson4 victory Sun ledger changed by an unaccounted input"))return true;
+        if(GetTickCount()-s.inputAt>5000)
+        {
+            if(coin&&!coin->mIsBeingCollected){s.sunId=0;s.sunUID=0;return true;}
+            Require(a,false,"Lesson4 victory selected native Sun never scored its real value");
+        }
+        return true;
+    }
+    if(b->mCursorObject->mCursorType!=CURSOR_TYPE_NORMAL)return false;
+    Coin* coin=nullptr;while(b->IterateCoins(coin))if(coin->IsSun()&&!coin->mIsBeingCollected&&coin->mHitGround)
+    {
+        const int x=int(coin->mPosX+coin->mWidth*.5f),y=int(coin->mPosY+coin->mHeight*.5f);HitResult hit;
+        if(!b->MouseHitTest(x,y,&hit)||hit.mObject!=coin)continue;
+        const int screenX=x+b->mX+a->mDDInterface->mWideScreenOffsetX,screenY=y+b->mY+a->mDDInterface->mWideScreenOffsetY;
+        auto* widget=a->mWidgetManager->GetWidgetAt(screenX,screenY,nullptr,nullptr);
+        if(widget!=b)
+        {
+            if(!s.sunBlockedLogged){s.sunBlockedLogged=true;NetTrace("SMOKE_LESSON4_VICTORY278_SUN_OCCLUDED id=%u screen=%d,%d pause=%d slowdown=%d speedup=%d skipped=1 realWidgetRouting=1",coin->mNetId,screenX,screenY,widget==b->mPauseButton?1:0,widget==b->mSlowdownButton?1:0,widget==b->mSpeedupButton?1:0);}
+            continue;
+        }
+        if(BoardClick(a,float(x),float(y)))
+        {s.sunId=coin->mNetId;s.sunUID=b->mCoins.DataArrayGetID(coin);s.sunValue=coin->GetSunValue();s.sunBefore=b->mSunMoney;s.inputAt=GetTickCount();s.sunClickX=screenX;s.sunClickY=screenY;}
+        return true;
+    }
+    return false;
+}
+bool DefenseProof278(LawnApp* a,LawnNet::NetBuffer& proof)
+{
+    for(const auto& cell:Defenses278())
+    {
+        auto* p=At278(a->mBoard,cell.col,cell.row,cell.kind);const auto* d=GetNativePlantData(p);if(!p||!d)return false;
+        const auto* def=FusionFindPlant(cell.kind);
+        if(!Require(a,def&&p->mPlantHealth==def->maxHealth&&p->mPlantMaxHealth==def->maxHealth&&d->owner==0&&
+            d->firstParent==(cell.kind==1030?uint16_t(0):kFusionNoPlant)&&d->secondParent==(cell.kind==1030?uint16_t(0):kFusionNoPlant)&&
+            p->mNetId&&d->instanceToken&&a->ReanimationTryToGet(p->mBodyReanimID),"Lesson4 victory purchased defense ancestry/owner/HP/body differs"))return false;
+        proof.WriteU16(p->mNetId);proof.WriteU32(d->instanceToken);proof.WriteU16(d->kind);proof.WriteU8(uint8_t(cell.col));proof.WriteU8(uint8_t(cell.row));
+    }
+    return true;
+}
+bool Farm278(LawnApp* a)
+{
+    auto* b=a->mBoard;const auto* c=GetNativeContext(b);
+    if(!Require(a,c->adventure.run.tutorial.active&&c->adventure.run.tutorial.stage==3&&c->adventure.wave==0&&
+        !c->adventure.run.over&&!c->adventure.run.rewardCollected&&!b->mZombies.mSize,
+        "Lesson4 victory farm lost the genuine MoveTwinFlower wave gate")||!Plants(a,false))return false;
+    if(!Speed278(a))return false;
+    if(!s.farmInput&&!s.sunId)
+    {
+        LawnNet::NetBuffer proof;
+        if(DefenseProof278(a,proof))
+        {
+            if(a->NetIsHost()&&!Require(a,s.purchases==53&&s.spent==4650&&b->mSunMoney==500+s.collected-s.spent,
+                "Lesson4 victory defense purchase count/cost/Sun ledger differs"))return false;
+            char tag[40];sprintf_s(tag,"DEFENSES_%08x",LawnNet::NetFnv1a32(proof.Data(),proof.Size()));
+            if(!Capture(a,"defenses")||!Barrier(a,tag))return false;
+            NetTrace("SMOKE_LESSON4_VICTORY278_DEFENSES role=%s sunflowers=8 doubleShooters=20 wallNuts=5 purchasedPlants=33 purchases=%d spent=%d collected=%d sun=%d wave=0 tutorial=3 missionReserved=1 input=SDL actorWrites=0 balanceWrites=0",
+                Role(a),s.purchases,s.spent,s.collected,b->mSunMoney);return true;
+        }
+    }
+    if(!a->NetIsHost())return false;
+    if(s.farmInput==1)
+    {
+        auto* packet=Packet278(b,uint16_t(s.farmKind));auto* cursor=b->mCursorObject;
+        if(!packet||cursor->mCursorType!=CURSOR_TYPE_PLANT_FROM_BANK||cursor->mSeedBankIndex<0||cursor->mSeedBankIndex>=b->mSeedBank->mNumPackets||
+            b->mSeedBank->mSeedPackets[cursor->mSeedBankIndex].mNetId!=packet->mNetId)
+        {if(cursor->mCursorType==CURSOR_TYPE_NORMAL&&GetTickCount()-s.inputAt>1500)s.farmInput=0;return false;}
+        if(Cell(a,s.farmCol,s.farmRow)){s.farmInput=2;s.inputAt=GetTickCount();}return false;
+    }
+    if(s.farmInput==2)
+    {
+        auto* p=At278(b,s.farmCol,s.farmRow,uint16_t(s.farmResult));const auto* d=GetNativePlantData(p);if(!p||!d)return false;
+        if(!Require(a,d->owner==0&&p->mPlantHealth==p->mPlantMaxHealth&&b->mSunMoney==s.farmBefore-s.farmCost,
+            "Lesson4 victory real purchase ownership/HP/Sun debit differs"))return false;
+        ++s.purchases;s.spent+=s.farmCost;
+        NetTrace("SMOKE_LESSON4_VICTORY278_BUY purchase=%d used=%d result=%u id=%u token=%u packetCost=%d before=%d after=%d col=%d row=%d input=SDL",s.purchases,s.farmKind,d->kind,p->mNetId,d->instanceToken,s.farmCost,s.farmBefore,b->mSunMoney,s.farmCol,s.farmRow);
+        s.farmInput=0;return false;
+    }
+    if(Sun278(a))return false;
+    if(!Require(a,b->mSunMoney==500+s.collected-s.spent,"Lesson4 victory unexplained balance outside a pending native purchase/Sun"))return false;
+    if(b->mCursorObject->mCursorType!=CURSOR_TYPE_NORMAL)return false;
+    for(const auto& cell:Defenses278())
+    {
+        if(At278(b,cell.col,cell.row,cell.kind))continue;
+        const uint16_t used=cell.kind==1030?uint16_t(0):cell.kind;
+        const uint16_t result=cell.kind==1030&&!At278(b,cell.col,cell.row,0)?uint16_t(0):cell.kind;
+        auto* packet=Packet278(b,used);if(!packet||!packet->CanPickUp())continue;
+        const int cost=b->GetSeedPacketCost(*packet);if(b->mSunMoney<cost)continue;
+        if(cell.kind==1030&&result==1030)
+        {const auto* recipe=FindFusionRecipe(0,0);if(!Require(a,recipe&&recipe->result==1030,"Lesson4 victory real DoubleShooter recipe changed"))return false;}
+        const int x=b->mSeedBank->mX+packet->mX+packet->mOffsetX+25,y=b->mSeedBank->mY+packet->mY+35;HitResult hit;
+        if(!b->MouseHitTest(x,y,&hit)||hit.mObject!=packet)continue;
+        if(BoardClick(a,float(x),float(y)))
+        {s.farmKind=used;s.farmCol=cell.col;s.farmRow=cell.row;s.farmResult=result;s.farmCost=cost;s.farmBefore=b->mSunMoney;s.farmInput=1;s.inputAt=GetTickCount();}
+        return false;
+    }
+    if(!s.diagnostic||GetTickCount()-s.diagnostic>=5000)
+    {s.diagnostic=GetTickCount();NetTrace("SMOKE_LESSON4_VICTORY278_FARM_WAIT role=%s purchases=%d spent=%d collected=%d sun=%d cursor=%d elapsed=%u",Role(a),s.purchases,s.spent,s.collected,b->mSunMoney,int(b->mCursorObject->mCursorType),GetTickCount()-s.since);}
+    return false;
+}
+bool Observe278(LawnApp* a)
+{
+    auto* b=a->mBoard;const auto* c=GetNativeContext(b);const auto& v=c->adventure;
+    if(!Require(a,IsNativeSourceAdventure273(b)&&!c->validation&&!a->mFusionRuntime&&c->epoch==s.epoch&&
+        v.run.level==4&&v.run.cycle==1&&v.sourceDifficulty==2&&!v.run.replay&&!v.schedulerFailed&&v.maximumWaves==20&&v.wave<=20&&
+        b->GetColumnCount()==10&&GetNativeFusionRowCount(b)==5&&b->mBackground==BACKGROUND_1_DAY&&
+        a->mGameScene!=SCENE_ZOMBIES_WON&&a->mPlayerInfo->mLevel==s.classicLevel&&a->mPlayerInfo->mFinishedAdventure==s.classicFinished,
+        "Lesson4 victory natural battle lost/source world/Classic identity differs"))return false;
+    const uint64_t expectedMask=v.run.rewardCollected?15:7;const int expectedFrontier=v.run.rewardCollected?5:4;
+    if(!Require(a,v.profile.completedLevels==expectedMask&&v.profile.frontierLevel==expectedFrontier&&v.profile.cycle==1&&
+        (a->NetIsHost()?SameProfile(a->mNetManager->mConfig.mFusionSourceProfile,v.profile):SameProfile(a->mNetManager->mConfig.mFusionSourceProfile,s.profile)),
+        "Lesson4 victory source progress committed early or client local profile changed"))return false;
+    if(a->NetIsHost())
+    {
+        const auto& scheduler=c->adventureScheduler;
+        if(!Require(a,scheduler.initialized&&!scheduler.failed&&scheduler.waves.size()==20,"Lesson4 victory actual host wave plan missing"))return false;
+        if(!s.planChecked)
+        {
+            for(const auto& wave:scheduler.waves)for(auto kind:wave)if(!Require(a,FusionSourceAdventureAllowsZombie272(4,kind),"Lesson4 victory plan includes a non-source4 identity"))return false;
+            s.planChecked=true;
+        }
+        if(v.wave<20||c->adventureEnemyCount>0)
+            if(!Require(a,!v.run.over&&!v.run.trophyNetId&&!v.run.rewardCollected,"Lesson4 victory trophy/over appeared with real source enemies or incomplete waves"))return false;
+    }
+    Zombie* z=nullptr;while(b->mZombies.IterateNext(z))
+    {
+        const auto* d=GetNativeSourceZombieData(z);
+        if(!d){if(!Require(a,z->mDead,"Lesson4 victory untyped live native zombie leaked"))return false;continue;}
+        const auto* profile=FindFusionZombieProfile(d->kind);
+        if(!Require(a,profile&&FusionSourceAdventureAllowsZombie272(4,d->kind)&&!z->mMindControlled&&z->mNetId&&d->instanceToken&&
+            z->mZombieType==GetNativeSourceZombieCarrier(d->kind)&&z->mBodyMaxHealth==profile->maxHealth&&z->mFromWave>=1&&z->mFromWave<=20&&
+            (z->mDead||a->ReanimationTryToGet(z->mBodyReanimID)),"Lesson4 victory actual typed kind/carrier/HP/body/wave differs"))return false;
+        const Enemy278 fresh{z->mNetId,d->kind,uint8_t(z->mFromWave),b->mZombies.DataArrayGetID(z),z->mBodyReanimID,0};
+        auto [it,added]=s.enemies.emplace(d->instanceToken,fresh);auto& old=it->second;
+        if(!Require(a,old.id==fresh.id&&old.kind==fresh.kind&&old.wave==fresh.wave&&old.localUID==fresh.localUID&&old.body==fresh.body,
+            "Lesson4 victory full source generation changed native identity/body"))return false;
+        if(d->kind==3&&!z->mDead)
+        {
+            const auto* day=GetNativeDayZombie273(z);
+            if(!Require(a,day&&NativeDayZombie273ControllerValid(3,*day),"Lesson4 victory Pole has no real validated source controller"))return false;
+            old.poleStates|=1u<<day->status;
+        }
+        if(added)NetTrace("SMOKE_LESSON4_VICTORY278_ENEMY role=%s id=%u token=%u localUID=%u kind=%u wave=%u maxHP=%d nativeBody=%u sourceCounter=%d",Role(a),old.id,d->instanceToken,old.localUID,old.kind,old.wave,z->mBodyMaxHealth,unsigned(old.body),a->NetIsHost()?c->adventureEnemyCount:-1);
+    }
+    return true;
+}
+bool AllWaves278(LawnApp* a)
+{
+    const auto* c=GetNativeContext(a->mBoard);LawnNet::NetBuffer proof;unsigned poles=0,poleStates=0;
+    for(const auto& [token,e]:s.enemies)
+    {proof.WriteU32(token);proof.WriteU16(e.id);proof.WriteU16(e.kind);proof.WriteU8(e.wave);if(e.kind==3){++poles;poleStates|=e.poleStates;}}
+    if(!Require(a,poles>0,"Lesson4 victory did not observe a genuine sourcePole3"))return false;
+    for(int wave=1;wave<=20;++wave)
+    {
+        std::map<uint16_t,unsigned> actual,expected;for(const auto& [token,e]:s.enemies)if(e.wave==wave)++actual[e.kind];
+        if(!Require(a,!actual.empty(),"Lesson4 victory missed an entire natural wave"))return false;
+        if(a->NetIsHost())
+        {
+            for(auto kind:c->adventureScheduler.waves[size_t(wave-1)])++expected[kind];
+            if(!Require(a,actual==expected,"Lesson4 victory actual native wave multiset differs from source RNG plan"))return false;
+        }
+    }
+    char tag[60];sprintf_s(tag,"ALL20_%zu_%08x",s.enemies.size(),LawnNet::NetFnv1a32(proof.Data(),proof.Size()));
+    if(!Barrier(a,tag))return false;
+    NetTrace("SMOKE_LESSON4_VICTORY278_ALLWAVES role=%s naturalWaves=20 naturalSourceNPC=%zu kinds=0,2,3 exactHostPlan=1 fullPeerIdentityDigest=1 poles=%u observedPoleStatusBits=%u forcedWaves=0",Role(a),s.enemies.size(),poles,poleStates);return true;
+}
+Coin* Trophy278(LawnApp* a)
+{Coin* coin=nullptr;const auto& run=GetNativeContext(a->mBoard)->adventure.run;while(a->mBoard->IterateCoins(coin))if(IsNativeFusionAdventureTrophy273(coin,run))return coin;return nullptr;}
+bool Next5_278(LawnApp* a)
+{
+    auto* b=a->mBoard;const auto* c=GetNativeContext(b);const auto& v=c->adventure;auto* chooser=a->mSeedChooserScreen;
+    if(!Require(a,s.commitObserved&&c->epoch!=s.epoch&&v.run.level==5&&v.run.cycle==1&&v.profile.completedLevels==15&&v.profile.frontierLevel==5&&v.profile.cycle==1&&
+        !v.run.over&&!v.run.rewardCollected&&!v.run.tutorial.active&&v.wave==0&&v.maximumWaves==20&&v.sourceDifficulty==2&&
+        b->mSunMoney==500&&c->money==3000&&a->mPlayerInfo->mLevel==s.classicLevel&&a->mPlayerInfo->mFinishedAdventure==s.classicFinished&&
+        (a->NetIsHost()?SameProfile(a->mNetManager->mConfig.mFusionSourceProfile,v.profile):SameProfile(a->mNetManager->mConfig.mFusionSourceProfile,s.profile)),
+        "Lesson4 victory next5/source profile/Classic preservation differs"))return false;
+    if(!chooser||!chooser->mNativeFusionChooser||!chooser->mMouseVisible||c->selection.State().phase!=FusionBankPhase::Choosing)return false;
+    std::set<unsigned> eligible;for(const auto& card:c->eligible)eligible.insert(unsigned(card.kind)*2+(card.isExtra?1:0));
+    if(!Require(a,c->eligible.size()==10&&eligible==std::set<unsigned>{0,1,2,3,4,5,6,7,8,9},"Lesson4 victory real unlock did not expose source5 SnowPea native cards"))return false;
+    if(!Capture(a,"next5_chooser")||!Barrier(a,"NEXT5_"+std::to_string(c->epoch)))return false;
+    NetTrace("SMOKE_LESSON4_VICTORY278_COMPLETE role=%s source4Victory=1 naturalWaves=20 naturalSourceNPC=%zu typedKinds=0,2,3 trophyClientClick=1 earnedCompletedMask=15 frontier=5 nextSourceChooser=5 ClassicUnchanged=1 clientLocalProfileUnchanged=1 purchasesHost=53 directActorWrites=0 clockWrites=0 RNGWrites=0 balanceWrites=0 source5FullVictory=NotExecuted source6FinalDoll=NotExecuted",Role(a),s.enemies.size());
+    a->CoopSmokeWriteResult(true,nullptr);return true;
+}
+bool Victory278(LawnApp* a)
+{
+    auto* b=a->mBoard;const auto* c=GetNativeContext(b);if(!c)return true;
+    if(c->adventure.run.level==5){Next5_278(a);return true;}
+    if(!Observe278(a))return true;const auto& v=c->adventure;
+    if(s.stage==17)
+    {
+        if(!Barrier(a,"RESUME_READY"))return true;
+        if(a->NetIsHost()&&b->mPaused&&!s.resume)s.resume=Escape(a);
+        if(!b->mPaused){s.samples=Samples(a);Advance(a,20);}return true;
+    }
+    if(s.stage==20)
+    {
+        if(b->mPaused||a->GetDialogCount())
+        {
+            NetTrace("SMOKE_LESSON4_VICTORY278_UNEXPECTED_PAUSE role=%s paused=%d dialogs=%d pendingSun=%u lastSunClick=%d,%d",Role(a),b->mPaused?1:0,a->GetDialogCount(),s.sunId,s.sunClickX,s.sunClickY);
+            for(auto* dialog:a->mDialogList)NetTrace("SMOKE_LESSON4_VICTORY278_DIALOG role=%s id=%d",Role(a),dialog->mId);
+            Require(a,false,"Lesson4 victory natural battle unexpectedly paused or opened a modal");return true;
+        }
+        if(a->NetIsHost()&&!v.run.over)Sun278(a);
+        if(v.wave>=3&&!s.frames.contains("fusion_lesson4_275_battle"))Capture(a,"battle");
+        if(v.wave==20&&!s.frames.contains("fusion_lesson4_275_finalwave"))Capture(a,"finalwave");
+        if(!s.diagnostic||GetTickCount()-s.diagnostic>=5000)
+        {s.diagnostic=GetTickCount();NetTrace("SMOKE_LESSON4_VICTORY278_BATTLE role=%s wave=%u/20 seen=%zu sourceEnemies=%d over=%d sun=%d elapsed=%u",Role(a),v.wave,s.enemies.size(),a->NetIsHost()?c->adventureEnemyCount:-1,v.run.over?1:0,b->mSunMoney,GetTickCount()-s.since);}
+        if(!v.run.over)return true;
+        if(!Require(a,v.wave==20&&!v.run.rewardCollected&&(!a->NetIsHost()||(c->adventureEnemyCount==0&&c->adventureEnemies.empty())),
+            "Lesson4 victory ended before all20 waves/real source retirements")||!AllWaves278(a))return true;
+        Advance(a,21);
+    }
+    if(s.stage==21)
+    {
+        auto* coin=Trophy278(a);if(!coin||!coin->mHitGround)return true;
+        s.trophy={v.run.trophyNetId,v.run.trophyToken};
+        if(!Require(a,s.trophy.id&&s.trophy.token&&!v.run.rewardCollected&&v.profile.completedLevels==7,
+            "Lesson4 victory actual trophy identity/preclick progress differs"))return true;
+        if(Capture(a,"trophy")&&Barrier(a,"TROPHY_"+std::to_string(s.trophy.id)+"_"+std::to_string(s.trophy.token)))Advance(a,22);
+    }
+    if(s.stage==22)
+    {
+        if(a->NetIsClient()&&!s.trophyClicked)
+        {
+            auto* coin=Trophy278(a);if(!coin||!coin->mHitGround||b->mCursorObject->mCursorType!=CURSOR_TYPE_NORMAL)return true;
+            const int x=int(coin->mPosX+coin->mWidth*.5f),y=int(coin->mPosY+coin->mHeight*.5f);HitResult hit;
+            if(!coin->MouseHitTest(x,y,&hit)||hit.mObject!=coin)return true;
+            if(BoardClick(a,float(x),float(y)))
+            {s.trophyClicked=true;NetTrace("SMOKE_LESSON4_VICTORY278_TROPHY_INPUT role=client id=%u token=%u input=ownedSDL authenticatedCommand=AdventureRewardCollect",s.trophy.id,s.trophy.token);}return true;
+        }
+        if(!v.run.rewardCollected)return true;
+        if(!Require(a,v.profile.completedLevels==15&&v.profile.frontierLevel==5,"Lesson4 victory client trophy did not earn source4 exactly once"))return true;
+        s.commitObserved=true;if(!Capture(a,"trophy_clicked"))return true;
+        NetTrace("SMOKE_LESSON4_VICTORY278_COMMIT role=%s id=%u token=%u completedBefore=7 completedAfter=15 frontier=5 rewardTicks=%u",Role(a),s.trophy.id,s.trophy.token,v.run.rewardTicks);Advance(a,23);
+    }
+    return true;
+}
 }
 namespace LawnNet
 {
@@ -245,7 +560,9 @@ bool NetSmokeUpdateFusionLesson4_275(LawnApp* a)
     if(!Require(a,Enabled("PVZ_COOP_SMOKE_FUSION_NATIVE")&&a->mCoopSmokeManifest.mScenario==NETSMOKE_SCENARIO_FUSION_VALIDATION,
         "Lesson4 requires owned native fusion_validation"))return true;
     if(!s.started)s.started=s.since=GetTickCount();
-    if(GetTickCount()-s.started>180000||GetTickCount()-s.since>60000)
+    const uint32_t totalLimit=Victory()?(s.speedMode==2?1800000:900000):180000;
+    const uint32_t stageLimit=Victory()&&(s.stage==15||s.stage==20)?(s.speedMode==2?800000:400000):60000;
+    if(GetTickCount()-s.started>totalLimit||GetTickCount()-s.since>stageLimit)
     {a->CoopSmokeFail("Lesson4 actual native input deadline; inspect stage/message/mission/glove identities");return true;}
     if(!a->mNetManager->IsActive())return true;a->mCoopSmokePeerReady=true;
     if(!s.stage)
@@ -261,7 +578,9 @@ bool NetSmokeUpdateFusionLesson4_275(LawnApp* a)
         NetTrace("SMOKE_LESSON4_275_BEGIN sourceLevel=4 cycle=1 completedMask=7 frontier=4 profileWrites=0 ClassicWrites=0");
         Advance(a,1);return true;
     }
-    if(!a->mBoard||!World(a))return true;
+    if(!a->mBoard)return true;
+    if(Victory()&&(s.stage==17||s.stage>=20))return Victory278(a);
+    if(!World(a))return true;
     auto* b=a->mBoard;const auto* c=GetNativeContext(b);const auto& bank=c->selection.State();
     if(!Message(a))return true;
     if(s.stage==1){if(Choose(a))Advance(a,2);}
@@ -296,8 +615,9 @@ bool NetSmokeUpdateFusionLesson4_275(LawnApp* a)
             s.preparedLogged=true;NetTrace("SMOKE_LESSON4_275_PREPARED role=%s mission=%u token=%u localUID=%u hostMissionUID=%u other=%u otherToken=%u kind0=1033 col0=9 kind1=1003 col1=5 row=2 sourceElapsedTicks=%d sharedDefault=1 postBirthWrites=0",
                 Role(a),s.plants[0].id,s.plants[0].token,s.plants[0].localUID,c->adventureMissionPlantUID,s.plants[1].id,s.plants[1].token,s.preparedTick-s.lessonStartTick);
         }
-        if(Capture(a,"prepared")&&IdentityProof(a,"PREPARED"))Advance(a,5);
+        if(Capture(a,"prepared")&&IdentityProof(a,"PREPARED"))Advance(a,Victory()?15:5);
     }
+    else if(s.stage==15){if(Farm278(a))Advance(a,5);}
     else if(s.stage==5)
     {
         if(!Plants(a,false))return true;
@@ -326,7 +646,7 @@ bool NetSmokeUpdateFusionLesson4_275(LawnApp* a)
         const auto& v=c->adventure;if(v.run.tutorial.active)return true;
         if(!Require(a,v.run.tutorial.stage==3&&v.run.tutorial.message==FusionAdventureMessage273::GloveReady&&(s.messages&15)==15&&
             v.countdown>4.5f&&v.countdown<=5.f&&(!a->NetIsHost()||!c->adventureMissionPlantUID),"Lesson4 completion/message/five-second countdown differs"))return true;
-        if(!s.completedLogged){s.completedLogged=true;NetTrace("SMOKE_LESSON4_275_COMPLETED role=%s sourceLevel=4 tutorialStage=3 active=0 countdown=%.6f wave=%u message=%u hostMissionCleared=%d fullLevelVictory=NotExecuted",Role(a),v.countdown,unsigned(v.wave),unsigned(v.run.tutorial.message),c->adventureMissionPlantUID?0:1);}
+        if(!s.completedLogged){s.completedLogged=true;NetTrace("SMOKE_LESSON4_275_COMPLETED role=%s sourceLevel=4 tutorialStage=3 active=0 countdown=%.6f wave=%u message=%u hostMissionCleared=%d fullLevelVictory=%s",Role(a),v.countdown,unsigned(v.wave),unsigned(v.run.tutorial.message),c->adventureMissionPlantUID?0:1,Victory()?"Pending":"NotExecuted");}
         if(a->NetIsHost()&&!s.pause)s.pause=Escape(a);
         if(!b->mPaused)return true;
         s.samples=Samples(a);Advance(a,7);
@@ -334,6 +654,7 @@ bool NetSmokeUpdateFusionLesson4_275(LawnApp* a)
     else if(s.stage==7&&Samples(a)-s.samples>=2)
     {
         if(!b->mPaused||!Plants(a,true)||!Released(a)||!Capture(a,"moved")||!Capture(a,"complete")||!FinalProof(a)||!Barrier(a,"DONE"))return true;
+        if(Victory()){Advance(a,17);return true;}
         NetTrace("SMOKE_LESSON4_275_COMPLETE role=%s sourceLevel=4 nativeChooser=1 nativeReady=1 nativeIntro=1 messages=4 genuineNineSecondPreparation=1 sourceFactories=2 sharedDefault=1 clientGloveMove=1 exactFullGenerations=2 unchangedBody=1 canonicalHP=1 released=1 tutorialCompleted=1 fiveSecondCountdown=1 profileUnchanged=1 ClassicUnchanged=1 commonPausedProof=1 actorWrites=0 clockWrites=0 RNGWrites=0 source4Victory=NotExecuted dirtyCellCallbacks=NotExecuted allocatorExhaustion=NotExecuted",Role(a));
         a->CoopSmokeWriteResult(true,nullptr);
     }

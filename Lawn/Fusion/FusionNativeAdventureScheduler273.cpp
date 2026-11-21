@@ -11,6 +11,7 @@
 #include "../Net/NetCommon.h"
 #include "../../LawnApp.h"
 #include <cmath>
+#include <algorithm>
 #include <vector>
 
 namespace LawnFusion
@@ -18,6 +19,7 @@ namespace LawnFusion
 namespace
 {
 using Result=FusionAdventureScheduler273Result;
+constexpr uint16_t admittedKinds278[]={0,2,3,4,8,21,100,104,106,108};
 struct Adapter
 {
     Board* board;
@@ -35,7 +37,7 @@ bool Current(Board* b)
 bool Ready(void* user,uint16_t kind)
 {
     auto& a=*static_cast<Adapter*>(user);
-    if(kind!=0&&kind!=2&&kind!=3&&kind!=4&&kind!=21&&kind!=100)
+    if(std::find(std::begin(admittedKinds278),std::end(admittedKinds278),kind)==std::end(admittedKinds278))
         return Reject(a,"Source scheduler native world refused an unadmitted source NPC; no replacement allowed.");
     const auto actorReady=[&](uint16_t actor)
     {
@@ -81,11 +83,12 @@ bool CanSpawn(void* user,std::span<const uint16_t> kinds)
     if(b->mZombies.mMaxSize<=b->mZombies.mSize||
         kinds.size()>size_t(b->mZombies.mMaxSize-1-b->mZombies.mSize))
         return Reject(a,"Source scheduler whole-wave native actor capacity is unavailable.");
-    bool checked[6]={};
+    bool checked[std::size(admittedKinds278)]={};
     for(auto kind:kinds)
     {
-        const int index=kind==0?0:kind==2?1:kind==4?2:kind==3?3:kind==21?4:kind==100?5:-1;
-        if(index<0)return Reject(a,"Source scheduler refused an unadmitted source NPC.");
+        const auto found=std::find(std::begin(admittedKinds278),std::end(admittedKinds278),kind);
+        if(found==std::end(admittedKinds278))return Reject(a,"Source scheduler refused an unadmitted source NPC.");
+        const auto index=found-std::begin(admittedKinds278);
         if(!checked[index]){if(!Ready(user,kind))return false;checked[index]=true;}
     }
     return CanAllocateNativeSourceDayBatch274(b,kinds,a.error);
@@ -124,7 +127,7 @@ Result InitializeNativeAdventureScheduler273(Board* board,FusionAdventureSchedul
     if(!board||!board->mApp||board->mApp->NetIsClient())return Result::NotHost;
     Adapter adapter{board,error};
     if(!Current(board)||!NativeSourceAdventureLevelReady273(level,uint32_t(cycle)))
-    {Reject(adapter,"Source scheduler native readiness is bounded to real Day Adventure1..6, cycle1.");return Result::NotReady;}
+    {Reject(adapter,"Source scheduler native readiness is bounded to real Day Adventure1..8, cycle1.");return Result::NotReady;}
     return InitializeFusionAdventureScheduler273(state,true,level,cycle,difficulty,random,&adapter,Ready);
 }
 Result UpdateNativeAdventureScheduler273(Board* board,FusionAdventureScheduler273State& state,

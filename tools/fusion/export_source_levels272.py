@@ -198,6 +198,19 @@ def export():
         unlocks.append({"kind": kind, "requiredAdventureCompleted": int(match[1], 0) - 0x20})
     assert unlocks[2]["requiredAdventureCompleted"] == 1
     assert unlocks[3]["requiredAdventureCompleted"] == 2
+    # Source special cards have sparse plant IDs. Keep their actual IDs rather
+    # than treating the dense base-card array index as a universal identity.
+    special_unlocks = []
+    for kind, body in sorted(unlock_cases.items()):
+        if kind < 35 or "+ 0xd0)" not in body:
+            continue
+        matches = re.findall(r"return \*\(char \*\)\(lVar2 \+ (0x[0-9a-f]+|\d+)\)", body)
+        if len(matches) != 1:
+            raise ValueError("unresolved adventure special-card unlock " + str(kind))
+        completed = int(matches[0], 0) - 0x20
+        if not 1 <= completed <= 45:
+            raise ValueError("invalid adventure special-card completion " + str(kind))
+        special_unlocks.append({"kind": kind, "requiredAdventureCompleted": completed})
 
     selection_path = STAGE / "source-zombie-selection-primary.json"
     selection = load(selection_path)["decompiled_code"].replace("\r", "")
@@ -226,12 +239,14 @@ def export():
     source_paths = [primary_path, RECOVERED / "levels-ghidra-batch1.json",
         RECOVERED / "levels-ghidra-batch2.json", RECOVERED / "levels-ghidra-batch3.json",
         RECOVERED / "levels-ghidra-batch7.json", RECOVERED / "levels-ghidra-batch8.json",
-        RECOVERED / "waves-contract.json", selection_path, STAGE / "source-boss-insertion-primary.json", catalog_path]
+        RECOVERED / "waves-contract.json", selection_path, STAGE / "source-boss-insertion-primary.json", catalog_path,
+        STAGE / "unlock-primary.c"]
     report = {"schema": 1, "sourceVersion": "Fusion2.3.1", "runtimeVerified": False,
         "sourceBinarySha256": load(RECOVERED / "waves-contract.json")["sources"][0]["sha256"],
         "sourceEvidence": [{"path": p.relative_to(ROOT).as_posix(),
             "sha256": hashlib.sha256(p.read_bytes()).hexdigest()} for p in source_paths],
         "adventure": adventure, "challenges": challenges, "baseUnlocks": unlocks,
+        "adventureSpecialUnlocks": special_unlocks,
         "zombieSelectionInSourceDictionaryOrder": weighted,
         "waveGeneration": {"source": "recovered/waves-contract.json + InitZombieList.InitZombie3E3B60",
             "difficultyMultipliers": [1, 3, 5, 7, 10, 10],
@@ -261,12 +276,17 @@ def export():
         generated.append('    {%d,"%s",%d,%d,%s},\n' % (r["id"], r["enumName"], r["scene"] if r["scene"] is not None else -1,
             r["maximumWaves"] or 0, "true" if r["requiresCustomMapData"] else "false"))
     generated.append("};\nconstexpr uint8_t baseUnlocks272[] = {%s};\n" % ",".join(str(r["requiredAdventureCompleted"]) for r in unlocks))
+    generated.append("constexpr struct { uint16_t kind; uint8_t completed; } adventureSpecialUnlocks272[] = {\n")
+    for row in special_unlocks:
+        generated.append("    {%d,%d},\n" % (row["kind"], row["requiredAdventureCompleted"]))
+    generated.append("};\n")
     generated.append("constexpr FusionSourceZombieWeight272 zombieWeights272[] = {\n")
     for row in weighted:
         generated.append("    {%d,%d,%d},\n" % (row["kind"], row["weight"], row["cost"]))
     generated.append("};\n")
     (ROOT / "Lawn/Fusion/generated/FusionSourceLevels272.inc").write_text("".join(generated), encoding="ascii")
     print(json.dumps({"adventure": len(adventure), "challenges": len(challenges), "baseUnlocks": len(unlocks),
+        "adventureSpecialUnlocks": len(special_unlocks),
         "uniqueSourceZombieDependencies": len({z for r in adventure for z in r["allowedZombieKinds"]}), "runtimeVerified": False}))
 
 

@@ -9,6 +9,9 @@ namespace LawnFusion
 {
 struct NativePlantData;
 inline bool IsFusionSourceFlyingKind(uint16_t kind){return kind==241||kind==912||kind==1082;}
+// CreatePlant.CheckBox444B10/PresentCheck44AB50 creates this transient actor
+// alongside actual recipients; it does not occupy a persistent native layer.
+inline bool IsFusionSourcePresentOverlayKind(uint16_t kind){return kind==256;}
 // TypeMgr.IsPuff0x18040D650; CheckPuff0x180446D00 limits real
 // same-cell Puff actors to three before trying a source recipe.
 inline bool IsFusionSourcePuffKind(uint16_t kind)

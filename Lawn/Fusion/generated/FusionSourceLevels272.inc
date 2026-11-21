@@ -216,6 +216,11 @@ constexpr FusionSourceChallenge272 challenges272[] = {
     {122,"PVPScaryPot",17,20,false},
 };
 constexpr uint8_t baseUnlocks272[] = {0,0,1,2,4,5,9,10,11,13,14,15,18,19,20,21,22,23,24,27,28,29,31,32,33,34,36,37,38,39,40,41,42,45,45};
+constexpr struct { uint16_t kind; uint8_t completed; } adventureSpecialUnlocks272[] = {
+    {250,16},
+    {254,13},
+    {256,6},
+};
 constexpr FusionSourceZombieWeight272 zombieWeights272[] = {
     {0,4000,1},
     {2,3000,2},

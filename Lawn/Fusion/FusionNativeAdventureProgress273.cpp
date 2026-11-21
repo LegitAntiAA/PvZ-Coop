@@ -4,10 +4,15 @@
 #include "FusionNativeGlove.h"
 #include "FusionNativeEquipment268.h"
 #include "FusionNativeDroppedCards269.h"
+#include "FusionNativeZombies.h"
+#include "FusionNativeZombieVisual.h"
+#include "FusionNativeDayZombie273Bridge.h"
+#include "FusionNativeProjectileMetadata.h"
 #include "FusionBasePlantRules.h"
 #include "../Board.h"
 #include "../Coin.h"
 #include "../Plant.h"
+#include "../Zombie.h"
 #include "../MessageWidget.h"
 #include "../System/Music.h"
 #include "../Net/NetManager.h"
@@ -22,6 +27,7 @@
 #include <cmath>
 #include <cstring>
 #include <limits>
+#include <span>
 #include <vector>
 
 namespace LawnFusion
@@ -50,6 +56,16 @@ SexyString Text(FusionAdventureMessage273 message)
     case FusionAdventureMessage273::GloveMove:return _S("Перчатка перемещает растения и позволяет объединять их.");
     case FusionAdventureMessage273::MoveTwinFlower:return _S("Переместите двойной подсолнух за орех.");
     case FusionAdventureMessage273::GloveReady:return _S("Вы освоили перчатку. Готовьте оборону от зомби!");
+    case FusionAdventureMessage273::PresentIntro:return _S("Подарок может дать любое базовое растение.");
+    case FusionAdventureMessage273::UsePresent:return _S("Положите подарок на этого повторителя.");
+    case FusionAdventureMessage273::PresentReady:return _S("Вы освоили подарок. Продолжим!");
+    case FusionAdventureMessage273::CherryPaperWarning:return _S("Вишнёвый газетчик на дорожке 1! Поставьте вишнёвый орех.");
+    case FusionAdventureMessage273::PresentDefenseReady:return _S("Отлично! Высаживайте растения и защищайтесь от зомби!");
+    case FusionAdventureMessage273::EquipmentIntro:return _S("Можно ли надеть зомбиное снаряжение на растение?");
+    case FusionAdventureMessage273::BucketNutWarning:return _S("Убейте орехозомби с ведром на дорожке 1. Без вишни и пожирателя!");
+    case FusionAdventureMessage273::UseBucket:return _S("Подбери выпавшее ведро и надень на горохострел или орех");
+    case FusionAdventureMessage273::IronPlants:return _S("Железные растения — лучшие друзья ранней игры!");
+    case FusionAdventureMessage273::EquipmentReady:return _S("Высаживайте растения и защищайтесь от зомби!");
     default:return _S("");
     }
 }
@@ -163,6 +179,141 @@ bool PrepareLesson4(Board* b,uint32_t& mission)
         made[0]->mNetId,mission,old.size(),made[0]->mPlantHealth,made[1]->mPlantHealth,b->mMainCounter);
     return true;
 }
+bool LessonWorld278(Board* b,int level,std::string* error)
+{
+    const auto* context=GetNativeContext(b);
+    if(!Host(b)||!context||!context->adventure.enabled||context->adventure.run.level!=level||
+        context->adventure.run.cycle!=1||(level!=7&&level!=8)||b->mApp->mGameMode!=GAMEMODE_ADVENTURE||
+        b->mBackground!=BACKGROUND_1_DAY||b->GetColumnCount()!=10||GetNativeFusionRowCount(b)!=5||
+        b->mApp->IsWallnutBowlingLevel())
+    {if(error)*error="Source Tutor7/8 requires its ordinary cycle1 Day Board.";return false;}
+    for(int row=0;row<5;++row)if(b->mPlantRow[row]!=PLANTROW_NORMAL)
+    {if(error)*error="Source Tutor7/8 row initializer differs.";return false;}
+    return true;
+}
+bool RepeaterPeak278(Board* b,std::string* error)
+{
+    const auto reject=[&](const char* why){if(error)*error=why;return false;};
+    const auto* definition=FusionFindPlant(1030);
+    if(!definition||!definition->hasStats||definition->maxHealth<=0||GetNativeSeedForPlant(1030)!=SEED_PEASHOOTER||
+        GetPlantDefinition(SEED_PEASHOOTER).mReanimationType!=REANIM_PEASHOOTER||
+        !EnsureNativePlantVisuals(b,1030,error))return reject("Source1030 model/stats/native carrier unavailable.");
+    ReanimatorEnsureDefinitionLoaded(REANIM_PEASHOOTER,false);
+    if(!gReanimatorDefArray||unsigned(REANIM_PEASHOOTER)>=gReanimatorDefCount)
+        return reject("Source1030 native definition unavailable.");
+    const auto& tracks=gReanimatorDefArray[int(REANIM_PEASHOOTER)].mTracks;
+    if(!tracks.tracks||tracks.count<=0)return reject("Source1030 native definition has no tracks.");
+    for(int i=0;i<tracks.count;++i)if(tracks.tracks[i].mName&&strnicmp(tracks.tracks[i].mName,"attacher__",10)==0)
+        return reject("Source1030 native definition has an unbudgeted dynamic attacher.");
+    auto* effects=b->mApp->mEffectSystem;
+    if(!effects||effects!=gEffectSystem||!effects->mReanimationHolder||!effects->mAttachmentHolder)
+        return reject("Source1030 native effect pools unavailable.");
+    const auto& p=b->mPlants;const auto& r=effects->mReanimationHolder->mReanimations;
+    const auto& a=effects->mAttachmentHolder->mAttachments;
+    // Pea carrier initializes one body, one head and one attachment, before
+    // the source metadata adapts it. No dead/removed slots count as free.
+    if(!p.mBlock||!r.mBlock||!a.mBlock||p.mSize>p.mMaxSize||r.mSize>r.mMaxSize||a.mSize>a.mMaxSize||
+        p.mMaxSize-p.mSize<1||r.mMaxSize-r.mSize<2||a.mMaxSize-a.mSize<1)
+        return reject("Source1030 whole batch needs1 Plant/2 Reanimation/1 Attachment slots.");
+    return true;
+}
+bool MissionBatchReady278(Board* b,int level,std::string* error)
+{
+    const auto reject=[&](const char* why){if(error)*error=why;return false;};
+    const uint16_t kind=level==7?104:106;
+    if(!EnsureNativeSourceZombieVisuals(b,kind,error))return false;
+    if(!CanQueryNativeSourceZombieRoot273(b,kind))return reject("Source mission NPC root is unavailable.");
+    if(kind==106&&!CanSpawnNativeDayZombie273(b,kind,error))return false;
+    if(kind==104)
+    {
+        NativeProjectileData shot;shot.kind=3;shot.damage=300;shot.specialType=9;shot.isZombieBullet=true;
+        if(!NativeProjectileMetadataValid(shot,PROJECTILE_PEA,MOTION_BACKWARDS))
+            return reject("Source104 actual Cherry projectile tuple is unavailable.");
+        if(!EnsureNativeProjectileVisuals(b,3,error))return false;
+    }
+    const uint16_t batch[]={kind};
+    if(!CanAllocateNativeSourceDayBatch274(b,batch,error))return false;
+    const uint16_t cards7[]={1003},cards8[]={1007,1007,1010};
+    const auto cards=level==7?std::span<const uint16_t>(cards7):std::span<const uint16_t>(cards8);
+    if(!b->mCoins.mBlock||b->mCoins.mSize>b->mCoins.mMaxSize||
+        cards.size()>size_t(b->mCoins.mMaxSize-b->mCoins.mSize))return reject("Source mission whole card batch has no Coin capacity.");
+    size_t count=0;Coin* old=nullptr;
+    while(b->mCoins.IterateNext(old))if(!old->mDead&&GetNativeDroppedCard269Data(old))++count;
+    if(count+cards.size()>128)return reject("Source mission whole card batch exceeds source card capacity.");
+    for(uint16_t card:cards)
+        if(!CanCreateNativeDroppedCard269(b,card,0)||!EnsureNativePlantVisuals(b,card,error))
+            return reject("Source mission card portrait/plant resource is unavailable.");
+    return true;
+}
+bool PrepareLesson7(Board* b,uint32_t& mission)
+{
+    std::string error;
+    const auto reject=[&](const char* why)
+    {if(b->mMainCounter%100==0)LawnNet::NetTrace("Fusion source Tutor7 Prepare blocked reason=%s tick=%d",why,b->mMainCounter);return false;};
+    if(!LessonWorld278(b,7,&error)||!CanApplyNativeFusionGameplay(b)||
+        GetNativeContext(b)->selection.State().phase!=FusionBankPhase::Playing||!b->IsValidGridCell(1,2))return reject(error.c_str());
+    std::vector<uint32_t> old;Plant* p=nullptr;
+    while(b->mPlants.IterateNext(p))if(!p->mDead&&p->mIsOnBoard&&p->mRow==2&&
+        (p->mPlantCol==1||(p->mSeedType==SEED_COBCANNON&&p->mPlantCol+1==1)))
+    {
+        const auto* d=GetNativePlantData(p);const auto uid=b->mPlants.DataArrayGetID(p);
+        if(p->mNetGhost||!d||d->instanceToken!=uid||!Lesson4OldKind(d->kind)||
+            p->mSeedType!=GetNativeSeedForPlant(d->kind)||IsNativeGlovePlantReserved(b,p,-1))
+            return reject("uncovered cell occupant/removal callback or glove lease");
+        old.push_back(uid);
+    }
+    if(!RepeaterPeak278(b,&error))return reject(error.c_str());
+    NativePlantData fresh;fresh.kind=1030;fresh.owner=LawnNet::NET_SHARED_OWNER;
+    auto* made=b->AddPlant(1,2,SEED_PEASHOOTER,SEED_NONE,&fresh);
+    const auto valid=[&]()
+    {
+        const auto* d=GetNativePlantData(made);const auto* definition=FusionFindPlant(1030);
+        return made&&!made->mDead&&!made->mNetGhost&&made->mNetId&&d&&d->kind==1030&&d->instanceToken&&
+            b->mPlants.DataArrayTryToGet(d->instanceToken)==made&&made->mSeedType==SEED_PEASHOOTER&&
+            made->mPlantCol==1&&made->mRow==2&&made->mIsOnBoard&&d->firstParent==kFusionNoPlant&&
+            d->secondParent==kFusionNoPlant&&!d->packetId&&d->owner==LawnNet::NET_SHARED_OWNER&&!d->randomOrigin&&
+            made->mPlantHealth==definition->maxHealth&&made->mPlantMaxHealth==definition->maxHealth;
+    };
+    if(!valid()){if(made&&!made->mDead)made->Die(255);return reject("default factory binding failed before clear");}
+    for(uint32_t uid:old)if(auto* actor=b->mPlants.DataArrayTryToGet(uid);actor&&!actor->mDead)actor->Die(0);
+    if(!valid())
+    {LawnNet::NetTrace("Fusion source Tutor7 invariant FAILED after source Die0; old removal already committed tick=%d",b->mMainCounter);if(!made->mDead)made->Die(255);return false;}
+    mission=b->mPlants.DataArrayGetID(made);RebuildNativeEquipmentGraph(b);
+    LawnNet::NetTrace("Fusion source Tutor7 Prepare committed mission=%u uid=%u old=%zu kind=1030 col=1 row=2 sharedDefault=1 peakP=1 peakR=2 peakA=1 giftGranted=0 tick=%d",made->mNetId,mission,old.size(),b->mMainCounter);
+    return true;
+}
+bool SpawnLessonEnemyAndCards278(Board* b,int level,uint32_t& mission)
+{
+    std::string error;
+    const auto reject=[&](const char* why)
+    {if(b->mMainCounter%100==0)LawnNet::NetTrace("Fusion source Tutor%d batch blocked reason=%s tick=%d",level,why,b->mMainCounter);return false;};
+    if(!LessonWorld278(b,level,&error)||!CanApplyNativeFusionGameplay(b)||b->mCurrentWave!=0||
+        GetNativeContext(b)->selection.State().phase!=FusionBankPhase::Playing||!MissionBatchReady278(b,level,&error))return reject(error.c_str());
+    const uint16_t kind=level==7?104:106;
+    auto* zombie=SpawnNativeSourceZombie(b,kind,0,0);float x=0,y=0;
+    const auto* data=GetNativeSourceZombieData(zombie);
+    const float target=float(b->GetCellCenterX(b->GetColumnCount()-1,0))+2.6f*(float(b->GetCellPitchX())/1.35f);
+    if(!zombie||!data||data->kind!=kind||!data->instanceToken||!zombie->mNetId||
+        b->mZombies.DataArrayTryToGet(data->instanceToken)!=zombie||!GetNativeSourceZombie269NodePoint(zombie,"",x,y)||!std::isfinite(target))
+    {if(zombie&&!zombie->mDead)zombie->DieNoLoot();return reject("source default NPC/root binding failed");}
+    zombie->mPosX+=target-x;zombie->mX=int(zombie->mPosX);
+    const uint16_t cards7[]={1003},cards8[]={1007,1007,1010};
+    const auto cards=level==7?std::span<const uint16_t>(cards7):std::span<const uint16_t>(cards8);
+    std::array<Coin*,3> made{};
+    for(size_t i=0;i<cards.size();++i)
+    {
+        const int col=level==7?4:int(i)+1;
+        made[i]=CreateNativeDroppedCard269(b,cards[i],0,float(b->GetCellCenterX(col,2)),float(b->GridToPixelY(col,2)+50));
+        if(!made[i])
+        {
+            for(auto* card:made)if(card&&!card->mDead)card->Die();
+            zombie->DieNoLoot();return reject("source card factory failed; partial group retired without stage commit");
+        }
+    }
+    mission=b->mZombies.DataArrayGetID(zombie);
+    LawnNet::NetTrace("Fusion source Tutor%d batch committed mission=%u uid=%u kind=%u row=0 rootX=%.9g sourceX=sentinel9.9 fromWave=0 cards=%zu cost=0 way=0 tick=%d",level,zombie->mNetId,mission,kind,target,cards.size(),b->mMainCounter);
+    return true;
+}
 bool Active(Board* b,int slot)
 {
     const auto* c=GetNativeContext(b);
@@ -171,6 +322,11 @@ bool Active(Board* b,int slot)
     const auto* net=b->mApp->mNetManager;if(!net)return false;
     const auto& player=net->GetPlayer(slot);return player.mActive&&!player.mSpectator;
 }
+}
+bool PreflightNativeFusionAdventureLesson278(Board* b,int level,std::string* error)
+{
+    if(error)error->clear();
+    return LessonWorld278(b,level,error)&&(level!=7||RepeaterPeak278(b,error))&&MissionBatchReady278(b,level,error);
 }
 void PresentNativeFusionAdventureTutorial273(Board* b,const FusionAdventureRun273& r)
 {
@@ -199,22 +355,43 @@ bool UpdateNativeFusionAdventureTutorial273(Board* b,FusionAdventureRun273& r,Fu
 {
     out={};
     if(!Playing(b)||!FusionAdventureRunValid273(r)||!r.level||
-        (r.tutorial.active&&r.level!=1&&r.level!=4))return false;
+        (r.tutorial.active&&r.level!=1&&r.level!=4&&r.level!=7&&r.level!=8))return false;
     auto* context=GetNativeContext(b);if(!context)return false;
-    if(r.level!=4||r.tutorial.stage<3||!r.tutorial.active)context->adventureMissionPlantUID=0;
+    if(!r.tutorial.active||(r.level!=4&&r.level!=7)||(r.level==4&&r.tutorial.stage<3)||
+        (r.level==7&&r.tutorial.stage!=2))context->adventureMissionPlantUID=0;
+    if(!r.tutorial.active||(r.level!=7&&r.level!=8)||(r.level==7&&r.tutorial.stage<4)||
+        (r.level==8&&r.tutorial.stage<2))context->adventureMissionZombieUID=0;
     auto candidate=r;FusionAdventureTutorialEffects273 effects;
-    if(r.level==4)
+    if(r.level==4||r.level==7||r.level==8)
     {
         FusionAdventureLessonInput274 input;
         auto* mission=b->mPlants.DataArrayTryToGet(context->adventureMissionPlantUID);
         const auto* data=GetNativePlantData(mission);
-        input.hasMissionPlant=mission&&!mission->mDead&&!mission->mNetGhost&&data&&
+        input.hasMissionPlant=mission&&(r.level==7||!mission->mDead)&&!mission->mNetGhost&&data&&
             data->instanceToken==context->adventureMissionPlantUID;
         if(input.hasMissionPlant)input.missionPlantColumn=mission->mPlantCol;
+        auto* enemy=b->mZombies.DataArrayTryToGet(context->adventureMissionZombieUID);
+        const auto* source=GetNativeSourceZombieData(enemy);
+        input.hasMissionZombie=enemy&&!enemy->mNetGhost&&source&&source->instanceToken==context->adventureMissionZombieUID&&
+            source->kind==(r.level==7?104:106);
+        if(input.hasMissionZombie)
+        {input.missionZombieBeforeDying=!enemy->mHasHead;input.missionZombieDying=GetNativeFusionZombieStatus(enemy)==1;}
+        if(r.level==8)
+        {
+            Plant* plant=nullptr;
+            while(b->mPlants.IterateNext(plant))if(const auto* identity=GetNativePlantData(plant);identity&&
+                identity->instanceToken==b->mPlants.DataArrayGetID(plant)&&(identity->kind==1020||identity->kind==1029))
+                input.hasBucketPlant1020or1029=true;
+        }
         if(!StepFusionAdventureTutorial273(candidate,1,input,effects))return false;
-        if(effects.missionAction!=FusionAdventureMissionAction274::None&&
-            (effects.missionAction!=FusionAdventureMissionAction274::Prepare4||
-             !PrepareLesson4(b,context->adventureMissionPlantUID)))return false;
+        switch(effects.missionAction)
+        {
+        case FusionAdventureMissionAction274::None:break;
+        case FusionAdventureMissionAction274::Prepare4:if(!PrepareLesson4(b,context->adventureMissionPlantUID))return false;break;
+        case FusionAdventureMissionAction274::Prepare7:if(!PrepareLesson7(b,context->adventureMissionPlantUID))return false;break;
+        case FusionAdventureMissionAction274::Spawn7EnemyAndCard:if(!SpawnLessonEnemyAndCards278(b,7,context->adventureMissionZombieUID))return false;break;
+        case FusionAdventureMissionAction274::Prepare8:if(!SpawnLessonEnemyAndCards278(b,8,context->adventureMissionZombieUID))return false;break;
+        }
     }
     else
     {
@@ -227,7 +404,7 @@ bool UpdateNativeFusionAdventureTutorial273(Board* b,FusionAdventureRun273& r,Fu
     // A partial group is retired and no stage/message/card grant is committed.
     if(effects.grantMissionCards&&!MissionCards(b))return false;
     r=candidate;out=effects;
-    if(effects.completed)context->adventureMissionPlantUID=0;
+    if(effects.completed)context->adventureMissionPlantUID=context->adventureMissionZombieUID=0;
     if(effects.messageChanged||!r.tutorial.messageTicks)PresentNativeFusionAdventureTutorial273(b,r);
     return true;
 }
