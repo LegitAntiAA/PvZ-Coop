@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 class Board;class Plant;class Projectile;class Zombie;class LawnApp;class TodParticleSystem;
+namespace LawnNet { struct NetFusionLimbEvent276; }
 namespace LawnFusion
 {
 class NativeWorldParticle269Definition;
@@ -36,6 +37,9 @@ public:
     bool Ensure(Board*,uint16_t plantKind,const std::string& modelJson,const std::string& bindingManifest,std::string& error);
     bool EnsureProjectile(Board*,uint16_t modelKey,const std::string& modelJson,const std::string& bindingManifest,std::string& error);
     bool EnsureZombie(Board*,uint16_t kind,const std::string& modelJson,const std::string& bindingManifest,std::string& error);
+    // Canonical host event, including before owner birth/after owner deletion.
+    // Consume once per epoch/id/token/kind/part; no actor lookup or phase clock.
+    bool PlayZombieLimbEvent(Board*,const LawnNet::NetFusionLimbEvent276&,bool& newEvent);
     void Update(Board*);
     // Exact source emission-module callbacks may override a dormant module;
     // absence of this callback never silently enables source-disabled emission.

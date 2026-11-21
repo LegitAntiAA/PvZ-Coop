@@ -3,6 +3,7 @@
 #include "Lawn/Board.h"
 #include "Lawn/Fusion/FusionRuntime.h"
 #include "Lawn/Fusion/FusionNative.h"
+#include "Lawn/Fusion/FusionNativeAdventure273.h"
 #include "Lawn/Fusion/FusionNativeEffects269.h"
 #include "Lawn/Net/NetFusion269Smoke.h"
 #include "Lawn/Net/NetFusion270Smoke.h"
@@ -134,6 +135,9 @@ namespace LawnNet
 	bool NetSmokeControlsComplete(LawnApp* theApp);
 	bool NetSmokeUpdateFusionAdventure273(LawnApp* theApp);
 	bool NetSmokeUpdateFusionDayZombie274(LawnApp* theApp);
+	bool NetSmokeUpdateFusionPole275(LawnApp* theApp);
+	bool NetSmokeUpdateFusionLesson4_275(LawnApp* theApp);
+	bool NetSmokeUpdateFusionDayLimbs276(LawnApp* theApp);
 	bool NetSmokeUpdateZenGarden(LawnApp* theApp);
 	bool NetSmokeZenGardenAllowsStart(LawnApp* theApp, uint8_t theMode, int32_t theLevel);
 	bool NetSmokeUpdateMystery(LawnApp* theApp);
@@ -6012,6 +6016,12 @@ void LawnApp::CoopSmokeUpdate()
 		return;
 	if (LawnNet::NetSmokeUpdateFusionDayZombie274(this))
 		return;
+	if (LawnNet::NetSmokeUpdateFusionDayLimbs276(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionPole275(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionLesson4_275(this))
+		return;
 	if (LawnNet::NetSmokeUpdateFusionAdventure273(this))
 		return;
 	if (LawnNet::NetSmokeUpdateFusionWallnut(this))
@@ -6408,9 +6418,10 @@ void LawnApp::NetOnStartGame(LawnNet::NetBuffer& thePayload)
 	const uint8_t aMode = aStart.mGameMode;
 	if (aStart.mContentMode==LawnFusion::ContentMode::Fusion &&
 		(!aStart.mSourceAdventure.enabled&&!CanStartFusionClassicCampaign() ||
-		 aStart.mSourceAdventure.enabled&&(aStart.mSourceAdventure.run.level>3||aStart.mSourceAdventure.run.cycle!=1)))
+		 aStart.mSourceAdventure.enabled&&!LawnFusion::NativeSourceAdventureLevelReady273(aStart.mSourceAdventure.run.level,aStart.mSourceAdventure.run.cycle)))
 	{
-		LawnNet::NetTrace("START_GAME rejected before app mutation: Fusion Classic campaign disabled");
+		LawnNet::NetTrace("START_GAME rejected before app mutation: Fusion campaign unavailable source=%d level=%u cycle=%u",
+            aStart.mSourceAdventure.enabled?1:0,aStart.mSourceAdventure.run.level,aStart.mSourceAdventure.run.cycle);
 		return;
 	}
 	const int aLevel = aStart.mLevel;
@@ -6434,7 +6445,8 @@ void LawnApp::NetOnStartGame(LawnNet::NetBuffer& thePayload)
 			 aNativeFixture && strcmp(aNativeFixture, "1") == 0 && aStart.mContentEpoch)) &&
 			((aMode == mCoopSmokeManifest.mGameMode && aLevel == mCoopSmokeManifest.mLevel) ||
 			 (aFusionCampaign&&aMode==GAMEMODE_ADVENTURE&&aLevel>=1&&aLevel<=2) ||
-			 (aFusionSource&&aMode==GAMEMODE_ADVENTURE&&aLevel>=1&&aLevel<=3) ||
+			 (aFusionSource&&aMode==GAMEMODE_ADVENTURE&&LawnFusion::NativeSourceAdventureLevelReady273(
+                aStart.mSourceAdventure.run.level,aStart.mSourceAdventure.run.cycle)) ||
 			 (aFusionCampaign&&aMode==GAMEMODE_ADVENTURE&&aLevel==11&&aFusionWavesFixture&&strcmp(aFusionWavesFixture,"1")==0) ||
 			 (aFusionCampaign&&aMode==GAMEMODE_ADVENTURE&&(aLevel==21||aLevel==31)&&aFusionVehiclesFixture&&atoi(aFusionVehiclesFixture)==aLevel) ||
 			 CoopSmokeFirstAdventureAllowsStart(aMode, aLevel) ||

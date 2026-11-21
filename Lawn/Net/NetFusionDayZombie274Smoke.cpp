@@ -4,6 +4,8 @@
 #include "NetCommon.h"
 #include "../Board.h"
 #include "../Zombie.h"
+#include "../Plant.h"
+#include "../Coin.h"
 #include "../Projectile.h"
 #include "../Cutscene.h"
 #include "../Widget/SeedChooserScreen.h"
@@ -14,6 +16,8 @@
 #include "../Fusion/FusionNativeDayZombie273.h"
 #include "../Fusion/FusionNativeZombieVisual.h"
 #include "../Fusion/FusionNativeProjectileMetadata.h"
+#include "../Fusion/FusionNativeEquipment.h"
+#include "../Fusion/FusionNativeVisual.h"
 #include "../../Sexy.TodLib/Reanimator.h"
 #include "../../SexyAppFramework/ScrollbarWidget.h"
 #include "../../SexyAppFramework/DDInterface.h"
@@ -39,6 +43,16 @@ struct State
     std::set<std::string> frames;std::map<std::string,int> draws;
 }s;
 bool Enabled(const char* name){const auto* value=std::getenv(name);return value&&std::strcmp(value,"1")==0;}
+bool Combat(){return Enabled("PVZ_COOP_SMOKE_FUSION_DAY274_COMBAT");}
+struct CombatState
+{
+    int cohort=0,chainIndex=-1,previousNutHP=0;uint32_t oldEpoch=0,diagnostic=0;
+    bool setup=false,restarted=false,initial=false,resources=false,armor107=false,armorCaptured=false,dead107=false,
+        headless108=false,hit11=false,hitCaptured=false,chomp=false,proofReady=false,completionLogged=false;
+    std::array<Ref,4> chain{};std::array<bool,4> chainCaptured{};std::array<bool,3> damaged{};
+    std::array<Ref,2> npc{};Ref chomper,wall,bucket;uint16_t seenIronShot=0;
+    std::string proofTag;
+}combat;
 int Slot(LawnApp* a){return a->mNetManager->GetMySlot();}
 const char* Role(LawnApp* a){return a->NetIsHost()?"host":"client";}
 uint32_t Samples(LawnApp* a){return a->NetIsHost()?a->mCoopSmokeSnapshotsSent:a->mCoopSmokeSnapshotsApplied;}
@@ -57,6 +71,14 @@ bool Send(LawnApp* a,const std::string& text)
 }
 bool Barrier(LawnApp* a,const std::string& value)
 {const auto text=Tag(value);Send(a,text);return Has(a,0,text)&&Has(a,1,text);}
+bool CombatProofBarrier(LawnApp* a,const char* name,const Ref* refs,size_t count)
+{
+    LawnNet::NetBuffer proof;for(size_t i=0;i<count;++i){proof.WriteU16(refs[i].id);proof.WriteU32(refs[i].token);}
+    char digest[16];sprintf_s(digest,"%08x",LawnNet::NetFnv1a32(proof.Data(),proof.Size()));
+    const auto value=std::string(name)+"_"+digest;
+    combat.proofTag=Tag(value);combat.proofReady=true;combat.oldEpoch=s.epoch;
+    return Barrier(a,value);
+}
 bool Click(LawnApp* a,float x,float y)
 {
     SDL_Event motion{};motion.type=SDL_EVENT_MOUSE_MOTION;motion.motion.windowID=SDL_GetWindowID(a->mSDLWindow);motion.motion.x=x;motion.motion.y=y;
@@ -72,7 +94,7 @@ bool Escape(LawnApp* a)
 }
 bool Capture(LawnApp* a,const char* suffix)
 {
-    const std::string name="fusion_day274_"+std::string(suffix);if(s.frames.contains(name))return true;
+    const std::string name="fusion_day274_"+(Combat()?"combat"+std::to_string(combat.cohort)+"_":"")+std::string(suffix);if(s.frames.contains(name))return true;
     if(!s.draws.contains(name))s.draws[name]=a->mDrawCount;
     const int requested=s.draws[name]+2;if(!a->CoopSmokeEnsureFreshFrameAfterDraw(requested))return false;
     if(!Require(a,a->CoopSmokeCaptureFrame(name.c_str()),"Day274 fresh owned capture failed"))return false;
@@ -258,6 +280,286 @@ bool Shots(LawnApp* a)
     }
     return Capture(a,"shots")&&Barrier(a,"SHOTS");
 }
+Plant* CombatPlant(Board* b,Ref ref)
+{Plant* p=nullptr;while(b->IteratePlants(p))if(const auto* d=GetNativePlantData(p);d&&p->mNetId==ref.id&&d->instanceToken==ref.token)return p;return nullptr;}
+Plant* CombatPlantAt(Board* b,uint16_t kind,int col,int row)
+{Plant* p=nullptr;while(b->IteratePlants(p))if(const auto* d=GetNativePlantData(p);d&&d->kind==kind&&p->mPlantCol==col&&p->mRow==row)return p;return nullptr;}
+Zombie* CombatZombie(Board* b,uint16_t kind)
+{Zombie* z=nullptr;while(b->IterateZombies(z))if(!z->IsDeadOrDying())if(const auto* d=GetNativeSourceZombieData(z);d&&d->kind==kind)return z;return nullptr;}
+Zombie* CombatZombieRef(Board* b,Ref ref)
+{Zombie* z=nullptr;while(b->IterateZombies(z))if(const auto* d=GetNativeSourceZombieData(z);d&&z->mNetId==ref.id&&d->instanceToken==ref.token)return z;return nullptr;}
+bool CombatVisible(LawnApp* a,Zombie* z)
+{
+    float rx=0,ry=0,x=0,y=0;if(!Require(a,GetNativeSourceZombie269NodePoint(z,"",rx,ry)&&
+        GetNativeSourceZombie269NodePoint(z,"Shadow",x,y),"Day275 actual combat model nodes unavailable"))return false;
+    const float dx=float(a->mBoard->mX+a->mDDInterface->mWideScreenOffsetX),dy=float(a->mBoard->mY+a->mDDInterface->mWideScreenOffsetY);
+    return (std::min)(rx+dx,x+dx)>=32&&(std::max)(rx+dx,x+dx)<=a->mWidth-64&&
+        (std::min)(ry+dy,y+dy)>=0&&(std::max)(ry+dy,y+dy)<=a->mHeight-8;
+}
+bool CombatBind(LawnApp* a,Zombie* z,uint16_t kind,Ref& ref)
+{
+    const auto* d=GetNativeSourceZombieData(z);const auto* p=FindFusionZombieProfile(kind);
+    if(!z)return false;
+    if(!Require(a,d&&p&&d->kind==kind&&z->mNetId&&d->instanceToken&&!z->mMindControlled&&z->mFromWave==0&&
+        z->mZombieType==GetNativeSourceZombieCarrier(kind)&&z->mBodyMaxHealth==p->maxHealth&&
+        z->mHelmMaxHealth==p->firstArmor&&z->mBodyHealth>0,"Day275 source combat actor contract differs"))return false;
+    if(!ref.id)
+    {
+        ref={z->mNetId,d->instanceToken,z->mPosX};
+        NetTrace("SMOKE_DAY275_BIND role=%s cohort=%d kind=%u id=%u token=%u row=%d body=%d/%d helm=%d/%d",
+            Role(a),combat.cohort,kind,ref.id,ref.token,z->mRow,z->mBodyHealth,z->mBodyMaxHealth,z->mHelmHealth,z->mHelmMaxHealth);
+    }
+    return Require(a,z->mNetId==ref.id&&d->instanceToken==ref.token,"Day275 canonical source combat generation changed");
+}
+bool CombatPreflight(LawnApp* a)
+{
+    if(combat.resources)return true;
+    auto* b=a->mBoard;std::string error;
+    for(uint16_t kind:{uint16_t(1032),uint16_t(5),uint16_t(3)})
+    {
+        if(!Require(a,EnsureNativePlantVisuals(b,kind,&error),"Day275 actual plant resources unavailable"))return false;
+        const auto seed=GetNativeSeedForPlant(kind);
+        if(!Require(a,seed!=SEED_NONE,"Day275 source plant has no native carrier"))return false;
+        ReanimationPreload(GetPlantDefinition(seed).mReanimationType);
+    }
+    for(uint16_t kind:{uint16_t(21),uint16_t(22),uint16_t(23),uint16_t(2),uint16_t(106),uint16_t(107),uint16_t(108)})
+    {
+        if(!Require(a,EnsureNativeSourceZombieVisuals(b,kind,&error),"Day275 actual NPC resources unavailable"))return false;
+        ReanimationPreload(GetZombieDefinition(ZombieType(GetNativeSourceZombieCarrier(kind))).mReanimationType);
+    }
+    if(!Require(a,CanCreateNativeEquipmentVisual(b,FusionEquipmentType::Bucket),"Day275 source Bucket resources unavailable"))return false;
+    combat.resources=true;return true;
+}
+bool CombatPlantBirth(LawnApp* a,uint16_t kind,int col,int row,Ref* saved=nullptr)
+{
+    NativePlantData d;d.kind=kind;d.owner=LawnNet::NET_SHARED_OWNER;
+    auto* p=a->mBoard->AddPlant(col,row,GetNativeSeedForPlant(kind),SEED_NONE,&d);const auto* actual=GetNativePlantData(p);
+    if(!Require(a,p&&actual&&actual->kind==kind&&p->mNetId&&actual->instanceToken&&p->mPlantHealth==p->mPlantMaxHealth,
+        "Day275 genuine initial source plant factory failed"))return false;
+    if(saved)*saved={p->mNetId,actual->instanceToken,0};
+    NetTrace("SMOKE_DAY275_PLANT_BIRTH kind=%u id=%u token=%u col=%d row=%d hp=%d/%d initialFactory=1 recipeAcquisition=NotExecuted postBirthWrites=0",
+        kind,p->mNetId,actual->instanceToken,col,row,p->mPlantHealth,p->mPlantMaxHealth);return true;
+}
+bool CombatZombieBirth(LawnApp* a,uint16_t kind,int row,float shadowX,Ref* saved=nullptr)
+{
+    NativeSourceZombieSpawnRequest request;request.kind=kind;request.row=row;request.fromWave=0;request.positioned=true;request.shadowX=shadowX;
+    auto* z=SpawnNativeSourceZombie(a->mBoard,request);const auto* d=GetNativeSourceZombieData(z);
+    if(!Require(a,z&&d&&d->kind==kind&&z->mBodyHealth==z->mBodyMaxHealth&&z->mHelmHealth==z->mHelmMaxHealth,
+        "Day275 genuine initial typed NPC factory failed"))return false;
+    if(saved)*saved={z->mNetId,d->instanceToken,z->mPosX};
+    NetTrace("SMOKE_DAY275_BIRTH cohort=%d kind=%u id=%u token=%u row=%d shadowBirthX=%.2f body=%d helm=%d postBirthWrites=0",
+        combat.cohort,kind,z->mNetId,d->instanceToken,row,shadowX,z->mBodyHealth,z->mHelmHealth);return true;
+}
+bool CombatSetup(LawnApp* a)
+{
+    if(!a->NetIsHost()||combat.setup)return true;
+    auto* b=a->mBoard;
+    if(!Require(a,!b->mPlants.mSize&&!b->mZombies.mSize&&!b->mPaused,"Day275 initial cohort must use an empty active source world"))return false;
+    if(combat.cohort==0)
+    {
+        for(int col=0;col<5;++col)if(!CombatPlantBirth(a,1032,col,1))return false;
+        if(!CombatZombieBirth(a,21,1,660.f))return false;
+    }
+    else if(combat.cohort==1)
+    {
+        if(!CombatPlantBirth(a,5,3,1,&combat.chomper)||
+            !CombatZombieBirth(a,106,1,float(b->GetCellCenterX(3,1)+240),&combat.npc[0]))return false;
+    }
+    else
+    {
+        for(int row:{1,3})for(int col=0;col<2;++col)if(!CombatPlantBirth(a,1032,col,row))return false;
+        if(!CombatPlantBirth(a,3,3,3,&combat.wall)||!CombatZombieBirth(a,107,1,660.f,&combat.npc[0])||
+            !CombatZombieBirth(a,108,3,660.f,&combat.npc[1]))return false;
+    }
+    combat.setup=true;return true;
+}
+bool CombatBucket(LawnApp* a)
+{
+    auto* b=a->mBoard;Coin* coin=nullptr;Coin* found=nullptr;unsigned count=0;
+    while(b->IterateCoins(coin))if(const auto* d=GetNativeEquipmentData(coin);d&&d->factoryType==FusionEquipmentType::Bucket)
+    {
+        ++count;found=coin;
+        if(!Require(a,d->type==FusionEquipmentType::Bucket&&!d->weapon&&!d->sourcePlantId&&d->instanceToken&&
+            coin->mType==COIN_NONE&&coin->mNetId&&NativeEquipmentDataValid(*d),"Day275 actual Bucket factory metadata differs"))return false;
+    }
+    if(!Require(a,count<=1,"Day275 exclusive cohort produced ambiguous multiple Bucket items"))return false;
+    if(!found)return false;const auto* d=GetNativeEquipmentData(found);
+    if(!combat.bucket.id)
+    {
+        combat.bucket={found->mNetId,d->instanceToken,0};
+        NetTrace("SMOKE_DAY275_BUCKET role=%s cohort=%d id=%u token=%u factory=Bucket phase=%u exclusiveSourceKind=%d sourceOwnershipField=NotPresent",
+            Role(a),combat.cohort,found->mNetId,d->instanceToken,unsigned(d->phase),combat.cohort==1?106:108);
+    }
+    if(!Require(a,found->mNetId==combat.bucket.id&&d->instanceToken==combat.bucket.token,"Day275 Bucket generation changed"))return false;
+    const float x=found->mPosX+20+b->mX+a->mDDInterface->mWideScreenOffsetX;
+    const float y=found->mPosY+20+b->mY+a->mDDInterface->mWideScreenOffsetY;
+    return d->phase==NativeEquipmentPhase::World&&std::isfinite(x)&&std::isfinite(y)&&x>=24&&x<=a->mWidth-32&&y>=100&&y<=a->mHeight-16;
+}
+bool CombatInitial(LawnApp* a)
+{
+    if(combat.initial)return true;auto* b=a->mBoard;
+    if(combat.cohort==0)
+    {auto* z=CombatZombie(b,21);if(!CombatBind(a,z,21,combat.chain[0])||!CombatVisible(a,z))return false;combat.chainIndex=0;}
+    else if(combat.cohort==1)
+    {
+        auto* z=CombatZombie(b,106);auto* p=CombatPlantAt(b,5,3,1);
+        if(!p||!CombatBind(a,z,106,combat.npc[0])||!CombatVisible(a,z))return false;
+        const auto* pd=GetNativePlantData(p);if(!combat.chomper.id)combat.chomper={p->mNetId,pd->instanceToken,0};
+        if(!Require(a,z->mHelmHealth>0&&z->mHasHead,"Day275 Chomper cohort did not bind an initially armored/headed106"))return false;
+    }
+    else
+    {
+        auto* z=CombatZombie(b,107);auto* iron=CombatZombie(b,108);auto* p=CombatPlantAt(b,3,3,3);
+        if(!p||!CombatBind(a,z,107,combat.npc[0])||!CombatBind(a,iron,108,combat.npc[1])||!CombatVisible(a,z)||!CombatVisible(a,iron))return false;
+        const auto* pd=GetNativePlantData(p);if(!combat.wall.id)combat.wall={p->mNetId,pd->instanceToken,0};
+        if(!Require(a,z->mHelmHealth>0&&iron->mHasHead&&p->mPlantHealth==4000,"Day275 armor/Iron baseline was not observed"))return false;
+        combat.previousNutHP=p->mPlantHealth;
+    }
+    if(!Capture(a,"start")||!Barrier(a,"COMBAT_INITIAL"))return false;
+    combat.initial=true;return true;
+}
+bool CombatDolls(LawnApp* a)
+{
+    auto* b=a->mBoard;constexpr uint16_t chain[]={21,22,23,2};
+    Zombie* current=nullptr;int step=-1;
+    for(int i=0;i<4;++i)if(auto* z=CombatZombie(b,chain[i]))
+    {if(!Require(a,!current,"Day275 Doll parent and child stayed alive together"))return false;current=z;step=i;}
+    if(current)
+    {
+        if(!Require(a,step>=combat.chainIndex&&step<=combat.chainIndex+1,"Day275 a typed Doll generation was skipped"))return false;
+        if(!CombatBind(a,current,chain[step],combat.chain[step]))return false;
+        if(step<3&&current->mHelmHealth<current->mHelmMaxHealth)combat.damaged[step]=true;
+        if(step>combat.chainIndex)
+        {
+            if(!Require(a,combat.chainCaptured[step-1],"Day275 Doll phase retired before fresh milestone capture")||
+                !Require(a,combat.damaged[step-1]&&combat.chain[step].id!=combat.chain[step-1].id&&
+                combat.chain[step].token!=combat.chain[step-1].token,"Day275 Doll replacement lacks genuine prior armor damage/new generation"))return false;
+            NetTrace("SMOKE_DAY275_CHAIN role=%s from=%u to=%u oldId=%u oldToken=%u childId=%u childToken=%u childBody=%d childArmor=%d naturalGatling=1",
+                Role(a),chain[step-1],chain[step],combat.chain[step-1].id,combat.chain[step-1].token,current->mNetId,
+                GetNativeSourceZombieData(current)->instanceToken,current->mBodyHealth,current->mHelmHealth);
+            combat.chainIndex=step;
+        }
+        const std::string frame="chain"+std::to_string(chain[step]);
+        if(!CombatVisible(a,current)||!Capture(a,frame.c_str()))return false;
+        combat.chainCaptured[step]=true;
+    }
+    if(combat.chainIndex!=3)return false;
+    for(const bool captured:combat.chainCaptured)if(!Require(a,captured,"Day275 final Doll phase retired before fresh milestone capture"))return false;
+    return CombatProofBarrier(a,"DOLL_CHAIN",combat.chain.data(),combat.chain.size());
+}
+bool CombatChomper(LawnApp* a)
+{
+    auto* b=a->mBoard;auto* p=CombatPlant(b,combat.chomper);auto* target=CombatZombie(b,106);
+    if(!Require(a,p!=nullptr,"Day275 genuine source5 Chomper disappeared"))return false;
+    if(target&&!CombatBind(a,target,106,combat.npc[0]))return false;
+    if(!target&&(p->mState==STATE_CHOMPER_BITING_GOT_ONE||p->mState==STATE_CHOMPER_DIGESTING))combat.chomp=true;
+    if(!combat.chomp||!CombatBucket(a))return false;
+    if(!Capture(a,"bucket"))return false;
+    if(!combat.proofReady)NetTrace("SMOKE_DAY275_CHOMPER role=%s targetId=%u targetToken=%u source5Id=%u source5Token=%u state=%d digest=%d directArmorDrop=exclusive-cohort bucketId=%u bucketToken=%u",
+        Role(a),combat.npc[0].id,combat.npc[0].token,combat.chomper.id,combat.chomper.token,int(p->mState),p->mLaunchCounter,combat.bucket.id,combat.bucket.token);
+    const Ref proof[]={combat.npc[0],combat.chomper,combat.bucket};
+    return CombatProofBarrier(a,"CHOMP",proof,std::size(proof));
+}
+bool CombatArmorIron(LawnApp* a)
+{
+    auto* b=a->mBoard;auto* nut=CombatPlant(b,combat.wall);auto* z=CombatZombie(b,107);auto* iron=CombatZombie(b,108);
+    if(!Require(a,nut!=nullptr,"Day275 hostile11 target WallNut disappeared"))return false;
+    if(z)
+    {
+        if(!CombatBind(a,z,107,combat.npc[0]))return false;
+        if(!z->mHelmHealth&&z->mBodyHealth>0)
+        {
+            if(!combat.armor107)NetTrace("SMOKE_DAY275_ARMOR role=%s kind=107 id=%u token=%u helm=0 body=%d sourceArmorStage=%u naturalProjectileDamage=1",
+                Role(a),z->mNetId,GetNativeSourceZombieData(z)->instanceToken,z->mBodyHealth,unsigned(GetNativeDayZombie273(z)->armorStage));
+            combat.armor107=true;if(!CombatVisible(a,z)||!Capture(a,"armor107"))return false;
+            combat.armorCaptured=true;
+        }
+    }
+    else if(combat.armor107)
+    {
+        if(!Require(a,combat.armorCaptured,"Day275 source107 died before fresh armor-break capture"))return false;
+        if(auto* dying=CombatZombieRef(b,combat.npc[0]);dying&&dying->mBodyHealth==0&&dying->IsDeadOrDying())
+        {
+            if(!combat.dead107)NetTrace("SMOKE_DAY275_DEATH role=%s kind=107 id=%u token=%u body=0 phase=%d dead=%d naturalProjectileDamage=1",
+                Role(a),dying->mNetId,combat.npc[0].token,int(dying->mZombiePhase),dying->mDead);
+            combat.dead107=true;
+        }
+    }
+    if(iron)
+    {
+        if(!CombatBind(a,iron,108,combat.npc[1]))return false;
+        if(!iron->mHasHead)
+        {
+            if(!combat.headless108)NetTrace("SMOKE_DAY275_HEADLOSS role=%s kind=108 id=%u token=%u body=%d hasHead=0 naturalProjectileDamage=1",
+                Role(a),iron->mNetId,GetNativeSourceZombieData(iron)->instanceToken,iron->mBodyHealth);
+            combat.headless108=true;
+        }
+    }
+    Projectile* shot=nullptr;while(b->IterateProjectiles(shot))if(const auto* d=GetNativeProjectileData(shot);
+        d&&!shot->mDead&&shot->mNetId&&d->kind==11&&d->damage==80&&d->isZombieBullet&&d->specialType==9&&shot->mRow==3&&
+        NativeDay273ProjectileMetadataValid(*d,shot->mProjectileType,shot->mMotionType))combat.seenIronShot=shot->mNetId;
+    if(nut->mPlantHealth<combat.previousNutHP)
+    {
+        const int damage=combat.previousNutHP-nut->mPlantHealth;
+        const bool contact=iron&&GetRectOverlap(iron->GetZombieAttackRect(),nut->GetPlantRect())>0;
+        if(!Require(a,combat.seenIronShot&&damage>0&&damage%80==0&&!contact,
+            "Day275 WallNut damage cannot be attributed exclusively to genuine hostile11"))return false;
+        combat.hit11=true;
+        NetTrace("SMOKE_DAY275_HIT role=%s sourceKind=108 projectileKind=11 projectileId=%u targetId=%u targetToken=%u before=%d after=%d delta=%d nativeBiteContact=0 exclusiveHostileShooter=1",
+            Role(a),combat.seenIronShot,combat.wall.id,combat.wall.token,combat.previousNutHP,nut->mPlantHealth,damage);
+        if(!Capture(a,"hit11"))return false;
+        combat.hitCaptured=true;
+    }
+    combat.previousNutHP=nut->mPlantHealth;
+    if(!combat.armorCaptured||!combat.dead107||!combat.headless108||!combat.hitCaptured||!CombatBucket(a))return false;
+    if(!Capture(a,"bucket"))return false;
+    const Ref proof[]={combat.npc[0],combat.npc[1],combat.wall,combat.bucket};
+    return CombatProofBarrier(a,"IRON",proof,std::size(proof));
+}
+void CombatCompletion(LawnApp* a)
+{
+    if(combat.completionLogged)return;combat.completionLogged=true;
+    NetTrace("SMOKE_DAY275_COHORT_COMPLETE role=%s cohort=%d source1=1 tutorialActive=1 wave=0 actorWritesAfterBirth=0",Role(a),combat.cohort);
+}
+bool CombatUpdate(LawnApp* a)
+{
+    if(!combat.diagnostic||GetTickCount()-combat.diagnostic>=2000)
+    {
+        combat.diagnostic=GetTickCount();auto* b=a->mBoard;auto* p=CombatPlant(b,combat.chomper);auto* nut=CombatPlant(b,combat.wall);
+        NetTrace("SMOKE_DAY275_WAIT role=%s cohort=%d initial=%d chain=%d armor107=%d armorFrame=%d dead107=%d headless108=%d hit11=%d hitFrame=%d chomp=%d chompState=%d nutHP=%d bucketId=%u proof=%d",
+            Role(a),combat.cohort,combat.initial,combat.chainIndex,combat.armor107,combat.armorCaptured,combat.dead107,combat.headless108,
+            combat.hit11,combat.hitCaptured,combat.chomp,p?int(p->mState):-1,nut?nut->mPlantHealth:-1,combat.bucket.id,combat.proofReady);
+        Zombie* z=nullptr;while(b->IterateZombies(z))if(const auto* d=GetNativeSourceZombieData(z))
+            NetTrace("SMOKE_DAY275_ACTOR role=%s cohort=%d kind=%u id=%u token=%u body=%d helm=%d hasHead=%d dying=%d",
+                Role(a),combat.cohort,d->kind,z->mNetId,d->instanceToken,z->mBodyHealth,z->mHelmHealth,z->mHasHead,z->IsDeadOrDying());
+    }
+    if(!CombatInitial(a))return true;
+    const bool done=combat.cohort==0?CombatDolls(a):combat.cohort==1?CombatChomper(a):CombatArmorIron(a);
+    if(!done)return true;
+    CombatCompletion(a);
+    if(combat.cohort==2)
+    {
+        NetTrace("SMOKE_DAY275_COMPLETE role=%s DollChain=21,22,23,2 source106ChomperBucket=1 source107ArmorBreakDeath=1 source108HeadLossBucket=1 hostile11PlantDamage=1 PoleJump=SeparateScenario fullDayAI=0 initialFactoriesOnly=1 postBirthActorWrites=0 clockWrites=0",
+            Role(a));a->CoopSmokeWriteResult(true,nullptr);return true;
+    }
+    combat.oldEpoch=s.epoch;Advance(a,20);return true;
+}
+bool CombatRestart(LawnApp* a)
+{
+    const auto* context=GetNativeContext(a->mBoard);
+    if(context&&context->epoch!=combat.oldEpoch)
+    {
+        if(!Require(a,combat.proofReady&&!combat.proofTag.empty(),"Day275 source epoch changed before local combat proof"))return true;
+        if(!Has(a,0,combat.proofTag)||!Has(a,1,combat.proofTag))return true;
+        CombatCompletion(a);
+        const int next=combat.cohort+1;combat=CombatState{};combat.cohort=next;
+        s.waiting=0;s.playingFrame=-1;s.epoch=0;s.born=s.bound=s.moved=s.pause=false;s.actors={};s.diagnostic=0;
+        Advance(a,1);return true;
+    }
+    if(a->NetIsHost()&&!combat.restarted)
+    {combat.restarted=true;Require(a,a->StartFusionSourceAdventure(1,false),"Day275 genuine source1 fresh-cohort restart failed");}
+    return true;
+}
 }
 
 namespace LawnNet
@@ -269,7 +571,7 @@ bool NetSmokeUpdateFusionDayZombie274(LawnApp* a)
     if(!Require(a,Enabled("PVZ_COOP_SMOKE_FUSION_NATIVE")&&a->mCoopSmokeManifest.mScenario==NETSMOKE_SCENARIO_FUSION_VALIDATION,
         "Day274 requires owned native fusion_validation fixture"))return true;
     if(!s.started)s.started=s.since=GetTickCount();
-    if(GetTickCount()-s.started>180000||GetTickCount()-s.since>60000)
+    if(GetTickCount()-s.started>(Combat()?600000u:180000u)||GetTickCount()-s.since>(Combat()?180000u:60000u))
     {a->CoopSmokeFail("Day274 actual cohort/input deadline; inspect stage and model-node traces");return true;}
     if(!s.stage)
     {
@@ -280,7 +582,13 @@ bool NetSmokeUpdateFusionDayZombie274(LawnApp* a)
         if(!Require(a,a->StartFusionSourceAdventure(1,false),"Day274 production source1 start rejected"))return true;
         Advance(a,1);return true;
     }
+    if(Combat())
+    {
+        const auto* context=GetNativeContext(a->mBoard);
+        if(s.stage==20||(combat.proofReady&&context&&context->epoch!=s.epoch))return CombatRestart(a);
+    }
     if(!a->mBoard||!World(a))return true;
+    if(Combat()&&s.stage==10)return CombatUpdate(a);
     auto* b=a->mBoard;const auto* c=GetNativeContext(b);const auto& bank=c->selection.State();
     if(s.stage==1){if(Choose(a))Advance(a,2);}
     else if(s.stage==2)
@@ -298,6 +606,11 @@ bool NetSmokeUpdateFusionDayZombie274(LawnApp* a)
         if(bank.phase!=FusionBankPhase::Playing||a->mSeedChooserScreen||a->mGameScene!=SCENE_PLAYING)return true;
         if(s.playingFrame<0){s.playingFrame=a->mAppCounter;s.startSamples=Samples(a);return true;}
         if(a->mAppCounter<=s.playingFrame||Samples(a)-s.startSamples<2)return true;
+        if(Combat())
+        {
+            if(!CombatPreflight(a)||!Barrier(a,"EMPTY_SOURCE_OPENING")||!CombatSetup(a))return true;
+            Advance(a,10);return true;
+        }
         if(!Barrier(a,"EMPTY_SOURCE_OPENING")||!Birth(a))return true;
         if(Observe(a,false,"cohort"))Advance(a,4);
     }

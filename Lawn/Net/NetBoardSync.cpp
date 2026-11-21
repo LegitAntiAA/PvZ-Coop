@@ -33,6 +33,7 @@
 #include "../Fusion/FusionNative.h"
 #include "../Fusion/FusionNativeWire.h"
 #include "../Fusion/FusionNativeEffects269.h"
+#include "../Fusion/FusionNativeAdventureProgress273.h"
 #include "../Fusion/FusionNativeVisual.h"
 #include "../Fusion/FusionNativeZombieVisual.h"
 #include "../Fusion/NativeSpecialZombie269.h"
@@ -778,6 +779,10 @@ bool NetBindNativeFusionFrame(Board* board, const LawnFusion::NativeSnapshotFram
 	context->gloveCooldownTicks = frame.gloveCooldownTicks;
 	LawnFusion::ReleaseUnusedNativeVisuals(board);
 	LawnFusion::ReleaseUnusedNativeSourceZombieVisuals(board);
+	// Client Board::Update skips host spawning/tutorial updates. Materialize the
+	// source Advice only after the full accepted native view was committed.
+	if(context->adventure.enabled)
+		LawnFusion::PresentNativeFusionAdventureTutorial273(board,context->adventure.run);
 	return true;
 }
 
@@ -993,12 +998,15 @@ bool NetDay273AllocationCapacity(Board* board,const NetBuffer& body,const LawnFu
                 case SEED_PUMPKINSHELL:case SEED_FLOWERPOT:case SEED_POTATOMINE:case SEED_GARLIC:case SEED_BLOVER:
                 case SEED_JALAPENO:case SEED_SQUASH:case SEED_TORCHWOOD:case SEED_CHOMPER:case SEED_CABBAGEPULT:
                 case SEED_KERNELPULT:case SEED_MELONPULT:case SEED_WINTERMELON:case SEED_CATTAIL:case SEED_CACTUS:
-                case SEED_MARIGOLD:case SEED_SPIKEWEED:case SEED_SPIKEROCK:break;
+                case SEED_MARIGOLD:case SEED_SPIKEWEED:case SEED_SPIKEROCK:case SEED_FUMESHROOM:break;
                 default:return reject("plant-factory-not-budgeted",section,type);
                 }
                 const auto reanim=GetPlantDefinition(SeedType(type)).mReanimationType;
                 if(!plainDefinition(reanim))return reject("plant-definition-or-attacher",section,type);
                 reanims+=1+heads;attachments+=heads; // Each Attach call can require at most one container.
+                // A raw daytime Fume carrier initializes before Fusion metadata
+                // is bound and can allocate its sleep reanimation (PlantInitialize).
+                if(type==SEED_FUMESHROOM){++reanims;if(!plainDefinition(REANIM_SLEEPING))return reject("fume-initial-sleep-definition",section,type);}
                 if(scan.mData[start+11]&1){++reanims;if(!plainDefinition(REANIM_SLEEPING))return reject("sleep-definition",section,type);}
                 if(type==SEED_POTATOMINE)
                 {
@@ -1747,6 +1755,16 @@ void NetEnsureGridItemVisual(GridItem* theGridItem, GridItemState thePreviousSta
 		aReanim->SetPosition(theGridItem->mPosX, theGridItem->mPosY);
 	}
 }
+}
+
+void LawnNet::NetBroadcastFusionLimb276(LawnApp* app,const NetFusionLimbEvent276& event)
+{
+    if(!app||!app->NetIsHost()||!app->mNetManager||!app->mBoard)return;
+    const auto* context=LawnFusion::GetNativeContext(app->mBoard);
+    if(!context||context->epoch!=event.mEpoch)return;
+    NetBuffer payload;
+    if(NetEncodeFusionLimbEvent276(event,payload))
+        app->mNetManager->SendBoardEvent(payload,BOARDEV_FUSION_LIMB276);
 }
 
 void LawnNet::NetBroadcastParticle(LawnApp* theApp, float theX, float theY,
@@ -2640,6 +2658,18 @@ void Board::NetApplyEvent(NetBuffer& b)
 	uint8_t aEvent = b.ReadU8Or();
 	switch (aEvent)
 	{
+	case BOARDEV_FUSION_LIMB276:
+	{
+        NetFusionLimbEvent276 event;
+        const auto* context=LawnFusion::GetNativeContext(this);
+        if(!mApp||!mApp->NetIsClient()||mApp->mBoard!=this||!context||
+            mBackground!=BACKGROUND_1_DAY||!NetDecodeFusionLimbEvent276(b,event)||
+            context->epoch!=event.mEpoch)break;
+        // The real loss can retire the owner before its next snapshot.
+        // Event identity and the epoch, rather than a live ghost, own this FX.
+        LawnFusion::PlayNativeSourceZombieLimbEvent276(this,event);
+        break;
+	}
 	case BOARDEV_PRESENTATION_FWOOSH:
 	{
 		if (b.Remaining() != 1 + 12*(20 + NET_ZOMBIE_ANIM_WIRE_BYTES)) break;
@@ -4162,6 +4192,19 @@ void Board::NetApplySnapshot(NetBuffer& b, bool* theApplied)
 		const float aTargetX = aWire.mPosX4 / 4.0f;
 		const float aTargetY = aWire.mPosY4 / 4.0f;
 		const bool aFirstAuthoritativeSample = aCreated || !aZombie->mVisible;
+        const auto* previousDay=aNativeFusion?LawnFusion::GetNativeDayZombie273(aZombie):nullptr;
+        bool sourceMotionEdge=false;
+        if(previousDay)
+        {
+            const auto incoming=std::find_if(aFusionFrame.dayZombies273.begin(),aFusionFrame.dayZombies273.end(),
+                [&](const auto& record){return record.id==aWire.mId;});
+            sourceMotionEdge=incoming!=aFusionFrame.dayZombies273.end()&&
+                (incoming->data.status!=previousDay->status||incoming->data.shadowEnabled!=previousDay->shadowEnabled);
+            if(sourceMotionEdge)
+                NetTrace("Fusion source motion edge id=%u status=%u->%u shadow=%d->%d oldPos=(%.3f,%.3f) target=(%.3f,%.3f) coherentSnap=1",
+                    aWire.mId,unsigned(previousDay->status),unsigned(incoming->data.status),previousDay->shadowEnabled?1:0,
+                    incoming->data.shadowEnabled?1:0,aZombie->mPosX,aZombie->mPosY,aTargetX,aTargetY);
+        }
 		const bool aPortalJump = !aFirstAuthoritativeSample &&
 			(fabsf(aTargetX - aZombie->mPosX) >= 120.0f ||
 			 fabsf(aTargetY - aZombie->mPosY) >= 50.0f);
@@ -4169,7 +4212,10 @@ void Board::NetApplySnapshot(NetBuffer& b, bool* theApplied)
 			aZombie->SetRow(aWire.mRow);
 		aZombie->mNetTargetX = aWire.mPosX4 / 4.0f;
 		aZombie->mNetTargetY = aWire.mPosY4 / 4.0f;
-		if (aFirstAuthoritativeSample || aPortalJump)
+		// The authoritative pose/state below changes immediately. A motion
+		// transition (including a source landing correction) must use its same
+		// position sample rather than the previous phase's smoothed position.
+		if (aFirstAuthoritativeSample || aPortalJump || sourceMotionEdge)
 		{
 			aZombie->mPosX = aZombie->mNetTargetX;
 			aZombie->mPosY = aZombie->mNetTargetY;
@@ -4214,8 +4260,10 @@ void Board::NetApplySnapshot(NetBuffer& b, bool* theApplied)
 		const bool aHasHead = (aWire.mFlags & 8) != 0;
 		const bool aHasArm = (aWire.mFlags & 16) != 0;
 		if (aZombie->mHasArm && !aHasArm)
+		{
 			aZombie->SetupReanimForLostArm(aFirstAuthoritativeSample ?
 				1U << (int)DamageFlags::DAMAGE_DOESNT_LEAVE_BODY : 0U);
+		}
 		if (aZombie->mHasHead && !aHasHead)
 		{
 			if (aFirstAuthoritativeSample)

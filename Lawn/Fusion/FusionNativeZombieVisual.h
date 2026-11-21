@@ -25,7 +25,7 @@ public:
     // Called for the body inside Zombie::Draw, in BeginDraw entity coordinates.
     // Native shadow/ice/butter/attachments/health UI remain in their own passes.
     bool Draw(Sexy::Graphics* graphics, Zombie* zombie) const;
-    bool Node(const Zombie*,const char* path,float& x,float& y,bool* active=nullptr) const;
+    bool Node(const Zombie*,const char* path,float& x,float& y,bool* active=nullptr,bool actualBodyPose=false) const;
     bool CanQueryRoot(uint16_t kind) const;
 
 private:
@@ -43,6 +43,9 @@ void ReleaseUnusedNativeSourceZombieVisuals(Board* board);
 bool DrawNativeSourceZombie(Sexy::Graphics* graphics, Zombie* zombie);
 bool GetNativeSourceZombie269NodePoint(const Zombie*,const char*,float&,float&);
 bool GetNativeSourceZombie269NodeActivity(const Zombie*,const char*,bool&);
+// Synchronous Day loss callback: sample the actual native body track, including
+// a lethal hit before PlayDeathAnim changes it. Never select a pose from HP.
+bool GetNativeSourceZombieLimbBirthPoint276(const Zombie*,const char*,float&,float&);
 bool CanQueryNativeSourceZombieRoot273(Board*,uint16_t kind);
 }
 

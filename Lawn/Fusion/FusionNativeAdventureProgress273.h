@@ -5,6 +5,10 @@ namespace LawnFusion
 {
 // Root owns the NativeContext member/save/snapshot codec. Each adapter receives
 // that one room state by reference; clients never step it or mutate the profile.
+// Native lessons1/4 only. Active7/8 fail closed. Prepare4 currently supports
+// empty cells or audited removal-only kinds0/1/2/3/1000/1030/1032/1033; other
+// occupants refuse before mutation until their source callback budgets/order
+// are closed. Root keeps public/campaign admission separate from this adapter.
 bool UpdateNativeFusionAdventureTutorial273(Board*,FusionAdventureRun273&,FusionAdventureTutorialEffects273&);
 void PresentNativeFusionAdventureTutorial273(Board*,const FusionAdventureRun273&);
 // Real non-friendly Zombie::Die, after source enemy-count decrement. Root must

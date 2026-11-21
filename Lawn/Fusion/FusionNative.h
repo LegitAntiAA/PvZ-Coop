@@ -217,6 +217,7 @@ struct NativeContext
     int adventureTick = -1;
     int adventureEnemyCount = 0;
     std::unordered_set<uint32_t> adventureEnemies; // Host generations, retired exactly once on death/MC.
+    uint32_t adventureMissionPlantUID = 0; // Host-private full Plant generation for source Tutor4; never FNS.
     int adventureSkySunTicks = 750;
     bool adventureTeardown = false;
     bool selectionCommitted = false;

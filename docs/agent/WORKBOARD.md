@@ -1,3 +1,29 @@
+## ROOT 276B — 2026-11-21
+
+- LIMBS276: DONE bounded runtime829common/46BMP app66u;9resources/10host+10clientrealFX, no stock/drop/duplicate. Standaloneownerdelete/latejoin/pool-exhaustion runtimeNotExecuted.
+- LESSON4-NATIVE275: DONE tutorial-only app66x159common/12BMP, realclientGlovemove/fullidentity/4Advice+sourceclocks/profilepreservation. Fullsource4victoryNotExecuted.
+- READINESS275 / ADVICE275: DONE verified byLesson66x. Shared7-pointnativelevelpredicate; clientreachableFNS-ownedAdviceprojection, nativewidget/Classicpreserved. Failed66s/t/u/v/wretained.
+- PUBLISH275/276: IN_PROGRESS Root, protectedverifiedmaincommit/push throughuserghidentity; no release.
+- ADVENTURE5/6-277: READY auditcomplete; E1implementationafterpublishedbaseline, source100/21closure/finalDollno-earlyreward/12eligible-nativebank10 validation.
+- BG277-NIGHT/POOL: IN_PROGRESS E2 stagingONLY genuine2packages/water6000/candidateconverter, productionnotstarted. Fog/Rooflater.
+
+## ROOT 276A — 2026-11-21
+
+- POLE275: DONE bounded runtime93common/12BMP app66q, actual success/blocked vault and source Shadow/client landing-edge correction.
+- DAY-COMBAT275: IN_TESTING: app66q970common/28BMP real Dollchain/Bucket/armor/hostilehit passed; genuine source limb FX remain blocking full8 acceptance.
+- LIMB276: IN_PROGRESS E2 producer/cache/reliableFX; E3 protocol63/event28 codec frozen, Root glue reviewed; Unit3 Passed72384/0/0. E1 fourcohort real-shot fixture23BMP/peer frozen. Root app66r build/runtime pending all sourcefreeze/review.
+- LESSON4-NATIVE275: IN_TESTING adapter+real client Glove fixture integrated, native admission1..4/publicfalse, runtime NotExecuted.
+- NONDAY-BG274: BACKLOG actual port. Source Pool19–27 exists; Day-only custom backdrop means current Pool harness uses native Classic. Inventory staged, no Pool campaign acceptance.
+- PUBLISH275/276: READY after actual runtime proof; directmain through user gh identity, no release. Current published40a5e04.
+
+## ROOT 275A — 2026-11-21
+
+- PUBLISH274: DONE main40a5e04, legitimateauthor/committer; UnitCI71735/0/1Passed.
+- DAY-COMBAT275: IN_PROGRESS E1 existingDayfixture;3genuinecohortsDoll/ChomperBucket/107108armor-drop-hit. No runtimeyet.
+- POLE275: IN_TESTING staging E3newfixturefrozen, Rootregistration/build/runtimepending. RootShadowbindingfiximplemented, notruntimeverified.
+- LESSON4-NATIVE275: IN_PROGRESS E2 nativeadapter/contextonly, exactmissionidentity+safeinitialtransaction. Source1preserved; dirtycellswithuncoveredDiecallbacksnotaccepted; publicgatefalse/kernel1..3.
+- RUNNERS275: RootnewPole/CombatoptionsparsePassed. No games/buildsactive; waitallsourcefreeze beforebuild.
+
 ## ROOT 274C — 2026-11-21
 
 - DAY-ALLOC/MOVEMENT274: DONE bounded. App66o pair Passed38common/10BMP,8actualNPC/body/head/UIDtoken/naturalmovement, hostile0/11 andpausedcanonicalheadproof; Root genuineFusionDayframesviewed. Unit71749/0/0Passed. Doesnotestablishfull8NPCcombatreadiness; historicalNPC15unchanged.

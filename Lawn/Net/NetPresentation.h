@@ -6,6 +6,8 @@ class Reanimation;
 
 namespace LawnNet
 {
+struct NetFusionLimbEvent276;
+void NetBroadcastFusionLimb276(LawnApp*, const NetFusionLimbEvent276&);
 // Explicitly relay standalone effects whose stock producer is host-only.
 // Entity attachments are reconstructed from entity snapshots instead.
 void NetBroadcastParticle(LawnApp* theApp, float theX, float theY,

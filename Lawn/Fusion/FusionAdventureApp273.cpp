@@ -1,5 +1,6 @@
 #include "../../LawnApp.h"
 #include "FusionNative.h"
+#include "FusionNativeAdventure273.h"
 #include "FusionCampaign272Rules.h"
 #include "../Board.h"
 #include "../Net/NetManager.h"
@@ -15,8 +16,12 @@ bool SourceFixture(const LawnApp* app)
 {
     const char* value=std::getenv("PVZ_COOP_SMOKE_FUSION_SOURCE273");
     const char* day=std::getenv("PVZ_COOP_SMOKE_FUSION_DAY274");
+    const char* pole=std::getenv("PVZ_COOP_SMOKE_FUSION_POLE275");
+    const char* lesson4=std::getenv("PVZ_COOP_SMOKE_FUSION_LESSON4_275");
+    const char* limbs=std::getenv("PVZ_COOP_SMOKE_FUSION_LIMBS276");
     return app->CoopSmokeActive()&&app->mCoopSmokeManifest.mScenario==LawnNet::NETSMOKE_SCENARIO_FUSION_VALIDATION&&
-        ((value&&std::strcmp(value,"1")==0)||(day&&std::strcmp(day,"1")==0));
+        ((value&&std::strcmp(value,"1")==0)||(day&&std::strcmp(day,"1")==0)||(pole&&std::strcmp(pole,"1")==0)||
+         (lesson4&&std::strcmp(lesson4,"1")==0)||(limbs&&std::strcmp(limbs,"1")==0));
 }
 }
 
@@ -32,7 +37,7 @@ bool LawnApp::StartFusionSourceAdventure(int level,bool disableTutorial)
     if(NetIsClient()||GetContentMode()!=ContentMode::Fusion||mStartingSourceAdventure)return false;
     const auto profile=mNetManager?mNetManager->mConfig.mFusionSourceProfile:FusionAdventureProfile273{};
     if(!level)level=profile.frontierLevel;
-    if((!kSourceAdventurePublicReady273&&!SourceFixture(this))||level<1||level>3||profile.cycle!=1||
+    if((!kSourceAdventurePublicReady273&&!SourceFixture(this))||!NativeSourceAdventureLevelReady273(level,profile.cycle)||
         !CanEnterFusionAdventureLevel273(profile,level))
     {
         if(!mGameSelector&&!mBoard)ShowGameSelector();
@@ -67,7 +72,7 @@ void LawnApp::ProcessFusionSourceAdventureTransition()
     if(!TakeFusionAdventureTransition273(context->adventure.profile,context->adventure.run,transition))return;
     LawnNet::NetTrace("Fusion source Adventure273 transition old=%u next=%u cycle=%u replay=%d",
         context->adventure.run.level,transition.nextLevel,transition.nextCycle,transition.returnToSelector?1:0);
-    if(transition.returnToSelector||transition.nextLevel>3||transition.nextCycle!=1)
+    if(transition.returnToSelector||!NativeSourceAdventureLevelReady273(transition.nextLevel,transition.nextCycle))
     {
         DoBackToMain();return;
     }

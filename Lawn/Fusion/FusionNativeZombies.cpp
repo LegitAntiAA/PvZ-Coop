@@ -343,6 +343,10 @@ Zombie* SpawnNativeSourceZombie(Board* board,const NativeSourceZombieSpawnReques
         zombie=board->AddZombieInRow(static_cast<ZombieType>(GetNativeSourceZombieCarrier(kind)),row,fromWave);
     }
     if (!zombie) return nullptr;
+    // Typed source factories need stable identities offline as well: source
+    // targets and standalone loss events outlive the raw native allocation.
+    if(!zombie->mNetId)zombie->mNetId=board->NetAllocId();
+    if(!zombie->mNetId){zombie->DieNoLoot();return nullptr;}
     if(kind!=0&&kind!=2)
     {
         // Allocation already applied native co-op/endless health scaling.

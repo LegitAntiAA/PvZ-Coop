@@ -29,7 +29,7 @@ namespace LawnNet
 // (the host broadcasts the same sounds via events).
 extern bool gNetSuppressSounds;
 
-static const uint32_t NET_PROTOCOL_VERSION = 62; // Source Fusion Adventure descriptor/view; FNS26.
+static const uint32_t NET_PROTOCOL_VERSION = 63; // Reliable source Day limb-loss event; FNS26 unchanged.
 static const uint16_t NET_DEFAULT_PORT = 27713;			// PvZ co-op port
 static const int NET_MAX_PLAYERS = 4;					// 1 host + 3 clients
 static const int NET_MAX_NICK_CHARS = 16;
@@ -211,7 +211,8 @@ enum NetBoardEvent : uint8_t
 	BOARDEV_READY_SET_PLANT = 24,		// empty: materialize the stock intro reanimation
 	BOARDEV_PRESENTATION_PARTICLE = 25, // u16 type, f32 x/y, i32 render order
 	BOARDEV_PRESENTATION_REANIM = 26,   // u16 type, f32 x/y, i32 order, animation state
-	BOARDEV_PRESENTATION_FWOOSH = 27    // u8 row; native Board owns the finite effect lifecycle.
+	BOARDEV_PRESENTATION_FWOOSH = 27,   // u8 row; native Board owns the finite effect lifecycle.
+	BOARDEV_FUSION_LIMB276 = 28        // Exact26-byte NetFusionLimbEvent276 payload; source callback, not raw resource/path.
 };
 
 // Exact payload sizes for coin/sun board events.  Keep these shared by the
@@ -538,6 +539,26 @@ static const size_t NET_ENDLESS_REPICK_WIRE_BYTES = 5; // event u8 + stage u32
 static const uint32_t NET_ENDLESS_STAGE_MAX = UINT32_C(0x7FFFFFFF);
 bool NetEncodeEndlessRepickEvent(uint32_t theStage, NetBuffer& theBuffer);
 bool NetDecodeEndlessRepickEvent(NetBuffer& theBuffer, uint32_t& theStage);
+
+// Reliable host source loss survives removal before the next Board snapshot.
+// SendBoardEvent prepends the event byte; this payload contains no event type.
+static const size_t NET_FUSION_LIMB276_WIRE_BYTES = 26;
+struct NetFusionLimbEvent276
+{
+	uint32_t mEpoch = 0;
+	uint16_t mZombieId = 0;
+	uint32_t mZombieToken = 0;
+	uint16_t mSourceKind = 0;
+	bool mHead = false;
+	uint8_t mRow = 0;
+	float mX = 0.0f;
+	float mY = 0.0f;
+	int32_t mRenderOrder = 0;
+};
+bool NetFusionLimbEvent276Valid(const NetFusionLimbEvent276&);
+bool NetEncodeFusionLimbEvent276(const NetFusionLimbEvent276&, NetBuffer&);
+// Exact remaining payload required. Invalid input preserves cursor and output.
+bool NetDecodeFusionLimbEvent276(NetBuffer&, NetFusionLimbEvent276&);
 
 // Every current/max health pool is authoritative.  U32 prevents Endless health
 // scaling from silently pinning client ghosts at 65535 and keeps health-bar

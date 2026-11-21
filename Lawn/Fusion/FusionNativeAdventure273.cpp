@@ -85,8 +85,8 @@ bool InitializeNativeSourceAdventure273(Board* b,const FusionAdventureSession273
     if(error)error->clear();
     const auto* level=FindFusionSourceAdventure272(boot.run.level);auto* c=GetNativeContext(b);
     if(!Current(b)||!c||!boot.enabled||!FusionAdventureSessionValid273(boot)||!level||
-        boot.run.level<1||boot.run.level>3||level->scene!=0||level->rows!=5||level->columns!=10)
-    {if(error)*error="Source Adventure boot is invalid or outside the admitted Day1..3 world.";return false;}
+        !NativeSourceAdventureLevelReady273(boot.run.level,boot.run.cycle)||level->scene!=0||level->rows!=5||level->columns!=10)
+    {if(error)*error="Source Adventure boot is invalid or outside the admitted Day1..4 world.";return false;}
     const bool host=!b->mApp->NetIsClient();
     if(host&&(boot.wave||boot.run.over||boot.run.rewardCollected||boot.schedulerFailed||
         b->mZombies.mSize||b->mPlants.mSize))
@@ -147,7 +147,7 @@ bool UpdateNativeSourceAdventure273(Board* b)
     {Failed(b,"source TutorOver could not set the five-second wave countdown");return true;}
     FusionAdventureScheduler273Input input;input.host=true;input.deltaSeconds=.01f;
     input.tutorial=view.run.tutorial.active;
-    // Ordinary source Day1..3 has allowSummon=true and no Boss/ScaryPot/IceDoom
+    // Ordinary source Day1..4 has allowSummon=true and no Boss/ScaryPot/IceDoom
     // controller. These worlds must be gated before widening native admission.
     FusionAdventureScheduler273Events events;std::string error;
     const auto status=UpdateNativeAdventureScheduler273(b,c->adventureScheduler,input,BoardRandom(b),events,&error);

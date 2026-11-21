@@ -9,6 +9,7 @@
 #include "../Zombie.h"
 #include "../Net/NetCommon.h"
 #include "../../LawnApp.h"
+#include "../../Sexy.TodLib/Reanimator.h"
 #include "../../SexyAppFramework/Graphics.h"
 #include "../../third_party/nlohmann/json.hpp"
 #include <algorithm>
@@ -347,11 +348,44 @@ bool SourcePose273(const Zombie* zombie,const char*& state,float& phase)
     return GetNativeSourceZombiePresentation(zombie,state,phase);
 }
 
+bool DayBodyPose276(const Zombie* zombie,const char*& state,float& phase)
+{
+    if(!IsNativeDayZombie273(zombie))return false;
+    auto* body=zombie->mApp->ReanimationTryToGet(zombie->mBodyReanimID);
+    const auto* data=GetNativeSourceZombieData(zombie);
+    if(!body||!body->mDefinition||body->mFrameStart<0||body->mFrameCount<=0||
+        !std::isfinite(body->mAnimTime)||body->mAnimTime<0||body->mAnimTime>1)return false;
+    // Match the real carrier span, not IsDeadOrDying/mIsEating: health and
+    // phase can already be the next snapshot while this body is still walking.
+    const auto match=[&](const char* track,const char* source)
+    {
+        if(!body->TrackExists(track))return false;
+        int first=0,count=0;body->GetFramesForLayer(track,first,count);
+        if(first!=body->mFrameStart||count!=body->mFrameCount)return false;
+        LawnNet::NetTrace("Fusion Day limb276 birthpose kind=%u id=%u token=%u source=%s native=%s frame=%d/%d phase=%.9g bodyHP=%d",
+            data->kind,zombie->mNetId,data->instanceToken,source,track,first,count,body->mAnimTime,zombie->mBodyHealth);
+        state=source;phase=body->mAnimTime;return true;
+    };
+    if(data->kind==3)
+        return match("anim_run","walk")||match("anim_jump","jump")||match("anim_walk","walk2")||
+            match("anim_eat","attack")||match("anim_death","die")||match("anim_idle","idle");
+    if(FusionDayZombie273Doll(data->kind))
+        return match("anim_walk","walk")||match("anim_walk2","walk2")||match("anim_eat","attack")||
+            match("anim_eat2","attack2")||match("anim_death","die")||match("anim_idle","idle");
+    return match("anim_walk2","walk")||match("anim_eat","attack")||
+        match("anim_death","die")||match("anim_idle","idle");
+}
+
 bool DayPose273(const Zombie* zombie,const ZombieModel& model,FusionAnimationDrawOptions& options)
 {
     const auto* data=GetNativeSourceZombieData(zombie);if(!data||!DayPrefab273(data->kind))return true;
     const auto* day=GetNativeDayZombie273(zombie);
     if(!day||!NativeDayZombie273ControllerValid(data->kind,*day))return false;
+    if(data->kind==3)options.nodeActivityOverrides.push_back({"Shadow",day->shadowEnabled});
+    // These describe the current source subtree only. Day detached particles
+    // are started by the actual loss callback, never inferred by the FX poll.
+    options.nodeActivityOverrides.push_back({"LoseArm",!zombie->mHasArm});
+    if(data->kind==3)options.nodeActivityOverrides.push_back({"LoseHead",!zombie->mHasHead});
     const char* head=nullptr;float phase=0;
     const bool headPose=GetNativeDayZombie273HeadPose(zombie,head,phase);
     if(FusionDayZombie273Shooter(data->kind)&&day->shootEvent&&!headPose)return false;
@@ -535,13 +569,13 @@ bool NativeZombieVisuals::Draw(Sexy::Graphics* graphics,Zombie* zombie) const
     return true;
 }
 
-bool NativeZombieVisuals::Node(const Zombie* zombie,const char* path,float& x,float& y,bool* active) const
+bool NativeZombieVisuals::Node(const Zombie* zombie,const char* path,float& x,float& y,bool* active,bool actualBodyPose) const
 {
     const auto* data=GetNativeSourceZombieData(zombie);
     if(!data||!path||zombie->mApp!=mImpl->app||!std::isfinite(zombie->mScaleZombie)||zombie->mScaleZombie<=0)return false;
     const auto found=mImpl->models.find(data->kind);if(found==mImpl->models.end())return false;
     const auto& model=*found->second;const char* state=nullptr;float phase=0,sx=0,sy=0;
-    if(!SourcePose273(zombie,state,phase)||!state||
+    if(!(actualBodyPose?DayBodyPose276(zombie,state,phase):SourcePose273(zombie,state,phase))||!state||
        !const_cast<Zombie*>(zombie)->GetShadowCenter(sx,sy))return false;
     const auto duration=model.durations.find(state);if(duration==model.durations.end())return false;
     auto options=model.options;SpecialPose(zombie,model,options);if(!DayPose273(zombie,model,options))return false;
@@ -624,5 +658,10 @@ bool GetNativeSourceZombie269NodeActivity(const Zombie* zombie,const char* path,
 {
     float x=0,y=0;auto* context=GetNativeContext(zombie?zombie->mBoard:nullptr);
     return context&&context->zombieVisuals&&context->zombieVisuals->Node(zombie,path,x,y,&active);
+}
+bool GetNativeSourceZombieLimbBirthPoint276(const Zombie* zombie,const char* path,float& x,float& y)
+{
+    auto* context=GetNativeContext(zombie?zombie->mBoard:nullptr);
+    return context&&context->zombieVisuals&&context->zombieVisuals->Node(zombie,path,x,y,nullptr,true);
 }
 }

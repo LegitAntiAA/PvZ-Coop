@@ -26,6 +26,7 @@
 #include "Net/NetManager.h"
 #include "Fusion/FusionNative.h"
 #include "Fusion/FusionNativeZombieVisual.h"
+#include "Fusion/FusionNativeEffects269.h"
 #include "Fusion/FusionNativeDefender.h"
 #include "Fusion/FusionNativePlantDamage.h"
 #include "Fusion/FusionNativeBatchActions.h"
@@ -4067,8 +4068,17 @@ void Zombie::DropHead(unsigned int theDamageFlags)
 
     mHasHead = false;
     SetupReanimForLostHead();
-    if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);source&&(source->kind==106||source->kind==108))
-        return; // These source LoseHead callbacks create Items/Bucket, not a stock severed head.
+    if(LawnFusion::IsNativeDayZombie273(this))
+    {
+        // Flags/stump and source106/108 Bucket gameplay above are independent
+        // of the genuine cosmetic callback. Other Day heads have no fall PS.
+        // Historical hydration calls SetupReanimForLostHead directly. Native
+        // weapon flags (including physical CherryPea18U) do not cancel this
+        // real source BodyTakeDamage callback.
+        LawnFusion::PlayNativeSourceZombieLimb276(this,true);
+        if(!mNetGhost)mApp->PlayFoley(FoleyType::FOLEY_LIMBS_POP);
+        return;
+    }
     if (TestBit(theDamageFlags, DamageFlags::DAMAGE_DOESNT_LEAVE_BODY))
     {
         return;
@@ -4449,6 +4459,9 @@ void Zombie::SetupReanimForLostArm(unsigned int theDamageFlags)
         }
     }
 
+    if(LawnFusion::IsNativeDayZombie273(this))
+        return; // Hydration-safe native stump only; actual DropArm owns the event.
+
     if (!mInPool && !TestBit(theDamageFlags, DamageFlags::DAMAGE_DOESNT_LEAVE_BODY))
     {
         ParticleEffect aEffect = ParticleEffect::PARTICLE_ZOMBIE_ARM;
@@ -4571,6 +4584,8 @@ void Zombie::DropArm(unsigned int theDamageFlags)
 
     mHasArm = false;
     SetupReanimForLostArm(theDamageFlags);
+    if(LawnFusion::IsNativeDayZombie273(this))
+        LawnFusion::PlayNativeSourceZombieLimb276(this,false);
     mApp->PlayFoley(FoleyType::FOLEY_LIMBS_POP);
 }
 
@@ -4584,7 +4599,8 @@ void Zombie::UpdateDamageStates(unsigned int theDamageFlags)
     float sourceArm = 0, sourceHead = 0;
     const bool sourceThresholds = source &&
         LawnFusion::TryGetFusionZombieLimbThresholds(source->kind,mBodyMaxHealth,sourceArm,sourceHead);
-    if (mHasArm && (sourceThresholds ? source->health < sourceArm : mBodyHealth < 2 * mBodyMaxHealth / 3) && mBodyHealth > 0)
+    if (mHasArm && (sourceThresholds ? source->health < sourceArm : mBodyHealth < 2 * mBodyMaxHealth / 3) &&
+        (mBodyHealth > 0 || LawnFusion::IsNativeDayZombie273(this)))
     {
         DropArm(theDamageFlags);
     }

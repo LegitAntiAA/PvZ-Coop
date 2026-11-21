@@ -1,5 +1,8 @@
 #include "FusionNativeAdventureProgress273.h"
 #include "FusionNative.h"
+#include "FusionNativeVisual.h"
+#include "FusionNativeGlove.h"
+#include "FusionNativeEquipment268.h"
 #include "FusionNativeDroppedCards269.h"
 #include "FusionBasePlantRules.h"
 #include "../Board.h"
@@ -11,11 +14,15 @@
 #include "../../LawnApp.h"
 #include "../../Resources.h"
 #include "../../Sexy.TodLib/Attachment.h"
+#include "../../Sexy.TodLib/EffectSystem.h"
+#include "../../Sexy.TodLib/Reanimator.h"
 #include "../../Sexy.TodLib/TodCommon.h"
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <cstring>
 #include <limits>
+#include <vector>
 
 namespace LawnFusion
 {
@@ -39,6 +46,10 @@ SexyString Text(FusionAdventureMessage273 message)
     case FusionAdventureMessage273::FusePeaSunflower:return _S("Подсолнух даёт солнце. Посадите на него горохострел.");
     case FusionAdventureMessage273::BuildGatling:return _S("Сажайте горох на горох, чтобы получить стрелка Гатлинга.");
     case FusionAdventureMessage273::Ready:return _S("Теперь высаживайте растения и защищайтесь от зомби!");
+    case FusionAdventureMessage273::GloveUnlocked:return _S("Вы открыли перчатку — важный инструмент.");
+    case FusionAdventureMessage273::GloveMove:return _S("Перчатка перемещает растения и позволяет объединять их.");
+    case FusionAdventureMessage273::MoveTwinFlower:return _S("Переместите двойной подсолнух за орех.");
+    case FusionAdventureMessage273::GloveReady:return _S("Вы освоили перчатку. Готовьте оборону от зомби!");
     default:return _S("");
     }
 }
@@ -62,6 +73,96 @@ bool MissionCards(Board* b)
     }
     return true;
 }
+bool Lesson4OldKind(uint16_t kind)
+{
+    // Audited removal-only source4 closure. In particular SunNut1006 has
+    // producer death rewards, and CherryNut1003 has AoE; neither may observe
+    // the prepared children before its original Clear->spawn source order.
+    switch(kind){case 0:case 1:case 2:case 3:case 1000:case 1030:case 1032:case 1033:return true;default:return false;}
+}
+bool PrepareLesson4(Board* b,uint32_t& mission)
+{
+    const auto reject=[&](const char* why)
+    {if(b->mMainCounter%100==0)LawnNet::NetTrace("Fusion source Tutor4 Prepare blocked reason=%s tick=%d",why,b->mMainCounter);return false;};
+    if(!CanApplyNativeFusionGameplay(b)||GetNativeContext(b)->selection.State().phase!=FusionBankPhase::Playing||
+        b->mApp->mGameMode!=GAMEMODE_ADVENTURE||b->mBackground!=BACKGROUND_1_DAY||GetNativeFusionRowCount(b)!=5||
+        !b->IsValidGridCell(9,2)||!b->IsValidGridCell(5,2)||b->mPlantRow[2]!=PLANTROW_NORMAL||
+        b->mApp->IsWallnutBowlingLevel())return reject("uncovered native initializer/terrain");
+    std::vector<uint32_t> old;
+    // Source ClearPlant9,2 then5,2 visits every existing cell layer. Capture
+    // exact generations BEFORE factory allocation; never clear by cell after
+    // birth, when the two new default actors occupy those same cells.
+    for(int column:{9,5})
+    {
+        Plant* p=nullptr;
+        while(b->IteratePlants(p))if(!p->mDead&&p->mIsOnBoard&&p->mRow==2&&
+            (p->mPlantCol==column||(p->mSeedType==SEED_COBCANNON&&p->mPlantCol+1==column)))
+        {
+            const auto* d=GetNativePlantData(p);const uint32_t uid=b->mPlants.DataArrayGetID(p);
+            if(p->mNetGhost||!d||d->instanceToken!=uid||!Lesson4OldKind(d->kind)||
+                p->mSeedType!=GetNativeSeedForPlant(d->kind)||IsNativeGlovePlantReserved(b,p,-1))
+                return reject("uncovered cell occupant/removal callback or glove lease");
+            old.push_back(uid);
+        }
+    }
+    constexpr uint16_t kinds[]={1033,1003};
+    const SeedType seeds[]={SEED_TWINSUNFLOWER,SEED_WALLNUT};
+    const ReanimationType types[]={REANIM_TWIN_SUNFLOWER,REANIM_WALLNUT};
+    for(int i=0;i<2;++i)
+    {
+        const auto* definition=FusionFindPlant(kinds[i]);
+        if(GetNativeSeedForPlant(kinds[i])!=seeds[i]||!definition||!definition->hasStats||definition->maxHealth<=0||
+            GetPlantDefinition(seeds[i]).mReanimationType!=types[i]||!EnsureNativePlantVisuals(b,kinds[i]))
+            return reject("source model/stats/native carrier unavailable");
+        ReanimatorEnsureDefinitionLoaded(types[i],false);
+        if(!gReanimatorDefArray||unsigned(types[i])>=gReanimatorDefCount)return reject("native definition unavailable");
+        const auto& tracks=gReanimatorDefArray[int(types[i])].mTracks;
+        if(!tracks.tracks||tracks.count<=0)return reject("native definition has no tracks");
+        for(int track=0;track<tracks.count;++track)
+            if(tracks.tracks[track].mName&&strnicmp(tracks.tracks[track].mName,"attacher__",10)==0)
+                return reject("native definition has an unbudgeted dynamic attacher");
+    }
+    auto* effects=b->mApp->mEffectSystem;
+    if(!effects||effects!=gEffectSystem||!effects->mReanimationHolder||!effects->mAttachmentHolder)
+        return reject("native effect pools unavailable");
+    const auto& p=b->mPlants;const auto& r=effects->mReanimationHolder->mReanimations;
+    const auto& a=effects->mAttachmentHolder->mAttachments;
+    // Exact ordinary Day initializer: one TwinSunflower body +one WallNut
+    // body, no seed-specific extra heads/sleep/blink/attachments. No slots
+    // from future removals or already-dead actors are credited to this peak.
+    if(!p.mBlock||!r.mBlock||!a.mBlock||p.mSize>p.mMaxSize||r.mSize>r.mMaxSize||a.mSize>a.mMaxSize||
+        p.mMaxSize-p.mSize<2||r.mMaxSize-r.mSize<2)return reject("whole batch needs2 live Plant/2 Reanimation slots");
+    std::array<Plant*,2> made{};
+    const auto valid=[&](Plant* plant,int index)
+    {
+        const auto* data=GetNativePlantData(plant);const auto* definition=FusionFindPlant(kinds[index]);
+        return plant&&!plant->mDead&&!plant->mNetGhost&&plant->mNetId&&data&&data->kind==kinds[index]&&
+            data->instanceToken&&b->mPlants.DataArrayTryToGet(data->instanceToken)==plant&&
+            plant->mSeedType==seeds[index]&&plant->mPlantCol==(index?5:9)&&plant->mRow==2&&plant->mIsOnBoard&&
+            data->firstParent==kFusionNoPlant&&data->secondParent==kFusionNoPlant&&!data->packetId&&
+            data->owner==LawnNet::NET_SHARED_OWNER&&!data->randomOrigin&&
+            plant->mPlantHealth==definition->maxHealth&&plant->mPlantMaxHealth==definition->maxHealth;
+    };
+    const auto retire=[&](){for(auto* plant:made)if(plant&&!plant->mDead)plant->Die(255);};
+    for(int i=0;i<2;++i)
+    {
+        NativePlantData fresh;fresh.kind=kinds[i];fresh.owner=LawnNet::NET_SHARED_OWNER;
+        made[i]=b->AddPlant(i?5:9,2,seeds[i],SEED_NONE,&fresh);
+        if(!valid(made[i],i)){retire();return reject("default factory binding failed before clear");}
+    }
+    for(uint32_t uid:old)if(auto* plant=b->mPlants.DataArrayTryToGet(uid);plant&&!plant->mDead)plant->Die(0);
+    // The accepted old kind set cannot damage/spawn on these children. Keep
+    // source Die0 callbacks; unsupported effectful callbacks refused above.
+    if(!valid(made[0],0)||!valid(made[1],1))
+    {
+        LawnNet::NetTrace("Fusion source Tutor4 invariant FAILED after source Die0; old removal already committed tick=%d",b->mMainCounter);
+        retire();return false;
+    }
+    mission=b->mPlants.DataArrayGetID(made[0]);RebuildNativeEquipmentGraph(b);
+    LawnNet::NetTrace("Fusion source Tutor4 Prepare committed mission=%u uid=%u old=%zu hp=%d/%d sharedDefault=1 peakP=2 peakR=2 peakA=0 tick=%d",
+        made[0]->mNetId,mission,old.size(),made[0]->mPlantHealth,made[1]->mPlantHealth,b->mMainCounter);
+    return true;
+}
 bool Active(Board* b,int slot)
 {
     const auto* c=GetNativeContext(b);
@@ -75,13 +176,20 @@ void PresentNativeFusionAdventureTutorial273(Board* b,const FusionAdventureRun27
 {
     if(!Current(b)||!FusionAdventureRunValid273(r)||!r.level||!b->mAdvice)return;
     const auto text=Text(r.tutorial.message);
+    if(text.empty())return; // Unimplemented lesson messages never replace native Advice with an empty label.
     if(!r.tutorial.messageTicks)
     {
-        if(!text.empty()&&b->mAdvice->mLabel==text)b->ClearAdviceImmediately();
+        if(b->mAdvice->mLabel==text)
+        {
+            b->mAdvice->ClearLabel();b->mAdvice->mDuration=0;b->mHelpIndex=ADVICE_NONE;
+        }
         return;
     }
+    // Source message and lifetime already travel together in the accepted FNS
+    // view. Use the native widget without a second legacy Advice clock/event.
     if(b->mAdvice->mLabel!=text||b->mAdvice->mDuration==0)
-        b->DisplayAdvice(text,MESSAGE_STYLE_TUTORIAL_LEVEL1_STAY,ADVICE_NONE);
+        b->mAdvice->SetLabel(text,MESSAGE_STYLE_TUTORIAL_LEVEL1_STAY);
+    b->mHelpIndex=ADVICE_NONE;
     // Native Advice supplies font/layout/drawing. The source message clock,
     // including600s BuildGatling, stays in the explicitly replicated room view.
     b->mAdvice->mDuration=r.tutorial.messageTicks;
@@ -90,16 +198,36 @@ void PresentNativeFusionAdventureTutorial273(Board* b,const FusionAdventureRun27
 bool UpdateNativeFusionAdventureTutorial273(Board* b,FusionAdventureRun273& r,FusionAdventureTutorialEffects273& out)
 {
     out={};
-    if(!Playing(b)||!FusionAdventureRunValid273(r)||!r.level)return false;
-    bool sunflower=false,peaSunflower=false,gatling=false;Plant* p=nullptr;
-    while(b->IteratePlants(p))if(Actor(p))if(const auto* d=GetNativePlantData(p))
-    {sunflower|=d->kind==1;peaSunflower|=d->kind==1000;gatling|=d->kind==1032;}
+    if(!Playing(b)||!FusionAdventureRunValid273(r)||!r.level||
+        (r.tutorial.active&&r.level!=1&&r.level!=4))return false;
+    auto* context=GetNativeContext(b);if(!context)return false;
+    if(r.level!=4||r.tutorial.stage<3||!r.tutorial.active)context->adventureMissionPlantUID=0;
     auto candidate=r;FusionAdventureTutorialEffects273 effects;
-    if(!StepFusionAdventureTutorial273(candidate,1,sunflower,peaSunflower,gatling,effects))return false;
+    if(r.level==4)
+    {
+        FusionAdventureLessonInput274 input;
+        auto* mission=b->mPlants.DataArrayTryToGet(context->adventureMissionPlantUID);
+        const auto* data=GetNativePlantData(mission);
+        input.hasMissionPlant=mission&&!mission->mDead&&!mission->mNetGhost&&data&&
+            data->instanceToken==context->adventureMissionPlantUID;
+        if(input.hasMissionPlant)input.missionPlantColumn=mission->mPlantCol;
+        if(!StepFusionAdventureTutorial273(candidate,1,input,effects))return false;
+        if(effects.missionAction!=FusionAdventureMissionAction274::None&&
+            (effects.missionAction!=FusionAdventureMissionAction274::Prepare4||
+             !PrepareLesson4(b,context->adventureMissionPlantUID)))return false;
+    }
+    else
+    {
+        bool sunflower=false,peaSunflower=false,gatling=false;Plant* p=nullptr;
+        while(b->IteratePlants(p))if(Actor(p))if(const auto* d=GetNativePlantData(p))
+        {sunflower|=d->kind==1;peaSunflower|=d->kind==1000;gatling|=d->kind==1032;}
+        if(!StepFusionAdventureTutorial273(candidate,1,sunflower,peaSunflower,gatling,effects))return false;
+    }
     // Retry the same source stage if native allocation is temporarily full.
     // A partial group is retired and no stage/message/card grant is committed.
     if(effects.grantMissionCards&&!MissionCards(b))return false;
     r=candidate;out=effects;
+    if(effects.completed)context->adventureMissionPlantUID=0;
     if(effects.messageChanged||!r.tutorial.messageTicks)PresentNativeFusionAdventureTutorial273(b,r);
     return true;
 }

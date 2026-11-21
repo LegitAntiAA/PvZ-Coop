@@ -193,6 +193,7 @@
     <ClCompile Include="..\..\Lawn\Fusion\FusionDayZombie273Rules.cpp" />
     <ClCompile Include="FusionDayZombie273Tests.cpp" />
     <ClCompile Include="FusionBucketReceivers274Tests.cpp" />
+    <ClCompile Include="FusionLimbEvent276Tests.cpp" />
     <ClCompile Include="..\..\Lawn\Fusion\FusionParticleCollision269Rules.cpp" />
     <ClCompile Include="FusionParticleCollision269Tests.cpp" />
     <ClCompile Include="SpecialZombie269Tests.cpp" />

@@ -751,6 +751,69 @@ bool NetDecodeEndlessRepickEvent(NetBuffer& theBuffer, uint32_t& theStage)
 	return true;
 }
 
+bool NetFusionLimbEvent276Valid(const NetFusionLimbEvent276& theEvent)
+{
+	if (!theEvent.mEpoch || !theEvent.mZombieId || !theEvent.mZombieToken ||
+		theEvent.mRow >= 5 || (theEvent.mHead && theEvent.mSourceKind != 3) ||
+		!std::isfinite(theEvent.mX) || !std::isfinite(theEvent.mY) ||
+		std::fabs(theEvent.mX) > 4096.0f || std::fabs(theEvent.mY) > 4096.0f ||
+		theEvent.mRenderOrder < 0 || theEvent.mRenderOrder > 1000000)
+		return false;
+	switch (theEvent.mSourceKind)
+	{
+	case 3: case 21: case 22: case 23: case 100: case 106: case 107: case 108:
+		return true;
+	default:
+		return false;
+	}
+}
+
+bool NetEncodeFusionLimbEvent276(const NetFusionLimbEvent276& theEvent, NetBuffer& theBuffer)
+{
+	if (!NetFusionLimbEvent276Valid(theEvent))
+		return false;
+	NetBuffer aWire;
+	aWire.WriteU32(theEvent.mEpoch);
+	aWire.WriteU16(theEvent.mZombieId);
+	aWire.WriteU32(theEvent.mZombieToken);
+	aWire.WriteU16(theEvent.mSourceKind);
+	aWire.WriteU8(theEvent.mHead ? 1 : 0);
+	aWire.WriteU8(theEvent.mRow);
+	aWire.WriteF32(theEvent.mX);
+	aWire.WriteF32(theEvent.mY);
+	aWire.WriteI32(theEvent.mRenderOrder);
+	if (aWire.Size() != NET_FUSION_LIMB276_WIRE_BYTES)
+		return false;
+	theBuffer.WriteBytes(aWire.Data(), aWire.Size());
+	return true;
+}
+
+bool NetDecodeFusionLimbEvent276(NetBuffer& theBuffer, NetFusionLimbEvent276& theEvent)
+{
+	if (theBuffer.mReadPos > theBuffer.Size() || theBuffer.Remaining() != NET_FUSION_LIMB276_WIRE_BYTES)
+		return false;
+	const size_t aStartReadPos = theBuffer.mReadPos;
+	NetFusionLimbEvent276 aDecoded;
+	uint8_t aHead = 0;
+	if (!theBuffer.ReadU32(&aDecoded.mEpoch) || !theBuffer.ReadU16(&aDecoded.mZombieId) ||
+		!theBuffer.ReadU32(&aDecoded.mZombieToken) || !theBuffer.ReadU16(&aDecoded.mSourceKind) ||
+		!theBuffer.ReadU8(&aHead) || !theBuffer.ReadU8(&aDecoded.mRow) ||
+		!theBuffer.ReadF32(&aDecoded.mX) || !theBuffer.ReadF32(&aDecoded.mY) ||
+		!theBuffer.ReadI32(&aDecoded.mRenderOrder) || aHead > 1 || theBuffer.Remaining())
+	{
+		theBuffer.mReadPos = aStartReadPos;
+		return false;
+	}
+	aDecoded.mHead = aHead != 0;
+	if (!NetFusionLimbEvent276Valid(aDecoded))
+	{
+		theBuffer.mReadPos = aStartReadPos;
+		return false;
+	}
+	theEvent = aDecoded;
+	return true;
+}
+
 namespace
 {
 bool NetZombieHealthStateIsBounded(const NetZombieHealthState& theState)

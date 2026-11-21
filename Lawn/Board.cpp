@@ -6,6 +6,7 @@
 #include "Fusion/FusionRuntime.h"
 #include "Fusion/FusionNative.h"
 #include "Fusion/FusionNativeAdventure273.h"
+#include "Fusion/FusionNativeAdventureProgress273.h"
 #include "Fusion/FusionNativeLastPlants269.h"
 #include "Fusion/FusionNativeWorldRemainder269.h"
 #include "Fusion/FusionNativeDeath.h"
@@ -7874,6 +7875,10 @@ void Board::Update()
 			mMainCounter++;
 			mEffectCounter++;
 		}
+		// Tick native text animation, then restore the source-owned message
+		// lifetime. The client never advances the host tutorial clock itself.
+		if(const auto* context=LawnFusion::GetNativeContext(this);context&&context->adventure.enabled)
+			LawnFusion::PresentNativeFusionAdventureTutorial273(this,context->adventure.run);
 		mCursorPreview->Update();
 		mCursorObject->Update();
 		mPrevMouseX = mApp->mWidgetManager->mLastMouseX;

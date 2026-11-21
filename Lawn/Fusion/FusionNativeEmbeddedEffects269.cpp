@@ -4,6 +4,7 @@
 #include "FusionNativeVisual.h"
 #include "FusionNativeLaserConnections269.h"
 #include "FusionNativeZombieVisual.h"
+#include "FusionNativeDayZombie273.h"
 #include "../Board.h"
 #include "../Plant.h"
 #include "../Projectile.h"
@@ -18,6 +19,7 @@
 #include <cmath>
 #include <filesystem>
 #include <fstream>
+#include <limits>
 #include <map>
 #include <set>
 #include <stdexcept>
@@ -122,6 +124,14 @@ struct NativeEmbeddedEffects269::Impl
     std::map<std::tuple<uint32_t,uint16_t,int64_t>,Lease> derivedPlantLeases;
     std::map<uint16_t,std::vector<Binding>> zombieBindings;
     std::map<std::tuple<uint32_t,uint16_t,int64_t>,Lease> zombieLeases;
+    // Separate from actor-owned polling leases: a reliable loss can arrive
+    // before the first actor snapshot or after its native array slot is gone.
+    using LimbKey=std::tuple<uint32_t,uint16_t,uint32_t,uint16_t,bool>;
+    std::map<LimbKey,uint32_t> limbEvents; // Seen key -> optional real native PS ID.
+    uint32_t limbEpoch=0;
+    // Never evict canonical keys to make old packets replayable. At this board
+    // budget (16-bit actor ID space x two parts), further cosmetics only drop.
+    static constexpr size_t maximumLimbEvents=2u*(std::numeric_limits<uint16_t>::max)();
     TodParticleSystem* System(uint32_t id) const
     {return id&&app&&app->mEffectSystem&&app->mEffectSystem->mParticleHolder==holder?app->ParticleTryToGet(static_cast<ParticleSystemID>(id)):nullptr;}
     void Kill(Lease& lease){if(auto* system=System(lease.system))system->ParticleSystemDie();lease.system=0;}
@@ -129,7 +139,7 @@ struct NativeEmbeddedEffects269::Impl
 };
 NativeEmbeddedEffects269::NativeEmbeddedEffects269(LawnApp* app):mImpl(std::make_unique<Impl>())
 {mImpl->app=app;mImpl->holder=app&&app->mEffectSystem?app->mEffectSystem->mParticleHolder:nullptr;}
-NativeEmbeddedEffects269::~NativeEmbeddedEffects269(){for(auto& entry:mImpl->leases)mImpl->Kill(entry.second);for(auto& entry:mImpl->projectileLeases)mImpl->Kill(entry.second);for(auto& entry:mImpl->derivedPlantLeases)mImpl->Kill(entry.second);for(auto& entry:mImpl->zombieLeases)mImpl->Kill(entry.second);}
+NativeEmbeddedEffects269::~NativeEmbeddedEffects269(){for(auto& entry:mImpl->leases)mImpl->Kill(entry.second);for(auto& entry:mImpl->projectileLeases)mImpl->Kill(entry.second);for(auto& entry:mImpl->derivedPlantLeases)mImpl->Kill(entry.second);for(auto& entry:mImpl->zombieLeases)mImpl->Kill(entry.second);for(auto& entry:mImpl->limbEvents)if(auto* system=mImpl->System(entry.second))system->ParticleSystemDie();}
 bool NativeEmbeddedEffects269::Ensure(Board* board,uint16_t kind,const std::string& model,const std::string& manifest,std::string& error)
 {
     try
@@ -163,6 +173,64 @@ bool NativeEmbeddedEffects269::EnsureZombie(Board* board,uint16_t kind,const std
         mImpl->zombieBindings.emplace(kind,std::move(bindings));error.clear();return true;
     }
     catch(const std::exception& ex){error=ex.what();return false;}
+}
+bool NativeEmbeddedEffects269::PlayZombieLimbEvent(Board* board,const LawnNet::NetFusionLimbEvent276& event,bool& newEvent)
+{
+    newEvent=false;
+    const auto* context=GetNativeContext(board);
+    if(!mImpl->Valid(board)||!context||context->epoch!=event.mEpoch||
+        board->mBackground!=BACKGROUND_1_DAY||GetNativeFusionRowCount(board)!=5||
+        !LawnNet::NetFusionLimbEvent276Valid(event))return false;
+    if(mImpl->limbEpoch!=event.mEpoch)
+    {
+        for(auto& entry:mImpl->limbEvents)if(auto* system=mImpl->System(entry.second))system->ParticleSystemDie();
+        mImpl->limbEvents.clear();mImpl->limbEpoch=event.mEpoch;
+    }
+    const Impl::LimbKey key{event.mEpoch,event.mZombieId,event.mZombieToken,event.mSourceKind,event.mHead};
+    if(mImpl->limbEvents.contains(key))
+    {
+        LawnNet::NetTrace("Fusion Day limb276 duplicate epoch=%u kind=%u id=%u token=%u part=%s role=%s",
+            event.mEpoch,event.mSourceKind,event.mZombieId,event.mZombieToken,event.mHead?"head":"arm",
+            mImpl->app->NetIsClient()?"client":"host");return true;
+    }
+    if(mImpl->limbEvents.size()>=Impl::maximumLimbEvents)
+    {
+        LawnNet::NetTrace("Fusion Day limb276 dropped epoch=%u kind=%u id=%u token=%u part=%s row=%u birth=(%.3f,%.3f) reason=board-seen-capacity role=%s",
+            event.mEpoch,event.mSourceKind,event.mZombieId,event.mZombieToken,event.mHead?"head":"arm",event.mRow,
+            event.mX,event.mY,mImpl->app->NetIsClient()?"client":"host");return true;
+    }
+    // Consume BEFORE any resource/particle allocation. A cosmetic failure is
+    // terminal for this event, independent of gameplay and owner lifetime.
+    auto& systemId=mImpl->limbEvents.emplace(key,0).first->second;newEvent=true;
+    const char* path=event.mHead?"LoseHead":"LoseArm";
+    const auto drop=[&](const char* reason)
+    {
+        LawnNet::NetTrace("Fusion Day limb276 dropped epoch=%u kind=%u id=%u token=%u part=%s node=%s row=%u birth=(%.3f,%.3f) reason=%s role=%s",
+            event.mEpoch,event.mSourceKind,event.mZombieId,event.mZombieToken,event.mHead?"head":"arm",path,event.mRow,
+            event.mX,event.mY,reason,mImpl->app->NetIsClient()?"client":"host");return true;
+    };
+    std::string error;
+    // Resources are admitted without requiring the owner to exist. The selected
+    // model's exact source bindings retain their genuine scales/lifetimes.
+    if(!EnsureNativeSourceZombieVisuals(board,event.mSourceKind,&error))return drop("source-resource");
+    const auto found=mImpl->zombieBindings.find(event.mSourceKind);
+    if(found==mImpl->zombieBindings.end())return drop("source-binding");
+    const auto binding=std::find_if(found->second.begin(),found->second.end(),[&](const Binding& b){return b.path==path;});
+    if(binding==found->second.end())return drop("source-loss-node");
+    auto* definition=EnsureNativeEmbeddedParticle269Resource(board,binding->resource,binding->package,error);
+    if(!definition)return drop("particle-resource");
+    // AnimLoseActive37EF60 overwrites the serialized PS renderer order(19/20)
+    // with owner SortingGroup+1. Do not add that discarded source default.
+    auto* system=CreateNativeEmbeddedParticle269System(board,binding->resource,definition,event.mX,event.mY,
+        event.mRenderOrder+1,binding->emission);
+    if(!system)return drop("particle-capacity");
+    if(!definition->BindSourceCollision(system,float(board->GridToPixelY(0,event.mRow)+80),true,&error))
+    {system->ParticleSystemDie();return drop("collision-plane");}
+    systemId=uint32_t(mImpl->app->ParticleGetID(system));
+    LawnNet::NetTrace("Fusion Day limb276 started epoch=%u kind=%u id=%u token=%u part=%s node=%s row=%u resource=%u system=%u birth=(%.3f,%.3f) order=%d role=%s",
+        event.mEpoch,event.mSourceKind,event.mZombieId,event.mZombieToken,event.mHead?"head":"arm",path,event.mRow,binding->resource,systemId,event.mX,event.mY,event.mRenderOrder+1,
+        mImpl->app->NetIsClient()?"client":"host");
+    return true;
 }
 void NativeEmbeddedEffects269::Update(Board* board)
 {
@@ -279,6 +347,11 @@ void NativeEmbeddedEffects269::Update(Board* board)
         for(auto& binding:found->second)
         {
             const auto key=std::make_tuple(generation,data->kind,binding.component);zombieObserved.insert(key);
+            // Day body-part effects have a synchronous authoritative loss
+            // callback. A first already-headless/armless sample is a baseline,
+            // not a new event; keep existing15/104 polling unchanged.
+            if(IsNativeDayZombie273(zombie)&&(binding.path=="LoseHead"||binding.path.starts_with("LoseHead/")||
+                binding.path=="LoseArm"||binding.path.starts_with("LoseArm/")))continue;
             auto& lease=mImpl->zombieLeases[key];bool active=false;float x=0,y=0;
             // AnimLoseActive detached the real source subtree. Its native Tod
             // particles now keep their birth transform and own lifetime.

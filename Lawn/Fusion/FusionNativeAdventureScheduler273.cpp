@@ -1,11 +1,15 @@
 #include "FusionNativeAdventureScheduler273.h"
+#include "FusionNativeAdventure273.h"
 #include "FusionNative.h"
 #include "FusionNativeZombies.h"
+#include "FusionNativeDayZombie273Bridge.h"
+#include "FusionNativeEffects269.h"
 #include "FusionNativeZombieVisual.h"
 #include "../Board.h"
 #include "../Zombie.h"
 #include "../Net/NetCommon.h"
 #include "../../LawnApp.h"
+#include "../../Resources.h"
 #include <cmath>
 #include <vector>
 
@@ -31,10 +35,16 @@ bool Current(Board* b)
 bool Ready(void* user,uint16_t kind)
 {
     auto& a=*static_cast<Adapter*>(user);
-    if(kind!=0&&kind!=2&&kind!=4)return Reject(a,"Source scheduler native world admits only source0/2/4; no replacement allowed.");
+    if(kind!=0&&kind!=2&&kind!=3&&kind!=4)return Reject(a,"Source scheduler native world admits only source0/2/3/4; no replacement allowed.");
     if(!FindFusionZombieProfile(kind)||GetNativeSourceZombieCarrier(kind)<0)
         return Reject(a,"Source scheduler NPC factory is unavailable.");
     if(!EnsureNativeSourceZombieVisuals(a.board,kind,a.error))return false;
+    if(kind==3)
+    {
+        if(Sexy::SOUND_GRASSSTEP<0||Sexy::SOUND_POLEVAULT<0||NativeSourceEffectParticle269(23)<0)
+            return Reject(a,"Source Pole sound/Star dispatcher is unavailable.");
+        if(!EnsureNativeSourceEffect269(a.board,23,a.error))return false;
+    }
     return CanQueryNativeSourceZombieRoot273(a.board,kind)||
         Reject(a,"Source scheduler cached model root pose is unavailable before batch allocation.");
 }
@@ -60,13 +70,14 @@ bool CanSpawn(void* user,std::span<const uint16_t> kinds)
     if(b->mZombies.mMaxSize<=b->mZombies.mSize||
         kinds.size()>size_t(b->mZombies.mMaxSize-1-b->mZombies.mSize))
         return Reject(a,"Source scheduler whole-wave native actor capacity is unavailable.");
-    bool checked[3]={};
+    bool checked[4]={};
     for(auto kind:kinds)
     {
-        const int index=kind==0?0:kind==2?1:kind==4?2:-1;
+        const int index=kind==0?0:kind==2?1:kind==4?2:kind==3?3:-1;
         if(index<0)return Reject(a,"Source scheduler refused an unadmitted source NPC.");
         if(!checked[index]){if(!Ready(user,kind))return false;checked[index]=true;}
     }
+    if(checked[3]&&!CanSpawnNativeDayZombie273(b,3,a.error))return false;
     return CanAllocateNativeSourceDayBatch274(b,kinds,a.error);
 }
 bool Spawn(void* user,int wave,std::span<const FusionAdventureScheduler273Spawn> batch,float& output)
@@ -102,8 +113,8 @@ Result InitializeNativeAdventureScheduler273(Board* board,FusionAdventureSchedul
     if(error)error->clear();
     if(!board||!board->mApp||board->mApp->NetIsClient())return Result::NotHost;
     Adapter adapter{board,error};
-    if(!Current(board)||level<1||level>3)
-    {Reject(adapter,"Source scheduler native readiness is bounded to real Day Adventure1..3.");return Result::NotReady;}
+    if(!Current(board)||!NativeSourceAdventureLevelReady273(level,uint32_t(cycle)))
+    {Reject(adapter,"Source scheduler native readiness is bounded to real Day Adventure1..4.");return Result::NotReady;}
     return InitializeFusionAdventureScheduler273(state,true,level,cycle,difficulty,random,&adapter,Ready);
 }
 Result UpdateNativeAdventureScheduler273(Board* board,FusionAdventureScheduler273State& state,
@@ -113,7 +124,7 @@ Result UpdateNativeAdventureScheduler273(Board* board,FusionAdventureScheduler27
     events={};if(error)error->clear();
     if(!board||!board->mApp||board->mApp->NetIsClient())return Result::NotHost;
     Adapter adapter{board,error};
-    if(!Current(board)||state.level<1||state.level>3)
+    if(!Current(board)||!NativeSourceAdventureLevelReady273(state.level,uint32_t(state.cycle)))
     {Reject(adapter,"Source scheduler lost its admitted native Day Board.");return Result::NotReady;}
     auto effective=input;effective.host=input.host&&!board->mApp->NetIsClient();
     effective.paused=input.paused||board->mPaused||board->mApp->mGameScene!=SCENE_PLAYING;

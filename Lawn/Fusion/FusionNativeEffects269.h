@@ -4,7 +4,8 @@
 #include <cstdint>
 #include <memory>
 #include <string>
-class Board;class LawnApp;class TodParticleSystem;class TodParticleDefinition;
+class Board;class LawnApp;class Zombie;class TodParticleSystem;class TodParticleDefinition;
+namespace LawnNet { struct NetFusionLimbEvent276; }
 namespace LawnFusion
 {
 class NativeWorldParticle269Definition;
@@ -22,6 +23,7 @@ public:
     bool EnsureEmbedded(Board*,uint16_t,const std::string& modelPath,std::string& error);
     bool EnsureEmbeddedProjectile(Board*,uint16_t,const std::string& modelPath,std::string& error);
     bool EnsureEmbeddedZombie(Board*,uint16_t,const std::string& modelPath,std::string& error);
+    bool PlayZombieLimbEvent(Board*,const LawnNet::NetFusionLimbEvent276&,bool& newEvent);
     void UpdateEmbedded(Board*);
     bool BirthPoints(Board*,uint16_t sourceKind,float x,float y,std::array<NativeDoom269Point,8>&) const;
 private:
@@ -30,6 +32,12 @@ private:
 // Root owns NativeContext unique_ptr and mode/receiver admission. Both validated
 // host and reliable cosmetic receiver may create this resource cache.
 NativeSourceEffects269* GetNativeSourceEffects269(Board*,bool create=false);
+// Presentation only: invoked by actual native loss callbacks, never hydration.
+// Host/offline builds an authoritative birth DTO; clients only use the receiver.
+bool PlayNativeSourceZombieLimb276(Zombie*,bool head);
+// True acknowledges a valid event, including duplicate/cosmetic capacity drop.
+// Full canonical seen-set survives owner deletion and resets with Board/epoch.
+bool PlayNativeSourceZombieLimbEvent276(Board*,const LawnNet::NetFusionLimbEvent276&);
 // Explicit reliable-event mapping; dynamic cache resource IDs never enter the
 // native stock array or the network presentation event.
 int NativeSourceEffectParticle269(uint16_t sourceKind);
