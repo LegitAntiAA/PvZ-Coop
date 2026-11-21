@@ -75,7 +75,7 @@ Zen Garden is shared: clients can care for and move plants, use the wheelbarrow,
 
 ## Verification and roadmap
 
-The [delivery board](docs/agent/WORKBOARD.md) records the checks and remaining work. Native transport checks passed 30/30 and signaling checks passed 9/9. A two-process game through the public Cloudflare service passed on one PC; connectivity between different external networks remains unverified. Connection errors explain the failed stage and known cause, with possible NAT/firewall restrictions identified as possibilities. [Smoke documentation](tests/CoopSmoke/README.md) describes the test tools.
+Native transport checks passed 30/30 and signaling checks passed 9/9. A two-process game through the public Cloudflare service passed on one PC; connectivity between different external networks remains unverified. Connection errors explain the failed stage and known cause, with possible NAT/firewall restrictions identified as possibilities. [Smoke documentation](tests/CoopSmoke/README.md) describes the test tools.
 
 - [x] Host-authoritative TCP, snapshots, ordered input and adaptive snapshot rate
 - [x] Shared seed selection, relative player colors, custom modes
@@ -135,7 +135,7 @@ The [delivery board](docs/agent/WORKBOARD.md) records the checks and remaining w
 
 ### Проверки и планы
 
-[Доска задач и фактических проверок](docs/agent/WORKBOARD.md). Нативные проверки транспорта прошли 30/30, проверки сигналинга — 9/9. Двухпроцессная игра через публичный Cloudflare-сервис проверена на одном ПК; соединение между разными внешними сетями ещё не проверялось. Ошибки подключения объясняют этап и известную причину; ограничения NAT или брандмауэра обозначаются как возможная причина, если точный диагноз недоступен.
+Нативные проверки транспорта прошли 30/30, проверки сигналинга — 9/9. Двухпроцессная игра через публичный Cloudflare-сервис проверена на одном ПК; соединение между разными внешними сетями ещё не проверялось. Ошибки подключения объясняют этап и известную причину; ограничения NAT или брандмауэра обозначаются как возможная причина, если точный диагноз недоступен.
 
 Нативный браузер комнат в стиле PvZ, обновлённый интерфейс мода и предпросмотр настроек уже реализованы. Пока **не реализуются**, только запланированы: Lua modding API, дополнительные мини-игры и новые Adventure-режимы.
 

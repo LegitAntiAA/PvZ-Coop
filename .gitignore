@@ -13,6 +13,8 @@ Plants Vs. Zombies/
 Plants Vs Zombies/
 resourcepack/
 work/
+# Local agent notes, workboards, and session handoffs
+/docs/agent/
 __pycache__/
 *.pyc
 Lawn/Net/NetBuildVersion.h
