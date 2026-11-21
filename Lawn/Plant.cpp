@@ -10,6 +10,8 @@
 #include "Projectile.h"
 #include "SeedPacket.h"
 #include "../LawnApp.h"
+#include "Net/NetManager.h"
+#include "Fusion/FusionWire.h"
 #include "CursorObject.h"
 #include "../GameConstants.h"
 #include "System/PlayerInfo.h"
@@ -25,6 +27,44 @@
 #include "ToolTipWidget.h"
 #include "../Sexy.TodLib/FilterEffect.h"
 #include "Net/NetCommon.h"
+#include "Fusion/FusionPotatoRules.h"
+#include "Fusion/FusionNative.h"
+#include "Fusion/FusionNativeVisual.h"
+#include "Fusion/FusionNativeLaserConnections269.h"
+#include "Fusion/FusionNativeCherryShooter.h"
+#include "Fusion/FusionNativeBasePlants.h"
+#include "Fusion/FusionNativeProducer.h"
+#include "Fusion/FusionNativeCold.h"
+#include "Fusion/FusionNativeFire.h"
+#include "Fusion/FusionNativeDeath.h"
+#include "Fusion/FusionNativeShooterTiming.h"
+#include "Fusion/FusionNativeLobber.h"
+#include "Fusion/FusionNativeBatchActions.h"
+#include "Fusion/FusionNativeRecipientShooters.h"
+#include "Fusion/FusionNativeShooterBatch.h"
+#include "Fusion/FusionNativeFireActionBatch.h"
+#include "Fusion/FusionNativeAction266.h"
+#include "Fusion/FusionNativeEconomy.h"
+#include "Fusion/FusionNativeAction267.h"
+#include "Fusion/FusionNativeUmbrellaBatch.h"
+#include "Fusion/FusionNativeWaterPlants267.h"
+#include "Fusion/FusionNativeSeaLantern267.h"
+#include "Fusion/FusionNativeCannon268.h"
+#include "Fusion/FusionNativeWater268.h"
+#include "Fusion/FusionNativeChomper268.h"
+#include "Fusion/FusionNativeEquipment268.h"
+#include "Fusion/FusionNativeLastPlants269.h"
+#include "Fusion/FusionNativeWorldRemainder269.h"
+#include "Fusion/FusionNativeStar269.h"
+#include "Fusion/FusionNativeDoom269.h"
+#include "Fusion/FusionNativeHypno269.h"
+#include "Fusion/FusionNativeSolar269.h"
+#include "Fusion/FusionNativeSummonPlants269.h"
+#include "Fusion/FusionNativeCompanions269.h"
+#include "Fusion/FusionNativeWorldActors269.h"
+#include "Fusion/FusionNativeRemainingPlants269.h"
+#include "Fusion/FusionNativeMorePlants269.h"
+#include <cmath>
 
 PlantDefinition gPlantDefs[SeedType::NUM_SEED_TYPES] = {  //0x69F2B0
     { SeedType::SEED_PEASHOOTER,        nullptr, ReanimationType::REANIM_PEASHOOTER,    0,  100,    750,    PlantSubClass::SUBCLASS_SHOOTER,    150,    _S("PEASHOOTER") },
@@ -103,7 +143,7 @@ void Plant::PlantInitialize(int theGridX, int theGridY, SeedType theSeedType, Se
     mRow = theGridY;
     if (mBoard)
     {
-        mX = mBoard->GridToPixelX(theGridX, theGridY);
+        mX = mBoard->GetPlantOriginX(theGridX, theGridY);
         mY = mBoard->GridToPixelY(theGridX, theGridY);
     }
     mAnimCounter = 0;
@@ -265,7 +305,7 @@ void Plant::PlantInitialize(int theGridX, int theGridY, SeedType theSeedType, Se
 #endif
     }
 
-    if (IsNocturnal(mSeedType) && mBoard && !mBoard->StageIsNight())
+    if (IsNocturnal(mSeedType) && mBoard && !mBoard->StageIsNight() && !LawnFusion::IsNativeBaseMushroom(this))
         SetSleeping(true);
 
     if (mLaunchRate > 0)
@@ -713,6 +753,8 @@ void Plant::PlantInitialize(int theGridX, int theGridY, SeedType theSeedType, Se
                 mApp->ReanimationGet(aFlowerPot->mBodyReanimID)->mAnimRate = 0.0f;
         }
     }
+    LawnFusion::NativePlantInitialized(this);
+    LawnFusion::NativeLaserConnections269PlantPlaced(this);
 }
 
 //0x45E7C0
@@ -873,7 +915,7 @@ int Plant::GetDamageRangeFlags(PlantWeapon thePlantWeapon)
 //0x45EBD0
 bool Plant::IsOnHighGround()
 {
-    return mBoard && mBoard->mGridSquareType[mPlantCol][mRow] == GridSquareType::GRIDSQUARE_HIGH_GROUND;
+    return mBoard && mBoard->GetGridSquareTypeAt(mPlantCol, mRow) == GridSquareType::GRIDSQUARE_HIGH_GROUND;
 }
 
 //0x45EC00
@@ -912,6 +954,7 @@ bool Plant::IsSpiky()
 //0x45ED00
 void Plant::DoRowAreaDamage(int theDamage, unsigned int theDamageFlags)
 {
+    if (LawnFusion::ApplyNativeFumeAreaDamage(this, theDamage, theDamageFlags)) return;
     int aDamageRangeFlags = GetDamageRangeFlags(PlantWeapon::WEAPON_PRIMARY);
     Rect aAttackRect = GetPlantAttackRect(PlantWeapon::WEAPON_PRIMARY);
 
@@ -1046,6 +1089,12 @@ bool Plant::FindTargetAndFire(int theRow, PlantWeapon thePlantWeapon)
         return false;
 
     EndBlink();
+    if (LawnFusion::IsNativeLobber(this))
+    {
+        // Source chooses its alternate shot once, before any stock Kernel RNG.
+        LawnFusion::BeginNativeLobberShot(this,aZombie);
+        return mShootingCounter > 0;
+    }
     Reanimation* aBodyReanim = mApp->ReanimationTryToGet(mBodyReanimID);
     Reanimation* aHeadReanim = mApp->ReanimationTryToGet(mHeadReanimID);
 
@@ -1156,6 +1205,8 @@ bool Plant::FindTargetAndFire(int theRow, PlantWeapon thePlantWeapon)
     else
         Fire(aZombie, theRow, thePlantWeapon);
 
+    LawnFusion::BeginNativeCherryShot(this);
+    LawnFusion::BeginNativeBaseShot(this);
     return true;
 }
 
@@ -1299,10 +1350,14 @@ void Plant::UpdateShooter()
     mLaunchCounter--;
     if (mLaunchCounter <= 0)
     {
-        mLaunchCounter = mLaunchRate - Sexy::Rand(15);
-        if (mBoard) mLaunchCounter = mBoard->GetPvPPlantInterval(mLaunchCounter);
-        if (mBoard && mApp->IsIZombieLevel())
-            mLaunchCounter = LawnNet::DifficultyInterval(mLaunchCounter, mBoard->GetModeDifficulty(), 150);
+        if (!LawnFusion::ResetNativeLobberLaunchCounter(this) &&
+            !LawnFusion::ResetNativeCherryLaunchCounter(this) && !LawnFusion::ResetNativeBaseLaunchCounter(this))
+        {
+            mLaunchCounter = mLaunchRate - Sexy::Rand(15);
+            if (mBoard) mLaunchCounter = mBoard->GetPvPPlantInterval(mLaunchCounter);
+            if (mBoard && mApp->IsIZombieLevel())
+                mLaunchCounter = LawnNet::DifficultyInterval(mLaunchCounter, mBoard->GetModeDifficulty(), 150);
+        }
 #ifdef _MOBILE_MINIGAMES
         if (mState == PlantState::STATE_HEAT_WAVE_POWERED)
             mLaunchCounter = 26;
@@ -1366,6 +1421,8 @@ bool Plant::MakesSun()
 //0x45F9A0
 void Plant::UpdateProductionPlant()
 {
+    if (LawnFusion::UpdateNativeProducer(this)) return;
+
     if (!IsInPlay() || mApp->IsIZombieLevel() || mApp->mGameMode == GameMode::GAMEMODE_UPSELL || mApp->mGameMode == GameMode::GAMEMODE_INTRO)
         return;
 
@@ -1556,6 +1613,7 @@ void Plant::PlayBodyReanim(const char* theTrackName, ReanimLoopType theLoopType,
 void Plant::UpdatePotato()
 {
     Reanimation* aBodyReanim = mApp->ReanimationGet(mBodyReanimID);
+    const bool aFusionPotato = LawnFusion::IsNativeFusionPotato(this);
 
     if (mState == PlantState::STATE_NOTREADY)
     {
@@ -1564,12 +1622,18 @@ void Plant::UpdatePotato()
             mApp->AddTodParticle(mX + mWidth / 2, mY + mHeight / 2, mRenderOrder, ParticleEffect::PARTICLE_POTATO_MINE_RISE);
             PlayBodyReanim("anim_rise", ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD, 20, 18.0f);
             mState = PlantState::STATE_POTATO_RISING;
+            if (aFusionPotato)
+            {
+                mStateCountdown = LawnFusion::kFusionPotatoRiseTicks;
+                aBodyReanim->mAnimRate = aBodyReanim->mFrameCount / (LawnFusion::kFusionPotatoRiseTicks * .01f);
+                LawnNet::NetTrace("Fusion native Potato rising id=%u tick=%d eventTicks=%d", mNetId, mBoard->mMainCounter, mStateCountdown);
+            }
             mApp->PlayFoley(FoleyType::FOLEY_DIRT_RISE);
         }
     }
     else if (mState == PlantState::STATE_POTATO_RISING)
     {
-        if (aBodyReanim->mLoopCount > 0)
+        if (aFusionPotato ? mStateCountdown == 0 : aBodyReanim->mLoopCount > 0)
         {
             float aRate = RandRangeFloat(12.0f, 15.0f);
             PlayBodyReanim("anim_armed", ReanimLoopType::REANIM_LOOP, 0, aRate);
@@ -1587,12 +1651,13 @@ void Plant::UpdatePotato()
                 aLightReanim->mFilterEffect = FilterEffect::FILTER_EFFECT_WASHED_OUT;
 
             mState = PlantState::STATE_POTATO_ARMED;
+            if (aFusionPotato) LawnNet::NetTrace("Fusion native Potato armed id=%u tick=%d", mNetId, mBoard->mMainCounter);
             mBlinkCountdown = 400 + Sexy::Rand(4000);
         }
     }
     else if (mState == PlantState::STATE_POTATO_ARMED)
     {
-        if (FindTargetZombie(mRow, PlantWeapon::WEAPON_PRIMARY))
+        if (aFusionPotato ? LawnFusion::NativeFusionPotatoHasTrigger(this) : FindTargetZombie(mRow, PlantWeapon::WEAPON_PRIMARY) != nullptr)
         {
             DoSpecial();
         }
@@ -1807,6 +1872,7 @@ void Plant::UpdateScaredyShroom()
 //0x460610
 void Plant::UpdateTorchwood()
 {
+    if (LawnFusion::HandleNativeTorchwood(this)) return;
     Rect aAttackRect = GetPlantAttackRect(PlantWeapon::WEAPON_PRIMARY);
 
     Projectile* aProjectile = nullptr;
@@ -1844,6 +1910,8 @@ void Plant::UpdateTorchwood()
 //0x4606F0
 void Plant::DoSquashDamage()
 {
+    if(LawnFusion::IsNativeMorePlants269(this)&&LawnFusion::GetNativePlantData(this)->kind==248)
+    {LawnFusion::ApplyNativeSqualour269Attack(this,false);return;}
     int aDamageRangeFlags = GetDamageRangeFlags(PlantWeapon::WEAPON_PRIMARY);
     Rect aAttackRect = GetPlantAttackRect(PlantWeapon::WEAPON_PRIMARY);
 
@@ -2060,6 +2128,7 @@ void Plant::UpdateDoomShroom()
 
 void Plant::UpdateIceShroom()
 {
+    if (LawnFusion::IsNativeIceShroom(this)) return;
     if (!mIsAsleep && mState != PlantState::STATE_DOINGSPECIAL)
     {
         mState = PlantState::STATE_DOINGSPECIAL;
@@ -2259,6 +2328,7 @@ void Plant::UpdateCactus()
 //0x461320
 void Plant::UpdateChomper()
 {
+    if (LawnFusion::UpdateNativeChomper(this)) return;
     Reanimation* aBodyReanim = mApp->ReanimationTryToGet(mBodyReanimID);
     if (mState == PlantState::STATE_READY)
     {
@@ -2898,6 +2968,9 @@ void Plant::RemoveEffects()
 //0x462B80
 void Plant::Squish()
 {
+    if(LawnFusion::NativeRollingActor269SuppressSourceDie(this))return;
+    if (LawnFusion::NativeStar269Invulnerable(this)) return;
+    if (LawnFusion::HandleNativeAction267Crush(this) || LawnFusion::HandleNativeAction266Crush(this)) return;
     if (NotOnGround())
         return;
 
@@ -3126,6 +3199,8 @@ void Plant::UpdateAbilities()
         mDisappearCountdown--;
         if (mDisappearCountdown < 0)
         {
+            if (LawnFusion::IsNativeFusionPotato(this))
+                LawnNet::NetTrace("Fusion native Potato retired id=%u tick=%d", mNetId, mBoard->mMainCounter);
             Die();
             return;
         }
@@ -3163,6 +3238,18 @@ void Plant::UpdateAbilities()
         return;
     }
 
+    if (!LawnFusion::UpdateNativeLastPlants269(this) && !LawnFusion::UpdateNativeWorldRemainder269Plant(this) &&
+        !LawnFusion::UpdateNativeMorePlants269(this) && !LawnFusion::UpdateNativeRemainingLeaves269Plant(this) && !LawnFusion::UpdateNativeRemaining269Plant(this) && !LawnFusion::UpdateNativeSummonPlants269(this) && !LawnFusion::UpdateNativeCompanions269Plant(this) && !LawnFusion::UpdateNativeWorld269Plant(this) &&
+        !LawnFusion::UpdateNativeStar269Plant(this) && !LawnFusion::UpdateNativeDoom269Plant(this) &&
+        !LawnFusion::UpdateNativeHypno269Plant(this) && !LawnFusion::UpdateNativeSolar269(this) &&
+        !LawnFusion::UpdateNativeCannon268(this) && !LawnFusion::UpdateNativeWater268Plant(this) &&
+        !LawnFusion::UpdateNativeChomper268Plant(this) && !LawnFusion::UpdateNativeEquipmentPlant(this) &&
+        !LawnFusion::UpdateNativeSeaLantern267Plant(this) && !LawnFusion::UpdateNativeWater267(this) &&
+        !LawnFusion::UpdateNativeAction267(this) && !LawnFusion::UpdateNativeUmbrellaBatch(this) &&
+        !LawnFusion::UpdateNativeEconomyPlant(this) && !LawnFusion::UpdateNativeAction266(this) &&
+        !LawnFusion::UpdateNativeShooterBatch(this) && !LawnFusion::UpdateNativeFireAction(this) &&
+        !LawnFusion::UpdateNativeRecipientShooter(this) && !LawnFusion::UpdateNativeBatchAction(this))
+    {
     if (mSeedType == SeedType::SEED_SQUASH)                                                     UpdateSquash();
     else if (mSeedType == SeedType::SEED_DOOMSHROOM)                                            UpdateDoomShroom();
     else if (mSeedType == SeedType::SEED_ICESHROOM)                                             UpdateIceShroom();
@@ -3178,7 +3265,8 @@ void Plant::UpdateAbilities()
     else if (mSeedType == SeedType::SEED_MAGNETSHROOM)                                          UpdateMagnetShroom();
     else if (mSeedType == SeedType::SEED_GOLD_MAGNET)                                           UpdateGoldMagnetShroom();
     else if (mSeedType == SeedType::SEED_SUNSHROOM)                                             UpdateSunShroom();
-    else if (MakesSun() || mSeedType == SeedType::SEED_MARIGOLD)                                UpdateProductionPlant();
+    else if (LawnFusion::IsNativeFusionPotato(this))                                         UpdatePotato();
+    else if (MakesSun() || mSeedType == SeedType::SEED_MARIGOLD || LawnFusion::IsNativeProducer(this)) UpdateProductionPlant();
     else if (mSeedType == SeedType::SEED_GRAVEBUSTER)                                           UpdateGraveBuster();
     else if (mSeedType == SeedType::SEED_TORCHWOOD)                                             UpdateTorchwood();
     else if (mSeedType == SeedType::SEED_POTATOMINE)                                            UpdatePotato();
@@ -3205,7 +3293,8 @@ void Plant::UpdateAbilities()
 
         UpdateShooter();
     }
-    if (mDoSpecialCountdown > 0)
+    }
+    if (mDoSpecialCountdown > 0 && !(LawnFusion::GetNativePlantData(this)&&LawnFusion::GetNativePlantData(this)->kind==1175))
     {
         mDoSpecialCountdown--;
         if (mDoSpecialCountdown == 0)
@@ -3213,6 +3302,8 @@ void Plant::UpdateAbilities()
             DoSpecial();
         }
     }
+    LawnFusion::DispatchNativeCannon268SubEvents(this);
+    LawnFusion::UpdateNativePlant(this);
 }
 
 //0x463420
@@ -3532,6 +3623,7 @@ void Plant::UpdateReanim()
 //0x463E40
 void Plant::Update()
 {
+    if(LawnFusion::UpdateNativeRollingActor269(this)||LawnFusion::UpdateNativeWheat269(this))return;
     bool doUpdate = false;
     if (IsOnBoard() && mApp->mGameScene == GameScenes::SCENE_LEVEL_INTRO && mApp->IsWallnutBowlingLevel())
         doUpdate = true;
@@ -3941,13 +4033,31 @@ void Plant::UpdateShooting()
 
     mShootingCounter--;
 
-    if (mSeedType == SeedType::SEED_FUMESHROOM && mShootingCounter == 15)
+    if (LawnFusion::DispatchNativeCannon268Events(this) || LawnFusion::DispatchNativeWater268Events(this) ||
+        LawnFusion::DispatchNativeChomper268Events(this)) return;
+
+    if (mSeedType == SeedType::SEED_FUMESHROOM && mShootingCounter == 15 && !LawnFusion::IsNativeBaseMushroom(this))
     {
         int aRenderPosition = Board::MakeRenderOrder(RenderLayer::RENDER_LAYER_PARTICLE, mRow, 0);
         AddAttachedParticle(mX + 85, mY + 31, aRenderPosition, ParticleEffect::PARTICLE_FUMECLOUD);
     }
 
-    if (mSeedType == SeedType::SEED_GLOOMSHROOM)
+    if (LawnFusion::DispatchNativeShooterEvents(this))
+    {
+        // Source lobbers keep the stock body idle; their source clip owns its
+        // visual tail, so an unrelated native loop must not hold the counter.
+        if (LawnFusion::IsNativeLobber(this) || LawnFusion::IsNativeBatchAction(this) ||
+            LawnFusion::IsNativeRecipientShooter(this) || LawnFusion::IsNativeShooterBatch(this) ||
+            LawnFusion::IsNativeStar269Plant(this) || LawnFusion::IsNativeDoom269Plant(this) ||
+            LawnFusion::IsNativeHypno269Plant(this) || LawnFusion::IsNativeSummonPlants269(this) ||
+            LawnFusion::IsNativeCompanions269Plant(this) || LawnFusion::IsNativeWorld269Plant(this) ||
+            LawnFusion::IsNativeRemaining269Plant(this) || LawnFusion::IsNativeRemainingLeaves269Plant(this) ||
+            LawnFusion::IsNativeMorePlants269(this) || LawnFusion::IsNativeLastPlants269(this) ||
+            LawnFusion::IsNativeWorldRemainder269Plant(this)) return;
+        // The shared source event list already fired this tick. Keep the
+        // native idle-animation cleanup below when the real counter reaches0.
+    }
+    else if (mSeedType == SeedType::SEED_GLOOMSHROOM)
     {
         if (mShootingCounter == 136 || mShootingCounter == 108 || mShootingCounter == 80 || mShootingCounter == 52)
         {
@@ -4649,23 +4759,26 @@ Image* Plant::GetImage(SeedType theSeedType)
 }
 
 //0x465680
-void Plant::DrawShadow(Sexy::Graphics* g, float theOffsetX, float theOffsetY)
+bool Plant::GetShadowDrawParams(float theOffsetX, float theOffsetY, ShadowDrawParams& theParams, bool theIncludeHiddenShadow)
 {
-    if (mSeedType == SeedType::SEED_LILYPAD || mSeedType == SeedType::SEED_STARFRUIT || mSeedType == SeedType::SEED_TANGLEKELP || 
+    if (mOnBungeeState == PlantOnBungeeState::RISING_WITH_BUNGEE || mBurnedCounter != -1)
+        return false;
+
+    if (!theIncludeHiddenShadow && (mSeedType == SeedType::SEED_LILYPAD || mSeedType == SeedType::SEED_STARFRUIT || mSeedType == SeedType::SEED_TANGLEKELP ||
         mSeedType == SeedType::SEED_SEASHROOM || mSeedType == SeedType::SEED_COBCANNON || mSeedType == SeedType::SEED_SPIKEWEED || 
         mSeedType == SeedType::SEED_SPIKEROCK || mSeedType == SeedType::SEED_GRAVEBUSTER && IsOnBoard()|| mSeedType == SeedType::SEED_CATTAIL ||
         mSeedType == SeedType::SEED_INSTANT_COFFEE 
 #ifdef _HAS_BLOOM_AND_DOOM_CONTENTS
         || mSeedType == SeedType::SEED_YAMPOLINE 
 #endif
-        || mOnBungeeState == PlantOnBungeeState::RISING_WITH_BUNGEE || mBurnedCounter != -1)
-        return;
+        ))
+        return false;
 
     if (IsOnBoard() && mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN && mApp->mZenGarden->mGardenType == GardenType::GARDEN_MAIN)
-        return;
+        return false;
 
     //if (IsOnBoard() && mBoard->GetFlowerPotAt(mPlantCol, mRow) && mSeedType != SEED_FLOWERPOT)
-    //    return;
+    //    return false;
 
     int aShadowType = 0;
     float aShadowOffsetX = -3.0f;
@@ -4784,13 +4897,13 @@ void Plant::DrawShadow(Sexy::Graphics* g, float theOffsetX, float theOffsetY)
     {
         aShadowOffsetY += 90.0f;
         if (mBoard && (mBoard->GetTopPlantAt(mPlantCol, mRow, TOPPLANT_ONLY_NORMAL_POSITION) || mBoard->GetTopPlantAt(mPlantCol, mRow, TOPPLANT_ONLY_PUMPKIN)))
-            return;
+            return false;
     }
     else if (mSeedType == SeedType::SEED_CHERRYHOVERBOMB)
     {
         aShadowOffsetY += 30.0f;
         if (mBoard && (mBoard->GetTopPlantAt(mPlantCol, mRow, TOPPLANT_ONLY_NORMAL_POSITION) || mBoard->GetTopPlantAt(mPlantCol, mRow, TOPPLANT_ONLY_PUMPKIN)))
-            return;
+            return false;
     }
     else 
 #endif
@@ -4798,7 +4911,7 @@ void Plant::DrawShadow(Sexy::Graphics* g, float theOffsetX, float theOffsetY)
     {
         aShadowOffsetY += 10.0f;
         if (mBoard && (mBoard->GetTopPlantAt(mPlantCol, mRow, TOPPLANT_ONLY_NORMAL_POSITION) || mBoard->GetTopPlantAt(mPlantCol, mRow, TOPPLANT_ONLY_PUMPKIN)))
-            return;
+            return false;
     }
 
     if (FloatApproxEqual(mRad, 0.0f))
@@ -4810,32 +4923,73 @@ void Plant::DrawShadow(Sexy::Graphics* g, float theOffsetX, float theOffsetY)
         aShadowOffsetX += rotatedHeightX;
     }
 
-    if (aShadowType == 0)
-    {
-        TodDrawImageCelCenterScaledF(g, IMAGE_PLANTSHADOW, theOffsetX + aShadowOffsetX, theOffsetY + aShadowOffsetY, 0, aScale, aScale);
-    }
-    else
-    {
-        TodDrawImageCelCenterScaledF(g, IMAGE_PLANTSHADOW2, theOffsetX + aShadowOffsetX, theOffsetY + aShadowOffsetY, 0, aScale, aScale);
-    }
+    theParams.image = aShadowType == 0 ? IMAGE_PLANTSHADOW : IMAGE_PLANTSHADOW2;
+    theParams.x = theOffsetX + aShadowOffsetX;
+    theParams.y = theOffsetY + aShadowOffsetY;
+    theParams.scale = aScale;
+    return true;
+}
+
+void Plant::DrawShadow(Sexy::Graphics* g, float theOffsetX, float theOffsetY)
+{
+    ShadowDrawParams params;
+    if (!GetShadowDrawParams(theOffsetX, theOffsetY, params)) return;
+    TodDrawImageCelCenterScaledF(g, params.image, params.x, params.y, 0, params.scale, params.scale);
+}
+
+bool Plant::GetShadowCenter(float& theX, float& theY)
+{
+    if(LawnFusion::GetNativeRollingActor269ShadowCenter(this,theX,theY))return true;
+    // Draw omits the shadow for squished plants. Shake is applied to the body
+    // only after DrawShadow, so it never changes this native ground point.
+    if (mSquished) return false;
+    float offsetX = 0, offsetY = 0;
+    GetDrawOffsets(offsetX, offsetY);
+    ShadowDrawParams params;
+    // A source gameplay anchor exists even when the native alias omits its
+    // visible shadow. Keep the same native offsets and all invalid-state guards.
+    if (!GetShadowDrawParams(offsetX, offsetY, params, LawnFusion::IsNativeFusionBoard(mBoard)) || !params.image) return false;
+    const float x = mX + params.x + params.image->GetCelWidth() * 0.5f;
+    const float y = mY + params.y + params.image->GetCelHeight() * 0.5f;
+    if (!std::isfinite(x) || !std::isfinite(y)) return false;
+    theX = x; theY = y;
+    return true;
+}
+
+void Plant::DrawShadow(Graphics* g)
+{
+    float offsetX = 0.0f, offsetY = 0.0f;
+    GetDrawOffsets(offsetX, offsetY);
+    DrawShadow(g, offsetX, offsetY);
 }
 
 //0x465A90
-void Plant::Draw(Graphics* g)
+void Plant::GetDrawOffsets(float& theOffsetX, float& theOffsetY)
 {
-    float aOffsetX = 0.0f;
-    float aOffsetY = PlantDrawHeightOffset(mBoard, this, mSeedType, mPlantCol, mRow);
+    theOffsetX = 0.0f;
+    theOffsetY = PlantDrawHeightOffset(mBoard, this, mSeedType, mPlantCol, mRow);
     if (Plant::IsFlying(mSeedType) && mSquished)
     {
-        aOffsetY += 30.0f;
+        theOffsetY += 30.0f;
     }
 
 #ifdef _HAS_BLOOM_AND_DOOM_CONTENTS
     if (!((LawnApp*)gSexyAppBase)->GetDialog(Dialogs::DIALOG_ALMANAC) && mSeedType == SeedType::SEED_STINGER)
     {
-        aOffsetY -= 60.0f;
+        theOffsetY -= 60.0f;
     }
 #endif
+}
+
+void Plant::Draw(Graphics* g)
+{
+    if (LawnFusion::IsNativeFusionBoard(mBoard) && LawnFusion::DrawNativeFusionPlant(g, this))
+    {
+        DrawHealthBar(g);
+        return;
+    }
+    float aOffsetX = 0.0f, aOffsetY = 0.0f;
+    GetDrawOffsets(aOffsetX, aOffsetY);
 
     int aImageIndex = mFrame;
 #ifdef _HAS_BLOOM_AND_DOOM_CONTENTS
@@ -4963,7 +5117,11 @@ void Plant::Draw(Graphics* g)
 
         if (aDrawPumpkinBack)
         {
-            aPumpkin->DrawPumkin(g, DrawVariation::VARIATION_PUMPKINSHELL_BACK, aBitVar);
+            Graphics aPumpkinBackGraphics(*g);
+            aPumpkinBackGraphics.mTransX += aPumpkin->mX-mX;
+            aPumpkinBackGraphics.mTransY += aPumpkin->mY-mY;
+            if (!LawnFusion::DrawNativeFusionPumpkinBack(&aPumpkinBackGraphics,aPumpkin))
+                aPumpkin->DrawPumkin(g, DrawVariation::VARIATION_PUMPKINSHELL_BACK, aBitVar);
         }
 
         if (mSeedType == SeedType::SEED_WALLNUT || mSeedType == SeedType::SEED_TALLNUT || mSeedType == SeedType::SEED_PUMPKINSHELL && !aPlantInPumpkin ||
@@ -5053,12 +5211,14 @@ void Plant::Draw(Graphics* g)
 
         if (aDrawPumpkinBack)
         {
-            Reanimation* aPumpkinReanim = mApp->ReanimationGet(aPumpkin->mBodyReanimID);
-
             g->PushState();
             g->mTransX += aPumpkin->mX - mX;
             g->mTransY += aPumpkin->mY - mY;
-            aPumpkinReanim->DrawRenderGroup(g, 1);
+            if (!LawnFusion::DrawNativeFusionPumpkinBack(g,aPumpkin))
+            {
+                Reanimation* aPumpkinReanim = mApp->ReanimationGet(aPumpkin->mBodyReanimID);
+                aPumpkinReanim->DrawRenderGroup(g, 1);
+            }
             g->PopState();
         }
 
@@ -5191,9 +5351,12 @@ void Plant::Draw(Graphics* g)
         }
     }
 
-    if (IsInPlay() && !mSquished && mApp->mShowHealthBar && !mApp->IsWallnutBowlingLevel() && mPlantHealth != mPlantMaxHealth /* &&
-        (mSeedType == SeedType::SEED_WALLNUT || mSeedType == SeedType::SEED_TALLNUT || mSeedType == SeedType::SEED_PUMPKINSHELL || 
-            mSeedType == SeedType::SEED_GARLIC)*/) {
+    DrawHealthBar(g);
+}
+
+void Plant::DrawHealthBar(Graphics* g)
+{
+    if (IsInPlay() && !mSquished && mApp->mShowHealthBar && !mApp->IsWallnutBowlingLevel() && mPlantHealth != mPlantMaxHealth) {
         const int HEALTH_Y = PlantDrawHeightOffset(mBoard, this, mSeedType, mPlantCol, mRow) + 10;
         g->SetColor(Color(75, 75, 255));
         g->FillRect(12, HEALTH_Y, 50, 5);
@@ -5427,6 +5590,15 @@ void Plant::MouseDown(int x, int y, int theClickCount)
 {
     if (theClickCount < 0 || mBurnedCounter != -1)
         return;
+    if (const auto* data=LawnFusion::GetNativePlantData(this); data && data->kind==1043)
+    {
+        if (mApp->NetIsHost() && mApp->mNetManager && mApp->mNetManager->GetRawActingPlayerSlot()>0) return;
+        LawnFusion::FusionCommand command;
+        command.action=LawnFusion::FusionCommandKind::ActivatePlant;
+        command.sourceId=mNetId; command.sourceToken=data->instanceToken;
+        mApp->SubmitNativeFusionCommand(command);
+        return;
+    }
 
     if (mState == PlantState::STATE_COBCANNON_READY)
     {
@@ -5601,6 +5773,23 @@ void Plant::KillAllPlantsNearDoom()
 //0x4666A0
 void Plant::DoSpecial()
 {
+    if(LawnFusion::IsNativeLastPlants269(this)||LawnFusion::IsNativeWorldRemainder269Plant(this)||
+       LawnFusion::IsNativeMorePlants269(this)||LawnFusion::IsNativeRemainingLeaves269Plant(this)||LawnFusion::IsNativeRemaining269Plant(this)||LawnFusion::IsNativeSummonPlants269(this)||LawnFusion::IsNativeWorld269Plant(this)||
+        (LawnFusion::IsNativeCompanions269Plant(this)&&!LawnFusion::IsNativeEquipmentPlant(this)))return;
+    if (LawnFusion::IsNativeStar269Plant(this) || LawnFusion::IsNativeDoom269Plant(this) ||
+        LawnFusion::IsNativeHypno269Plant(this) || LawnFusion::IsNativeSolar269(this)) return;
+    if (LawnFusion::IsNativeCannon268(this) || LawnFusion::ApplyNativeWater268Special(this) ||
+        LawnFusion::ApplyNativeChomper268Special(this) || LawnFusion::ApplyNativeEquipmentPlantSpecial(this)) return;
+    if (LawnFusion::ApplyNativeShooterBatchSpecial(this)) return;
+    if (LawnFusion::ApplyNativeAction267Special(this) || LawnFusion::ApplyNativeUmbrellaBatchSpecial(this) ||
+        LawnFusion::ApplyNativeAction266Special(this)) return;
+    if (LawnFusion::ApplyNativeFireActionSpecial(this)) return;
+    if (LawnFusion::ApplyNativeBatchSpecial(this)) return;
+    if (LawnFusion::IsNativeIceShroom(this))
+    {
+        LawnFusion::ApplyNativeIceShroom(this);
+        return;
+    }
     int aPosX = mX + mWidth / 2;
     int aPosY = mY + mHeight / 2;
     int aDamageRangeFlags = GetDamageRangeFlags(PlantWeapon::WEAPON_PRIMARY);
@@ -5621,7 +5810,7 @@ void Plant::DoSpecial()
         mApp->PlayFoley(FoleyType::FOLEY_CHERRYBOMB);
         mApp->PlayFoley(FoleyType::FOLEY_JUICY);
 
-        if (mBoard->KillAllZombiesInRadius(mRow, aPosX, aPosY, 115, 1, true, aDamageRangeFlags) >= 10)
+        if (mBoard->KillAllZombiesInRadius(mRow, aPosX, aPosY, 115, 1, true, aDamageRangeFlags, this) >= 10)
             if (!mApp->IsIZombieLevel())
                 ReportAchievement::GiveAchievement(mApp, AchievementId::Explodonator, true); // @Patoke: add achievement
 
@@ -5742,11 +5931,22 @@ void Plant::DoSpecial()
     }
     case SeedType::SEED_POTATOMINE:
     {
+        const bool aFusionPotato = LawnFusion::IsNativeFusionPotato(this);
+        if (aFusionPotato)
+        {
+            if (mNetGhost || mApp->NetIsClient() || mState != STATE_POTATO_ARMED) return;
+            // Consume the trigger before applying damage or publishing effects.
+            mState = STATE_DOINGSPECIAL;
+            // UpdateAbilities decrements first and dies when the value is<0.
+            mDisappearCountdown = LawnFusion::kFusionPotatoDeathTicks - 1;
+            LawnNet::NetTrace("Fusion native Potato explosion id=%u tick=%d delayTicks=%d sourceDifficulty=2",
+                mNetId, mBoard->mMainCounter, LawnFusion::kFusionPotatoDeathTicks);
+        }
         aPosX = mX + mWidth / 2 - 20;
         aPosY = mY + mHeight / 2;
 
         mApp->PlaySample(SOUND_POTATO_MINE);
-        if (mBoard->GetKilledlZombiesInRadius(mRow, aPosX, aPosY, 60, 0, false, aDamageRangeFlags) >= 1) 
+        if (mBoard->GetKilledlZombiesInRadius(mRow, aPosX, aPosY, 60, 0, false, aDamageRangeFlags, this) >= 1)
             if (!mApp->IsIZombieLevel())
                 ReportAchievement::GiveAchievement(mApp, AchievementId::Spudow, true); // @Patoke: add achievement
 
@@ -5763,7 +5963,7 @@ void Plant::DoSpecial()
         mBoard->NetBroadcastPotatoExplosion(this);
         mBoard->ShakeBoard(3, -4);
 
-        Die();
+        if (!aFusionPotato) Die();
         break;
     }
     case SeedType::SEED_INSTANT_COFFEE:
@@ -5956,10 +6156,21 @@ void Plant::CobCannonFire(int theTargetX, int theTargetY)
 }
 
 //0x466E00
-void Plant::Fire(Zombie* theTargetZombie, int theRow, PlantWeapon thePlantWeapon)
+void Plant::Fire(Zombie* theTargetZombie, int theRow, PlantWeapon thePlantWeapon, const LawnFusion::FusionSplitEmissionSpec* fusionEmission)
 {
+    // These real source events emit through their family controller only.
+    if(LawnFusion::IsNativeLastPlants269(this)||LawnFusion::IsNativeWorldRemainder269Plant(this))return;
+    if (LawnFusion::IsNativeStar269Plant(this) || LawnFusion::IsNativeDoom269Plant(this) ||
+        LawnFusion::IsNativeHypno269Plant(this)) return;
+    if (LawnFusion::FireNativePeaChomper(this)) return;
+    if (LawnFusion::FireNativeLobberProjectile(this)) return;
     if (mSeedType == SeedType::SEED_FUMESHROOM)
     {
+        if (LawnFusion::IsNativeBaseMushroom(this))
+        {
+            int aRenderPosition = Board::MakeRenderOrder(RenderLayer::RENDER_LAYER_PARTICLE, mRow, 0);
+            AddAttachedParticle(mX + 85, mY + 31, aRenderPosition, ParticleEffect::PARTICLE_FUMECLOUD);
+        }
         DoRowAreaDamage(20, 2U);
         mApp->PlayFoley(FoleyType::FOLEY_FUME);
         return;
@@ -6215,6 +6426,7 @@ void Plant::Fire(Zombie* theTargetZombie, int theRow, PlantWeapon thePlantWeapon
     }
 
     Projectile* aProjectile = mBoard->AddProjectile(aOriginX, aOriginY, mRenderOrder - 1, theRow, aProjectileType);
+    LawnFusion::NativeProjectileCreated(this, aProjectile, fusionEmission);
     aProjectile->mDamageRangeFlags = GetDamageRangeFlags(thePlantWeapon);
 
     if (aProjectileType == ProjectileType::PROJECTILE_COBBIG && !FloatApproxEqual(mRad, 0.0f))
@@ -6343,6 +6555,9 @@ void Plant::Fire(Zombie* theTargetZombie, int theRow, PlantWeapon thePlantWeapon
 //0x4675C0
 Zombie* Plant::FindTargetZombie(int theRow, PlantWeapon thePlantWeapon)
 {
+    if (LawnFusion::IsNativeLobber(this)) return LawnFusion::FindNativeLobberTarget(this,theRow);
+    if (LawnFusion::IsNativeBaseMushroom(this)) return LawnFusion::FindNativeBaseShooterTarget(this, theRow);
+    if (LawnFusion::IsNativeSplitShooter(this)) return LawnFusion::FindNativeSplitShooterTarget(this, theRow);
     int aDamageRangeFlags = GetDamageRangeFlags(thePlantWeapon);
     Rect aAttackRect = GetPlantAttackRect(thePlantWeapon);
     int aHighestWeight = 0;
@@ -6539,13 +6754,19 @@ int Plant::DistanceToClosestZombie()
 }
 
 //0x4679B0
-void Plant::Die()
+void Plant::Die(int theFusionRemovalReason)
 {
+    if(LawnFusion::NativeRollingActor269SuppressSourceDie(this,theFusionRemovalReason))return;
+    const bool firstRemoval = !mDead;
+    if (theFusionRemovalReason != 255) LawnFusion::NativeProducerDying(this);
+
     if (IsOnBoard() && !mApp->GetDialog(DIALOG_ALMANAC) && mApp->ChallengeHasScores(mApp->mGameMode) && mApp->IsIZombieLevel()) {
         mBoard->mChallenge->mChallengePoints += GetCost(mSeedType, mImitaterType);
     }
 
-    if (IsOnBoard() && mSeedType == SeedType::SEED_TANGLEKELP)
+    const auto* removalSource = LawnFusion::GetNativePlantData(this);
+    if (IsOnBoard() && mSeedType == SeedType::SEED_TANGLEKELP &&
+        !(removalSource && LawnFusion::IsNativeWater268ImplementedKind(removalSource->kind)))
     {
         Zombie* aZombie = mBoard->ZombieTryToGet(mTargetZombieID);
         if (aZombie)
@@ -6555,6 +6776,9 @@ void Plant::Die()
     }
 
     mDead = true;
+    if (firstRemoval) LawnFusion::NativeLobberPlantRemoved(this);
+    if (firstRemoval) LawnFusion::NativeUmbrellaBatchRemoving(this);
+    if (firstRemoval) LawnFusion::NativePlantRemoving(this, theFusionRemovalReason);
     RemoveEffects();
 
     if (!Plant::IsFlying(mSeedType) && IsOnBoard())
@@ -6787,7 +7011,9 @@ bool Plant::IsUpgrade(SeedType theSeedtype)
 //0x467EF0
 Rect Plant::GetPlantRect()
 {
+    Rect rolling;if(LawnFusion::GetNativeRollingActor269Rect(this,rolling))return rolling;
     Rect aRect;
+    if (LawnFusion::GetNativeBatchContactPlantRect(this,aRect)) return aRect;
     if (mSeedType == SeedType::SEED_TALLNUT)
     {
         aRect = Rect(mX + 10, mY, mWidth, mHeight);
@@ -6982,7 +7208,7 @@ void Plant::ApplyBurn()
 {
     if (mBurnedCounter != -1) return;
 
-    if (IsOnBoard() && mBoard->mGridSquareType[mPlantCol][mRow] == GridSquareType::GRIDSQUARE_POOL)
+    if (IsOnBoard() && mBoard->GetGridSquareTypeAt(mPlantCol, mRow) == GridSquareType::GRIDSQUARE_POOL)
     {
         Die();
         return;

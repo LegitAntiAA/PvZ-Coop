@@ -12,6 +12,7 @@ void NetBroadcastParticle(LawnApp* theApp, float theX, float theY,
 	int theRenderOrder, int theEffect);
 void NetBroadcastReanimation(LawnApp* theApp, Reanimation* theReanim,
 	float theX, float theY, int theRenderOrder, int theType);
+void NetBroadcastFwoosh(LawnApp* theApp, int theRow);
 }
 
 #endif

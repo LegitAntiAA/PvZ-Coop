@@ -6,6 +6,7 @@
 #include "../CursorObject.h"
 #include "../Plant.h"
 #include "../CutScene.h"
+#include "../Fusion/FusionNative.h"
 #include "../Widget/SeedChooserScreen.h"
 #include "../../Resources.h"
 #include "../../SexyAppFramework/DDInterface.h"
@@ -19,6 +20,20 @@ void NetSmokeObserveChooserPing(LawnApp* app, int seed);
 
 void NetManager::SetMyReady(bool theReady)
 {
+	if (const auto* context = LawnFusion::GetNativeContext(mApp ? mApp->mBoard : nullptr))
+	{
+		const auto& state = context->selection.State();
+		const int slot = IsActive() ? mMySlot : 0;
+		if (slot >= NET_MAX_PLAYERS || (IsActive() && IsSpectator()) ||
+			!(state.activeMask & (1U << slot)) || state.phase != LawnFusion::FusionBankPhase::Choosing ||
+			(theReady && (!mApp->mSeedChooserScreen || !mApp->mSeedChooserScreen->CoopCanReady())) ||
+			IsMyReady() == theReady) return;
+		LawnFusion::FusionCommand command;
+		command.action = LawnFusion::FusionCommandKind::Ready;
+		command.enabled = theReady;
+		mApp->SubmitNativeFusionCommand(command);
+		return;
+	}
 	if (!IsActive() || IsSpectator() || !mApp || (!mChooserOpen && !mApp->NetIsChoosingPvpTeams())) return;
 	if (theReady && mChooserOpen &&
 		(!mApp->mSeedChooserScreen || !mApp->mSeedChooserScreen->CoopCanReady())) return;
@@ -27,8 +42,26 @@ void NetManager::SetMyReady(bool theReady)
 	else if (mHostConn) { NetBuffer b; b.WriteU8(theReady); mHostConn->SendMessage(NETMSG_READY, b); }
 }
 
+bool NetManager::IsMyReady() const
+{
+	if (const auto* context = LawnFusion::GetNativeContext(mApp ? mApp->mBoard : nullptr))
+	{
+		const auto& state = context->selection.State();
+		const int slot = IsActive() ? mMySlot : 0;
+		return slot < NET_MAX_PLAYERS && (state.activeMask & state.readyMask & (1U << slot)) != 0;
+	}
+	return mPlayers[mMySlot].mReady != 0;
+}
+
 int NetManager::GetReadyEligibleCount() const
 {
+	if (const auto* context = LawnFusion::GetNativeContext(mApp ? mApp->mBoard : nullptr))
+	{
+		int count = 0;
+		for (int slot = 0; slot < NET_MAX_PLAYERS; ++slot)
+			if (context->selection.State().activeMask & (1U << slot)) ++count;
+		return count;
+	}
 	int n = 0;
 	for (const auto& p : mPlayers) if (p.mActive && !p.mSpectator) ++n;
 	return n;
@@ -36,6 +69,14 @@ int NetManager::GetReadyEligibleCount() const
 
 int NetManager::GetReadyCount() const
 {
+	if (const auto* context = LawnFusion::GetNativeContext(mApp ? mApp->mBoard : nullptr))
+	{
+		const auto& state = context->selection.State();
+		int count = 0;
+		for (int slot = 0; slot < NET_MAX_PLAYERS; ++slot)
+			if (state.activeMask & state.readyMask & (1U << slot)) ++count;
+		return count;
+	}
 	int n = 0;
 	for (const auto& p : mPlayers) if (p.mActive && !p.mSpectator && p.mReady) ++n;
 	return n;
@@ -48,6 +89,18 @@ bool NetManager::AreAllPlayersReady() const
 
 void NetManager::ResetReadyState()
 {
+	if (auto* context = LawnFusion::GetNativeContext(mApp ? mApp->mBoard : nullptr))
+	{
+		if (IsActive() && !IsHosting()) return;
+		const auto& state = context->selection.State();
+		if (state.phase == LawnFusion::FusionBankPhase::Choosing)
+		{
+			const uint8_t ready = state.activeMask & state.readyMask;
+			for (int slot = 0; slot < NET_MAX_PLAYERS; ++slot)
+				if (ready & (1U << slot)) context->selection.SetReady(context->epoch, slot, false);
+		}
+		return;
+	}
 	if (!IsHosting()) return;
 	bool changed = false;
 	for (auto& p : mPlayers) { changed |= p.mReady != 0; p.mReady = 0; }
@@ -139,6 +192,16 @@ void NetManager::RedistributeSeeds(int theDepartedSlot)
 	if (!mApp || !mApp->mBoard || !mApp->mBoard->mSeedBank) return;
 	Board* board = mApp->mBoard;
 	SeedBank* bank = board->mSeedBank;
+	if (LawnFusion::IsNativeFusionBoard(board))
+	{
+		uint8_t mask = 0;
+		for (int slot = 0; slot < NET_MAX_PLAYERS; ++slot)
+			if (slot != theDepartedSlot && mPlayers[slot].mActive && !mPlayers[slot].mSpectator)
+				mask |= static_cast<uint8_t>(1U << slot);
+		if (!LawnFusion::ReconcileNativePlayers(board,mask))
+			NetTrace("Fusion native roster reconciliation rejected departed=%d active=%u",theDepartedSlot,mask);
+		return;
+	}
 	int counts[NET_MAX_PLAYERS] = {};
 	for (int i = 0; i < bank->mNumPackets; ++i)
 	{
@@ -171,31 +234,35 @@ void NetManager::RedistributeSeeds(int theDepartedSlot)
 
 void NetManager::SendLateJoinState(NetSession* theSession)
 {
+	if (mApp && mApp->mFusionRuntime) { SendFusionLateJoin(theSession); return; }
 	if (!theSession || !mApp || !mApp->mBoard) return;
 	Board* board = mApp->mBoard;
 	// Custom modes can use an internal board level unrelated to their start
 	// descriptor. Reuse exactly what created this board, changing only roster.
 	NetBuffer start = mCurrentStart;
-	uint8_t mode = 0, previousCount = 0;
-	int32_t level = 0;
-	bool recorded = start.ReadU8(&mode) && start.ReadI32(&level);
-	const size_t rosterPosition = start.mReadPos;
-	recorded = recorded && start.ReadU8(&previousCount);
-	if (recorded)
+	NetStartGameState aState;
+	const bool recorded = NetDecodeStartGame(start, aState, (int)GameMode::NUM_GAME_MODES,
+		(int)GameMode::GAMEMODE_COOP_TOWER_DEFENSE) && aState.mContentMode == mApp->GetContentMode();
+	if (!recorded)
 	{
-		start.mData[rosterPosition] = (uint8_t)GetPlayerCount();
-		start.mReadPos = 0;
+		aState.mContentMode = mApp->GetContentMode();
+		aState.mGameMode = (uint8_t)mApp->mGameMode;
+		aState.mLevel = board->mLevel;
+		aState.mBoardSeed = mApp->mNetBoardSeed;
+		aState.mTDPath = mStartTDPath;
 	}
-	else
+	aState.mPlayerCount = (uint8_t)GetPlayerCount();
+	start.Clear();
+	if (!mApp->IsContentModeAvailable(aState.mContentMode) ||
+		!NetEncodeStartGame(aState, start, (int)GameMode::NUM_GAME_MODES,
+			(int)GameMode::GAMEMODE_COOP_TOWER_DEFENSE))
 	{
-		start.Clear();
-		mode = (uint8_t)mApp->mGameMode; level = board->mLevel;
-		start.WriteU8(mode); start.WriteI32(level);
-		start.WriteU8((uint8_t)GetPlayerCount()); start.WriteU32(mApp->mNetBoardSeed);
-		start.WriteU8((uint8_t)mStartTDPath.size());
-		for (uint8_t cell : mStartTDPath) start.WriteU8(cell);
+		NetTrace("late join start descriptor rejected: invalid/unavailable content");
+		return;
 	}
-	NetTrace("late join start descriptor mode=%u level=%d players=%d recorded=%d",mode,level,GetPlayerCount(),recorded?1:0);
+	NetTrace("late join start descriptor mode=%u level=%d players=%d recorded=%d contentMode=%s",
+		aState.mGameMode, aState.mLevel, GetPlayerCount(), recorded ? 1 : 0,
+		LawnFusion::ContentModeName(aState.mContentMode));
 	theSession->mConn.SendMessage(NETMSG_START_GAME, start);
 	// Apply one complete authoritative bank while the new board is still in
 	// INTRO; only then cross the playing barrier. Existing peers never restart.

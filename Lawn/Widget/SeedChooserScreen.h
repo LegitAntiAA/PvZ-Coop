@@ -6,6 +6,8 @@
 #include "ScrollbarWidget.h"
 #include "../Net/NetCommon.h"
 #include "../Net/NetCursorTarget.h"
+#include <cstdint>
+#include <vector>
 
 using namespace Sexy;
 
@@ -87,6 +89,28 @@ public:
     bool					mSwipeJustReleased;
     bool                    mAllowBetaSeedpackets;
     ScrollbarWidget*        mScrollbar;
+
+    // Dense widget entries only; sparse Fusion kinds never index mChosenSeeds.
+    struct NativeFusionChoice
+    {
+        ChosenSeed motion{};
+        uint16_t kind = 0xffff;
+        uint16_t packetId = 0;
+        uint8_t owner = 0xff;
+        bool extra = false;
+        bool pending = false;
+        bool removed = false;
+        int price = 0;
+    };
+    bool                    mNativeFusionChooser = false;
+    uint32_t                mNativeFusionEpoch = 0;
+    uint32_t                mNativeFusionRevision = 0xffffffffu;
+    uint8_t                 mNativeFusionMysteryMask = 0;
+    std::vector<NativeFusionChoice> mNativeFusionChoices;
+    void                    NativeFusionSync();
+    void                    NativeFusionDrawCards(Graphics* g);
+    bool                    NativeFusionMouseDown(int x, int y, int theClickCount);
+    int                     NativeFusionLocalSlot() const;
 
     // ---- co-op shared seed picking ----
     bool                    mCoopChooserActive;                 // quota 0 is valid while this is true

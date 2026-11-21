@@ -1,0 +1,3538 @@
+{
+  "schema": 1,
+  "sourcePrefab": "Resources/plants/seashroom/seablover/SeaBloverPrefab.prefab",
+  "unitsPerNativePixel": 0.01,
+  "applyRootMotion": false,
+  "static": false,
+  "root": 0,
+  "nodes": [
+    {
+      "name": "SeaBloverPrefab",
+      "active": true,
+      "tag": "Plant",
+      "parent": -1,
+      "path": "",
+      "position": {
+        "x": -0.69,
+        "y": -0.965,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 0.25,
+        "y": 0.25,
+        "z": 0.25
+      }
+    },
+    {
+      "name": "SeaShroom_body",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "SeaShroom_body",
+      "position": {
+        "x": -0.07500005,
+        "y": 1.505,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "SeaShroom_head",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 1,
+      "path": "SeaShroom_body/SeaShroom_head",
+      "position": {
+        "x": -0.12,
+        "y": 0.526,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 0.86742,
+        "y": 0.86742,
+        "z": 0.86742
+      }
+    },
+    {
+      "name": "SeaShroom_foam",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 1,
+      "path": "SeaShroom_body/SeaShroom_foam",
+      "position": {
+        "x": 0.034999967,
+        "y": -0.585,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "SeaShroom_blink2",
+      "active": false,
+      "tag": "Untagged",
+      "parent": 1,
+      "path": "SeaShroom_body/SeaShroom_blink2",
+      "position": {
+        "x": 0.42999995,
+        "y": 0.07499993,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "SeaShroom_blink1",
+      "active": false,
+      "tag": "Untagged",
+      "parent": 1,
+      "path": "SeaShroom_body/SeaShroom_blink1",
+      "position": {
+        "x": 0.43999982,
+        "y": 0.08500016,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "SeaShroom_tentacles",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 1,
+      "path": "SeaShroom_body/SeaShroom_tentacles",
+      "position": {
+        "x": 0.07500005,
+        "y": -0.9549999,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "petals",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 1,
+      "path": "SeaShroom_body/petals",
+      "position": {
+        "x": -0.252,
+        "y": 0.553,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 0.86290944,
+        "y": 0.86290944,
+        "z": 0.86290944
+      }
+    },
+    {
+      "name": "Shadow",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "Shadow",
+      "position": {
+        "x": 0.04,
+        "y": 0.88,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 5.0,
+        "y": 5.0,
+        "z": 5.0
+      }
+    },
+    {
+      "name": "Shoot",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "Shoot",
+      "position": {
+        "x": 1.271,
+        "y": 1.493,
+        "z": 0.013911259
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 5.0,
+        "y": 5.0,
+        "z": 5.0
+      }
+    }
+  ],
+  "sourceHierarchy": null,
+  "sprites": [
+    {
+      "texture": "textures/96675f8a72cc.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: petals\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 4\n    width: 335\n    height: 329\n  m_Offset: {x: -9.056135, y: -20.58209}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.47296676, y: 0.43744045}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    25724fa26707ede49a198871364ef228: -8156425020005495048\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 70dd352e9dba6c74c82d1c97ae8251a5, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 69\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 25\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 1800170016000b0016001700090016000b000a0016000900120016000a00150016001200130015001200140013001200110010000e000f000e0010000d000e000f000b000e000d000c000b000d0008000b000c000a0008000c000b00080009000a0009000800070006000400050004000600000004000500030004000000010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 25\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 504\n      _typelessdata: 38838cbe3333573a00000000aed9febd2e93a7bf00000000aed9febdecad6abe0000000040b203bf0537b8bf00000000c4499fbf0537b8bf000000002ab0a5bf3333573a00000000e3cecabff6840ebe00000000e3cecabf24bc83bf000000004d68c53e710ff13e000000000f5eee3e85bdb83e000000000f5eee3e710ff13e000000006cedb03e85bdb83e000000000f5eee3eb3e7ec3f0000000003a82cbfb3e7ec3f00000000e42241bf85bdb83e0000000003a86cbfc895d43f0000000020d981bf1a4eb33f0000000020d981bf7b7d613f00000000e026de3f710ff13e00000000eafde13f524f2bbf00000000eafde13f1480ae3e000000006512b03f33ca7fbf000000005ae7553f33ca7fbf0000000061168d3eecf5053e0000000061168d3e00970cbf00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 4\n      width: 335\n      height: 329\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 162.44386, z: 100, w: 147.91791}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -0.27443861961364746,
+            "y": 0.0008209228399209678,
+            "z": 0.0,
+            "u": 0.2636718711692095,
+            "v": 0.855468747769539
+          },
+          {
+            "x": -0.12443862855434418,
+            "y": -1.3091790676116943,
+            "z": 0.0,
+            "u": 0.29296874442297965,
+            "v": 0.9833984343370795
+          },
+          {
+            "x": -0.12443862855434418,
+            "y": -0.22917908430099487,
+            "z": 0.0,
+            "u": 0.29296874442297965,
+            "v": 0.877929685966894
+          },
+          {
+            "x": -0.5144386291503906,
+            "y": -1.4391790628433228,
+            "z": 0.0,
+            "u": 0.21679686930656433,
+            "v": 0.9960937463714182
+          },
+          {
+            "x": -1.244438648223877,
+            "y": -1.4391790628433228,
+            "z": 0.0,
+            "u": 0.07421874058127403,
+            "v": 0.9960937463714182
+          },
+          {
+            "x": -1.2944386005401611,
+            "y": 0.0008209228399209678,
+            "z": 0.0,
+            "u": 0.06445312489449978,
+            "v": 0.855468747769539
+          },
+          {
+            "x": -1.584438681602478,
+            "y": -0.1391790807247162,
+            "z": 0.0,
+            "u": 0.007812484062016012,
+            "v": 0.8691406231176481
+          },
+          {
+            "x": -1.584438681602478,
+            "y": -1.0291790962219238,
+            "z": 0.0,
+            "u": 0.007812484062016012,
+            "v": 0.9560546871310472
+          },
+          {
+            "x": 0.38556137681007385,
+            "y": 0.47082093358039856,
+            "z": 0.0,
+            "u": 0.39257812047071755,
+            "v": 0.8095703092206642
+          },
+          {
+            "x": 0.4655613601207733,
+            "y": 0.3608209192752838,
+            "z": 0.0,
+            "u": 0.40820311721108854,
+            "v": 0.8203124981176481
+          },
+          {
+            "x": 0.4655613601207733,
+            "y": 0.47082093358039856,
+            "z": 0.0,
+            "u": 0.40820311721108854,
+            "v": 0.8095703092206642
+          },
+          {
+            "x": 0.3455613851547241,
+            "y": 0.3608209192752838,
+            "z": 0.0,
+            "u": 0.38476562210053206,
+            "v": 0.8203124981176481
+          },
+          {
+            "x": 0.4655613601207733,
+            "y": 1.8508208990097046,
+            "z": 0.0,
+            "u": 0.40820311721108854,
+            "v": 0.6748046875967085
+          },
+          {
+            "x": -0.6744386553764343,
+            "y": 1.8508208990097046,
+            "z": 0.0,
+            "u": 0.18554686418429017,
+            "v": 0.6748046875967085
+          },
+          {
+            "x": -0.7544386386871338,
+            "y": 0.3608209192752838,
+            "z": 0.0,
+            "u": 0.16992186744391918,
+            "v": 0.8203124981176481
+          },
+          {
+            "x": -0.9244386553764343,
+            "y": 1.6608209609985352,
+            "z": 0.0,
+            "u": 0.13671873918429017,
+            "v": 0.6933593690431118
+          },
+          {
+            "x": -1.0144386291503906,
+            "y": 1.4008209705352783,
+            "z": 0.0,
+            "u": 0.11914061930656433,
+            "v": 0.7187499931117892
+          },
+          {
+            "x": -1.0144386291503906,
+            "y": 0.8808209300041199,
+            "z": 0.0,
+            "u": 0.11914061930656433,
+            "v": 0.7695312470699102
+          },
+          {
+            "x": 1.7355613708496094,
+            "y": 0.47082093358039856,
+            "z": 0.0,
+            "u": 0.6562499943065643,
+            "v": 0.8095703092206642
+          },
+          {
+            "x": 1.7655613422393799,
+            "y": -0.6691790819168091,
+            "z": 0.0,
+            "u": 0.6621093637186288,
+            "v": 0.9208984357340634
+          },
+          {
+            "x": 1.7655613422393799,
+            "y": 0.34082090854644775,
+            "z": 0.0,
+            "u": 0.6621093637186288,
+            "v": 0.822265624165386
+          },
+          {
+            "x": 1.3755613565444946,
+            "y": -0.9991790652275085,
+            "z": 0.0,
+            "u": 0.5859374915125966,
+            "v": 0.9531249966042489
+          },
+          {
+            "x": 0.8355613946914673,
+            "y": -0.9991790652275085,
+            "z": 0.0,
+            "u": 0.4804687489631772,
+            "v": 0.9531249966042489
+          },
+          {
+            "x": 0.2755613625049591,
+            "y": 0.13082093000411987,
+            "z": 0.0,
+            "u": 0.3710937426767498,
+            "v": 0.8427734345699102
+          },
+          {
+            "x": 0.2755613625049591,
+            "y": -0.5491790771484375,
+            "z": 0.0,
+            "u": 0.3710937426767498,
+            "v": 0.9091796852684021
+          }
+        ],
+        "indices": [
+          24,
+          23,
+          22,
+          11,
+          22,
+          23,
+          9,
+          22,
+          11,
+          10,
+          22,
+          9,
+          18,
+          22,
+          10,
+          21,
+          22,
+          18,
+          19,
+          21,
+          18,
+          20,
+          19,
+          18,
+          17,
+          16,
+          14,
+          15,
+          14,
+          16,
+          13,
+          14,
+          15,
+          11,
+          14,
+          13,
+          12,
+          11,
+          13,
+          8,
+          11,
+          12,
+          10,
+          8,
+          12,
+          11,
+          8,
+          9,
+          10,
+          9,
+          8,
+          7,
+          6,
+          4,
+          5,
+          4,
+          6,
+          0,
+          4,
+          5,
+          3,
+          4,
+          0,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/seashroom/seablover/petals.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 4.0,
+        "width": 335.0,
+        "height": 329.0,
+        "yTop": 691.0
+      },
+      "logicalSize": {
+        "width": 335.0,
+        "height": 329.0
+      },
+      "pivot": {
+        "x": 0.47296676,
+        "y": 0.43744045
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "1254f9924858537468e2b40606bc271b",
+      "node": 7,
+      "sortingOrder": 0,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    },
+    {
+      "texture": "../batch-19/textures/4719ca59e021.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: SeaShroom_tentacles\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 166\n    width: 270\n    height: 108\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    c9292ed9c72f85a48a331bf72771b0f0: 3073469733560532401\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: b302da5b1b6bca842aff045942031b64, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 69\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 20\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 0e000c0011000b0011000c000a0011000b001300120009000d0009001200110009000d000e0011000d000a0009001100070006000f0010000f00060005000c000d000e000d000c000b000c0005000a000b00050009000a000500080009000500070008000500060007000500040006000500000004000500030004000000010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 20\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 400\n      _typelessdata: 6666a63f5c8f023f00000000cdccac3f713d8abe00000000cdccac3f14aec73e000000000ad7a33fd7a3f0be0000000085eb913f5c8fc2be0000000014ae873f713d0a3f000000000ad7833fae4761be000000003d0a573f713d0abf0000000014ae473fb81e05bf000000003333333f713d0abf0000000052b89e3eec5138be000000000000803e0ad7a3bd000000005c8f423e00000000000000008fc275bf713d0a3f000000007b142e3e8fc2f5bc00000000d7a3903f713d0abf000000008fc2953f6666e6be000000001f856b3eae47e1bd00000000cdccacbfec5138be00000000cdccacbf713d0abf0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 166\n      width: 270\n      height: 108\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 139, z: 100, w: 220}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 1.2999999523162842,
+            "y": 0.5099999904632568,
+            "z": 0.0,
+            "u": 0.5253906156867743,
+            "v": 0.47070312686264515
+          },
+          {
+            "x": 1.350000023841858,
+            "y": -0.27000001072883606,
+            "z": 0.0,
+            "u": 0.5351562546566129,
+            "v": 0.6230468770954758
+          },
+          {
+            "x": 1.350000023841858,
+            "y": 0.38999998569488525,
+            "z": 0.0,
+            "u": 0.5351562546566129,
+            "v": 0.4941406277939677
+          },
+          {
+            "x": 1.2799999713897705,
+            "y": -0.4699999988079071,
+            "z": 0.0,
+            "u": 0.5214843694120646,
+            "v": 0.6621093747671694
+          },
+          {
+            "x": 1.1399999856948853,
+            "y": -0.3799999952316284,
+            "z": 0.0,
+            "u": 0.4941406222060323,
+            "v": 0.6445312490686774
+          },
+          {
+            "x": 1.059999942779541,
+            "y": 0.5400000214576721,
+            "z": 0.0,
+            "u": 0.4785156138241291,
+            "v": 0.4648437458090484
+          },
+          {
+            "x": 1.0299999713897705,
+            "y": -0.2199999988079071,
+            "z": 0.0,
+            "u": 0.47265624441206455,
+            "v": 0.6132812497671694
+          },
+          {
+            "x": 0.8399999737739563,
+            "y": -0.5400000214576721,
+            "z": 0.0,
+            "u": 0.43554686987772584,
+            "v": 0.6757812541909516
+          },
+          {
+            "x": 0.7799999713897705,
+            "y": -0.5199999809265137,
+            "z": 0.0,
+            "u": 0.42382811941206455,
+            "v": 0.6718749962747097
+          },
+          {
+            "x": 0.699999988079071,
+            "y": -0.5400000214576721,
+            "z": 0.0,
+            "u": 0.40820312267169356,
+            "v": 0.6757812541909516
+          },
+          {
+            "x": 0.3100000023841858,
+            "y": -0.18000000715255737,
+            "z": 0.0,
+            "u": 0.3320312504656613,
+            "v": 0.6054687513969839
+          },
+          {
+            "x": 0.25,
+            "y": -0.07999999821186066,
+            "z": 0.0,
+            "u": 0.3203125,
+            "v": 0.585937499650754
+          },
+          {
+            "x": 0.1899999976158142,
+            "y": 0.0,
+            "z": 0.0,
+            "u": 0.3085937495343387,
+            "v": 0.5703125
+          },
+          {
+            "x": -0.9599999785423279,
+            "y": 0.5400000214576721,
+            "z": 0.0,
+            "u": 0.08398437919095159,
+            "v": 0.4648437458090484
+          },
+          {
+            "x": 0.17000000178813934,
+            "y": -0.029999999329447746,
+            "z": 0.0,
+            "u": 0.30468750034924597,
+            "v": 0.5761718748690328
+          },
+          {
+            "x": 1.1299999952316284,
+            "y": -0.5400000214576721,
+            "z": 0.0,
+            "u": 0.4921874990686774,
+            "v": 0.6757812541909516
+          },
+          {
+            "x": 1.1699999570846558,
+            "y": -0.44999998807907104,
+            "z": 0.0,
+            "u": 0.49999999161809683,
+            "v": 0.6582031226716936
+          },
+          {
+            "x": 0.23000000417232513,
+            "y": -0.10999999940395355,
+            "z": 0.0,
+            "u": 0.31640625081490725,
+            "v": 0.5917968748835847
+          },
+          {
+            "x": -1.350000023841858,
+            "y": -0.18000000715255737,
+            "z": 0.0,
+            "u": 0.007812495343387127,
+            "v": 0.6054687513969839
+          },
+          {
+            "x": -1.350000023841858,
+            "y": -0.5400000214576721,
+            "z": 0.0,
+            "u": 0.007812495343387127,
+            "v": 0.6757812541909516
+          }
+        ],
+        "indices": [
+          14,
+          12,
+          17,
+          11,
+          17,
+          12,
+          10,
+          17,
+          11,
+          19,
+          18,
+          9,
+          13,
+          9,
+          18,
+          17,
+          9,
+          13,
+          14,
+          17,
+          13,
+          10,
+          9,
+          17,
+          7,
+          6,
+          15,
+          16,
+          15,
+          6,
+          5,
+          12,
+          13,
+          14,
+          13,
+          12,
+          11,
+          12,
+          5,
+          10,
+          11,
+          5,
+          9,
+          10,
+          5,
+          8,
+          9,
+          5,
+          7,
+          8,
+          5,
+          6,
+          7,
+          5,
+          4,
+          6,
+          5,
+          0,
+          4,
+          5,
+          3,
+          4,
+          0,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/seashroom/SeaShroom_tentacles.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 166.0,
+        "width": 270.0,
+        "height": 108.0,
+        "yTop": 238.0
+      },
+      "logicalSize": {
+        "width": 270.0,
+        "height": 108.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "65dfe57b7da7060429d05ec3bc2ea5ef",
+      "node": 6,
+      "sortingOrder": 1,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    },
+    {
+      "texture": "textures/96675f8a72cc.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Blover_head\n  m_Rect:\n    serializedVersion: 2\n    x: 196\n    y: 619\n    width: 184\n    height: 158\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    25724fa26707ede49a198871364ef228: 1039580502726949465\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 70dd352e9dba6c74c82d1c97ae8251a5, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 21\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 9\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 080007000600050006000700040006000500030004000500010004000300000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 9\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 184\n      _typelessdata: 1f856b3ff628dc3e00000000d7a3303fb81e45bf000000001f856b3f14aec7be00000000b81e053f713d4a3f00000000b81e053f713d4abf00000000f628dcbe713d4a3f00000000295c0fbf713d4abf000000001f856bbfd7a3f03e000000001f856bbfa470bdbe0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 196\n      y: 619\n      width: 184\n      height: 158\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 288, z: 100, w: 698}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.9200000166893005,
+            "y": 0.4300000071525574,
+            "z": 0.0,
+            "u": 0.742187503259629,
+            "v": 0.27636718680150807
+          },
+          {
+            "x": 0.6899999976158142,
+            "y": -0.7699999809265137,
+            "z": 0.0,
+            "u": 0.6972656245343387,
+            "v": 0.39355468563735485
+          },
+          {
+            "x": 0.9200000166893005,
+            "y": -0.38999998569488525,
+            "z": 0.0,
+            "u": 0.742187503259629,
+            "v": 0.35644531110301614
+          },
+          {
+            "x": 0.5199999809265137,
+            "y": 0.7900000214576721,
+            "z": 0.0,
+            "u": 0.6640624962747097,
+            "v": 0.2412109354045242
+          },
+          {
+            "x": 0.5199999809265137,
+            "y": -0.7900000214576721,
+            "z": 0.0,
+            "u": 0.6640624962747097,
+            "v": 0.3955078145954758
+          },
+          {
+            "x": -0.4300000071525574,
+            "y": 0.7900000214576721,
+            "z": 0.0,
+            "u": 0.47851562360301614,
+            "v": 0.2412109354045242
+          },
+          {
+            "x": -0.5600000023841858,
+            "y": -0.7900000214576721,
+            "z": 0.0,
+            "u": 0.4531249995343387,
+            "v": 0.3955078145954758
+          },
+          {
+            "x": -0.9200000166893005,
+            "y": 0.4699999988079071,
+            "z": 0.0,
+            "u": 0.382812496740371,
+            "v": 0.2724609376164153
+          },
+          {
+            "x": -0.9200000166893005,
+            "y": -0.3700000047683716,
+            "z": 0.0,
+            "u": 0.382812496740371,
+            "v": 0.3544921879656613
+          }
+        ],
+        "indices": [
+          8,
+          7,
+          6,
+          5,
+          6,
+          7,
+          4,
+          6,
+          5,
+          3,
+          4,
+          5,
+          1,
+          4,
+          3,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/seashroom/seablover/Blover_head.asset",
+      "textureRect": {
+        "x": 196.0,
+        "y": 619.0,
+        "width": 184.0,
+        "height": 158.0,
+        "yTop": 247.0
+      },
+      "logicalSize": {
+        "width": 184.0,
+        "height": 158.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "82c9904737b1f45458f53adae7182746",
+      "node": 1,
+      "sortingOrder": 2,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    },
+    {
+      "texture": "../batch-19/textures/4719ca59e021.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: SeaShroom_blink1\n  m_Rect:\n    serializedVersion: 2\n    x: 373\n    y: 166\n    width: 83\n    height: 50\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    c9292ed9c72f85a48a331bf72771b0f0: 1415482583189536601\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: b302da5b1b6bca842aff045942031b64, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 030000000100020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: e17ad4be0000803e00000000e17ad43e000080be00000000e17ad43e0000803e00000000e17ad4be000080be000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 373\n      y: 166\n      width: 83\n      height: 50\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 414.5, z: 100, w: 191}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -0.41499999165534973,
+            "y": 0.25,
+            "z": 0.0,
+            "u": 0.7285156266298145,
+            "v": 0.578125
+          },
+          {
+            "x": 0.41499999165534973,
+            "y": -0.25,
+            "z": 0.0,
+            "u": 0.8906249983701855,
+            "v": 0.67578125
+          },
+          {
+            "x": 0.41499999165534973,
+            "y": 0.25,
+            "z": 0.0,
+            "u": 0.8906249983701855,
+            "v": 0.578125
+          },
+          {
+            "x": -0.41499999165534973,
+            "y": -0.25,
+            "z": 0.0,
+            "u": 0.7285156266298145,
+            "v": 0.67578125
+          }
+        ],
+        "indices": [
+          3,
+          0,
+          1,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/seashroom/SeaShroom_blink1.asset",
+      "textureRect": {
+        "x": 373.0,
+        "y": 166.0,
+        "width": 83.0,
+        "height": 50.0,
+        "yTop": 296.0
+      },
+      "logicalSize": {
+        "width": 83.0,
+        "height": 50.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "e56cf9d8c07f5ad40bd8c56ffd69f666",
+      "node": 5,
+      "sortingOrder": 3,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    },
+    {
+      "texture": "../batch-19/textures/4719ca59e021.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: SeaShroom_blink2\n  m_Rect:\n    serializedVersion: 2\n    x: 282\n    y: 166\n    width: 83\n    height: 50\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    c9292ed9c72f85a48a331bf72771b0f0: 8882500328921874794\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: b302da5b1b6bca842aff045942031b64, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 030000000100020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: e17ad4be0000803e00000000e17ad43e000080be00000000e17ad43e0000803e00000000e17ad4be000080be000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 282\n      y: 166\n      width: 83\n      height: 50\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 323.5, z: 100, w: 191}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -0.41499999165534973,
+            "y": 0.25,
+            "z": 0.0,
+            "u": 0.5507812516298145,
+            "v": 0.578125
+          },
+          {
+            "x": 0.41499999165534973,
+            "y": -0.25,
+            "z": 0.0,
+            "u": 0.7128906233701855,
+            "v": 0.67578125
+          },
+          {
+            "x": 0.41499999165534973,
+            "y": 0.25,
+            "z": 0.0,
+            "u": 0.7128906233701855,
+            "v": 0.578125
+          },
+          {
+            "x": -0.41499999165534973,
+            "y": -0.25,
+            "z": 0.0,
+            "u": 0.5507812516298145,
+            "v": 0.67578125
+          }
+        ],
+        "indices": [
+          3,
+          0,
+          1,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/seashroom/SeaShroom_blink2.asset",
+      "textureRect": {
+        "x": 282.0,
+        "y": 166.0,
+        "width": 83.0,
+        "height": 50.0,
+        "yTop": 296.0
+      },
+      "logicalSize": {
+        "width": 83.0,
+        "height": 50.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "89c060bafe4dee14f82dd12425ca6826",
+      "node": 4,
+      "sortingOrder": 4,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    },
+    {
+      "texture": "../batch-19/textures/4719ca59e021.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: SeaShroom_foam\n  m_Rect:\n    serializedVersion: 2\n    x: 282\n    y: 224\n    width: 138\n    height: 25\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    c9292ed9c72f85a48a331bf72771b0f0: 1600327361663632445\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: b302da5b1b6bca842aff045942031b64, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: d7a330bf0000003e00000000d7a3303f0000003e00000000d7a330bf000000be00000000d7a3303f000000be000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 282\n      y: 224\n      width: 138\n      height: 25\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 351, z: 100, w: 236.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -0.6899999976158142,
+            "y": 0.125,
+            "z": 0.0,
+            "u": 0.5507812504656613,
+            "v": 0.513671875
+          },
+          {
+            "x": 0.6899999976158142,
+            "y": 0.125,
+            "z": 0.0,
+            "u": 0.8203124995343387,
+            "v": 0.513671875
+          },
+          {
+            "x": -0.6899999976158142,
+            "y": -0.125,
+            "z": 0.0,
+            "u": 0.5507812504656613,
+            "v": 0.5625
+          },
+          {
+            "x": 0.6899999976158142,
+            "y": -0.125,
+            "z": 0.0,
+            "u": 0.8203124995343387,
+            "v": 0.5625
+          }
+        ],
+        "indices": [
+          0,
+          1,
+          2,
+          2,
+          1,
+          3
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/seashroom/SeaShroom_foam.asset",
+      "textureRect": {
+        "x": 282.0,
+        "y": 224.0,
+        "width": 138.0,
+        "height": 25.0,
+        "yTop": 263.0
+      },
+      "logicalSize": {
+        "width": 138.0,
+        "height": 25.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "9ae007125c28210419b2a7645e963b92",
+      "node": 3,
+      "sortingOrder": 5,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    },
+    {
+      "texture": "textures/96675f8a72cc.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: SeaShroom_head\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 341\n    width: 229\n    height: 154\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    25724fa26707ede49a198871364ef228: 7514532289243594329\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 70dd352e9dba6c74c82d1c97ae8251a5, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 18\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 8\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 070006000400050004000600030004000500010004000300000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 8\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 160\n      _typelessdata: 85eb313fb81e453f000000005c8f923fec5138be000000005c8f923fec51b83e00000000e17ad4beb81e453f00000000e17a34bfb81e45bf00000000333353bf1f852b3f000000005c8f92bfcdcc4c3e000000005c8f92bfb81e45bf0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 341\n      width: 229\n      height: 154\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 118.5, z: 100, w: 418}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.6949999928474426,
+            "y": 0.7699999809265137,
+            "z": 0.0,
+            "u": 0.36718749860301614,
+            "v": 0.5166015643626451
+          },
+          {
+            "x": 1.1449999809265137,
+            "y": -0.18000000715255737,
+            "z": 0.0,
+            "u": 0.4550781212747097,
+            "v": 0.6093750006984919
+          },
+          {
+            "x": 1.1449999809265137,
+            "y": 0.36000001430511475,
+            "z": 0.0,
+            "u": 0.4550781212747097,
+            "v": 0.5566406236030161
+          },
+          {
+            "x": -0.41499999165534973,
+            "y": 0.7699999809265137,
+            "z": 0.0,
+            "u": 0.1503906266298145,
+            "v": 0.5166015643626451
+          },
+          {
+            "x": -0.7049999833106995,
+            "y": -0.7699999809265137,
+            "z": 0.0,
+            "u": 0.09375000325962901,
+            "v": 0.6669921856373549
+          },
+          {
+            "x": -0.824999988079071,
+            "y": 0.6700000166893005,
+            "z": 0.0,
+            "u": 0.07031250232830644,
+            "v": 0.5263671858701855
+          },
+          {
+            "x": -1.1449999809265137,
+            "y": 0.20000000298023224,
+            "z": 0.0,
+            "u": 0.007812503725290298,
+            "v": 0.5722656247089617
+          },
+          {
+            "x": -1.1449999809265137,
+            "y": -0.7699999809265137,
+            "z": 0.0,
+            "u": 0.007812503725290298,
+            "v": 0.6669921856373549
+          }
+        ],
+        "indices": [
+          7,
+          6,
+          4,
+          5,
+          4,
+          6,
+          3,
+          4,
+          5,
+          1,
+          4,
+          3,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/seashroom/seablover/SeaShroom_head.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 341.0,
+        "width": 229.0,
+        "height": 154.0,
+        "yTop": 529.0
+      },
+      "logicalSize": {
+        "width": 229.0,
+        "height": 154.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "4a0d8191705b5b14596884cda2f558bc",
+      "node": 2,
+      "sortingOrder": 6,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    }
+  ],
+  "spriteVariants": {
+    "82c9904737b1f45458f53adae7182746": {
+      "texture": "textures/96675f8a72cc.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Blover_head\n  m_Rect:\n    serializedVersion: 2\n    x: 196\n    y: 619\n    width: 184\n    height: 158\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    25724fa26707ede49a198871364ef228: 1039580502726949465\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 70dd352e9dba6c74c82d1c97ae8251a5, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 21\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 9\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 080007000600050006000700040006000500030004000500010004000300000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 9\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 184\n      _typelessdata: 1f856b3ff628dc3e00000000d7a3303fb81e45bf000000001f856b3f14aec7be00000000b81e053f713d4a3f00000000b81e053f713d4abf00000000f628dcbe713d4a3f00000000295c0fbf713d4abf000000001f856bbfd7a3f03e000000001f856bbfa470bdbe0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 196\n      y: 619\n      width: 184\n      height: 158\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 288, z: 100, w: 698}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.9200000166893005,
+            "y": 0.4300000071525574,
+            "z": 0.0,
+            "u": 0.742187503259629,
+            "v": 0.27636718680150807
+          },
+          {
+            "x": 0.6899999976158142,
+            "y": -0.7699999809265137,
+            "z": 0.0,
+            "u": 0.6972656245343387,
+            "v": 0.39355468563735485
+          },
+          {
+            "x": 0.9200000166893005,
+            "y": -0.38999998569488525,
+            "z": 0.0,
+            "u": 0.742187503259629,
+            "v": 0.35644531110301614
+          },
+          {
+            "x": 0.5199999809265137,
+            "y": 0.7900000214576721,
+            "z": 0.0,
+            "u": 0.6640624962747097,
+            "v": 0.2412109354045242
+          },
+          {
+            "x": 0.5199999809265137,
+            "y": -0.7900000214576721,
+            "z": 0.0,
+            "u": 0.6640624962747097,
+            "v": 0.3955078145954758
+          },
+          {
+            "x": -0.4300000071525574,
+            "y": 0.7900000214576721,
+            "z": 0.0,
+            "u": 0.47851562360301614,
+            "v": 0.2412109354045242
+          },
+          {
+            "x": -0.5600000023841858,
+            "y": -0.7900000214576721,
+            "z": 0.0,
+            "u": 0.4531249995343387,
+            "v": 0.3955078145954758
+          },
+          {
+            "x": -0.9200000166893005,
+            "y": 0.4699999988079071,
+            "z": 0.0,
+            "u": 0.382812496740371,
+            "v": 0.2724609376164153
+          },
+          {
+            "x": -0.9200000166893005,
+            "y": -0.3700000047683716,
+            "z": 0.0,
+            "u": 0.382812496740371,
+            "v": 0.3544921879656613
+          }
+        ],
+        "indices": [
+          8,
+          7,
+          6,
+          5,
+          6,
+          7,
+          4,
+          6,
+          5,
+          3,
+          4,
+          5,
+          1,
+          4,
+          3,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/seashroom/seablover/Blover_head.asset",
+      "textureRect": {
+        "x": 196.0,
+        "y": 619.0,
+        "width": 184.0,
+        "height": 158.0,
+        "yTop": 247.0
+      },
+      "logicalSize": {
+        "width": 184.0,
+        "height": 158.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "4a0d8191705b5b14596884cda2f558bc": {
+      "texture": "textures/96675f8a72cc.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: SeaShroom_head\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 341\n    width: 229\n    height: 154\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    25724fa26707ede49a198871364ef228: 7514532289243594329\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 70dd352e9dba6c74c82d1c97ae8251a5, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 18\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 8\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 070006000400050004000600030004000500010004000300000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 8\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 160\n      _typelessdata: 85eb313fb81e453f000000005c8f923fec5138be000000005c8f923fec51b83e00000000e17ad4beb81e453f00000000e17a34bfb81e45bf00000000333353bf1f852b3f000000005c8f92bfcdcc4c3e000000005c8f92bfb81e45bf0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 341\n      width: 229\n      height: 154\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 118.5, z: 100, w: 418}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.6949999928474426,
+            "y": 0.7699999809265137,
+            "z": 0.0,
+            "u": 0.36718749860301614,
+            "v": 0.5166015643626451
+          },
+          {
+            "x": 1.1449999809265137,
+            "y": -0.18000000715255737,
+            "z": 0.0,
+            "u": 0.4550781212747097,
+            "v": 0.6093750006984919
+          },
+          {
+            "x": 1.1449999809265137,
+            "y": 0.36000001430511475,
+            "z": 0.0,
+            "u": 0.4550781212747097,
+            "v": 0.5566406236030161
+          },
+          {
+            "x": -0.41499999165534973,
+            "y": 0.7699999809265137,
+            "z": 0.0,
+            "u": 0.1503906266298145,
+            "v": 0.5166015643626451
+          },
+          {
+            "x": -0.7049999833106995,
+            "y": -0.7699999809265137,
+            "z": 0.0,
+            "u": 0.09375000325962901,
+            "v": 0.6669921856373549
+          },
+          {
+            "x": -0.824999988079071,
+            "y": 0.6700000166893005,
+            "z": 0.0,
+            "u": 0.07031250232830644,
+            "v": 0.5263671858701855
+          },
+          {
+            "x": -1.1449999809265137,
+            "y": 0.20000000298023224,
+            "z": 0.0,
+            "u": 0.007812503725290298,
+            "v": 0.5722656247089617
+          },
+          {
+            "x": -1.1449999809265137,
+            "y": -0.7699999809265137,
+            "z": 0.0,
+            "u": 0.007812503725290298,
+            "v": 0.6669921856373549
+          }
+        ],
+        "indices": [
+          7,
+          6,
+          4,
+          5,
+          4,
+          6,
+          3,
+          4,
+          5,
+          1,
+          4,
+          3,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/seashroom/seablover/SeaShroom_head.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 341.0,
+        "width": 229.0,
+        "height": 154.0,
+        "yTop": 529.0
+      },
+      "logicalSize": {
+        "width": 229.0,
+        "height": 154.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "9ae007125c28210419b2a7645e963b92": {
+      "texture": "../batch-19/textures/4719ca59e021.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: SeaShroom_foam\n  m_Rect:\n    serializedVersion: 2\n    x: 282\n    y: 224\n    width: 138\n    height: 25\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    c9292ed9c72f85a48a331bf72771b0f0: 1600327361663632445\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: b302da5b1b6bca842aff045942031b64, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: d7a330bf0000003e00000000d7a3303f0000003e00000000d7a330bf000000be00000000d7a3303f000000be000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 282\n      y: 224\n      width: 138\n      height: 25\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 351, z: 100, w: 236.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -0.6899999976158142,
+            "y": 0.125,
+            "z": 0.0,
+            "u": 0.5507812504656613,
+            "v": 0.513671875
+          },
+          {
+            "x": 0.6899999976158142,
+            "y": 0.125,
+            "z": 0.0,
+            "u": 0.8203124995343387,
+            "v": 0.513671875
+          },
+          {
+            "x": -0.6899999976158142,
+            "y": -0.125,
+            "z": 0.0,
+            "u": 0.5507812504656613,
+            "v": 0.5625
+          },
+          {
+            "x": 0.6899999976158142,
+            "y": -0.125,
+            "z": 0.0,
+            "u": 0.8203124995343387,
+            "v": 0.5625
+          }
+        ],
+        "indices": [
+          0,
+          1,
+          2,
+          2,
+          1,
+          3
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/seashroom/SeaShroom_foam.asset",
+      "textureRect": {
+        "x": 282.0,
+        "y": 224.0,
+        "width": 138.0,
+        "height": 25.0,
+        "yTop": 263.0
+      },
+      "logicalSize": {
+        "width": 138.0,
+        "height": 25.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "89c060bafe4dee14f82dd12425ca6826": {
+      "texture": "../batch-19/textures/4719ca59e021.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: SeaShroom_blink2\n  m_Rect:\n    serializedVersion: 2\n    x: 282\n    y: 166\n    width: 83\n    height: 50\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    c9292ed9c72f85a48a331bf72771b0f0: 8882500328921874794\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: b302da5b1b6bca842aff045942031b64, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 030000000100020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: e17ad4be0000803e00000000e17ad43e000080be00000000e17ad43e0000803e00000000e17ad4be000080be000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 282\n      y: 166\n      width: 83\n      height: 50\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 323.5, z: 100, w: 191}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -0.41499999165534973,
+            "y": 0.25,
+            "z": 0.0,
+            "u": 0.5507812516298145,
+            "v": 0.578125
+          },
+          {
+            "x": 0.41499999165534973,
+            "y": -0.25,
+            "z": 0.0,
+            "u": 0.7128906233701855,
+            "v": 0.67578125
+          },
+          {
+            "x": 0.41499999165534973,
+            "y": 0.25,
+            "z": 0.0,
+            "u": 0.7128906233701855,
+            "v": 0.578125
+          },
+          {
+            "x": -0.41499999165534973,
+            "y": -0.25,
+            "z": 0.0,
+            "u": 0.5507812516298145,
+            "v": 0.67578125
+          }
+        ],
+        "indices": [
+          3,
+          0,
+          1,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/seashroom/SeaShroom_blink2.asset",
+      "textureRect": {
+        "x": 282.0,
+        "y": 166.0,
+        "width": 83.0,
+        "height": 50.0,
+        "yTop": 296.0
+      },
+      "logicalSize": {
+        "width": 83.0,
+        "height": 50.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "e56cf9d8c07f5ad40bd8c56ffd69f666": {
+      "texture": "../batch-19/textures/4719ca59e021.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: SeaShroom_blink1\n  m_Rect:\n    serializedVersion: 2\n    x: 373\n    y: 166\n    width: 83\n    height: 50\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    c9292ed9c72f85a48a331bf72771b0f0: 1415482583189536601\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: b302da5b1b6bca842aff045942031b64, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 030000000100020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: e17ad4be0000803e00000000e17ad43e000080be00000000e17ad43e0000803e00000000e17ad4be000080be000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 373\n      y: 166\n      width: 83\n      height: 50\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 414.5, z: 100, w: 191}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -0.41499999165534973,
+            "y": 0.25,
+            "z": 0.0,
+            "u": 0.7285156266298145,
+            "v": 0.578125
+          },
+          {
+            "x": 0.41499999165534973,
+            "y": -0.25,
+            "z": 0.0,
+            "u": 0.8906249983701855,
+            "v": 0.67578125
+          },
+          {
+            "x": 0.41499999165534973,
+            "y": 0.25,
+            "z": 0.0,
+            "u": 0.8906249983701855,
+            "v": 0.578125
+          },
+          {
+            "x": -0.41499999165534973,
+            "y": -0.25,
+            "z": 0.0,
+            "u": 0.7285156266298145,
+            "v": 0.67578125
+          }
+        ],
+        "indices": [
+          3,
+          0,
+          1,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/seashroom/SeaShroom_blink1.asset",
+      "textureRect": {
+        "x": 373.0,
+        "y": 166.0,
+        "width": 83.0,
+        "height": 50.0,
+        "yTop": 296.0
+      },
+      "logicalSize": {
+        "width": 83.0,
+        "height": 50.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "65dfe57b7da7060429d05ec3bc2ea5ef": {
+      "texture": "../batch-19/textures/4719ca59e021.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: SeaShroom_tentacles\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 166\n    width: 270\n    height: 108\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    c9292ed9c72f85a48a331bf72771b0f0: 3073469733560532401\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: b302da5b1b6bca842aff045942031b64, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 69\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 20\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 0e000c0011000b0011000c000a0011000b001300120009000d0009001200110009000d000e0011000d000a0009001100070006000f0010000f00060005000c000d000e000d000c000b000c0005000a000b00050009000a000500080009000500070008000500060007000500040006000500000004000500030004000000010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 20\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 400\n      _typelessdata: 6666a63f5c8f023f00000000cdccac3f713d8abe00000000cdccac3f14aec73e000000000ad7a33fd7a3f0be0000000085eb913f5c8fc2be0000000014ae873f713d0a3f000000000ad7833fae4761be000000003d0a573f713d0abf0000000014ae473fb81e05bf000000003333333f713d0abf0000000052b89e3eec5138be000000000000803e0ad7a3bd000000005c8f423e00000000000000008fc275bf713d0a3f000000007b142e3e8fc2f5bc00000000d7a3903f713d0abf000000008fc2953f6666e6be000000001f856b3eae47e1bd00000000cdccacbfec5138be00000000cdccacbf713d0abf0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 166\n      width: 270\n      height: 108\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 139, z: 100, w: 220}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 1.2999999523162842,
+            "y": 0.5099999904632568,
+            "z": 0.0,
+            "u": 0.5253906156867743,
+            "v": 0.47070312686264515
+          },
+          {
+            "x": 1.350000023841858,
+            "y": -0.27000001072883606,
+            "z": 0.0,
+            "u": 0.5351562546566129,
+            "v": 0.6230468770954758
+          },
+          {
+            "x": 1.350000023841858,
+            "y": 0.38999998569488525,
+            "z": 0.0,
+            "u": 0.5351562546566129,
+            "v": 0.4941406277939677
+          },
+          {
+            "x": 1.2799999713897705,
+            "y": -0.4699999988079071,
+            "z": 0.0,
+            "u": 0.5214843694120646,
+            "v": 0.6621093747671694
+          },
+          {
+            "x": 1.1399999856948853,
+            "y": -0.3799999952316284,
+            "z": 0.0,
+            "u": 0.4941406222060323,
+            "v": 0.6445312490686774
+          },
+          {
+            "x": 1.059999942779541,
+            "y": 0.5400000214576721,
+            "z": 0.0,
+            "u": 0.4785156138241291,
+            "v": 0.4648437458090484
+          },
+          {
+            "x": 1.0299999713897705,
+            "y": -0.2199999988079071,
+            "z": 0.0,
+            "u": 0.47265624441206455,
+            "v": 0.6132812497671694
+          },
+          {
+            "x": 0.8399999737739563,
+            "y": -0.5400000214576721,
+            "z": 0.0,
+            "u": 0.43554686987772584,
+            "v": 0.6757812541909516
+          },
+          {
+            "x": 0.7799999713897705,
+            "y": -0.5199999809265137,
+            "z": 0.0,
+            "u": 0.42382811941206455,
+            "v": 0.6718749962747097
+          },
+          {
+            "x": 0.699999988079071,
+            "y": -0.5400000214576721,
+            "z": 0.0,
+            "u": 0.40820312267169356,
+            "v": 0.6757812541909516
+          },
+          {
+            "x": 0.3100000023841858,
+            "y": -0.18000000715255737,
+            "z": 0.0,
+            "u": 0.3320312504656613,
+            "v": 0.6054687513969839
+          },
+          {
+            "x": 0.25,
+            "y": -0.07999999821186066,
+            "z": 0.0,
+            "u": 0.3203125,
+            "v": 0.585937499650754
+          },
+          {
+            "x": 0.1899999976158142,
+            "y": 0.0,
+            "z": 0.0,
+            "u": 0.3085937495343387,
+            "v": 0.5703125
+          },
+          {
+            "x": -0.9599999785423279,
+            "y": 0.5400000214576721,
+            "z": 0.0,
+            "u": 0.08398437919095159,
+            "v": 0.4648437458090484
+          },
+          {
+            "x": 0.17000000178813934,
+            "y": -0.029999999329447746,
+            "z": 0.0,
+            "u": 0.30468750034924597,
+            "v": 0.5761718748690328
+          },
+          {
+            "x": 1.1299999952316284,
+            "y": -0.5400000214576721,
+            "z": 0.0,
+            "u": 0.4921874990686774,
+            "v": 0.6757812541909516
+          },
+          {
+            "x": 1.1699999570846558,
+            "y": -0.44999998807907104,
+            "z": 0.0,
+            "u": 0.49999999161809683,
+            "v": 0.6582031226716936
+          },
+          {
+            "x": 0.23000000417232513,
+            "y": -0.10999999940395355,
+            "z": 0.0,
+            "u": 0.31640625081490725,
+            "v": 0.5917968748835847
+          },
+          {
+            "x": -1.350000023841858,
+            "y": -0.18000000715255737,
+            "z": 0.0,
+            "u": 0.007812495343387127,
+            "v": 0.6054687513969839
+          },
+          {
+            "x": -1.350000023841858,
+            "y": -0.5400000214576721,
+            "z": 0.0,
+            "u": 0.007812495343387127,
+            "v": 0.6757812541909516
+          }
+        ],
+        "indices": [
+          14,
+          12,
+          17,
+          11,
+          17,
+          12,
+          10,
+          17,
+          11,
+          19,
+          18,
+          9,
+          13,
+          9,
+          18,
+          17,
+          9,
+          13,
+          14,
+          17,
+          13,
+          10,
+          9,
+          17,
+          7,
+          6,
+          15,
+          16,
+          15,
+          6,
+          5,
+          12,
+          13,
+          14,
+          13,
+          12,
+          11,
+          12,
+          5,
+          10,
+          11,
+          5,
+          9,
+          10,
+          5,
+          8,
+          9,
+          5,
+          7,
+          8,
+          5,
+          6,
+          7,
+          5,
+          4,
+          6,
+          5,
+          0,
+          4,
+          5,
+          3,
+          4,
+          0,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/seashroom/SeaShroom_tentacles.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 166.0,
+        "width": 270.0,
+        "height": 108.0,
+        "yTop": 238.0
+      },
+      "logicalSize": {
+        "width": 270.0,
+        "height": 108.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "1254f9924858537468e2b40606bc271b": {
+      "texture": "textures/96675f8a72cc.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: petals\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 4\n    width: 335\n    height: 329\n  m_Offset: {x: -9.056135, y: -20.58209}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.47296676, y: 0.43744045}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    25724fa26707ede49a198871364ef228: -8156425020005495048\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 70dd352e9dba6c74c82d1c97ae8251a5, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 69\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 25\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 1800170016000b0016001700090016000b000a0016000900120016000a00150016001200130015001200140013001200110010000e000f000e0010000d000e000f000b000e000d000c000b000d0008000b000c000a0008000c000b00080009000a0009000800070006000400050004000600000004000500030004000000010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 25\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 504\n      _typelessdata: 38838cbe3333573a00000000aed9febd2e93a7bf00000000aed9febdecad6abe0000000040b203bf0537b8bf00000000c4499fbf0537b8bf000000002ab0a5bf3333573a00000000e3cecabff6840ebe00000000e3cecabf24bc83bf000000004d68c53e710ff13e000000000f5eee3e85bdb83e000000000f5eee3e710ff13e000000006cedb03e85bdb83e000000000f5eee3eb3e7ec3f0000000003a82cbfb3e7ec3f00000000e42241bf85bdb83e0000000003a86cbfc895d43f0000000020d981bf1a4eb33f0000000020d981bf7b7d613f00000000e026de3f710ff13e00000000eafde13f524f2bbf00000000eafde13f1480ae3e000000006512b03f33ca7fbf000000005ae7553f33ca7fbf0000000061168d3eecf5053e0000000061168d3e00970cbf00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 4\n      width: 335\n      height: 329\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 162.44386, z: 100, w: 147.91791}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -0.27443861961364746,
+            "y": 0.0008209228399209678,
+            "z": 0.0,
+            "u": 0.2636718711692095,
+            "v": 0.855468747769539
+          },
+          {
+            "x": -0.12443862855434418,
+            "y": -1.3091790676116943,
+            "z": 0.0,
+            "u": 0.29296874442297965,
+            "v": 0.9833984343370795
+          },
+          {
+            "x": -0.12443862855434418,
+            "y": -0.22917908430099487,
+            "z": 0.0,
+            "u": 0.29296874442297965,
+            "v": 0.877929685966894
+          },
+          {
+            "x": -0.5144386291503906,
+            "y": -1.4391790628433228,
+            "z": 0.0,
+            "u": 0.21679686930656433,
+            "v": 0.9960937463714182
+          },
+          {
+            "x": -1.244438648223877,
+            "y": -1.4391790628433228,
+            "z": 0.0,
+            "u": 0.07421874058127403,
+            "v": 0.9960937463714182
+          },
+          {
+            "x": -1.2944386005401611,
+            "y": 0.0008209228399209678,
+            "z": 0.0,
+            "u": 0.06445312489449978,
+            "v": 0.855468747769539
+          },
+          {
+            "x": -1.584438681602478,
+            "y": -0.1391790807247162,
+            "z": 0.0,
+            "u": 0.007812484062016012,
+            "v": 0.8691406231176481
+          },
+          {
+            "x": -1.584438681602478,
+            "y": -1.0291790962219238,
+            "z": 0.0,
+            "u": 0.007812484062016012,
+            "v": 0.9560546871310472
+          },
+          {
+            "x": 0.38556137681007385,
+            "y": 0.47082093358039856,
+            "z": 0.0,
+            "u": 0.39257812047071755,
+            "v": 0.8095703092206642
+          },
+          {
+            "x": 0.4655613601207733,
+            "y": 0.3608209192752838,
+            "z": 0.0,
+            "u": 0.40820311721108854,
+            "v": 0.8203124981176481
+          },
+          {
+            "x": 0.4655613601207733,
+            "y": 0.47082093358039856,
+            "z": 0.0,
+            "u": 0.40820311721108854,
+            "v": 0.8095703092206642
+          },
+          {
+            "x": 0.3455613851547241,
+            "y": 0.3608209192752838,
+            "z": 0.0,
+            "u": 0.38476562210053206,
+            "v": 0.8203124981176481
+          },
+          {
+            "x": 0.4655613601207733,
+            "y": 1.8508208990097046,
+            "z": 0.0,
+            "u": 0.40820311721108854,
+            "v": 0.6748046875967085
+          },
+          {
+            "x": -0.6744386553764343,
+            "y": 1.8508208990097046,
+            "z": 0.0,
+            "u": 0.18554686418429017,
+            "v": 0.6748046875967085
+          },
+          {
+            "x": -0.7544386386871338,
+            "y": 0.3608209192752838,
+            "z": 0.0,
+            "u": 0.16992186744391918,
+            "v": 0.8203124981176481
+          },
+          {
+            "x": -0.9244386553764343,
+            "y": 1.6608209609985352,
+            "z": 0.0,
+            "u": 0.13671873918429017,
+            "v": 0.6933593690431118
+          },
+          {
+            "x": -1.0144386291503906,
+            "y": 1.4008209705352783,
+            "z": 0.0,
+            "u": 0.11914061930656433,
+            "v": 0.7187499931117892
+          },
+          {
+            "x": -1.0144386291503906,
+            "y": 0.8808209300041199,
+            "z": 0.0,
+            "u": 0.11914061930656433,
+            "v": 0.7695312470699102
+          },
+          {
+            "x": 1.7355613708496094,
+            "y": 0.47082093358039856,
+            "z": 0.0,
+            "u": 0.6562499943065643,
+            "v": 0.8095703092206642
+          },
+          {
+            "x": 1.7655613422393799,
+            "y": -0.6691790819168091,
+            "z": 0.0,
+            "u": 0.6621093637186288,
+            "v": 0.9208984357340634
+          },
+          {
+            "x": 1.7655613422393799,
+            "y": 0.34082090854644775,
+            "z": 0.0,
+            "u": 0.6621093637186288,
+            "v": 0.822265624165386
+          },
+          {
+            "x": 1.3755613565444946,
+            "y": -0.9991790652275085,
+            "z": 0.0,
+            "u": 0.5859374915125966,
+            "v": 0.9531249966042489
+          },
+          {
+            "x": 0.8355613946914673,
+            "y": -0.9991790652275085,
+            "z": 0.0,
+            "u": 0.4804687489631772,
+            "v": 0.9531249966042489
+          },
+          {
+            "x": 0.2755613625049591,
+            "y": 0.13082093000411987,
+            "z": 0.0,
+            "u": 0.3710937426767498,
+            "v": 0.8427734345699102
+          },
+          {
+            "x": 0.2755613625049591,
+            "y": -0.5491790771484375,
+            "z": 0.0,
+            "u": 0.3710937426767498,
+            "v": 0.9091796852684021
+          }
+        ],
+        "indices": [
+          24,
+          23,
+          22,
+          11,
+          22,
+          23,
+          9,
+          22,
+          11,
+          10,
+          22,
+          9,
+          18,
+          22,
+          10,
+          21,
+          22,
+          18,
+          19,
+          21,
+          18,
+          20,
+          19,
+          18,
+          17,
+          16,
+          14,
+          15,
+          14,
+          16,
+          13,
+          14,
+          15,
+          11,
+          14,
+          13,
+          12,
+          11,
+          13,
+          8,
+          11,
+          12,
+          10,
+          8,
+          12,
+          11,
+          8,
+          9,
+          10,
+          9,
+          8,
+          7,
+          6,
+          4,
+          5,
+          4,
+          6,
+          0,
+          4,
+          5,
+          3,
+          4,
+          0,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/seashroom/seablover/petals.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 4.0,
+        "width": 335.0,
+        "height": 329.0,
+        "yTop": 691.0
+      },
+      "logicalSize": {
+        "width": 335.0,
+        "height": 329.0
+      },
+      "pivot": {
+        "x": 0.47296676,
+        "y": 0.43744045
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "9bdc3f1c6b2e5234eb2635eeb6d19a1f": {
+      "texture": "textures/96675f8a72cc.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Blover_head2\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 619\n    width: 184\n    height: 158\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    25724fa26707ede49a198871364ef228: -4387577446947105661\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 70dd352e9dba6c74c82d1c97ae8251a5, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 21\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 9\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 080007000600050006000700040006000500030004000500010004000300000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 9\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 184\n      _typelessdata: 1f856b3ff628dc3e00000000d7a3303fb81e45bf000000001f856b3f14aec7be00000000b81e053f713d4a3f00000000b81e053f713d4abf00000000f628dcbe713d4a3f00000000295c0fbf713d4abf000000001f856bbfd7a3f03e000000001f856bbfa470bdbe0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 619\n      width: 184\n      height: 158\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 96, z: 100, w: 698}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.9200000166893005,
+            "y": 0.4300000071525574,
+            "z": 0.0,
+            "u": 0.367187503259629,
+            "v": 0.27636718680150807
+          },
+          {
+            "x": 0.6899999976158142,
+            "y": -0.7699999809265137,
+            "z": 0.0,
+            "u": 0.3222656245343387,
+            "v": 0.39355468563735485
+          },
+          {
+            "x": 0.9200000166893005,
+            "y": -0.38999998569488525,
+            "z": 0.0,
+            "u": 0.367187503259629,
+            "v": 0.35644531110301614
+          },
+          {
+            "x": 0.5199999809265137,
+            "y": 0.7900000214576721,
+            "z": 0.0,
+            "u": 0.2890624962747097,
+            "v": 0.2412109354045242
+          },
+          {
+            "x": 0.5199999809265137,
+            "y": -0.7900000214576721,
+            "z": 0.0,
+            "u": 0.2890624962747097,
+            "v": 0.3955078145954758
+          },
+          {
+            "x": -0.4300000071525574,
+            "y": 0.7900000214576721,
+            "z": 0.0,
+            "u": 0.10351562360301614,
+            "v": 0.2412109354045242
+          },
+          {
+            "x": -0.5600000023841858,
+            "y": -0.7900000214576721,
+            "z": 0.0,
+            "u": 0.07812499953433871,
+            "v": 0.3955078145954758
+          },
+          {
+            "x": -0.9200000166893005,
+            "y": 0.4699999988079071,
+            "z": 0.0,
+            "u": 0.007812496740370989,
+            "v": 0.2724609376164153
+          },
+          {
+            "x": -0.9200000166893005,
+            "y": -0.3700000047683716,
+            "z": 0.0,
+            "u": 0.007812496740370989,
+            "v": 0.3544921879656613
+          }
+        ],
+        "indices": [
+          8,
+          7,
+          6,
+          5,
+          6,
+          7,
+          4,
+          6,
+          5,
+          3,
+          4,
+          5,
+          1,
+          4,
+          3,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/seashroom/seablover/Blover_head2.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 619.0,
+        "width": 184.0,
+        "height": 158.0,
+        "yTop": 247.0
+      },
+      "logicalSize": {
+        "width": 184.0,
+        "height": 158.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    }
+  },
+  "extraSpriteGuids": {},
+  "anchors": {
+    "shadow": {
+      "path": "Shadow",
+      "x": 0.01,
+      "y": 0.22,
+      "relativeToRuntimeRoot": true
+    }
+  },
+  "visualBounds": {
+    "minX": -0.4235567863639832,
+    "maxX": 0.3375000059604645,
+    "minY": 0.0025000196355819404,
+    "maxY": 0.9137727063761902
+  },
+  "clips": {
+    "idle": {
+      "name": "idle",
+      "duration": 2.0,
+      "additiveReferencePoseTime": 0.0,
+      "hasAdditiveReferencePose": false,
+      "loop": true,
+      "sourceSampleRate": 60.0,
+      "curves": [
+        {
+          "kind": "position",
+          "path": "SeaShroom_body",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": -0.07500005,
+                "y": 1.505,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": -0.0074999034,
+                "y": -0.022599936,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.5,
+              "value": {
+                "x": -0.07875,
+                "y": 1.4937,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "x": -0.07500005,
+                "y": 1.505,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.5,
+              "value": {
+                "x": -0.07875,
+                "y": 1.4937,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 2.0,
+              "value": {
+                "x": -0.07500005,
+                "y": 1.505,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0074999034,
+                "y": 0.022599936,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "SeaShroom_body"
+        },
+        {
+          "kind": "scale",
+          "path": "SeaShroom_body",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.099999905,
+                "y": -0.100000024,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.5,
+              "value": {
+                "x": 1.05,
+                "y": 0.95,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": -0.099999964,
+                "y": 0.099999964,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": -0.099999964,
+                "y": 0.099999964,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.5,
+              "value": {
+                "x": 0.95,
+                "y": 1.05,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 2.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.100000024,
+                "y": -0.099999905,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "SeaShroom_body"
+        }
+      ],
+      "events": []
+    },
+    "blow": {
+      "name": "blow",
+      "duration": 0.8333333,
+      "additiveReferencePoseTime": 0.0,
+      "hasAdditiveReferencePose": false,
+      "loop": false,
+      "sourceSampleRate": 60.0,
+      "curves": [
+        {
+          "kind": "euler",
+          "path": "SeaShroom_body/petals",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": "-Infinity",
+                "z": 91.152
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.25,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 22.788
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -282.52808
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": "-Infinity",
+                "z": -282.528
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.8333333,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -360.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -656.20825
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "SeaShroom_body/petals"
+        },
+        {
+          "kind": "position",
+          "path": "SeaShroom_body",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": -0.07500005,
+                "y": 1.505,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.25,
+              "value": {
+                "x": -0.07500005,
+                "y": 1.409,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.48333332,
+              "value": {
+                "x": -0.07500005,
+                "y": 1.505,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 5.812868e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "SeaShroom_body"
+        },
+        {
+          "kind": "position",
+          "path": "SeaShroom_body/petals",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": -0.252,
+                "y": 0.553,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.48333332,
+              "value": {
+                "x": -0.17,
+                "y": 0.799,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -1.00349475e-07,
+                "y": 8.787188e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "SeaShroom_body/petals"
+        },
+        {
+          "kind": "scale",
+          "path": "SeaShroom_body",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.25,
+              "value": {
+                "x": 1.0,
+                "y": 0.9,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.48333332,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": -2.4976492e-09,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "SeaShroom_body"
+        },
+        {
+          "kind": "sprite",
+          "path": "SeaShroom_body",
+          "keys": [
+            {
+              "time": 0.0,
+              "spriteGuid": "82c9904737b1f45458f53adae7182746"
+            },
+            {
+              "time": 0.48333332,
+              "spriteGuid": "9bdc3f1c6b2e5234eb2635eeb6d19a1f"
+            }
+          ],
+          "sourceBindingPath": "SeaShroom_body"
+        }
+      ],
+      "events": [
+        {
+          "time": 0.48333332,
+          "functionName": "AnimBlow",
+          "intParameter": 0,
+          "floatParameter": 0.0,
+          "stringParameter": ""
+        }
+      ]
+    },
+    "blowloop": {
+      "name": "blowloop",
+      "duration": 0.6666667,
+      "additiveReferencePoseTime": 0.0,
+      "hasAdditiveReferencePose": false,
+      "loop": true,
+      "sourceSampleRate": 60.0,
+      "curves": [
+        {
+          "kind": "euler",
+          "path": "SeaShroom_body/petals",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 22.788
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": "-Infinity",
+                "z": -574.18195
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -360.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -574.182
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "SeaShroom_body/petals"
+        },
+        {
+          "kind": "position",
+          "path": "SeaShroom_body",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": -0.07500005,
+                "y": 1.505,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.31666666,
+              "value": {
+                "x": -0.07500005,
+                "y": 1.472,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": -2.6720821e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": -0.07500005,
+                "y": 1.505,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": -1.9760751e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "SeaShroom_body"
+        },
+        {
+          "kind": "position",
+          "path": "SeaShroom_body/petals",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": -0.20888016,
+                "y": 0.6823596,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": -0.20888016,
+                "y": 0.6823596,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "SeaShroom_body/petals"
+        },
+        {
+          "kind": "sprite",
+          "path": "SeaShroom_body",
+          "keys": [
+            {
+              "time": 0.0,
+              "spriteGuid": "9bdc3f1c6b2e5234eb2635eeb6d19a1f"
+            }
+          ],
+          "sourceBindingPath": "SeaShroom_body"
+        }
+      ],
+      "events": []
+    }
+  },
+  "controller": {
+    "states": [
+      {
+        "id": 1102730242686860875,
+        "name": "idle",
+        "clip": "idle",
+        "speed": 1.0,
+        "speedParameterActive": true,
+        "speedParameter": "Speed"
+      },
+      {
+        "id": 1102618682377417806,
+        "name": "blow",
+        "clip": "blow",
+        "speed": 1.0,
+        "speedParameterActive": false,
+        "speedParameter": ""
+      },
+      {
+        "id": 1102884547391421755,
+        "name": "blowloop",
+        "clip": "blowloop",
+        "speed": 1.0,
+        "speedParameterActive": false,
+        "speedParameter": ""
+      }
+    ],
+    "layers": [
+      {
+        "name": "Base Layer",
+        "blendingMode": 0,
+        "defaultState": 1102730242686860875,
+        "states": [
+          1102730242686860875,
+          1102618682377417806,
+          1102884547391421755
+        ],
+        "defaultWeight": 0.0
+      }
+    ],
+    "serializedController": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!91 &9100000\nAnimatorController:\n  serializedVersion: 5\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: SeaBlover\n  m_AnimatorParameters:\n  - m_Name: blow\n    m_Type: 9\n    m_DefaultFloat: 0\n    m_DefaultInt: 0\n    m_DefaultBool: 0\n    m_Controller: {fileID: 9100000}\n  - m_Name: Speed\n    m_Type: 1\n    m_DefaultFloat: 1\n    m_DefaultInt: 0\n    m_DefaultBool: 0\n    m_Controller: {fileID: 9100000}\n  m_AnimatorLayers:\n  - serializedVersion: 5\n    m_Name: Base Layer\n    m_StateMachine: {fileID: 1107709254077376921}\n    m_Mask: {fileID: 0}\n    m_Motions: []\n    m_Behaviours: []\n    m_BlendingMode: 0\n    m_SyncedLayerIndex: -1\n    m_DefaultWeight: 0\n    m_IKPass: 0\n    m_SyncedLayerAffectsTiming: 0\n    m_Controller: {fileID: 9100000}\n--- !u!1107 &1107709254077376921\nAnimatorStateMachine:\n  serializedVersion: 6\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Base Layer\n  m_ChildStates:\n  - m_State: {fileID: 1102730242686860875}\n    m_Position: {x: 0, y: 0, z: 0}\n  - m_State: {fileID: 1102618682377417806}\n    m_Position: {x: 250, y: 0, z: 0}\n  - m_State: {fileID: 1102884547391421755}\n    m_Position: {x: 0, y: 100, z: 0}\n  m_ChildStateMachines: []\n  m_AnyStateTransitions: []\n  m_EntryTransitions: []\n  m_StateMachineTransitions: {}\n  m_StateMachineBehaviours: []\n  m_AnyStatePosition: {x: 0, y: -100, z: 0}\n  m_EntryPosition: {x: 250, y: -100, z: 0}\n  m_ExitPosition: {x: 500, y: -100, z: 0}\n  m_ParentStateMachinePosition: {x: 0, y: -200, z: 0}\n  m_DefaultState: {fileID: 1102730242686860875}\n--- !u!1102 &1102730242686860875\nAnimatorState:\n  serializedVersion: 6\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: idle\n  m_Speed: 1\n  m_CycleOffset: 0\n  m_Transitions:\n  - {fileID: 1101724804207875695}\n  m_StateMachineBehaviours: []\n  m_Position: {x: 0, y: 0, z: 0}\n  m_IKOnFeet: 0\n  m_WriteDefaultValues: 1\n  m_Mirror: 0\n  m_SpeedParameterActive: 1\n  m_MirrorParameterActive: 0\n  m_CycleOffsetParameterActive: 0\n  m_TimeParameterActive: 0\n  m_Motion: {fileID: 7400000, guid: 07c4d94bdce6f04458659522b92b1dc7, type: 2}\n  m_Tag:\n  m_SpeedParameter: Speed\n  m_MirrorParameter:\n  m_CycleOffsetParameter:\n  m_TimeParameter:\n--- !u!1101 &1101724804207875695\nAnimatorStateTransition:\n  serializedVersion: 3\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name:\n  m_Conditions:\n  - m_ConditionMode: 1\n    m_ConditionEvent: blow\n    m_EventTreshold: 0\n  m_DstStateMachine: {fileID: 0}\n  m_DstState: {fileID: 1102618682377417806}\n  m_Solo: 0\n  m_Mute: 0\n  m_IsExit: 0\n  m_TransitionDuration: 0.25\n  m_TransitionOffset: 0\n  m_ExitTime: 0.875\n  m_HasExitTime: 1\n  m_HasFixedDuration: 1\n  m_InterruptionSource: 0\n  m_OrderedInterruption: 1\n  m_CanTransitionToSelf: 1\n--- !u!1102 &1102618682377417806\nAnimatorState:\n  serializedVersion: 6\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: blow\n  m_Speed: 1\n  m_CycleOffset: 0\n  m_Transitions:\n  - {fileID: 1101703437598541787}\n  m_StateMachineBehaviours: []\n  m_Position: {x: 250, y: 0, z: 0}\n  m_IKOnFeet: 0\n  m_WriteDefaultValues: 1\n  m_Mirror: 0\n  m_SpeedParameterActive: 0\n  m_MirrorParameterActive: 0\n  m_CycleOffsetParameterActive: 0\n  m_TimeParameterActive: 0\n  m_Motion: {fileID: 7400000, guid: dfbcc123158ff8048a26c3e4f58a4e4a, type: 2}\n  m_Tag:\n  m_SpeedParameter:\n  m_MirrorParameter:\n  m_CycleOffsetParameter:\n  m_TimeParameter:\n--- !u!1101 &1101703437598541787\nAnimatorStateTransition:\n  serializedVersion: 3\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name:\n  m_Conditions: []\n  m_DstStateMachine: {fileID: 0}\n  m_DstState: {fileID: 1102884547391421755}\n  m_Solo: 0\n  m_Mute: 0\n  m_IsExit: 0\n  m_TransitionDuration: 0.25\n  m_TransitionOffset: 0\n  m_ExitTime: 0.64285713\n  m_HasExitTime: 1\n  m_HasFixedDuration: 1\n  m_InterruptionSource: 0\n  m_OrderedInterruption: 1\n  m_CanTransitionToSelf: 1\n--- !u!1102 &1102884547391421755\nAnimatorState:\n  serializedVersion: 6\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: blowloop\n  m_Speed: 1\n  m_CycleOffset: 0\n  m_Transitions: []\n  m_StateMachineBehaviours: []\n  m_Position: {x: 0, y: 100, z: 0}\n  m_IKOnFeet: 0\n  m_WriteDefaultValues: 1\n  m_Mirror: 0\n  m_SpeedParameterActive: 0\n  m_MirrorParameterActive: 0\n  m_CycleOffsetParameterActive: 0\n  m_TimeParameterActive: 0\n  m_Motion: {fileID: 7400000, guid: 38d20f49ba04d244aba9df4db10ab645, type: 2}\n  m_Tag:\n  m_SpeedParameter:\n  m_MirrorParameter:\n  m_CycleOffsetParameter:\n  m_TimeParameter:\n"
+  },
+  "nonRenderingComponents": [
+    {
+      "typeId": 61,
+      "fileId": 61044625135789424,
+      "serializedComponent": "BoxCollider2D:\n  serializedVersion: 2\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1709254077376921}\n  m_Enabled: 1\n  m_Density: 1\n  m_Material: {fileID: 0}\n  m_IncludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_ExcludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_LayerOverridePriority: 0\n  m_ForceSendLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_ForceReceiveLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_ContactCaptureLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_CallbackLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_IsTrigger: 1\n  m_UsedByEffector: 0\n  m_UsedByComposite: 0\n  m_Offset: {x: -0.0825026, y: 2.286505}\n  m_SpriteTilingProperty:\n    border: {x: 0, y: 0, z: 0, w: 0}\n    pivot: {x: 0, y: 0}\n    oldSize: {x: 0, y: 0}\n    newSize: {x: 0, y: 0}\n    adaptiveTilingThreshold: 0\n    drawMode: 0\n    adaptiveTiling: 0\n  m_AutoTiling: 0\n  m_Size: {x: 5.596583, y: 4.912987}\n  m_EdgeRadius: 0\n"
+    },
+    {
+      "typeId": 61,
+      "fileId": 61589667821646929,
+      "serializedComponent": "BoxCollider2D:\n  serializedVersion: 2\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1709254077376921}\n  m_Enabled: 1\n  m_Density: 1\n  m_Material: {fileID: 0}\n  m_IncludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_ExcludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_LayerOverridePriority: 0\n  m_ForceSendLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_ForceReceiveLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_ContactCaptureLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_CallbackLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_IsTrigger: 1\n  m_UsedByEffector: 0\n  m_UsedByComposite: 0\n  m_Offset: {x: 0.4125138, y: 1.3907608}\n  m_SpriteTilingProperty:\n    border: {x: 0, y: 0, z: 0, w: 0}\n    pivot: {x: 0, y: 0}\n    oldSize: {x: 0, y: 0}\n    newSize: {x: 0, y: 0}\n    adaptiveTilingThreshold: 0\n    drawMode: 0\n    adaptiveTiling: 0\n  m_AutoTiling: 0\n  m_Size: {x: 1.8250276, y: 2.8857772}\n  m_EdgeRadius: 0\n"
+    },
+    {
+      "typeId": 50,
+      "fileId": 50372920208702427,
+      "serializedComponent": "Rigidbody2D:\n  serializedVersion: 4\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1709254077376921}\n  m_BodyType: 1\n  m_Simulated: 1\n  m_UseFullKinematicContacts: 0\n  m_UseAutoMass: 0\n  m_Mass: 1\n  m_LinearDrag: 0\n  m_AngularDrag: 0.05\n  m_GravityScale: 1\n  m_Material: {fileID: 0}\n  m_IncludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_ExcludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_Interpolate: 0\n  m_SleepingMode: 1\n  m_CollisionDetection: 0\n  m_Constraints: 0\n"
+    },
+    {
+      "typeId": 114,
+      "fileId": 114985305603660343,
+      "serializedComponent": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1709254077376921}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: be5331bc7c056a52745f2cf36c4fbeb2, type: 3}\n  m_Name:\n  m_EditorClassIdentifier:\n  mouseCollider: {fileID: 0}\n  thePlantMaxHealth: 300\n  thePlantHealth: 300\n  attackDamage: 20\n  thePlantAttackInterval: 0\n  thePlantProduceInterval: 0\n  isLily: 0\n  invincible: 0\n  isShort: 1\n  board: {fileID: 0}\n  pumpkin: {fileID: 0}\n  shadow: {fileID: 0}\n  startPos: {x: 0, y: 0, z: 0}\n  thePlantColumn: 0\n  thePlantRow: 0\n  magnetCount: 0\n  theLevel: 0\n  thePlantSpeed: 1\n  thePlantAttackCountDown: 0\n  thePlantProduceCountDown: 0\n  attributeCountdown: 0\n  lightCountDown: 0\n  flashCountDown: 0\n  wheatTime: 0\n  brightness: 1\n  lastTakeDamgeTime: 0\n  disappearTime: 0\n  isFlashing: 0\n  isFromWheat: 0\n  alwaysLightUp: 0\n  isCrashed: 0\n  melonSputter: 0\n  dieMeansLose: 0\n  isGray: 0\n  isConnected: 0\n  keepShooting: 0\n  waitingDestory: 0\n  targetBox: {x: 0, y: 0}\n  moveTime: 0\n  timers:\n  - 0\n  - 0\n  - 0\n  disableCount: 0\n  attributeCount: 0\n  puffPlace: 0\n  baseLayer: 0\n  currentLightLevel: 0\n  p: 4\n  thePlantStage: 0\n  thePlantType: 0\n  theLilyType: -1\n  firstParent: -1\n  secondParent: -1\n  zombieLayer:\n    serializedVersion: 2\n    m_Bits: 0\n  plantLayer:\n    serializedVersion: 2\n    m_Bits: 0\n  theStatus: 0\n  next: {fileID: 0}\n  pre: {fileID: 0}\n  bulletLayer:\n    serializedVersion: 2\n    m_Bits: 0\n  plantTag:\n    flyingPlant: 0\n    hardLandPlant: 0\n    waterPlant: 0\n    pumpkinPlant: 0\n    lanternPlant: 0\n    smallLanternPlant: 0\n    puffPlant: 0\n    nutPlant: 0\n    tallNutPlant: 0\n    potatoPlant: 0\n    caltropPlant: 0\n    tanglekelpPlant: 0\n    magnetPlant: 0\n    potPlant: 0\n    doubleBoxPlant: 0\n    spickRockPlant: 0\n    icePlant: 0\n    firePlant: 0\n  anim: {fileID: 0}\n  healthText: {fileID: 0}\n  healthTextShadow: {fileID: 0}\n  levelIcon: {fileID: 0}\n  targetPlant: {fileID: 0}\n  targetZombie: {fileID: 0}\n  falling: 0\n  regeneration: 0\n  shoot: {fileID: 0}\n  connectPlant: {fileID: 0}\n"
+    }
+  ],
+  "colliders": [
+    {
+      "type": "box",
+      "node": 0,
+      "fileId": 61044625135789424,
+      "enabled": true,
+      "trigger": true,
+      "offset": {
+        "x": -0.0825026,
+        "y": 2.286505
+      },
+      "size": {
+        "x": 5.596583,
+        "y": 4.912987
+      }
+    },
+    {
+      "type": "box",
+      "node": 0,
+      "fileId": 61589667821646929,
+      "enabled": true,
+      "trigger": true,
+      "offset": {
+        "x": 0.4125138,
+        "y": 1.3907608
+      },
+      "size": {
+        "x": 1.8250276,
+        "y": 2.8857772
+      }
+    }
+  ],
+  "ignoredBindings": [],
+  "omittedInactiveNodes": [],
+  "spritePrefix": null,
+  "unusedSpriteBonesExplicitlyAllowed": false,
+  "sources": [
+    {
+      "path": "Resources/plants/seashroom/idle.anim",
+      "sha256": "b87a7fffb0ecf8cf664334501602c563b6b277a43ffcf73457d15470ddc5e6c8"
+    },
+    {
+      "path": "Resources/plants/seashroom/idle.anim.meta",
+      "sha256": "3c6f5f3673bed00e83ef0b8480484d797a0f96b084eb002c2ba7a78f110cde5b"
+    },
+    {
+      "path": "Resources/plants/seashroom/seablover/Blover_head.asset",
+      "sha256": "b090d35424fcf4f7197ff283499bc035959bc097668bc7cea13d3da33d6bcb07"
+    },
+    {
+      "path": "Resources/plants/seashroom/seablover/Blover_head.asset.meta",
+      "sha256": "5644dfd02cd0e4c02da348021c4589ca6af446923cf2b2f1fe13e0fc8b171151"
+    },
+    {
+      "path": "Resources/plants/seashroom/seablover/Blover_head2.asset",
+      "sha256": "d947d7c8bc2262212d069097776495830a8563ec7111b2dc9ad551034a788d36"
+    },
+    {
+      "path": "Resources/plants/seashroom/seablover/Blover_head2.asset.meta",
+      "sha256": "c94a7aae7abd38a3fb3e77191d7889c0b61bc2522c958d1e7efc54f71ed16032"
+    },
+    {
+      "path": "Resources/plants/seashroom/seablover/blow.anim",
+      "sha256": "9fd1bba9defb40d576a887227ecae51a4b90fabbb5530a850f294fce13b4f574"
+    },
+    {
+      "path": "Resources/plants/seashroom/seablover/blow.anim.meta",
+      "sha256": "59e95ff9b3601099a4673592e5288a36f445abd3963777e57dcfe2c5351cb468"
+    },
+    {
+      "path": "Resources/plants/seashroom/seablover/blowloop.anim",
+      "sha256": "3a8ac2336ae2a003b3653ff237424001ad98608ae82e74fcd8e4d72a185d1839"
+    },
+    {
+      "path": "Resources/plants/seashroom/seablover/blowloop.anim.meta",
+      "sha256": "42284dd889641e15ac2eaad6a9803de88b53dbe527c3d1864c2cfe4bf71deebe"
+    },
+    {
+      "path": "Resources/plants/seashroom/seablover/petals.asset",
+      "sha256": "4ed38cd634d1866f72f3fe1fc97741bee825e3402a5dadfea96606c96f3f7c02"
+    },
+    {
+      "path": "Resources/plants/seashroom/seablover/petals.asset.meta",
+      "sha256": "91650325b41db49cab660ded7131ed7f0403bbf130d679183910b3fa3e9a0259"
+    },
+    {
+      "path": "Resources/plants/seashroom/seablover/SeaBlover.controller",
+      "sha256": "5bd2e39933bcd7314dabff57acdc8f49cb09a8d8767b834785b1dcc0f36e040e"
+    },
+    {
+      "path": "Resources/plants/seashroom/seablover/SeaBlover.controller.meta",
+      "sha256": "3f582ea24805775bb5e3f2eb214af187ed2efd1849404f2a33584d8abbdba773"
+    },
+    {
+      "path": "Resources/plants/seashroom/seablover/SeaBlover.png",
+      "sha256": "96675f8a72cce265ef69f45c4ee31eaa7de3d2e5e08e030f7be8267e0b97723b"
+    },
+    {
+      "path": "Resources/plants/seashroom/seablover/SeaBlover.png.meta",
+      "sha256": "895fc1ca9f3e03b19512ea2c6ba15dff088e3b949ee6e9a44f3b36ab6eacd6c0"
+    },
+    {
+      "path": "Resources/plants/seashroom/seablover/SeaBloverPrefab.prefab",
+      "sha256": "c96b39fd40cbc3f914eb56c65b29235af3f5363da2d0692cd6709efad8748491"
+    },
+    {
+      "path": "Resources/plants/seashroom/seablover/SeaShroom_head.asset",
+      "sha256": "e71faaf828925b8711f07c1d75e70289fdd1d5b952176f4fc0de81b65d33e825"
+    },
+    {
+      "path": "Resources/plants/seashroom/seablover/SeaShroom_head.asset.meta",
+      "sha256": "fd1e0405cf53a64af855d6aa9fe2164bb77d0abd56de268ef375a2a83bdc8f05"
+    },
+    {
+      "path": "Resources/plants/seashroom/SeaShroom.png",
+      "sha256": "4719ca59e02112dd80c1bc2bca931104db2ea3fe51c3630737bbb23ec42da5d3"
+    },
+    {
+      "path": "Resources/plants/seashroom/SeaShroom.png.meta",
+      "sha256": "c4fc4f4d10aa85d84b73a023d388fc6f7c48a7eff7f26ce40ac0f6b175e5c672"
+    },
+    {
+      "path": "Resources/plants/seashroom/SeaShroom_blink1.asset",
+      "sha256": "6f9716258206789876fc505d7e6a7e1f71170e6499bede6ac41b7bbfe48f114a"
+    },
+    {
+      "path": "Resources/plants/seashroom/SeaShroom_blink1.asset.meta",
+      "sha256": "8dfea2e472d29f699c6816a143b2def22b413b4be16f01b0939d5d12ba59b16a"
+    },
+    {
+      "path": "Resources/plants/seashroom/SeaShroom_blink2.asset",
+      "sha256": "a2559a7fccdacb0af88be2d02265b91e2c703d842cd8965e36be1c756423e684"
+    },
+    {
+      "path": "Resources/plants/seashroom/SeaShroom_blink2.asset.meta",
+      "sha256": "d1403713f7a28593520a726da999da818979d421ca030fa6a8a4bdd4d452e596"
+    },
+    {
+      "path": "Resources/plants/seashroom/SeaShroom_foam.asset",
+      "sha256": "fc2209d38b035453cad1ad76704da1fdf65d86a7cf9b461d32b341db28269e0c"
+    },
+    {
+      "path": "Resources/plants/seashroom/SeaShroom_foam.asset.meta",
+      "sha256": "1fd81ecbd30c343f523ea6278c9e3447ac3ac2d7097ab2f4955592c5629d0aa8"
+    },
+    {
+      "path": "Resources/plants/seashroom/SeaShroom_tentacles.asset",
+      "sha256": "54a7677a47e2ec815daed46d0ea1a94897519f508cb48b9c75b64b3eef9455bd"
+    },
+    {
+      "path": "Resources/plants/seashroom/SeaShroom_tentacles.asset.meta",
+      "sha256": "ea908294505c13280a06f9245873bbc282b55e27c8be36f39808bab7e13c137e"
+    }
+  ],
+  "deferredComponents": [],
+  "validation": "Exported source data. Native rendering and source-runtime comparison are separate verification steps."
+}

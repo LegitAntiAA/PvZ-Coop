@@ -313,7 +313,7 @@ function Start-SmokeProcess {
     $childEnvironment["PVZ_COOP_SMOKE_MODES"] = $(if ($VerifyModes) { "1" } else { "0" })
     $childEnvironment["PVZ_COOP_SMOKE_FIRST_ADVENTURE"] = $(if ($VerifyFirstAdventure) { "1" } else { "0" })
     $nativeUiWorkflow = $env:PVZ_COOP_SMOKE_NATIVE_UI -in @("appearance", "appearance-restart", "browser", "browser-probe")
-    $childEnvironment["PVZ_COOP_SMOKE_HIDE_CONTROL_CHAT"] = $(if ($VerifyFirstAdventure -or $nativeUiWorkflow -or $env:PVZ_COOP_SMOKE_MYSTERY -eq "1" -or $env:PVZ_COOP_SMOKE_GAME_OVER -in @("retry", "close")) { "1" } else { "0" })
+    $childEnvironment["PVZ_COOP_SMOKE_HIDE_CONTROL_CHAT"] = $(if ($env:PVZ_COOP_SMOKE_HIDE_CONTROL_CHAT -eq "1" -or $VerifyFirstAdventure -or $nativeUiWorkflow -or $env:PVZ_COOP_SMOKE_MYSTERY -eq "1" -or $env:PVZ_COOP_SMOKE_GAME_OVER -in @("retry", "close")) { "1" } else { "0" })
     $childEnvironment["PVZ_COOP_SMOKE_BACKGROUND"] = $(if ($Background) { "1" } else { "0" })
     $childEnvironment["PVZ_COOP_SMOKE_ONLINE_ENDPOINT"] = $OnlineEndpoint
     if ($Background) {
@@ -763,6 +763,9 @@ function Stop-OwnedProcess {
             return $true
         }
         if (-not (Test-OwnedProcessIdentity $Process)) {
+            # An owned process can finish between the first exit check and
+            # identity lookup. Its original handle proves it already stopped.
+            try { $Process.Refresh(); if ($Process.HasExited) { return $true } } catch { }
             Write-Warning ("Refusing to close {0}: PID/path/start time do not match the owned launch." -f $Role)
             return $false
         }

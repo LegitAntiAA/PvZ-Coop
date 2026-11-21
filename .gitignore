@@ -13,4 +13,6 @@ Plants Vs. Zombies/
 Plants Vs Zombies/
 resourcepack/
 work/
+__pycache__/
+*.pyc
 Lawn/Net/NetBuildVersion.h

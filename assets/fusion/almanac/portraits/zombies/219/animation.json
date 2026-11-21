@@ -1,0 +1,512 @@
+{
+  "anchors": {},
+  "applyRootMotion": false,
+  "clips": {},
+  "colliders": [],
+  "controller": {
+    "layers": [],
+    "serializedController": "",
+    "states": []
+  },
+  "deferredComponents": [],
+  "extraSpriteGuids": {},
+  "ignoredBindings": [],
+  "nodes": [
+    {
+      "active": true,
+      "name": "AlmanacZombie",
+      "parent": -1,
+      "path": "",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "ZombieGrop",
+      "parent": 0,
+      "path": "ZombieGrop",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "Grop3",
+      "parent": 1,
+      "path": "ZombieGrop/Grop3",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "Pages",
+      "parent": 2,
+      "path": "ZombieGrop/Grop3/Pages",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "Page1",
+      "parent": 3,
+      "path": "ZombieGrop/Grop3/Pages/Page1",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "Card",
+      "parent": 4,
+      "path": "ZombieGrop/Grop3/Pages/Page1/Card",
+      "position": {
+        "x": -0.299999,
+        "y": -1.1000001,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0
+      },
+      "scale": {
+        "x": 2.0,
+        "y": 2.0,
+        "z": 2.0
+      },
+      "tag": "Untagged"
+    },
+    {
+      "active": true,
+      "name": "UltimateFootballDrown",
+      "parent": 5,
+      "path": "ZombieGrop/Grop3/Pages/Page1/Card/UltimateFootballDrown",
+      "position": {
+        "x": 0.007,
+        "y": -0.079,
+        "z": 0.0
+      },
+      "rotation": {
+        "w": 1.0,
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "scale": {
+        "x": 0.08214912,
+        "y": 0.08214912,
+        "z": 0.08214912
+      },
+      "tag": "Untagged"
+    }
+  ],
+  "nonRenderingComponents": [],
+  "omittedInactiveNodes": [],
+  "root": 0,
+  "schema": 1,
+  "sourceHierarchy": null,
+  "sourcePrefab": "Resources/ui/almanac/AlmanacZombie.prefab",
+  "sources": [
+    {
+      "path": "Resources/ui/almanac/AlmanacZombie.prefab",
+      "sha256": "3704e03391ea372601e15cf6ff49fe731500ffe92d998adfedb0e88b284862aa"
+    },
+    {
+      "path": "Resources/zombies/machinenutzombie/ultimatemachinenut/UltimateMachineNut.png",
+      "sha256": "a9967d0bda670dc32cf7a39393907b00cde45f7e803fb2124484d1bcb8d7fb40"
+    },
+    {
+      "path": "Resources/zombies/machinenutzombie/ultimatemachinenut/UltimateMachineNut.png.meta",
+      "sha256": "6d2e715803644fbc0306b8681a23a4fdbe53baf47f982901ac092eadd48f6871"
+    },
+    {
+      "path": "Resources/zombies/machinenutzombie/ultimatemachinenut/yuan1.asset",
+      "sha256": "eb1ae894e7da450dedaf096eedb06961e6517c5f6a741eac58e51e6566d3a353"
+    },
+    {
+      "path": "Resources/zombies/machinenutzombie/ultimatemachinenut/yuan1.asset.meta",
+      "sha256": "db60666769c1149e06b4ccd4e8b456ddf3bf18f7147acfb6c43e5dd9628b907e"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/AlmanacCardZombie.cs.meta",
+      "sha256": "faf8882f92625339ade5d8a2ce122f5a60ea07c1beef78676fc31bd10df144dd"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/AlmanacZombieCtrl.cs.meta",
+      "sha256": "319f4f60a393ede0ab9edf0b0157927d2087703afa027f6a777bf09ebcb81c5d"
+    }
+  ],
+  "spritePrefix": null,
+  "spriteVariants": {
+    "a78f0cba19d45834bb0d42ae72022ae0": {
+      "hasBoneMetadata": false,
+      "logicalSize": {
+        "height": 629.0,
+        "width": 627.0
+      },
+      "mesh": {
+        "indices": [
+          8,
+          7,
+          6,
+          5,
+          6,
+          7,
+          3,
+          6,
+          5,
+          4,
+          3,
+          5,
+          0,
+          3,
+          4,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform",
+        "vertices": [
+          {
+            "u": 0.6005859281867743,
+            "v": 0.8056640616850927,
+            "x": 2.9749999046325684,
+            "y": 0.7950000166893005,
+            "z": 0.0
+          },
+          {
+            "u": 0.6162109365686774,
+            "v": 0.9252929673530161,
+            "x": 3.134999990463257,
+            "y": -1.6549999713897705,
+            "z": 0.0
+          },
+          {
+            "u": 0.6162109365686774,
+            "v": 0.8115234369179234,
+            "x": 3.134999990463257,
+            "y": 0.675000011920929,
+            "z": 0.0
+          },
+          {
+            "u": 0.5781249888241291,
+            "v": 0.9980468740686774,
+            "x": 2.744999885559082,
+            "y": -3.1449999809265137,
+            "z": 0.0
+          },
+          {
+            "u": 0.43847656808793545,
+            "v": 0.6909179696813226,
+            "x": 1.315000057220459,
+            "y": 3.1449999809265137,
+            "z": 0.0
+          },
+          {
+            "u": 0.04687500651925802,
+            "v": 0.6909179696813226,
+            "x": -2.694999933242798,
+            "y": 3.1449999809265137,
+            "z": 0.0
+          },
+          {
+            "u": 0.008789058774709702,
+            "v": 0.9980468740686774,
+            "x": -3.0850000381469727,
+            "y": -3.1449999809265137,
+            "z": 0.0
+          },
+          {
+            "u": 0.003906250931322575,
+            "v": 0.7041015625,
+            "x": -3.134999990463257,
+            "y": 2.875,
+            "z": 0.0
+          },
+          {
+            "u": 0.003906250931322575,
+            "v": 0.9951171893626451,
+            "x": -3.134999990463257,
+            "y": -3.0850000381469727,
+            "z": 0.0
+          }
+        ]
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "pixelsPerUnit": 100.0,
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: yuan1\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 4\n    width: 627\n    height: 629\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    399b5ea0875248a4fb3dd7e13f3e5d9b: -8339472113489724917\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 46804ef2ef4f8444891d831d25544e05, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 21\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 9\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 080007000600050006000700030006000500040003000500000003000400010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 9\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 184\n      _typelessdata: 66663e401f854b3f00000000d7a348400ad7d3bf00000000d7a34840cdcc2c3f0000000014ae2f40ae4749c000000000ec51a83fae47494000000000e17a2cc0ae47494000000000a47045c0ae4749c000000000d7a348c00000384000000000d7a348c0a47045c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 4\n      width: 627\n      height: 629\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 317.5, z: 100, w: 318.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "sourceSprite": "Resources/zombies/machinenutzombie/ultimatemachinenut/yuan1.asset",
+      "texture": "../../textures/a9967d0bda670dc32cf7a39393907b00cde45f7e803fb2124484d1bcb8d7fb40.png",
+      "textureRect": {
+        "height": 629.0,
+        "width": 627.0,
+        "x": 4.0,
+        "y": 4.0,
+        "yTop": 1415.0
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      }
+    }
+  },
+  "sprites": [
+    {
+      "color": {
+        "a": 1.0,
+        "b": 1.0,
+        "g": 1.0,
+        "r": 1.0
+      },
+      "enabled": true,
+      "flipX": true,
+      "flipY": false,
+      "guid": "a78f0cba19d45834bb0d42ae72022ae0",
+      "hasBoneMetadata": false,
+      "logicalSize": {
+        "height": 629.0,
+        "width": 627.0
+      },
+      "mesh": {
+        "indices": [
+          8,
+          7,
+          6,
+          5,
+          6,
+          7,
+          3,
+          6,
+          5,
+          4,
+          3,
+          5,
+          0,
+          3,
+          4,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform",
+        "vertices": [
+          {
+            "u": 0.6005859281867743,
+            "v": 0.8056640616850927,
+            "x": 2.9749999046325684,
+            "y": 0.7950000166893005,
+            "z": 0.0
+          },
+          {
+            "u": 0.6162109365686774,
+            "v": 0.9252929673530161,
+            "x": 3.134999990463257,
+            "y": -1.6549999713897705,
+            "z": 0.0
+          },
+          {
+            "u": 0.6162109365686774,
+            "v": 0.8115234369179234,
+            "x": 3.134999990463257,
+            "y": 0.675000011920929,
+            "z": 0.0
+          },
+          {
+            "u": 0.5781249888241291,
+            "v": 0.9980468740686774,
+            "x": 2.744999885559082,
+            "y": -3.1449999809265137,
+            "z": 0.0
+          },
+          {
+            "u": 0.43847656808793545,
+            "v": 0.6909179696813226,
+            "x": 1.315000057220459,
+            "y": 3.1449999809265137,
+            "z": 0.0
+          },
+          {
+            "u": 0.04687500651925802,
+            "v": 0.6909179696813226,
+            "x": -2.694999933242798,
+            "y": 3.1449999809265137,
+            "z": 0.0
+          },
+          {
+            "u": 0.008789058774709702,
+            "v": 0.9980468740686774,
+            "x": -3.0850000381469727,
+            "y": -3.1449999809265137,
+            "z": 0.0
+          },
+          {
+            "u": 0.003906250931322575,
+            "v": 0.7041015625,
+            "x": -3.134999990463257,
+            "y": 2.875,
+            "z": 0.0
+          },
+          {
+            "u": 0.003906250931322575,
+            "v": 0.9951171893626451,
+            "x": -3.134999990463257,
+            "y": -3.0850000381469727,
+            "z": 0.0
+          }
+        ]
+      },
+      "node": 6,
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "pixelsPerUnit": 100.0,
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: yuan1\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 4\n    width: 627\n    height: 629\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    399b5ea0875248a4fb3dd7e13f3e5d9b: -8339472113489724917\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 46804ef2ef4f8444891d831d25544e05, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 21\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 9\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 080007000600050006000700030006000500040003000500000003000400010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 9\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 184\n      _typelessdata: 66663e401f854b3f00000000d7a348400ad7d3bf00000000d7a34840cdcc2c3f0000000014ae2f40ae4749c000000000ec51a83fae47494000000000e17a2cc0ae47494000000000a47045c0ae4749c000000000d7a348c00000384000000000d7a348c0a47045c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 4\n      width: 627\n      height: 629\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 317.5, z: 100, w: 318.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "sortingLayerId": 0,
+      "sortingOrder": 0,
+      "sourceSprite": "Resources/zombies/machinenutzombie/ultimatemachinenut/yuan1.asset",
+      "texture": "../../textures/a9967d0bda670dc32cf7a39393907b00cde45f7e803fb2124484d1bcb8d7fb40.png",
+      "textureRect": {
+        "height": 629.0,
+        "width": 627.0,
+        "x": 4.0,
+        "y": 4.0,
+        "yTop": 1415.0
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      }
+    }
+  ],
+  "static": true,
+  "uiPortraitExtraction": {
+    "gameObjectFileId": 1545644887736600,
+    "originalRendererEnabled": true,
+    "sourceActivity": [
+      {
+        "gameObjectFileId": 1709254077376921,
+        "originalActive": true
+      },
+      {
+        "gameObjectFileId": 1724804207875695,
+        "originalActive": true
+      },
+      {
+        "gameObjectFileId": 1092164755975753,
+        "originalActive": false
+      },
+      {
+        "gameObjectFileId": 1595037906316070,
+        "originalActive": true
+      },
+      {
+        "gameObjectFileId": 1919793621727318,
+        "originalActive": true
+      },
+      {
+        "gameObjectFileId": 1652820779262545,
+        "originalActive": true
+      },
+      {
+        "gameObjectFileId": 1545644887736600,
+        "originalActive": true
+      }
+    ],
+    "sourceSpriteRenderer": "SpriteRenderer:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1545644887736600}\n  m_Enabled: 1\n  m_CastShadows: 0\n  m_ReceiveShadows: 0\n  m_DynamicOccludee: 1\n  m_StaticShadowCaster: 0\n  m_MotionVectors: 1\n  m_LightProbeUsage: 1\n  m_ReflectionProbeUsage: 1\n  m_RayTracingMode: 0\n  m_RayTraceProcedural: 0\n  m_RenderingLayerMask: 1\n  m_RendererPriority: 0\n  m_Materials:\n  - {fileID: 2100000, guid: 8fa820fab1c50434da82a0d53ec31815, type: 2}\n  m_StaticBatchInfo:\n    firstSubMesh: 0\n    subMeshCount: 0\n  m_StaticBatchRoot: {fileID: 0}\n  m_ProbeAnchor: {fileID: 0}\n  m_LightProbeVolumeOverride: {fileID: 0}\n  m_ScaleInLightmap: 1\n  m_ReceiveGI: 1\n  m_PreserveUVs: 0\n  m_IgnoreNormalsForChartDetection: 0\n  m_ImportantGI: 0\n  m_StitchLightmapSeams: 0\n  m_SelectedEditorRenderState: 3\n  m_MinimumChartSize: 4\n  m_AutoUVMaxDistance: 0.5\n  m_AutoUVMaxAngle: 89\n  m_LightmapParameters: {fileID: 0}\n  m_SortingLayerID: 0\n  m_SortingLayer: 0\n  m_SortingOrder: 0\n  m_Sprite: {fileID: 21300000, guid: a78f0cba19d45834bb0d42ae72022ae0, type: 2}\n  m_Color: {r: 1, g: 1, b: 1, a: 1}\n  m_FlipX: 1\n  m_FlipY: 0\n  m_DrawMode: 0\n  m_Size: {x: 8.96, y: 6.64}\n  m_AdaptiveModeThreshold: 0.5\n  m_SpriteTileMode: 0\n  m_WasSpriteAssigned: 1\n  m_MaskInteraction: 1\n  m_SpriteSortPoint: 0\n",
+    "spriteRendererFileId": 212575022827800255,
+    "uiVisiblePose": "selected portrait renderer and its retained ancestors active"
+  },
+  "unitsPerNativePixel": 0.01,
+  "unusedSpriteBonesExplicitlyAllowed": false,
+  "validation": "Exported source data. Native rendering and source-runtime comparison are separate verification steps.",
+  "visualBounds": {
+    "maxX": 0.22907598083312997,
+    "maxY": -0.74128213833374,
+    "minX": -0.80107398083313,
+    "minY": -1.7747180616662597
+  }
+}

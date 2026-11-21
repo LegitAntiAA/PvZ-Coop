@@ -1,0 +1,824 @@
+{
+  "schema": 1,
+  "sourceVersion": "Fusion 2.3.1",
+  "assetPathRoot": "ExportedProject/Assets",
+  "sources": [
+    {
+      "path": "analysis/game_enums.json",
+      "sha256": "c17d2f33fba838c9bc706025074067329d1debc03a3cad7ff6c063206f48e0c7"
+    },
+    {
+      "path": "assetripper/extracted/AssetRipper_export_20261112_215914/ExportedProject/Assets/Resources/plant_data.txt",
+      "sha256": "b2d3032c2f53105e47c37d9fd0f2a644587f5dafe8271f65a7bd09195a1d286a"
+    },
+    {
+      "path": "assetripper/extracted/AssetRipper_export_20261112_215914/ExportedProject/Assets/Resources/LawnStrings.json",
+      "sha256": "e0ea87b8252a710c923392ec9f96bc0b7de4490d72d2b8162f1773c30e38750d"
+    },
+    {
+      "path": "assetripper/extracted/AssetRipper_export_20261112_215914/ExportedProject/Assets/Resources/ZombieStrings.json",
+      "sha256": "8b81ca48826c735bfe5de4005a18f2830065da36a5b73db830de9fbeb170cdaf"
+    },
+    {
+      "path": "GameAssembly.dll",
+      "sha256": "b19cfc30b2061514689a93191a979e76335dd02f5c12e550e1bb62de9578b94f"
+    }
+  ],
+  "counts": {
+    "plantEnumValues": 287,
+    "plantStats": 283,
+    "plantAlmanac": 281,
+    "zombieEnumValues": 95,
+    "zombieStats": 94,
+    "zombieAlmanac": 88,
+    "bulletEnumValues": 100
+  },
+  "recoveredTables": [
+    {
+      "path": "tools/fusion/reference/zombie-stats-2.3.1.json",
+      "sha256": "3c657a79fbb5655abe1a34da5a2c5cc590cbeee1ec45f8ebd7d335132bb13ac0",
+      "originalBinarySha256": "b19cfc30b2061514689a93191a979e76335dd02f5c12e550e1bb62de9578b94f",
+      "sourceFunctions": [
+        {
+          "method": "InitZombieData",
+          "va": "0x1803BA5C0",
+          "native_packed_writes": 98,
+          "records": 49,
+          "decompiled_code_sha256": "c6c3605eed32c4af07383ac6fbf12c7bc6e69a43bb00cba34b8c2f079c54fe9c"
+        },
+        {
+          "method": "PlantZombie",
+          "va": "0x1803BB0E0",
+          "native_packed_writes": 40,
+          "records": 20,
+          "decompiled_code_sha256": "140a671e029f5701689c5f91c3d275e66823c0302b1d6bae56044220612c4194"
+        },
+        {
+          "method": "TravelZombie",
+          "va": "0x1803BB590",
+          "native_packed_writes": 50,
+          "records": 25,
+          "decompiled_code_sha256": "e58c0590584db04ec17f6ce7c3f77fbb0cea5272ee53bec2ddaecb34de5f63e0"
+        }
+      ]
+    },
+    {
+      "path": "tools/fusion/reference/loader-bindings-2.3.1.json",
+      "sha256": "ae6998bada9de659fabaa501b200576a94bdab5a3d7e5e8c3ddc15a169b6e7e0",
+      "originalBinarySha256": "b19cfc30b2061514689a93191a979e76335dd02f5c12e550e1bb62de9578b94f",
+      "proof": "Original Resources.Load<GameObject> result stores; ID=(arrayByteOffset-0x20)/8. Zombie path uses original String.Concat prefix."
+    }
+  ],
+  "missingPlantStats": [
+    -1,
+    257,
+    258,
+    800
+  ],
+  "issues": [
+    {
+      "group": "PlantType",
+      "id": 246,
+      "enumName": "MagnetBox",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "PlantType",
+      "id": 247,
+      "enumName": "MagnetInterface",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "PlantType",
+      "id": 257,
+      "enumName": "Pit",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "PlantType",
+      "id": 258,
+      "enumName": "Refrash",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "PlantType",
+      "id": 800,
+      "enumName": "CustomPeashooter",
+      "mappingStatus": "sourcePreviewOnly",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 0,
+      "enumName": "Pea",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 1,
+      "enumName": "Cherry",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 2,
+      "enumName": "Peanut",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 3,
+      "enumName": "SuperCherry",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 4,
+      "enumName": "ZombieBlock1",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 5,
+      "enumName": "ZombieBlock2",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 6,
+      "enumName": "ZombieBlock3",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 7,
+      "enumName": "Potato",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 8,
+      "enumName": "SmallSun",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 9,
+      "enumName": "Puff",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 10,
+      "enumName": "PuffPea",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 11,
+      "enumName": "IronPea",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 12,
+      "enumName": "ThreeSpike",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 13,
+      "enumName": "Puff_randomColor",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 14,
+      "enumName": "Puff_love",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 15,
+      "enumName": "SnowPea",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 16,
+      "enumName": "Puff_snowPea",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 17,
+      "enumName": "IceSpark",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 18,
+      "enumName": "IceSpark_small",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 20,
+      "enumName": "MagicTrack",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 21,
+      "enumName": "Puff_snow",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 22,
+      "enumName": "Puff_dark",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 23,
+      "enumName": "Doom",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 24,
+      "enumName": "IceDoom",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 25,
+      "enumName": "FirePea_yellow",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 26,
+      "enumName": "FirePea_orange",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 27,
+      "enumName": "FirePea_red",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 28,
+      "enumName": "Squash",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 29,
+      "enumName": "Tangkelp",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 30,
+      "enumName": "Firekelp",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 32,
+      "enumName": "SquashKelp",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 33,
+      "enumName": "NormalTrack",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 34,
+      "enumName": "IceTrack",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 35,
+      "enumName": "FireTrack",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 36,
+      "enumName": "CherrySquashBullet",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 37,
+      "enumName": "Cactus",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 38,
+      "enumName": "LanternCactus",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 39,
+      "enumName": "Star",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 40,
+      "enumName": "LanternStar",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 41,
+      "enumName": "SeaStar",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 42,
+      "enumName": "CactusStar",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 43,
+      "enumName": "JackboxStar",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 44,
+      "enumName": "PickaxeStar",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 45,
+      "enumName": "MagnetStar",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 46,
+      "enumName": "IronStar",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 47,
+      "enumName": "MagnetCactus",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 48,
+      "enumName": "SuperStar",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 49,
+      "enumName": "UltimateStar",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 50,
+      "enumName": "EletricPea",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 51,
+      "enumName": "SwordBullet",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 52,
+      "enumName": "Cabbage",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 53,
+      "enumName": "SunCabbage",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 54,
+      "enumName": "Kernal",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 55,
+      "enumName": "Butter",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 56,
+      "enumName": "BigKernal",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 57,
+      "enumName": "BigButter",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 58,
+      "enumName": "Basketball",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 59,
+      "enumName": "MelonBullet",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 60,
+      "enumName": "WinterMelonBullet",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 61,
+      "enumName": "GarlicKernal",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 62,
+      "enumName": "GarlicButter",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 63,
+      "enumName": "GarlicCabbage",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 64,
+      "enumName": "GarlicMelon",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 65,
+      "enumName": "CannonBullet",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 66,
+      "enumName": "Melon_corn",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 67,
+      "enumName": "Melon_butter",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 68,
+      "enumName": "CannonBullet_fire",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 69,
+      "enumName": "CannonBullet_ice",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 70,
+      "enumName": "Melon_cabbage",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 71,
+      "enumName": "Melon_super",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 72,
+      "enumName": "Melon_ultimate",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 73,
+      "enumName": "Melon_cannon",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 74,
+      "enumName": "Cabbage_silver",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 75,
+      "enumName": "Cabbage_gold",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 76,
+      "enumName": "Kernal_silver",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 77,
+      "enumName": "Kernal_gold",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 78,
+      "enumName": "Butter_silver",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 79,
+      "enumName": "Butter_gold",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 80,
+      "enumName": "ProjectileCannon_smallGold",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 81,
+      "enumName": "Melon_silver",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 82,
+      "enumName": "Melon_gold",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 83,
+      "enumName": "GoldMelon_cannon",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 84,
+      "enumName": "Ultimate_cannon",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 85,
+      "enumName": "Ultimate_kernal",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 86,
+      "enumName": "Melon_fire",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 87,
+      "enumName": "Super_fire_pea",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 89,
+      "enumName": "Bomb_garlic",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 90,
+      "enumName": "PuffPea_iron",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 91,
+      "enumName": "CactusBullet_lour",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 92,
+      "enumName": "Puff_potato",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 93,
+      "enumName": "ProjectileSteelPea",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 94,
+      "enumName": "Shulk_leaf",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 95,
+      "enumName": "SunSpark",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 96,
+      "enumName": "EndoSunBullet",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 97,
+      "enumName": "ExtremeSnowPea",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 98,
+      "enumName": "ProjectileSilver",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 99,
+      "enumName": "ProjectileGold",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 100,
+      "enumName": "UltimateCactus",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 101,
+      "enumName": "SnowBall",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    },
+    {
+      "group": "BulletType",
+      "id": 102,
+      "enumName": "Cactus_doom",
+      "mappingStatus": "sourceRuntimeBindingUnknown",
+      "missingAssets": []
+    }
+  ],
+  "limitations": [
+    "Catalog data is not an implemented native gameplay system.",
+    "Plant InitPlant overrides execute after CSV base stats; per-ability overrides remain authoritative.",
+    "Card eligibility, unlock rules and generated animation availability are intentionally unknown.",
+    "Runtime prefab identity follows original loader result stores; a MonoScript GUID alone does not identify a source ID.",
+    "Bullet loader bindings and unassigned plant runtime slots remain unknown rather than inferred from names/classes.",
+    "Asset paths contain exact loaded runtime/preview prefabs, not all prefabs sharing a class or guessed related art.",
+    "Paths identify source assets; bulk source textures are not bundled by this exporter."
+  ]
+}

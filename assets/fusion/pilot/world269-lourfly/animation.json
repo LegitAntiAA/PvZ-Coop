@@ -1,0 +1,562 @@
+{
+  "schema": 1,
+  "sourcePrefab": "Resources/plants/cattailplant/cattaillour/CattailLour_fly.prefab",
+  "unitsPerNativePixel": 0.01,
+  "applyRootMotion": false,
+  "static": true,
+  "root": 0,
+  "nodes": [
+    {
+      "name": "CattailLour_fly",
+      "active": true,
+      "tag": "Untagged",
+      "parent": -1,
+      "path": "",
+      "position": {
+        "x": 2.8399997,
+        "y": 3.945,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5
+      }
+    },
+    {
+      "name": "Pos",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "Pos",
+      "position": {
+        "x": 0.702,
+        "y": -0.149,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 2.0,
+        "y": 2.0,
+        "z": 2.0
+      }
+    }
+  ],
+  "sourceHierarchy": null,
+  "sprites": [
+    {
+      "texture": "../batch269-926/textures/74284a68ac12.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: CattailLour_fly\n  m_Rect:\n    serializedVersion: 2\n    x: 291\n    y: 4\n    width: 216\n    height: 139\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    97efe41b87709084c8ad7db335243e27: 6982726668525774974\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 820f571c4709b44458a5d830883a04bd, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 60\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 18\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 0e000c0010000f0010000c000b000f000c000a000f000b0011000d000900100009000d000e0010000d000f00090010000a0009000f0005000c000d000e000d000c000b000c0005000a000b00050009000a000500080009000500060008000500070006000500040003000100000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 18\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 368\n      _typelessdata: 666686bf48e17abe0000000014ae87bf3d0a97be00000000b81e85bfcdcc8cbe00000000713d8abf48e17abe00000000713d8abf3d0a97be000000009a99193f85eb313f00000000713d8a3f333333be00000000713d8a3fec5138bd0000000014ae073f85eb31bf000000003d0a57be85eb31bf00000000d7a330bf9a99d93e00000000333333bfc3f5e83e0000000048e13abfc3f5e83e000000001f856bbf85eb313f00000000000040bf52b8de3e000000008fc235bf295ccf3e00000000a4703dbf295ccf3e000000001f856bbf8fc215bf000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 291\n      y: 4\n      width: 216\n      height: 139\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 399, z: 100, w: 73.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -1.0499999523162842,
+            "y": -0.24500000476837158,
+            "z": 0.0,
+            "u": 0.5742187593132257,
+            "v": 0.9521484379656613
+          },
+          {
+            "x": -1.059999942779541,
+            "y": -0.29499998688697815,
+            "z": 0.0,
+            "u": 0.5722656361758709,
+            "v": 0.9570312487194315
+          },
+          {
+            "x": -1.0399999618530273,
+            "y": -0.2750000059604645,
+            "z": 0.0,
+            "u": 0.5761718824505806,
+            "v": 0.9550781255820766
+          },
+          {
+            "x": -1.0800000429153442,
+            "y": -0.24500000476837158,
+            "z": 0.0,
+            "u": 0.5683593666180968,
+            "v": 0.9521484379656613
+          },
+          {
+            "x": -1.0800000429153442,
+            "y": -0.29499998688697815,
+            "z": 0.0,
+            "u": 0.5683593666180968,
+            "v": 0.9570312487194315
+          },
+          {
+            "x": 0.6000000238418579,
+            "y": 0.6949999928474426,
+            "z": 0.0,
+            "u": 0.8964843796566129,
+            "v": 0.8603515631984919
+          },
+          {
+            "x": 1.0800000429153442,
+            "y": -0.17499999701976776,
+            "z": 0.0,
+            "u": 0.9902343833819032,
+            "v": 0.9453124997089617
+          },
+          {
+            "x": 1.0800000429153442,
+            "y": -0.04500000178813934,
+            "z": 0.0,
+            "u": 0.9902343833819032,
+            "v": 0.932617187674623
+          },
+          {
+            "x": 0.5299999713897705,
+            "y": -0.6949999928474426,
+            "z": 0.0,
+            "u": 0.8828124944120646,
+            "v": 0.9960937493015081
+          },
+          {
+            "x": -0.20999999344348907,
+            "y": -0.6949999928474426,
+            "z": 0.0,
+            "u": 0.7382812512805685,
+            "v": 0.9960937493015081
+          },
+          {
+            "x": -0.6899999976158142,
+            "y": 0.42500001192092896,
+            "z": 0.0,
+            "u": 0.6445312504656613,
+            "v": 0.8867187488358468
+          },
+          {
+            "x": -0.699999988079071,
+            "y": 0.45500001311302185,
+            "z": 0.0,
+            "u": 0.6425781273283064,
+            "v": 0.8837890612194315
+          },
+          {
+            "x": -0.7300000190734863,
+            "y": 0.45500001311302185,
+            "z": 0.0,
+            "u": 0.6367187462747097,
+            "v": 0.8837890612194315
+          },
+          {
+            "x": -0.9200000166893005,
+            "y": 0.6949999928474426,
+            "z": 0.0,
+            "u": 0.599609371740371,
+            "v": 0.8603515631984919
+          },
+          {
+            "x": -0.75,
+            "y": 0.4350000023841858,
+            "z": 0.0,
+            "u": 0.6328125,
+            "v": 0.8857421872671694
+          },
+          {
+            "x": -0.7099999785423279,
+            "y": 0.4050000011920929,
+            "z": 0.0,
+            "u": 0.6406250041909516,
+            "v": 0.8886718748835847
+          },
+          {
+            "x": -0.7400000095367432,
+            "y": 0.4050000011920929,
+            "z": 0.0,
+            "u": 0.6347656231373549,
+            "v": 0.8886718748835847
+          },
+          {
+            "x": -0.9200000166893005,
+            "y": -0.5849999785423279,
+            "z": 0.0,
+            "u": 0.599609371740371,
+            "v": 0.9853515604045242
+          }
+        ],
+        "indices": [
+          14,
+          12,
+          16,
+          15,
+          16,
+          12,
+          11,
+          15,
+          12,
+          10,
+          15,
+          11,
+          17,
+          13,
+          9,
+          16,
+          9,
+          13,
+          14,
+          16,
+          13,
+          15,
+          9,
+          16,
+          10,
+          9,
+          15,
+          5,
+          12,
+          13,
+          14,
+          13,
+          12,
+          11,
+          12,
+          5,
+          10,
+          11,
+          5,
+          9,
+          10,
+          5,
+          8,
+          9,
+          5,
+          6,
+          8,
+          5,
+          7,
+          6,
+          5,
+          4,
+          3,
+          1,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/cattailplant/cattaillour/CattailLour_fly.asset",
+      "textureRect": {
+        "x": 291.0,
+        "y": 4.0,
+        "width": 216.0,
+        "height": 139.0,
+        "yTop": 881.0
+      },
+      "logicalSize": {
+        "width": 216.0,
+        "height": 139.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "789035059b8f3d149bc6118a7970a851",
+      "node": 0,
+      "sortingOrder": 18,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    }
+  ],
+  "spriteVariants": {
+    "789035059b8f3d149bc6118a7970a851": {
+      "texture": "../batch269-926/textures/74284a68ac12.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: CattailLour_fly\n  m_Rect:\n    serializedVersion: 2\n    x: 291\n    y: 4\n    width: 216\n    height: 139\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    97efe41b87709084c8ad7db335243e27: 6982726668525774974\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 820f571c4709b44458a5d830883a04bd, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 60\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 18\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 0e000c0010000f0010000c000b000f000c000a000f000b0011000d000900100009000d000e0010000d000f00090010000a0009000f0005000c000d000e000d000c000b000c0005000a000b00050009000a000500080009000500060008000500070006000500040003000100000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 18\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 368\n      _typelessdata: 666686bf48e17abe0000000014ae87bf3d0a97be00000000b81e85bfcdcc8cbe00000000713d8abf48e17abe00000000713d8abf3d0a97be000000009a99193f85eb313f00000000713d8a3f333333be00000000713d8a3fec5138bd0000000014ae073f85eb31bf000000003d0a57be85eb31bf00000000d7a330bf9a99d93e00000000333333bfc3f5e83e0000000048e13abfc3f5e83e000000001f856bbf85eb313f00000000000040bf52b8de3e000000008fc235bf295ccf3e00000000a4703dbf295ccf3e000000001f856bbf8fc215bf000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 291\n      y: 4\n      width: 216\n      height: 139\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 399, z: 100, w: 73.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -1.0499999523162842,
+            "y": -0.24500000476837158,
+            "z": 0.0,
+            "u": 0.5742187593132257,
+            "v": 0.9521484379656613
+          },
+          {
+            "x": -1.059999942779541,
+            "y": -0.29499998688697815,
+            "z": 0.0,
+            "u": 0.5722656361758709,
+            "v": 0.9570312487194315
+          },
+          {
+            "x": -1.0399999618530273,
+            "y": -0.2750000059604645,
+            "z": 0.0,
+            "u": 0.5761718824505806,
+            "v": 0.9550781255820766
+          },
+          {
+            "x": -1.0800000429153442,
+            "y": -0.24500000476837158,
+            "z": 0.0,
+            "u": 0.5683593666180968,
+            "v": 0.9521484379656613
+          },
+          {
+            "x": -1.0800000429153442,
+            "y": -0.29499998688697815,
+            "z": 0.0,
+            "u": 0.5683593666180968,
+            "v": 0.9570312487194315
+          },
+          {
+            "x": 0.6000000238418579,
+            "y": 0.6949999928474426,
+            "z": 0.0,
+            "u": 0.8964843796566129,
+            "v": 0.8603515631984919
+          },
+          {
+            "x": 1.0800000429153442,
+            "y": -0.17499999701976776,
+            "z": 0.0,
+            "u": 0.9902343833819032,
+            "v": 0.9453124997089617
+          },
+          {
+            "x": 1.0800000429153442,
+            "y": -0.04500000178813934,
+            "z": 0.0,
+            "u": 0.9902343833819032,
+            "v": 0.932617187674623
+          },
+          {
+            "x": 0.5299999713897705,
+            "y": -0.6949999928474426,
+            "z": 0.0,
+            "u": 0.8828124944120646,
+            "v": 0.9960937493015081
+          },
+          {
+            "x": -0.20999999344348907,
+            "y": -0.6949999928474426,
+            "z": 0.0,
+            "u": 0.7382812512805685,
+            "v": 0.9960937493015081
+          },
+          {
+            "x": -0.6899999976158142,
+            "y": 0.42500001192092896,
+            "z": 0.0,
+            "u": 0.6445312504656613,
+            "v": 0.8867187488358468
+          },
+          {
+            "x": -0.699999988079071,
+            "y": 0.45500001311302185,
+            "z": 0.0,
+            "u": 0.6425781273283064,
+            "v": 0.8837890612194315
+          },
+          {
+            "x": -0.7300000190734863,
+            "y": 0.45500001311302185,
+            "z": 0.0,
+            "u": 0.6367187462747097,
+            "v": 0.8837890612194315
+          },
+          {
+            "x": -0.9200000166893005,
+            "y": 0.6949999928474426,
+            "z": 0.0,
+            "u": 0.599609371740371,
+            "v": 0.8603515631984919
+          },
+          {
+            "x": -0.75,
+            "y": 0.4350000023841858,
+            "z": 0.0,
+            "u": 0.6328125,
+            "v": 0.8857421872671694
+          },
+          {
+            "x": -0.7099999785423279,
+            "y": 0.4050000011920929,
+            "z": 0.0,
+            "u": 0.6406250041909516,
+            "v": 0.8886718748835847
+          },
+          {
+            "x": -0.7400000095367432,
+            "y": 0.4050000011920929,
+            "z": 0.0,
+            "u": 0.6347656231373549,
+            "v": 0.8886718748835847
+          },
+          {
+            "x": -0.9200000166893005,
+            "y": -0.5849999785423279,
+            "z": 0.0,
+            "u": 0.599609371740371,
+            "v": 0.9853515604045242
+          }
+        ],
+        "indices": [
+          14,
+          12,
+          16,
+          15,
+          16,
+          12,
+          11,
+          15,
+          12,
+          10,
+          15,
+          11,
+          17,
+          13,
+          9,
+          16,
+          9,
+          13,
+          14,
+          16,
+          13,
+          15,
+          9,
+          16,
+          10,
+          9,
+          15,
+          5,
+          12,
+          13,
+          14,
+          13,
+          12,
+          11,
+          12,
+          5,
+          10,
+          11,
+          5,
+          9,
+          10,
+          5,
+          8,
+          9,
+          5,
+          6,
+          8,
+          5,
+          7,
+          6,
+          5,
+          4,
+          3,
+          1,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/cattailplant/cattaillour/CattailLour_fly.asset",
+      "textureRect": {
+        "x": 291.0,
+        "y": 4.0,
+        "width": 216.0,
+        "height": 139.0,
+        "yTop": 881.0
+      },
+      "logicalSize": {
+        "width": 216.0,
+        "height": 139.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    }
+  },
+  "extraSpriteGuids": {},
+  "anchors": {},
+  "visualBounds": {
+    "minX": -0.5400000214576721,
+    "maxX": 0.5400000214576721,
+    "minY": -0.3474999964237213,
+    "maxY": 0.3474999964237213
+  },
+  "clips": {},
+  "controller": {
+    "states": [],
+    "layers": [],
+    "serializedController": ""
+  },
+  "nonRenderingComponents": [
+    {
+      "typeId": 114,
+      "fileId": 114703437598541787,
+      "serializedComponent": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1709254077376921}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 6516e5dc85fc277bc03f7fb968add0b4, type: 3}\n  m_Name:\n  m_EditorClassIdentifier:\n  targetPosition: {x: 0, y: 0}\n  shootPos: {fileID: 4884547391421755}\n  theRow: 0\n  lour: {fileID: 0}\n"
+    }
+  ],
+  "colliders": [],
+  "ignoredBindings": [],
+  "omittedInactiveNodes": [],
+  "spritePrefix": null,
+  "unusedSpriteBonesExplicitlyAllowed": false,
+  "sources": [
+    {
+      "path": "Resources/plants/cattailplant/cattaillour/CattailLour.png",
+      "sha256": "74284a68ac12afd34f38f79aaf4bb67e8e937b7b116903ecf94ae30f33a813c8"
+    },
+    {
+      "path": "Resources/plants/cattailplant/cattaillour/CattailLour.png.meta",
+      "sha256": "83310550c7f3ebfc57be95ed780f975696e34cf14dae171a620462d42c46aa75"
+    },
+    {
+      "path": "Resources/plants/cattailplant/cattaillour/CattailLour_fly.asset",
+      "sha256": "731d19a480c26df38c8a1c16fa59ab582084c3225e657dd98a7d2c6bdc832851"
+    },
+    {
+      "path": "Resources/plants/cattailplant/cattaillour/CattailLour_fly.asset.meta",
+      "sha256": "5dd6705f4cda95e1a899a2447942d50481a0fe2f13af0fcf4feff9b68e91d064"
+    },
+    {
+      "path": "Resources/plants/cattailplant/cattaillour/CattailLour_fly.prefab",
+      "sha256": "48c772b98654c9b927d7fea7c718da59aad100c063b0f3c205f86aa78b06f37c"
+    }
+  ],
+  "deferredComponents": [],
+  "validation": "Exported source data. Native rendering and source-runtime comparison are separate verification steps."
+}

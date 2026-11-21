@@ -1,6 +1,7 @@
 #include "TodDebug.h"
 #include "TodCommon.h"
 #include "TodStringFile.h"
+#include <algorithm>
 #include "../PakLib/PakInterface.h"
 #include "../SexyAppFramework/Font.h"
 #include "../SexyAppFramework/TextEncoding.h"
@@ -359,6 +360,12 @@ int TodDrawStringWrappedHelper(Graphics* g, const SexyString& theText, const Rec
 	int aYOffset = theFont->GetAscent() - theFont->GetAscentPadding();
 	int aLineSpacing = theFont->GetLineSpacing() + aCurrentFormat.mLineSpacingOffset;
 	SexyString aCurString;
+	int aRunBaseWidth = 0;
+#ifndef _USE_WIDE_STRING
+	const bool aMeasureRuns = std::any_of(theText.begin(), theText.end(), [](unsigned char ch) { return ch >= 0x80; });
+#else
+	const bool aMeasureRuns = false;
+#endif
 	int aLineFeedPos = 0;
 	int aCurPos = 0;
 	int aCurWidth = 0;
@@ -395,6 +402,8 @@ int TodDrawStringWrappedHelper(Graphics* g, const SexyString& theText, const Rec
 				int aNewAscentOffset = (*aCurrentFormat.mNewFont)->GetAscent() - (*aCurrentFormat.mNewFont)->GetAscentPadding();
 				aLineSpacing = (*aCurrentFormat.mNewFont)->GetLineSpacing() + aCurrentFormat.mLineSpacingOffset;
 				aYOffset += aNewAscentOffset - aOldAscentOffset;
+				aCurString.clear();
+				aRunBaseWidth = aCurWidth;
 				continue;
 			}
 		}
@@ -411,7 +420,19 @@ int TodDrawStringWrappedHelper(Graphics* g, const SexyString& theText, const Rec
 		}
 
 #ifndef _USE_WIDE_STRING
-		if (aCharLength > 1 || static_cast<unsigned char>(aCurChar) >= 0x80U)
+		if (aMeasureRuns)
+		{
+			if (aCurChar != '\n')
+			{
+				// Drawing flushes a whole format run. Use that same measurement
+				// so Unicode fallback, kerning and DPI rounding stay consistent.
+				if (aCurChar == ' ') aCurString += ' ';
+				else aCurString.append(theText, aCurPos, aCharLength);
+				aCurWidth = aRunBaseWidth + (*aCurrentFormat.mNewFont)->StringWidth(aCurString);
+			}
+			aPrevChar = '\0';
+		}
+		else if (aCharLength > 1 || static_cast<unsigned char>(aCurChar) >= 0x80U)
 		{
 			// Font::CharWidthKern consumes one byte, but localized text is UTF-8.
 			// Measure and advance a complete code point so wrapping never emits a
@@ -485,6 +506,8 @@ int TodDrawStringWrappedHelper(Graphics* g, const SexyString& theText, const Rec
 			aLineFeedPos = aCurPos;  // 记录当前位置为“上次换行的位置”
 			aSpacePos = -1;
 			aCurWidth = 0;
+			aCurString.clear();
+			aRunBaseWidth = 0;
 			aPrevChar = '\0';
 		}
 		else  // 当前宽度未超过限制区域宽度时

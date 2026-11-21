@@ -6,6 +6,8 @@
 #include "../Sexy.TodLib/FilterEffect.h"
 #include "Net/NetZombatar.h"
 
+namespace LawnFusion { struct FusionColdDamageContext; }
+
 #define MAX_ZOMBIE_FOLLOWERS 4
 #define NUM_BOBSLED_FOLLOWERS 3
 #define NUM_BACKUP_DANCERS 4
@@ -209,10 +211,12 @@ public:
     void                            DrawZombieWithParts(Graphics* g, const ZombieDrawPosition& theDrawPos);
     void                            DrawZombiePart(Graphics* g, Image* theImage, int theFrame, int theRow, const ZombieDrawPosition& theDrawPos);
     void                            DrawBungeeCord(Graphics* g, int theOffsetX, int theOffsetY);
-    void                            TakeDamage(int theDamage, unsigned int theDamageFlags);
+    void                            TakeDamage(int theDamage, unsigned int theDamageFlags, const LawnFusion::FusionColdDamageContext* theColdContext = nullptr);
     /*inline*/ void                 SetRow(int theRow);
     float                           GetPosYBasedOnRow(int theRow);
     void                            ApplyChill(bool theIsIceTrap);
+    void                            SetColdCounters(int theChilledTicks, int theFrozenTicks);
+    void                            StartIceTrapEffects();
     void                            UpdateZombieBungee();
     void                            BungeeLanding();
     bool                            EffectedByDamage(unsigned int theDamageRangeFlags);
@@ -283,6 +287,7 @@ public:
     void                            PlayDeathAnim(unsigned int theDamageFlags);
     void                            UpdateDeath();
     void                            DrawShadow(Graphics* g);
+    bool                            GetShadowCenter(float& theX, float& theY); // Board coordinates; no terminal-win Graphics setup.
     bool                            HasShadow();
     Reanimation*                    LoadReanim(ReanimationType theReanimationType);
     /*inline*/ int                  TakeFlyingDamage(int theDamage, unsigned int theDamageFlags);
@@ -307,7 +312,7 @@ public:
     void                            UpdateClimbingLadder();
     void                            UpdateZombieGargantuar();
     int                             GetBodyDamageIndex();
-    void                            ApplyBurn();
+    void                            ApplyBurn(bool forceDeath = false);
     void                            UpdateBurn();
     bool                            ZombieNotWalking();
     Zombie*                         FindZombieTarget();
@@ -323,7 +328,7 @@ public:
     /*inline*/ bool                 IsOnBoard();
     void                            DrawButter(Graphics* g, const ZombieDrawPosition& theDrawPos);
     bool                            IsImmobilizied();
-    void                            ApplyButter();
+    void                            ApplyButter(int theTicks = 400);
     float                           ZombieTargetLeadX(float theTime);
     void                            UpdateZombieImp();
     void                            SquishAllInSquare(int theX, int theY, ZombieAttackType theAttackType);
@@ -419,6 +424,8 @@ public:
     static /*inline*/ bool          ZombieTypeCanGoOnHighGround(ZombieType theZombieType);
     static /*inline*/ bool          ZombieTypeCanGoInPool(ZombieType theZombieType);
     void                            SetupWaterTrack(const char* theTrackName);
+    void                            SetupPoolReanim();
+    void                            CompletePoolEntry();
     void                            BurnRow(int theRow);
     void                            SetupReanimForLostHead();
     void                            SetupReanimForLostArm(unsigned int theDamageFlags);
@@ -438,6 +445,14 @@ public:
     void                            DropJackInTheBox();
     void                            DropDiggerAxe();
     void                            DropAllParticles(bool hasBody = false);
+
+private:
+    struct ShadowDrawParams
+    {
+        Image* image = nullptr;
+        float x = 0, y = 0, scale = 1;
+    };
+    void                            GetShadowDrawParams(const ZombieDrawPosition& theDrawPos, ShadowDrawParams& theParams);
 };
 
 class ZombieDefinition

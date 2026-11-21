@@ -263,7 +263,7 @@ bool NetSmokeControlsComplete(LawnApp* app)
         s.plant = plant->mNetId;
         if (!Record(app, "client_plant")) return false;
         NetTrace("SMOKE_CONTROLS_PLANT role=%s packet=%u plant=%u type=%d", role, s.packet, s.plant, (int)s.seed);
-        if (!host && !Key(app, SDLK_Q)) app->CoopSmokeFail("controls Q SDL queue failed");
+        if (!host && !Key(app, SDLK_R)) app->CoopSmokeFail("controls R SDL queue failed");
         Advance(3); return false;
     }
     if (s.stage == 3)
@@ -275,8 +275,8 @@ bool NetSmokeControlsComplete(LawnApp* app)
         }
         else if (!Has(app, "CTL_SHOVEL")) return false;
         if (!Record(app, "client_shovel")) return false;
-        NetTrace("SMOKE_CONTROLS_SHOVEL role=%s key=Q authoritative=1", role);
-        if (!host && !Key(app, SDLK_Q)) app->CoopSmokeFail("controls Q cancel SDL queue failed");
+        NetTrace("SMOKE_CONTROLS_SHOVEL role=%s key=R authoritative=1", role);
+        if (!host && !Key(app, SDLK_R)) app->CoopSmokeFail("controls R cancel SDL queue failed");
         Advance(4); return false;
     }
     if (s.stage == 4)
@@ -298,14 +298,14 @@ bool NetSmokeControlsComplete(LawnApp* app)
             {
                 if (!app->mNetChatTyping) return false;
                 SDL_Event text{}; text.type = SDL_EVENT_TEXT_INPUT;
-                text.text.windowID = SDL_GetWindowID(app->mSDLWindow); text.text.text = "1q";
-                if (!SDL_PushEvent(&text) || !Key(app, SDLK_1) || !Key(app, SDLK_Q))
+                text.text.windowID = SDL_GetWindowID(app->mSDLWindow); text.text.text = "1r";
+                if (!SDL_PushEvent(&text) || !Key(app, SDLK_1) || !Key(app, SDLK_R))
                     app->CoopSmokeFail("controls chat input SDL queue failed");
                 s.action = true; s.changed = now; return false;
             }
             if (now - s.changed < 250U) return false;
-            if (!app->mNetChatTyping || SexyStringToStringFast(app->mNetChatDraft) != "1q" || remote->mCursorType != CURSOR_TYPE_NORMAL)
-            { app->CoopSmokeFail("digit or Q hotkey leaked through native chat typing"); return false; }
+            if (!app->mNetChatTyping || SexyStringToStringFast(app->mNetChatDraft) != "1r" || remote->mCursorType != CURSOR_TYPE_NORMAL)
+            { app->CoopSmokeFail("digit or R hotkey leaked through native chat typing"); return false; }
             if (!Record(app, "chat_blocked") || !Send(app, "CTL_CHAT_OK") || !Key(app, SDLK_ESCAPE)) return false;
             Advance(6); return false;
         }
@@ -330,14 +330,14 @@ bool NetSmokeControlsComplete(LawnApp* app)
         board->mMenuButton->mIsOver = false;
         if (!Record(app, "host_pick")) return false;
         if (!Send(app, "CTL_HOST_PICKED")) return false;
-        if (!Key(app, SDLK_Q)) app->CoopSmokeFail("controls host Q SDL queue failed");
+        if (!Key(app, SDLK_R)) app->CoopSmokeFail("controls host R SDL queue failed");
         Advance(7); return false;
     }
     if (s.stage == 7)
     {
         if (!host) { if (Has(app, "CTL_PAUSE_GO")) Advance(9); return false; }
         if (board->mCursorObject->mCursorType != CURSOR_TYPE_SHOVEL) return false;
-        if (!Record(app, "host_shovel") || !Key(app, SDLK_Q)) return false;
+        if (!Record(app, "host_shovel") || !Key(app, SDLK_R)) return false;
         Advance(8); return false;
     }
     if (s.stage == 8)
@@ -345,7 +345,7 @@ bool NetSmokeControlsComplete(LawnApp* app)
         if (board->mCursorObject->mCursorType != CURSOR_TYPE_NORMAL) return false;
         if (!Send(app, "CTL_PAUSE_GO")) return false;
         board->mPaused = true; net->SendPauseState(true);
-        if (!Key(app, SDLK_1) || !Key(app, SDLK_Q)) app->CoopSmokeFail("controls paused SDL queue failed");
+        if (!Key(app, SDLK_1) || !Key(app, SDLK_R)) app->CoopSmokeFail("controls paused SDL queue failed");
         Advance(9); return false;
     }
     if (s.stage == 9)

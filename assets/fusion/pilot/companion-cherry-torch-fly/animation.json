@@ -1,0 +1,4079 @@
+{
+  "schema": 1,
+  "sourcePrefab": "Resources/plants/torchwood/cherrytorch/CherryFly.prefab",
+  "unitsPerNativePixel": 0.01,
+  "applyRootMotion": false,
+  "static": false,
+  "root": 0,
+  "nodes": [
+    {
+      "name": "CherryFly",
+      "active": true,
+      "tag": "Untagged",
+      "parent": -1,
+      "path": "",
+      "position": {
+        "x": 4.777,
+        "y": 0.7965,
+        "z": -0.04775027
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 0.25,
+        "y": 0.25,
+        "z": 0.25
+      }
+    },
+    {
+      "name": "UltimateFly_body",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "UltimateFly_body",
+      "position": {
+        "x": 0.2049999,
+        "y": -0.037889,
+        "z": 0.04775027
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "leaf3_1",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 1,
+      "path": "UltimateFly_body/leaf3_1",
+      "position": {
+        "x": -0.91,
+        "y": 0.77,
+        "z": 0.14325082
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "leaf2_1",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 1,
+      "path": "UltimateFly_body/leaf2_1",
+      "position": {
+        "x": -1.01,
+        "y": -0.06,
+        "z": 0.14325082
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "leaf1_1",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 1,
+      "path": "UltimateFly_body/leaf1_1",
+      "position": {
+        "x": -0.21,
+        "y": 1.04,
+        "z": 0.14325082
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "Shadow",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "Shadow",
+      "position": {
+        "x": 0.0,
+        "y": -4.5560007,
+        "z": 0.19100109
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 4.0,
+        "y": 4.0,
+        "z": 4.0
+      }
+    }
+  ],
+  "sourceHierarchy": null,
+  "sprites": [
+    {
+      "texture": "../cactus/textures/7924e0d6960d.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: plantshadow\n  m_Rect:\n    serializedVersion: 2\n    x: 0\n    y: 0\n    width: 86\n    height: 36\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    b79a0977f249dd948866a2f5a914ba3a: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 0286c7c34d435bf4694be6a09458c445, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: f628dcbeec51383e00000000f628dc3eec51383e00000000f628dcbeec5138be00000000f628dc3eec5138be000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 86\n      height: 36\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 0\n    uvTransform: {x: 100, y: 43, z: 100, w: 18}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -0.4300000071525574,
+            "y": 0.18000000715255737,
+            "z": 0.0,
+            "u": -8.316927177961482e-09,
+            "v": -1.986821485111534e-08
+          },
+          {
+            "x": 0.4300000071525574,
+            "y": 0.18000000715255737,
+            "z": 0.0,
+            "u": 1.0000000083169271,
+            "v": -1.986821485111534e-08
+          },
+          {
+            "x": -0.4300000071525574,
+            "y": -0.18000000715255737,
+            "z": 0.0,
+            "u": -8.316927177961482e-09,
+            "v": 1.0000000198682149
+          },
+          {
+            "x": 0.4300000071525574,
+            "y": -0.18000000715255737,
+            "z": 0.0,
+            "u": 1.0000000083169271,
+            "v": 1.0000000198682149
+          }
+        ],
+        "indices": [
+          0,
+          1,
+          2,
+          2,
+          1,
+          3
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/board/plantshadow.asset",
+      "textureRect": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 86.0,
+        "height": 36.0,
+        "yTop": 0.0
+      },
+      "logicalSize": {
+        "width": 86.0,
+        "height": 36.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "e741cea7caea00248903707884a3228b",
+      "node": 5,
+      "sortingOrder": 0,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    },
+    {
+      "texture": "../batch-1178/textures/1b36e5da3b86.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: leaf1\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 307\n    width: 120\n    height: 155\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    a02bf125dbd89234a91fad1d3fb915b5: 3960039482418246000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 41d6c0daa8b158b438a746993c92fb2a, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 39\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 15\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 0e000d000c000b000c000d000a000c000b0007000a000b0008000a000700090008000500070005000800060005000700040005000600010005000400030001000400000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 15\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 312\n      _typelessdata: 9a99193f3333333e000000003333b33e666646bf000000009a99193f713d2abf00000000713d8a3e6666463f00000000a470bdbe6666463f000000006666e6be666646bf000000005c8f02bf0ad7033f000000005c8f02bf0000c0be000000005c8f02bf52b8debe000000005c8f02bf48e11abf00000000713d0abf7b14eebe00000000295c0fbf1f85abbe00000000295c0fbf7b14eebe000000009a9919bf1f85abbe000000009a9919bf52b8debe00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 307\n      width: 120\n      height: 155\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 64, z: 100, w: 384.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.6000000238418579,
+            "y": 0.17499999701976776,
+            "z": 0.0,
+            "u": 0.12109375232830644,
+            "v": 0.6074218752910383
+          },
+          {
+            "x": 0.3499999940395355,
+            "y": -0.7749999761581421,
+            "z": 0.0,
+            "u": 0.09667968691792339,
+            "v": 0.7001953101716936
+          },
+          {
+            "x": 0.6000000238418579,
+            "y": -0.6650000214576721,
+            "z": 0.0,
+            "u": 0.12109375232830644,
+            "v": 0.6894531270954758
+          },
+          {
+            "x": 0.27000001072883606,
+            "y": 0.7749999761581421,
+            "z": 0.0,
+            "u": 0.0888671885477379,
+            "v": 0.5488281273283064
+          },
+          {
+            "x": -0.3700000047683716,
+            "y": 0.7749999761581421,
+            "z": 0.0,
+            "u": 0.026367187034338713,
+            "v": 0.5488281273283064
+          },
+          {
+            "x": -0.44999998807907104,
+            "y": -0.7749999761581421,
+            "z": 0.0,
+            "u": 0.01855468866415322,
+            "v": 0.7001953101716936
+          },
+          {
+            "x": -0.5099999904632568,
+            "y": 0.5149999856948853,
+            "z": 0.0,
+            "u": 0.012695313431322575,
+            "v": 0.5742187513969839
+          },
+          {
+            "x": -0.5099999904632568,
+            "y": -0.375,
+            "z": 0.0,
+            "u": 0.012695313431322575,
+            "v": 0.6611328125
+          },
+          {
+            "x": -0.5099999904632568,
+            "y": -0.4350000023841858,
+            "z": 0.0,
+            "u": 0.012695313431322575,
+            "v": 0.6669921877328306
+          },
+          {
+            "x": -0.5099999904632568,
+            "y": -0.6050000190734863,
+            "z": 0.0,
+            "u": 0.012695313431322575,
+            "v": 0.6835937518626451
+          },
+          {
+            "x": -0.5400000214576721,
+            "y": -0.4650000035762787,
+            "z": 0.0,
+            "u": 0.009765622904524207,
+            "v": 0.669921875349246
+          },
+          {
+            "x": -0.5600000023841858,
+            "y": -0.33500000834465027,
+            "z": 0.0,
+            "u": 0.007812499767169356,
+            "v": 0.6572265633149073
+          },
+          {
+            "x": -0.5600000023841858,
+            "y": -0.4650000035762787,
+            "z": 0.0,
+            "u": 0.007812499767169356,
+            "v": 0.669921875349246
+          },
+          {
+            "x": -0.6000000238418579,
+            "y": -0.33500000834465027,
+            "z": 0.0,
+            "u": 0.0039062476716935635,
+            "v": 0.6572265633149073
+          },
+          {
+            "x": -0.6000000238418579,
+            "y": -0.4350000023841858,
+            "z": 0.0,
+            "u": 0.0039062476716935635,
+            "v": 0.6669921877328306
+          }
+        ],
+        "indices": [
+          14,
+          13,
+          12,
+          11,
+          12,
+          13,
+          10,
+          12,
+          11,
+          7,
+          10,
+          11,
+          8,
+          10,
+          7,
+          9,
+          8,
+          5,
+          7,
+          5,
+          8,
+          6,
+          5,
+          7,
+          4,
+          5,
+          6,
+          1,
+          5,
+          4,
+          3,
+          1,
+          4,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/torchwood/cherrytorch/leaf1_0.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 307.0,
+        "width": 120.0,
+        "height": 155.0,
+        "yTop": 562.0
+      },
+      "logicalSize": {
+        "width": 120.0,
+        "height": 155.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "698bd0207a085974eb32e2169f894a6f",
+      "node": 4,
+      "sortingOrder": 1,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    },
+    {
+      "texture": "../batch-1178/textures/1b36e5da3b86.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: leaf2\n  m_Rect:\n    serializedVersion: 2\n    x: 633\n    y: 4\n    width: 185\n    height: 127\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    a02bf125dbd89234a91fad1d3fb915b5: 4197076938837000444\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 41d6c0daa8b158b438a746993c92fb2a, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 18\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 8\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 070006000400050004000600000004000500030004000000010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 8\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 160\n      _typelessdata: f6283c3f5c8f223f00000000cdcc6c3ff6289cbe00000000cdcc6c3f3d0a973e000000008fc2153f5c8f22bf00000000d7a3b0be5c8f22bf000000000ad703bf5c8f223f00000000cdcc6cbfb81ec53e00000000cdcc6cbf85eb91be0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 633\n      y: 4\n      width: 185\n      height: 127\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 725.5, z: 100, w: 67.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.7350000143051147,
+            "y": 0.6349999904632568,
+            "z": 0.0,
+            "u": 0.7802734388969839,
+            "v": 0.8720703134313226
+          },
+          {
+            "x": 0.925000011920929,
+            "y": -0.3050000071525574,
+            "z": 0.0,
+            "u": 0.7988281261641532,
+            "v": 0.9638671881984919
+          },
+          {
+            "x": 0.925000011920929,
+            "y": 0.29499998688697815,
+            "z": 0.0,
+            "u": 0.7988281261641532,
+            "v": 0.9052734387805685
+          },
+          {
+            "x": 0.5849999785423279,
+            "y": -0.6349999904632568,
+            "z": 0.0,
+            "u": 0.7656249979045242,
+            "v": 0.9960937490686774
+          },
+          {
+            "x": -0.3449999988079071,
+            "y": -0.6349999904632568,
+            "z": 0.0,
+            "u": 0.6748046876164153,
+            "v": 0.9960937490686774
+          },
+          {
+            "x": -0.5149999856948853,
+            "y": 0.6349999904632568,
+            "z": 0.0,
+            "u": 0.6582031263969839,
+            "v": 0.8720703134313226
+          },
+          {
+            "x": -0.925000011920929,
+            "y": 0.38499999046325684,
+            "z": 0.0,
+            "u": 0.6181640613358468,
+            "v": 0.8964843759313226
+          },
+          {
+            "x": -0.925000011920929,
+            "y": -0.2849999964237213,
+            "z": 0.0,
+            "u": 0.6181640613358468,
+            "v": 0.961914062150754
+          }
+        ],
+        "indices": [
+          7,
+          6,
+          4,
+          5,
+          4,
+          6,
+          0,
+          4,
+          5,
+          3,
+          4,
+          0,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/torchwood/cherrytorch/leaf2.asset",
+      "textureRect": {
+        "x": 633.0,
+        "y": 4.0,
+        "width": 185.0,
+        "height": 127.0,
+        "yTop": 893.0
+      },
+      "logicalSize": {
+        "width": 185.0,
+        "height": 127.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "26d1775294b66d043b4024989d42819f",
+      "node": 3,
+      "sortingOrder": 2,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    },
+    {
+      "texture": "../batch-1178/textures/1b36e5da3b86.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: leaf3\n  m_Rect:\n    serializedVersion: 2\n    x: 289\n    y: 307\n    width: 122\n    height: 125\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    a02bf125dbd89234a91fad1d3fb915b5: -737414012026323517\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 41d6c0daa8b158b438a746993c92fb2a, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 30\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 12\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 0b000a000900080009000a00060009000800070006000800050006000700040006000500030004000500010004000300000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 12\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 240\n      _typelessdata: f6281c3fc3f5283e00000000295c0f3f8fc215bf00000000f6281c3fe17ad4be000000008fc2f53e8fc2b53e000000005c8fc23e000020bf000000000ad7a33cc3f5083f00000000295c0fbe000020bf000000009a9919be0000203f00000000b81e05bf0000203f00000000713d0abf6666a6be00000000f6281cbf295ccf3e00000000f6281cbf666666be00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 289\n      y: 307\n      width: 122\n      height: 125\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 350, z: 100, w: 369.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.6100000143051147,
+            "y": 0.16500000655651093,
+            "z": 0.0,
+            "u": 0.40136718889698386,
+            "v": 0.6230468743597157
+          },
+          {
+            "x": 0.5600000023841858,
+            "y": -0.5849999785423279,
+            "z": 0.0,
+            "u": 0.39648437523283064,
+            "v": 0.6962890604045242
+          },
+          {
+            "x": 0.6100000143051147,
+            "y": -0.41499999165534973,
+            "z": 0.0,
+            "u": 0.40136718889698386,
+            "v": 0.6796874991850927
+          },
+          {
+            "x": 0.47999998927116394,
+            "y": 0.35499998927116394,
+            "z": 0.0,
+            "u": 0.3886718739522621,
+            "v": 0.6044921885477379
+          },
+          {
+            "x": 0.3799999952316284,
+            "y": -0.625,
+            "z": 0.0,
+            "u": 0.3789062495343387,
+            "v": 0.7001953125
+          },
+          {
+            "x": 0.019999999552965164,
+            "y": 0.5350000262260437,
+            "z": 0.0,
+            "u": 0.34374999995634425,
+            "v": 0.5869140599388629
+          },
+          {
+            "x": -0.14000000059604645,
+            "y": -0.625,
+            "z": 0.0,
+            "u": 0.32812499994179234,
+            "v": 0.7001953125
+          },
+          {
+            "x": -0.15000000596046448,
+            "y": 0.625,
+            "z": 0.0,
+            "u": 0.3271484369179234,
+            "v": 0.578125
+          },
+          {
+            "x": -0.5199999809265137,
+            "y": 0.625,
+            "z": 0.0,
+            "u": 0.29101562686264515,
+            "v": 0.578125
+          },
+          {
+            "x": -0.5400000214576721,
+            "y": -0.32499998807907104,
+            "z": 0.0,
+            "u": 0.2890624979045242,
+            "v": 0.6708984363358468
+          },
+          {
+            "x": -0.6100000143051147,
+            "y": 0.4050000011920929,
+            "z": 0.0,
+            "u": 0.28222656110301614,
+            "v": 0.5996093748835847
+          },
+          {
+            "x": -0.6100000143051147,
+            "y": -0.22499999403953552,
+            "z": 0.0,
+            "u": 0.28222656110301614,
+            "v": 0.6611328119179234
+          }
+        ],
+        "indices": [
+          11,
+          10,
+          9,
+          8,
+          9,
+          10,
+          6,
+          9,
+          8,
+          7,
+          6,
+          8,
+          5,
+          6,
+          7,
+          4,
+          6,
+          5,
+          3,
+          4,
+          5,
+          1,
+          4,
+          3,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/torchwood/cherrytorch/leaf3.asset",
+      "textureRect": {
+        "x": 289.0,
+        "y": 307.0,
+        "width": 122.0,
+        "height": 125.0,
+        "yTop": 592.0
+      },
+      "logicalSize": {
+        "width": 122.0,
+        "height": 125.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "1520ec88749db9b4caf3fc3db9b697e7",
+      "node": 2,
+      "sortingOrder": 3,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    },
+    {
+      "texture": "../batch-1178/textures/1b36e5da3b86.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: body\n  m_Rect:\n    serializedVersion: 2\n    x: 412\n    y: 4\n    width: 213\n    height: 143\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    a02bf125dbd89234a91fad1d3fb915b5: -1446250738317567249\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 41d6c0daa8b158b438a746993c92fb2a, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 39\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 17\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 10000f000d000c000d000f000e000d000c000b000a000800090008000a00070008000900030008000700060003000700050003000600040003000500000003000400010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 17\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 344\n      _typelessdata: 295ccf3e295c2f3f000000003d0a373fa470fdbe000000003d0a373f48e1ba3e00000000cdcc8c3e3d0a37bf00000000d7a3703e3d0a373f00000000000020bf3d0a373f00000000c3f548bf713d2a3f00000000000060bfa4701d3f00000000000060bf3d0a37bf00000000333383bfae47013f00000000ec5188bf48e1ba3e00000000ec5188bf0ad7e3be00000000ec51883f295c0fbd000000003d0a873f7b14aebd00000000ec51883f7b14aebd000000008fc2853f295c0fbd00000000e17a843fb81e85bd000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 412\n      y: 4\n      width: 213\n      height: 143\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 518.5, z: 100, w: 75.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.4050000011920929,
+            "y": 0.6850000023841858,
+            "z": 0.0,
+            "u": 0.5458984376164153,
+            "v": 0.8593749997671694
+          },
+          {
+            "x": 0.7149999737739563,
+            "y": -0.4950000047683716,
+            "z": 0.0,
+            "u": 0.5761718724388629,
+            "v": 0.9746093754656613
+          },
+          {
+            "x": 0.7149999737739563,
+            "y": 0.36500000953674316,
+            "z": 0.0,
+            "u": 0.5761718724388629,
+            "v": 0.8906249990686774
+          },
+          {
+            "x": 0.2750000059604645,
+            "y": -0.7149999737739563,
+            "z": 0.0,
+            "u": 0.5332031255820766,
+            "v": 0.9960937474388629
+          },
+          {
+            "x": 0.23499999940395355,
+            "y": 0.7149999737739563,
+            "z": 0.0,
+            "u": 0.5292968749417923,
+            "v": 0.8564453150611371
+          },
+          {
+            "x": -0.625,
+            "y": 0.7149999737739563,
+            "z": 0.0,
+            "u": 0.4453125,
+            "v": 0.8564453150611371
+          },
+          {
+            "x": -0.7850000262260437,
+            "y": 0.6650000214576721,
+            "z": 0.0,
+            "u": 0.4296874974388629,
+            "v": 0.8613281229045242
+          },
+          {
+            "x": -0.875,
+            "y": 0.6150000095367432,
+            "z": 0.0,
+            "u": 0.4208984375,
+            "v": 0.8662109365686774
+          },
+          {
+            "x": -0.875,
+            "y": -0.7149999737739563,
+            "z": 0.0,
+            "u": 0.4208984375,
+            "v": 0.9960937474388629
+          },
+          {
+            "x": -1.024999976158142,
+            "y": 0.5049999952316284,
+            "z": 0.0,
+            "u": 0.40625000232830644,
+            "v": 0.8769531254656613
+          },
+          {
+            "x": -1.065000057220459,
+            "y": 0.36500000953674316,
+            "z": 0.0,
+            "u": 0.40234374441206455,
+            "v": 0.8906249990686774
+          },
+          {
+            "x": -1.065000057220459,
+            "y": -0.4449999928474426,
+            "z": 0.0,
+            "u": 0.40234374441206455,
+            "v": 0.9697265618015081
+          },
+          {
+            "x": 1.065000057220459,
+            "y": -0.03500000014901161,
+            "z": 0.0,
+            "u": 0.6103515680879354,
+            "v": 0.9296875000145519
+          },
+          {
+            "x": 1.0549999475479126,
+            "y": -0.08500000089406967,
+            "z": 0.0,
+            "u": 0.6093749948777258,
+            "v": 0.9345703125873115
+          },
+          {
+            "x": 1.065000057220459,
+            "y": -0.08500000089406967,
+            "z": 0.0,
+            "u": 0.6103515680879354,
+            "v": 0.9345703125873115
+          },
+          {
+            "x": 1.0449999570846558,
+            "y": -0.03500000014901161,
+            "z": 0.0,
+            "u": 0.6083984333090484,
+            "v": 0.9296875000145519
+          },
+          {
+            "x": 1.034999966621399,
+            "y": -0.06499999761581421,
+            "z": 0.0,
+            "u": 0.607421871740371,
+            "v": 0.9326171872671694
+          }
+        ],
+        "indices": [
+          16,
+          15,
+          13,
+          12,
+          13,
+          15,
+          14,
+          13,
+          12,
+          11,
+          10,
+          8,
+          9,
+          8,
+          10,
+          7,
+          8,
+          9,
+          3,
+          8,
+          7,
+          6,
+          3,
+          7,
+          5,
+          3,
+          6,
+          4,
+          3,
+          5,
+          0,
+          3,
+          4,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/torchwood/cherrytorch/body.asset",
+      "textureRect": {
+        "x": 412.0,
+        "y": 4.0,
+        "width": 213.0,
+        "height": 143.0,
+        "yTop": 877.0
+      },
+      "logicalSize": {
+        "width": 213.0,
+        "height": 143.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "09da8f10a17a37345b39574442b9f86f",
+      "node": 1,
+      "sortingOrder": 4,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    }
+  ],
+  "spriteVariants": {
+    "09da8f10a17a37345b39574442b9f86f": {
+      "texture": "../batch-1178/textures/1b36e5da3b86.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: body\n  m_Rect:\n    serializedVersion: 2\n    x: 412\n    y: 4\n    width: 213\n    height: 143\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    a02bf125dbd89234a91fad1d3fb915b5: -1446250738317567249\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 41d6c0daa8b158b438a746993c92fb2a, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 39\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 17\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 10000f000d000c000d000f000e000d000c000b000a000800090008000a00070008000900030008000700060003000700050003000600040003000500000003000400010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 17\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 344\n      _typelessdata: 295ccf3e295c2f3f000000003d0a373fa470fdbe000000003d0a373f48e1ba3e00000000cdcc8c3e3d0a37bf00000000d7a3703e3d0a373f00000000000020bf3d0a373f00000000c3f548bf713d2a3f00000000000060bfa4701d3f00000000000060bf3d0a37bf00000000333383bfae47013f00000000ec5188bf48e1ba3e00000000ec5188bf0ad7e3be00000000ec51883f295c0fbd000000003d0a873f7b14aebd00000000ec51883f7b14aebd000000008fc2853f295c0fbd00000000e17a843fb81e85bd000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 412\n      y: 4\n      width: 213\n      height: 143\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 518.5, z: 100, w: 75.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.4050000011920929,
+            "y": 0.6850000023841858,
+            "z": 0.0,
+            "u": 0.5458984376164153,
+            "v": 0.8593749997671694
+          },
+          {
+            "x": 0.7149999737739563,
+            "y": -0.4950000047683716,
+            "z": 0.0,
+            "u": 0.5761718724388629,
+            "v": 0.9746093754656613
+          },
+          {
+            "x": 0.7149999737739563,
+            "y": 0.36500000953674316,
+            "z": 0.0,
+            "u": 0.5761718724388629,
+            "v": 0.8906249990686774
+          },
+          {
+            "x": 0.2750000059604645,
+            "y": -0.7149999737739563,
+            "z": 0.0,
+            "u": 0.5332031255820766,
+            "v": 0.9960937474388629
+          },
+          {
+            "x": 0.23499999940395355,
+            "y": 0.7149999737739563,
+            "z": 0.0,
+            "u": 0.5292968749417923,
+            "v": 0.8564453150611371
+          },
+          {
+            "x": -0.625,
+            "y": 0.7149999737739563,
+            "z": 0.0,
+            "u": 0.4453125,
+            "v": 0.8564453150611371
+          },
+          {
+            "x": -0.7850000262260437,
+            "y": 0.6650000214576721,
+            "z": 0.0,
+            "u": 0.4296874974388629,
+            "v": 0.8613281229045242
+          },
+          {
+            "x": -0.875,
+            "y": 0.6150000095367432,
+            "z": 0.0,
+            "u": 0.4208984375,
+            "v": 0.8662109365686774
+          },
+          {
+            "x": -0.875,
+            "y": -0.7149999737739563,
+            "z": 0.0,
+            "u": 0.4208984375,
+            "v": 0.9960937474388629
+          },
+          {
+            "x": -1.024999976158142,
+            "y": 0.5049999952316284,
+            "z": 0.0,
+            "u": 0.40625000232830644,
+            "v": 0.8769531254656613
+          },
+          {
+            "x": -1.065000057220459,
+            "y": 0.36500000953674316,
+            "z": 0.0,
+            "u": 0.40234374441206455,
+            "v": 0.8906249990686774
+          },
+          {
+            "x": -1.065000057220459,
+            "y": -0.4449999928474426,
+            "z": 0.0,
+            "u": 0.40234374441206455,
+            "v": 0.9697265618015081
+          },
+          {
+            "x": 1.065000057220459,
+            "y": -0.03500000014901161,
+            "z": 0.0,
+            "u": 0.6103515680879354,
+            "v": 0.9296875000145519
+          },
+          {
+            "x": 1.0549999475479126,
+            "y": -0.08500000089406967,
+            "z": 0.0,
+            "u": 0.6093749948777258,
+            "v": 0.9345703125873115
+          },
+          {
+            "x": 1.065000057220459,
+            "y": -0.08500000089406967,
+            "z": 0.0,
+            "u": 0.6103515680879354,
+            "v": 0.9345703125873115
+          },
+          {
+            "x": 1.0449999570846558,
+            "y": -0.03500000014901161,
+            "z": 0.0,
+            "u": 0.6083984333090484,
+            "v": 0.9296875000145519
+          },
+          {
+            "x": 1.034999966621399,
+            "y": -0.06499999761581421,
+            "z": 0.0,
+            "u": 0.607421871740371,
+            "v": 0.9326171872671694
+          }
+        ],
+        "indices": [
+          16,
+          15,
+          13,
+          12,
+          13,
+          15,
+          14,
+          13,
+          12,
+          11,
+          10,
+          8,
+          9,
+          8,
+          10,
+          7,
+          8,
+          9,
+          3,
+          8,
+          7,
+          6,
+          3,
+          7,
+          5,
+          3,
+          6,
+          4,
+          3,
+          5,
+          0,
+          3,
+          4,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/torchwood/cherrytorch/body.asset",
+      "textureRect": {
+        "x": 412.0,
+        "y": 4.0,
+        "width": 213.0,
+        "height": 143.0,
+        "yTop": 877.0
+      },
+      "logicalSize": {
+        "width": 213.0,
+        "height": 143.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "1520ec88749db9b4caf3fc3db9b697e7": {
+      "texture": "../batch-1178/textures/1b36e5da3b86.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: leaf3\n  m_Rect:\n    serializedVersion: 2\n    x: 289\n    y: 307\n    width: 122\n    height: 125\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    a02bf125dbd89234a91fad1d3fb915b5: -737414012026323517\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 41d6c0daa8b158b438a746993c92fb2a, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 30\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 12\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 0b000a000900080009000a00060009000800070006000800050006000700040006000500030004000500010004000300000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 12\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 240\n      _typelessdata: f6281c3fc3f5283e00000000295c0f3f8fc215bf00000000f6281c3fe17ad4be000000008fc2f53e8fc2b53e000000005c8fc23e000020bf000000000ad7a33cc3f5083f00000000295c0fbe000020bf000000009a9919be0000203f00000000b81e05bf0000203f00000000713d0abf6666a6be00000000f6281cbf295ccf3e00000000f6281cbf666666be00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 289\n      y: 307\n      width: 122\n      height: 125\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 350, z: 100, w: 369.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.6100000143051147,
+            "y": 0.16500000655651093,
+            "z": 0.0,
+            "u": 0.40136718889698386,
+            "v": 0.6230468743597157
+          },
+          {
+            "x": 0.5600000023841858,
+            "y": -0.5849999785423279,
+            "z": 0.0,
+            "u": 0.39648437523283064,
+            "v": 0.6962890604045242
+          },
+          {
+            "x": 0.6100000143051147,
+            "y": -0.41499999165534973,
+            "z": 0.0,
+            "u": 0.40136718889698386,
+            "v": 0.6796874991850927
+          },
+          {
+            "x": 0.47999998927116394,
+            "y": 0.35499998927116394,
+            "z": 0.0,
+            "u": 0.3886718739522621,
+            "v": 0.6044921885477379
+          },
+          {
+            "x": 0.3799999952316284,
+            "y": -0.625,
+            "z": 0.0,
+            "u": 0.3789062495343387,
+            "v": 0.7001953125
+          },
+          {
+            "x": 0.019999999552965164,
+            "y": 0.5350000262260437,
+            "z": 0.0,
+            "u": 0.34374999995634425,
+            "v": 0.5869140599388629
+          },
+          {
+            "x": -0.14000000059604645,
+            "y": -0.625,
+            "z": 0.0,
+            "u": 0.32812499994179234,
+            "v": 0.7001953125
+          },
+          {
+            "x": -0.15000000596046448,
+            "y": 0.625,
+            "z": 0.0,
+            "u": 0.3271484369179234,
+            "v": 0.578125
+          },
+          {
+            "x": -0.5199999809265137,
+            "y": 0.625,
+            "z": 0.0,
+            "u": 0.29101562686264515,
+            "v": 0.578125
+          },
+          {
+            "x": -0.5400000214576721,
+            "y": -0.32499998807907104,
+            "z": 0.0,
+            "u": 0.2890624979045242,
+            "v": 0.6708984363358468
+          },
+          {
+            "x": -0.6100000143051147,
+            "y": 0.4050000011920929,
+            "z": 0.0,
+            "u": 0.28222656110301614,
+            "v": 0.5996093748835847
+          },
+          {
+            "x": -0.6100000143051147,
+            "y": -0.22499999403953552,
+            "z": 0.0,
+            "u": 0.28222656110301614,
+            "v": 0.6611328119179234
+          }
+        ],
+        "indices": [
+          11,
+          10,
+          9,
+          8,
+          9,
+          10,
+          6,
+          9,
+          8,
+          7,
+          6,
+          8,
+          5,
+          6,
+          7,
+          4,
+          6,
+          5,
+          3,
+          4,
+          5,
+          1,
+          4,
+          3,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/torchwood/cherrytorch/leaf3.asset",
+      "textureRect": {
+        "x": 289.0,
+        "y": 307.0,
+        "width": 122.0,
+        "height": 125.0,
+        "yTop": 592.0
+      },
+      "logicalSize": {
+        "width": 122.0,
+        "height": 125.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "26d1775294b66d043b4024989d42819f": {
+      "texture": "../batch-1178/textures/1b36e5da3b86.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: leaf2\n  m_Rect:\n    serializedVersion: 2\n    x: 633\n    y: 4\n    width: 185\n    height: 127\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    a02bf125dbd89234a91fad1d3fb915b5: 4197076938837000444\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 41d6c0daa8b158b438a746993c92fb2a, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 18\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 8\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 070006000400050004000600000004000500030004000000010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 8\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 160\n      _typelessdata: f6283c3f5c8f223f00000000cdcc6c3ff6289cbe00000000cdcc6c3f3d0a973e000000008fc2153f5c8f22bf00000000d7a3b0be5c8f22bf000000000ad703bf5c8f223f00000000cdcc6cbfb81ec53e00000000cdcc6cbf85eb91be0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 633\n      y: 4\n      width: 185\n      height: 127\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 725.5, z: 100, w: 67.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.7350000143051147,
+            "y": 0.6349999904632568,
+            "z": 0.0,
+            "u": 0.7802734388969839,
+            "v": 0.8720703134313226
+          },
+          {
+            "x": 0.925000011920929,
+            "y": -0.3050000071525574,
+            "z": 0.0,
+            "u": 0.7988281261641532,
+            "v": 0.9638671881984919
+          },
+          {
+            "x": 0.925000011920929,
+            "y": 0.29499998688697815,
+            "z": 0.0,
+            "u": 0.7988281261641532,
+            "v": 0.9052734387805685
+          },
+          {
+            "x": 0.5849999785423279,
+            "y": -0.6349999904632568,
+            "z": 0.0,
+            "u": 0.7656249979045242,
+            "v": 0.9960937490686774
+          },
+          {
+            "x": -0.3449999988079071,
+            "y": -0.6349999904632568,
+            "z": 0.0,
+            "u": 0.6748046876164153,
+            "v": 0.9960937490686774
+          },
+          {
+            "x": -0.5149999856948853,
+            "y": 0.6349999904632568,
+            "z": 0.0,
+            "u": 0.6582031263969839,
+            "v": 0.8720703134313226
+          },
+          {
+            "x": -0.925000011920929,
+            "y": 0.38499999046325684,
+            "z": 0.0,
+            "u": 0.6181640613358468,
+            "v": 0.8964843759313226
+          },
+          {
+            "x": -0.925000011920929,
+            "y": -0.2849999964237213,
+            "z": 0.0,
+            "u": 0.6181640613358468,
+            "v": 0.961914062150754
+          }
+        ],
+        "indices": [
+          7,
+          6,
+          4,
+          5,
+          4,
+          6,
+          0,
+          4,
+          5,
+          3,
+          4,
+          0,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/torchwood/cherrytorch/leaf2.asset",
+      "textureRect": {
+        "x": 633.0,
+        "y": 4.0,
+        "width": 185.0,
+        "height": 127.0,
+        "yTop": 893.0
+      },
+      "logicalSize": {
+        "width": 185.0,
+        "height": 127.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "698bd0207a085974eb32e2169f894a6f": {
+      "texture": "../batch-1178/textures/1b36e5da3b86.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: leaf1\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 307\n    width: 120\n    height: 155\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    a02bf125dbd89234a91fad1d3fb915b5: 3960039482418246000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 41d6c0daa8b158b438a746993c92fb2a, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 39\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 15\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 0e000d000c000b000c000d000a000c000b0007000a000b0008000a000700090008000500070005000800060005000700040005000600010005000400030001000400000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 15\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 312\n      _typelessdata: 9a99193f3333333e000000003333b33e666646bf000000009a99193f713d2abf00000000713d8a3e6666463f00000000a470bdbe6666463f000000006666e6be666646bf000000005c8f02bf0ad7033f000000005c8f02bf0000c0be000000005c8f02bf52b8debe000000005c8f02bf48e11abf00000000713d0abf7b14eebe00000000295c0fbf1f85abbe00000000295c0fbf7b14eebe000000009a9919bf1f85abbe000000009a9919bf52b8debe00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 307\n      width: 120\n      height: 155\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 64, z: 100, w: 384.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.6000000238418579,
+            "y": 0.17499999701976776,
+            "z": 0.0,
+            "u": 0.12109375232830644,
+            "v": 0.6074218752910383
+          },
+          {
+            "x": 0.3499999940395355,
+            "y": -0.7749999761581421,
+            "z": 0.0,
+            "u": 0.09667968691792339,
+            "v": 0.7001953101716936
+          },
+          {
+            "x": 0.6000000238418579,
+            "y": -0.6650000214576721,
+            "z": 0.0,
+            "u": 0.12109375232830644,
+            "v": 0.6894531270954758
+          },
+          {
+            "x": 0.27000001072883606,
+            "y": 0.7749999761581421,
+            "z": 0.0,
+            "u": 0.0888671885477379,
+            "v": 0.5488281273283064
+          },
+          {
+            "x": -0.3700000047683716,
+            "y": 0.7749999761581421,
+            "z": 0.0,
+            "u": 0.026367187034338713,
+            "v": 0.5488281273283064
+          },
+          {
+            "x": -0.44999998807907104,
+            "y": -0.7749999761581421,
+            "z": 0.0,
+            "u": 0.01855468866415322,
+            "v": 0.7001953101716936
+          },
+          {
+            "x": -0.5099999904632568,
+            "y": 0.5149999856948853,
+            "z": 0.0,
+            "u": 0.012695313431322575,
+            "v": 0.5742187513969839
+          },
+          {
+            "x": -0.5099999904632568,
+            "y": -0.375,
+            "z": 0.0,
+            "u": 0.012695313431322575,
+            "v": 0.6611328125
+          },
+          {
+            "x": -0.5099999904632568,
+            "y": -0.4350000023841858,
+            "z": 0.0,
+            "u": 0.012695313431322575,
+            "v": 0.6669921877328306
+          },
+          {
+            "x": -0.5099999904632568,
+            "y": -0.6050000190734863,
+            "z": 0.0,
+            "u": 0.012695313431322575,
+            "v": 0.6835937518626451
+          },
+          {
+            "x": -0.5400000214576721,
+            "y": -0.4650000035762787,
+            "z": 0.0,
+            "u": 0.009765622904524207,
+            "v": 0.669921875349246
+          },
+          {
+            "x": -0.5600000023841858,
+            "y": -0.33500000834465027,
+            "z": 0.0,
+            "u": 0.007812499767169356,
+            "v": 0.6572265633149073
+          },
+          {
+            "x": -0.5600000023841858,
+            "y": -0.4650000035762787,
+            "z": 0.0,
+            "u": 0.007812499767169356,
+            "v": 0.669921875349246
+          },
+          {
+            "x": -0.6000000238418579,
+            "y": -0.33500000834465027,
+            "z": 0.0,
+            "u": 0.0039062476716935635,
+            "v": 0.6572265633149073
+          },
+          {
+            "x": -0.6000000238418579,
+            "y": -0.4350000023841858,
+            "z": 0.0,
+            "u": 0.0039062476716935635,
+            "v": 0.6669921877328306
+          }
+        ],
+        "indices": [
+          14,
+          13,
+          12,
+          11,
+          12,
+          13,
+          10,
+          12,
+          11,
+          7,
+          10,
+          11,
+          8,
+          10,
+          7,
+          9,
+          8,
+          5,
+          7,
+          5,
+          8,
+          6,
+          5,
+          7,
+          4,
+          5,
+          6,
+          1,
+          5,
+          4,
+          3,
+          1,
+          4,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/torchwood/cherrytorch/leaf1_0.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 307.0,
+        "width": 120.0,
+        "height": 155.0,
+        "yTop": 562.0
+      },
+      "logicalSize": {
+        "width": 120.0,
+        "height": 155.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "e741cea7caea00248903707884a3228b": {
+      "texture": "../cactus/textures/7924e0d6960d.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: plantshadow\n  m_Rect:\n    serializedVersion: 2\n    x: 0\n    y: 0\n    width: 86\n    height: 36\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    b79a0977f249dd948866a2f5a914ba3a: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 0286c7c34d435bf4694be6a09458c445, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: f628dcbeec51383e00000000f628dc3eec51383e00000000f628dcbeec5138be00000000f628dc3eec5138be000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 86\n      height: 36\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 0\n    uvTransform: {x: 100, y: 43, z: 100, w: 18}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -0.4300000071525574,
+            "y": 0.18000000715255737,
+            "z": 0.0,
+            "u": -8.316927177961482e-09,
+            "v": -1.986821485111534e-08
+          },
+          {
+            "x": 0.4300000071525574,
+            "y": 0.18000000715255737,
+            "z": 0.0,
+            "u": 1.0000000083169271,
+            "v": -1.986821485111534e-08
+          },
+          {
+            "x": -0.4300000071525574,
+            "y": -0.18000000715255737,
+            "z": 0.0,
+            "u": -8.316927177961482e-09,
+            "v": 1.0000000198682149
+          },
+          {
+            "x": 0.4300000071525574,
+            "y": -0.18000000715255737,
+            "z": 0.0,
+            "u": 1.0000000083169271,
+            "v": 1.0000000198682149
+          }
+        ],
+        "indices": [
+          0,
+          1,
+          2,
+          2,
+          1,
+          3
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/board/plantshadow.asset",
+      "textureRect": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 86.0,
+        "height": 36.0,
+        "yTop": 0.0
+      },
+      "logicalSize": {
+        "width": 86.0,
+        "height": 36.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    }
+  },
+  "extraSpriteGuids": {},
+  "anchors": {
+    "shadow": {
+      "path": "Shadow",
+      "x": 0.0,
+      "y": -1.139000175,
+      "relativeToRuntimeRoot": true
+    }
+  },
+  "visualBounds": {
+    "minX": -0.43250002798023224,
+    "maxX": 0.4300000071525574,
+    "minY": -1.3190001821525574,
+    "maxY": 0.4442777440395355
+  },
+  "clips": {
+    "idle": {
+      "name": "idle",
+      "duration": 2.0,
+      "additiveReferencePoseTime": 0.0,
+      "hasAdditiveReferencePose": false,
+      "loop": true,
+      "sourceSampleRate": 60.0,
+      "curves": [
+        {
+          "kind": "position",
+          "path": "Electrics",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.0,
+                "y": -2.15,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "x": 0.0,
+                "y": -2.29,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 2.0,
+              "value": {
+                "x": 0.0,
+                "y": -2.15,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Electrics"
+        },
+        {
+          "kind": "position",
+          "path": "UltimateFly_body",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.2049999,
+                "y": -0.037889004,
+                "z": 0.04775027
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "x": 0.2049999,
+                "y": -0.17788887,
+                "z": 0.04775027
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 2.0,
+              "value": {
+                "x": 0.2049999,
+                "y": -0.037889004,
+                "z": 0.04775027
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "UltimateFly_body"
+        },
+        {
+          "kind": "position",
+          "path": "UltimateFly_light",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 1.535001,
+                "y": -0.077889204,
+                "z": 0.04775027
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "x": 1.535001,
+                "y": -0.21788907,
+                "z": 0.04775027
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 2.0,
+              "value": {
+                "x": 1.535001,
+                "y": -0.077889204,
+                "z": 0.04775027
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "UltimateFly_light"
+        },
+        {
+          "kind": "position",
+          "path": "Shoot",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.3700008,
+                "y": -0.07000041,
+                "z": 0.1910011
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "x": 0.37000084,
+                "y": -0.21000028,
+                "z": 0.1910011
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 2.0,
+              "value": {
+                "x": 0.3700008,
+                "y": -0.07000041,
+                "z": 0.1910011
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Shoot"
+        }
+      ],
+      "events": []
+    },
+    "shoot": {
+      "name": "shoot",
+      "duration": 0.6,
+      "additiveReferencePoseTime": 0.0,
+      "hasAdditiveReferencePose": false,
+      "loop": false,
+      "sourceSampleRate": 60.0,
+      "curves": [
+        {
+          "kind": "position",
+          "path": "Electrics",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.0,
+                "y": -2.15,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.33333334,
+              "value": {
+                "x": -0.0013123,
+                "y": -2.3392,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 7.039726e-10,
+                "y": 1.0149475e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.5,
+              "value": {
+                "x": 0.00057025,
+                "y": -1.5936,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -5.894592e-09,
+                "y": 1.5998843e-06,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6,
+              "value": {
+                "x": 0.0,
+                "y": -2.15,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -1.871641e-10,
+                "y": 6.3514324e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Electrics"
+        },
+        {
+          "kind": "position",
+          "path": "UltimateFly_body",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.2049999,
+                "y": -0.037889,
+                "z": 0.04775027
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.33333334,
+              "value": {
+                "x": 0.18575,
+                "y": -0.068639,
+                "z": 0.04775027
+              },
+              "inSlope": {
+                "x": 1.0326452e-08,
+                "y": 5.6232018e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.5,
+              "value": {
+                "x": 0.21335,
+                "y": 0.052562,
+                "z": 0.04775027
+              },
+              "inSlope": {
+                "x": -9.9722506e-08,
+                "y": -3.7571365e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6,
+              "value": {
+                "x": 0.2049999,
+                "y": -0.037889,
+                "z": 0.04775027
+              },
+              "inSlope": {
+                "x": 6.2228686e-08,
+                "y": -1.5567387e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "UltimateFly_body"
+        },
+        {
+          "kind": "position",
+          "path": "UltimateFly_light",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 1.535001,
+                "y": -0.0778892,
+                "z": 0.04775027
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.33333334,
+              "value": {
+                "x": 1.3994,
+                "y": -0.11164,
+                "z": 0.04775027
+              },
+              "inSlope": {
+                "x": 7.274207e-08,
+                "y": 1.8105343e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.5,
+              "value": {
+                "x": 1.5939,
+                "y": 0.021386,
+                "z": 0.04775027
+              },
+              "inSlope": {
+                "x": -2.184311e-07,
+                "y": -3.2448515e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6,
+              "value": {
+                "x": 1.535001,
+                "y": -0.0778892,
+                "z": 0.04775027
+              },
+              "inSlope": {
+                "x": 3.0849785e-07,
+                "y": 3.5202712e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "UltimateFly_light"
+        },
+        {
+          "kind": "position",
+          "path": "Shoot",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.3700008,
+                "y": -0.07000041,
+                "z": 0.1910011
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.33333334,
+              "value": {
+                "x": 0.33631,
+                "y": -0.10316,
+                "z": 0.1910011
+              },
+              "inSlope": {
+                "x": 1.8073159e-08,
+                "y": 1.7788192e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.5,
+              "value": {
+                "x": 0.38462,
+                "y": 0.027534,
+                "z": 0.1910011
+              },
+              "inSlope": {
+                "x": 1.0366206e-07,
+                "y": -3.5534387e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6,
+              "value": {
+                "x": 0.3700008,
+                "y": -0.07000041,
+                "z": 0.1910011
+              },
+              "inSlope": {
+                "x": 1.8394376e-08,
+                "y": 4.797129e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Shoot"
+        },
+        {
+          "kind": "scale",
+          "path": "Electrics",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.33333334,
+              "value": {
+                "x": 0.9125,
+                "y": 1.075,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 4.6938645e-08,
+                "y": -4.023316e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.5,
+              "value": {
+                "x": 1.0379689,
+                "y": 0.7793751,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": -4.8664404e-08,
+                "y": 1.4403359e-09,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 2.3797307e-07,
+                "y": -4.0948117e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Electrics"
+        },
+        {
+          "kind": "scale",
+          "path": "UltimateFly_body",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.33333334,
+              "value": {
+                "x": 0.9125,
+                "y": 1.075,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 4.6938645e-08,
+                "y": -4.023316e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.5,
+              "value": {
+                "x": 1.0379689,
+                "y": 0.7793751,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": -4.8664404e-08,
+                "y": 1.4403359e-09,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 2.3797307e-07,
+                "y": -4.0948117e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "UltimateFly_body"
+        },
+        {
+          "kind": "scale",
+          "path": "UltimateFly_light",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.33333334,
+              "value": {
+                "x": 0.9125,
+                "y": 1.075,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 4.6938645e-08,
+                "y": -4.023316e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.5,
+              "value": {
+                "x": 1.0379689,
+                "y": 0.7793751,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": -4.8664404e-08,
+                "y": 1.4403359e-09,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 2.3797307e-07,
+                "y": -4.0948117e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "UltimateFly_light"
+        },
+        {
+          "kind": "scale",
+          "path": "Shoot",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 3.030303,
+                "y": 3.030303,
+                "z": 3.030303
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.33333334,
+              "value": {
+                "x": 2.7651515,
+                "y": 3.257576,
+                "z": 3.030303
+              },
+              "inSlope": {
+                "x": 1.4223835e-07,
+                "y": -1.2191873e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.5,
+              "value": {
+                "x": 3.14536,
+                "y": 2.3617427,
+                "z": 3.030303
+              },
+              "inSlope": {
+                "x": -4.5572654e-07,
+                "y": 6.208812e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6,
+              "value": {
+                "x": 3.030303,
+                "y": 3.030303,
+                "z": 3.030303
+              },
+              "inSlope": {
+                "x": -1.8515225e-07,
+                "y": -4.085524e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Shoot"
+        },
+        {
+          "kind": "float",
+          "path": "UltimateFly_light/UltimateFly_frontshock1",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": 1.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.55,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": 0.0,
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "attribute": "m_IsActive",
+          "classID": 1,
+          "sourceBindingPath": "UltimateFly_light/UltimateFly_frontshock1"
+        },
+        {
+          "kind": "float",
+          "path": "UltimateFly_light/UltimateFly_frontshock2",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.55,
+              "value": 1.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.6,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": 0.0,
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "attribute": "m_IsActive",
+          "classID": 1,
+          "sourceBindingPath": "UltimateFly_light/UltimateFly_frontshock2"
+        },
+        {
+          "kind": "float",
+          "path": "UltimateFly_light/UltimateFly_frontshock3",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.6,
+              "value": 1.0,
+              "inSlope": 0.0,
+              "outSlope": 0.0,
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "attribute": "m_IsActive",
+          "classID": 1,
+          "sourceBindingPath": "UltimateFly_light/UltimateFly_frontshock3"
+        },
+        {
+          "kind": "float",
+          "path": "UltimateFly_light",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.5,
+              "value": 1.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.6,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": 0.0,
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "attribute": "m_IsActive",
+          "classID": 1,
+          "sourceBindingPath": "UltimateFly_light"
+        }
+      ],
+      "events": [
+        {
+          "time": 0.5,
+          "functionName": "AnimShoot",
+          "intParameter": 0,
+          "floatParameter": 0.0,
+          "stringParameter": ""
+        }
+      ]
+    },
+    "blowloop": {
+      "name": "blowloop",
+      "duration": 0.25,
+      "additiveReferencePoseTime": 0.0,
+      "hasAdditiveReferencePose": false,
+      "loop": true,
+      "sourceSampleRate": 60.0,
+      "curves": [
+        {
+          "kind": "float",
+          "path": "Electrics/Surrounding/UltimateFly_surround1",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": 1.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.083333336,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": 0.0,
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "attribute": "m_IsActive",
+          "classID": 1,
+          "sourceBindingPath": "Electrics/Surrounding/UltimateFly_surround1"
+        },
+        {
+          "kind": "float",
+          "path": "Electrics/Surrounding/UltimateFly_surround2",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.083333336,
+              "value": 1.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.16666667,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": 0.0,
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "attribute": "m_IsActive",
+          "classID": 1,
+          "sourceBindingPath": "Electrics/Surrounding/UltimateFly_surround2"
+        },
+        {
+          "kind": "float",
+          "path": "Electrics/Surrounding/UltimateFly_surround3",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.16666667,
+              "value": 1.0,
+              "inSlope": 0.0,
+              "outSlope": 0.0,
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "attribute": "m_IsActive",
+          "classID": 1,
+          "sourceBindingPath": "Electrics/Surrounding/UltimateFly_surround3"
+        },
+        {
+          "kind": "float",
+          "path": "Electrics/HeadLeft/UltimateFly_headleft_electric1",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": 1.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.083333336,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.25,
+              "value": 1.0,
+              "inSlope": 0.0,
+              "outSlope": 0.0,
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "attribute": "m_IsActive",
+          "classID": 1,
+          "sourceBindingPath": "Electrics/HeadLeft/UltimateFly_headleft_electric1"
+        },
+        {
+          "kind": "float",
+          "path": "Electrics/HeadLeft/UltimateFly_headleft_electric2",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.083333336,
+              "value": 1.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.16666667,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": 0.0,
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "attribute": "m_IsActive",
+          "classID": 1,
+          "sourceBindingPath": "Electrics/HeadLeft/UltimateFly_headleft_electric2"
+        },
+        {
+          "kind": "float",
+          "path": "Electrics/HeadRight/UltimateFly_headright_electric1",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": "-Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.083333336,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.16666667,
+              "value": 1.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.25,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": 0.0,
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "attribute": "m_IsActive",
+          "classID": 1,
+          "sourceBindingPath": "Electrics/HeadRight/UltimateFly_headright_electric1"
+        },
+        {
+          "kind": "float",
+          "path": "Electrics/HeadRight/UltimateFly_headright_electric3",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.083333336,
+              "value": 1.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.16666667,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": 0.0,
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "attribute": "m_IsActive",
+          "classID": 1,
+          "sourceBindingPath": "Electrics/HeadRight/UltimateFly_headright_electric3"
+        },
+        {
+          "kind": "float",
+          "path": "Electrics/Headmind/UltimateFly_headmid_electric1",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.083333336,
+              "value": 1.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.16666667,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.25,
+              "value": 1.0,
+              "inSlope": 0.0,
+              "outSlope": 0.0,
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "attribute": "m_IsActive",
+          "classID": 1,
+          "sourceBindingPath": "Electrics/Headmind/UltimateFly_headmid_electric1"
+        },
+        {
+          "kind": "float",
+          "path": "Electrics/Headmind/UltimateFly_headmid_electric2",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.16666667,
+              "value": 1.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.25,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": 0.0,
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "attribute": "m_IsActive",
+          "classID": 1,
+          "sourceBindingPath": "Electrics/Headmind/UltimateFly_headmid_electric2"
+        },
+        {
+          "kind": "float",
+          "path": "Electrics/HeadLeft/UltimateFly_headleft_electric3",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.16666667,
+              "value": 1.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.25,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": 0.0,
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "attribute": "m_IsActive",
+          "classID": 1,
+          "sourceBindingPath": "Electrics/HeadLeft/UltimateFly_headleft_electric3"
+        },
+        {
+          "kind": "float",
+          "path": "Electrics/HeadRight/UltimateFly_headright_electric2",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": 1.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.083333336,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.25,
+              "value": 1.0,
+              "inSlope": 0.0,
+              "outSlope": 0.0,
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "attribute": "m_IsActive",
+          "classID": 1,
+          "sourceBindingPath": "Electrics/HeadRight/UltimateFly_headright_electric2"
+        },
+        {
+          "kind": "float",
+          "path": "Electrics/Headmind/UltimateFly_headmid_electric3",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": 1.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.083333336,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": 0.0,
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "attribute": "m_IsActive",
+          "classID": 1,
+          "sourceBindingPath": "Electrics/Headmind/UltimateFly_headmid_electric3"
+        }
+      ],
+      "events": []
+    }
+  },
+  "controller": {
+    "states": [
+      {
+        "id": 1102724804207875695,
+        "name": "idle",
+        "clip": "idle",
+        "speed": 1.0,
+        "speedParameterActive": true,
+        "speedParameter": "Speed"
+      },
+      {
+        "id": 1102618682377417806,
+        "name": "shoot",
+        "clip": "shoot",
+        "speed": 1.2,
+        "speedParameterActive": true,
+        "speedParameter": "Speed"
+      },
+      {
+        "id": 1102099118695303065,
+        "name": "blowloop",
+        "clip": "blowloop",
+        "speed": 2.0,
+        "speedParameterActive": true,
+        "speedParameter": "Speed"
+      }
+    ],
+    "layers": [
+      {
+        "name": "Base Layer",
+        "blendingMode": 0,
+        "defaultState": 1102724804207875695,
+        "states": [
+          1102724804207875695,
+          1102618682377417806
+        ],
+        "defaultWeight": 0.0
+      },
+      {
+        "name": "petal",
+        "blendingMode": 1,
+        "defaultState": 1102099118695303065,
+        "states": [
+          1102099118695303065
+        ],
+        "defaultWeight": 1.0
+      }
+    ],
+    "serializedController": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!91 &9100000\nAnimatorController:\n  serializedVersion: 5\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: UltimateFly\n  m_AnimatorParameters:\n  - m_Name: shoot\n    m_Type: 9\n    m_DefaultFloat: 0\n    m_DefaultInt: 0\n    m_DefaultBool: 0\n    m_Controller: {fileID: 9100000}\n  - m_Name: Speed\n    m_Type: 1\n    m_DefaultFloat: 1\n    m_DefaultInt: 0\n    m_DefaultBool: 0\n    m_Controller: {fileID: 9100000}\n  m_AnimatorLayers:\n  - serializedVersion: 5\n    m_Name: Base Layer\n    m_StateMachine: {fileID: 1107709254077376921}\n    m_Mask: {fileID: 0}\n    m_Motions: []\n    m_Behaviours: []\n    m_BlendingMode: 0\n    m_SyncedLayerIndex: -1\n    m_DefaultWeight: 0\n    m_IKPass: 0\n    m_SyncedLayerAffectsTiming: 0\n    m_Controller: {fileID: 9100000}\n  - serializedVersion: 5\n    m_Name: petal\n    m_StateMachine: {fileID: 1107884547391421755}\n    m_Mask: {fileID: 0}\n    m_Motions: []\n    m_Behaviours: []\n    m_BlendingMode: 1\n    m_SyncedLayerIndex: -1\n    m_DefaultWeight: 1\n    m_IKPass: 0\n    m_SyncedLayerAffectsTiming: 0\n    m_Controller: {fileID: 9100000}\n--- !u!1107 &1107709254077376921\nAnimatorStateMachine:\n  serializedVersion: 6\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Base Layer\n  m_ChildStates:\n  - m_State: {fileID: 1102724804207875695}\n    m_Position: {x: 0, y: 0, z: 0}\n  - m_State: {fileID: 1102618682377417806}\n    m_Position: {x: 250, y: 0, z: 0}\n  m_ChildStateMachines: []\n  m_AnyStateTransitions:\n  - {fileID: 1101730242686860875}\n  m_EntryTransitions: []\n  m_StateMachineTransitions: {}\n  m_StateMachineBehaviours: []\n  m_AnyStatePosition: {x: 0, y: -100, z: 0}\n  m_EntryPosition: {x: 250, y: -100, z: 0}\n  m_ExitPosition: {x: 500, y: -100, z: 0}\n  m_ParentStateMachinePosition: {x: 0, y: -200, z: 0}\n  m_DefaultState: {fileID: 1102724804207875695}\n--- !u!1101 &1101730242686860875\nAnimatorStateTransition:\n  serializedVersion: 3\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name:\n  m_Conditions:\n  - m_ConditionMode: 1\n    m_ConditionEvent: shoot\n    m_EventTreshold: 0\n  m_DstStateMachine: {fileID: 0}\n  m_DstState: {fileID: 1102618682377417806}\n  m_Solo: 0\n  m_Mute: 0\n  m_IsExit: 0\n  m_TransitionDuration: 0.25\n  m_TransitionOffset: 0\n  m_ExitTime: 0.75\n  m_HasExitTime: 0\n  m_HasFixedDuration: 1\n  m_InterruptionSource: 0\n  m_OrderedInterruption: 1\n  m_CanTransitionToSelf: 1\n--- !u!1102 &1102724804207875695\nAnimatorState:\n  serializedVersion: 6\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: idle\n  m_Speed: 1\n  m_CycleOffset: 0\n  m_Transitions: []\n  m_StateMachineBehaviours: []\n  m_Position: {x: 0, y: 0, z: 0}\n  m_IKOnFeet: 0\n  m_WriteDefaultValues: 1\n  m_Mirror: 0\n  m_SpeedParameterActive: 1\n  m_MirrorParameterActive: 0\n  m_CycleOffsetParameterActive: 0\n  m_TimeParameterActive: 0\n  m_Motion: {fileID: 7400000, guid: 49b602bc61c810c4c81f9c5b266f9963, type: 2}\n  m_Tag:\n  m_SpeedParameter: Speed\n  m_MirrorParameter:\n  m_CycleOffsetParameter:\n  m_TimeParameter:\n--- !u!1102 &1102618682377417806\nAnimatorState:\n  serializedVersion: 6\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: shoot\n  m_Speed: 1.2\n  m_CycleOffset: 0\n  m_Transitions:\n  - {fileID: 1101703437598541787}\n  m_StateMachineBehaviours: []\n  m_Position: {x: 250, y: 0, z: 0}\n  m_IKOnFeet: 0\n  m_WriteDefaultValues: 1\n  m_Mirror: 0\n  m_SpeedParameterActive: 1\n  m_MirrorParameterActive: 0\n  m_CycleOffsetParameterActive: 0\n  m_TimeParameterActive: 0\n  m_Motion: {fileID: 7400000, guid: 6d917a3ed53f4dc4bb4502aa2976dc82, type: 2}\n  m_Tag:\n  m_SpeedParameter: Speed\n  m_MirrorParameter:\n  m_CycleOffsetParameter:\n  m_TimeParameter:\n--- !u!1101 &1101703437598541787\nAnimatorStateTransition:\n  serializedVersion: 3\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name:\n  m_Conditions: []\n  m_DstStateMachine: {fileID: 0}\n  m_DstState: {fileID: 1102724804207875695}\n  m_Solo: 0\n  m_Mute: 0\n  m_IsExit: 0\n  m_TransitionDuration: 0.25\n  m_TransitionOffset: 0\n  m_ExitTime: 0.75\n  m_HasExitTime: 1\n  m_HasFixedDuration: 1\n  m_InterruptionSource: 0\n  m_OrderedInterruption: 1\n  m_CanTransitionToSelf: 1\n--- !u!1107 &1107884547391421755\nAnimatorStateMachine:\n  serializedVersion: 6\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: petal\n  m_ChildStates:\n  - m_State: {fileID: 1102099118695303065}\n    m_Position: {x: 0, y: 0, z: 0}\n  m_ChildStateMachines: []\n  m_AnyStateTransitions: []\n  m_EntryTransitions: []\n  m_StateMachineTransitions: {}\n  m_StateMachineBehaviours: []\n  m_AnyStatePosition: {x: 0, y: -100, z: 0}\n  m_EntryPosition: {x: 250, y: -100, z: 0}\n  m_ExitPosition: {x: 500, y: -100, z: 0}\n  m_ParentStateMachinePosition: {x: 0, y: -200, z: 0}\n  m_DefaultState: {fileID: 1102099118695303065}\n--- !u!1102 &1102099118695303065\nAnimatorState:\n  serializedVersion: 6\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: blowloop\n  m_Speed: 2\n  m_CycleOffset: 0\n  m_Transitions: []\n  m_StateMachineBehaviours: []\n  m_Position: {x: 0, y: 0, z: 0}\n  m_IKOnFeet: 0\n  m_WriteDefaultValues: 1\n  m_Mirror: 0\n  m_SpeedParameterActive: 1\n  m_MirrorParameterActive: 0\n  m_CycleOffsetParameterActive: 0\n  m_TimeParameterActive: 0\n  m_Motion: {fileID: 7400000, guid: 78eb58bd8574b184cb5793148b1bb437, type: 2}\n  m_Tag:\n  m_SpeedParameter: Speed\n  m_MirrorParameter:\n  m_CycleOffsetParameter:\n  m_TimeParameter:\n"
+  },
+  "nonRenderingComponents": [
+    {
+      "typeId": 114,
+      "fileId": 114061268324235159,
+      "serializedComponent": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1709254077376921}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 3c7e4496e3d73276eeade2447a7b50bd, type: 3}\n  m_Name:\n  m_EditorClassIdentifier:\n  shoot: {fileID: 0}\n  theFlyRow: 0\n  parentPlant: {fileID: 0}\n  positionOffset: 0\n  small: 0\n"
+    }
+  ],
+  "colliders": [],
+  "ignoredBindings": [],
+  "omittedInactiveNodes": [],
+  "spritePrefix": null,
+  "unusedSpriteBonesExplicitlyAllowed": false,
+  "sources": [
+    {
+      "path": "Resources/board/plantshadow.asset",
+      "sha256": "e02e122cb3bfb8765afedad2150f3172d60feb8f549356312efca74dce78ae71"
+    },
+    {
+      "path": "Resources/board/plantshadow.asset.meta",
+      "sha256": "08bf3a1a85aabd4284a5755b459880ee4aa2b4575ccdb802a5fcaa2d0ecd462a"
+    },
+    {
+      "path": "Resources/board/plantshadow.png",
+      "sha256": "7924e0d6960dcba0b775b7ebc7d6a49ecb82b27b55b3216f4f6d83f04492a45a"
+    },
+    {
+      "path": "Resources/board/plantshadow.png.meta",
+      "sha256": "901cd63206d878ad5e0556c56e9691ee440a48dddb2a45971ee256b0e139c923"
+    },
+    {
+      "path": "Resources/plants/pumpkin/ultimatepumpkin/blowloop.anim",
+      "sha256": "aee2b5e6e788d7d2a7f611ec80c7d2d984c058f1633e2423fa12a506b20ae1c1"
+    },
+    {
+      "path": "Resources/plants/pumpkin/ultimatepumpkin/blowloop.anim.meta",
+      "sha256": "551e39976c62c4f4f87543da0ebe381526851e11b3ded32eacae43e990abe5d5"
+    },
+    {
+      "path": "Resources/plants/pumpkin/ultimatepumpkin/idle.anim",
+      "sha256": "47b2dc306d2aa98958fa46af0a197f6eafe4676a1a74c909baa24d17a5ebd905"
+    },
+    {
+      "path": "Resources/plants/pumpkin/ultimatepumpkin/idle.anim.meta",
+      "sha256": "b75f8c757a9e2d29c3fb7294a8f85e580991bfd12534d2fd612ec816bb9ddf1c"
+    },
+    {
+      "path": "Resources/plants/pumpkin/ultimatepumpkin/shoot.anim",
+      "sha256": "731f8b48a1b07c310368a080d8cc87c9d7f50d55b7f592e74616cf93fc34b252"
+    },
+    {
+      "path": "Resources/plants/pumpkin/ultimatepumpkin/shoot.anim.meta",
+      "sha256": "95d76581417442a48702102eecd9323a91e324be416bf37cb8472e47f8ab2986"
+    },
+    {
+      "path": "Resources/plants/pumpkin/ultimatepumpkin/UltimateFly.controller",
+      "sha256": "bf5271b0ae8890224095614793ac5e3a9cafca70b27c5e2f6a971eb8aac814c2"
+    },
+    {
+      "path": "Resources/plants/pumpkin/ultimatepumpkin/UltimateFly.controller.meta",
+      "sha256": "cc2e384e4a1bc400292ec34e5fa10dd404ed823ba21d157d7c9f4e08d62f529e"
+    },
+    {
+      "path": "Resources/plants/torchwood/cherrytorch/body.asset",
+      "sha256": "afe68f8543cda8f097ee409a7e7d2c1f30c7982dcdf57538e0d74f95f1bb0d74"
+    },
+    {
+      "path": "Resources/plants/torchwood/cherrytorch/body.asset.meta",
+      "sha256": "5d7270b368e618c4dd07965ea2921b9fe7a70f418e5ff79b7aec3b04f2223599"
+    },
+    {
+      "path": "Resources/plants/torchwood/cherrytorch/CherryFly.prefab",
+      "sha256": "2240c8a4b74cbd2fb250c458243c87129568346bef371ee0e1ea90e138e6b565"
+    },
+    {
+      "path": "Resources/plants/torchwood/cherrytorch/CherryTorch.png",
+      "sha256": "1b36e5da3b86005f26e873fe46577dbba456a2376e1c5b712734a81b3f7268c4"
+    },
+    {
+      "path": "Resources/plants/torchwood/cherrytorch/CherryTorch.png.meta",
+      "sha256": "9c8f83761cae347e9437fb5344ebd93055a2f0e4abf1e28de774af8f32e46383"
+    },
+    {
+      "path": "Resources/plants/torchwood/cherrytorch/leaf1_0.asset",
+      "sha256": "6c654b6fb6978d8dd619a4425c1c9032d2e951c83875848c36e4477d1a80cf30"
+    },
+    {
+      "path": "Resources/plants/torchwood/cherrytorch/leaf1_0.asset.meta",
+      "sha256": "41860e44dfe785e3e029f0cf07ad577cab6741ec40be4b0534bebe3d1fd5d852"
+    },
+    {
+      "path": "Resources/plants/torchwood/cherrytorch/leaf2.asset",
+      "sha256": "659d0044e83b8edee1e87cfbda10413ec5eaf575f0bf24cb1681d92cbad4eb1a"
+    },
+    {
+      "path": "Resources/plants/torchwood/cherrytorch/leaf2.asset.meta",
+      "sha256": "10a2a791c67a2ddc8c8b8a1c9c0fb51de2a9fa788360853be4e5ed953b6de6e3"
+    },
+    {
+      "path": "Resources/plants/torchwood/cherrytorch/leaf3.asset",
+      "sha256": "3c16cf78652ee3435e8d5c59cad1a9e29679691833319d8470bcab4dcded40ce"
+    },
+    {
+      "path": "Resources/plants/torchwood/cherrytorch/leaf3.asset.meta",
+      "sha256": "b57eebff809cbc840556e36e9d93fbaa46645d6593b57e330ab61a23dfbfdd56"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/CherryLittleFly.cs",
+      "sha256": "61ca63cb28821c62112ee500335a0a802e9a00309fcc930730b5a381a01f2b88"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/CherryLittleFly.cs.meta",
+      "sha256": "e5990d835006d9b84143effb16d9af1f45ade3baeeeb10911767af573041ec47"
+    }
+  ],
+  "deferredComponents": [],
+  "validation": "Exported source data. Native rendering and source-runtime comparison are separate verification steps.",
+  "sourceUnboundBindings": [
+    {
+      "path": "Electrics",
+      "sourceBindingPath": "Electrics",
+      "rawPathHash": "0xAF183FF1",
+      "clip": "idle",
+      "curveIndex": 0,
+      "curveKind": "position",
+      "sourceClip": "Resources/plants/pumpkin/ultimatepumpkin/idle.anim",
+      "sourceClipSha256": "47b2dc306d2aa98958fa46af0a197f6eafe4676a1a74c909baa24d17a5ebd905"
+    },
+    {
+      "path": "Electrics",
+      "sourceBindingPath": "Electrics",
+      "rawPathHash": "0xAF183FF1",
+      "clip": "shoot",
+      "curveIndex": 0,
+      "curveKind": "position",
+      "sourceClip": "Resources/plants/pumpkin/ultimatepumpkin/shoot.anim",
+      "sourceClipSha256": "731f8b48a1b07c310368a080d8cc87c9d7f50d55b7f592e74616cf93fc34b252"
+    },
+    {
+      "path": "Electrics",
+      "sourceBindingPath": "Electrics",
+      "rawPathHash": "0xAF183FF1",
+      "clip": "shoot",
+      "curveIndex": 4,
+      "curveKind": "scale",
+      "sourceClip": "Resources/plants/pumpkin/ultimatepumpkin/shoot.anim",
+      "sourceClipSha256": "731f8b48a1b07c310368a080d8cc87c9d7f50d55b7f592e74616cf93fc34b252"
+    },
+    {
+      "path": "Electrics/HeadLeft/UltimateFly_headleft_electric1",
+      "sourceBindingPath": "Electrics/HeadLeft/UltimateFly_headleft_electric1",
+      "rawPathHash": "0x3395EFFD",
+      "clip": "blowloop",
+      "curveIndex": 3,
+      "curveKind": "float",
+      "sourceClip": "Resources/plants/pumpkin/ultimatepumpkin/blowloop.anim",
+      "sourceClipSha256": "aee2b5e6e788d7d2a7f611ec80c7d2d984c058f1633e2423fa12a506b20ae1c1"
+    },
+    {
+      "path": "Electrics/HeadLeft/UltimateFly_headleft_electric2",
+      "sourceBindingPath": "Electrics/HeadLeft/UltimateFly_headleft_electric2",
+      "rawPathHash": "0xAA9CBE47",
+      "clip": "blowloop",
+      "curveIndex": 4,
+      "curveKind": "float",
+      "sourceClip": "Resources/plants/pumpkin/ultimatepumpkin/blowloop.anim",
+      "sourceClipSha256": "aee2b5e6e788d7d2a7f611ec80c7d2d984c058f1633e2423fa12a506b20ae1c1"
+    },
+    {
+      "path": "Electrics/HeadLeft/UltimateFly_headleft_electric3",
+      "sourceBindingPath": "Electrics/HeadLeft/UltimateFly_headleft_electric3",
+      "rawPathHash": "0xDD9B8ED1",
+      "clip": "blowloop",
+      "curveIndex": 9,
+      "curveKind": "float",
+      "sourceClip": "Resources/plants/pumpkin/ultimatepumpkin/blowloop.anim",
+      "sourceClipSha256": "aee2b5e6e788d7d2a7f611ec80c7d2d984c058f1633e2423fa12a506b20ae1c1"
+    },
+    {
+      "path": "Electrics/HeadRight/UltimateFly_headright_electric1",
+      "sourceBindingPath": "Electrics/HeadRight/UltimateFly_headright_electric1",
+      "rawPathHash": "0xE32BC554",
+      "clip": "blowloop",
+      "curveIndex": 5,
+      "curveKind": "float",
+      "sourceClip": "Resources/plants/pumpkin/ultimatepumpkin/blowloop.anim",
+      "sourceClipSha256": "aee2b5e6e788d7d2a7f611ec80c7d2d984c058f1633e2423fa12a506b20ae1c1"
+    },
+    {
+      "path": "Electrics/HeadRight/UltimateFly_headright_electric2",
+      "sourceBindingPath": "Electrics/HeadRight/UltimateFly_headright_electric2",
+      "rawPathHash": "0x7A2294EE",
+      "clip": "blowloop",
+      "curveIndex": 10,
+      "curveKind": "float",
+      "sourceClip": "Resources/plants/pumpkin/ultimatepumpkin/blowloop.anim",
+      "sourceClipSha256": "aee2b5e6e788d7d2a7f611ec80c7d2d984c058f1633e2423fa12a506b20ae1c1"
+    },
+    {
+      "path": "Electrics/HeadRight/UltimateFly_headright_electric3",
+      "sourceBindingPath": "Electrics/HeadRight/UltimateFly_headright_electric3",
+      "rawPathHash": "0x0D25A478",
+      "clip": "blowloop",
+      "curveIndex": 6,
+      "curveKind": "float",
+      "sourceClip": "Resources/plants/pumpkin/ultimatepumpkin/blowloop.anim",
+      "sourceClipSha256": "aee2b5e6e788d7d2a7f611ec80c7d2d984c058f1633e2423fa12a506b20ae1c1"
+    },
+    {
+      "path": "Electrics/Headmind/UltimateFly_headmid_electric1",
+      "sourceBindingPath": "Electrics/Headmind/UltimateFly_headmid_electric1",
+      "rawPathHash": "0x04BDD39D",
+      "clip": "blowloop",
+      "curveIndex": 7,
+      "curveKind": "float",
+      "sourceClip": "Resources/plants/pumpkin/ultimatepumpkin/blowloop.anim",
+      "sourceClipSha256": "aee2b5e6e788d7d2a7f611ec80c7d2d984c058f1633e2423fa12a506b20ae1c1"
+    },
+    {
+      "path": "Electrics/Headmind/UltimateFly_headmid_electric2",
+      "sourceBindingPath": "Electrics/Headmind/UltimateFly_headmid_electric2",
+      "rawPathHash": "0x9DB48227",
+      "clip": "blowloop",
+      "curveIndex": 8,
+      "curveKind": "float",
+      "sourceClip": "Resources/plants/pumpkin/ultimatepumpkin/blowloop.anim",
+      "sourceClipSha256": "aee2b5e6e788d7d2a7f611ec80c7d2d984c058f1633e2423fa12a506b20ae1c1"
+    },
+    {
+      "path": "Electrics/Headmind/UltimateFly_headmid_electric3",
+      "sourceBindingPath": "Electrics/Headmind/UltimateFly_headmid_electric3",
+      "rawPathHash": "0xEAB3B2B1",
+      "clip": "blowloop",
+      "curveIndex": 11,
+      "curveKind": "float",
+      "sourceClip": "Resources/plants/pumpkin/ultimatepumpkin/blowloop.anim",
+      "sourceClipSha256": "aee2b5e6e788d7d2a7f611ec80c7d2d984c058f1633e2423fa12a506b20ae1c1"
+    },
+    {
+      "path": "Electrics/Surrounding/UltimateFly_surround1",
+      "sourceBindingPath": "Electrics/Surrounding/UltimateFly_surround1",
+      "rawPathHash": "0x63262A4E",
+      "clip": "blowloop",
+      "curveIndex": 0,
+      "curveKind": "float",
+      "sourceClip": "Resources/plants/pumpkin/ultimatepumpkin/blowloop.anim",
+      "sourceClipSha256": "aee2b5e6e788d7d2a7f611ec80c7d2d984c058f1633e2423fa12a506b20ae1c1"
+    },
+    {
+      "path": "Electrics/Surrounding/UltimateFly_surround2",
+      "sourceBindingPath": "Electrics/Surrounding/UltimateFly_surround2",
+      "rawPathHash": "0xFA2F7BF4",
+      "clip": "blowloop",
+      "curveIndex": 1,
+      "curveKind": "float",
+      "sourceClip": "Resources/plants/pumpkin/ultimatepumpkin/blowloop.anim",
+      "sourceClipSha256": "aee2b5e6e788d7d2a7f611ec80c7d2d984c058f1633e2423fa12a506b20ae1c1"
+    },
+    {
+      "path": "Electrics/Surrounding/UltimateFly_surround3",
+      "sourceBindingPath": "Electrics/Surrounding/UltimateFly_surround3",
+      "rawPathHash": "0x8D284B62",
+      "clip": "blowloop",
+      "curveIndex": 2,
+      "curveKind": "float",
+      "sourceClip": "Resources/plants/pumpkin/ultimatepumpkin/blowloop.anim",
+      "sourceClipSha256": "aee2b5e6e788d7d2a7f611ec80c7d2d984c058f1633e2423fa12a506b20ae1c1"
+    },
+    {
+      "path": "Shoot",
+      "sourceBindingPath": "Shoot",
+      "rawPathHash": "0xB185D3BA",
+      "clip": "idle",
+      "curveIndex": 3,
+      "curveKind": "position",
+      "sourceClip": "Resources/plants/pumpkin/ultimatepumpkin/idle.anim",
+      "sourceClipSha256": "47b2dc306d2aa98958fa46af0a197f6eafe4676a1a74c909baa24d17a5ebd905"
+    },
+    {
+      "path": "Shoot",
+      "sourceBindingPath": "Shoot",
+      "rawPathHash": "0xB185D3BA",
+      "clip": "shoot",
+      "curveIndex": 3,
+      "curveKind": "position",
+      "sourceClip": "Resources/plants/pumpkin/ultimatepumpkin/shoot.anim",
+      "sourceClipSha256": "731f8b48a1b07c310368a080d8cc87c9d7f50d55b7f592e74616cf93fc34b252"
+    },
+    {
+      "path": "Shoot",
+      "sourceBindingPath": "Shoot",
+      "rawPathHash": "0xB185D3BA",
+      "clip": "shoot",
+      "curveIndex": 7,
+      "curveKind": "scale",
+      "sourceClip": "Resources/plants/pumpkin/ultimatepumpkin/shoot.anim",
+      "sourceClipSha256": "731f8b48a1b07c310368a080d8cc87c9d7f50d55b7f592e74616cf93fc34b252"
+    },
+    {
+      "path": "UltimateFly_light",
+      "sourceBindingPath": "UltimateFly_light",
+      "rawPathHash": "0xC75F4F1A",
+      "clip": "idle",
+      "curveIndex": 2,
+      "curveKind": "position",
+      "sourceClip": "Resources/plants/pumpkin/ultimatepumpkin/idle.anim",
+      "sourceClipSha256": "47b2dc306d2aa98958fa46af0a197f6eafe4676a1a74c909baa24d17a5ebd905"
+    },
+    {
+      "path": "UltimateFly_light",
+      "sourceBindingPath": "UltimateFly_light",
+      "rawPathHash": "0xC75F4F1A",
+      "clip": "shoot",
+      "curveIndex": 2,
+      "curveKind": "position",
+      "sourceClip": "Resources/plants/pumpkin/ultimatepumpkin/shoot.anim",
+      "sourceClipSha256": "731f8b48a1b07c310368a080d8cc87c9d7f50d55b7f592e74616cf93fc34b252"
+    },
+    {
+      "path": "UltimateFly_light",
+      "sourceBindingPath": "UltimateFly_light",
+      "rawPathHash": "0xC75F4F1A",
+      "clip": "shoot",
+      "curveIndex": 6,
+      "curveKind": "scale",
+      "sourceClip": "Resources/plants/pumpkin/ultimatepumpkin/shoot.anim",
+      "sourceClipSha256": "731f8b48a1b07c310368a080d8cc87c9d7f50d55b7f592e74616cf93fc34b252"
+    },
+    {
+      "path": "UltimateFly_light",
+      "sourceBindingPath": "UltimateFly_light",
+      "rawPathHash": "0xC75F4F1A",
+      "clip": "shoot",
+      "curveIndex": 11,
+      "curveKind": "float",
+      "sourceClip": "Resources/plants/pumpkin/ultimatepumpkin/shoot.anim",
+      "sourceClipSha256": "731f8b48a1b07c310368a080d8cc87c9d7f50d55b7f592e74616cf93fc34b252"
+    },
+    {
+      "path": "UltimateFly_light/UltimateFly_frontshock1",
+      "sourceBindingPath": "UltimateFly_light/UltimateFly_frontshock1",
+      "rawPathHash": "0x8FA04B45",
+      "clip": "shoot",
+      "curveIndex": 8,
+      "curveKind": "float",
+      "sourceClip": "Resources/plants/pumpkin/ultimatepumpkin/shoot.anim",
+      "sourceClipSha256": "731f8b48a1b07c310368a080d8cc87c9d7f50d55b7f592e74616cf93fc34b252"
+    },
+    {
+      "path": "UltimateFly_light/UltimateFly_frontshock2",
+      "sourceBindingPath": "UltimateFly_light/UltimateFly_frontshock2",
+      "rawPathHash": "0x16A91AFF",
+      "clip": "shoot",
+      "curveIndex": 9,
+      "curveKind": "float",
+      "sourceClip": "Resources/plants/pumpkin/ultimatepumpkin/shoot.anim",
+      "sourceClipSha256": "731f8b48a1b07c310368a080d8cc87c9d7f50d55b7f592e74616cf93fc34b252"
+    },
+    {
+      "path": "UltimateFly_light/UltimateFly_frontshock3",
+      "sourceBindingPath": "UltimateFly_light/UltimateFly_frontshock3",
+      "rawPathHash": "0x61AE2A69",
+      "clip": "shoot",
+      "curveIndex": 10,
+      "curveKind": "float",
+      "sourceClip": "Resources/plants/pumpkin/ultimatepumpkin/shoot.anim",
+      "sourceClipSha256": "731f8b48a1b07c310368a080d8cc87c9d7f50d55b7f592e74616cf93fc34b252"
+    }
+  ],
+  "sourceUnboundHierarchyProof": {
+    "method": "complete Animator-root hierarchy; no relative-path CRC32 target",
+    "pathHash": "CRC32/UTF-8 of semantic Unity YAML path",
+    "sourcePrefabSha256": "2240c8a4b74cbd2fb250c458243c87129568346bef371ee0e1ea90e138e6b565",
+    "documentCount": 19,
+    "transformCount": 6,
+    "animatorRootFileId": 4099118695303065,
+    "hierarchy": [
+      {
+        "path": "",
+        "hash": "0x00000000"
+      },
+      {
+        "path": "Shadow",
+        "hash": "0x72DA871B"
+      },
+      {
+        "path": "UltimateFly_body",
+        "hash": "0x2242A699"
+      },
+      {
+        "path": "UltimateFly_body/leaf1_1",
+        "hash": "0x4F35B142"
+      },
+      {
+        "path": "UltimateFly_body/leaf2_1",
+        "hash": "0x4D730F1B"
+      },
+      {
+        "path": "UltimateFly_body/leaf3_1",
+        "hash": "0x4CB1652C"
+      }
+    ],
+    "hierarchySha256": "a8021d632dad3626203af6df3489112d6b6607278c8667bb264ce6eeb3d5b514",
+    "scripts": [
+      {
+        "class": "CherryLittleFly",
+        "source": "Scripts/Assembly-CSharp/CherryLittleFly.cs",
+        "sha256": "61ca63cb28821c62112ee500335a0a802e9a00309fcc930730b5a381a01f2b88"
+      }
+    ]
+  }
+}

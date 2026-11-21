@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="DebugGOTY|Win32">
@@ -542,7 +542,220 @@ EXIT /B 0</Command>
     <ClCompile Include="..\Lawn\Net\NetFirstAdventureSmoke.cpp" />
     <ClCompile Include="..\Lawn\Net\NetNativeUiSmoke.cpp" />
     <ClCompile Include="..\Lawn\Widget\CoopHelpDialog.cpp" />
+    <ClCompile Include="..\Lawn\Widget\GameModesDialog.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionCatalog.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionCherryRules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionPotatoRules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionCherryShooterRules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeCherryShooter.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeRollingProjectile.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeGlove.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeGloveUI.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionGloveRules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionRollingProjectileRules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionStraightProjectileRules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionProducerRules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionSplitShooterRules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionColdRules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeCold.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionFireRules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeFire.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionDeathRules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionChomperRules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionLobberRules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionButterRules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeButter.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionMoneyRules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeMoney.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionDefenderRules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeDefender.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionBatchActionRules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeFireActionBatch.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeShooterBatch.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionEconomyRules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionPoisonRules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionAction266Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeEconomy.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativePoison.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeAction266.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeMoneyAction.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionExtendedShooter40Smoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionAction266Smoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionEconomy266Smoke.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionCannon268Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionChomper268Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionEquipmentRules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionExtras268Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionShulk268Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionWater268Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNative269State.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNative269World.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeHypno269.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeSolar269.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionSolar269Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeEffects269.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionStar269Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeStar269.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionSummon269Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeSummon269.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionDoom269Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionRemainingLeaves269Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionWorldParticle269Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeRemainingLeaves269.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeWorldParticle269.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeEmbeddedEffects269.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeFertilize269Attribute.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionSourceZombieDeps269.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionRemainingPlants269Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionRollingActors269Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeRemainingPlants269.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionMorePlants269Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeMorePlants269.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionMorePlants269BackendRules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeMorePlants269Backend.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionWorldRemainder269Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeWorldRemainder269.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeWorldRemainder269Context.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionLastPlants269Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeLastPlants269.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNative269RemainderCallbacks.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeRollingActors269.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeRollingActors269State.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeDroppedCards269.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionSummonPlants269Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionCompanions269Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionWorldActors269Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeSummonPlants269.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeCompanions269.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeWorldActors269.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeLaserConnections269.cpp" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeLaserConnections269.h" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNative269Callbacks.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeDoom269.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionDeform269.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionDeform269Image.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeCannon268.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeChomper268.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeEquipment.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeEquipment268.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeExtras268.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeTools268.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeWater268.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionEquipment268Smoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionCombat268Smoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusion269Smoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusion270Smoke.cpp" />
+    <ClInclude Include="..\Lawn\Net\NetFusion270Smoke.h" />
+    <ClCompile Include="..\Lawn\Net\NetFusionEmperor270Smoke.cpp" />
+    <ClInclude Include="..\Lawn\Net\NetFusionEmperor270Smoke.h" />
+    <ClCompile Include="..\Lawn\Net\NetFusionCampaign270Smoke.cpp" />
+    <ClInclude Include="..\Lawn\Net\NetFusionCampaign270Smoke.h" />
+    <ClCompile Include="..\Lawn\Net\NetFusionCannon268Smoke.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionShooter267Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionAction267Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionUmbrellaBatchRules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionWaterPlants267Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionSeaLantern267Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionHostileProjectileRules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionUmbrellaRules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeShooter267.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeAction267.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeUmbrellaBatch.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeWaterPlants267.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeSeaLantern267.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeHostileProjectile.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativePlantDamage.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeGeometry.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeUmbrella.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionShooter267Smoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionUmbrella267Smoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionPotStar267Smoke.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionFireActionBatchRules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionShooterBatchRules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeBatchActions.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionRecipientShooterRules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeRecipientShooters.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionGarlicRules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionZombieRules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\SpecialZombie269Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\NativeSpecialZombie269.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionZombieBatch270Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionCampaign272Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionParticleCollision269Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionZombieMotion.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeZombies.cpp" />
+    <ClInclude Include="..\Lawn\Fusion\SpecialZombie269Rules.h" />
+    <ClInclude Include="..\Lawn\Fusion\NativeSpecialZombie269.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionZombieBatch270Rules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionParticleCollision269Rules.h" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeZombieVisual.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeGarlic.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeLobber.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeDeath.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeProducer.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeSeedTypes.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionBasePlantRules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeBasePlants.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionShooterTiming.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeShooterTiming.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionAnimation.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionRecipe.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionSimulation.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionWire.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionSeedBank.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionTutorial.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionPresentation.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionRuntime.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionApp.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNative.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeApp.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeAbilities.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeGameplay.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeVisual.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionPortraitCache.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionAlmanacText.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeWire.cpp" />
+    <ClCompile Include="..\Lawn\System\StartupVideo.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusion.cpp" />
     <ClCompile Include="..\Lawn\Net\NetHelpSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetGameModesSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionNativeSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionCherrySmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionPotatoSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionWallnutSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionCherryShooterSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionBaseBatchSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionDoubleSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionNutSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionGloveSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionPuffPeaSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionProducerSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionSplitSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionColdSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionFireSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionDeathSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionChomperSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionLobberSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionCornSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionBulkSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionDefenderMoneySmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionActionSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionRecipientSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionGarlicSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionPaidBatchSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionCold40Smoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionShooter40Smoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionFire40Smoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionMoneyBatchSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionRosterSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionSilverSunflowerSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionIceCaltropSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionSourceZombieSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionAnimationProbe.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionNativeMysterySmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionAlmanacSmoke.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionAlmanacModeSmoke.cpp" />
     <ClCompile Include="..\Lawn\Net\NetControlsSmoke.cpp" />
     <ClCompile Include="..\Lawn\Net\NetCommunicationsSmoke.cpp" />
     <ClCompile Include="..\Lawn\Net\NetZenGardenSmoke.cpp" />
@@ -1273,6 +1486,15 @@ EXIT /B 0</Command>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Editor\ParticleScreen.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionMorePlants269Rules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeMorePlants269.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionMorePlants269BackendRules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeMorePlants269Backend.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionWorldRemainder269Rules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeWorldRemainder269.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionLastPlants269Rules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeLastPlants269.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNative269RemainderCallbacks.h" />
     <ClInclude Include="..\include\ImageLib\ImageLib.h" />
     <ClInclude Include="..\include\ImageLib\jpeg\jpeglib.h" />
     <ClInclude Include="..\include\imgui\backends\imgui_impl_sdl3.h" />
@@ -1472,6 +1694,53 @@ EXIT /B 0</Command>
   <ItemGroup>
     <Image Include="..\main_icon.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Lawn\Fusion\FusionShooterBatchRules.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Lawn\Fusion\FusionEconomyRules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionPoisonRules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionAction266Rules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeEconomy.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativePoison.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeAction266.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeMoneyAction.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionCannon268Rules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionChomper268Rules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionEquipmentRules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionExtras268Rules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionShulk268Rules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionWater268Rules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeCannon268.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeChomper268.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeEquipment.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeEquipment268.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeExtras268.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeTools268.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeWater268.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionShooter267Rules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionAction267Rules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionUmbrellaBatchRules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionWaterPlants267Rules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionSeaLantern267Rules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionHostileProjectileRules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionUmbrellaRules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeShooter267.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeAction267.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeUmbrellaBatch.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeWaterPlants267.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeSeaLantern267.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeHostileProjectile.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativePlantDamage.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeUmbrella.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionFireActionBatchRules.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeShooterBatch.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeFireActionBatch.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Target Name="GenerateCoopBuildVersion" BeforeTargets="PrepareForBuild" Condition="'$(DesignTimeBuild)' != 'true'">
     <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(ProjectDir)..\tools\BumpBuildVersion.ps1&quot; -OutputPath &quot;$(ProjectDir)..\Lawn\Net\NetBuildVersion.h&quot; -CounterPath &quot;$(ProjectDir)..\build\coop-build-number.txt&quot;" />
@@ -1479,6 +1748,10 @@ EXIT /B 0</Command>
   <Target Name="CopyNetworkCursor" AfterTargets="Build">
     <Copy SourceFiles="$(SolutionDir)Cursor13.bmp" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="$(SolutionDir)Cursor13.png" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  </Target>
+  <Target Name="CopyStartupIntro" AfterTargets="Build">
+    <MakeDir Directories="$(OutDir)videos" />
+    <Copy SourceFiles="$(ProjectDir)..\assets\videos\intro.mp4" DestinationFiles="$(OutDir)videos\intro.mp4" SkipUnchangedFiles="false" />
   </Target>
   <Target Name="CopyOnlineRuntime" AfterTargets="Build">
     <ItemGroup>

@@ -11,6 +11,7 @@
 
 class LawnApp;
 class ToolTipWidget;
+class LawnStoneButton;
 namespace Sexy
 {
     class DialogButton;
@@ -39,6 +40,7 @@ private:
         GameSelector_Help,
         GameSelector_Quit,
         GameSelector_ChangeUser,
+        GameSelector_GameModes,
         GameSelector_Store,
         GameSelector_Almanac,
         GameSelector_ZenGarden,
@@ -63,6 +65,7 @@ public:
     Sexy::DDImage*              mGithubImage;
     Sexy::Widget*               mGithubIconHitbox;
     Sexy::Widget*               mCoopHelpIconHitbox;
+    LawnStoneButton*            mGameModesButton;
     NewLawnButton*              mAdventureButton;           //+0x90
     NewLawnButton*              mMinigameButton;            //+0x94
     NewLawnButton*              mPuzzleButton;              //+0x98
@@ -140,6 +143,7 @@ public:
     virtual void                DrawOverlay(Graphics* g);
     Rect                        GetGithubIconRect() const { return Rect(8, 8, 32, 32); }
     Rect                        GetCoopHelpIconRect() const { return Rect(48, 8, 32, 32); }
+    Rect                        GetGameModesButtonRect() const { return Rect(88, 8, 154, 34); }
     bool                        MainMenuIconsVisible() const
     { return mVisible && !mStartingGame && mSelectorState == SELECTOR_IDLE && mSlideCounter == 0 && mX == 0 && mY == 0 && mDestX == 0 && mDestY == 0; }
     virtual void                Update();

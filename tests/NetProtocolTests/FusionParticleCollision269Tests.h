@@ -1,0 +1,4 @@
+#ifndef FUSION_PARTICLE_COLLISION269_TESTS_H
+#define FUSION_PARTICLE_COLLISION269_TESTS_H
+int RunFusionParticleCollision269Tests(int& checks);
+#endif

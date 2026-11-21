@@ -1,0 +1,414 @@
+{
+  "schema": 1,
+  "sourcePrefab": "Resources/items/Door.prefab",
+  "unitsPerNativePixel": 0.01,
+  "applyRootMotion": false,
+  "static": true,
+  "root": 0,
+  "nodes": [
+    {
+      "name": "Door",
+      "active": true,
+      "tag": "Untagged",
+      "parent": -1,
+      "path": "",
+      "position": {
+        "x": -0.24520001,
+        "y": -0.49390006,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.24,
+        "y": 1.24,
+        "z": 1.24
+      }
+    }
+  ],
+  "sourceHierarchy": null,
+  "sprites": [
+    {
+      "texture": "../zombie-batch-8/textures/240c9b7f4b19.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Zombie_screendoor1\n  m_Rect:\n    serializedVersion: 2\n    x: 1.0761205\n    y: 0\n    width: 64.92388\n    height: 122.97325\n  m_Offset: {x: -0.5380618, y: 0.013376843}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.49171242, y: 0.5001088}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    9c22ccda8ee0d914696b50b247bca7f4: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 3c6fd3ccc068ca64cbf7dd619adecf5e, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 36\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 11\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 0a0009000800040008000900070008000400030007000400060007000300050007000600030001000600050006000100020005000100040000000300010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 11\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 232\n      _typelessdata: c3f5a83e7b14ee3e0000000052b89e3e6666a6be00000000c3f5a83e1f85abbe00000000e17a943ed7a3b0be00000000ec51b8bda4701d3f00000000c3f5a83e48e1babe0000000052b89e3e0000c0be00000000c3f5a83ea4701dbf00000000ae4761bea4701dbf000000000ad7a3bea4701d3f000000000ad7a3be3333f3be0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 1.0761205\n      y: 0\n      width: 64.92388\n      height: 122.97325\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 33, z: 100, w: 61.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape:\n  - - {x: 0.28, y: 0.385}\n    - {x: -0.12, y: 0.615}\n    - {x: -0.29, y: 0.615}\n    - {x: -0.32, y: 0.60499996}\n    - {x: -0.32, y: -0.375}\n    - {x: -0.22, y: -0.475}\n    - {x: 0.07, y: -0.615}\n    - {x: 0.28, y: -0.615}\n    - {x: 0.29999998, y: -0.60499996}\n    - {x: 0.31, y: -0.21499999}\n    - {x: 0.32999998, y: -0.155}\n    - {x: 0.32999998, y: 0.13499999}\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.33000001311302185,
+            "y": 0.4650000035762787,
+            "z": 0.0,
+            "u": 1.0000000198682149,
+            "v": 0.12195121660465147
+          },
+          {
+            "x": 0.3100000023841858,
+            "y": -0.32499998807907104,
+            "z": 0.0,
+            "u": 0.9696969733093724,
+            "v": 0.7642276325846106
+          },
+          {
+            "x": 0.33000001311302185,
+            "y": -0.33500000834465027,
+            "z": 0.0,
+            "u": 1.0000000198682149,
+            "v": 0.7723577303615043
+          },
+          {
+            "x": 0.28999999165534973,
+            "y": -0.3449999988079071,
+            "z": 0.0,
+            "u": 0.9393939267505299,
+            "v": 0.7804878039088676
+          },
+          {
+            "x": -0.09000000357627869,
+            "y": 0.6150000095367432,
+            "z": 0.0,
+            "u": 0.3636363582177596,
+            "v": -7.753449660086176e-09
+          },
+          {
+            "x": 0.33000001311302185,
+            "y": -0.36500000953674316,
+            "z": 0.0,
+            "u": 1.0000000198682149,
+            "v": 0.7967479752331246
+          },
+          {
+            "x": 0.3100000023841858,
+            "y": -0.375,
+            "z": 0.0,
+            "u": 0.9696969733093724,
+            "v": 0.8048780487804879
+          },
+          {
+            "x": 0.33000001311302185,
+            "y": -0.6150000095367432,
+            "z": 0.0,
+            "u": 1.0000000198682149,
+            "v": 1.0000000077534497
+          },
+          {
+            "x": -0.2199999988079071,
+            "y": -0.6150000095367432,
+            "z": 0.0,
+            "u": 0.166666668472868,
+            "v": 1.0000000077534497
+          },
+          {
+            "x": -0.3199999928474426,
+            "y": 0.6150000095367432,
+            "z": 0.0,
+            "u": 0.015151525988723293,
+            "v": -7.753449660086176e-09
+          },
+          {
+            "x": -0.3199999928474426,
+            "y": -0.4749999940395355,
+            "z": 0.0,
+            "u": 0.015151525988723293,
+            "v": 0.8861788569427118
+          }
+        ],
+        "indices": [
+          10,
+          9,
+          8,
+          4,
+          8,
+          9,
+          7,
+          8,
+          4,
+          3,
+          7,
+          4,
+          6,
+          7,
+          3,
+          5,
+          7,
+          6,
+          3,
+          1,
+          6,
+          5,
+          6,
+          1,
+          2,
+          5,
+          1,
+          4,
+          0,
+          3,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/door/Zombie_screendoor1.asset",
+      "textureRect": {
+        "x": 1.0761205,
+        "y": 0.0,
+        "width": 64.92388,
+        "height": 122.97325,
+        "yTop": 0.026750000000006935
+      },
+      "logicalSize": {
+        "width": 64.92388,
+        "height": 122.97325
+      },
+      "pivot": {
+        "x": 0.49171242,
+        "y": 0.5001088
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "e1984bbc576fea944bf6c6a146141e56",
+      "node": 0,
+      "sortingOrder": 18,
+      "sortingLayerId": 1923799275,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    }
+  ],
+  "spriteVariants": {
+    "e1984bbc576fea944bf6c6a146141e56": {
+      "texture": "../zombie-batch-8/textures/240c9b7f4b19.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Zombie_screendoor1\n  m_Rect:\n    serializedVersion: 2\n    x: 1.0761205\n    y: 0\n    width: 64.92388\n    height: 122.97325\n  m_Offset: {x: -0.5380618, y: 0.013376843}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.49171242, y: 0.5001088}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    9c22ccda8ee0d914696b50b247bca7f4: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 3c6fd3ccc068ca64cbf7dd619adecf5e, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 36\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 11\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 0a0009000800040008000900070008000400030007000400060007000300050007000600030001000600050006000100020005000100040000000300010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 11\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 232\n      _typelessdata: c3f5a83e7b14ee3e0000000052b89e3e6666a6be00000000c3f5a83e1f85abbe00000000e17a943ed7a3b0be00000000ec51b8bda4701d3f00000000c3f5a83e48e1babe0000000052b89e3e0000c0be00000000c3f5a83ea4701dbf00000000ae4761bea4701dbf000000000ad7a3bea4701d3f000000000ad7a3be3333f3be0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 1.0761205\n      y: 0\n      width: 64.92388\n      height: 122.97325\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 33, z: 100, w: 61.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape:\n  - - {x: 0.28, y: 0.385}\n    - {x: -0.12, y: 0.615}\n    - {x: -0.29, y: 0.615}\n    - {x: -0.32, y: 0.60499996}\n    - {x: -0.32, y: -0.375}\n    - {x: -0.22, y: -0.475}\n    - {x: 0.07, y: -0.615}\n    - {x: 0.28, y: -0.615}\n    - {x: 0.29999998, y: -0.60499996}\n    - {x: 0.31, y: -0.21499999}\n    - {x: 0.32999998, y: -0.155}\n    - {x: 0.32999998, y: 0.13499999}\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.33000001311302185,
+            "y": 0.4650000035762787,
+            "z": 0.0,
+            "u": 1.0000000198682149,
+            "v": 0.12195121660465147
+          },
+          {
+            "x": 0.3100000023841858,
+            "y": -0.32499998807907104,
+            "z": 0.0,
+            "u": 0.9696969733093724,
+            "v": 0.7642276325846106
+          },
+          {
+            "x": 0.33000001311302185,
+            "y": -0.33500000834465027,
+            "z": 0.0,
+            "u": 1.0000000198682149,
+            "v": 0.7723577303615043
+          },
+          {
+            "x": 0.28999999165534973,
+            "y": -0.3449999988079071,
+            "z": 0.0,
+            "u": 0.9393939267505299,
+            "v": 0.7804878039088676
+          },
+          {
+            "x": -0.09000000357627869,
+            "y": 0.6150000095367432,
+            "z": 0.0,
+            "u": 0.3636363582177596,
+            "v": -7.753449660086176e-09
+          },
+          {
+            "x": 0.33000001311302185,
+            "y": -0.36500000953674316,
+            "z": 0.0,
+            "u": 1.0000000198682149,
+            "v": 0.7967479752331246
+          },
+          {
+            "x": 0.3100000023841858,
+            "y": -0.375,
+            "z": 0.0,
+            "u": 0.9696969733093724,
+            "v": 0.8048780487804879
+          },
+          {
+            "x": 0.33000001311302185,
+            "y": -0.6150000095367432,
+            "z": 0.0,
+            "u": 1.0000000198682149,
+            "v": 1.0000000077534497
+          },
+          {
+            "x": -0.2199999988079071,
+            "y": -0.6150000095367432,
+            "z": 0.0,
+            "u": 0.166666668472868,
+            "v": 1.0000000077534497
+          },
+          {
+            "x": -0.3199999928474426,
+            "y": 0.6150000095367432,
+            "z": 0.0,
+            "u": 0.015151525988723293,
+            "v": -7.753449660086176e-09
+          },
+          {
+            "x": -0.3199999928474426,
+            "y": -0.4749999940395355,
+            "z": 0.0,
+            "u": 0.015151525988723293,
+            "v": 0.8861788569427118
+          }
+        ],
+        "indices": [
+          10,
+          9,
+          8,
+          4,
+          8,
+          9,
+          7,
+          8,
+          4,
+          3,
+          7,
+          4,
+          6,
+          7,
+          3,
+          5,
+          7,
+          6,
+          3,
+          1,
+          6,
+          5,
+          6,
+          1,
+          2,
+          5,
+          1,
+          4,
+          0,
+          3,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/door/Zombie_screendoor1.asset",
+      "textureRect": {
+        "x": 1.0761205,
+        "y": 0.0,
+        "width": 64.92388,
+        "height": 122.97325,
+        "yTop": 0.026750000000006935
+      },
+      "logicalSize": {
+        "width": 64.92388,
+        "height": 122.97325
+      },
+      "pivot": {
+        "x": 0.49171242,
+        "y": 0.5001088
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    }
+  },
+  "extraSpriteGuids": {},
+  "anchors": {},
+  "visualBounds": {
+    "minX": -0.39679999113082887,
+    "maxX": 0.40920001626014707,
+    "minY": -0.7626000118255615,
+    "maxY": 0.7626000118255615
+  },
+  "clips": {},
+  "controller": {
+    "states": [],
+    "layers": [],
+    "serializedController": ""
+  },
+  "nonRenderingComponents": [
+    {
+      "typeId": 114,
+      "fileId": 114618682377417806,
+      "serializedComponent": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1709254077376921}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 1f062a5da4b86317da7adf2918b89c27, type: 3}\n  m_Name:\n  m_EditorClassIdentifier:\n  isLand: 0\n  disappear: 1\n  itemType: 0\n  existTime: 0\n  startPosition: {x: 0, y: 0}\n  magnetShroom: {fileID: 0}\n"
+    },
+    {
+      "typeId": 61,
+      "fileId": 61703437598541787,
+      "serializedComponent": "BoxCollider2D:\n  serializedVersion: 2\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1709254077376921}\n  m_Enabled: 1\n  m_Density: 1\n  m_Material: {fileID: 0}\n  m_IncludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_ExcludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_LayerOverridePriority: 0\n  m_ForceSendLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_ForceReceiveLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_ContactCaptureLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_CallbackLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_IsTrigger: 1\n  m_UsedByEffector: 0\n  m_UsedByComposite: 0\n  m_Offset: {x: 0, y: 0}\n  m_SpriteTilingProperty:\n    border: {x: 0, y: 0, z: 0, w: 0}\n    pivot: {x: 0.5, y: 0.5}\n    oldSize: {x: 0.66, y: 1.23}\n    newSize: {x: 0.66, y: 1.23}\n    adaptiveTilingThreshold: 0.5\n    drawMode: 0\n    adaptiveTiling: 0\n  m_AutoTiling: 0\n  m_Size: {x: 0.66, y: 1.0440154}\n  m_EdgeRadius: 0\n"
+    }
+  ],
+  "colliders": [
+    {
+      "type": "box",
+      "node": 0,
+      "fileId": 61703437598541787,
+      "enabled": true,
+      "trigger": true,
+      "offset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "size": {
+        "x": 0.66,
+        "y": 1.0440154
+      }
+    }
+  ],
+  "ignoredBindings": [],
+  "omittedInactiveNodes": [],
+  "spritePrefix": null,
+  "unusedSpriteBonesExplicitlyAllowed": false,
+  "sources": [
+    {
+      "path": "Resources/items/Door.prefab",
+      "sha256": "4b4d881399782ac294d1a1a114f3c86c78039791f14b8112197f379010cd1fbc"
+    },
+    {
+      "path": "Resources/zombies/door/Zombie_screendoor1.asset",
+      "sha256": "00a1a09f75d37640cbcdf0032013d50d0778384fe8cffd281b45069b865c08d4"
+    },
+    {
+      "path": "Resources/zombies/door/Zombie_screendoor1.asset.meta",
+      "sha256": "f36719fc2023a8b96536b7bc69a2e8d561bfd9af24456f118c0ba3995ee4c3a7"
+    },
+    {
+      "path": "Resources/zombies/door/Zombie_screendoor1.png",
+      "sha256": "240c9b7f4b19070e331601768dfa82d84dd69972a6ad406da1fce34a23d8730e"
+    },
+    {
+      "path": "Resources/zombies/door/Zombie_screendoor1.png.meta",
+      "sha256": "022de2127ce91292c390ae5107ec0fee176e5d3b33bff6854191bf966734d547"
+    }
+  ],
+  "deferredComponents": [],
+  "validation": "Exported source data. Native rendering and source-runtime comparison are separate verification steps."
+}

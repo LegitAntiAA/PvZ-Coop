@@ -1,0 +1,4201 @@
+{
+  "schema": 1,
+  "sourcePrefab": "Resources/plants/doomshroom/DoomShroomPrefab.prefab",
+  "unitsPerNativePixel": 0.01,
+  "applyRootMotion": false,
+  "static": false,
+  "root": 0,
+  "nodes": [
+    {
+      "name": "DoomShroomPrefab",
+      "active": true,
+      "tag": "Plant",
+      "parent": -1,
+      "path": "",
+      "position": {
+        "x": -0.039,
+        "y": -1.963,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 0.3
+      }
+    },
+    {
+      "name": "DoomShroom_head3",
+      "active": false,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "DoomShroom_head3",
+      "position": {
+        "x": -0.005000114,
+        "y": 3.375,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "DoomShroom_head2",
+      "active": false,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "DoomShroom_head2",
+      "position": {
+        "x": -0.1300001,
+        "y": 3.105,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "DoomShroom_head1",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "DoomShroom_head1",
+      "position": {
+        "x": 0.004999876,
+        "y": 2.875,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "DoomShroom_body",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "DoomShroom_body",
+      "position": {
+        "x": -0.1350002,
+        "y": 1.05,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "Shadow",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "Shadow",
+      "position": {
+        "x": -0.17,
+        "y": 0.46,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 5.3666663,
+        "y": 5.3666663,
+        "z": 0.7666666
+      }
+    }
+  ],
+  "sourceHierarchy": null,
+  "sprites": [
+    {
+      "texture": "../cactus/textures/7924e0d6960d.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: plantshadow\n  m_Rect:\n    serializedVersion: 2\n    x: 0\n    y: 0\n    width: 86\n    height: 36\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    b79a0977f249dd948866a2f5a914ba3a: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 0286c7c34d435bf4694be6a09458c445, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: f628dcbeec51383e00000000f628dc3eec51383e00000000f628dcbeec5138be00000000f628dc3eec5138be000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 86\n      height: 36\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 0\n    uvTransform: {x: 100, y: 43, z: 100, w: 18}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -0.4300000071525574,
+            "y": 0.18000000715255737,
+            "z": 0.0,
+            "u": -8.316927177961482e-09,
+            "v": -1.986821485111534e-08
+          },
+          {
+            "x": 0.4300000071525574,
+            "y": 0.18000000715255737,
+            "z": 0.0,
+            "u": 1.0000000083169271,
+            "v": -1.986821485111534e-08
+          },
+          {
+            "x": -0.4300000071525574,
+            "y": -0.18000000715255737,
+            "z": 0.0,
+            "u": -8.316927177961482e-09,
+            "v": 1.0000000198682149
+          },
+          {
+            "x": 0.4300000071525574,
+            "y": -0.18000000715255737,
+            "z": 0.0,
+            "u": 1.0000000083169271,
+            "v": 1.0000000198682149
+          }
+        ],
+        "indices": [
+          0,
+          1,
+          2,
+          2,
+          1,
+          3
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/board/plantshadow.asset",
+      "textureRect": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 86.0,
+        "height": 36.0,
+        "yTop": 0.0
+      },
+      "logicalSize": {
+        "width": 86.0,
+        "height": 36.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "e741cea7caea00248903707884a3228b",
+      "node": 5,
+      "sortingOrder": 0,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    },
+    {
+      "texture": "textures/f624fe242468.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: DoomShroom_body\n  m_Rect:\n    serializedVersion: 2\n    x: 541\n    y: 4\n    width: 225\n    height: 208\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    6677faf5ab23ec64eb65c69c2bc02878: 3093204338535473560\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 19660ee61fe111f45837eb766fa5df25, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 21\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 9\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 080007000500060005000700000005000600040005000000030004000000010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 9\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 184\n      _typelessdata: 14ae673fb81e853f000000000000903f713d4abf000000000000903f0ad7633f0000000052b83e3fb81e85bf00000000ae4741bfb81e85bf00000000e17a74bfae4781bf000000008fc285bfb81e853f00000000000090bf295c8f3e00000000000090bfec5138bf0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 541\n      y: 4\n      width: 225\n      height: 208\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 653.5, z: 100, w: 108}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.9049999713897705,
+            "y": 1.0399999618530273,
+            "z": 0.0,
+            "u": 0.7265624972060323,
+            "v": 0.7929687537252903
+          },
+          {
+            "x": 1.125,
+            "y": -0.7900000214576721,
+            "z": 0.0,
+            "u": 0.748046875,
+            "v": 0.9716796895954758
+          },
+          {
+            "x": 1.125,
+            "y": 0.8899999856948853,
+            "z": 0.0,
+            "u": 0.748046875,
+            "v": 0.8076171888969839
+          },
+          {
+            "x": 0.7450000047683716,
+            "y": -1.0399999618530273,
+            "z": 0.0,
+            "u": 0.7109375004656613,
+            "v": 0.9960937462747097
+          },
+          {
+            "x": -0.7549999952316284,
+            "y": -1.0399999618530273,
+            "z": 0.0,
+            "u": 0.5644531254656613,
+            "v": 0.9960937462747097
+          },
+          {
+            "x": -0.9549999833106995,
+            "y": -1.0099999904632568,
+            "z": 0.0,
+            "u": 0.5449218766298145,
+            "v": 0.9931640615686774
+          },
+          {
+            "x": -1.0449999570846558,
+            "y": 1.0399999618530273,
+            "z": 0.0,
+            "u": 0.5361328166909516,
+            "v": 0.7929687537252903
+          },
+          {
+            "x": -1.125,
+            "y": 0.2800000011920929,
+            "z": 0.0,
+            "u": 0.5283203125,
+            "v": 0.8671874998835847
+          },
+          {
+            "x": -1.125,
+            "y": -0.7200000286102295,
+            "z": 0.0,
+            "u": 0.5283203125,
+            "v": 0.9648437527939677
+          }
+        ],
+        "indices": [
+          8,
+          7,
+          5,
+          6,
+          5,
+          7,
+          0,
+          5,
+          6,
+          4,
+          5,
+          0,
+          3,
+          4,
+          0,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/doomshroom/DoomShroom_body.asset",
+      "textureRect": {
+        "x": 541.0,
+        "y": 4.0,
+        "width": 225.0,
+        "height": 208.0,
+        "yTop": 812.0
+      },
+      "logicalSize": {
+        "width": 225.0,
+        "height": 208.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "77d4c616c01b5ce42b936590e160c9ae",
+      "node": 4,
+      "sortingOrder": 1,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    },
+    {
+      "texture": "textures/f624fe242468.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: DoomShroom_head1\n  m_Rect:\n    serializedVersion: 2\n    x: 500\n    y: 341\n    width: 421\n    height: 229\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    6677faf5ab23ec64eb65c69c2bc02878: -7745618211831884908\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 19660ee61fe111f45837eb766fa5df25, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 18\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 8\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 070006000300050003000600040003000500000003000400010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 8\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 160\n      _typelessdata: 5c8fb23f5c8f923f0000000052b806405c8f92bf0000000052b806405c8f823e00000000f6288cbf5c8f92bf000000003333a3bf5c8f923f00000000ec5100c0f6287c3f0000000052b806c00ad7033f0000000052b806c08fc215bf0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 500\n      y: 341\n      width: 421\n      height: 229\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 710.5, z: 100, w: 455.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 1.3949999809265137,
+            "y": 1.1449999809265137,
+            "z": 0.0,
+            "u": 0.8300781231373549,
+            "v": 0.44335937686264515
+          },
+          {
+            "x": 2.1050000190734863,
+            "y": -1.1449999809265137,
+            "z": 0.0,
+            "u": 0.8994140643626451,
+            "v": 0.6669921856373549
+          },
+          {
+            "x": 2.1050000190734863,
+            "y": 0.2549999952316284,
+            "z": 0.0,
+            "u": 0.8994140643626451,
+            "v": 0.5302734379656613
+          },
+          {
+            "x": -1.0950000286102295,
+            "y": -1.1449999809265137,
+            "z": 0.0,
+            "u": 0.5869140597060323,
+            "v": 0.6669921856373549
+          },
+          {
+            "x": -1.274999976158142,
+            "y": 1.1449999809265137,
+            "z": 0.0,
+            "u": 0.5693359398283064,
+            "v": 0.44335937686264515
+          },
+          {
+            "x": -2.005000114440918,
+            "y": 0.9850000143051147,
+            "z": 0.0,
+            "u": 0.4980468638241291,
+            "v": 0.45898437360301614
+          },
+          {
+            "x": -2.1050000190734863,
+            "y": 0.5149999856948853,
+            "z": 0.0,
+            "u": 0.48828124813735485,
+            "v": 0.5048828138969839
+          },
+          {
+            "x": -2.1050000190734863,
+            "y": -0.5849999785423279,
+            "z": 0.0,
+            "u": 0.48828124813735485,
+            "v": 0.6123046854045242
+          }
+        ],
+        "indices": [
+          7,
+          6,
+          3,
+          5,
+          3,
+          6,
+          4,
+          3,
+          5,
+          0,
+          3,
+          4,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/doomshroom/DoomShroom_head1.asset",
+      "textureRect": {
+        "x": 500.0,
+        "y": 341.0,
+        "width": 421.0,
+        "height": 229.0,
+        "yTop": 454.0
+      },
+      "logicalSize": {
+        "width": 421.0,
+        "height": 229.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "20b658a51e808174bbb730ae1e9f5ea5",
+      "node": 3,
+      "sortingOrder": 2,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    },
+    {
+      "texture": "textures/f624fe242468.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: DoomShroom_head2\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 341\n    width: 488\n    height: 275\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    6677faf5ab23ec64eb65c69c2bc02878: 1315871225807942484\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 19660ee61fe111f45837eb766fa5df25, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 18\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 8\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 070006000500040005000600010005000400030001000400000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 8\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 160\n      _typelessdata: f6281c405c8f623f000000001f850b400000b0bf00000000f6281c40e17a84bf000000001f85eb3f0000b03f000000000000a0bf0000b03f00000000d7a3b0bf0000b0bf00000000f6281cc09a99393f00000000f6281cc014ae27bf0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 341\n      width: 488\n      height: 275\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 248, z: 100, w: 478.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 2.440000057220459,
+            "y": 0.8849999904632568,
+            "z": 0.0,
+            "u": 0.48046875558793545,
+            "v": 0.4462890634313226
+          },
+          {
+            "x": 2.180000066757202,
+            "y": -1.375,
+            "z": 0.0,
+            "u": 0.455078131519258,
+            "v": 0.6669921875
+          },
+          {
+            "x": 2.440000057220459,
+            "y": -1.034999966621399,
+            "z": 0.0,
+            "u": 0.48046875558793545,
+            "v": 0.633789059240371
+          },
+          {
+            "x": 1.840000033378601,
+            "y": 1.375,
+            "z": 0.0,
+            "u": 0.421875003259629,
+            "v": 0.3984375
+          },
+          {
+            "x": -1.25,
+            "y": 1.375,
+            "z": 0.0,
+            "u": 0.1201171875,
+            "v": 0.3984375
+          },
+          {
+            "x": -1.3799999952316284,
+            "y": -1.375,
+            "z": 0.0,
+            "u": 0.10742187546566129,
+            "v": 0.6669921875
+          },
+          {
+            "x": -2.440000057220459,
+            "y": 0.7250000238418579,
+            "z": 0.0,
+            "u": 0.0039062444120645523,
+            "v": 0.46191406017169356
+          },
+          {
+            "x": -2.440000057220459,
+            "y": -0.6549999713897705,
+            "z": 0.0,
+            "u": 0.0039062444120645523,
+            "v": 0.5966796847060323
+          }
+        ],
+        "indices": [
+          7,
+          6,
+          5,
+          4,
+          5,
+          6,
+          1,
+          5,
+          4,
+          3,
+          1,
+          4,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/doomshroom/DoomShroom_head2.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 341.0,
+        "width": 488.0,
+        "height": 275.0,
+        "yTop": 408.0
+      },
+      "logicalSize": {
+        "width": 488.0,
+        "height": 275.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "976c0d04b3c57864c9c7db1f8397126b",
+      "node": 2,
+      "sortingOrder": 3,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    },
+    {
+      "texture": "textures/f624fe242468.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: DoomShroom_head3\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 4\n    width: 529\n    height: 329\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    6677faf5ab23ec64eb65c69c2bc02878: -6306205115803389277\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 19660ee61fe111f45837eb766fa5df25, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 27\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 11\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 0a0009000800070008000900060008000700040006000700050006000400030005000400000003000400010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 11\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 232\n      _typelessdata: 52b81640ae47d13f00000000ae47294052b88ebf00000000ae4729400ad7433f0000000048e1124052b8cebf00000000ec5110405c8fd23f00000000f62804405c8fd2bf00000000295cdfbf5c8fd2bf000000007b14febf5c8fd23f00000000cdcc14c0c3f5b8bf00000000ae4729c048e15a3f00000000ae4729c09a9939bf0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 4\n      width: 529\n      height: 329\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 268.5, z: 100, w: 168.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 2.3550000190734863,
+            "y": 1.6349999904632568,
+            "z": 0.0,
+            "u": 0.49218750186264515,
+            "v": 0.6757812509313226
+          },
+          {
+            "x": 2.6449999809265137,
+            "y": -1.1150000095367432,
+            "z": 0.0,
+            "u": 0.5205078106373549,
+            "v": 0.9443359384313226
+          },
+          {
+            "x": 2.6449999809265137,
+            "y": 0.7649999856948853,
+            "z": 0.0,
+            "u": 0.5205078106373549,
+            "v": 0.7607421888969839
+          },
+          {
+            "x": 2.2950000762939453,
+            "y": -1.6150000095367432,
+            "z": 0.0,
+            "u": 0.4863281324505806,
+            "v": 0.9931640634313226
+          },
+          {
+            "x": 2.255000114440918,
+            "y": 1.6449999809265137,
+            "z": 0.0,
+            "u": 0.4824218861758709,
+            "v": 0.6748046893626451
+          },
+          {
+            "x": 2.065000057220459,
+            "y": -1.6449999809265137,
+            "z": 0.0,
+            "u": 0.46386719308793545,
+            "v": 0.9960937481373549
+          },
+          {
+            "x": -1.7450000047683716,
+            "y": -1.6449999809265137,
+            "z": 0.0,
+            "u": 0.09179687453433871,
+            "v": 0.9960937481373549
+          },
+          {
+            "x": -1.9850000143051147,
+            "y": 1.6449999809265137,
+            "z": 0.0,
+            "u": 0.06835937360301614,
+            "v": 0.6748046893626451
+          },
+          {
+            "x": -2.325000047683716,
+            "y": -1.4450000524520874,
+            "z": 0.0,
+            "u": 0.03515624534338713,
+            "v": 0.9765625051222742
+          },
+          {
+            "x": -2.6449999809265137,
+            "y": 0.8550000190734863,
+            "z": 0.0,
+            "u": 0.003906251862645149,
+            "v": 0.7519531231373549
+          },
+          {
+            "x": -2.6449999809265137,
+            "y": -0.7250000238418579,
+            "z": 0.0,
+            "u": 0.003906251862645149,
+            "v": 0.9062500023283064
+          }
+        ],
+        "indices": [
+          10,
+          9,
+          8,
+          7,
+          8,
+          9,
+          6,
+          8,
+          7,
+          4,
+          6,
+          7,
+          5,
+          6,
+          4,
+          3,
+          5,
+          4,
+          0,
+          3,
+          4,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/doomshroom/DoomShroom_head3.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 4.0,
+        "width": 529.0,
+        "height": 329.0,
+        "yTop": 691.0
+      },
+      "logicalSize": {
+        "width": 529.0,
+        "height": 329.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "ce6fb4fae320fb5478c6d1a225c9c712",
+      "node": 1,
+      "sortingOrder": 4,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    }
+  ],
+  "spriteVariants": {
+    "ce6fb4fae320fb5478c6d1a225c9c712": {
+      "texture": "textures/f624fe242468.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: DoomShroom_head3\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 4\n    width: 529\n    height: 329\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    6677faf5ab23ec64eb65c69c2bc02878: -6306205115803389277\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 19660ee61fe111f45837eb766fa5df25, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 27\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 11\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 0a0009000800070008000900060008000700040006000700050006000400030005000400000003000400010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 11\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 232\n      _typelessdata: 52b81640ae47d13f00000000ae47294052b88ebf00000000ae4729400ad7433f0000000048e1124052b8cebf00000000ec5110405c8fd23f00000000f62804405c8fd2bf00000000295cdfbf5c8fd2bf000000007b14febf5c8fd23f00000000cdcc14c0c3f5b8bf00000000ae4729c048e15a3f00000000ae4729c09a9939bf0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 4\n      width: 529\n      height: 329\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 268.5, z: 100, w: 168.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 2.3550000190734863,
+            "y": 1.6349999904632568,
+            "z": 0.0,
+            "u": 0.49218750186264515,
+            "v": 0.6757812509313226
+          },
+          {
+            "x": 2.6449999809265137,
+            "y": -1.1150000095367432,
+            "z": 0.0,
+            "u": 0.5205078106373549,
+            "v": 0.9443359384313226
+          },
+          {
+            "x": 2.6449999809265137,
+            "y": 0.7649999856948853,
+            "z": 0.0,
+            "u": 0.5205078106373549,
+            "v": 0.7607421888969839
+          },
+          {
+            "x": 2.2950000762939453,
+            "y": -1.6150000095367432,
+            "z": 0.0,
+            "u": 0.4863281324505806,
+            "v": 0.9931640634313226
+          },
+          {
+            "x": 2.255000114440918,
+            "y": 1.6449999809265137,
+            "z": 0.0,
+            "u": 0.4824218861758709,
+            "v": 0.6748046893626451
+          },
+          {
+            "x": 2.065000057220459,
+            "y": -1.6449999809265137,
+            "z": 0.0,
+            "u": 0.46386719308793545,
+            "v": 0.9960937481373549
+          },
+          {
+            "x": -1.7450000047683716,
+            "y": -1.6449999809265137,
+            "z": 0.0,
+            "u": 0.09179687453433871,
+            "v": 0.9960937481373549
+          },
+          {
+            "x": -1.9850000143051147,
+            "y": 1.6449999809265137,
+            "z": 0.0,
+            "u": 0.06835937360301614,
+            "v": 0.6748046893626451
+          },
+          {
+            "x": -2.325000047683716,
+            "y": -1.4450000524520874,
+            "z": 0.0,
+            "u": 0.03515624534338713,
+            "v": 0.9765625051222742
+          },
+          {
+            "x": -2.6449999809265137,
+            "y": 0.8550000190734863,
+            "z": 0.0,
+            "u": 0.003906251862645149,
+            "v": 0.7519531231373549
+          },
+          {
+            "x": -2.6449999809265137,
+            "y": -0.7250000238418579,
+            "z": 0.0,
+            "u": 0.003906251862645149,
+            "v": 0.9062500023283064
+          }
+        ],
+        "indices": [
+          10,
+          9,
+          8,
+          7,
+          8,
+          9,
+          6,
+          8,
+          7,
+          4,
+          6,
+          7,
+          5,
+          6,
+          4,
+          3,
+          5,
+          4,
+          0,
+          3,
+          4,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/doomshroom/DoomShroom_head3.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 4.0,
+        "width": 529.0,
+        "height": 329.0,
+        "yTop": 691.0
+      },
+      "logicalSize": {
+        "width": 529.0,
+        "height": 329.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "976c0d04b3c57864c9c7db1f8397126b": {
+      "texture": "textures/f624fe242468.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: DoomShroom_head2\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 341\n    width: 488\n    height: 275\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    6677faf5ab23ec64eb65c69c2bc02878: 1315871225807942484\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 19660ee61fe111f45837eb766fa5df25, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 18\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 8\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 070006000500040005000600010005000400030001000400000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 8\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 160\n      _typelessdata: f6281c405c8f623f000000001f850b400000b0bf00000000f6281c40e17a84bf000000001f85eb3f0000b03f000000000000a0bf0000b03f00000000d7a3b0bf0000b0bf00000000f6281cc09a99393f00000000f6281cc014ae27bf0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 341\n      width: 488\n      height: 275\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 248, z: 100, w: 478.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 2.440000057220459,
+            "y": 0.8849999904632568,
+            "z": 0.0,
+            "u": 0.48046875558793545,
+            "v": 0.4462890634313226
+          },
+          {
+            "x": 2.180000066757202,
+            "y": -1.375,
+            "z": 0.0,
+            "u": 0.455078131519258,
+            "v": 0.6669921875
+          },
+          {
+            "x": 2.440000057220459,
+            "y": -1.034999966621399,
+            "z": 0.0,
+            "u": 0.48046875558793545,
+            "v": 0.633789059240371
+          },
+          {
+            "x": 1.840000033378601,
+            "y": 1.375,
+            "z": 0.0,
+            "u": 0.421875003259629,
+            "v": 0.3984375
+          },
+          {
+            "x": -1.25,
+            "y": 1.375,
+            "z": 0.0,
+            "u": 0.1201171875,
+            "v": 0.3984375
+          },
+          {
+            "x": -1.3799999952316284,
+            "y": -1.375,
+            "z": 0.0,
+            "u": 0.10742187546566129,
+            "v": 0.6669921875
+          },
+          {
+            "x": -2.440000057220459,
+            "y": 0.7250000238418579,
+            "z": 0.0,
+            "u": 0.0039062444120645523,
+            "v": 0.46191406017169356
+          },
+          {
+            "x": -2.440000057220459,
+            "y": -0.6549999713897705,
+            "z": 0.0,
+            "u": 0.0039062444120645523,
+            "v": 0.5966796847060323
+          }
+        ],
+        "indices": [
+          7,
+          6,
+          5,
+          4,
+          5,
+          6,
+          1,
+          5,
+          4,
+          3,
+          1,
+          4,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/doomshroom/DoomShroom_head2.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 341.0,
+        "width": 488.0,
+        "height": 275.0,
+        "yTop": 408.0
+      },
+      "logicalSize": {
+        "width": 488.0,
+        "height": 275.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "20b658a51e808174bbb730ae1e9f5ea5": {
+      "texture": "textures/f624fe242468.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: DoomShroom_head1\n  m_Rect:\n    serializedVersion: 2\n    x: 500\n    y: 341\n    width: 421\n    height: 229\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    6677faf5ab23ec64eb65c69c2bc02878: -7745618211831884908\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 19660ee61fe111f45837eb766fa5df25, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 18\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 8\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 070006000300050003000600040003000500000003000400010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 8\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 160\n      _typelessdata: 5c8fb23f5c8f923f0000000052b806405c8f92bf0000000052b806405c8f823e00000000f6288cbf5c8f92bf000000003333a3bf5c8f923f00000000ec5100c0f6287c3f0000000052b806c00ad7033f0000000052b806c08fc215bf0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 500\n      y: 341\n      width: 421\n      height: 229\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 710.5, z: 100, w: 455.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 1.3949999809265137,
+            "y": 1.1449999809265137,
+            "z": 0.0,
+            "u": 0.8300781231373549,
+            "v": 0.44335937686264515
+          },
+          {
+            "x": 2.1050000190734863,
+            "y": -1.1449999809265137,
+            "z": 0.0,
+            "u": 0.8994140643626451,
+            "v": 0.6669921856373549
+          },
+          {
+            "x": 2.1050000190734863,
+            "y": 0.2549999952316284,
+            "z": 0.0,
+            "u": 0.8994140643626451,
+            "v": 0.5302734379656613
+          },
+          {
+            "x": -1.0950000286102295,
+            "y": -1.1449999809265137,
+            "z": 0.0,
+            "u": 0.5869140597060323,
+            "v": 0.6669921856373549
+          },
+          {
+            "x": -1.274999976158142,
+            "y": 1.1449999809265137,
+            "z": 0.0,
+            "u": 0.5693359398283064,
+            "v": 0.44335937686264515
+          },
+          {
+            "x": -2.005000114440918,
+            "y": 0.9850000143051147,
+            "z": 0.0,
+            "u": 0.4980468638241291,
+            "v": 0.45898437360301614
+          },
+          {
+            "x": -2.1050000190734863,
+            "y": 0.5149999856948853,
+            "z": 0.0,
+            "u": 0.48828124813735485,
+            "v": 0.5048828138969839
+          },
+          {
+            "x": -2.1050000190734863,
+            "y": -0.5849999785423279,
+            "z": 0.0,
+            "u": 0.48828124813735485,
+            "v": 0.6123046854045242
+          }
+        ],
+        "indices": [
+          7,
+          6,
+          3,
+          5,
+          3,
+          6,
+          4,
+          3,
+          5,
+          0,
+          3,
+          4,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/doomshroom/DoomShroom_head1.asset",
+      "textureRect": {
+        "x": 500.0,
+        "y": 341.0,
+        "width": 421.0,
+        "height": 229.0,
+        "yTop": 454.0
+      },
+      "logicalSize": {
+        "width": 421.0,
+        "height": 229.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "77d4c616c01b5ce42b936590e160c9ae": {
+      "texture": "textures/f624fe242468.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: DoomShroom_body\n  m_Rect:\n    serializedVersion: 2\n    x: 541\n    y: 4\n    width: 225\n    height: 208\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    6677faf5ab23ec64eb65c69c2bc02878: 3093204338535473560\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 19660ee61fe111f45837eb766fa5df25, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 21\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 9\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 080007000500060005000700000005000600040005000000030004000000010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 9\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 184\n      _typelessdata: 14ae673fb81e853f000000000000903f713d4abf000000000000903f0ad7633f0000000052b83e3fb81e85bf00000000ae4741bfb81e85bf00000000e17a74bfae4781bf000000008fc285bfb81e853f00000000000090bf295c8f3e00000000000090bfec5138bf0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 541\n      y: 4\n      width: 225\n      height: 208\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 653.5, z: 100, w: 108}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.9049999713897705,
+            "y": 1.0399999618530273,
+            "z": 0.0,
+            "u": 0.7265624972060323,
+            "v": 0.7929687537252903
+          },
+          {
+            "x": 1.125,
+            "y": -0.7900000214576721,
+            "z": 0.0,
+            "u": 0.748046875,
+            "v": 0.9716796895954758
+          },
+          {
+            "x": 1.125,
+            "y": 0.8899999856948853,
+            "z": 0.0,
+            "u": 0.748046875,
+            "v": 0.8076171888969839
+          },
+          {
+            "x": 0.7450000047683716,
+            "y": -1.0399999618530273,
+            "z": 0.0,
+            "u": 0.7109375004656613,
+            "v": 0.9960937462747097
+          },
+          {
+            "x": -0.7549999952316284,
+            "y": -1.0399999618530273,
+            "z": 0.0,
+            "u": 0.5644531254656613,
+            "v": 0.9960937462747097
+          },
+          {
+            "x": -0.9549999833106995,
+            "y": -1.0099999904632568,
+            "z": 0.0,
+            "u": 0.5449218766298145,
+            "v": 0.9931640615686774
+          },
+          {
+            "x": -1.0449999570846558,
+            "y": 1.0399999618530273,
+            "z": 0.0,
+            "u": 0.5361328166909516,
+            "v": 0.7929687537252903
+          },
+          {
+            "x": -1.125,
+            "y": 0.2800000011920929,
+            "z": 0.0,
+            "u": 0.5283203125,
+            "v": 0.8671874998835847
+          },
+          {
+            "x": -1.125,
+            "y": -0.7200000286102295,
+            "z": 0.0,
+            "u": 0.5283203125,
+            "v": 0.9648437527939677
+          }
+        ],
+        "indices": [
+          8,
+          7,
+          5,
+          6,
+          5,
+          7,
+          0,
+          5,
+          6,
+          4,
+          5,
+          0,
+          3,
+          4,
+          0,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/doomshroom/DoomShroom_body.asset",
+      "textureRect": {
+        "x": 541.0,
+        "y": 4.0,
+        "width": 225.0,
+        "height": 208.0,
+        "yTop": 812.0
+      },
+      "logicalSize": {
+        "width": 225.0,
+        "height": 208.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "e741cea7caea00248903707884a3228b": {
+      "texture": "../cactus/textures/7924e0d6960d.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: plantshadow\n  m_Rect:\n    serializedVersion: 2\n    x: 0\n    y: 0\n    width: 86\n    height: 36\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    b79a0977f249dd948866a2f5a914ba3a: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 0286c7c34d435bf4694be6a09458c445, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: f628dcbeec51383e00000000f628dc3eec51383e00000000f628dcbeec5138be00000000f628dc3eec5138be000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 86\n      height: 36\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 0\n    uvTransform: {x: 100, y: 43, z: 100, w: 18}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -0.4300000071525574,
+            "y": 0.18000000715255737,
+            "z": 0.0,
+            "u": -8.316927177961482e-09,
+            "v": -1.986821485111534e-08
+          },
+          {
+            "x": 0.4300000071525574,
+            "y": 0.18000000715255737,
+            "z": 0.0,
+            "u": 1.0000000083169271,
+            "v": -1.986821485111534e-08
+          },
+          {
+            "x": -0.4300000071525574,
+            "y": -0.18000000715255737,
+            "z": 0.0,
+            "u": -8.316927177961482e-09,
+            "v": 1.0000000198682149
+          },
+          {
+            "x": 0.4300000071525574,
+            "y": -0.18000000715255737,
+            "z": 0.0,
+            "u": 1.0000000083169271,
+            "v": 1.0000000198682149
+          }
+        ],
+        "indices": [
+          0,
+          1,
+          2,
+          2,
+          1,
+          3
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/board/plantshadow.asset",
+      "textureRect": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 86.0,
+        "height": 36.0,
+        "yTop": 0.0
+      },
+      "logicalSize": {
+        "width": 86.0,
+        "height": 36.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    }
+  },
+  "extraSpriteGuids": {},
+  "anchors": {
+    "shadow": {
+      "path": "Shadow",
+      "x": -0.051000000000000004,
+      "y": 0.138,
+      "relativeToRuntimeRoot": true
+    }
+  },
+  "visualBounds": {
+    "minX": -0.7432999642156167,
+    "maxX": 0.6412999642156166,
+    "minY": -0.1517999917156166,
+    "maxY": 1.205999994277954
+  },
+  "clips": {
+    "idle": {
+      "name": "idle",
+      "duration": 2.0,
+      "additiveReferencePoseTime": 0.0,
+      "hasAdditiveReferencePose": false,
+      "loop": true,
+      "sourceSampleRate": 60.0,
+      "curves": [
+        {
+          "kind": "position",
+          "path": "DoomShroom_head3",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": -0.005000114,
+                "y": 3.375,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": -0.0017499719,
+                "y": -0.61000013,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.5,
+              "value": {
+                "x": -0.0058751,
+                "y": 3.07,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.5,
+              "value": {
+                "x": -0.005000114,
+                "y": 3.6100004,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 2.0,
+              "value": {
+                "x": -0.005000114,
+                "y": 3.375,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": -0.47000074,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "DoomShroom_head3"
+        },
+        {
+          "kind": "position",
+          "path": "DoomShroom_head2",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": -0.1300001,
+                "y": 3.105,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": -0.0236198,
+                "y": -0.55600023,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.5,
+              "value": {
+                "x": -0.14181,
+                "y": 2.827,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.5,
+              "value": {
+                "x": -0.1300001,
+                "y": 3.3400004,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 2.0,
+              "value": {
+                "x": -0.1300001,
+                "y": 3.105,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": -0.47000074,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "DoomShroom_head2"
+        },
+        {
+          "kind": "position",
+          "path": "DoomShroom_head1",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.004999876,
+                "y": 2.875,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": -0.5100002,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.5,
+              "value": {
+                "x": 0.004999876,
+                "y": 2.62,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.5,
+              "value": {
+                "x": 0.004999876,
+                "y": 3.11,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 2.0,
+              "value": {
+                "x": 0.004999876,
+                "y": 2.875,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": -0.4699998,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "DoomShroom_head1"
+        },
+        {
+          "kind": "position",
+          "path": "DoomShroom_body",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": -0.1350002,
+                "y": 1.05,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": -0.024499595,
+                "y": -0.14500034,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.5,
+              "value": {
+                "x": -0.14725,
+                "y": 0.9774998,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.5,
+              "value": {
+                "x": -0.1350002,
+                "y": 1.13,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 2.0,
+              "value": {
+                "x": -0.1350002,
+                "y": 1.05,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": -0.16000009,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "DoomShroom_body"
+        },
+        {
+          "kind": "scale",
+          "path": "DoomShroom_head3",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.099999905,
+                "y": -0.20000005,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.5,
+              "value": {
+                "x": 1.05,
+                "y": 0.9,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.5,
+              "value": {
+                "x": 0.95,
+                "y": 1.1,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 2.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.100000024,
+                "y": -0.20000005,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "DoomShroom_head3"
+        },
+        {
+          "kind": "scale",
+          "path": "DoomShroom_head2",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.099999905,
+                "y": -0.20000005,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.5,
+              "value": {
+                "x": 1.05,
+                "y": 0.9,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.5,
+              "value": {
+                "x": 0.95,
+                "y": 1.1,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 2.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.100000024,
+                "y": -0.20000005,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "DoomShroom_head2"
+        },
+        {
+          "kind": "scale",
+          "path": "DoomShroom_head1",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.099999905,
+                "y": -0.20000005,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.5,
+              "value": {
+                "x": 1.05,
+                "y": 0.9,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.5,
+              "value": {
+                "x": 0.95,
+                "y": 1.1,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 2.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.100000024,
+                "y": -0.20000005,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "DoomShroom_head1"
+        },
+        {
+          "kind": "scale",
+          "path": "DoomShroom_body",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.099999905,
+                "y": -0.20000005,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.5,
+              "value": {
+                "x": 1.05,
+                "y": 0.9,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.5,
+              "value": {
+                "x": 0.95,
+                "y": 1.1,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 2.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.100000024,
+                "y": -0.20000005,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "DoomShroom_body"
+        }
+      ],
+      "events": []
+    },
+    "explode": {
+      "name": "explode",
+      "duration": 0.6666667,
+      "additiveReferencePoseTime": 0.0,
+      "hasAdditiveReferencePose": false,
+      "loop": false,
+      "sourceSampleRate": 60.0,
+      "curves": [
+        {
+          "kind": "position",
+          "path": "DoomShroom_head1",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.004999876,
+                "y": 2.875,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.016666668,
+              "value": {
+                "x": -0.02,
+                "y": 2.83,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -1.4096742e-07,
+                "y": -1.1999984,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": -1.1999987,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.033333335,
+              "value": {
+                "x": 0.06,
+                "y": 2.82,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 3.3000016,
+                "y": -1.1871271e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 3.3000002,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.05,
+              "value": {
+                "x": 0.09,
+                "y": 2.88,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 5.4279974e-07,
+                "y": 3.9000027,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 3.9000032,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.06666667,
+              "value": {
+                "x": 0.07,
+                "y": 2.95,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -2.3999999,
+                "y": 1.5634369e-06,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": -2.4,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.083333336,
+              "value": {
+                "x": 0.01,
+                "y": 2.92,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -1.9105275e-06,
+                "y": -2.0999987,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": -2.0999982,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.1,
+              "value": {
+                "x": 0.04,
+                "y": 2.88,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -7.804233e-07,
+                "y": -5.729988e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.11666667,
+              "value": {
+                "x": -0.03,
+                "y": 2.91,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -6.882352e-07,
+                "y": -3.735229e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.13333334,
+              "value": {
+                "x": -0.02785156,
+                "y": 2.89,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.2578128,
+                "y": 3.480856e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.25781277,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.15,
+              "value": {
+                "x": 0.01,
+                "y": 2.94,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 2.9355478,
+                "y": 1.199999,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 2.9355469,
+                "y": 1.1999989,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.16666667,
+              "value": {
+                "x": 0.07,
+                "y": 2.95,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -1.096989e-06,
+                "y": 1.1999991,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 1.199999,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.18333334,
+              "value": {
+                "x": -0.01,
+                "y": 3.02,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -2.4000003,
+                "y": 3.3378495e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": -2.3999996,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.2,
+              "value": {
+                "x": -0.03,
+                "y": 2.94,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 5.3644403e-08,
+                "y": -8.900824e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": "-Infinity",
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.21666667,
+              "value": {
+                "x": 0.06,
+                "y": 2.94,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -2.5447205e-06,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.23333333,
+              "value": {
+                "x": -0.03,
+                "y": 3.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 2.5447205e-06,
+                "y": 2.399998,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 2.399998,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.25,
+              "value": {
+                "x": 0.02,
+                "y": 3.02,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -1.4781932e-07,
+                "y": 1.2715645e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "DoomShroom_head1"
+        },
+        {
+          "kind": "position",
+          "path": "DoomShroom_head2",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": -0.1300001,
+                "y": 3.105,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.25,
+              "value": {
+                "x": 0.02,
+                "y": 3.07,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": -0.35625008,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": -0.35625008,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.26666668,
+              "value": {
+                "x": -0.03,
+                "y": 3.01,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -3.3,
+                "y": -1.3651068e-06,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": -3.3000002,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.28333333,
+              "value": {
+                "x": -0.09,
+                "y": 3.06,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -5.0907673e-08,
+                "y": 2.9999967,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 2.9999974,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.3,
+              "value": {
+                "x": -0.06,
+                "y": 3.11,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 3.0000007,
+                "y": 3.0000045,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 3.0000005,
+                "y": 3.0000045,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.31666666,
+              "value": {
+                "x": 0.01,
+                "y": 3.16,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 1.6975931e-06,
+                "y": 2.700005,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 2.7000048,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.33333334,
+              "value": {
+                "x": -0.06,
+                "y": 3.2,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -1.303872e-07,
+                "y": -7.104483e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.35,
+              "value": {
+                "x": -0.03,
+                "y": 3.11,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 3.6,
+                "y": -1.2000011,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 3.6000001,
+                "y": -1.1999989,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.36666667,
+              "value": {
+                "x": 0.06,
+                "y": 3.1,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 3.9000003,
+                "y": 1.838118e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 3.9,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.38333333,
+              "value": {
+                "x": 0.1,
+                "y": 3.17,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -3.242263e-07,
+                "y": 4.3245922e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.4,
+              "value": {
+                "x": 0.03,
+                "y": 3.09,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -3.6000004,
+                "y": -1.1952836e-06,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": -3.6000001,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.41666666,
+              "value": {
+                "x": -0.02,
+                "y": 3.18,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -2.1937623e-07,
+                "y": 3.900004,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 3.9000037,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.43333334,
+              "value": {
+                "x": 0.03,
+                "y": 3.22,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 2.4000008,
+                "y": -3.3534164e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 2.4,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.45,
+              "value": {
+                "x": 0.06,
+                "y": 3.18,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 6.995423e-08,
+                "y": 7.1204977e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.46666667,
+              "value": {
+                "x": -0.02,
+                "y": 3.28,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -5.1000004,
+                "y": -3.1851744e-06,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": -5.1000004,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.48333332,
+              "value": {
+                "x": -0.11,
+                "y": 3.24,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -8.011512e-07,
+                "y": 7.1204977e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.5,
+              "value": {
+                "x": -0.06,
+                "y": 3.36,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 4.4190614e-07,
+                "y": 3.827541e-06,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "DoomShroom_head2"
+        },
+        {
+          "kind": "position",
+          "path": "DoomShroom_head3",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": -0.005000114,
+                "y": 3.375,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.5,
+              "value": {
+                "x": -0.005000114,
+                "y": 3.39,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.51666665,
+              "value": {
+                "x": 0.04,
+                "y": 3.35,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -2.1608216e-07,
+                "y": -1.1190839e-06,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.53333336,
+              "value": {
+                "x": -0.02,
+                "y": 3.4,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -4.4999957,
+                "y": 1.6214427e-06,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": -4.4999967,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.55,
+              "value": {
+                "x": -0.11,
+                "y": 3.36,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 1.461545e-07,
+                "y": -1.1190839e-06,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.56666666,
+              "value": {
+                "x": -0.08,
+                "y": 3.44,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 3.6000035,
+                "y": 3.261912,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 3.6000035,
+                "y": 3.2619126,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.5833333,
+              "value": {
+                "x": 0.03,
+                "y": 3.4687302,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -2.2410484e-06,
+                "y": 2.3999956,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 2.3999958,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6,
+              "value": {
+                "x": -0.02,
+                "y": 3.52,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 1.2266928e-06,
+                "y": -5.437062e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6166667,
+              "value": {
+                "x": 0.02,
+                "y": 3.41,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 5.0866464e-07,
+                "y": 4.8312313e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6333333,
+              "value": {
+                "x": -0.08,
+                "y": 3.4488888,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -2.400006,
+                "y": 4.666648,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": -2.4000025,
+                "y": 4.666648,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.65,
+              "value": {
+                "x": -0.1,
+                "y": 3.57,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -2.881218e-08,
+                "y": -1.9453428e-06,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": -0.005000114,
+                "y": 3.56,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": -1.7402972e-07,
+                "y": 2.3515811e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "DoomShroom_head3"
+        },
+        {
+          "kind": "scale",
+          "path": "DoomShroom_head1",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.25,
+              "value": {
+                "x": 1.1749277,
+                "y": 1.1749277,
+                "z": 1.1749277
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "DoomShroom_head1"
+        },
+        {
+          "kind": "scale",
+          "path": "DoomShroom_head2",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.25,
+              "value": {
+                "x": 0.97346705,
+                "y": 0.9590817,
+                "z": 1.0368451
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.2947607
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.2947607
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.5,
+              "value": {
+                "x": 1.0559618,
+                "y": 1.1898162,
+                "z": 1.1898162
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "DoomShroom_head2"
+        },
+        {
+          "kind": "scale",
+          "path": "DoomShroom_head3",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": "-Infinity",
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.5,
+              "value": {
+                "x": 0.890625,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": 1.0087218,
+                "y": 1.1326,
+                "z": 1.1326
+              },
+              "inSlope": {
+                "x": 1.289664e-07,
+                "y": -2.5116574e-07,
+                "z": -2.5116574e-07
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "DoomShroom_head3"
+        },
+        {
+          "kind": "float",
+          "path": "DoomShroom_head2",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.25,
+              "value": 1.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.5,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": 0.0,
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "attribute": "m_IsActive",
+          "classID": 1,
+          "sourceBindingPath": "DoomShroom_head2"
+        },
+        {
+          "kind": "float",
+          "path": "DoomShroom_head1",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": 1.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.25,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": 0.0,
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "attribute": "m_IsActive",
+          "classID": 1,
+          "sourceBindingPath": "DoomShroom_head1"
+        },
+        {
+          "kind": "float",
+          "path": "DoomShroom_head3",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": 0.0,
+              "inSlope": 0.0,
+              "outSlope": "Infinity",
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            },
+            {
+              "time": 0.5,
+              "value": 1.0,
+              "inSlope": 0.0,
+              "outSlope": 0.0,
+              "weightedMode": 0.0,
+              "inWeight": 0.33333334,
+              "outWeight": 0.33333334
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "attribute": "m_IsActive",
+          "classID": 1,
+          "sourceBindingPath": "DoomShroom_head3"
+        }
+      ],
+      "events": [
+        {
+          "time": 0.6666667,
+          "functionName": "AnimExplode",
+          "intParameter": 0,
+          "floatParameter": 0.0,
+          "stringParameter": ""
+        }
+      ]
+    }
+  },
+  "controller": {
+    "states": [
+      {
+        "id": 1102730242686860875,
+        "name": "idle",
+        "clip": "idle",
+        "speed": 1.0,
+        "speedParameterActive": true,
+        "speedParameter": "Speed"
+      },
+      {
+        "id": 1102724804207875695,
+        "name": "explode",
+        "clip": "explode",
+        "speed": 0.7,
+        "speedParameterActive": true,
+        "speedParameter": "Speed"
+      }
+    ],
+    "layers": [
+      {
+        "name": "Base Layer",
+        "blendingMode": 0,
+        "defaultState": 1102730242686860875,
+        "states": [
+          1102730242686860875,
+          1102724804207875695
+        ],
+        "defaultWeight": 0.0
+      }
+    ],
+    "serializedController": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!91 &9100000\nAnimatorController:\n  serializedVersion: 5\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: DoomShroom\n  m_AnimatorParameters:\n  - m_Name: Speed\n    m_Type: 1\n    m_DefaultFloat: 1\n    m_DefaultInt: 0\n    m_DefaultBool: 0\n    m_Controller: {fileID: 9100000}\n  m_AnimatorLayers:\n  - serializedVersion: 5\n    m_Name: Base Layer\n    m_StateMachine: {fileID: 1107709254077376921}\n    m_Mask: {fileID: 0}\n    m_Motions: []\n    m_Behaviours: []\n    m_BlendingMode: 0\n    m_SyncedLayerIndex: -1\n    m_DefaultWeight: 0\n    m_IKPass: 0\n    m_SyncedLayerAffectsTiming: 0\n    m_Controller: {fileID: 9100000}\n--- !u!1107 &1107709254077376921\nAnimatorStateMachine:\n  serializedVersion: 6\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Base Layer\n  m_ChildStates:\n  - m_State: {fileID: 1102730242686860875}\n    m_Position: {x: 0, y: 0, z: 0}\n  - m_State: {fileID: 1102724804207875695}\n    m_Position: {x: 250, y: 0, z: 0}\n  m_ChildStateMachines: []\n  m_AnyStateTransitions: []\n  m_EntryTransitions: []\n  m_StateMachineTransitions: {}\n  m_StateMachineBehaviours: []\n  m_AnyStatePosition: {x: 0, y: -100, z: 0}\n  m_EntryPosition: {x: 250, y: -100, z: 0}\n  m_ExitPosition: {x: 500, y: -100, z: 0}\n  m_ParentStateMachinePosition: {x: 0, y: -200, z: 0}\n  m_DefaultState: {fileID: 1102730242686860875}\n--- !u!1102 &1102730242686860875\nAnimatorState:\n  serializedVersion: 6\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: idle\n  m_Speed: 1\n  m_CycleOffset: 0\n  m_Transitions: []\n  m_StateMachineBehaviours: []\n  m_Position: {x: 0, y: 0, z: 0}\n  m_IKOnFeet: 0\n  m_WriteDefaultValues: 1\n  m_Mirror: 0\n  m_SpeedParameterActive: 1\n  m_MirrorParameterActive: 0\n  m_CycleOffsetParameterActive: 0\n  m_TimeParameterActive: 0\n  m_Motion: {fileID: 7400000, guid: 7a36258b96f8b7549b18564a8c328064, type: 2}\n  m_Tag:\n  m_SpeedParameter: Speed\n  m_MirrorParameter:\n  m_CycleOffsetParameter:\n  m_TimeParameter:\n--- !u!1102 &1102724804207875695\nAnimatorState:\n  serializedVersion: 6\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: explode\n  m_Speed: 0.7\n  m_CycleOffset: 0\n  m_Transitions: []\n  m_StateMachineBehaviours: []\n  m_Position: {x: 250, y: 0, z: 0}\n  m_IKOnFeet: 0\n  m_WriteDefaultValues: 1\n  m_Mirror: 0\n  m_SpeedParameterActive: 1\n  m_MirrorParameterActive: 0\n  m_CycleOffsetParameterActive: 0\n  m_TimeParameterActive: 0\n  m_Motion: {fileID: 7400000, guid: 591043c244734d2448ca0086cee36fb3, type: 2}\n  m_Tag:\n  m_SpeedParameter: Speed\n  m_MirrorParameter:\n  m_CycleOffsetParameter:\n  m_TimeParameter:\n"
+  },
+  "nonRenderingComponents": [
+    {
+      "typeId": 61,
+      "fileId": 61243736805655561,
+      "serializedComponent": "BoxCollider2D:\n  serializedVersion: 2\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1709254077376921}\n  m_Enabled: 1\n  m_Density: 1\n  m_Material: {fileID: 0}\n  m_IncludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_ExcludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_LayerOverridePriority: 0\n  m_ForceSendLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_ForceReceiveLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_ContactCaptureLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_CallbackLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_IsTrigger: 1\n  m_UsedByEffector: 0\n  m_UsedByComposite: 0\n  m_Offset: {x: -1.1920929E-07, y: 2.0084991}\n  m_SpriteTilingProperty:\n    border: {x: 0, y: 0, z: 0, w: 0}\n    pivot: {x: 0, y: 0}\n    oldSize: {x: 0, y: 0}\n    newSize: {x: 0, y: 0}\n    adaptiveTilingThreshold: 0\n    drawMode: 0\n    adaptiveTiling: 0\n  m_AutoTiling: 0\n  m_Size: {x: 3.8821523, y: 3.8281116}\n  m_EdgeRadius: 0\n"
+    },
+    {
+      "typeId": 61,
+      "fileId": 61061268324235159,
+      "serializedComponent": "BoxCollider2D:\n  serializedVersion: 2\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1709254077376921}\n  m_Enabled: 1\n  m_Density: 1\n  m_Material: {fileID: 0}\n  m_IncludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_ExcludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_LayerOverridePriority: 0\n  m_ForceSendLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_ForceReceiveLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_ContactCaptureLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_CallbackLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_IsTrigger: 1\n  m_UsedByEffector: 0\n  m_UsedByComposite: 0\n  m_Offset: {x: 1.1348473, y: 2.188634}\n  m_SpriteTilingProperty:\n    border: {x: 0, y: 0, z: 0, w: 0}\n    pivot: {x: 0, y: 0}\n    oldSize: {x: 0, y: 0}\n    newSize: {x: 0, y: 0}\n    adaptiveTilingThreshold: 0\n    drawMode: 0\n    adaptiveTiling: 0\n  m_AutoTiling: 0\n  m_Size: {x: 1.2882149, y: 4.0082464}\n  m_EdgeRadius: 0\n"
+    },
+    {
+      "typeId": 50,
+      "fileId": 50587765826080250,
+      "serializedComponent": "Rigidbody2D:\n  serializedVersion: 4\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1709254077376921}\n  m_BodyType: 1\n  m_Simulated: 1\n  m_UseFullKinematicContacts: 0\n  m_UseAutoMass: 0\n  m_Mass: 1\n  m_LinearDrag: 0\n  m_AngularDrag: 0.05\n  m_GravityScale: 1\n  m_Material: {fileID: 0}\n  m_IncludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_ExcludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_Interpolate: 0\n  m_SleepingMode: 1\n  m_CollisionDetection: 0\n  m_Constraints: 0\n"
+    },
+    {
+      "typeId": 114,
+      "fileId": 114044625135789424,
+      "serializedComponent": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1709254077376921}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: 7493794a1adb908aa86b2f02dc0bb806, type: 3}\n  m_Name:\n  m_EditorClassIdentifier:\n  mouseCollider: {fileID: 0}\n  thePlantMaxHealth: 300\n  thePlantHealth: 300\n  attackDamage: 20\n  thePlantAttackInterval: 0\n  thePlantProduceInterval: 0\n  isLily: 0\n  invincible: 1\n  isShort: 0\n  board: {fileID: 0}\n  pumpkin: {fileID: 0}\n  shadow: {fileID: 0}\n  startPos: {x: 0, y: 0, z: 0}\n  thePlantColumn: 0\n  thePlantRow: 0\n  magnetCount: 0\n  theLevel: 0\n  thePlantSpeed: 1\n  thePlantAttackCountDown: 0\n  thePlantProduceCountDown: 0\n  attributeCountdown: 0\n  lightCountDown: 0\n  flashCountDown: 0\n  wheatTime: 0\n  brightness: 1\n  lastTakeDamgeTime: 0\n  disappearTime: 0\n  isFlashing: 0\n  isFromWheat: 0\n  alwaysLightUp: 0\n  isCrashed: 0\n  melonSputter: 0\n  dieMeansLose: 0\n  isGray: 0\n  isConnected: 0\n  keepShooting: 0\n  waitingDestory: 0\n  targetBox: {x: 0, y: 0}\n  moveTime: 0\n  timers:\n  - 0\n  - 0\n  - 0\n  disableCount: 0\n  attributeCount: 0\n  puffPlace: 0\n  baseLayer: 0\n  currentLightLevel: 0\n  p: 4\n  thePlantStage: 0\n  thePlantType: 11\n  theLilyType: -1\n  firstParent: -1\n  secondParent: -1\n  zombieLayer:\n    serializedVersion: 2\n    m_Bits: 0\n  plantLayer:\n    serializedVersion: 2\n    m_Bits: 0\n  theStatus: 0\n  next: {fileID: 0}\n  pre: {fileID: 0}\n  bulletLayer:\n    serializedVersion: 2\n    m_Bits: 0\n  plantTag:\n    flyingPlant: 0\n    hardLandPlant: 0\n    waterPlant: 0\n    pumpkinPlant: 0\n    lanternPlant: 0\n    smallLanternPlant: 0\n    puffPlant: 0\n    nutPlant: 0\n    tallNutPlant: 0\n    potatoPlant: 0\n    caltropPlant: 0\n    tanglekelpPlant: 0\n    magnetPlant: 0\n    potPlant: 0\n    doubleBoxPlant: 0\n    spickRockPlant: 0\n    icePlant: 0\n    firePlant: 0\n  anim: {fileID: 0}\n  healthText: {fileID: 0}\n  healthTextShadow: {fileID: 0}\n  levelIcon: {fileID: 0}\n  targetPlant: {fileID: 0}\n  targetZombie: {fileID: 0}\n  falling: 0\n  regeneration: 0\n  shoot: {fileID: 0}\n  connectPlant: {fileID: 0}\n"
+    }
+  ],
+  "colliders": [
+    {
+      "type": "box",
+      "node": 0,
+      "fileId": 61243736805655561,
+      "enabled": true,
+      "trigger": true,
+      "offset": {
+        "x": -1.1920929e-07,
+        "y": 2.0084991
+      },
+      "size": {
+        "x": 3.8821523,
+        "y": 3.8281116
+      }
+    },
+    {
+      "type": "box",
+      "node": 0,
+      "fileId": 61061268324235159,
+      "enabled": true,
+      "trigger": true,
+      "offset": {
+        "x": 1.1348473,
+        "y": 2.188634
+      },
+      "size": {
+        "x": 1.2882149,
+        "y": 4.0082464
+      }
+    }
+  ],
+  "ignoredBindings": [],
+  "omittedInactiveNodes": [],
+  "spritePrefix": null,
+  "unusedSpriteBonesExplicitlyAllowed": false,
+  "sources": [
+    {
+      "path": "Resources/board/plantshadow.asset",
+      "sha256": "e02e122cb3bfb8765afedad2150f3172d60feb8f549356312efca74dce78ae71"
+    },
+    {
+      "path": "Resources/board/plantshadow.asset.meta",
+      "sha256": "08bf3a1a85aabd4284a5755b459880ee4aa2b4575ccdb802a5fcaa2d0ecd462a"
+    },
+    {
+      "path": "Resources/board/plantshadow.png",
+      "sha256": "7924e0d6960dcba0b775b7ebc7d6a49ecb82b27b55b3216f4f6d83f04492a45a"
+    },
+    {
+      "path": "Resources/board/plantshadow.png.meta",
+      "sha256": "901cd63206d878ad5e0556c56e9691ee440a48dddb2a45971ee256b0e139c923"
+    },
+    {
+      "path": "Resources/plants/doomshroom/DoomShroom.controller",
+      "sha256": "ff3505473d29c0c95830184af39e3a782e689df15097f10f98c3750d24f392ab"
+    },
+    {
+      "path": "Resources/plants/doomshroom/DoomShroom.controller.meta",
+      "sha256": "c3fb59710f33da16925f7279a13cce60e9e28b6913b3127a1450ed667e68dfa8"
+    },
+    {
+      "path": "Resources/plants/doomshroom/DoomShroom.png",
+      "sha256": "f624fe242468d344a620379a44d6cc9f683c594040c7aaacf05b3c7a7ad24813"
+    },
+    {
+      "path": "Resources/plants/doomshroom/DoomShroom.png.meta",
+      "sha256": "7e4ce9c36c230b9027ea4c0b963def29ee5b82639e9337463295754f74069ae0"
+    },
+    {
+      "path": "Resources/plants/doomshroom/DoomShroom_body.asset",
+      "sha256": "bfca483887c96570e7dd0cbd2ee0af75c527cdf25367f46a37880d5a0436b72b"
+    },
+    {
+      "path": "Resources/plants/doomshroom/DoomShroom_body.asset.meta",
+      "sha256": "8aad897afe8fb63e2e1a3881fa575e024e7cafe2de25b0627ff2a69fa5e53898"
+    },
+    {
+      "path": "Resources/plants/doomshroom/DoomShroom_head1.asset",
+      "sha256": "10197da892a5ce98e7ebffa6799f375e11664e0dee2a10073f4413fdcc30b625"
+    },
+    {
+      "path": "Resources/plants/doomshroom/DoomShroom_head1.asset.meta",
+      "sha256": "53e0ed3a5b0ad5e3496fa5d504102f4e7d885c01f921c9188f0f2a7901bedc83"
+    },
+    {
+      "path": "Resources/plants/doomshroom/DoomShroom_head2.asset",
+      "sha256": "14da9297392473d744b1ad7e375ed01dfef7584a6ef934a2490c2dd8c62da174"
+    },
+    {
+      "path": "Resources/plants/doomshroom/DoomShroom_head2.asset.meta",
+      "sha256": "8b0c0d39cf62027b5c782f8bbf6416d7ca6dd1ec80aadad277daa605425cc301"
+    },
+    {
+      "path": "Resources/plants/doomshroom/DoomShroom_head3.asset",
+      "sha256": "54386f2546c753a751ea0127fe5b21e4f2cc9ac70dbaab879787508e26657b4f"
+    },
+    {
+      "path": "Resources/plants/doomshroom/DoomShroom_head3.asset.meta",
+      "sha256": "57555463b3480279bb03a20c9d17f88711164aad9b4bff5e42e8e047f62427d2"
+    },
+    {
+      "path": "Resources/plants/doomshroom/DoomShroomPrefab.prefab",
+      "sha256": "4d27de9360db526ff8cacc4a744d4b125cf1e8f113650a0da24d9be7190f95f5"
+    },
+    {
+      "path": "Resources/plants/doomshroom/explode.anim",
+      "sha256": "f4168d76609c5897a71d8f47e26784895a248c4c383ddf4bed9d39166a902b1d"
+    },
+    {
+      "path": "Resources/plants/doomshroom/explode.anim.meta",
+      "sha256": "75e2f5b3b2c219f2efe22aa2e4fa962b089520cbfe678b25aa08be82ea745d10"
+    },
+    {
+      "path": "Resources/plants/doomshroom/idle.anim",
+      "sha256": "8e578f05e7ae094bb80cc5cda606b527ffad1d472e3433c73b3c4ea124f403af"
+    },
+    {
+      "path": "Resources/plants/doomshroom/idle.anim.meta",
+      "sha256": "c9d26b994e009f6d45103fc9fa803367edbfe54aef45bdd2d23fa019389b4055"
+    }
+  ],
+  "deferredComponents": [],
+  "validation": "Exported source data. Native rendering and source-runtime comparison are separate verification steps."
+}

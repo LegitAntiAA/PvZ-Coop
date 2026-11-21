@@ -4,6 +4,12 @@
 #include "../LawnApp.h"
 #include "CursorObject.h"
 #include "Challenge.h"
+#include "Fusion/FusionNativeGloveUI.h"
+#include "Fusion/FusionNativeVisual.h"
+#include "Fusion/FusionNative.h"
+#include "Net/NetManager.h"
+#include "Fusion/FusionNativePlacement.h"
+#include "SeedPacket.h"
 #include "../Resources.h"
 #include "../Sexy.TodLib/Reanimator.h"
 #include "../SexyAppFramework/WidgetManager.h"
@@ -75,8 +81,23 @@ void CursorObject::Draw(Graphics* g)
     g->PushState();
     g->TranslateF(-mApp->mDDInterface->mWideScreenOffsetX, -mApp->mDDInterface->mWideScreenOffsetY);
 
-    DrawContent(g, mCursorType, mType, mImitaterType,
+    const auto previousGloveID=mGlovePlantID;
+    bool draw=true;
+    if(mCursorType==CURSOR_TYPE_PLANT_FROM_GLOVE&&LawnFusion::IsNativeFusionBoard(mBoard))
+    {
+        // A delayed raw cursor echo is presentation, never an authoritative
+        // glove lease. Remote drawing already resolves its own canonical slot.
+        const int slot=mApp->mNetManager&&mApp->mNetManager->IsActive()?mApp->mNetManager->GetMySlot():0;
+        const auto* context=LawnFusion::GetNativeContext(mBoard);
+        Plant* held=LawnFusion::GetNativeGloveHeldPlant(mBoard,slot);
+        const auto* data=LawnFusion::GetNativePlantData(held);
+        draw=context&&slot>=0&&slot<int(context->gloveHolds.size())&&held&&data&&
+            context->gloveHolds[slot].plantId==held->mNetId&&context->gloveHolds[slot].instanceToken==data->instanceToken;
+        if(draw)mGlovePlantID=static_cast<PlantID>(mBoard->mPlants.DataArrayGetID(held));
+    }
+    if(draw)DrawContent(g, mCursorType, mType, mImitaterType,
         mBoard->mPrevMouseX, mBoard->mPrevMouseY);
+    mGlovePlantID=previousGloveID;
     g->PopState();
 }
 
@@ -84,13 +105,31 @@ bool CursorObject::DrawRemoteAtMouse(Graphics* g, int theMouseX, int theMouseY,
     CursorType theCursorType, SeedType theSeedType, SeedType theImitaterType,
     const Color& theTintColor)
 {
-    // These cursors carry object ids which are local to the authoritative
-    // board.  Until that object identity is part of the cursor wire state, a
-    // peer must use the normal pointer instead of dereferencing an unrelated id.
-    if (theCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_GLOVE ||
+    // These cursors carry local object ids. Fusion resolves the canonical
+    // host tuple below; other modes retain the pointer fallback rather than
+    // dereferencing an unrelated peer's id.
+    if ((theCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_GLOVE && !LawnFusion::IsNativeFusionBoard(mBoard)) ||
         theCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_WHEEL_BARROW)
     {
         return false;
+    }
+
+    struct RestoreGlovePreview
+    {
+        CursorObject* cursor = nullptr;
+        PlantID previous = PLANTID_NULL;
+        ~RestoreGlovePreview() { if (cursor) cursor->mGlovePlantID = previous; }
+    } restore;
+    if (theCursorType == CURSOR_TYPE_PLANT_FROM_GLOVE && LawnFusion::IsNativeFusionBoard(mBoard))
+    {
+        int slot = -1;
+        for (int i = 0; i < LawnNet::NET_MAX_PLAYERS; ++i)
+            if (mBoard->mNetPlayerCursors[i] == this) { slot = i; break; }
+        Plant* plant = LawnFusion::GetNativeGloveHeldPlant(mBoard, slot);
+        if (!plant) return false;
+        restore.cursor = this;
+        restore.previous = mGlovePlantID;
+        mGlovePlantID = static_cast<PlantID>(mBoard->mPlants.DataArrayGetID(plant));
     }
 
     // CursorObject is a widget rooted at mouse-25,-35.  Draw every supported
@@ -128,6 +167,10 @@ bool CursorObject::DrawRemoteAtMouse(Graphics* g, int theMouseX, int theMouseY,
 bool CursorObject::DrawContent(Graphics* g, CursorType theCursorType,
     SeedType theSeedType, SeedType theImitaterType, int theMouseX, int theMouseY)
 {
+    if(theCursorType==CURSOR_TYPE_PLANT_FROM_USABLE_COIN&&LawnFusion::IsNativeFusionBoard(mBoard))
+    {int slot=-1;for(int i=0;i<LawnNet::NET_MAX_PLAYERS;++i)if(mBoard->mNetPlayerCursors[i]==this){slot=i;break;}
+     if(this==mBoard->mCursorObject)slot=mApp->mNetManager&&mApp->mNetManager->IsActive()?mApp->mNetManager->GetMySlot():0;
+     if(LawnFusion::DrawNativeDroppedCard269Cursor(g,mBoard,slot,25,35))return true;}
     bool aDrewCursor = true;
 
     switch (theCursorType)
@@ -205,7 +248,16 @@ bool CursorObject::DrawContent(Graphics* g, CursorType theCursorType,
 
     case CursorType::CURSOR_TYPE_PLANT_FROM_GLOVE:
     {
-        if (mApp->mGameMode == GAMEMODE_CHALLENGE_ZEN_GARDEN)
+        if (LawnFusion::IsNativeFusionBoard(mBoard))
+        {
+            Plant* plant = mBoard->mPlants.DataArrayTryToGet(static_cast<unsigned int>(mGlovePlantID));
+            const auto* data = LawnFusion::GetNativePlantData(plant);
+            if (!plant || plant->mDead || !data) { aDrewCursor = false; break; }
+            if (!LawnFusion::DrawNativeFusionPortrait(g, data->kind, Rect(-22, -20, 80, 80), 255, true))
+                Plant::DrawSeedType(g, plant->mSeedType, plant->mImitaterType,
+                    DrawVariation::VARIATION_NORMAL, -22.0f, 0);
+        }
+        else if (mApp->mGameMode == GAMEMODE_CHALLENGE_ZEN_GARDEN)
         {
             Plant* aPlant = mBoard->mPlants.DataArrayTryToGet((unsigned int)mGlovePlantID);
             PottedPlant aDisplayPlant;
@@ -354,12 +406,27 @@ void CursorPreview::Update()
     SeedType aSeedType = mBoard->GetSeedTypeInCursor();
     int aMouseX = mApp->mWidgetManager->mLastMouseX - mApp->mDDInterface->mWideScreenOffsetX;
     int aMouseY = mApp->mWidgetManager->mLastMouseY - mApp->mDDInterface->mWideScreenOffsetY;
+    if (LawnFusion::IsNativeFusionBoard(mBoard))
+    {
+        aMouseX -= mBoard->mX;
+        aMouseY -= mBoard->mY;
+    }
     mGridX = mBoard->PlantingPixelToGridX(aMouseX, aMouseY, aSeedType);
     mGridY = mBoard->PlantingPixelToGridY(aMouseX, aMouseY, aSeedType);
-    if (mGridX >= 0 && mGridX < MAX_GRID_SIZE_X && mGridY >= 0 && mGridY <= MAX_GRID_SIZE_Y)
+    if (mBoard->IsValidGridCell(mGridX, mGridY))
     {
         bool aShow = false;
-        if (mBoard->IsPlantInCursor() && mBoard->CanPlantAt(mGridX, mGridY, aSeedType) == PlantingReason::PLANTING_OK)
+        if (LawnFusion::IsNativeFusionBoard(mBoard) && mBoard->mCursorObject &&
+            mBoard->mCursorObject->mCursorType == CURSOR_TYPE_PLANT_FROM_BANK)
+        {
+            const int index = mBoard->mCursorObject->mSeedBankIndex;
+            const auto* packet = mBoard->mSeedBank && index >= 0 && index < mBoard->mSeedBank->mNumPackets &&
+                index < SEEDBANK_CAPACITY ? &mBoard->mSeedBank->mSeedPackets[index] : nullptr;
+            const auto* data = LawnFusion::GetNativePacketData(packet);
+            Plant* target = nullptr;
+            aShow = data && LawnFusion::ResolveNativeFusionPlacementTarget(mBoard,mGridX,mGridY,data->kind,target);
+        }
+        else if (mBoard->IsPlantInCursor() && mBoard->CanPlantAt(mGridX, mGridY, aSeedType) == PlantingReason::PLANTING_OK)
         {
             aShow = true;
         }
@@ -373,7 +440,7 @@ void CursorPreview::Update()
 
         if (aShow)
         {
-            mX = mBoard->GridToPixelX(mGridX, mGridY);
+            mX = mBoard->GridToPixelX(mGridX, mGridY) + (mBoard->GetCellPitchX() - 80) / 2;
             mY = mBoard->GridToPixelY(mGridX, mGridY);
             mVisible = true;
             return;

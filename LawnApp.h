@@ -4,6 +4,7 @@
 #include "ConstEnums.h"
 #include "SexyAppFramework/SexyApp.h"
 #include "Lawn/Net/NetCommon.h"
+#include "Lawn/Fusion/FusionMode.h"
 
 #include "portaudio.h"
 #include "SexyAppFramework/DDImage.h"
@@ -21,6 +22,7 @@
 #define SHOUT_THRESHOLD 0.2f 
 
 class Board;
+namespace LawnFusion { class FusionRuntime; struct FusionCommand; struct FusionStartDescriptor; }
 class GameSelector;
 class ChallengeDefinition;
 class SeedChooserScreen;
@@ -176,6 +178,15 @@ public:
 	// ---- co-op networking ----
 	LawnNet::NetManager*			mNetManager;
 	LawnNet::NetLobbyPanel*			mNetLobbyPanel;
+	LawnFusion::ContentMode mContentMode;
+	int mNetFusionAdventureLevel = 1;
+	LawnFusion::ContentMode mLocalContentModeBackup;
+	bool mHasRemoteContentMode;
+	std::unique_ptr<LawnFusion::FusionRuntime> mFusionRuntime;
+	uint32_t mFusionNextEpoch = 1;
+	uint32_t mNativeFusionEpoch = 0;
+	uint32_t mFusionNextLocalCommand = 0;
+	uint32_t mFusionLastSnapshotTick = 0;
 	uint32_t						mNetBoardSeed;			// shared board RNG seed for coop level creation
 	bool							mNetBlockProfileSave;	// client: never write host-synced profile to disk
 	PlayerInfo*					mNetLocalProfileBackup;	// complete local profile restored when the client session ends
@@ -220,6 +231,27 @@ public:
 	void							NetOnHostLost();
 	void							NetOnBackToMenu();
 	void							NetRestoreLocalProfile();
+	LawnFusion::ContentMode GetContentMode() const { return mContentMode; }
+	int GetFusionAdventureLevel() const;
+	void SetFusionAdventureLevel(int level, bool persist = true);
+	int GetActiveAdventureLevel() const;
+	bool IsFusionAdventure() const;
+	bool CanStartFusionClassicCampaign() const;
+	bool CanSelectContentMode() const;
+	bool IsContentModeAvailable(LawnFusion::ContentMode theMode, std::string* theError = nullptr) const;
+	bool SetContentMode(LawnFusion::ContentMode theMode, std::string* theError = nullptr);
+	bool ApplyContentModeFromHost(LawnFusion::ContentMode theMode, std::string* theError = nullptr);
+	void ShowGameModes();
+	bool IsFusionValidationFixture() const;
+	bool StartFusionValidation(std::string* theError = nullptr);
+	bool NetOnFusionStart(LawnNet::NetBuffer& thePayload, std::string* theError = nullptr);
+	bool SubmitFusionCommand(const LawnFusion::FusionCommand& theCommand);
+	bool SubmitNativeFusionCommand(const LawnFusion::FusionCommand& theCommand);
+	void NativeFusionTickNetwork();
+	bool NativeFusionPointerDown(int theButton, int theX, int theY);
+	void FusionAdvancePlaying();
+	void FusionTickNetwork();
+	void FusionRosterChanged();
 	bool							NetOnSceneCmd(uint8_t theCmd, uint32_t theParam);
 	void							NetOnProfileSync(LawnNet::NetBuffer& thePayload);
 	void							NetBroadcastProfile(bool theForce = true);									// host: push profile to clients
@@ -232,6 +264,7 @@ public:
 	void NetShowOnlineBrowser();
 	void							NetHandleRemoteInputs();
 	bool							CoopSmokeActive() const;
+	bool CoopSmokeFailMysteryRngOnce();
 	void							CoopSmokeStartLifecycle();
 	void							CoopSmokeUpdate();
 	void							CoopSmokeFail(const char* theReason);
@@ -256,7 +289,10 @@ public:
 	bool							NetHandleChatText(const char* theUtf8Text);
 	bool NetHandlePointerInput(int theAction, int theButton, int theX, int theY);
 	bool CoopSmokeCaptureFrame(const char* theBasename);
+	bool CoopSmokeEnsureFreshFrameAfterDraw(int theMinDrawCount);
 	std::shared_ptr<SDL_Surface> mCoopSmokeFrame;
+	int mCoopSmokeFrameDrawCount = -1;
+	int mCoopSmokeFrameRequestedDrawCount = -1;
 	bool mNetDrawing = false;
 	unsigned short mNetDrawingId = 0;
 	int mNetLastDrawX = 0, mNetLastDrawY = 0;

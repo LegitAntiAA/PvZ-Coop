@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <cstdarg>
+#include <cstdlib>
 #include <cctype>
 #include <cstdio>
 #include <ctime>
@@ -66,6 +67,169 @@ bool LawnNet::NetNormalizeUtf8(const std::string& theInput, size_t theMaxBytes,
 
 namespace LawnNet
 {
+namespace
+{
+bool NetValidWireNick(const std::string& theNick, bool theAllowEmpty)
+{
+	if (theAllowEmpty && theNick.empty()) return true;
+	std::string aNormalized;
+	return theNick.size() <= NET_MAX_NICK_BYTES &&
+		NetNormalizeUtf8(theNick, NET_MAX_NICK_BYTES, NET_MAX_NICK_CHARS, true, aNormalized) &&
+		aNormalized == theNick;
+}
+
+bool NetReadWireNick(NetBuffer& theBuffer, std::string& theNick, bool theAllowEmpty)
+{
+	const size_t aStart = theBuffer.mReadPos;
+	char aNick[256] = {};
+	if (!theBuffer.ReadString(aNick, sizeof(aNick)) ||
+		theBuffer.mReadPos - aStart != strlen(aNick) + 1 ||
+		!NetValidWireNick(aNick, theAllowEmpty))
+		return false;
+	theNick = aNick;
+	return true;
+}
+
+bool NetValidLobbyPlayer(const NetPlayerInfo& thePlayer, int theSlot)
+{
+	return thePlayer.mSlot == theSlot && thePlayer.mReady <= 1 &&
+		thePlayer.mTeam <= NETTEAM_ZOMBIES &&
+		NetValidWireNick(thePlayer.mNick, !thePlayer.mActive);
+}
+
+bool NetValidStartGame(const NetStartGameState& theState, int theGameModeCount,
+	int theTowerDefenseMode)
+{
+	if (!LawnFusion::IsValidContentMode(theState.mContentMode) ||
+		(theState.mContentMode == LawnFusion::ContentMode::Fusion ? !theState.mContentEpoch : theState.mContentEpoch != 0) ||
+		theGameModeCount <= 0 || theState.mGameMode >= theGameModeCount ||
+		theState.mPlayerCount < 1 || theState.mPlayerCount > NET_MAX_PLAYERS ||
+		theState.mTDPath.size() > 254 || (theState.mTDPath.size() & 1U))
+		return false;
+	// Path row bytes have their own native representation (row * 2). Board's
+	// existing validator checks geometry; this codec validates its frame shape.
+	return theState.mGameMode == theTowerDefenseMode ?
+		theState.mTDPath.size() >= 4 : theState.mTDPath.empty();
+}
+}
+
+bool NetEncodeWelcomeState(const NetWelcomeState& theState, NetBuffer& theBuffer)
+{
+	if (theState.mSlot == 0 || theState.mSlot >= NET_MAX_PLAYERS ||
+		!NetValidWireNick(theState.mHostNick, false) ||
+		!LawnFusion::IsValidContentMode(theState.mContentMode))
+		return false;
+	NetBuffer aCandidate;
+	aCandidate.WriteU8(theState.mSlot);
+	aCandidate.WriteString(theState.mHostNick.c_str());
+	LawnFusion::EncodeContentMode(aCandidate, theState.mContentMode);
+	theBuffer.WriteBytes(aCandidate.Data(), aCandidate.Size());
+	return true;
+}
+
+bool NetDecodeWelcomeState(NetBuffer& theBuffer, NetWelcomeState& theState)
+{
+	NetBuffer aCandidate = theBuffer;
+	NetWelcomeState aState;
+	if (!aCandidate.ReadU8(&aState.mSlot) || aState.mSlot == 0 || aState.mSlot >= NET_MAX_PLAYERS ||
+		!NetReadWireNick(aCandidate, aState.mHostNick, false) ||
+		!LawnFusion::DecodeContentMode(aCandidate, aState.mContentMode) || aCandidate.Remaining())
+		return false;
+	theState = aState;
+	theBuffer.mReadPos = aCandidate.mReadPos;
+	return true;
+}
+
+bool NetEncodeLobbyState(const NetLobbyState& theState, NetBuffer& theBuffer)
+{
+	if (theState.mDifficulty < 1 || theState.mDifficulty > 10 ||
+		!LawnFusion::IsValidContentMode(theState.mContentMode)) return false;
+	for (int i = 0; i < NET_MAX_PLAYERS; ++i)
+		if (!NetValidLobbyPlayer(theState.mPlayers[i], i)) return false;
+	NetBuffer aCandidate;
+	for (const NetPlayerInfo& aPlayer : theState.mPlayers)
+	{
+		aCandidate.WriteU8(aPlayer.mActive ? 1 : 0);
+		aCandidate.WriteU8(aPlayer.mSlot);
+		aCandidate.WriteString(aPlayer.mNick);
+		aCandidate.WriteU16(aPlayer.mPing);
+		aCandidate.WriteU8(aPlayer.mTeam);
+		aCandidate.WriteU8(aPlayer.mReady);
+		aCandidate.WriteU8(aPlayer.mSpectator ? 1 : 0);
+	}
+	aCandidate.WriteU8(theState.mDifficulty);
+	LawnFusion::EncodeContentMode(aCandidate, theState.mContentMode);
+	theBuffer.WriteBytes(aCandidate.Data(), aCandidate.Size());
+	return true;
+}
+
+bool NetDecodeLobbyState(NetBuffer& theBuffer, NetLobbyState& theState)
+{
+	NetBuffer aCandidate = theBuffer;
+	NetLobbyState aState;
+	for (int i = 0; i < NET_MAX_PLAYERS; ++i)
+	{
+		NetPlayerInfo& aPlayer = aState.mPlayers[i];
+		uint8_t anActive = 0, aSpectator = 0;
+		std::string aNick;
+		if (!aCandidate.ReadU8(&anActive) || anActive > 1 ||
+			!aCandidate.ReadU8(&aPlayer.mSlot) ||
+			!NetReadWireNick(aCandidate, aNick, anActive == 0) ||
+			!aCandidate.ReadU16(&aPlayer.mPing) || !aCandidate.ReadU8(&aPlayer.mTeam) ||
+			!aCandidate.ReadU8(&aPlayer.mReady) || !aCandidate.ReadU8(&aSpectator) || aSpectator > 1)
+			return false;
+		aPlayer.mActive = anActive != 0;
+		aPlayer.mSpectator = aSpectator != 0;
+		strcpy_s(aPlayer.mNick, aNick.c_str());
+		if (!NetValidLobbyPlayer(aPlayer, i)) return false;
+	}
+	if (!aCandidate.ReadU8(&aState.mDifficulty) || aState.mDifficulty < 1 || aState.mDifficulty > 10 ||
+		!LawnFusion::DecodeContentMode(aCandidate, aState.mContentMode) || aCandidate.Remaining())
+		return false;
+	theState = aState;
+	theBuffer.mReadPos = aCandidate.mReadPos;
+	return true;
+}
+
+bool NetEncodeStartGame(const NetStartGameState& theState, NetBuffer& theBuffer,
+	int theGameModeCount, int theTowerDefenseMode)
+{
+	if (!NetValidStartGame(theState, theGameModeCount, theTowerDefenseMode)) return false;
+	NetBuffer aCandidate;
+	LawnFusion::EncodeContentMode(aCandidate, theState.mContentMode);
+	aCandidate.WriteU8(theState.mGameMode);
+	aCandidate.WriteI32(theState.mLevel);
+	aCandidate.WriteU8(theState.mPlayerCount);
+	aCandidate.WriteU32(theState.mBoardSeed);
+	aCandidate.WriteU8(static_cast<uint8_t>(theState.mTDPath.size()));
+	for (uint8_t aCell : theState.mTDPath) aCandidate.WriteU8(aCell);
+	if (theState.mContentMode == LawnFusion::ContentMode::Fusion) aCandidate.WriteU32(theState.mContentEpoch);
+	theBuffer.WriteBytes(aCandidate.Data(), aCandidate.Size());
+	return true;
+}
+
+bool NetDecodeStartGame(NetBuffer& theBuffer, NetStartGameState& theState,
+	int theGameModeCount, int theTowerDefenseMode)
+{
+	NetBuffer aCandidate = theBuffer;
+	NetStartGameState aState;
+	uint8_t aPathLength = 0;
+	if (!LawnFusion::DecodeContentMode(aCandidate, aState.mContentMode) ||
+		!aCandidate.ReadU8(&aState.mGameMode) || !aCandidate.ReadI32(&aState.mLevel) ||
+		!aCandidate.ReadU8(&aState.mPlayerCount) || !aCandidate.ReadU32(&aState.mBoardSeed) ||
+		!aCandidate.ReadU8(&aPathLength) || aCandidate.Remaining() != aPathLength +
+			(aState.mContentMode == LawnFusion::ContentMode::Fusion ? 4U : 0U))
+		return false;
+	aState.mTDPath.resize(aPathLength);
+	if (aPathLength && !aCandidate.ReadBytes(aState.mTDPath.data(), aPathLength)) return false;
+	if (aState.mContentMode == LawnFusion::ContentMode::Fusion &&
+		(!aCandidate.ReadU32(&aState.mContentEpoch) || !aState.mContentEpoch)) return false;
+	if (!NetValidStartGame(aState, theGameModeCount, theTowerDefenseMode)) return false;
+	theState = aState;
+	theBuffer.mReadPos = aCandidate.mReadPos;
+	return true;
+}
+
 bool NetSpectatorMaySend(uint8_t theMessageType)
 {
 	switch (theMessageType)
@@ -1053,6 +1217,13 @@ bool NetLoadConfig(NetConfig& theConfig)
 			theConfig.mEnableCoop = (aValue == "1" || aValue == "true" || aValue == "yes");
 		else if (aKey == "skipIntro")
 			theConfig.mSkipIntro = (aValue == "1");
+		else if (aKey == "fusion_classic_field")
+			theConfig.mFusionClassicField = (aValue == "1" || aValue == "true" || aValue == "yes");
+		else if (aKey == "fusion_adventure_level")
+		{
+			const long aLevel = strtol(aValue.c_str(), nullptr, 10);
+			theConfig.mFusionAdventureLevel = aLevel < 1 ? 1 : aLevel > 50 ? 50 : static_cast<int>(aLevel);
+		}
 		else if (aKey == "base_snapshot_rate")
 			theConfig.mBaseSnapshotHz = atoi(aValue.c_str());
 		else if (aKey == "window_width")
@@ -1074,6 +1245,7 @@ bool NetLoadConfig(NetConfig& theConfig)
 
 	if (theConfig.mBaseSnapshotHz < NET_SNAPSHOT_HZ_MIN) theConfig.mBaseSnapshotHz = NET_SNAPSHOT_HZ_MIN;
 	if (theConfig.mBaseSnapshotHz > NET_SNAPSHOT_HZ_MAX) theConfig.mBaseSnapshotHz = NET_SNAPSHOT_HZ_MAX;
+	theConfig.mFusionAdventureLevel = max(1, min(50, theConfig.mFusionAdventureLevel));
 	theConfig.mHeldPlantTintAlpha = max(0, min(255, theConfig.mHeldPlantTintAlpha));
 	theConfig.mHotbarTintAlpha = max(0, min(255, theConfig.mHotbarTintAlpha));
 	theConfig.mHeldPlantOutlineAlpha = max(0, min(255, theConfig.mHeldPlantOutlineAlpha));
@@ -1094,6 +1266,8 @@ bool NetSaveConfig(const NetConfig& theConfig)
 	fprintf(aFile, "enable_coop=%d\n", theConfig.mEnableCoop ? 1 : 0);
 	fprintf(aFile, "# skipIntro - 1 = skip the startup video (level intros are unchanged)\n");
 	fprintf(aFile, "skipIntro=%d\n", theConfig.mSkipIntro ? 1 : 0);
+	fprintf(aFile, "fusion_classic_field=%d\n", theConfig.mFusionClassicField ? 1 : 0);
+	fprintf(aFile, "fusion_adventure_level=%d\n", max(1, min(50, theConfig.mFusionAdventureLevel)));
 	fprintf(aFile, "base_snapshot_rate=%d\n", theConfig.mBaseSnapshotHz);
 	fprintf(aFile, "window_width=%d\n", theConfig.mWindowWidth);
 	fprintf(aFile, "window_height=%d\n", theConfig.mWindowHeight);

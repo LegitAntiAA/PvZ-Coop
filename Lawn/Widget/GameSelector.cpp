@@ -43,6 +43,23 @@ public:
 	void MouseDown(int x, int y, int theClickCount) override
 	{ mSelector->MouseDown(mX + x, mY + y, theClickCount); }
 };
+
+class SelectorModesButton : public LawnStoneButton
+{
+	GameSelector* mSelector;
+public:
+	SelectorModesButton(GameSelector* theSelector, int theId) :
+		LawnStoneButton(nullptr, theId, theSelector), mSelector(theSelector)
+	{ SetLabel(_S("Gamemodes")); mHasAlpha = true; }
+	void Update() override
+	{
+		LawnStoneButton::Update();
+		mVisible = mSelector->MainMenuIconsVisible();
+		mMouseVisible = mVisible;
+	}
+	void Draw(Graphics* g) override
+	{ NetUi::StoneButton(g, Rect(0, 0, mWidth, mHeight), mLabel, mIsDown && mIsOver, mIsOver, false); }
+};
 }
 
 //0x448C80
@@ -71,6 +88,8 @@ GameSelector::GameSelector(LawnApp* theApp)
 	mCoopHelpIconHitbox = new SelectorIconHitbox(this);
 	mGithubIconHitbox->Resize(8, 8, 32, 32);
 	mCoopHelpIconHitbox->Resize(48, 8, 32, 32);
+	mGameModesButton = new SelectorModesButton(this, GameSelector_GameModes);
+	mGameModesButton->Resize(88, 8, 154, 34);
 	mLevel = 1;
 	mLoading = false;
 	mHasTrophy = false;
@@ -490,6 +509,7 @@ GameSelector::~GameSelector()
 {
 	delete mGithubIconHitbox;
 	delete mCoopHelpIconHitbox;
+	delete mGameModesButton;
 	delete mGithubImage;
 	if (mAdventureButton)
 		delete mAdventureButton;
@@ -686,6 +706,8 @@ void GameSelector::SyncProfile(bool theShowLoading)
 	mLevel = 1;
 	if (mApp->mPlayerInfo)
 		mLevel = mApp->mPlayerInfo->GetLevel();
+	if (mApp->GetContentMode() == LawnFusion::ContentMode::Fusion)
+		mLevel = mApp->GetFusionAdventureLevel();
 	mApp->mPlayerLevelRef = -1;
 	mShowStartButton = true;
 	mMinigamesLocked = true;
@@ -719,6 +741,8 @@ void GameSelector::SyncProfile(bool theShowLoading)
 		}
 	}
 
+	if (mApp->GetContentMode() == LawnFusion::ContentMode::Fusion)
+		mShowStartButton = mLevel == 1;
 	mLastUnlockAll = mApp->NetUnlockAllMinigames();
 	if (mLastUnlockAll)
 	{
@@ -1380,6 +1404,11 @@ void GameSelector::Update()
 			{
 				mApp->KillGameSelector();
 
+				if (mApp->GetContentMode() == LawnFusion::ContentMode::Fusion)
+				{
+					mApp->PreNewGame(GameMode::GAMEMODE_ADVENTURE, false);
+					return;
+				}
 				if (mApp->IsIceDemo())
 				{
 					mApp->PreNewGame(GameMode::GAMEMODE_CHALLENGE_ICE, false);
@@ -1732,6 +1761,7 @@ void GameSelector::AddedToManager(WidgetManager* theWidgetManager)
 #endif
 	theWidgetManager->AddWidget(mGithubIconHitbox);
 	theWidgetManager->AddWidget(mCoopHelpIconHitbox);
+	theWidgetManager->AddWidget(mGameModesButton);
 }
 
 //0x44BCA0
@@ -1740,6 +1770,7 @@ void GameSelector::RemovedFromManager(WidgetManager* theWidgetManager)
 	Widget::RemovedFromManager(theWidgetManager);
 	theWidgetManager->RemoveWidget(mGithubIconHitbox);
 	theWidgetManager->RemoveWidget(mCoopHelpIconHitbox);
+	theWidgetManager->RemoveWidget(mGameModesButton);
 
 	theWidgetManager->RemoveWidget(mAdventureButton);
 	theWidgetManager->RemoveWidget(mMinigameButton);
@@ -2066,6 +2097,8 @@ bool GameSelector::StartAdventurePresentation(bool theAuthority)
 {
 	if (!mApp || mStartingGame)
 		return false;
+	if (mApp->GetContentMode() == LawnFusion::ContentMode::Fusion)
+		mLevel = mApp->GetFusionAdventureLevel();
 
 	if (theAuthority)
 	{
@@ -2145,6 +2178,11 @@ bool GameSelector::ShouldDoZenTuturialBeforeAdventure()
 //0x44C8C0
 void GameSelector::ButtonDepress(int theId)
 {
+	if (theId == GameSelector_GameModes)
+	{
+		mApp->ShowGameModes();
+		return;
+	}
 	if (mLastUnlockAll != mApp->NetUnlockAllMinigames())
 		SyncProfile(false);
 	if (mSlideCounter > 0 || mStartingGame)

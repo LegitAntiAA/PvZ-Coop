@@ -1,0 +1,289 @@
+{
+  "schema": 1,
+  "sourcePrefab": "Resources/plants/tallnut/TallNutPreview.prefab",
+  "unitsPerNativePixel": 0.01,
+  "applyRootMotion": false,
+  "static": true,
+  "root": 0,
+  "nodes": [
+    {
+      "name": "TallNutPreview",
+      "active": true,
+      "tag": "Preview",
+      "parent": -1,
+      "path": "",
+      "position": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.2,
+        "y": 1.2,
+        "z": 1.2
+      }
+    }
+  ],
+  "sourceHierarchy": null,
+  "sprites": [
+    {
+      "texture": "../batch-1027/textures/9082681b430b.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Tallnut_body\n  m_Rect:\n    serializedVersion: 2\n    x: 0\n    y: 0\n    width: 99\n    height: 146\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    253973c5b57ef664f86b3b155b6bacce: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: d8ab3f9727c3d024f94ef9ab6b1b6f43, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 15\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 7\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 060005000400030004000500010004000300000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 7\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 152\n      _typelessdata: 3d0a973e48e13a3f00000000a470fd3e48e13abf00000000a470fd3e713d0a3f00000000d7a3b0be48e13a3f000000003333f3be48e13abf00000000a470fdbeb81e853e00000000a470fdbe8fc235bf000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 99\n      height: 146\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 49.5, z: 100, w: 73}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape:\n  - - {x: 0.49499997, y: -0.07}\n    - {x: 0.45499998, y: 0.08}\n    - {x: 0.42499998, y: 0.39999998}\n    - {x: 0.325, y: 0.59}\n    - {x: 0.16499999, y: 0.71999997}\n    - {x: 0.13499999, y: 0.72999996}\n    - {x: -0.055, y: 0.72999996}\n    - {x: -0.114999995, y: 0.71999997}\n    - {x: -0.21499999, y: 0.63}\n    - {x: -0.305, y: 0.53}\n    - {x: -0.375, y: 0.42}\n    - {x: -0.405, y: 0.29999998}\n    - {x: -0.465, y: 0.099999994}\n    - {x: -0.49499997, y: -0.099999994}\n    - {x: -0.49499997, y: -0.48999998}\n    - {x: -0.45499998, y: -0.58}\n    - {x: -0.385, y: -0.65999997}\n    - {x: -0.33499998, y: -0.7}\n    - {x: -0.175, y: -0.72999996}\n    - {x: 0.275, y: -0.72999996}\n    - {x: 0.39499998, y: -0.65999997}\n    - {x: 0.475, y: -0.59999996}\n    - {x: 0.49499997, y: -0.53}\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.29499998688697815,
+            "y": 0.7300000190734863,
+            "z": 0.0,
+            "u": 0.7979797847343214,
+            "v": -1.3064031634257844e-08
+          },
+          {
+            "x": 0.4950000047683716,
+            "y": -0.7300000190734863,
+            "z": 0.0,
+            "u": 1.000000004816537,
+            "v": 1.0000000130640316
+          },
+          {
+            "x": 0.4950000047683716,
+            "y": 0.5400000214576721,
+            "z": 0.0,
+            "u": 1.000000004816537,
+            "v": 0.13013697160433413
+          },
+          {
+            "x": -0.3449999988079071,
+            "y": 0.7300000190734863,
+            "z": 0.0,
+            "u": 0.15151515271928576,
+            "v": -1.3064031634257844e-08
+          },
+          {
+            "x": -0.4749999940395355,
+            "y": -0.7300000190734863,
+            "z": 0.0,
+            "u": 0.02020202622269139,
+            "v": 1.0000000130640316
+          },
+          {
+            "x": -0.4950000047683716,
+            "y": 0.25999999046325684,
+            "z": 0.0,
+            "u": -4.8165369515467176e-09,
+            "v": 0.32191781475119396
+          },
+          {
+            "x": -0.4950000047683716,
+            "y": -0.7099999785423279,
+            "z": 0.0,
+            "u": -4.8165369515467176e-09,
+            "v": 0.986301355165978
+          }
+        ],
+        "indices": [
+          6,
+          5,
+          4,
+          3,
+          4,
+          5,
+          1,
+          4,
+          3,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/tallnut/Tallnut_body.asset",
+      "textureRect": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 99.0,
+        "height": 146.0,
+        "yTop": 0.0
+      },
+      "logicalSize": {
+        "width": 99.0,
+        "height": 146.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "47c5918cc49f2c64696bc15cddc6b054",
+      "node": 0,
+      "sortingOrder": 0,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    }
+  ],
+  "spriteVariants": {
+    "47c5918cc49f2c64696bc15cddc6b054": {
+      "texture": "../batch-1027/textures/9082681b430b.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Tallnut_body\n  m_Rect:\n    serializedVersion: 2\n    x: 0\n    y: 0\n    width: 99\n    height: 146\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    253973c5b57ef664f86b3b155b6bacce: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: d8ab3f9727c3d024f94ef9ab6b1b6f43, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 15\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 7\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 060005000400030004000500010004000300000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 7\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 152\n      _typelessdata: 3d0a973e48e13a3f00000000a470fd3e48e13abf00000000a470fd3e713d0a3f00000000d7a3b0be48e13a3f000000003333f3be48e13abf00000000a470fdbeb81e853e00000000a470fdbe8fc235bf000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 99\n      height: 146\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 49.5, z: 100, w: 73}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape:\n  - - {x: 0.49499997, y: -0.07}\n    - {x: 0.45499998, y: 0.08}\n    - {x: 0.42499998, y: 0.39999998}\n    - {x: 0.325, y: 0.59}\n    - {x: 0.16499999, y: 0.71999997}\n    - {x: 0.13499999, y: 0.72999996}\n    - {x: -0.055, y: 0.72999996}\n    - {x: -0.114999995, y: 0.71999997}\n    - {x: -0.21499999, y: 0.63}\n    - {x: -0.305, y: 0.53}\n    - {x: -0.375, y: 0.42}\n    - {x: -0.405, y: 0.29999998}\n    - {x: -0.465, y: 0.099999994}\n    - {x: -0.49499997, y: -0.099999994}\n    - {x: -0.49499997, y: -0.48999998}\n    - {x: -0.45499998, y: -0.58}\n    - {x: -0.385, y: -0.65999997}\n    - {x: -0.33499998, y: -0.7}\n    - {x: -0.175, y: -0.72999996}\n    - {x: 0.275, y: -0.72999996}\n    - {x: 0.39499998, y: -0.65999997}\n    - {x: 0.475, y: -0.59999996}\n    - {x: 0.49499997, y: -0.53}\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.29499998688697815,
+            "y": 0.7300000190734863,
+            "z": 0.0,
+            "u": 0.7979797847343214,
+            "v": -1.3064031634257844e-08
+          },
+          {
+            "x": 0.4950000047683716,
+            "y": -0.7300000190734863,
+            "z": 0.0,
+            "u": 1.000000004816537,
+            "v": 1.0000000130640316
+          },
+          {
+            "x": 0.4950000047683716,
+            "y": 0.5400000214576721,
+            "z": 0.0,
+            "u": 1.000000004816537,
+            "v": 0.13013697160433413
+          },
+          {
+            "x": -0.3449999988079071,
+            "y": 0.7300000190734863,
+            "z": 0.0,
+            "u": 0.15151515271928576,
+            "v": -1.3064031634257844e-08
+          },
+          {
+            "x": -0.4749999940395355,
+            "y": -0.7300000190734863,
+            "z": 0.0,
+            "u": 0.02020202622269139,
+            "v": 1.0000000130640316
+          },
+          {
+            "x": -0.4950000047683716,
+            "y": 0.25999999046325684,
+            "z": 0.0,
+            "u": -4.8165369515467176e-09,
+            "v": 0.32191781475119396
+          },
+          {
+            "x": -0.4950000047683716,
+            "y": -0.7099999785423279,
+            "z": 0.0,
+            "u": -4.8165369515467176e-09,
+            "v": 0.986301355165978
+          }
+        ],
+        "indices": [
+          6,
+          5,
+          4,
+          3,
+          4,
+          5,
+          1,
+          4,
+          3,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/tallnut/Tallnut_body.asset",
+      "textureRect": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 99.0,
+        "height": 146.0,
+        "yTop": 0.0
+      },
+      "logicalSize": {
+        "width": 99.0,
+        "height": 146.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    }
+  },
+  "extraSpriteGuids": {},
+  "anchors": {},
+  "visualBounds": {
+    "minX": -0.5940000057220459,
+    "maxX": 0.5940000057220459,
+    "minY": -0.8760000228881836,
+    "maxY": 0.8760000228881836
+  },
+  "clips": {},
+  "controller": {
+    "states": [],
+    "layers": [],
+    "serializedController": ""
+  },
+  "nonRenderingComponents": [],
+  "colliders": [],
+  "ignoredBindings": [],
+  "omittedInactiveNodes": [],
+  "spritePrefix": null,
+  "unusedSpriteBonesExplicitlyAllowed": false,
+  "sources": [
+    {
+      "path": "Resources/plants/tallnut/Tallnut_body.asset",
+      "sha256": "a9622d42035b491e2bfb74a7305e9333f5be967fe8397d0e15bb3f151cb99f7a"
+    },
+    {
+      "path": "Resources/plants/tallnut/Tallnut_body.asset.meta",
+      "sha256": "a87e912f28f1c1813659a76039ad1ff20d0d6934970a1d4daad882761f21454d"
+    },
+    {
+      "path": "Resources/plants/tallnut/Tallnut_body.png",
+      "sha256": "9082681b430ba468df86911e85e7d972e6b042110ff65f6091ff6b6b5979abc0"
+    },
+    {
+      "path": "Resources/plants/tallnut/Tallnut_body.png.meta",
+      "sha256": "995233a87caa9284149dc1683f6619fb951b69ac846d5d4a46c7dfe1861bca9c"
+    },
+    {
+      "path": "Resources/plants/tallnut/TallNutPreview.prefab",
+      "sha256": "f490c7bd89aaa4a011f02ceb88d9a714ae5cd77424ac325825194b317e8cd389"
+    }
+  ],
+  "deferredComponents": [],
+  "validation": "Exported source data. Native rendering and source-runtime comparison are separate verification steps."
+}

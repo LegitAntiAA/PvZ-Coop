@@ -1,0 +1,2564 @@
+{
+  "schema": 1,
+  "sourceVersion": "Fusion2.3.1",
+  "runtimeVerified": false,
+  "sourceBinarySha256": "b19cfc30b2061514689a93191a979e76335dd02f5c12e550e1bb62de9578b94f",
+  "sourceEvidence": [
+    {
+      "path": "work/fusion/stage272/modes/source-level-mode-primary.json",
+      "sha256": "c9495c64acda7f1ccfec9bc6759ce80ab8a4508e5bcc18fd8bffd641ba427415"
+    },
+    {
+      "path": "work/fusion/recovered/levels-ghidra-batch1.json",
+      "sha256": "f3ed1c1a2a25c7da394aa8db8e2baf167c06050f4c65788570ba3436a777a856"
+    },
+    {
+      "path": "work/fusion/recovered/levels-ghidra-batch2.json",
+      "sha256": "436965af43ecf0c06545d03a02a36b46f832cf2d1937680fc82ae80eff4b8a5e"
+    },
+    {
+      "path": "work/fusion/recovered/levels-ghidra-batch3.json",
+      "sha256": "7a7730e40ae05e82435fcdfb1b15a9a7c6306eb5f1b71a1ad53ce4bd958cf592"
+    },
+    {
+      "path": "work/fusion/recovered/levels-ghidra-batch7.json",
+      "sha256": "4b2a668a67e97c03dfebd022e289c7a060699661de665eea118d0c7138c36775"
+    },
+    {
+      "path": "work/fusion/recovered/levels-ghidra-batch8.json",
+      "sha256": "6e197ffa3304de0e007e100d8d7f22bd06c6a422a57f89bbcc5199500d63c5f2"
+    },
+    {
+      "path": "work/fusion/recovered/waves-contract.json",
+      "sha256": "3465d7355db77cd53d95a6c3222d7f8aea21a7fa62e2bee896f9c117248c5ea6"
+    },
+    {
+      "path": "work/fusion/stage272/modes/source-zombie-selection-primary.json",
+      "sha256": "35f830f88aaeaa707b8cae069b4102a1cf16cc9f0536e443188657206a1f7334"
+    },
+    {
+      "path": "work/fusion/stage272/modes/source-boss-insertion-primary.json",
+      "sha256": "3e32b1d950551f7af739d68ec89ae64df14e09f2b37df2030ec46c9cce36b165"
+    },
+    {
+      "path": "assets/fusion/catalog/modes.json",
+      "sha256": "5856d8e78bbee4c7ecfb1461a25f1d19cdfe8d75230271efa90b4ca71781d132"
+    }
+  ],
+  "adventure": [
+    {
+      "level": 1,
+      "scene": 0,
+      "columns": 10,
+      "rows": 5,
+      "initialSun": 500,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 10,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0
+      ],
+      "nativeProjection": {
+        "background": 0,
+        "layoutLevel": 1,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": []
+    },
+    {
+      "level": 2,
+      "scene": 0,
+      "columns": 10,
+      "rows": 5,
+      "initialSun": 500,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 10,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2
+      ],
+      "nativeProjection": {
+        "background": 0,
+        "layoutLevel": 2,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": []
+    },
+    {
+      "level": 3,
+      "scene": 0,
+      "columns": 10,
+      "rows": 5,
+      "initialSun": 500,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 10,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        4
+      ],
+      "nativeProjection": {
+        "background": 0,
+        "layoutLevel": 3,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": []
+    },
+    {
+      "level": 4,
+      "scene": 0,
+      "columns": 10,
+      "rows": 5,
+      "initialSun": 500,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 20,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        3
+      ],
+      "nativeProjection": {
+        "background": 0,
+        "layoutLevel": 4,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": []
+    },
+    {
+      "level": 5,
+      "scene": 0,
+      "columns": 10,
+      "rows": 5,
+      "initialSun": 500,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 20,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        4,
+        100
+      ],
+      "nativeProjection": {
+        "background": 0,
+        "layoutLevel": 5,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": []
+    },
+    {
+      "level": 6,
+      "scene": 0,
+      "columns": 10,
+      "rows": 5,
+      "initialSun": 500,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 20,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        4,
+        21
+      ],
+      "nativeProjection": {
+        "background": 0,
+        "layoutLevel": 6,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": [
+        21
+      ]
+    },
+    {
+      "level": 7,
+      "scene": 0,
+      "columns": 10,
+      "rows": 5,
+      "initialSun": 500,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 30,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        4,
+        21,
+        104
+      ],
+      "nativeProjection": {
+        "background": 0,
+        "layoutLevel": 7,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": [
+        21
+      ]
+    },
+    {
+      "level": 8,
+      "scene": 0,
+      "columns": 10,
+      "rows": 5,
+      "initialSun": 500,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 30,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        4,
+        8,
+        106,
+        108
+      ],
+      "nativeProjection": {
+        "background": 0,
+        "layoutLevel": 8,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": []
+    },
+    {
+      "level": 9,
+      "scene": 0,
+      "columns": 10,
+      "rows": 5,
+      "initialSun": 500,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 30,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        3,
+        4,
+        21,
+        104,
+        106,
+        107
+      ],
+      "nativeProjection": {
+        "background": 0,
+        "layoutLevel": 9,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": [
+        21
+      ]
+    },
+    {
+      "level": 10,
+      "scene": 1,
+      "columns": 10,
+      "rows": 5,
+      "initialSun": 150,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 10,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2
+      ],
+      "nativeProjection": {
+        "background": 1,
+        "layoutLevel": 11,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": []
+    },
+    {
+      "level": 11,
+      "scene": 1,
+      "columns": 10,
+      "rows": 5,
+      "initialSun": 150,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 10,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        8
+      ],
+      "nativeProjection": {
+        "background": 1,
+        "layoutLevel": 12,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": []
+    },
+    {
+      "level": 12,
+      "scene": 1,
+      "columns": 10,
+      "rows": 5,
+      "initialSun": 150,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 10,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        5,
+        9
+      ],
+      "nativeProjection": {
+        "background": 1,
+        "layoutLevel": 13,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": []
+    },
+    {
+      "level": 13,
+      "scene": 1,
+      "columns": 10,
+      "rows": 5,
+      "initialSun": 150,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 20,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        3,
+        5,
+        9
+      ],
+      "nativeProjection": {
+        "background": 1,
+        "layoutLevel": 14,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": []
+    },
+    {
+      "level": 14,
+      "scene": 1,
+      "columns": 10,
+      "rows": 5,
+      "initialSun": 150,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 20,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        3,
+        4,
+        5,
+        9
+      ],
+      "nativeProjection": {
+        "background": 1,
+        "layoutLevel": 15,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": []
+    },
+    {
+      "level": 15,
+      "scene": 1,
+      "columns": 10,
+      "rows": 5,
+      "initialSun": 150,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 20,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        4,
+        5,
+        6,
+        9
+      ],
+      "nativeProjection": {
+        "background": 1,
+        "layoutLevel": 16,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": []
+    },
+    {
+      "level": 16,
+      "scene": 1,
+      "columns": 10,
+      "rows": 5,
+      "initialSun": 150,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 30,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        4,
+        5,
+        6,
+        9,
+        10
+      ],
+      "nativeProjection": {
+        "background": 1,
+        "layoutLevel": 17,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": []
+    },
+    {
+      "level": 17,
+      "scene": 1,
+      "columns": 10,
+      "rows": 5,
+      "initialSun": 150,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 30,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        4,
+        5,
+        6,
+        10,
+        109
+      ],
+      "nativeProjection": {
+        "background": 1,
+        "layoutLevel": 18,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": []
+    },
+    {
+      "level": 18,
+      "scene": 1,
+      "columns": 10,
+      "rows": 5,
+      "initialSun": 150,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 30,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        4,
+        5,
+        8,
+        9,
+        21,
+        109,
+        111
+      ],
+      "nativeProjection": {
+        "background": 1,
+        "layoutLevel": 19,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": [
+        21
+      ]
+    },
+    {
+      "level": 19,
+      "scene": 2,
+      "columns": 10,
+      "rows": 6,
+      "initialSun": 300,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 10,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2
+      ],
+      "nativeProjection": {
+        "background": 2,
+        "layoutLevel": 21,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": []
+    },
+    {
+      "level": 20,
+      "scene": 2,
+      "columns": 10,
+      "rows": 6,
+      "initialSun": 300,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 10,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        9
+      ],
+      "nativeProjection": {
+        "background": 2,
+        "layoutLevel": 22,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": []
+    },
+    {
+      "level": 21,
+      "scene": 2,
+      "columns": 10,
+      "rows": 6,
+      "initialSun": 300,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 20,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        4,
+        17
+      ],
+      "nativeProjection": {
+        "background": 2,
+        "layoutLevel": 23,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": [
+        17
+      ]
+    },
+    {
+      "level": 22,
+      "scene": 2,
+      "columns": 10,
+      "rows": 6,
+      "initialSun": 300,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 20,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        3,
+        5,
+        14
+      ],
+      "nativeProjection": {
+        "background": 2,
+        "layoutLevel": 24,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": []
+    },
+    {
+      "level": 23,
+      "scene": 2,
+      "columns": 10,
+      "rows": 6,
+      "initialSun": 300,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 30,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        4,
+        5,
+        14,
+        16
+      ],
+      "nativeProjection": {
+        "background": 2,
+        "layoutLevel": 25,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": []
+    },
+    {
+      "level": 24,
+      "scene": 2,
+      "columns": 10,
+      "rows": 6,
+      "initialSun": 300,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 30,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        4,
+        8,
+        14,
+        18
+      ],
+      "nativeProjection": {
+        "background": 2,
+        "layoutLevel": 26,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": [
+        18
+      ]
+    },
+    {
+      "level": 25,
+      "scene": 2,
+      "columns": 10,
+      "rows": 6,
+      "initialSun": 300,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 40,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        4,
+        8,
+        14,
+        18,
+        20
+      ],
+      "nativeProjection": {
+        "background": 2,
+        "layoutLevel": 27,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": [
+        18,
+        20
+      ]
+    },
+    {
+      "level": 26,
+      "scene": 2,
+      "columns": 10,
+      "rows": 6,
+      "initialSun": 300,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 40,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        4,
+        14,
+        16,
+        18,
+        20
+      ],
+      "nativeProjection": {
+        "background": 2,
+        "layoutLevel": 28,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": [
+        18,
+        20
+      ]
+    },
+    {
+      "level": 27,
+      "scene": 2,
+      "columns": 10,
+      "rows": 6,
+      "initialSun": 300,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 40,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "nativeProjection": {
+        "background": 2,
+        "layoutLevel": 29,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": [
+        17,
+        18,
+        19,
+        20
+      ]
+    },
+    {
+      "level": 28,
+      "scene": 3,
+      "columns": 10,
+      "rows": 6,
+      "initialSun": 150,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 10,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2
+      ],
+      "nativeProjection": {
+        "background": 3,
+        "layoutLevel": 31,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": []
+    },
+    {
+      "level": 29,
+      "scene": 3,
+      "columns": 10,
+      "rows": 6,
+      "initialSun": 150,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 10,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        24
+      ],
+      "nativeProjection": {
+        "background": 3,
+        "layoutLevel": 32,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": [
+        24
+      ]
+    },
+    {
+      "level": 30,
+      "scene": 3,
+      "columns": 10,
+      "rows": 6,
+      "initialSun": 150,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 20,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        5,
+        25
+      ],
+      "nativeProjection": {
+        "background": 3,
+        "layoutLevel": 33,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": [
+        25
+      ]
+    },
+    {
+      "level": 31,
+      "scene": 3,
+      "columns": 10,
+      "rows": 6,
+      "initialSun": 150,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 20,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        5,
+        8,
+        25
+      ],
+      "nativeProjection": {
+        "background": 3,
+        "layoutLevel": 34,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": [
+        25
+      ]
+    },
+    {
+      "level": 32,
+      "scene": 3,
+      "columns": 10,
+      "rows": 6,
+      "initialSun": 150,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 30,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        4,
+        24,
+        26
+      ],
+      "nativeProjection": {
+        "background": 3,
+        "layoutLevel": 35,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": [
+        24,
+        26
+      ]
+    },
+    {
+      "level": 33,
+      "scene": 3,
+      "columns": 10,
+      "rows": 6,
+      "initialSun": 150,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 30,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        3,
+        24,
+        25,
+        28
+      ],
+      "nativeProjection": {
+        "background": 3,
+        "layoutLevel": 36,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": [
+        24,
+        25,
+        28
+      ]
+    },
+    {
+      "level": 34,
+      "scene": 3,
+      "columns": 10,
+      "rows": 6,
+      "initialSun": 150,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 40,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        24,
+        25,
+        27,
+        28
+      ],
+      "nativeProjection": {
+        "background": 3,
+        "layoutLevel": 37,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": [
+        24,
+        25,
+        28
+      ]
+    },
+    {
+      "level": 35,
+      "scene": 3,
+      "columns": 10,
+      "rows": 6,
+      "initialSun": 150,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 40,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        4,
+        8,
+        26,
+        30,
+        106
+      ],
+      "nativeProjection": {
+        "background": 3,
+        "layoutLevel": 38,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": [
+        26
+      ]
+    },
+    {
+      "level": 36,
+      "scene": 3,
+      "columns": 10,
+      "rows": 6,
+      "initialSun": 150,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 40,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        4,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "nativeProjection": {
+        "background": 3,
+        "layoutLevel": 39,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": [
+        24,
+        25,
+        26,
+        28
+      ]
+    },
+    {
+      "level": 37,
+      "scene": 4,
+      "columns": 10,
+      "rows": 5,
+      "initialSun": 300,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 10,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2
+      ],
+      "nativeProjection": {
+        "background": 4,
+        "layoutLevel": 41,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": []
+    },
+    {
+      "level": 38,
+      "scene": 4,
+      "columns": 10,
+      "rows": 5,
+      "initialSun": 300,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 10,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        32
+      ],
+      "nativeProjection": {
+        "background": 4,
+        "layoutLevel": 42,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": [
+        32
+      ]
+    },
+    {
+      "level": 39,
+      "scene": 4,
+      "columns": 10,
+      "rows": 5,
+      "initialSun": 300,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 20,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        4
+      ],
+      "nativeProjection": {
+        "background": 4,
+        "layoutLevel": 43,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": []
+    },
+    {
+      "level": 40,
+      "scene": 4,
+      "columns": 10,
+      "rows": 5,
+      "initialSun": 300,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 20,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        4,
+        8,
+        33,
+        106
+      ],
+      "nativeProjection": {
+        "background": 4,
+        "layoutLevel": 44,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": [
+        33
+      ]
+    },
+    {
+      "level": 41,
+      "scene": 4,
+      "columns": 10,
+      "rows": 5,
+      "initialSun": 300,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 30,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        31,
+        40,
+        45
+      ],
+      "nativeProjection": {
+        "background": 4,
+        "layoutLevel": 45,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": [
+        40
+      ]
+    },
+    {
+      "level": 42,
+      "scene": 4,
+      "columns": 10,
+      "rows": 5,
+      "initialSun": 300,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 30,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        4,
+        31,
+        34
+      ],
+      "nativeProjection": {
+        "background": 4,
+        "layoutLevel": 46,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": []
+    },
+    {
+      "level": 43,
+      "scene": 4,
+      "columns": 10,
+      "rows": 5,
+      "initialSun": 300,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 40,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        4,
+        35,
+        106
+      ],
+      "nativeProjection": {
+        "background": 4,
+        "layoutLevel": 47,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": [
+        35
+      ]
+    },
+    {
+      "level": 44,
+      "scene": 4,
+      "columns": 10,
+      "rows": 5,
+      "initialSun": 300,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 40,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        4,
+        32,
+        38,
+        112
+      ],
+      "nativeProjection": {
+        "background": 4,
+        "layoutLevel": 48,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": [
+        32,
+        38,
+        112
+      ]
+    },
+    {
+      "level": 45,
+      "scene": 4,
+      "columns": 10,
+      "rows": 5,
+      "initialSun": 300,
+      "initialMoney": 3000,
+      "maximumWavesFirstCycle": 40,
+      "laterCycleWaveBonus": 10,
+      "allowedZombieKinds": [
+        0,
+        2,
+        31,
+        32,
+        33,
+        34,
+        35,
+        38,
+        40,
+        45,
+        112
+      ],
+      "nativeProjection": {
+        "background": 4,
+        "layoutLevel": 49,
+        "meaning": "native layout carrier only; not progress/unlock or source gameplay parity"
+      },
+      "finalWaveOnlyKinds": [
+        32,
+        33,
+        35,
+        38,
+        40,
+        112
+      ]
+    }
+  ],
+  "challenges": [
+    {
+      "id": 1,
+      "enumName": "Travel1",
+      "scene": 0,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 2,
+      "enumName": "Travel2",
+      "scene": 0,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 3,
+      "enumName": "Travel3",
+      "scene": 1,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 4,
+      "enumName": "Travel4",
+      "scene": 1,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 5,
+      "enumName": "Travel5",
+      "scene": 2,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 6,
+      "enumName": "Travel6",
+      "scene": 2,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 7,
+      "enumName": "SuperCherryShooter",
+      "scene": 0,
+      "maximumWaves": 30,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 8,
+      "enumName": "SuperCherryShooter2",
+      "scene": 0,
+      "maximumWaves": 30,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 9,
+      "enumName": "SuperCherryShooter3",
+      "scene": 0,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 10,
+      "enumName": "SuperChomper",
+      "scene": 0,
+      "maximumWaves": 30,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 11,
+      "enumName": "SuperChomper2",
+      "scene": 0,
+      "maximumWaves": 30,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 12,
+      "enumName": "SuperChomper3",
+      "scene": 0,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 13,
+      "enumName": "FlagDay",
+      "scene": 0,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 14,
+      "enumName": "FlagPlantZombie",
+      "scene": 0,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 15,
+      "enumName": "FlagRandomPlant",
+      "scene": 0,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 16,
+      "enumName": "FlagRandomZombie",
+      "scene": 0,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 17,
+      "enumName": "FlagRandomAll",
+      "scene": 0,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 18,
+      "enumName": "FlagNight",
+      "scene": 1,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 19,
+      "enumName": "SuperHypno",
+      "scene": 1,
+      "maximumWaves": 30,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 20,
+      "enumName": "SuperHypno2",
+      "scene": 1,
+      "maximumWaves": 30,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 21,
+      "enumName": "SuperHypno3",
+      "scene": 1,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 22,
+      "enumName": "SuperFume",
+      "scene": 1,
+      "maximumWaves": 30,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 23,
+      "enumName": "SuperFume2",
+      "scene": 1,
+      "maximumWaves": 30,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 24,
+      "enumName": "SuperFume3",
+      "scene": 1,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 25,
+      "enumName": "ScaredDream",
+      "scene": 1,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 26,
+      "enumName": "FlagDream",
+      "scene": 1,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 27,
+      "enumName": "FlagElite",
+      "scene": 1,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 28,
+      "enumName": "PolDance",
+      "scene": 1,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 29,
+      "enumName": "PuffTime",
+      "scene": 1,
+      "maximumWaves": 20,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 30,
+      "enumName": "PaperBattle",
+      "scene": 0,
+      "maximumWaves": 20,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 31,
+      "enumName": "SuperTorch",
+      "scene": 0,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 32,
+      "enumName": "SuperKelp",
+      "scene": 2,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 33,
+      "enumName": "FlagPool",
+      "scene": 2,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 34,
+      "enumName": "DriverBattle",
+      "scene": 2,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 35,
+      "enumName": "TowerDefense",
+      "scene": 0,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 36,
+      "enumName": "TowerDefense2",
+      "scene": 7,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 37,
+      "enumName": "Doll",
+      "scene": 0,
+      "maximumWaves": 20,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 38,
+      "enumName": "Column",
+      "scene": 6,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 39,
+      "enumName": "SuperPresent",
+      "scene": 6,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 40,
+      "enumName": "Shooting",
+      "scene": 0,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 41,
+      "enumName": "FlagShooting",
+      "scene": 0,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 42,
+      "enumName": "SeedRain",
+      "scene": 3,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 43,
+      "enumName": "Indestructible",
+      "scene": 3,
+      "maximumWaves": 50,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 44,
+      "enumName": "AirBattle",
+      "scene": 3,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 45,
+      "enumName": "Travel7",
+      "scene": 3,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 46,
+      "enumName": "Travel8",
+      "scene": 3,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 47,
+      "enumName": "BigMapDay",
+      "scene": 8,
+      "maximumWaves": 50,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 48,
+      "enumName": "UltimatePresent",
+      "scene": 8,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 49,
+      "enumName": "BigMapPool",
+      "scene": 9,
+      "maximumWaves": 50,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 50,
+      "enumName": "TowerDefense3",
+      "scene": 8,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 51,
+      "enumName": "Travel9",
+      "scene": 3,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 52,
+      "enumName": "CustomMapEditor",
+      "scene": 8,
+      "maximumWaves": 20,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 53,
+      "enumName": "CustomMap",
+      "scene": null,
+      "maximumWaves": null,
+      "requiresCustomMapData": true,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 54,
+      "enumName": "SuperStar",
+      "scene": 3,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 55,
+      "enumName": "SuperPumpkin",
+      "scene": 3,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 56,
+      "enumName": "RandomTower",
+      "scene": 8,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 57,
+      "enumName": "FlagFog",
+      "scene": 3,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 58,
+      "enumName": "Explosion",
+      "scene": 4,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 59,
+      "enumName": "PogoParty",
+      "scene": 4,
+      "maximumWaves": 20,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 60,
+      "enumName": "Travel10",
+      "scene": 4,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 61,
+      "enumName": "Garden1",
+      "scene": 0,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 62,
+      "enumName": "Gargantuar",
+      "scene": 4,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 63,
+      "enumName": "ZumaGame",
+      "scene": 0,
+      "maximumWaves": 20,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 64,
+      "enumName": "WheatProtection",
+      "scene": 0,
+      "maximumWaves": 50,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 65,
+      "enumName": "Squalour",
+      "scene": 6,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 66,
+      "enumName": "Mirror",
+      "scene": 6,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 67,
+      "enumName": "HypnoNut",
+      "scene": 7,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 68,
+      "enumName": "FlagExchange",
+      "scene": 6,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 69,
+      "enumName": "FlagExchange2",
+      "scene": 6,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 70,
+      "enumName": "Travel11",
+      "scene": 0,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 71,
+      "enumName": "Travel12",
+      "scene": 10,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 72,
+      "enumName": "Shooting2",
+      "scene": 0,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 73,
+      "enumName": "FlagShooting2",
+      "scene": 0,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 74,
+      "enumName": "SuperMelon",
+      "scene": 4,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 75,
+      "enumName": "SuperUmbrella",
+      "scene": 4,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 76,
+      "enumName": "Loon",
+      "scene": 0,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 77,
+      "enumName": "Boss",
+      "scene": 4,
+      "maximumWaves": 20,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 78,
+      "enumName": "GoldMagnet",
+      "scene": 1,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 79,
+      "enumName": "Travel13",
+      "scene": 6,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 80,
+      "enumName": "FlagConvey",
+      "scene": 6,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 81,
+      "enumName": "TowerDefense4",
+      "scene": 8,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 82,
+      "enumName": "PuffTime2",
+      "scene": 7,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 83,
+      "enumName": "TowerDefense5",
+      "scene": 8,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 84,
+      "enumName": "Shooting3",
+      "scene": 0,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 85,
+      "enumName": "FlagShooting3",
+      "scene": 0,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 86,
+      "enumName": "ObsidianImp",
+      "scene": 6,
+      "maximumWaves": 30,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 87,
+      "enumName": "FlagRoof",
+      "scene": 4,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 88,
+      "enumName": "ShootingAll",
+      "scene": 6,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 89,
+      "enumName": "Garden2",
+      "scene": 1,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 90,
+      "enumName": "Garden3",
+      "scene": 2,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 91,
+      "enumName": "Garden4",
+      "scene": 3,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 92,
+      "enumName": "Garden5",
+      "scene": 4,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 93,
+      "enumName": "ImitaterRandom",
+      "scene": 6,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 94,
+      "enumName": "Travel14",
+      "scene": 1,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 95,
+      "enumName": "ImitaterRandom2",
+      "scene": 6,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 96,
+      "enumName": "DisMix",
+      "scene": 6,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 97,
+      "enumName": "TowerDefense6",
+      "scene": 8,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 98,
+      "enumName": "Single",
+      "scene": 7,
+      "maximumWaves": 50,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 99,
+      "enumName": "BungiBattle",
+      "scene": 4,
+      "maximumWaves": 20,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 100,
+      "enumName": "Bejeweled",
+      "scene": 1,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 101,
+      "enumName": "Travel15",
+      "scene": 2,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 102,
+      "enumName": "ScaryPot",
+      "scene": 1,
+      "maximumWaves": 20,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 103,
+      "enumName": "ScaryPot2",
+      "scene": 1,
+      "maximumWaves": 20,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 104,
+      "enumName": "NewGarden",
+      "scene": 14,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 105,
+      "enumName": "TravelAll",
+      "scene": 2,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 106,
+      "enumName": "UltimateBattle",
+      "scene": 1,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 107,
+      "enumName": "LookStar",
+      "scene": 0,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 108,
+      "enumName": "Travel16",
+      "scene": 0,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 109,
+      "enumName": "RandomMix",
+      "scene": 6,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 110,
+      "enumName": "RandomMix2",
+      "scene": 6,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 111,
+      "enumName": "GloveZombie",
+      "scene": 6,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 112,
+      "enumName": "UltimateRandom",
+      "scene": 2,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 113,
+      "enumName": "Shooting4",
+      "scene": 0,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 114,
+      "enumName": "HappyRandom",
+      "scene": 6,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 115,
+      "enumName": "ScaryPot3",
+      "scene": 1,
+      "maximumWaves": 20,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 116,
+      "enumName": "BilliardBall",
+      "scene": 15,
+      "maximumWaves": 20,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 117,
+      "enumName": "BilliardBall2",
+      "scene": 15,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 118,
+      "enumName": "BilliardBall3",
+      "scene": 16,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 119,
+      "enumName": "OppositeRandom",
+      "scene": 6,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 120,
+      "enumName": "UltimateRandom2",
+      "scene": 6,
+      "maximumWaves": 100,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 121,
+      "enumName": "Shooting5",
+      "scene": 2,
+      "maximumWaves": 40,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    },
+    {
+      "id": 122,
+      "enumName": "PVPScaryPot",
+      "scene": 17,
+      "maximumWaves": 20,
+      "requiresCustomMapData": false,
+      "runtimeAdmission": false
+    }
+  ],
+  "baseUnlocks": [
+    {
+      "kind": 0,
+      "requiredAdventureCompleted": 0
+    },
+    {
+      "kind": 1,
+      "requiredAdventureCompleted": 0
+    },
+    {
+      "kind": 2,
+      "requiredAdventureCompleted": 1
+    },
+    {
+      "kind": 3,
+      "requiredAdventureCompleted": 2
+    },
+    {
+      "kind": 4,
+      "requiredAdventureCompleted": 4
+    },
+    {
+      "kind": 5,
+      "requiredAdventureCompleted": 5
+    },
+    {
+      "kind": 6,
+      "requiredAdventureCompleted": 9
+    },
+    {
+      "kind": 7,
+      "requiredAdventureCompleted": 10
+    },
+    {
+      "kind": 8,
+      "requiredAdventureCompleted": 11
+    },
+    {
+      "kind": 9,
+      "requiredAdventureCompleted": 13
+    },
+    {
+      "kind": 10,
+      "requiredAdventureCompleted": 14
+    },
+    {
+      "kind": 11,
+      "requiredAdventureCompleted": 15
+    },
+    {
+      "kind": 12,
+      "requiredAdventureCompleted": 18
+    },
+    {
+      "kind": 13,
+      "requiredAdventureCompleted": 19
+    },
+    {
+      "kind": 14,
+      "requiredAdventureCompleted": 20
+    },
+    {
+      "kind": 15,
+      "requiredAdventureCompleted": 21
+    },
+    {
+      "kind": 16,
+      "requiredAdventureCompleted": 22
+    },
+    {
+      "kind": 17,
+      "requiredAdventureCompleted": 23
+    },
+    {
+      "kind": 18,
+      "requiredAdventureCompleted": 24
+    },
+    {
+      "kind": 19,
+      "requiredAdventureCompleted": 27
+    },
+    {
+      "kind": 20,
+      "requiredAdventureCompleted": 28
+    },
+    {
+      "kind": 21,
+      "requiredAdventureCompleted": 29
+    },
+    {
+      "kind": 22,
+      "requiredAdventureCompleted": 31
+    },
+    {
+      "kind": 23,
+      "requiredAdventureCompleted": 32
+    },
+    {
+      "kind": 24,
+      "requiredAdventureCompleted": 33
+    },
+    {
+      "kind": 25,
+      "requiredAdventureCompleted": 34
+    },
+    {
+      "kind": 26,
+      "requiredAdventureCompleted": 36
+    },
+    {
+      "kind": 27,
+      "requiredAdventureCompleted": 37
+    },
+    {
+      "kind": 28,
+      "requiredAdventureCompleted": 38
+    },
+    {
+      "kind": 29,
+      "requiredAdventureCompleted": 39
+    },
+    {
+      "kind": 30,
+      "requiredAdventureCompleted": 40
+    },
+    {
+      "kind": 31,
+      "requiredAdventureCompleted": 41
+    },
+    {
+      "kind": 32,
+      "requiredAdventureCompleted": 42
+    },
+    {
+      "kind": 33,
+      "requiredAdventureCompleted": 45
+    },
+    {
+      "kind": 34,
+      "requiredAdventureCompleted": 45
+    }
+  ],
+  "zombieSelectionInSourceDictionaryOrder": [
+    {
+      "kind": 0,
+      "weight": 4000,
+      "cost": 1
+    },
+    {
+      "kind": 2,
+      "weight": 3000,
+      "cost": 2
+    },
+    {
+      "kind": 5,
+      "weight": 3000,
+      "cost": 2
+    },
+    {
+      "kind": 3,
+      "weight": 3000,
+      "cost": 2
+    },
+    {
+      "kind": 4,
+      "weight": 2000,
+      "cost": 4
+    },
+    {
+      "kind": 8,
+      "weight": 2000,
+      "cost": 4
+    },
+    {
+      "kind": 103,
+      "weight": 2000,
+      "cost": 4
+    },
+    {
+      "kind": 107,
+      "weight": 2000,
+      "cost": 5
+    },
+    {
+      "kind": 9,
+      "weight": 1500,
+      "cost": 4
+    },
+    {
+      "kind": 27,
+      "weight": 1000,
+      "cost": 4
+    },
+    {
+      "kind": 106,
+      "weight": 1000,
+      "cost": 5
+    },
+    {
+      "kind": 111,
+      "weight": 1000,
+      "cost": 5
+    },
+    {
+      "kind": 109,
+      "weight": 1000,
+      "cost": 10
+    },
+    {
+      "kind": 29,
+      "weight": 1000,
+      "cost": 5
+    },
+    {
+      "kind": 119,
+      "weight": 1000,
+      "cost": 5
+    },
+    {
+      "kind": 30,
+      "weight": 1000,
+      "cost": 5
+    },
+    {
+      "kind": 34,
+      "weight": 1000,
+      "cost": 6
+    },
+    {
+      "kind": 45,
+      "weight": 1000,
+      "cost": 5
+    },
+    {
+      "kind": 6,
+      "weight": 750,
+      "cost": 6
+    },
+    {
+      "kind": 15,
+      "weight": 750,
+      "cost": 6
+    },
+    {
+      "kind": 16,
+      "weight": 1000,
+      "cost": 7
+    },
+    {
+      "kind": 31,
+      "weight": 1000,
+      "cost": 7
+    },
+    {
+      "kind": 14,
+      "weight": 750,
+      "cost": 7
+    },
+    {
+      "kind": 10,
+      "weight": 500,
+      "cost": 10
+    },
+    {
+      "kind": 104,
+      "weight": 500,
+      "cost": 8
+    },
+    {
+      "kind": 39,
+      "weight": 500,
+      "cost": 8
+    },
+    {
+      "kind": 36,
+      "weight": 500,
+      "cost": 8
+    },
+    {
+      "kind": 43,
+      "weight": 500,
+      "cost": 10
+    },
+    {
+      "kind": 100,
+      "weight": 1000,
+      "cost": 1
+    },
+    {
+      "kind": 108,
+      "weight": 500,
+      "cost": 5
+    },
+    {
+      "kind": 114,
+      "weight": 500,
+      "cost": 5
+    },
+    {
+      "kind": 116,
+      "weight": 500,
+      "cost": 8
+    },
+    {
+      "kind": 49,
+      "weight": 500,
+      "cost": 8
+    },
+    {
+      "kind": 105,
+      "weight": 1000,
+      "cost": 5
+    },
+    {
+      "kind": 110,
+      "weight": 500,
+      "cost": 7
+    },
+    {
+      "kind": 215,
+      "weight": 300,
+      "cost": 5
+    },
+    {
+      "kind": 207,
+      "weight": 1000,
+      "cost": 5
+    },
+    {
+      "kind": 200,
+      "weight": 1000,
+      "cost": 5
+    },
+    {
+      "kind": 201,
+      "weight": 1000,
+      "cost": 5
+    },
+    {
+      "kind": 202,
+      "weight": 1000,
+      "cost": 5
+    },
+    {
+      "kind": 203,
+      "weight": 1000,
+      "cost": 5
+    },
+    {
+      "kind": 204,
+      "weight": 1000,
+      "cost": 5
+    },
+    {
+      "kind": 205,
+      "weight": 1000,
+      "cost": 5
+    },
+    {
+      "kind": 208,
+      "weight": 1000,
+      "cost": 5
+    },
+    {
+      "kind": 209,
+      "weight": 1000,
+      "cost": 5
+    },
+    {
+      "kind": 210,
+      "weight": 1000,
+      "cost": 5
+    },
+    {
+      "kind": 213,
+      "weight": 1000,
+      "cost": 5
+    },
+    {
+      "kind": 214,
+      "weight": 1000,
+      "cost": 5
+    },
+    {
+      "kind": 216,
+      "weight": 1000,
+      "cost": 5
+    }
+  ],
+  "waveGeneration": {
+    "source": "recovered/waves-contract.json + InitZombieList.InitZombie3E3B60",
+    "difficultyMultipliers": [
+      1,
+      3,
+      5,
+      7,
+      10,
+      10
+    ],
+    "initialBudget": "max(1,floor(wave*multiplier/3)); every tenth doubled",
+    "weightedDraw": "RandomRangeInt(1,totalWeight+1), first cumulativeWeight>=draw in source Dictionary insertion order",
+    "insufficientBudget": "emit source kind0 but subtract the originally chosen kind cost (Adventure)",
+    "finalWave": "AFTER weighted fill, append each allowed type once with temporary budget20; excludes212 and218..224",
+    "bossAdditions": "UltimateBoss calls TryAddBoss only for already-allowed boss IDs. None of these IDs are in45 Adventure allowlists.",
+    "timing": "initial15s; tutorialOver5s; after spawn30s; strict countdown<0; source health early-wave rules"
+  },
+  "nativeComparisons": [
+    {
+      "sourceId": 38,
+      "nativeMode": "GAMEMODE_CHALLENGE_COLUMN",
+      "status": "shared primitive candidate; source placement/waves still required"
+    },
+    {
+      "sourceId": 42,
+      "nativeMode": "GAMEMODE_CHALLENGE_RAINING_SEEDS",
+      "status": "shared drop/card primitive candidate; source deck/waves still required"
+    },
+    {
+      "sourceId": 59,
+      "nativeMode": "GAMEMODE_CHALLENGE_POGO_PARTY",
+      "status": "native jumping AI candidate; exact Fusion NPC/rules still required"
+    },
+    {
+      "sourceId": 100,
+      "nativeMode": "GAMEMODE_CHALLENGE_BEGHOULED",
+      "status": "shared match primitive candidate; source palette/matches still required"
+    },
+    {
+      "sourceId": 102,
+      "nativeMode": "GAMEMODE_SCARY_POTTER_1",
+      "status": "shared vase primitive candidate; source vase contents/win logic still required"
+    }
+  ],
+  "limits": "Complete static45 Adventure configurations and122 challenge scene/wave-count entries; not complete generated waves, source NPC AI, special-level scripts, rewards or runtime acceptance."
+}

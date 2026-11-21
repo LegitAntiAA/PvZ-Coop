@@ -19,6 +19,7 @@
 #include "Net/NetCommon.h"
 #include "Net/NetManager.h"
 #include "Net/NetPresentation.h"
+#include "Fusion/FusionNative.h"
 #include "../Sexy.TodLib/TodFoley.h"
 #include "Widget/SeedChooserScreen.h"
 #include "../Sexy.TodLib/TodCommon.h"
@@ -858,7 +859,14 @@ void CutScene::StartLevelIntro()
 		isRestart = true;
 	}
 
-	if (mApp->IsFirstTimeAdventureMode() && aLevel == 11)
+	if (LawnFusion::IsNativeFusionBoard(mBoard))
+	{
+		// Classic's replay-level dialogue is separate from its first-time
+		// tutorial. Fusion reuses the pan/chooser, without either Dave script.
+		mCrazyDaveDialogStart = -1;
+		mCrazyDaveTime = 0;
+	}
+	else if (mApp->IsFirstTimeAdventureMode() && aLevel == 11)
 	{
 		mCrazyDaveDialogStart = 201;
 	}

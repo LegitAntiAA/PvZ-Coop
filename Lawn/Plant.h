@@ -6,6 +6,8 @@
 #include "../GameConstants.h"
 #define MAX_MAGNET_ITEMS 5
 
+namespace LawnFusion { struct FusionSplitEmissionSpec; }
+
 enum PlantSubClass
 {
     SUBCLASS_NORMAL = 0,
@@ -213,11 +215,13 @@ public:
     void                    Update();
     void                    Animate();
     void                    Draw(Graphics* g);
+    void                    DrawHealthBar(Graphics* g);
     void                    MouseDown(int x, int y, int theClickCount);
     void                    DoSpecial();
-    void                    Fire(Zombie* theTargetZombie, int theRow, PlantWeapon thePlantWeapon = PlantWeapon::WEAPON_PRIMARY);
+    void                    Fire(Zombie* theTargetZombie, int theRow, PlantWeapon thePlantWeapon = PlantWeapon::WEAPON_PRIMARY,
+                                 const LawnFusion::FusionSplitEmissionSpec* fusionEmission = nullptr);
     Zombie*                 FindTargetZombie(int theRow, PlantWeapon thePlantWeapon = PlantWeapon::WEAPON_PRIMARY);
-    void                    Die();
+    void                    Die(int theFusionRemovalReason = 0);
     void                    UpdateProductionPlant();
     void                    UpdateShooter();
     bool                    FindTargetAndFire(int theRow, PlantWeapon thePlantWeapon = PlantWeapon::WEAPON_PRIMARY);
@@ -271,6 +275,8 @@ public:
     void                    SetSleeping(bool theIsAsleep);
     void                    UpdateShooting();
     void                    DrawShadow(Graphics* g, float theOffsetX, float theOffsetY);
+    void                    DrawShadow(Graphics* g);
+    bool                    GetShadowCenter(float& theX, float& theY); // Board coordinates; unscaled shadow centre.
     void                    UpdateScaredyShroom();
     int                     DistanceToClosestZombie();
     void                    UpdateSpikeweed();
@@ -316,6 +322,15 @@ public:
     void                    UpdatePowered();
     void                    DrawPumkin(Graphics* g, DrawVariation theDrawVariation, unsigned int theDrawBitVariation);
     void                    ApplyBurn();
+
+private:
+    struct ShadowDrawParams
+    {
+        Image* image = nullptr;
+        float x = 0, y = 0, scale = 1;
+    };
+    void                    GetDrawOffsets(float& theOffsetX, float& theOffsetY);
+    bool                    GetShadowDrawParams(float theOffsetX, float theOffsetY, ShadowDrawParams& theParams, bool theIncludeHiddenShadow = false);
 };
 
 float                       PlantDrawHeightOffset(Board* theBoard, Plant* thePlant, SeedType theSeedType, int theCol, int theRow, bool neverFloat = false);

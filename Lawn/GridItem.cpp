@@ -149,8 +149,8 @@ void GridItem::DrawGraveStone(Graphics* g)
 
     int aHeightPosition = TodAnimateCurve(0, 100, mGridItemCounter, 1000, 0, TodCurves::CURVE_EASE_IN_OUT);
     int aGridCelLook = mBoard->mGridCelLook[mGridX][mGridY];
-    int aGridCelOffsetX = mBoard->mGridCelOffset[mGridX][mGridY][0];
-    int aGridCelOffsetY = mBoard->mGridCelOffset[mGridX][mGridY][1];
+    int aGridCelOffsetX = mBoard->GetGridCelOffsetAt(mGridX, mGridY, 0);
+    int aGridCelOffsetY = mBoard->GetGridCelOffsetAt(mGridX, mGridY, 1);
     int aCelWidth = IMAGE_TOMBSTONES->GetCelWidth();
     int aCelHeight = IMAGE_TOMBSTONES->GetCelHeight();
     int aGraveCol = aGridCelLook % 5;
@@ -458,8 +458,8 @@ void GridItem::DrawSquirrel(Graphics* g)
 //0x44E090
 void GridItem::AddGraveStoneParticles()
 {
-    int aXOffset = mBoard->mGridCelOffset[mGridX][mGridY][0];
-    int aYOffset = mBoard->mGridCelOffset[mGridX][mGridY][1];
+    int aXOffset = mBoard->GetGridCelOffsetAt(mGridX, mGridY, 0);
+    int aYOffset = mBoard->GetGridCelOffsetAt(mGridX, mGridY, 1);
     int aXPos = mBoard->GridToPixelX(mGridX, mGridY) + 14 + aXOffset;
     int aYPos = mBoard->GridToPixelY(mGridX, mGridY) + 78 + aYOffset;
     mApp->AddTodParticle(aXPos, aYPos, mRenderOrder + 1, ParticleEffect::PARTICLE_GRAVE_STONE_RISE);

@@ -1384,9 +1384,92 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Lawn\Fusion\FusionMorePlants269Rules.cpp">
+      <Filter>Lawn\Common\Common Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeMorePlants269.cpp">
+      <Filter>Lawn\Common\Common Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Lawn\Fusion\FusionMorePlants269BackendRules.cpp">
+      <Filter>Lawn\Common\Common Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeMorePlants269Backend.cpp">
+      <Filter>Lawn\Common\Common Source</Filter>
+    </ClCompile>
+    <ClInclude Include="..\Lawn\Fusion\FusionMorePlants269Rules.h">
+      <Filter>Lawn\Common\Common Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeMorePlants269.h">
+      <Filter>Lawn\Common\Common Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Lawn\Fusion\FusionMorePlants269BackendRules.h">
+      <Filter>Lawn\Common\Common Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeMorePlants269Backend.h">
+      <Filter>Lawn\Common\Common Include</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\Lawn\Fusion\FusionWorldRemainder269Rules.cpp">
+      <Filter>Lawn\Common\Common Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeWorldRemainder269.cpp">
+      <Filter>Lawn\Common\Common Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeWorldRemainder269Context.cpp">
+      <Filter>Lawn\Common\Common Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeLaserConnections269.cpp">
+      <Filter>Lawn\Common\Common Source</Filter>
+    </ClCompile>
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeLaserConnections269.h">
+      <Filter>Lawn\Common\Common Include</Filter>
+    </ClInclude>
+    <ClCompile Include="..\Lawn\Fusion\FusionLastPlants269Rules.cpp">
+      <Filter>Lawn\Common\Common Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeLastPlants269.cpp">
+      <Filter>Lawn\Common\Common Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Lawn\Fusion\FusionNative269RemainderCallbacks.cpp">
+      <Filter>Lawn\Common\Common Source</Filter>
+    </ClCompile>
+    <ClInclude Include="..\Lawn\Fusion\FusionWorldRemainder269Rules.h">
+      <Filter>Lawn\Common\Common Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeWorldRemainder269.h">
+      <Filter>Lawn\Common\Common Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Lawn\Fusion\FusionLastPlants269Rules.h">
+      <Filter>Lawn\Common\Common Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeLastPlants269.h">
+      <Filter>Lawn\Common\Common Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Lawn\Fusion\FusionNative269RemainderCallbacks.h">
+      <Filter>Lawn\Common\Common Include</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
     <ResourceCompile Include="LawnProject.rc" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\main_icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\Lawn\Fusion\SpecialZombie269Rules.cpp"><Filter>Lawn\Common\Common Source</Filter></ClCompile>
+    <ClCompile Include="..\Lawn\Net\NetFusion270Smoke.cpp"><Filter>Lawn\Common\Common Source</Filter></ClCompile>
+    <ClInclude Include="..\Lawn\Net\NetFusion270Smoke.h"><Filter>Lawn\Common\Common Include</Filter></ClInclude>
+    <ClCompile Include="..\Lawn\Net\NetFusionEmperor270Smoke.cpp"><Filter>Lawn\Common\Common Source</Filter></ClCompile>
+    <ClInclude Include="..\Lawn\Net\NetFusionEmperor270Smoke.h"><Filter>Lawn\Common\Common Include</Filter></ClInclude>
+    <ClCompile Include="..\Lawn\Net\NetFusionCampaign270Smoke.cpp"><Filter>Lawn\Common\Common Source</Filter></ClCompile>
+    <ClInclude Include="..\Lawn\Net\NetFusionCampaign270Smoke.h"><Filter>Lawn\Common\Common Include</Filter></ClInclude>
+    <ClCompile Include="..\Lawn\Fusion\NativeSpecialZombie269.cpp"><Filter>Lawn\Common\Common Source</Filter></ClCompile>
+    <ClCompile Include="..\Lawn\Fusion\FusionZombieBatch270Rules.cpp"><Filter>Lawn\Common\Common Source</Filter></ClCompile>
+    <ClCompile Include="..\Lawn\Fusion\FusionParticleCollision269Rules.cpp"><Filter>Lawn\Common\Common Source</Filter></ClCompile>
+    <ClInclude Include="..\Lawn\Fusion\SpecialZombie269Rules.h"><Filter>Lawn\Common\Common Include</Filter></ClInclude>
+    <ClInclude Include="..\Lawn\Fusion\NativeSpecialZombie269.h"><Filter>Lawn\Common\Common Include</Filter></ClInclude>
+    <ClInclude Include="..\Lawn\Fusion\FusionZombieBatch270Rules.h"><Filter>Lawn\Common\Common Include</Filter></ClInclude>
+    <ClInclude Include="..\Lawn\Fusion\FusionParticleCollision269Rules.h"><Filter>Lawn\Common\Common Include</Filter></ClInclude>
   </ItemGroup>
 </Project>

@@ -1,0 +1,4557 @@
+{
+  "schema": 1,
+  "sourcePrefab": "Resources/plants/caltrop/firecaltrop/FireCaltropPrefab.prefab",
+  "unitsPerNativePixel": 0.01,
+  "applyRootMotion": false,
+  "static": false,
+  "root": 0,
+  "nodes": [
+    {
+      "name": "FireCaltropPrefab",
+      "active": true,
+      "tag": "Plant",
+      "parent": -1,
+      "path": "",
+      "position": {
+        "x": 3.44,
+        "y": -1.06,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 0.33,
+        "y": 0.33,
+        "z": 0.33
+      }
+    },
+    {
+      "name": "Caltrop_body",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "Caltrop_body",
+      "position": {
+        "x": 0.0,
+        "y": 0.78,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "Caltrop_horn4",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 1,
+      "path": "Caltrop_body/Caltrop_horn4",
+      "position": {
+        "x": 1.2899998,
+        "y": -0.01000011,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "Caltrop_horn3",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 1,
+      "path": "Caltrop_body/Caltrop_horn3",
+      "position": {
+        "x": 0.5499999,
+        "y": 0.3000001,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "Caltrop_horn2",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 1,
+      "path": "Caltrop_body/Caltrop_horn2",
+      "position": {
+        "x": -0.3800002,
+        "y": 0.35000002,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "Caltrop_horn1",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 1,
+      "path": "Caltrop_body/Caltrop_horn1",
+      "position": {
+        "x": -1.2999997,
+        "y": 0.120000005,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "Caltrop_body2",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 1,
+      "path": "Caltrop_body/Caltrop_body2",
+      "position": {
+        "x": 0.0,
+        "y": 0.03,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "Shadow",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "Shadow",
+      "position": {
+        "x": 0.0,
+        "y": 1.04,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    }
+  ],
+  "sourceHierarchy": null,
+  "sprites": [
+    {
+      "guid": null,
+      "node": 7,
+      "sortingOrder": 0,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    },
+    {
+      "texture": "textures/464fc75057c0.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Caltrop_body\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 166\n    width: 417\n    height: 154\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    fb765343479e8eb428723d520166f533: 3368849351917810720\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 97c8b20e66b03694b93c6ea5b84330cd, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 60\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 15\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 050003000b0001000b0003000a000b00010002000a00010009000a0002000e000d000c0004000c000d0007000c0004000b000700040005000b0004000a0007000b00090007000a00020007000900000007000200060007000000080007000600000001000400030004000100050004000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 15\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 312\n      _typelessdata: 713d9a3fb81e453f000000009a9939bf9a99193f000000005c8f22bf9a99193f0000000052b83ebf3d0a173f00000000ae47b1bfb81e453f0000000052b83ebf5c8f023f00000000a47005400ad7233d00000000713dda3fb81e45bf00000000a4700540ec5138bf000000005c8f22bf5c8f023f00000000cdcc2cbf48e1fa3e00000000f6283cbf48e1fa3e000000000000d0bfb81e45bf00000000a47005c0ae47e13d00000000a47005c0333333bf00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 166\n      width: 417\n      height: 154\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 212.5, z: 100, w: 243}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 1.2050000429153442,
+            "y": 0.7699999809265137,
+            "z": 0.0,
+            "u": 0.6503906333819032,
+            "v": 0.3750000037252903
+          },
+          {
+            "x": -0.7250000238418579,
+            "y": 0.6000000238418579,
+            "z": 0.0,
+            "u": 0.2734374953433871,
+            "v": 0.4082031203433871
+          },
+          {
+            "x": -0.6349999904632568,
+            "y": 0.6000000238418579,
+            "z": 0.0,
+            "u": 0.29101562686264515,
+            "v": 0.4082031203433871
+          },
+          {
+            "x": -0.7450000047683716,
+            "y": 0.5899999737739563,
+            "z": 0.0,
+            "u": 0.2695312490686774,
+            "v": 0.41015625512227416
+          },
+          {
+            "x": -1.3849999904632568,
+            "y": 0.7699999809265137,
+            "z": 0.0,
+            "u": 0.14453125186264515,
+            "v": 0.3750000037252903
+          },
+          {
+            "x": -0.7450000047683716,
+            "y": 0.5099999904632568,
+            "z": 0.0,
+            "u": 0.2695312490686774,
+            "v": 0.42578125186264515
+          },
+          {
+            "x": 2.0850000381469727,
+            "y": 0.03999999910593033,
+            "z": 0.0,
+            "u": 0.8222656324505806,
+            "v": 0.517578125174623
+          },
+          {
+            "x": 1.7050000429153442,
+            "y": -0.7699999809265137,
+            "z": 0.0,
+            "u": 0.7480468833819032,
+            "v": 0.6757812462747097
+          },
+          {
+            "x": 2.0850000381469727,
+            "y": -0.7200000286102295,
+            "z": 0.0,
+            "u": 0.8222656324505806,
+            "v": 0.6660156305879354
+          },
+          {
+            "x": -0.6349999904632568,
+            "y": 0.5099999904632568,
+            "z": 0.0,
+            "u": 0.29101562686264515,
+            "v": 0.42578125186264515
+          },
+          {
+            "x": -0.675000011920929,
+            "y": 0.49000000953674316,
+            "z": 0.0,
+            "u": 0.28320312267169356,
+            "v": 0.42968749813735485
+          },
+          {
+            "x": -0.7350000143051147,
+            "y": 0.49000000953674316,
+            "z": 0.0,
+            "u": 0.2714843722060323,
+            "v": 0.42968749813735485
+          },
+          {
+            "x": -1.625,
+            "y": -0.7699999809265137,
+            "z": 0.0,
+            "u": 0.09765625,
+            "v": 0.6757812462747097
+          },
+          {
+            "x": -2.0850000381469727,
+            "y": 0.10999999940395355,
+            "z": 0.0,
+            "u": 0.007812492549419403,
+            "v": 0.5039062501164153
+          },
+          {
+            "x": -2.0850000381469727,
+            "y": -0.699999988079071,
+            "z": 0.0,
+            "u": 0.007812492549419403,
+            "v": 0.6621093726716936
+          }
+        ],
+        "indices": [
+          5,
+          3,
+          11,
+          1,
+          11,
+          3,
+          10,
+          11,
+          1,
+          2,
+          10,
+          1,
+          9,
+          10,
+          2,
+          14,
+          13,
+          12,
+          4,
+          12,
+          13,
+          7,
+          12,
+          4,
+          11,
+          7,
+          4,
+          5,
+          11,
+          4,
+          10,
+          7,
+          11,
+          9,
+          7,
+          10,
+          2,
+          7,
+          9,
+          0,
+          7,
+          2,
+          6,
+          7,
+          0,
+          8,
+          7,
+          6,
+          0,
+          1,
+          4,
+          3,
+          4,
+          1,
+          5,
+          4,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/caltrop/firecaltrop/Caltrop_body.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 166.0,
+        "width": 417.0,
+        "height": 154.0,
+        "yTop": 192.0
+      },
+      "logicalSize": {
+        "width": 417.0,
+        "height": 154.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "fa6067f94a769664c9c5485c017fc784",
+      "node": 1,
+      "sortingOrder": 1,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    },
+    {
+      "texture": "textures/464fc75057c0.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Caltrop_body2\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 4\n    width: 417\n    height: 154\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    fb765343479e8eb428723d520166f533: 1890856824939521633\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 97c8b20e66b03694b93c6ea5b84330cd, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 117\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 26\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 05000300180001001800030017001800010002001700010016001700020010000e0014001500080012000c00120008000d0012000c00100012000d001400120010001900040015001800150004000500180004001700150018001600150017000200150016000000150002001100150000000800150011000700080011000900070011000a00090011000f000a0011000e000f00110014000e0011001200140011001300120011000d000b0010000e0010000b000b000f000e000d000c000b00060009000a00060007000900080007000600000001000400030004000100050004000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 26\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 528\n      _typelessdata: 14aeb73fb81e453f000000009a9939bf9a99193f000000005c8f22bf9a99193f0000000052b83ebf3d0a173f00000000a47005c0b81e453f0000000052b83ebf5c8f023f000000005c8ff23fcdcc4cbe00000000ae47f13fcdcc4cbe000000000000f03fae4761be000000005c8ff23fcdcc4cbe000000000ad7f33fae4761be00000000b81ef53f8fc275be000000005c8ff23fae4761be00000000b81ef53f8fc275be0000000014aef73f000080be000000006666f63fae4761be0000000014aef73fb81e85be00000000a4700540cdcc0c3f000000001f8503407b142ebf00000000a4700540666626bf00000000c3f5f83f713d8abe00000000b81ed53fb81e45bf000000005c8f22bf5c8f023f00000000cdcc2cbf48e1fa3e00000000f6283cbf48e1fa3e00000000a47005c0b81e45bf00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 4\n      width: 417\n      height: 154\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 212.5, z: 100, w: 81}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 1.434999942779541,
+            "y": 0.7699999809265137,
+            "z": 0.0,
+            "u": 0.6953124888241291,
+            "v": 0.6914062537252903
+          },
+          {
+            "x": -0.7250000238418579,
+            "y": 0.6000000238418579,
+            "z": 0.0,
+            "u": 0.2734374953433871,
+            "v": 0.7246093703433871
+          },
+          {
+            "x": -0.6349999904632568,
+            "y": 0.6000000238418579,
+            "z": 0.0,
+            "u": 0.29101562686264515,
+            "v": 0.7246093703433871
+          },
+          {
+            "x": -0.7450000047683716,
+            "y": 0.5899999737739563,
+            "z": 0.0,
+            "u": 0.2695312490686774,
+            "v": 0.7265625051222742
+          },
+          {
+            "x": -2.0850000381469727,
+            "y": 0.7699999809265137,
+            "z": 0.0,
+            "u": 0.007812492549419403,
+            "v": 0.6914062537252903
+          },
+          {
+            "x": -0.7450000047683716,
+            "y": 0.5099999904632568,
+            "z": 0.0,
+            "u": 0.2695312490686774,
+            "v": 0.7421875018626451
+          },
+          {
+            "x": 1.8949999809265137,
+            "y": -0.20000000298023224,
+            "z": 0.0,
+            "u": 0.7851562462747097,
+            "v": 0.8808593755820766
+          },
+          {
+            "x": 1.8849999904632568,
+            "y": -0.20000000298023224,
+            "z": 0.0,
+            "u": 0.7832031231373549,
+            "v": 0.8808593755820766
+          },
+          {
+            "x": 1.875,
+            "y": -0.2199999988079071,
+            "z": 0.0,
+            "u": 0.78125,
+            "v": 0.8847656247671694
+          },
+          {
+            "x": 1.8949999809265137,
+            "y": -0.20000000298023224,
+            "z": 0.0,
+            "u": 0.7851562462747097,
+            "v": 0.8808593755820766
+          },
+          {
+            "x": 1.9049999713897705,
+            "y": -0.2199999988079071,
+            "z": 0.0,
+            "u": 0.7871093694120646,
+            "v": 0.8847656247671694
+          },
+          {
+            "x": 1.9149999618530273,
+            "y": -0.23999999463558197,
+            "z": 0.0,
+            "u": 0.7890624925494194,
+            "v": 0.8886718739522621
+          },
+          {
+            "x": 1.8949999809265137,
+            "y": -0.2199999988079071,
+            "z": 0.0,
+            "u": 0.7851562462747097,
+            "v": 0.8847656247671694
+          },
+          {
+            "x": 1.9149999618530273,
+            "y": -0.23999999463558197,
+            "z": 0.0,
+            "u": 0.7890624925494194,
+            "v": 0.8886718739522621
+          },
+          {
+            "x": 1.934999942779541,
+            "y": -0.25,
+            "z": 0.0,
+            "u": 0.7929687388241291,
+            "v": 0.890625
+          },
+          {
+            "x": 1.9249999523162842,
+            "y": -0.2199999988079071,
+            "z": 0.0,
+            "u": 0.7910156156867743,
+            "v": 0.8847656247671694
+          },
+          {
+            "x": 1.934999942779541,
+            "y": -0.25999999046325684,
+            "z": 0.0,
+            "u": 0.7929687388241291,
+            "v": 0.8925781231373549
+          },
+          {
+            "x": 2.0850000381469727,
+            "y": 0.550000011920929,
+            "z": 0.0,
+            "u": 0.8222656324505806,
+            "v": 0.7343749976716936
+          },
+          {
+            "x": 2.055000066757202,
+            "y": -0.6800000071525574,
+            "z": 0.0,
+            "u": 0.816406263038516,
+            "v": 0.9746093763969839
+          },
+          {
+            "x": 2.0850000381469727,
+            "y": -0.6499999761581421,
+            "z": 0.0,
+            "u": 0.8222656324505806,
+            "v": 0.9687499953433871
+          },
+          {
+            "x": 1.9450000524520874,
+            "y": -0.27000001072883606,
+            "z": 0.0,
+            "u": 0.7949218852445483,
+            "v": 0.8945312520954758
+          },
+          {
+            "x": 1.6649999618530273,
+            "y": -0.7699999809265137,
+            "z": 0.0,
+            "u": 0.7402343675494194,
+            "v": 0.9921874962747097
+          },
+          {
+            "x": -0.6349999904632568,
+            "y": 0.5099999904632568,
+            "z": 0.0,
+            "u": 0.29101562686264515,
+            "v": 0.7421875018626451
+          },
+          {
+            "x": -0.675000011920929,
+            "y": 0.49000000953674316,
+            "z": 0.0,
+            "u": 0.28320312267169356,
+            "v": 0.7460937481373549
+          },
+          {
+            "x": -0.7350000143051147,
+            "y": 0.49000000953674316,
+            "z": 0.0,
+            "u": 0.2714843722060323,
+            "v": 0.7460937481373549
+          },
+          {
+            "x": -2.0850000381469727,
+            "y": -0.7699999809265137,
+            "z": 0.0,
+            "u": 0.007812492549419403,
+            "v": 0.9921874962747097
+          }
+        ],
+        "indices": [
+          5,
+          3,
+          24,
+          1,
+          24,
+          3,
+          23,
+          24,
+          1,
+          2,
+          23,
+          1,
+          22,
+          23,
+          2,
+          16,
+          14,
+          20,
+          21,
+          8,
+          18,
+          12,
+          18,
+          8,
+          13,
+          18,
+          12,
+          16,
+          18,
+          13,
+          20,
+          18,
+          16,
+          25,
+          4,
+          21,
+          24,
+          21,
+          4,
+          5,
+          24,
+          4,
+          23,
+          21,
+          24,
+          22,
+          21,
+          23,
+          2,
+          21,
+          22,
+          0,
+          21,
+          2,
+          17,
+          21,
+          0,
+          8,
+          21,
+          17,
+          7,
+          8,
+          17,
+          9,
+          7,
+          17,
+          10,
+          9,
+          17,
+          15,
+          10,
+          17,
+          14,
+          15,
+          17,
+          20,
+          14,
+          17,
+          18,
+          20,
+          17,
+          19,
+          18,
+          17,
+          13,
+          11,
+          16,
+          14,
+          16,
+          11,
+          11,
+          15,
+          14,
+          13,
+          12,
+          11,
+          6,
+          9,
+          10,
+          6,
+          7,
+          9,
+          8,
+          7,
+          6,
+          0,
+          1,
+          4,
+          3,
+          4,
+          1,
+          5,
+          4,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/caltrop/firecaltrop/Caltrop_body2.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 4.0,
+        "width": 417.0,
+        "height": 154.0,
+        "yTop": 354.0
+      },
+      "logicalSize": {
+        "width": 417.0,
+        "height": 154.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "b41c173f85eeff94bac9f123884d6994",
+      "node": 6,
+      "sortingOrder": 2,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    },
+    {
+      "texture": "textures/464fc75057c0.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Caltrop_horn1\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 328\n    width: 67\n    height: 108\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    fb765343479e8eb428723d520166f533: -7222352880934705710\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 97c8b20e66b03694b93c6ea5b84330cd, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 15\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 7\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 060005000100040001000500030001000400000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 7\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 152\n      _typelessdata: 1f85ab3ecdcc4cbd00000000c3f5283e713d0abf000000001f85ab3e14aec7be000000007b14aebd713d0a3f000000003d0a97be713d0a3f000000001f85abbe48e1fa3e000000001f85abbe713d0abf000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 328\n      width: 67\n      height: 108\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 37.5, z: 100, w: 382}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.33500000834465027,
+            "y": -0.05000000074505806,
+            "z": 0.0,
+            "u": 0.1386718766298145,
+            "v": 0.26367187514551915
+          },
+          {
+            "x": 0.16500000655651093,
+            "y": -0.5400000214576721,
+            "z": 0.0,
+            "u": 0.10546875128056854,
+            "v": 0.3593750041909516
+          },
+          {
+            "x": 0.33500000834465027,
+            "y": -0.38999998569488525,
+            "z": 0.0,
+            "u": 0.1386718766298145,
+            "v": 0.3300781222060323
+          },
+          {
+            "x": -0.08500000089406967,
+            "y": 0.5400000214576721,
+            "z": 0.0,
+            "u": 0.05664062482537702,
+            "v": 0.14843749580904841
+          },
+          {
+            "x": -0.29499998688697815,
+            "y": 0.5400000214576721,
+            "z": 0.0,
+            "u": 0.01562500256113708,
+            "v": 0.14843749580904841
+          },
+          {
+            "x": -0.33500000834465027,
+            "y": 0.49000000953674316,
+            "z": 0.0,
+            "u": 0.007812498370185494,
+            "v": 0.15820312313735485
+          },
+          {
+            "x": -0.33500000834465027,
+            "y": -0.5400000214576721,
+            "z": 0.0,
+            "u": 0.007812498370185494,
+            "v": 0.3593750041909516
+          }
+        ],
+        "indices": [
+          6,
+          5,
+          1,
+          4,
+          1,
+          5,
+          3,
+          1,
+          4,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/caltrop/firecaltrop/Caltrop_horn1.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 328.0,
+        "width": 67.0,
+        "height": 108.0,
+        "yTop": 76.0
+      },
+      "logicalSize": {
+        "width": 67.0,
+        "height": 108.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "a4586068fb833564da5ef5f8d114f9c5",
+      "node": 5,
+      "sortingOrder": 3,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    },
+    {
+      "texture": "textures/464fc75057c0.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Caltrop_horn2\n  m_Rect:\n    serializedVersion: 2\n    x: 429\n    y: 166\n    width: 75\n    height: 100\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    fb765343479e8eb428723d520166f533: 5936831105692758560\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 97c8b20e66b03694b93c6ea5b84330cd, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 21\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 9\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 080007000500060005000700040005000600010005000400030001000400000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 9\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 184\n      _typelessdata: 0000c03e295c8fbd0000000085eb913e000000bf000000000000c03e5c8fc2be00000000713d0a3e0000003f000000001f85ebbd0000003f00000000ae47a1be000000bf000000008fc2b5be8fc2753e000000000000c0be8fc2f53c000000000000c0bed7a3f0be0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 429\n      y: 166\n      width: 75\n      height: 100\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 466.5, z: 100, w: 216}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.375,
+            "y": -0.07000000029802322,
+            "z": 0.0,
+            "u": 0.984375,
+            "v": 0.5917968750582077
+          },
+          {
+            "x": 0.2849999964237213,
+            "y": -0.5,
+            "z": 0.0,
+            "u": 0.9667968743015081,
+            "v": 0.67578125
+          },
+          {
+            "x": 0.375,
+            "y": -0.3799999952316284,
+            "z": 0.0,
+            "u": 0.984375,
+            "v": 0.6523437490686774
+          },
+          {
+            "x": 0.13500000536441803,
+            "y": 0.5,
+            "z": 0.0,
+            "u": 0.9375000010477379,
+            "v": 0.48046875
+          },
+          {
+            "x": -0.11500000208616257,
+            "y": 0.5,
+            "z": 0.0,
+            "u": 0.8886718745925464,
+            "v": 0.48046875
+          },
+          {
+            "x": -0.3149999976158142,
+            "y": -0.5,
+            "z": 0.0,
+            "u": 0.8496093754656613,
+            "v": 0.67578125
+          },
+          {
+            "x": -0.35499998927116394,
+            "y": 0.23999999463558197,
+            "z": 0.0,
+            "u": 0.8417968770954758,
+            "v": 0.5312500010477379
+          },
+          {
+            "x": -0.375,
+            "y": 0.029999999329447746,
+            "z": 0.0,
+            "u": 0.837890625,
+            "v": 0.5722656251309672
+          },
+          {
+            "x": -0.375,
+            "y": -0.4699999988079071,
+            "z": 0.0,
+            "u": 0.837890625,
+            "v": 0.6699218747671694
+          }
+        ],
+        "indices": [
+          8,
+          7,
+          5,
+          6,
+          5,
+          7,
+          4,
+          5,
+          6,
+          1,
+          5,
+          4,
+          3,
+          1,
+          4,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/caltrop/firecaltrop/Caltrop_horn2.asset",
+      "textureRect": {
+        "x": 429.0,
+        "y": 166.0,
+        "width": 75.0,
+        "height": 100.0,
+        "yTop": 246.0
+      },
+      "logicalSize": {
+        "width": 75.0,
+        "height": 100.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "3cc4ebce7f3cf3e4594e4050c16cf0e4",
+      "node": 4,
+      "sortingOrder": 4,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    },
+    {
+      "texture": "textures/464fc75057c0.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Caltrop_horn3\n  m_Rect:\n    serializedVersion: 2\n    x: 79\n    y: 328\n    width: 67\n    height: 92\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    fb765343479e8eb428723d520166f533: 2721246481803752010\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 97c8b20e66b03694b93c6ea5b84330cd, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 12\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 6\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 050004000100030001000400000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 6\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 128\n      _typelessdata: 5c8f823e1f85eb3e000000001f85ab3e1f85ebbe000000001f85ab3ec3f5a83e00000000ae47613d1f85eb3e000000001f85abbe7b142ebe000000001f85abbe1f85ebbe000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 79\n      y: 328\n      width: 67\n      height: 92\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 112.5, z: 100, w: 374}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.2549999952316284,
+            "y": 0.46000000834465027,
+            "z": 0.0,
+            "u": 0.2695312490686774,
+            "v": 0.1796874983701855
+          },
+          {
+            "x": 0.33500000834465027,
+            "y": -0.46000000834465027,
+            "z": 0.0,
+            "u": 0.2851562516298145,
+            "v": 0.3593750016298145
+          },
+          {
+            "x": 0.33500000834465027,
+            "y": 0.33000001311302185,
+            "z": 0.0,
+            "u": 0.2851562516298145,
+            "v": 0.20507812243886292
+          },
+          {
+            "x": 0.054999999701976776,
+            "y": 0.46000000834465027,
+            "z": 0.0,
+            "u": 0.23046874994179234,
+            "v": 0.1796874983701855
+          },
+          {
+            "x": -0.33500000834465027,
+            "y": -0.17000000178813934,
+            "z": 0.0,
+            "u": 0.1542968733701855,
+            "v": 0.30273437534924597
+          },
+          {
+            "x": -0.33500000834465027,
+            "y": -0.46000000834465027,
+            "z": 0.0,
+            "u": 0.1542968733701855,
+            "v": 0.3593750016298145
+          }
+        ],
+        "indices": [
+          5,
+          4,
+          1,
+          3,
+          1,
+          4,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/caltrop/firecaltrop/Caltrop_horn3.asset",
+      "textureRect": {
+        "x": 79.0,
+        "y": 328.0,
+        "width": 67.0,
+        "height": 92.0,
+        "yTop": 92.0
+      },
+      "logicalSize": {
+        "width": 67.0,
+        "height": 92.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "cd8931f85955e98438dd32762ac52f48",
+      "node": 3,
+      "sortingOrder": 5,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    },
+    {
+      "texture": "textures/464fc75057c0.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Caltrop_horn4\n  m_Rect:\n    serializedVersion: 2\n    x: 429\n    y: 4\n    width: 75\n    height: 100\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    fb765343479e8eb428723d520166f533: 8998274869459028956\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 97c8b20e66b03694b93c6ea5b84330cd, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 15\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 7\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 060005000400030004000500010004000300000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 7\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 152\n      _typelessdata: 0000c03e0000003f00000000ae47a13e000000bf000000000000c03e85ebd1be0000000052b81e3e0000003f00000000333333be000000bf000000000000c0becdcccc3d000000000000c0be6666e6be000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 429\n      y: 4\n      width: 75\n      height: 100\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 466.5, z: 100, w: 54}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.375,
+            "y": 0.5,
+            "z": 0.0,
+            "u": 0.984375,
+            "v": 0.796875
+          },
+          {
+            "x": 0.3149999976158142,
+            "y": -0.5,
+            "z": 0.0,
+            "u": 0.9726562495343387,
+            "v": 0.9921875
+          },
+          {
+            "x": 0.375,
+            "y": -0.4099999964237213,
+            "z": 0.0,
+            "u": 0.984375,
+            "v": 0.9746093743015081
+          },
+          {
+            "x": 0.1550000011920929,
+            "y": 0.5,
+            "z": 0.0,
+            "u": 0.9414062502328306,
+            "v": 0.796875
+          },
+          {
+            "x": -0.17499999701976776,
+            "y": -0.5,
+            "z": 0.0,
+            "u": 0.8769531255820766,
+            "v": 0.9921875
+          },
+          {
+            "x": -0.375,
+            "y": 0.10000000149011612,
+            "z": 0.0,
+            "u": 0.837890625,
+            "v": 0.8749999997089617
+          },
+          {
+            "x": -0.375,
+            "y": -0.44999998807907104,
+            "z": 0.0,
+            "u": 0.837890625,
+            "v": 0.9824218726716936
+          }
+        ],
+        "indices": [
+          6,
+          5,
+          4,
+          3,
+          4,
+          5,
+          1,
+          4,
+          3,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/caltrop/firecaltrop/Caltrop_horn4.asset",
+      "textureRect": {
+        "x": 429.0,
+        "y": 4.0,
+        "width": 75.0,
+        "height": 100.0,
+        "yTop": 408.0
+      },
+      "logicalSize": {
+        "width": 75.0,
+        "height": 100.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "db386aacaf127fb4eb94a64c6b8b2f3e",
+      "node": 2,
+      "sortingOrder": 6,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false
+    }
+  ],
+  "spriteVariants": {
+    "fa6067f94a769664c9c5485c017fc784": {
+      "texture": "textures/464fc75057c0.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Caltrop_body\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 166\n    width: 417\n    height: 154\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    fb765343479e8eb428723d520166f533: 3368849351917810720\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 97c8b20e66b03694b93c6ea5b84330cd, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 60\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 15\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 050003000b0001000b0003000a000b00010002000a00010009000a0002000e000d000c0004000c000d0007000c0004000b000700040005000b0004000a0007000b00090007000a00020007000900000007000200060007000000080007000600000001000400030004000100050004000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 15\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 312\n      _typelessdata: 713d9a3fb81e453f000000009a9939bf9a99193f000000005c8f22bf9a99193f0000000052b83ebf3d0a173f00000000ae47b1bfb81e453f0000000052b83ebf5c8f023f00000000a47005400ad7233d00000000713dda3fb81e45bf00000000a4700540ec5138bf000000005c8f22bf5c8f023f00000000cdcc2cbf48e1fa3e00000000f6283cbf48e1fa3e000000000000d0bfb81e45bf00000000a47005c0ae47e13d00000000a47005c0333333bf00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 166\n      width: 417\n      height: 154\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 212.5, z: 100, w: 243}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 1.2050000429153442,
+            "y": 0.7699999809265137,
+            "z": 0.0,
+            "u": 0.6503906333819032,
+            "v": 0.3750000037252903
+          },
+          {
+            "x": -0.7250000238418579,
+            "y": 0.6000000238418579,
+            "z": 0.0,
+            "u": 0.2734374953433871,
+            "v": 0.4082031203433871
+          },
+          {
+            "x": -0.6349999904632568,
+            "y": 0.6000000238418579,
+            "z": 0.0,
+            "u": 0.29101562686264515,
+            "v": 0.4082031203433871
+          },
+          {
+            "x": -0.7450000047683716,
+            "y": 0.5899999737739563,
+            "z": 0.0,
+            "u": 0.2695312490686774,
+            "v": 0.41015625512227416
+          },
+          {
+            "x": -1.3849999904632568,
+            "y": 0.7699999809265137,
+            "z": 0.0,
+            "u": 0.14453125186264515,
+            "v": 0.3750000037252903
+          },
+          {
+            "x": -0.7450000047683716,
+            "y": 0.5099999904632568,
+            "z": 0.0,
+            "u": 0.2695312490686774,
+            "v": 0.42578125186264515
+          },
+          {
+            "x": 2.0850000381469727,
+            "y": 0.03999999910593033,
+            "z": 0.0,
+            "u": 0.8222656324505806,
+            "v": 0.517578125174623
+          },
+          {
+            "x": 1.7050000429153442,
+            "y": -0.7699999809265137,
+            "z": 0.0,
+            "u": 0.7480468833819032,
+            "v": 0.6757812462747097
+          },
+          {
+            "x": 2.0850000381469727,
+            "y": -0.7200000286102295,
+            "z": 0.0,
+            "u": 0.8222656324505806,
+            "v": 0.6660156305879354
+          },
+          {
+            "x": -0.6349999904632568,
+            "y": 0.5099999904632568,
+            "z": 0.0,
+            "u": 0.29101562686264515,
+            "v": 0.42578125186264515
+          },
+          {
+            "x": -0.675000011920929,
+            "y": 0.49000000953674316,
+            "z": 0.0,
+            "u": 0.28320312267169356,
+            "v": 0.42968749813735485
+          },
+          {
+            "x": -0.7350000143051147,
+            "y": 0.49000000953674316,
+            "z": 0.0,
+            "u": 0.2714843722060323,
+            "v": 0.42968749813735485
+          },
+          {
+            "x": -1.625,
+            "y": -0.7699999809265137,
+            "z": 0.0,
+            "u": 0.09765625,
+            "v": 0.6757812462747097
+          },
+          {
+            "x": -2.0850000381469727,
+            "y": 0.10999999940395355,
+            "z": 0.0,
+            "u": 0.007812492549419403,
+            "v": 0.5039062501164153
+          },
+          {
+            "x": -2.0850000381469727,
+            "y": -0.699999988079071,
+            "z": 0.0,
+            "u": 0.007812492549419403,
+            "v": 0.6621093726716936
+          }
+        ],
+        "indices": [
+          5,
+          3,
+          11,
+          1,
+          11,
+          3,
+          10,
+          11,
+          1,
+          2,
+          10,
+          1,
+          9,
+          10,
+          2,
+          14,
+          13,
+          12,
+          4,
+          12,
+          13,
+          7,
+          12,
+          4,
+          11,
+          7,
+          4,
+          5,
+          11,
+          4,
+          10,
+          7,
+          11,
+          9,
+          7,
+          10,
+          2,
+          7,
+          9,
+          0,
+          7,
+          2,
+          6,
+          7,
+          0,
+          8,
+          7,
+          6,
+          0,
+          1,
+          4,
+          3,
+          4,
+          1,
+          5,
+          4,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/caltrop/firecaltrop/Caltrop_body.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 166.0,
+        "width": 417.0,
+        "height": 154.0,
+        "yTop": 192.0
+      },
+      "logicalSize": {
+        "width": 417.0,
+        "height": 154.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "db386aacaf127fb4eb94a64c6b8b2f3e": {
+      "texture": "textures/464fc75057c0.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Caltrop_horn4\n  m_Rect:\n    serializedVersion: 2\n    x: 429\n    y: 4\n    width: 75\n    height: 100\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    fb765343479e8eb428723d520166f533: 8998274869459028956\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 97c8b20e66b03694b93c6ea5b84330cd, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 15\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 7\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 060005000400030004000500010004000300000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 7\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 152\n      _typelessdata: 0000c03e0000003f00000000ae47a13e000000bf000000000000c03e85ebd1be0000000052b81e3e0000003f00000000333333be000000bf000000000000c0becdcccc3d000000000000c0be6666e6be000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 429\n      y: 4\n      width: 75\n      height: 100\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 466.5, z: 100, w: 54}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.375,
+            "y": 0.5,
+            "z": 0.0,
+            "u": 0.984375,
+            "v": 0.796875
+          },
+          {
+            "x": 0.3149999976158142,
+            "y": -0.5,
+            "z": 0.0,
+            "u": 0.9726562495343387,
+            "v": 0.9921875
+          },
+          {
+            "x": 0.375,
+            "y": -0.4099999964237213,
+            "z": 0.0,
+            "u": 0.984375,
+            "v": 0.9746093743015081
+          },
+          {
+            "x": 0.1550000011920929,
+            "y": 0.5,
+            "z": 0.0,
+            "u": 0.9414062502328306,
+            "v": 0.796875
+          },
+          {
+            "x": -0.17499999701976776,
+            "y": -0.5,
+            "z": 0.0,
+            "u": 0.8769531255820766,
+            "v": 0.9921875
+          },
+          {
+            "x": -0.375,
+            "y": 0.10000000149011612,
+            "z": 0.0,
+            "u": 0.837890625,
+            "v": 0.8749999997089617
+          },
+          {
+            "x": -0.375,
+            "y": -0.44999998807907104,
+            "z": 0.0,
+            "u": 0.837890625,
+            "v": 0.9824218726716936
+          }
+        ],
+        "indices": [
+          6,
+          5,
+          4,
+          3,
+          4,
+          5,
+          1,
+          4,
+          3,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/caltrop/firecaltrop/Caltrop_horn4.asset",
+      "textureRect": {
+        "x": 429.0,
+        "y": 4.0,
+        "width": 75.0,
+        "height": 100.0,
+        "yTop": 408.0
+      },
+      "logicalSize": {
+        "width": 75.0,
+        "height": 100.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "cd8931f85955e98438dd32762ac52f48": {
+      "texture": "textures/464fc75057c0.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Caltrop_horn3\n  m_Rect:\n    serializedVersion: 2\n    x: 79\n    y: 328\n    width: 67\n    height: 92\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    fb765343479e8eb428723d520166f533: 2721246481803752010\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 97c8b20e66b03694b93c6ea5b84330cd, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 12\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 6\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 050004000100030001000400000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 6\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 128\n      _typelessdata: 5c8f823e1f85eb3e000000001f85ab3e1f85ebbe000000001f85ab3ec3f5a83e00000000ae47613d1f85eb3e000000001f85abbe7b142ebe000000001f85abbe1f85ebbe000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 79\n      y: 328\n      width: 67\n      height: 92\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 112.5, z: 100, w: 374}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.2549999952316284,
+            "y": 0.46000000834465027,
+            "z": 0.0,
+            "u": 0.2695312490686774,
+            "v": 0.1796874983701855
+          },
+          {
+            "x": 0.33500000834465027,
+            "y": -0.46000000834465027,
+            "z": 0.0,
+            "u": 0.2851562516298145,
+            "v": 0.3593750016298145
+          },
+          {
+            "x": 0.33500000834465027,
+            "y": 0.33000001311302185,
+            "z": 0.0,
+            "u": 0.2851562516298145,
+            "v": 0.20507812243886292
+          },
+          {
+            "x": 0.054999999701976776,
+            "y": 0.46000000834465027,
+            "z": 0.0,
+            "u": 0.23046874994179234,
+            "v": 0.1796874983701855
+          },
+          {
+            "x": -0.33500000834465027,
+            "y": -0.17000000178813934,
+            "z": 0.0,
+            "u": 0.1542968733701855,
+            "v": 0.30273437534924597
+          },
+          {
+            "x": -0.33500000834465027,
+            "y": -0.46000000834465027,
+            "z": 0.0,
+            "u": 0.1542968733701855,
+            "v": 0.3593750016298145
+          }
+        ],
+        "indices": [
+          5,
+          4,
+          1,
+          3,
+          1,
+          4,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/caltrop/firecaltrop/Caltrop_horn3.asset",
+      "textureRect": {
+        "x": 79.0,
+        "y": 328.0,
+        "width": 67.0,
+        "height": 92.0,
+        "yTop": 92.0
+      },
+      "logicalSize": {
+        "width": 67.0,
+        "height": 92.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "3cc4ebce7f3cf3e4594e4050c16cf0e4": {
+      "texture": "textures/464fc75057c0.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Caltrop_horn2\n  m_Rect:\n    serializedVersion: 2\n    x: 429\n    y: 166\n    width: 75\n    height: 100\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    fb765343479e8eb428723d520166f533: 5936831105692758560\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 97c8b20e66b03694b93c6ea5b84330cd, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 21\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 9\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 080007000500060005000700040005000600010005000400030001000400000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 9\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 184\n      _typelessdata: 0000c03e295c8fbd0000000085eb913e000000bf000000000000c03e5c8fc2be00000000713d0a3e0000003f000000001f85ebbd0000003f00000000ae47a1be000000bf000000008fc2b5be8fc2753e000000000000c0be8fc2f53c000000000000c0bed7a3f0be0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 429\n      y: 166\n      width: 75\n      height: 100\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 466.5, z: 100, w: 216}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.375,
+            "y": -0.07000000029802322,
+            "z": 0.0,
+            "u": 0.984375,
+            "v": 0.5917968750582077
+          },
+          {
+            "x": 0.2849999964237213,
+            "y": -0.5,
+            "z": 0.0,
+            "u": 0.9667968743015081,
+            "v": 0.67578125
+          },
+          {
+            "x": 0.375,
+            "y": -0.3799999952316284,
+            "z": 0.0,
+            "u": 0.984375,
+            "v": 0.6523437490686774
+          },
+          {
+            "x": 0.13500000536441803,
+            "y": 0.5,
+            "z": 0.0,
+            "u": 0.9375000010477379,
+            "v": 0.48046875
+          },
+          {
+            "x": -0.11500000208616257,
+            "y": 0.5,
+            "z": 0.0,
+            "u": 0.8886718745925464,
+            "v": 0.48046875
+          },
+          {
+            "x": -0.3149999976158142,
+            "y": -0.5,
+            "z": 0.0,
+            "u": 0.8496093754656613,
+            "v": 0.67578125
+          },
+          {
+            "x": -0.35499998927116394,
+            "y": 0.23999999463558197,
+            "z": 0.0,
+            "u": 0.8417968770954758,
+            "v": 0.5312500010477379
+          },
+          {
+            "x": -0.375,
+            "y": 0.029999999329447746,
+            "z": 0.0,
+            "u": 0.837890625,
+            "v": 0.5722656251309672
+          },
+          {
+            "x": -0.375,
+            "y": -0.4699999988079071,
+            "z": 0.0,
+            "u": 0.837890625,
+            "v": 0.6699218747671694
+          }
+        ],
+        "indices": [
+          8,
+          7,
+          5,
+          6,
+          5,
+          7,
+          4,
+          5,
+          6,
+          1,
+          5,
+          4,
+          3,
+          1,
+          4,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/caltrop/firecaltrop/Caltrop_horn2.asset",
+      "textureRect": {
+        "x": 429.0,
+        "y": 166.0,
+        "width": 75.0,
+        "height": 100.0,
+        "yTop": 246.0
+      },
+      "logicalSize": {
+        "width": 75.0,
+        "height": 100.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "a4586068fb833564da5ef5f8d114f9c5": {
+      "texture": "textures/464fc75057c0.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Caltrop_horn1\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 328\n    width: 67\n    height: 108\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    fb765343479e8eb428723d520166f533: -7222352880934705710\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 97c8b20e66b03694b93c6ea5b84330cd, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 15\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 7\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 060005000100040001000500030001000400000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 7\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 152\n      _typelessdata: 1f85ab3ecdcc4cbd00000000c3f5283e713d0abf000000001f85ab3e14aec7be000000007b14aebd713d0a3f000000003d0a97be713d0a3f000000001f85abbe48e1fa3e000000001f85abbe713d0abf000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 328\n      width: 67\n      height: 108\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 37.5, z: 100, w: 382}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.33500000834465027,
+            "y": -0.05000000074505806,
+            "z": 0.0,
+            "u": 0.1386718766298145,
+            "v": 0.26367187514551915
+          },
+          {
+            "x": 0.16500000655651093,
+            "y": -0.5400000214576721,
+            "z": 0.0,
+            "u": 0.10546875128056854,
+            "v": 0.3593750041909516
+          },
+          {
+            "x": 0.33500000834465027,
+            "y": -0.38999998569488525,
+            "z": 0.0,
+            "u": 0.1386718766298145,
+            "v": 0.3300781222060323
+          },
+          {
+            "x": -0.08500000089406967,
+            "y": 0.5400000214576721,
+            "z": 0.0,
+            "u": 0.05664062482537702,
+            "v": 0.14843749580904841
+          },
+          {
+            "x": -0.29499998688697815,
+            "y": 0.5400000214576721,
+            "z": 0.0,
+            "u": 0.01562500256113708,
+            "v": 0.14843749580904841
+          },
+          {
+            "x": -0.33500000834465027,
+            "y": 0.49000000953674316,
+            "z": 0.0,
+            "u": 0.007812498370185494,
+            "v": 0.15820312313735485
+          },
+          {
+            "x": -0.33500000834465027,
+            "y": -0.5400000214576721,
+            "z": 0.0,
+            "u": 0.007812498370185494,
+            "v": 0.3593750041909516
+          }
+        ],
+        "indices": [
+          6,
+          5,
+          1,
+          4,
+          1,
+          5,
+          3,
+          1,
+          4,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/caltrop/firecaltrop/Caltrop_horn1.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 328.0,
+        "width": 67.0,
+        "height": 108.0,
+        "yTop": 76.0
+      },
+      "logicalSize": {
+        "width": 67.0,
+        "height": 108.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "b41c173f85eeff94bac9f123884d6994": {
+      "texture": "textures/464fc75057c0.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Caltrop_body2\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 4\n    width: 417\n    height: 154\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    fb765343479e8eb428723d520166f533: 1890856824939521633\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 97c8b20e66b03694b93c6ea5b84330cd, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 117\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 26\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 05000300180001001800030017001800010002001700010016001700020010000e0014001500080012000c00120008000d0012000c00100012000d001400120010001900040015001800150004000500180004001700150018001600150017000200150016000000150002001100150000000800150011000700080011000900070011000a00090011000f000a0011000e000f00110014000e0011001200140011001300120011000d000b0010000e0010000b000b000f000e000d000c000b00060009000a00060007000900080007000600000001000400030004000100050004000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 26\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 528\n      _typelessdata: 14aeb73fb81e453f000000009a9939bf9a99193f000000005c8f22bf9a99193f0000000052b83ebf3d0a173f00000000a47005c0b81e453f0000000052b83ebf5c8f023f000000005c8ff23fcdcc4cbe00000000ae47f13fcdcc4cbe000000000000f03fae4761be000000005c8ff23fcdcc4cbe000000000ad7f33fae4761be00000000b81ef53f8fc275be000000005c8ff23fae4761be00000000b81ef53f8fc275be0000000014aef73f000080be000000006666f63fae4761be0000000014aef73fb81e85be00000000a4700540cdcc0c3f000000001f8503407b142ebf00000000a4700540666626bf00000000c3f5f83f713d8abe00000000b81ed53fb81e45bf000000005c8f22bf5c8f023f00000000cdcc2cbf48e1fa3e00000000f6283cbf48e1fa3e00000000a47005c0b81e45bf00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 4\n      width: 417\n      height: 154\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 212.5, z: 100, w: 81}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 1.434999942779541,
+            "y": 0.7699999809265137,
+            "z": 0.0,
+            "u": 0.6953124888241291,
+            "v": 0.6914062537252903
+          },
+          {
+            "x": -0.7250000238418579,
+            "y": 0.6000000238418579,
+            "z": 0.0,
+            "u": 0.2734374953433871,
+            "v": 0.7246093703433871
+          },
+          {
+            "x": -0.6349999904632568,
+            "y": 0.6000000238418579,
+            "z": 0.0,
+            "u": 0.29101562686264515,
+            "v": 0.7246093703433871
+          },
+          {
+            "x": -0.7450000047683716,
+            "y": 0.5899999737739563,
+            "z": 0.0,
+            "u": 0.2695312490686774,
+            "v": 0.7265625051222742
+          },
+          {
+            "x": -2.0850000381469727,
+            "y": 0.7699999809265137,
+            "z": 0.0,
+            "u": 0.007812492549419403,
+            "v": 0.6914062537252903
+          },
+          {
+            "x": -0.7450000047683716,
+            "y": 0.5099999904632568,
+            "z": 0.0,
+            "u": 0.2695312490686774,
+            "v": 0.7421875018626451
+          },
+          {
+            "x": 1.8949999809265137,
+            "y": -0.20000000298023224,
+            "z": 0.0,
+            "u": 0.7851562462747097,
+            "v": 0.8808593755820766
+          },
+          {
+            "x": 1.8849999904632568,
+            "y": -0.20000000298023224,
+            "z": 0.0,
+            "u": 0.7832031231373549,
+            "v": 0.8808593755820766
+          },
+          {
+            "x": 1.875,
+            "y": -0.2199999988079071,
+            "z": 0.0,
+            "u": 0.78125,
+            "v": 0.8847656247671694
+          },
+          {
+            "x": 1.8949999809265137,
+            "y": -0.20000000298023224,
+            "z": 0.0,
+            "u": 0.7851562462747097,
+            "v": 0.8808593755820766
+          },
+          {
+            "x": 1.9049999713897705,
+            "y": -0.2199999988079071,
+            "z": 0.0,
+            "u": 0.7871093694120646,
+            "v": 0.8847656247671694
+          },
+          {
+            "x": 1.9149999618530273,
+            "y": -0.23999999463558197,
+            "z": 0.0,
+            "u": 0.7890624925494194,
+            "v": 0.8886718739522621
+          },
+          {
+            "x": 1.8949999809265137,
+            "y": -0.2199999988079071,
+            "z": 0.0,
+            "u": 0.7851562462747097,
+            "v": 0.8847656247671694
+          },
+          {
+            "x": 1.9149999618530273,
+            "y": -0.23999999463558197,
+            "z": 0.0,
+            "u": 0.7890624925494194,
+            "v": 0.8886718739522621
+          },
+          {
+            "x": 1.934999942779541,
+            "y": -0.25,
+            "z": 0.0,
+            "u": 0.7929687388241291,
+            "v": 0.890625
+          },
+          {
+            "x": 1.9249999523162842,
+            "y": -0.2199999988079071,
+            "z": 0.0,
+            "u": 0.7910156156867743,
+            "v": 0.8847656247671694
+          },
+          {
+            "x": 1.934999942779541,
+            "y": -0.25999999046325684,
+            "z": 0.0,
+            "u": 0.7929687388241291,
+            "v": 0.8925781231373549
+          },
+          {
+            "x": 2.0850000381469727,
+            "y": 0.550000011920929,
+            "z": 0.0,
+            "u": 0.8222656324505806,
+            "v": 0.7343749976716936
+          },
+          {
+            "x": 2.055000066757202,
+            "y": -0.6800000071525574,
+            "z": 0.0,
+            "u": 0.816406263038516,
+            "v": 0.9746093763969839
+          },
+          {
+            "x": 2.0850000381469727,
+            "y": -0.6499999761581421,
+            "z": 0.0,
+            "u": 0.8222656324505806,
+            "v": 0.9687499953433871
+          },
+          {
+            "x": 1.9450000524520874,
+            "y": -0.27000001072883606,
+            "z": 0.0,
+            "u": 0.7949218852445483,
+            "v": 0.8945312520954758
+          },
+          {
+            "x": 1.6649999618530273,
+            "y": -0.7699999809265137,
+            "z": 0.0,
+            "u": 0.7402343675494194,
+            "v": 0.9921874962747097
+          },
+          {
+            "x": -0.6349999904632568,
+            "y": 0.5099999904632568,
+            "z": 0.0,
+            "u": 0.29101562686264515,
+            "v": 0.7421875018626451
+          },
+          {
+            "x": -0.675000011920929,
+            "y": 0.49000000953674316,
+            "z": 0.0,
+            "u": 0.28320312267169356,
+            "v": 0.7460937481373549
+          },
+          {
+            "x": -0.7350000143051147,
+            "y": 0.49000000953674316,
+            "z": 0.0,
+            "u": 0.2714843722060323,
+            "v": 0.7460937481373549
+          },
+          {
+            "x": -2.0850000381469727,
+            "y": -0.7699999809265137,
+            "z": 0.0,
+            "u": 0.007812492549419403,
+            "v": 0.9921874962747097
+          }
+        ],
+        "indices": [
+          5,
+          3,
+          24,
+          1,
+          24,
+          3,
+          23,
+          24,
+          1,
+          2,
+          23,
+          1,
+          22,
+          23,
+          2,
+          16,
+          14,
+          20,
+          21,
+          8,
+          18,
+          12,
+          18,
+          8,
+          13,
+          18,
+          12,
+          16,
+          18,
+          13,
+          20,
+          18,
+          16,
+          25,
+          4,
+          21,
+          24,
+          21,
+          4,
+          5,
+          24,
+          4,
+          23,
+          21,
+          24,
+          22,
+          21,
+          23,
+          2,
+          21,
+          22,
+          0,
+          21,
+          2,
+          17,
+          21,
+          0,
+          8,
+          21,
+          17,
+          7,
+          8,
+          17,
+          9,
+          7,
+          17,
+          10,
+          9,
+          17,
+          15,
+          10,
+          17,
+          14,
+          15,
+          17,
+          20,
+          14,
+          17,
+          18,
+          20,
+          17,
+          19,
+          18,
+          17,
+          13,
+          11,
+          16,
+          14,
+          16,
+          11,
+          11,
+          15,
+          14,
+          13,
+          12,
+          11,
+          6,
+          9,
+          10,
+          6,
+          7,
+          9,
+          8,
+          7,
+          6,
+          0,
+          1,
+          4,
+          3,
+          4,
+          1,
+          5,
+          4,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/plants/caltrop/firecaltrop/Caltrop_body2.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 4.0,
+        "width": 417.0,
+        "height": 154.0,
+        "yTop": 354.0
+      },
+      "logicalSize": {
+        "width": 417.0,
+        "height": 154.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    }
+  },
+  "extraSpriteGuids": {},
+  "anchors": {
+    "shadow": {
+      "path": "Shadow",
+      "x": 0.0,
+      "y": 0.3432,
+      "relativeToRuntimeRoot": true
+    }
+  },
+  "visualBounds": {
+    "minX": -0.688050012588501,
+    "maxX": 0.688050012588501,
+    "minY": 0.0033000062942504793,
+    "maxY": 0.5379000066
+  },
+  "clips": {
+    "idle": {
+      "name": "idle",
+      "duration": 2.0,
+      "additiveReferencePoseTime": 0.0,
+      "hasAdditiveReferencePose": false,
+      "loop": true,
+      "sourceSampleRate": 60.0,
+      "curves": [
+        {
+          "kind": "euler",
+          "path": "Caltrop_body/Caltrop_horn1",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": "-Infinity",
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 10.577
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": "-Infinity",
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 2.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Caltrop_body/Caltrop_horn1"
+        },
+        {
+          "kind": "euler",
+          "path": "Caltrop_body/Caltrop_horn2",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": "-Infinity",
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 12.608
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -3.8146973e-06
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": "-Infinity",
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 2.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 3.8146973e-06
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Caltrop_body/Caltrop_horn2"
+        },
+        {
+          "kind": "euler",
+          "path": "Caltrop_body/Caltrop_horn3",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": "-Infinity",
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -9.971
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 1.9073486e-06
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": "-Infinity",
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 2.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -1.9073486e-06
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Caltrop_body/Caltrop_horn3"
+        },
+        {
+          "kind": "euler",
+          "path": "Caltrop_body/Caltrop_horn4",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": "-Infinity",
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -10.666
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": "-Infinity",
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 2.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Caltrop_body/Caltrop_horn4"
+        },
+        {
+          "kind": "position",
+          "path": "Caltrop_body",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.807,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.719,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 2.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.807,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Caltrop_body"
+        },
+        {
+          "kind": "position",
+          "path": "Caltrop_body/Caltrop_horn1",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": -1.2999997,
+                "y": 0.120000005,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "x": -1.369,
+                "y": 0.07,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 1.4901161e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 2.0,
+              "value": {
+                "x": -1.2999997,
+                "y": 0.120000005,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": -1.4901161e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Caltrop_body/Caltrop_horn1"
+        },
+        {
+          "kind": "position",
+          "path": "Caltrop_body/Caltrop_horn2",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": -0.3800002,
+                "y": 0.35000002,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "x": -0.415,
+                "y": 0.35000005,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 2.0,
+              "value": {
+                "x": -0.3800002,
+                "y": 0.35000002,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Caltrop_body/Caltrop_horn2"
+        },
+        {
+          "kind": "position",
+          "path": "Caltrop_body/Caltrop_horn3",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.5499999,
+                "y": 0.3000001,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "x": 0.636,
+                "y": 0.30000007,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 2.0,
+              "value": {
+                "x": 0.5499999,
+                "y": 0.3000001,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Caltrop_body/Caltrop_horn3"
+        },
+        {
+          "kind": "position",
+          "path": "Caltrop_body/Caltrop_horn4",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 1.2899998,
+                "y": -0.01000011,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "x": 1.368,
+                "y": -0.010000125,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 2.0,
+              "value": {
+                "x": 1.2899998,
+                "y": -0.01000011,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Caltrop_body/Caltrop_horn4"
+        },
+        {
+          "kind": "scale",
+          "path": "Caltrop_body",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.05,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 1.0,
+              "value": {
+                "x": 1.0346875,
+                "y": 0.9125,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 2.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.05,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Caltrop_body"
+        }
+      ],
+      "events": []
+    },
+    "attack": {
+      "name": "attack",
+      "duration": 0.6666667,
+      "additiveReferencePoseTime": 0.0,
+      "hasAdditiveReferencePose": false,
+      "loop": false,
+      "sourceSampleRate": 60.0,
+      "curves": [
+        {
+          "kind": "euler",
+          "path": "Caltrop_body/Caltrop_horn1",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Caltrop_body/Caltrop_horn1"
+        },
+        {
+          "kind": "euler",
+          "path": "Caltrop_body/Caltrop_horn2",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Caltrop_body/Caltrop_horn2"
+        },
+        {
+          "kind": "euler",
+          "path": "Caltrop_body/Caltrop_horn3",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Caltrop_body/Caltrop_horn3"
+        },
+        {
+          "kind": "euler",
+          "path": "Caltrop_body/Caltrop_horn4",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Caltrop_body/Caltrop_horn4"
+        },
+        {
+          "kind": "position",
+          "path": "Caltrop_body",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.0,
+                "y": 0.807,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.33333334,
+              "value": {
+                "x": 0.0,
+                "y": 1.0,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": -1.0353328e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": 0.0,
+                "y": 0.807,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 1.0353328e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Caltrop_body"
+        },
+        {
+          "kind": "position",
+          "path": "Caltrop_body/Caltrop_horn1",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": -1.2999997,
+                "y": 0.120000005,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.33333334,
+              "value": {
+                "x": -1.2999997,
+                "y": 0.17,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": -2.682209e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": -1.2999997,
+                "y": 0.120000005,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 2.682209e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Caltrop_body/Caltrop_horn1"
+        },
+        {
+          "kind": "position",
+          "path": "Caltrop_body/Caltrop_horn2",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": -0.3800002,
+                "y": 0.35000002,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.33333334,
+              "value": {
+                "x": -0.3800002,
+                "y": 0.392,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": -2.253054e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": -0.3800002,
+                "y": 0.35000002,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 2.253054e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Caltrop_body/Caltrop_horn2"
+        },
+        {
+          "kind": "position",
+          "path": "Caltrop_body/Caltrop_horn3",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 0.5499999,
+                "y": 0.3000001,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.33333334,
+              "value": {
+                "x": 0.5499999,
+                "y": 0.367,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": -3.5941554e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": 0.5499999,
+                "y": 0.3000001,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 3.5941554e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Caltrop_body/Caltrop_horn3"
+        },
+        {
+          "kind": "position",
+          "path": "Caltrop_body/Caltrop_horn4",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 1.2899998,
+                "y": -0.01000011,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.33333334,
+              "value": {
+                "x": 1.2899998,
+                "y": 0.057,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": -3.594166e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": "-Infinity",
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": 1.2899998,
+                "y": -0.01000011,
+                "z": 0.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 3.594166e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Caltrop_body/Caltrop_horn4"
+        },
+        {
+          "kind": "scale",
+          "path": "Caltrop_body",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.05,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.33333334,
+              "value": {
+                "x": 0.8671875,
+                "y": 1.3274297,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 7.124618e-08,
+                "y": 1.6906657e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": 1.0,
+                "y": 1.05,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": -7.124618e-08,
+                "y": -1.6906657e-07,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Caltrop_body"
+        },
+        {
+          "kind": "scale",
+          "path": "Caltrop_body/Caltrop_horn2",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.33333334,
+              "value": {
+                "x": 0.8875,
+                "y": 1.0875,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": -9.859602e-08,
+                "y": -4.6938645e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 9.859602e-08,
+                "y": 4.6938645e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Caltrop_body/Caltrop_horn2"
+        },
+        {
+          "kind": "scale",
+          "path": "Caltrop_body/Caltrop_horn3",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.33333334,
+              "value": {
+                "x": 0.9375,
+                "y": 1.1,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 3.3527613e-08,
+                "y": -5.3644197e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": -3.3527613e-08,
+                "y": 5.3644197e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Caltrop_body/Caltrop_horn3"
+        },
+        {
+          "kind": "scale",
+          "path": "Caltrop_body/Caltrop_horn4",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.33333334,
+              "value": {
+                "x": 0.925,
+                "y": 1.15,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 4.023313e-08,
+                "y": -8.046626e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": -4.023313e-08,
+                "y": 8.046626e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Caltrop_body/Caltrop_horn4"
+        },
+        {
+          "kind": "scale",
+          "path": "Caltrop_body/Caltrop_horn1",
+          "keys": [
+            {
+              "time": 0.0,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.33333334,
+              "value": {
+                "x": 0.9,
+                "y": 1.0875,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": 5.3644197e-08,
+                "y": -4.6938645e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": "-Infinity"
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            },
+            {
+              "time": 0.6666667,
+              "value": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+              },
+              "inSlope": {
+                "x": -5.3644197e-08,
+                "y": 4.6938645e-08,
+                "z": 0.0
+              },
+              "outSlope": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              "weightedMode": 0.0,
+              "inWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              },
+              "outWeight": {
+                "x": 0.33333334,
+                "y": 0.33333334,
+                "z": 0.33333334
+              }
+            }
+          ],
+          "preInfinity": 2,
+          "postInfinity": 2,
+          "sourceBindingPath": "Caltrop_body/Caltrop_horn1"
+        }
+      ],
+      "events": [
+        {
+          "time": 0.33333334,
+          "functionName": "AnimAttack",
+          "intParameter": 0,
+          "floatParameter": 0.0,
+          "stringParameter": ""
+        }
+      ]
+    }
+  },
+  "controller": {
+    "states": [
+      {
+        "id": 1102730242686860875,
+        "name": "idle",
+        "clip": "idle",
+        "speed": 1.0,
+        "speedParameterActive": true,
+        "speedParameter": "Speed"
+      },
+      {
+        "id": 1102618682377417806,
+        "name": "attack",
+        "clip": "attack",
+        "speed": 1.0,
+        "speedParameterActive": true,
+        "speedParameter": "Speed"
+      }
+    ],
+    "layers": [
+      {
+        "name": "Base Layer",
+        "blendingMode": 0,
+        "defaultState": 1102730242686860875,
+        "states": [
+          1102730242686860875,
+          1102618682377417806
+        ],
+        "defaultWeight": 0.0
+      }
+    ],
+    "serializedController": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!91 &9100000\nAnimatorController:\n  serializedVersion: 5\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Caltrop\n  m_AnimatorParameters:\n  - m_Name: Speed\n    m_Type: 1\n    m_DefaultFloat: 1\n    m_DefaultInt: 0\n    m_DefaultBool: 0\n    m_Controller: {fileID: 9100000}\n  - m_Name: attack\n    m_Type: 9\n    m_DefaultFloat: 0\n    m_DefaultInt: 0\n    m_DefaultBool: 0\n    m_Controller: {fileID: 9100000}\n  m_AnimatorLayers:\n  - serializedVersion: 5\n    m_Name: Base Layer\n    m_StateMachine: {fileID: 1107709254077376921}\n    m_Mask: {fileID: 0}\n    m_Motions: []\n    m_Behaviours: []\n    m_BlendingMode: 0\n    m_SyncedLayerIndex: -1\n    m_DefaultWeight: 0\n    m_IKPass: 0\n    m_SyncedLayerAffectsTiming: 0\n    m_Controller: {fileID: 9100000}\n--- !u!1107 &1107709254077376921\nAnimatorStateMachine:\n  serializedVersion: 6\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Base Layer\n  m_ChildStates:\n  - m_State: {fileID: 1102730242686860875}\n    m_Position: {x: 0, y: 0, z: 0}\n  - m_State: {fileID: 1102618682377417806}\n    m_Position: {x: 250, y: 0, z: 0}\n  m_ChildStateMachines: []\n  m_AnyStateTransitions: []\n  m_EntryTransitions: []\n  m_StateMachineTransitions: {}\n  m_StateMachineBehaviours: []\n  m_AnyStatePosition: {x: 0, y: -100, z: 0}\n  m_EntryPosition: {x: 250, y: -100, z: 0}\n  m_ExitPosition: {x: 500, y: -100, z: 0}\n  m_ParentStateMachinePosition: {x: 0, y: -200, z: 0}\n  m_DefaultState: {fileID: 1102730242686860875}\n--- !u!1102 &1102730242686860875\nAnimatorState:\n  serializedVersion: 6\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: idle\n  m_Speed: 1\n  m_CycleOffset: 0\n  m_Transitions:\n  - {fileID: 1101724804207875695}\n  m_StateMachineBehaviours: []\n  m_Position: {x: 0, y: 0, z: 0}\n  m_IKOnFeet: 0\n  m_WriteDefaultValues: 1\n  m_Mirror: 0\n  m_SpeedParameterActive: 1\n  m_MirrorParameterActive: 0\n  m_CycleOffsetParameterActive: 0\n  m_TimeParameterActive: 0\n  m_Motion: {fileID: 7400000, guid: eac97a96afc344a47b6c9005af64845f, type: 2}\n  m_Tag:\n  m_SpeedParameter: Speed\n  m_MirrorParameter:\n  m_CycleOffsetParameter:\n  m_TimeParameter:\n--- !u!1101 &1101724804207875695\nAnimatorStateTransition:\n  serializedVersion: 3\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name:\n  m_Conditions:\n  - m_ConditionMode: 1\n    m_ConditionEvent: attack\n    m_EventTreshold: 0\n  m_DstStateMachine: {fileID: 0}\n  m_DstState: {fileID: 1102618682377417806}\n  m_Solo: 0\n  m_Mute: 0\n  m_IsExit: 0\n  m_TransitionDuration: 0.25\n  m_TransitionOffset: 0\n  m_ExitTime: 0.75\n  m_HasExitTime: 0\n  m_HasFixedDuration: 1\n  m_InterruptionSource: 0\n  m_OrderedInterruption: 1\n  m_CanTransitionToSelf: 1\n--- !u!1102 &1102618682377417806\nAnimatorState:\n  serializedVersion: 6\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: attack\n  m_Speed: 1\n  m_CycleOffset: 0\n  m_Transitions:\n  - {fileID: 1101703437598541787}\n  m_StateMachineBehaviours: []\n  m_Position: {x: 250, y: 0, z: 0}\n  m_IKOnFeet: 0\n  m_WriteDefaultValues: 1\n  m_Mirror: 0\n  m_SpeedParameterActive: 1\n  m_MirrorParameterActive: 0\n  m_CycleOffsetParameterActive: 0\n  m_TimeParameterActive: 0\n  m_Motion: {fileID: 7400000, guid: bce2b29e3db0107458556f8350110545, type: 2}\n  m_Tag:\n  m_SpeedParameter: Speed\n  m_MirrorParameter:\n  m_CycleOffsetParameter:\n  m_TimeParameter:\n--- !u!1101 &1101703437598541787\nAnimatorStateTransition:\n  serializedVersion: 3\n  m_ObjectHideFlags: 1\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name:\n  m_Conditions: []\n  m_DstStateMachine: {fileID: 0}\n  m_DstState: {fileID: 1102730242686860875}\n  m_Solo: 0\n  m_Mute: 0\n  m_IsExit: 0\n  m_TransitionDuration: 0.25\n  m_TransitionOffset: 0\n  m_ExitTime: 0.75\n  m_HasExitTime: 1\n  m_HasFixedDuration: 1\n  m_InterruptionSource: 0\n  m_OrderedInterruption: 1\n  m_CanTransitionToSelf: 1\n"
+  },
+  "nonRenderingComponents": [
+    {
+      "typeId": 61,
+      "fileId": 61709867586078768,
+      "serializedComponent": "BoxCollider2D:\n  serializedVersion: 2\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1709254077376921}\n  m_Enabled: 1\n  m_Density: 1\n  m_Material: {fileID: 0}\n  m_IncludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_ExcludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_LayerOverridePriority: 0\n  m_ForceSendLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_ForceReceiveLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_ContactCaptureLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_CallbackLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_IsTrigger: 1\n  m_UsedByEffector: 0\n  m_UsedByComposite: 0\n  m_Offset: {x: -0.1688335, y: 1.8571627}\n  m_SpriteTilingProperty:\n    border: {x: 0, y: 0, z: 0, w: 0}\n    pivot: {x: 0, y: 0}\n    oldSize: {x: 0, y: 0}\n    newSize: {x: 0, y: 0}\n    adaptiveTilingThreshold: 0\n    drawMode: 0\n    adaptiveTiling: 0\n  m_AutoTiling: 0\n  m_Size: {x: 3.9775991, y: 3.67063}\n  m_EdgeRadius: 0\n"
+    },
+    {
+      "typeId": 61,
+      "fileId": 61044625135789424,
+      "serializedComponent": "BoxCollider2D:\n  serializedVersion: 2\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1709254077376921}\n  m_Enabled: 1\n  m_Density: 1\n  m_Material: {fileID: 0}\n  m_IncludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_ExcludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_LayerOverridePriority: 0\n  m_ForceSendLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_ForceReceiveLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_ContactCaptureLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_CallbackLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_IsTrigger: 1\n  m_UsedByEffector: 0\n  m_UsedByComposite: 0\n  m_Offset: {x: -0.13582975, y: 0.8902101}\n  m_SpriteTilingProperty:\n    border: {x: 0, y: 0, z: 0, w: 0}\n    pivot: {x: 0, y: 0}\n    oldSize: {x: 0, y: 0}\n    newSize: {x: 0, y: 0}\n    adaptiveTilingThreshold: 0\n    drawMode: 0\n    adaptiveTiling: 0\n  m_AutoTiling: 0\n  m_Size: {x: 2.7268167, y: 1.4911505}\n  m_EdgeRadius: 0\n"
+    },
+    {
+      "typeId": 114,
+      "fileId": 114589667821646929,
+      "serializedComponent": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1709254077376921}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: d40aa0bb9b1085ae0cfb145626afc3e4, type: 3}\n  m_Name:\n  m_EditorClassIdentifier:\n  mouseCollider: {fileID: 0}\n  thePlantMaxHealth: 300\n  thePlantHealth: 300\n  attackDamage: 20\n  thePlantAttackInterval: 1\n  thePlantProduceInterval: 0\n  isLily: 0\n  invincible: 0\n  isShort: 1\n  board: {fileID: 0}\n  pumpkin: {fileID: 0}\n  shadow: {fileID: 0}\n  startPos: {x: 0, y: 0, z: 0}\n  thePlantColumn: 0\n  thePlantRow: 0\n  magnetCount: 0\n  theLevel: 0\n  thePlantSpeed: 1\n  thePlantAttackCountDown: 0\n  thePlantProduceCountDown: 0\n  attributeCountdown: 0\n  lightCountDown: 0\n  flashCountDown: 0\n  wheatTime: 0\n  brightness: 1\n  lastTakeDamgeTime: 0\n  disappearTime: 0\n  isFlashing: 0\n  isFromWheat: 0\n  alwaysLightUp: 0\n  isCrashed: 0\n  melonSputter: 0\n  dieMeansLose: 0\n  isGray: 0\n  isConnected: 0\n  keepShooting: 0\n  waitingDestory: 0\n  targetBox: {x: 0, y: 0}\n  moveTime: 0\n  timers:\n  - 0\n  - 0\n  - 0\n  disableCount: 0\n  attributeCount: 0\n  puffPlace: 0\n  baseLayer: 0\n  currentLightLevel: 0\n  p: 4\n  thePlantStage: 0\n  thePlantType: 0\n  theLilyType: -1\n  firstParent: -1\n  secondParent: -1\n  zombieLayer:\n    serializedVersion: 2\n    m_Bits: 0\n  plantLayer:\n    serializedVersion: 2\n    m_Bits: 0\n  theStatus: 0\n  next: {fileID: 0}\n  pre: {fileID: 0}\n  bulletLayer:\n    serializedVersion: 2\n    m_Bits: 0\n  plantTag:\n    flyingPlant: 0\n    hardLandPlant: 0\n    waterPlant: 0\n    pumpkinPlant: 0\n    lanternPlant: 0\n    smallLanternPlant: 0\n    puffPlant: 0\n    nutPlant: 0\n    tallNutPlant: 0\n    potatoPlant: 0\n    caltropPlant: 0\n    tanglekelpPlant: 0\n    magnetPlant: 0\n    potPlant: 0\n    doubleBoxPlant: 0\n    spickRockPlant: 0\n    icePlant: 0\n    firePlant: 0\n  anim: {fileID: 0}\n  healthText: {fileID: 0}\n  healthTextShadow: {fileID: 0}\n  levelIcon: {fileID: 0}\n  targetPlant: {fileID: 0}\n  targetZombie: {fileID: 0}\n  falling: 0\n  regeneration: 0\n  shoot: {fileID: 0}\n  connectPlant: {fileID: 0}\n"
+    }
+  ],
+  "colliders": [
+    {
+      "type": "box",
+      "node": 0,
+      "fileId": 61709867586078768,
+      "enabled": true,
+      "trigger": true,
+      "offset": {
+        "x": -0.1688335,
+        "y": 1.8571627
+      },
+      "size": {
+        "x": 3.9775991,
+        "y": 3.67063
+      }
+    },
+    {
+      "type": "box",
+      "node": 0,
+      "fileId": 61044625135789424,
+      "enabled": true,
+      "trigger": true,
+      "offset": {
+        "x": -0.13582975,
+        "y": 0.8902101
+      },
+      "size": {
+        "x": 2.7268167,
+        "y": 1.4911505
+      }
+    }
+  ],
+  "ignoredBindings": [],
+  "omittedInactiveNodes": [],
+  "spritePrefix": null,
+  "unusedSpriteBonesExplicitlyAllowed": false,
+  "sources": [
+    {
+      "path": "Resources/plants/caltrop/attack.anim",
+      "sha256": "83edd3e3cdcdafcae67cb12bd5df8dc8bc314ad7a5c78714b08e670eba72d736"
+    },
+    {
+      "path": "Resources/plants/caltrop/attack.anim.meta",
+      "sha256": "9a38fe1cc98c256bf44f749fbc0b01032ddf45ced2d383066b8a13b11a3ce504"
+    },
+    {
+      "path": "Resources/plants/caltrop/Caltrop.controller",
+      "sha256": "77802c0966fdf8e75cc43148a9844e275572c6e37a18d7d4e0f895a6505f985e"
+    },
+    {
+      "path": "Resources/plants/caltrop/Caltrop.controller.meta",
+      "sha256": "f7b991b3fe58e8ecf6642d84d3ebfa875b415b777105ac189e03beaea0b9feab"
+    },
+    {
+      "path": "Resources/plants/caltrop/firecaltrop/Caltrop_body.asset",
+      "sha256": "8bcb25800d479ba8b3555220215dc0c568a60e5acce6d381702b00af91aafa92"
+    },
+    {
+      "path": "Resources/plants/caltrop/firecaltrop/Caltrop_body.asset.meta",
+      "sha256": "71c19bd3efba0efc0f403c4df0593c8a16e2865978b4f78eb74dea8fa4c2355f"
+    },
+    {
+      "path": "Resources/plants/caltrop/firecaltrop/Caltrop_body2.asset",
+      "sha256": "2676d883e375de0a865a7ba47379f5d229057ec016948ed8a2f09a05156b81b8"
+    },
+    {
+      "path": "Resources/plants/caltrop/firecaltrop/Caltrop_body2.asset.meta",
+      "sha256": "45301c255acce6e3d3d2d492648a2c2a31d1f5c1a5d33dffe7d7f53be5afe4f0"
+    },
+    {
+      "path": "Resources/plants/caltrop/firecaltrop/Caltrop_horn1.asset",
+      "sha256": "04fa1a6f36eb01942f1327e3f4425c3047bf651f94cc419e6812214a0a01c1b3"
+    },
+    {
+      "path": "Resources/plants/caltrop/firecaltrop/Caltrop_horn1.asset.meta",
+      "sha256": "1bc4d3374c4f57daabdb248b1a41113a46d0904e321ecdb97497b7f4ab201085"
+    },
+    {
+      "path": "Resources/plants/caltrop/firecaltrop/Caltrop_horn2.asset",
+      "sha256": "a6b9039661a18acf2c0a41a15ea180a377421b63238fa1984fff91e3435705e9"
+    },
+    {
+      "path": "Resources/plants/caltrop/firecaltrop/Caltrop_horn2.asset.meta",
+      "sha256": "f87ffd30f54c1a1b9caa3863385b8dd7d81a8bf4a6055a43ea0dcaee77db8582"
+    },
+    {
+      "path": "Resources/plants/caltrop/firecaltrop/Caltrop_horn3.asset",
+      "sha256": "aeb81ccb90d11cb84806c0aaf0429566dc6cc284196c80a85fc849d58bbb8f3b"
+    },
+    {
+      "path": "Resources/plants/caltrop/firecaltrop/Caltrop_horn3.asset.meta",
+      "sha256": "5b13d3a8db42fa8bc36ca439833e26fdadaebfb71727c4cf4c2e09f3a1099538"
+    },
+    {
+      "path": "Resources/plants/caltrop/firecaltrop/Caltrop_horn4.asset",
+      "sha256": "42d96967e92cd05689f5f558f980c18551ebc5eb338c75b8cf4946eae0bdfeb4"
+    },
+    {
+      "path": "Resources/plants/caltrop/firecaltrop/Caltrop_horn4.asset.meta",
+      "sha256": "907b0bfb272e5316f87fe116ea7f7bc7e332700e074344b841b755c239f868cf"
+    },
+    {
+      "path": "Resources/plants/caltrop/firecaltrop/FireCaltrop.png",
+      "sha256": "464fc75057c0e39c2788c2ce29e89ab2b6cd08c79f91ff7c3aae022141bc6429"
+    },
+    {
+      "path": "Resources/plants/caltrop/firecaltrop/FireCaltrop.png.meta",
+      "sha256": "48cc5dad8822a05bd9f737267dea175145eb6af55909033d01b11c24fdf48a49"
+    },
+    {
+      "path": "Resources/plants/caltrop/firecaltrop/FireCaltropPrefab.prefab",
+      "sha256": "325d7aabe155ed326c0039dea0b5909c6b0f94915692ac941eedacc26a5fdb32"
+    },
+    {
+      "path": "Resources/plants/caltrop/idle.anim",
+      "sha256": "6c642ed6c3ccd60eaccfedd2937251dcfa9853bb5cd132773cedee01e7c3141f"
+    },
+    {
+      "path": "Resources/plants/caltrop/idle.anim.meta",
+      "sha256": "4cffc8a926caed06cb92338e40927f3aa8d2aaf11ebb98a17e8f2e158129cea4"
+    }
+  ],
+  "deferredComponents": [],
+  "validation": "Exported source data. Native rendering and source-runtime comparison are separate verification steps."
+}

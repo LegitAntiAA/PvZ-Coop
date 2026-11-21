@@ -1,0 +1,3653 @@
+{
+  "schema": 1,
+  "language": "ru",
+  "sourceVersion": "Fusion 2.3.1",
+  "indexConvention": "zero-based stringliteral.json index; Ghidra StringLiteral_N uses N-1",
+  "sources": [
+    {
+      "path": "GameAssembly.dll",
+      "sha256": "b19cfc30b2061514689a93191a979e76335dd02f5c12e550e1bb62de9578b94f"
+    },
+    {
+      "path": "il2cppdumper/stringliteral.json",
+      "sha256": "de8999374bc97fa6bfcd2b2f38ee9cf7881190cd91922f849e051f5f7f1e254d"
+    },
+    {
+      "path": "analysis/sections/reference_cn_1.md",
+      "sha256": "a0c8644dc3b31185449773258a16a3c893962ec9930bafd68a9ab9a2843ba2bd"
+    },
+    {
+      "path": "analysis/sections/reference_cn_2.md",
+      "sha256": "31e6d909b365a339f93a4323e8506aac28d403d7cc6426b1cf437652e2b190ce"
+    }
+  ],
+  "counts": {
+    "tableRows": 547,
+    "bilingualRows": 489,
+    "exactIndexedBilingualRows": 335,
+    "sourceVerifiedRows": 305,
+    "importedEntries": 300,
+    "rejectedRows": 247,
+    "sourceTextLookupEntries": 300,
+    "sourceTextCollisions": 0,
+    "qualityFlaggedEntries": 4
+  },
+  "translationQuality": "Existing semantic translations; source identity checked, human linguistic review not performed.",
+  "almanacCoverage": "Not a translated plant/zombie almanac catalog.",
+  "entries": [
+    {
+      "literalId": 6238,
+      "source": "【僵尸血量获得大幅提升】任务目标：献祭你的全部究极加农炮\n任务奖励：解锁全部旅行词条",
+      "ru": "[HP зомби сильно выросли] Цель: пожертвуй все Ультимативные пушки. Награда: все перки Путешествия",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 88
+        }
+      ]
+    },
+    {
+      "literalId": 6282,
+      "source": "䷀一",
+      "ru": "[мусор-глиф]",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 113
+        }
+      ],
+      "qualityWarnings": [
+        "source_service_marker"
+      ]
+    },
+    {
+      "literalId": 6286,
+      "source": "一个格子里可以放3个小喷菇",
+      "ru": "В одну клетку помещаются 3 Малых Пыхтуна",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 114
+        }
+      ]
+    },
+    {
+      "literalId": 6290,
+      "source": "一菇管5路",
+      "ru": "Один гриб прикрывает 5 рядов",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 115
+        }
+      ]
+    },
+    {
+      "literalId": 6294,
+      "source": "一针见血：魔法猫尾草的基础攻击力x5",
+      "ru": "«Один точный укол»: базовый урон Кото-хвоста ×5",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 9
+        }
+      ]
+    },
+    {
+      "literalId": 6298,
+      "source": "一ꀀ",
+      "ru": "[мусор-глиф]",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 116
+        }
+      ],
+      "qualityWarnings": [
+        "source_service_marker"
+      ]
+    },
+    {
+      "literalId": 6310,
+      "source": "万籁俱寂：究极忧郁菇亡语伤害增加到1000000",
+      "ru": "«Тишина»: урон по смерти Ультимативного мрачного гриба = 1 000 000",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 10
+        }
+      ]
+    },
+    {
+      "literalId": 6314,
+      "source": "三三得九！",
+      "ru": "Трижды три — девять!",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 108
+        }
+      ]
+    },
+    {
+      "literalId": 6318,
+      "source": "三位一体：究极南瓜的僚机增加至3个",
+      "ru": "«Троица»: спутники Ультимативной тыквы ×3",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 11
+        }
+      ]
+    },
+    {
+      "literalId": 6326,
+      "source": "三叉戟僵尸现在随机挑选目标攻击",
+      "ru": "Зомби-трезубец выбирает цель случайно",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 12
+        }
+      ]
+    },
+    {
+      "literalId": 6334,
+      "source": "三尺之寒：提升究极大喷菇的冻结速度为3倍",
+      "ru": "«Стужа»: скорость заморозки Ультимативного гриба ×3",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 13
+        }
+      ]
+    },
+    {
+      "literalId": 6342,
+      "source": "上天入地",
+      "ru": "Небо и земля",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 106
+        }
+      ]
+    },
+    {
+      "literalId": 6350,
+      "source": "不使用坚果通关旅行生存",
+      "ru": "Пройди выживание-Путешествие без орехов",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 101
+        }
+      ]
+    },
+    {
+      "literalId": 6362,
+      "source": "不能吹走非僵尸",
+      "ru": "Сдуть можно только зомби",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 197
+        }
+      ]
+    },
+    {
+      "literalId": 6382,
+      "source": "不选词条通关旅行生存",
+      "ru": "Пройди выживание-Путешествие без перков",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 102
+        }
+      ]
+    },
+    {
+      "literalId": 6386,
+      "source": "与火共舞",
+      "ru": "Танцуй с огнём",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 103
+        }
+      ]
+    },
+    {
+      "literalId": 6390,
+      "source": "丑跳一定爆炸，且蓄力时间大幅降低",
+      "ru": "Урод-прыгун всегда взрывается, время подготовки сильно снижено",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 14
+        }
+      ]
+    },
+    {
+      "literalId": 6394,
+      "source": "两肋插刀：黑曜石高坚果会代替左右两株植物受伤",
+      "ru": "«Нож в спину»: Обсидиановый высокий орех принимает урон за соседей слева/справа",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 15
+        }
+      ]
+    },
+    {
+      "literalId": 6406,
+      "source": "中心爆破：究极大炮的中心点爆炸伤害x4",
+      "ru": "«Центральный подрыв»: урон в центре взрыва Ультимативной пушки ×4",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 16
+        }
+      ]
+    },
+    {
+      "literalId": 6422,
+      "source": "九死一生",
+      "ru": "Девять жизней на волоске",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 104
+        }
+      ]
+    },
+    {
+      "literalId": 6426,
+      "source": "事半功倍：降低究极窝炬生成窝瓜需要的子弹数至10",
+      "ru": "«Малой кровью»: О-факелу нужно 10 пуль для тыквы",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 17
+        }
+      ]
+    },
+    {
+      "literalId": 6430,
+      "source": "二爷战争",
+      "ru": "Война «вторых господ» (мем про газетчиков)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 105
+        }
+      ]
+    },
+    {
+      "literalId": 6434,
+      "source": "人多势众：幻灭菇爆炸时召唤额外的魅惑巨人僵尸和魅惑冰车",
+      "ru": "Сила в числе: взрыв Разочаровывающего гриба призывает гипнотизированных гигантов и зомбони",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 246
+        }
+      ]
+    },
+    {
+      "literalId": 6438,
+      "source": "人工智能：绿宝石伞现在可以自动开大，并解锁亚种红宝石伞",
+      "ru": "ИИ: Изумрудный зонт раскрывается сам; открыт подвид Рубиновый зонт",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 245
+        }
+      ]
+    },
+    {
+      "literalId": 6442,
+      "source": "人造太阳：太阳神卷心菜召唤的小太阳伤害x3",
+      "ru": "«Искусственное солнце»: урон малых солнц Капусты-солнцебога ×3",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 20
+        }
+      ]
+    },
+    {
+      "literalId": 6446,
+      "source": "他射的是樱桃炸弹吗？",
+      "ru": "Он стреляет вишнёвыми бомбами? (мем)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 120
+        }
+      ]
+    },
+    {
+      "literalId": 6450,
+      "source": "他看起来不好欺负",
+      "ru": "Его не назовёшь слабаком",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 121
+        }
+      ]
+    },
+    {
+      "literalId": 6454,
+      "source": "仙人掌+南瓜+三叶草",
+      "ru": "Кактус + Тыква + Клевер (рецепт-подсказка)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 122
+        }
+      ]
+    },
+    {
+      "literalId": 6462,
+      "source": "令一只僵尸中毒",
+      "ru": "Отравь зомби",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 111
+        }
+      ]
+    },
+    {
+      "literalId": 6478,
+      "source": "以爆制爆：究极忧郁菇免疫爆炸，每吸收10000点爆炸伤害将释放毁灭菇爆炸",
+      "ru": "«Взрыв на взрыв»: иммунитет к взрывам; каждые 10000 поглощённого взрывного урона — свой взрыв мрачного гриба",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 21
+        }
+      ]
+    },
+    {
+      "literalId": 6490,
+      "source": "任务目标：击杀地图右侧出现的武装巨人\n任务奖励：究极加农炮x1",
+      "ru": "Цель: убей Вооружённого гиганта справа. Награда: Ультимативная пушка ×1",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 76
+        }
+      ]
+    },
+    {
+      "literalId": 6494,
+      "source": "任务目标：击败地图右侧出现的武装巨人！\n任务奖励：究极樱桃战神x2",
+      "ru": "Цель: победи Вооружённого гиганта справа! Награда: Ультимативный Вишнёвый бог войны ×2",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 77
+        }
+      ]
+    },
+    {
+      "literalId": 6498,
+      "source": "任务目标：合成8个寒冰机枪\n任务奖励：手套无cd+究极窝炬+他的两个词条",
+      "ru": "Цель: собери 8 Ледяных пулемётов. Награда: перчатка без КД + Ультимативный О-факел + 2 его перка",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 78
+        }
+      ]
+    },
+    {
+      "literalId": 6502,
+      "source": "任务目标：在30秒内击杀100个僵尸\n任务奖励：解锁全部究极植物",
+      "ru": "Цель: убей 100 зомби за 30 сек. Награда: все ультимативные растения",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 79
+        }
+      ]
+    },
+    {
+      "literalId": 6506,
+      "source": "任务目标：在30秒内击杀50个僵尸\n任务奖励：究极加农炮x1",
+      "ru": "Цель: убей 50 зомби за 30 сек. Награда: Ультимативная пушка ×1",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 80
+        }
+      ]
+    },
+    {
+      "literalId": 6514,
+      "source": "任务目标：存储5000阳光\n任务奖励：樱桃南瓜x2+究极忧郁菇x1",
+      "ru": "Цель: накопи 5000 солнца. Награда: Вишнёвая тыква ×2 + Ультимативный Мрачный гриб ×1",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 82
+        }
+      ]
+    },
+    {
+      "literalId": 6518,
+      "source": "任务目标：存储5000阳光\n任务奖励：连连看词条和模仿者减cd词条",
+      "ru": "Цель: накопи 5000 солнца. Награда: перк «Лианлянкан» + перк снижения КД Имитатора",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 83
+        }
+      ]
+    },
+    {
+      "literalId": 6522,
+      "source": "任务目标：种植6个樱桃机枪射手\n任务奖励：解锁究极樱桃射手配方以及他的两个词条",
+      "ru": "Цель: посади 6 Вишнёвых пулемётчиков. Награда: рецепт Ультимативного вишнестрела + 2 перка",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 84
+        }
+      ]
+    },
+    {
+      "literalId": 6530,
+      "source": "任务目标：融合4个火炮\n任务奖励：浴火三线x2",
+      "ru": "Цель: собери 4 пушки. Награда: Огнерождённый трёхстрел ×2",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 86
+        }
+      ]
+    },
+    {
+      "literalId": 6534,
+      "source": "任务目标：融合4个焦黑三线\n任务奖励：浴火三线的配方和他的两个词条",
+      "ru": "Цель: собери 4 Обугленных трёхстрела. Награда: рецепт Огнерождённого трёхстрела + 2 перка",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 87
+        }
+      ]
+    },
+    {
+      "literalId": 6538,
+      "source": "众星之力：究极杨桃的子弹基础攻击力翻倍并且攻击力不再有上限",
+      "ru": "«Сила звёзд»: урон пуль Ультимативной звезды ×2, снят предел",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 22
+        }
+      ]
+    },
+    {
+      "literalId": 6546,
+      "source": "传说有些僵尸被刺红温了更容易受伤",
+      "ru": "Говорят, зомби, «раскалённые» шипами, получают больше урона",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 23
+        }
+      ]
+    },
+    {
+      "literalId": 6558,
+      "source": "余额不足，购买需要：10000",
+      "ru": "Недостаточно средств; цена 10000",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 74
+        }
+      ]
+    },
+    {
+      "literalId": 6566,
+      "source": "你为你的卡库新增了一种卡牌",
+      "ru": "В твою коллекцию карт добавлена новая карта",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 93
+        }
+      ]
+    },
+    {
+      "literalId": 6570,
+      "source": "你为你的花园找到了一株植物",
+      "ru": "Ты нашёл растение для своего сада",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 92
+        }
+      ]
+    },
+    {
+      "literalId": 6590,
+      "source": "你已经完成全部任务，祝你好运！",
+      "ru": "Все задачи выполнены. Удачи!",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 91
+        }
+      ]
+    },
+    {
+      "literalId": 6634,
+      "source": "使一株植物的光照等级大于10",
+      "ru": "Доведи уровень освещения растения до >10",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 113
+        }
+      ]
+    },
+    {
+      "literalId": 6638,
+      "source": "使用三线地刺对抗冰车",
+      "ru": "Останови зомбони тройными шипами",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 114
+        }
+      ]
+    },
+    {
+      "literalId": 6642,
+      "source": "使用五叶草吸引杨桃子弹",
+      "ru": "Притяни звёздные пули пятилистником",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 115
+        }
+      ]
+    },
+    {
+      "literalId": 6654,
+      "source": "使用大坚果对同一个僵尸造成20000伤害",
+      "ru": "Нанеси Большим орехом 20000 урона одному зомби",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 128
+        }
+      ]
+    },
+    {
+      "literalId": 6674,
+      "source": "使用窝炬生产窝瓜",
+      "ru": "Вырасти тыкву через О-факел",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 118
+        }
+      ]
+    },
+    {
+      "literalId": 6686,
+      "source": "使用菜伞弹射植物子弹",
+      "ru": "Отрази пули капустным зонтом",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 119
+        }
+      ]
+    },
+    {
+      "literalId": 6690,
+      "source": "使用豌豆、双发、裂荚、机枪来传递胆小菇的子弹",
+      "ru": "Передавай пули трусливого гриба через горох/двойной/расколотый/пулемёт",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 130
+        }
+      ]
+    },
+    {
+      "literalId": 6694,
+      "source": "使用超级伞赚钱",
+      "ru": "Заработай деньгами Супер-зонта",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 120
+        }
+      ]
+    },
+    {
+      "literalId": 6698,
+      "source": "使用阳光帝果释放保龄球",
+      "ru": "Выпусти боулинг Солнечным император-плодом",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 121
+        }
+      ]
+    },
+    {
+      "literalId": 6702,
+      "source": "使用阳光炸弹炸到10个僵尸",
+      "ru": "Подорви Солнечной бомбой 10 зомби",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 122
+        }
+      ]
+    },
+    {
+      "literalId": 6706,
+      "source": "使用阳光磁力菇生产铁器",
+      "ru": "Добудь железо Солнечным магнитным грибом",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 123
+        }
+      ]
+    },
+    {
+      "literalId": 6718,
+      "source": "使究极杨桃的子弹伤害超过1800",
+      "ru": "Превысь 1800 урона пулей Ультимативной звезды",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 131
+        }
+      ]
+    },
+    {
+      "literalId": 6722,
+      "source": "使魅惑坚果召唤黄金盲盒僵尸",
+      "ru": "Призови золотых «слепых ящиков» Гипно-орехом",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 125
+        }
+      ]
+    },
+    {
+      "literalId": 6766,
+      "source": "僵尸受到伤害x2，持续15秒！",
+      "ru": "Зомби получают ×2 урона, 15 сек!",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 146
+        }
+      ]
+    },
+    {
+      "literalId": 6774,
+      "source": "僵尸的冻结值上限会随着冻结次数的增加而增加",
+      "ru": "Предел заморозки растёт с каждым замораживанием",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 225
+        }
+      ]
+    },
+    {
+      "literalId": 6814,
+      "source": "元",
+      "ru": "юань (валюта)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 118
+        }
+      ]
+    },
+    {
+      "literalId": 6830,
+      "source": "全息制冷：卡牌冷却减半",
+      "ru": "«Голограмма-холод»: КД карт ÷2 (перк)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 295
+        }
+      ]
+    },
+    {
+      "literalId": 6834,
+      "source": "全是套娃",
+      "ru": "Сплошные матрёшки (мем-перк)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 296
+        }
+      ]
+    },
+    {
+      "literalId": 6842,
+      "source": "关卡编辑器",
+      "ru": "Редактор уровней",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 61
+        }
+      ]
+    },
+    {
+      "literalId": 6854,
+      "source": "兵贵神速：究极大炮的装填时间降为原来的1/3",
+      "ru": "«Скорость решает»: перезарядка Ультимативной пушки ÷3",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 24
+        }
+      ]
+    },
+    {
+      "literalId": 6858,
+      "source": "冒险模式：第{0}关",
+      "ru": "Приключение: уровень {0}",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 10
+        }
+      ]
+    },
+    {
+      "literalId": 6866,
+      "source": "冰桶挑战",
+      "ru": "Вызов: ведро со льдом",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 44
+        }
+      ]
+    },
+    {
+      "literalId": 6870,
+      "source": "冰淬火炼：黑曜石高坚果受到寒冰菇效果回血10000，火爆辣椒效果回满血",
+      "ru": "«Закалка»: обсидиановый орех лечится на 10000 от Ледяного гриба и полностью от Халапеньо",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 25
+        }
+      ]
+    },
+    {
+      "literalId": 6886,
+      "source": "冻住了",
+      "ru": "Заморожено!",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 181
+        }
+      ]
+    },
+    {
+      "literalId": 6890,
+      "source": "冻彻心扉：冰锥对冻结的单位造成伤害提升至10倍，并解锁亚种阳光机枪小喷菇",
+      "ru": "«Пронизывающий холод»: лёд по замороженным ×10; открыт подвид Солнечный пулемётный пыхтун",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 26
+        }
+      ]
+    },
+    {
+      "literalId": 6894,
+      "source": "凛风刺骨：究极大喷菇的攻击力x3",
+      "ru": "«Ледяной ветер»: урон Ультимативного гриба ×3",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 27
+        }
+      ]
+    },
+    {
+      "literalId": 6906,
+      "source": "分",
+      "ru": "мин (единица времени)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 68
+        }
+      ]
+    },
+    {
+      "literalId": 6914,
+      "source": "初见泳池！",
+      "ru": "Первая встреча с бассейном!",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 47
+        }
+      ]
+    },
+    {
+      "literalId": 6922,
+      "source": "力大砖飞：植物的爆炸樱桃子弹伤害x3",
+      "ru": "«Сила есть»: урон вишнёвых взрывных пуль ×3",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 28
+        }
+      ]
+    },
+    {
+      "literalId": 6930,
+      "source": "势不可挡！",
+      "ru": "Непреодолимо!",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 184
+        }
+      ]
+    },
+    {
+      "literalId": 6934,
+      "source": "势如破竹：冰锥可以无限穿透，小冰机和小光机的攻击力增加50%",
+      "ru": "«Пробивать как бамбук»: ледяные пули не теряют пробитие; +50% урона малым лёд-пулемёту и лёд-светилу",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 29
+        }
+      ]
+    },
+    {
+      "literalId": 6938,
+      "source": "勇往直前",
+      "ru": "Вперёд, без страха",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 185
+        }
+      ]
+    },
+    {
+      "literalId": 6942,
+      "source": "十旗挑战：坚如磐石",
+      "ru": "Вызов 10 флагов: Скала",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 16
+        }
+      ]
+    },
+    {
+      "literalId": 6946,
+      "source": "十旗挑战：屋顶",
+      "ru": "Вызов 10 флагов: Крыша",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 17
+        }
+      ]
+    },
+    {
+      "literalId": 6950,
+      "source": "十旗挑战：末世重生",
+      "ru": "Вызов 10 флагов: Возрождение апокалипсиса",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 18
+        }
+      ]
+    },
+    {
+      "literalId": 6954,
+      "source": "十旗挑战：植物僵尸",
+      "ru": "Вызов 10 флагов: Растения-зомби",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 19
+        }
+      ]
+    },
+    {
+      "literalId": 6958,
+      "source": "十旗挑战：泳池",
+      "ru": "Вызов 10 флагов: Бассейн",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 20
+        }
+      ]
+    },
+    {
+      "literalId": 6962,
+      "source": "十旗挑战：浓雾",
+      "ru": "Вызов 10 флагов: Густой туман",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 21
+        }
+      ]
+    },
+    {
+      "literalId": 6966,
+      "source": "十旗挑战：白天",
+      "ru": "Вызов 10 флагов: День",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 22
+        }
+      ]
+    },
+    {
+      "literalId": 6970,
+      "source": "十旗挑战：究极随机",
+      "ru": "Вызов 10 флагов: Ультимативная случайность",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 23
+        }
+      ]
+    },
+    {
+      "literalId": 6974,
+      "source": "十旗挑战：等价交换",
+      "ru": "Вызов 10 флагов: Эквивалентный обмен",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 24
+        }
+      ]
+    },
+    {
+      "literalId": 6978,
+      "source": "十旗挑战：等价交换2",
+      "ru": "Вызов 10 флагов: Эквивалентный обмен 2",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 25
+        }
+      ]
+    },
+    {
+      "literalId": 6982,
+      "source": "十旗挑战：胆小菇之梦",
+      "ru": "Вызов 10 флагов: Сон трусливого гриба",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 26
+        }
+      ]
+    },
+    {
+      "literalId": 6986,
+      "source": "十旗挑战：诸神",
+      "ru": "Вызов 10 флагов: Боги",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 27
+        }
+      ]
+    },
+    {
+      "literalId": 6990,
+      "source": "十旗挑战：超级传送带",
+      "ru": "Вызов 10 флагов: Супер-конвейер",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 28
+        }
+      ]
+    },
+    {
+      "literalId": 6994,
+      "source": "十旗挑战：随机僵尸",
+      "ru": "Вызов 10 флагов: Случайные зомби",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 29
+        }
+      ]
+    },
+    {
+      "literalId": 6998,
+      "source": "十旗挑战：随机植物",
+      "ru": "Вызов 10 флагов: Случайные растения",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 30
+        }
+      ]
+    },
+    {
+      "literalId": 7002,
+      "source": "十旗挑战：随机植物VS随机僵尸",
+      "ru": "Вызов 10 флагов: Случайные растения VS случайные зомби",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 33
+        }
+      ]
+    },
+    {
+      "literalId": 7006,
+      "source": "十旗挑战：黑夜",
+      "ru": "Вызов 10 флагов: Ночь",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 31
+        }
+      ]
+    },
+    {
+      "literalId": 7010,
+      "source": "十旗挑战：黑夜舞会",
+      "ru": "Вызов 10 флагов: Ночной бал",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 32
+        }
+      ]
+    },
+    {
+      "literalId": 7030,
+      "source": "卑鄙的低矮植物！",
+      "ru": "Подлые низкорослые растения!",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 188
+        }
+      ]
+    },
+    {
+      "literalId": 7034,
+      "source": "单枪匹马",
+      "ru": "Один в поле воин",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 186
+        }
+      ]
+    },
+    {
+      "literalId": 7038,
+      "source": "南瓜武装",
+      "ru": "Тыквенное вооружение",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 187
+        }
+      ]
+    },
+    {
+      "literalId": 7042,
+      "source": "压路机",
+      "ru": "Каток",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 255
+        }
+      ]
+    },
+    {
+      "literalId": 7046,
+      "source": "参战植物数量增加到{0}",
+      "ru": "Число боевых растений увеличено до {0}",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 165
+        }
+      ]
+    },
+    {
+      "literalId": 7050,
+      "source": "发现一株会弹射的玉米卷",
+      "ru": "Найден подбрасывающий кукурузный рулет",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 189
+        }
+      ]
+    },
+    {
+      "literalId": 7142,
+      "source": "只能在上半地图放植物",
+      "ru": "Растения можно ставить только на верхней половине карты",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 67
+        }
+      ]
+    },
+    {
+      "literalId": 7146,
+      "source": "只能融合小喷菇！",
+      "ru": "Скрещивать можно только Малый Пыхтун!",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 66
+        }
+      ]
+    },
+    {
+      "literalId": 7154,
+      "source": "可以让大嘴花立即吞咽",
+      "ru": "Хищник может сглотнуть немедленно",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 130
+        }
+      ]
+    },
+    {
+      "literalId": 7158,
+      "source": "可控核聚变：所有毁灭菇爆炸不留弹坑，并解锁亚种贪欲菇",
+      "ru": "«Управляемый синтез»: взрывы мрачных грибов без воронок; подвид «Гриб жадности»",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 31
+        }
+      ]
+    },
+    {
+      "literalId": 7174,
+      "source": "合理投资：词条刷新次数+2",
+      "ru": "Разумная инвестиция: +2 обновления перков",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 132
+        }
+      ]
+    },
+    {
+      "literalId": 7186,
+      "source": "向狙击豌豆售卖机枪来获得奖励",
+      "ru": "Продай пулемёт Снайперскому гороху за награду",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 133
+        }
+      ]
+    },
+    {
+      "literalId": 7194,
+      "source": "咖啡豆对这株植物似乎没有效果",
+      "ru": "Кофейное зерно на это растение не действует",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 134
+        }
+      ]
+    },
+    {
+      "literalId": 7198,
+      "source": "商店",
+      "ru": "Магазин",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 191
+        }
+      ]
+    },
+    {
+      "literalId": 7218,
+      "source": "在一个磁力系统中连接50个植物",
+      "ru": "Соедини 50 растений в одной магнитной системе",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 132
+        }
+      ]
+    },
+    {
+      "literalId": 7222,
+      "source": "在一局旅行模式中消耗一百万阳光",
+      "ru": "Потрать миллион солнца за забег Путешествия",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 133
+        }
+      ]
+    },
+    {
+      "literalId": 7238,
+      "source": "在没有腐化词条的情况下10秒击杀黑曜石巨人",
+      "ru": "Убей Обсидианового гиганта за 10 сек без перка «Порча»",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 134
+        }
+      ]
+    },
+    {
+      "literalId": 7246,
+      "source": "在现实世界40分钟内通关一局旅行",
+      "ru": "Пройди Путешествие за 40 минут реального времени",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 135
+        }
+      ]
+    },
+    {
+      "literalId": 7254,
+      "source": "在边路种植三线射手，使三线在本行发射2发子弹",
+      "ru": "Посади трёхстрел на краю, чтобы он стрелял 2 пули в своём ряду",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 136
+        }
+      ]
+    },
+    {
+      "literalId": 7294,
+      "source": "坚果融合后可以回满血哦",
+      "ru": "После фьюжна орех полностью восстанавливает HP",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 208
+        }
+      ]
+    },
+    {
+      "literalId": 7298,
+      "source": "坚果辊压机",
+      "ru": "Ореховый каток",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 254
+        }
+      ]
+    },
+    {
+      "literalId": 7302,
+      "source": "培养一个血量大于100万的超级机械坚果",
+      "ru": "Вырасти Супер-механический орех с HP > 1 000 000",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 137
+        }
+      ]
+    },
+    {
+      "literalId": 7306,
+      "source": "基洛夫免疫三叶草效果，且飞行速度加快",
+      "ru": "Киров иммунен к вертолётчику и летает быстрее",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 101
+        }
+      ]
+    },
+    {
+      "literalId": 7310,
+      "source": "基洛夫的僚机血量大幅增加",
+      "ru": "HP эскорта Кирова сильно увеличены",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 102
+        }
+      ]
+    },
+    {
+      "literalId": 7314,
+      "source": "塔防：冰天雪地",
+      "ru": "Tower defense: ледяные снега",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 49
+        }
+      ]
+    },
+    {
+      "literalId": 7322,
+      "source": "多多益善：升级金盆的消耗不会超过8000",
+      "ru": "«Чем больше, тем лучше»: улучшение золотого горшка ≤8000",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 32
+        }
+      ]
+    },
+    {
+      "literalId": 7326,
+      "source": "大",
+      "ru": "«Б» (шрифт/тикер)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 174
+        }
+      ]
+    },
+    {
+      "literalId": 7342,
+      "source": "大富翁：基于当前金钱数量增加摇钱火炬的子弹伤害比例，每1000增加2%",
+      "ru": "«Монополист»: урон пуль денежного факела +2% за каждые 1000 монет",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 33
+        }
+      ]
+    },
+    {
+      "literalId": 7346,
+      "source": "大招需要{0}金币",
+      "ru": "Супер-способность стоит {0} монет",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 167
+        }
+      ]
+    },
+    {
+      "literalId": 7370,
+      "source": "好运连连：摇钱三线火炬的子弹附带火焰豌豆一样的溅射效果",
+      "ru": "«Полоса удачи»: пули денежного трёхфакела дают осколочный эффект огненного гороха",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 34
+        }
+      ]
+    },
+    {
+      "literalId": 7378,
+      "source": "妙手回春：阳光帝果召唤消耗降低至200阳光",
+      "ru": "«Золотые руки»: призыв Солнечного император-плода стоит 200 солнца",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 35
+        }
+      ]
+    },
+    {
+      "literalId": 7382,
+      "source": "威武南瓜",
+      "ru": "Могучая тыква",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 171
+        }
+      ]
+    },
+    {
+      "literalId": 7386,
+      "source": "它怎么跑了？",
+      "ru": "Куда он побежал?! (мем)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 170
+        }
+      ]
+    },
+    {
+      "literalId": 7390,
+      "source": "守夜菇",
+      "ru": "Дозорный гриб",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 169
+        }
+      ]
+    },
+    {
+      "literalId": 7418,
+      "source": "将肥料撒到睡莲上",
+      "ru": "Насыпь удобрение на лилию",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 213
+        }
+      ]
+    },
+    {
+      "literalId": 7422,
+      "source": "小喷菇是黑夜里十分重要的植物",
+      "ru": "Малый Пыхтун очень важен ночью (туториал)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 175
+        }
+      ]
+    },
+    {
+      "literalId": 7426,
+      "source": "小心你没见过的僵尸！",
+      "ru": "Осторожно: незнакомые зомби!",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 176
+        }
+      ]
+    },
+    {
+      "literalId": 7430,
+      "source": "小荷才露尖尖角",
+      "ru": "«Лотос только показал кончик» (мем-название)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 177
+        }
+      ]
+    },
+    {
+      "literalId": 7443,
+      "source": "QQ弹弹！",
+      "ru": "«Пружинка!» (QQ-текстура)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 247
+        }
+      ]
+    },
+    {
+      "literalId": 7450,
+      "source": "尸愁之路！",
+      "ru": "Путь скорби зомби!",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 179
+        }
+      ]
+    },
+    {
+      "literalId": 7458,
+      "source": "尸王死亡的爆炸伤害不可被小丑南瓜等免疫",
+      "ru": "Взрыв при смерти Зомби-короля не блокируется тыквой-клоуном и т.п.",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 37
+        }
+      ]
+    },
+    {
+      "literalId": 7462,
+      "source": "尸王的冲刺间隔降低，且攻击力大幅增加",
+      "ru": "Зомби-король: чаще рывки, сильно больше урона",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 38
+        }
+      ]
+    },
+    {
+      "literalId": 7466,
+      "source": "巨人之怒",
+      "ru": "Гнев гиганта",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 302
+        }
+      ]
+    },
+    {
+      "literalId": 7474,
+      "source": "已开启全部词条",
+      "ru": "Все перки включены",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 163
+        }
+      ]
+    },
+    {
+      "literalId": 7486,
+      "source": "已经完成全部任务，解锁全部旅行词条，祝你好运！",
+      "ru": "Все задачи выполнены, все перки Путешествия открыты. Удачи!",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 90
+        }
+      ]
+    },
+    {
+      "literalId": 7558,
+      "source": "弱究可用",
+      "ru": "«Слабые ультимативные доступны» (настройка)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 200
+        }
+      ]
+    },
+    {
+      "literalId": 7562,
+      "source": "弹射起步：绿宝石伞可以让子弹弹到前方其他绿宝石伞上并叠加伤害（无上限），且伤害增幅从75%增加到125%",
+      "ru": "«Рикошет»: изумрудные зонты перекидывают пули друг другу со сложением урона без предела; усиление 75%→125%",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 39
+        }
+      ]
+    },
+    {
+      "literalId": 7570,
+      "source": "弹道偏左",
+      "ru": "Траектория смещена влево (отладка)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 201
+        }
+      ]
+    },
+    {
+      "literalId": 7574,
+      "source": "强力打击：植物的攻击力增加20%",
+      "ru": "«Мощный удар»: урон растений +20%",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 40
+        }
+      ]
+    },
+    {
+      "literalId": 7582,
+      "source": "当僵尸处于红温状态时会额外受到50%的伤害",
+      "ru": "«Перегретый» зомби получает +50% урона",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 226
+        }
+      ]
+    },
+    {
+      "literalId": 7622,
+      "source": "当前时间戳：",
+      "ru": "Текущая метка времени (отладка)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 306
+        }
+      ]
+    },
+    {
+      "literalId": 7626,
+      "source": "当前能力值：{0}/100",
+      "ru": "Текущее значение способности: {0}/100",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 204
+        }
+      ]
+    },
+    {
+      "literalId": 7630,
+      "source": "往小喷菇聚落里面融合可以直接得到3个小喷菇的融合体",
+      "ru": "Фьюжн внутрь «поселения» пыхтунов даёт сразу тройной фьюжн",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 207
+        }
+      ]
+    },
+    {
+      "literalId": 7642,
+      "source": "忧郁菇作为紫卡只能放在大喷菇上",
+      "ru": "Мрачный гриб (фиолетовая карта) ставится только на Большой гриб",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 139
+        }
+      ]
+    },
+    {
+      "literalId": 7646,
+      "source": "快速填装：降低究极樱桃机枪的攻击间隔至1秒",
+      "ru": "«Быстрая перезарядка»: интервал Ультимативного вишнёвого пулемёта 1 сек",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 41
+        }
+      ]
+    },
+    {
+      "literalId": 7650,
+      "source": "怒火攻心：红温增伤幅度从50%增至150%，并且火焰豌豆类会对僵尸附加红温效果",
+      "ru": "«Гнев»: бонус урона по перегретым 50%→150%; огненный горох накладывает перегрев",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 42
+        }
+      ]
+    },
+    {
+      "literalId": 7654,
+      "source": "总之肥料总是可以让植物进入下一阶段",
+      "ru": "Удобрение всегда переводит растение на следующую стадию",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 216
+        }
+      ]
+    },
+    {
+      "literalId": 7662,
+      "source": "意外之喜！",
+      "ru": "Неожиданная радость!",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 205
+        }
+      ]
+    },
+    {
+      "literalId": 7666,
+      "source": "成功击败领袖，获得1250积分",
+      "ru": "Лидер побеждён: +1250 очков",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 77
+        }
+      ]
+    },
+    {
+      "literalId": 7690,
+      "source": "我是梦珞",
+      "ru": "Я — Мэнло (имя/мем)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 125
+        }
+      ]
+    },
+    {
+      "literalId": 7694,
+      "source": "战神",
+      "ru": "Бог войны",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 126
+        }
+      ]
+    },
+    {
+      "literalId": 7706,
+      "source": "手里拿着植物时可以融合的植物会发光",
+      "ru": "Совместимые для фьюжна растения светятся, когда несёшь растение",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 205
+        }
+      ]
+    },
+    {
+      "literalId": 7710,
+      "source": "把坚果放到坚果上",
+      "ru": "Положи орех на орех",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 203
+        }
+      ]
+    },
+    {
+      "literalId": 7714,
+      "source": "把磁力植物练成线",
+      "ru": "Соедини магнитные растения в цепь",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 204
+        }
+      ]
+    },
+    {
+      "literalId": 7742,
+      "source": "按V键切换僵尸手套来挪动僵尸",
+      "ru": "V — переключить перчатку зомби (двигать зомби)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 200
+        }
+      ]
+    },
+    {
+      "literalId": 7746,
+      "source": "按下鼠标左键返回",
+      "ru": "ЛКМ — вернуться",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 308
+        }
+      ]
+    },
+    {
+      "literalId": 7750,
+      "source": "挑战模式",
+      "ru": "Режим испытаний",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 36
+        }
+      ]
+    },
+    {
+      "literalId": 7754,
+      "source": "挥光如土",
+      "ru": "Свет как грязь (перк)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 207
+        }
+      ]
+    },
+    {
+      "literalId": 7758,
+      "source": "损失场上一半的植物",
+      "ru": "Потеряй половину растений на поле",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 208
+        }
+      ]
+    },
+    {
+      "literalId": 7770,
+      "source": "探索的时光",
+      "ru": "Время исследований",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 142
+        }
+      ]
+    },
+    {
+      "literalId": 7774,
+      "source": "推进旅行冒险解锁",
+      "ru": "Продвинь открытие Путешествия-приключения",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 143
+        }
+      ]
+    },
+    {
+      "literalId": 7782,
+      "source": "撒豆成兵：魅帝召唤间隔从30秒减为10秒，并解锁亚种魅后菇",
+      "ru": "«Бобы в воинов»: призыв Гипно-императора 30→10 сек; подвид Гипно-королева",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 43
+        }
+      ]
+    },
+    {
+      "literalId": 7786,
+      "source": "攻守兼备！",
+      "ru": "И атака, и защита!",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 211
+        }
+      ]
+    },
+    {
+      "literalId": 7790,
+      "source": "敬请期待",
+      "ru": "Ожидается (заглушка)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 212
+        }
+      ]
+    },
+    {
+      "literalId": 7862,
+      "source": "旅行冒险：第{0}关",
+      "ru": "Путешествие-приключение: уровень {0}",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 11
+        }
+      ]
+    },
+    {
+      "literalId": 7866,
+      "source": "旅行大师",
+      "ru": "Мастер путешествий",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 213
+        }
+      ]
+    },
+    {
+      "literalId": 7882,
+      "source": "无关痛痒：阳光帝果单次受伤降为10点",
+      "ru": "«Не по щекоте»: разовый урон Солнечному император-плоду ≤10",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 44
+        }
+      ]
+    },
+    {
+      "literalId": 7922,
+      "source": "星星相吸",
+      "ru": "Звёзды притягиваются (перк)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 215
+        }
+      ]
+    },
+    {
+      "literalId": 7942,
+      "source": "普度众生：究极魅惑菇子弹的魅惑血量阈值从50%提高到100%",
+      "ru": "«Спасение всех»: порог HP гипноза Ультимативного гипногриба 50%→100%",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 45
+        }
+      ]
+    },
+    {
+      "literalId": 7970,
+      "source": "朗朗上口",
+      "ru": "Легко запоминается (мем-перк)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 216
+        }
+      ]
+    },
+    {
+      "literalId": 7974,
+      "source": "木锤会送一只僵尸归西",
+      "ru": "Деревянный молот отправит зомби к предкам",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 217
+        }
+      ]
+    },
+    {
+      "literalId": 7994,
+      "source": "未知索引",
+      "ru": "Неизвестный индекс",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 237
+        }
+      ]
+    },
+    {
+      "literalId": 7998,
+      "source": "未选取此植物",
+      "ru": "Растение не выбрано",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 218
+        }
+      ]
+    },
+    {
+      "literalId": 8002,
+      "source": "本次消耗分数：{0}",
+      "ru": "Израсходовано очков: {0}",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 75
+        }
+      ]
+    },
+    {
+      "literalId": 8022,
+      "source": "来一点阳光",
+      "ru": "Немного солнца",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 219
+        }
+      ]
+    },
+    {
+      "literalId": 8026,
+      "source": "来硬的",
+      "ru": "Вставить по-крутомому (мем-перк)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 220
+        }
+      ]
+    },
+    {
+      "literalId": 8042,
+      "source": "枕戈待旦：毁灭机枪不再需要休息，并解锁亚种毁灭机枪胆小菇",
+      "ru": "«Наготове»: Мрачный пулемёт не отдыхает; подвид «Мрачный пулемёт-трусиха»",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 46
+        }
+      ]
+    },
+    {
+      "literalId": 8046,
+      "source": "核弹攻击",
+      "ru": "Ядерный удар",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 222
+        }
+      ]
+    },
+    {
+      "literalId": 8050,
+      "source": "核能威慑：毁灭机枪每轮都能发射大子弹",
+      "ru": "«Ядерное сдерживание»: мрачный пулемёт выпускает большую пулю каждый залп",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 47
+        }
+      ]
+    },
+    {
+      "literalId": 8054,
+      "source": "植物大战僵尸融合版",
+      "ru": "«Растения против зомби: Fusion» (титул)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 185
+        }
+      ]
+    },
+    {
+      "literalId": 8058,
+      "source": "植物娘",
+      "ru": "«Девушки-растения» (plantgirls)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 188
+        }
+      ]
+    },
+    {
+      "literalId": 8062,
+      "source": "植物血量已满",
+      "ru": "HP растения полны",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 169
+        }
+      ]
+    },
+    {
+      "literalId": 8082,
+      "source": "欢迎来到植物大战僵尸融合版。",
+      "ru": "Добро пожаловать в PvZ Fusion.",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 186
+        }
+      ]
+    },
+    {
+      "literalId": 8094,
+      "source": "每一波出现的僵尸数量最大值增加到100",
+      "ru": "Максимум зомби за волну — 100",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 98
+        }
+      ]
+    },
+    {
+      "literalId": 8098,
+      "source": "每关都会出现舞王冰车，且死亡时额外召唤一个白舞王",
+      "ru": "Зомбони-танцор в каждом уровне; при смерти призывает Белого короля танца",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 99
+        }
+      ]
+    },
+    {
+      "literalId": 8102,
+      "source": "每日一光",
+      "ru": "Ежедневный свет",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 155
+        }
+      ]
+    },
+    {
+      "literalId": 8106,
+      "source": "每轮只能使用一次",
+      "ru": "Один раз за раунд",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 156
+        }
+      ]
+    },
+    {
+      "literalId": 8122,
+      "source": "永动机：究极魅惑菇永远处于高能状态，且攻击间隔缩短至1秒",
+      "ru": "«Вечный двигатель»: Ультимативный гипногриб всегда на пике, интервал 1 сек",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 48
+        }
+      ]
+    },
+    {
+      "literalId": 8126,
+      "source": "没有找到fallbackTarget",
+      "ru": "Не найден fallbackTarget (отладка)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 236
+        }
+      ]
+    },
+    {
+      "literalId": 8130,
+      "source": "没有配对的植物了",
+      "ru": "Больше нет пар (match-3)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 80
+        }
+      ]
+    },
+    {
+      "literalId": 8142,
+      "source": "泳池激斗",
+      "ru": "Битва в бассейне",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 224
+        }
+      ]
+    },
+    {
+      "literalId": 8150,
+      "source": "浴火重生",
+      "ru": "Возрождение в огне",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 159
+        }
+      ]
+    },
+    {
+      "literalId": 8158,
+      "source": "海妖菇",
+      "ru": "Морской ведьмин гриб (KelpTorch?)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 158
+        }
+      ],
+      "qualityWarnings": [
+        "uncertain_terminology_annotation"
+      ]
+    },
+    {
+      "literalId": 8162,
+      "source": "游戏的核心",
+      "ru": "Суть игры",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 157
+        }
+      ]
+    },
+    {
+      "literalId": 8182,
+      "source": "火辣辣的",
+      "ru": "Обжигающий (мем)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 227
+        }
+      ]
+    },
+    {
+      "literalId": 8194,
+      "source": "点击僵尸掉落的铁桶，放到豌豆射手或者坚果墙上吧！",
+      "ru": "Подбери выпавшее ведро и надень на горохострел или орех",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 209
+        }
+      ]
+    },
+    {
+      "literalId": 8222,
+      "source": "热门景点",
+      "ru": "Популярное место (мем-перк)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 109
+        }
+      ]
+    },
+    {
+      "literalId": 8230,
+      "source": "爆破专家",
+      "ru": "Эксперт по подрыву",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 82
+        }
+      ]
+    },
+    {
+      "literalId": 8234,
+      "source": "特制弹药：魔法猫尾草的僚机攻击力x3",
+      "ru": "«Особые боеприпасы»: урон спутников Кото-хвоста ×3",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 51
+        }
+      ]
+    },
+    {
+      "literalId": 8238,
+      "source": "狂战士：究极炮塔血量越低防御力越高，当血量低于100时免疫低于100的伤害",
+      "ru": "«Берсерк»: чем меньше HP турели, тем выше защита; ниже 100 HP — иммунитет к урону <100",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 52
+        }
+      ]
+    },
+    {
+      "literalId": 8250,
+      "source": "玉米卷是你的谎言",
+      "ru": "Кукурузный рулет — ложь (мем)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 257
+        }
+      ]
+    },
+    {
+      "literalId": 8266,
+      "source": "球杆力度大幅增加",
+      "ru": "Сила кия сильно увеличена (бильярд)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 84
+        }
+      ]
+    },
+    {
+      "literalId": 8270,
+      "source": "瓜林弹雨",
+      "ru": "«Дынный шквал»",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 85
+        }
+      ]
+    },
+    {
+      "literalId": 8274,
+      "source": "瓜熟蒂落：究极投手附带瓜盆效果",
+      "ru": "«Спелая дыня»: Ультимативный метатель получает эффект дынного горшка",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 53
+        }
+      ]
+    },
+    {
+      "literalId": 8290,
+      "source": "生存模式：旅行",
+      "ru": "Выживание: Путешествие",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 14
+        }
+      ]
+    },
+    {
+      "literalId": 8341,
+      "source": "用伞将瓜跳弹落地",
+      "ru": "Зонт приземляет прыгающую дыню",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 91
+        }
+      ]
+    },
+    {
+      "literalId": 8349,
+      "source": "用磁力仙人掌令飞艇坠机",
+      "ru": "Магнитный кактус роняет дирижабль",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 87
+        }
+      ]
+    },
+    {
+      "literalId": 8353,
+      "source": "用究极高坚果防御爆炸",
+      "ru": "Ультимативный высокий орех держит взрывы",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 88
+        }
+      ]
+    },
+    {
+      "literalId": 8373,
+      "source": "百步穿杨：浴火三线的子弹可以无限穿透",
+      "ru": "«Сто шагов — стрела»: пули Огнерождённого трёхстрела не теряют пробитие",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 54
+        }
+      ]
+    },
+    {
+      "literalId": 8377,
+      "source": "百炼成钢：玄钢地刺王现在获得95%减伤",
+      "ru": "«Сто закалок»: Тёмностальной шип-король получает −95% урона",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 55
+        }
+      ]
+    },
+    {
+      "literalId": 8381,
+      "source": "盆满钵满",
+      "ru": "Полная чаша (про деньги)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 154
+        }
+      ]
+    },
+    {
+      "literalId": 8413,
+      "source": "目标场景：绿幕",
+      "ru": "Целевая сцена: зелёный экран (хромакей)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 250
+        }
+      ]
+    },
+    {
+      "literalId": 8441,
+      "source": "真正的超级随机",
+      "ru": "Настоящий супер-случайный",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 96
+        }
+      ]
+    },
+    {
+      "literalId": 8501,
+      "source": "种子雨",
+      "ru": "Семенной дождь",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 242
+        }
+      ]
+    },
+    {
+      "literalId": 8569,
+      "source": "立即冷却手套完毕",
+      "ru": "Перчатка немедленно перезаряжена",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 243
+        }
+      ]
+    },
+    {
+      "literalId": 8573,
+      "source": "第1436关",
+      "ru": "Уровень 1436 (шутка-пасхалка)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 60
+        }
+      ]
+    },
+    {
+      "literalId": 8577,
+      "source": "第{0}已完成",
+      "ru": "Уровень {0} пройден",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 59
+        }
+      ]
+    },
+    {
+      "literalId": 8585,
+      "source": "等价交换：金币数超出上限的部分将转化为阳光，转化率为2:1",
+      "ru": "«Эквивалентный обмен»: излишек монет → солнце 2:1",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 59
+        }
+      ]
+    },
+    {
+      "literalId": 8593,
+      "source": "类型的僵尸",
+      "ru": "…типа (хвост сообщения об ошибке)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 244
+        }
+      ],
+      "qualityWarnings": [
+        "fragment_translation"
+      ]
+    },
+    {
+      "literalId": 8597,
+      "source": "精兵强将：魅帝能召唤究极僵尸",
+      "ru": "«Отборные войска»: Гипно-император призывает ультимативных зомби",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 245
+        }
+      ]
+    },
+    {
+      "literalId": 8601,
+      "source": "精准打击：僵尸受到的伤害增加20%",
+      "ru": "«Точный удар»: урон по зомби +20%",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 60
+        }
+      ]
+    },
+    {
+      "literalId": 8605,
+      "source": "红温的僵尸死亡时会对附近的僵尸造成100点伤害并传递红温效果",
+      "ru": "Смерть перегретого зомби: 100 урона соседям + передача перегрева",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 227
+        }
+      ]
+    },
+    {
+      "literalId": 8645,
+      "source": "聚光盆：获得3000阳光然后使你的阳光翻倍，并使阳光上限增加到10万",
+      "ru": "«Прожектор»: +3000 солнца, затем удвоение; лимит солнца 100 000",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 61
+        }
+      ]
+    },
+    {
+      "literalId": 8649,
+      "source": "肉身成圣：魅惑僵尸获得1000%啃咬伤害加成和80%减伤",
+      "ru": "«Святая плоть»: гипнотизированные зомби: укус +1000%, −80% получаемого",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 62
+        }
+      ]
+    },
+    {
+      "literalId": 8653,
+      "source": "肥料可以充当紫卡的作用，直接升级一些植物",
+      "ru": "Удобрение работает как фиолетовая карта — улучшает растение",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 217
+        }
+      ]
+    },
+    {
+      "literalId": 8673,
+      "source": "腐化：僵尸每受到一次伤害，下次受到的伤害增加5%",
+      "ru": "Порча: каждый следующий удар по зомби +5% урона",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 148
+        }
+      ]
+    },
+    {
+      "literalId": 8681,
+      "source": "自定义！",
+      "ru": "Кастомизация!",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 38
+        }
+      ]
+    },
+    {
+      "literalId": 8685,
+      "source": "自给自足",
+      "ru": "Самодостаточность",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 248
+        }
+      ]
+    },
+    {
+      "literalId": 8689,
+      "source": "至极手速：手套挪动植物不再消耗冷却",
+      "ru": "«Максимальная скорость»: перенос растений перчаткой без КД",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 63
+        }
+      ]
+    },
+    {
+      "literalId": 8693,
+      "source": "致命一击：僵尸受到超过1800伤害（计算减伤之后）时额外受到1800伤害",
+      "ru": "«Смертельный удар»: после 1800 урона (с учётом защиты) — ещё 1800",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 64
+        }
+      ]
+    },
+    {
+      "literalId": 8697,
+      "source": "舞王冰车的移动速度大幅增加",
+      "ru": "Скорость зомбони-танцора сильно увеличена",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 100
+        }
+      ]
+    },
+    {
+      "literalId": 8729,
+      "source": "获得10%生命偷取，持续15秒！",
+      "ru": "+10% вампиризма, 15 сек!",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 147
+        }
+      ]
+    },
+    {
+      "literalId": 8733,
+      "source": "获得5000阳光",
+      "ru": "Получи 5000 солнца",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 152
+        }
+      ]
+    },
+    {
+      "literalId": 8741,
+      "source": "获得升级",
+      "ru": "Получи улучшение",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 153
+        }
+      ]
+    },
+    {
+      "literalId": 8749,
+      "source": "蘑菇啊！我已归来！",
+      "ru": "Грибы! Я вернулся! (мем)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 252
+        }
+      ]
+    },
+    {
+      "literalId": 8753,
+      "source": "融合时代",
+      "ru": "Эпоха фьюжна",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 231
+        }
+      ]
+    },
+    {
+      "literalId": 8761,
+      "source": "补给已到达，参战植物数量增加到{0}",
+      "ru": "Прибыло пополнение: боевых растений {0}",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 166
+        }
+      ]
+    },
+    {
+      "literalId": 8765,
+      "source": "被一发樱桃子弹炸掉4株以上的植物",
+      "ru": "4+ растения взорваны одной вишнёвой пулей",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 176
+        }
+      ]
+    },
+    {
+      "literalId": 8769,
+      "source": "被小丑爆炸影响的小丑类僵尸会变成丑跳",
+      "ru": "Клоуны после взрыва клоуна превращаются в уродов-прыгунов",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 65
+        }
+      ]
+    },
+    {
+      "literalId": 8785,
+      "source": "见者有份：究极投手散射概率提升至100%",
+      "ru": "«Всем по чуть-чуть»: шанс рассеивания Ультимативного метателя 100%",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 66
+        }
+      ]
+    },
+    {
+      "literalId": 8789,
+      "source": "观察流星从天而降",
+      "ru": "Увидь падение метеора",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 254
+        }
+      ]
+    },
+    {
+      "literalId": 8845,
+      "source": "让三线射手浴火重生",
+      "ru": "Возроди трёхстрела в огне (Обугленный → Огнерождённый)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 229
+        }
+      ]
+    },
+    {
+      "literalId": 8849,
+      "source": "让我们先从资源获取开始吧！",
+      "ru": "Начнём с добычи ресурсов!",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 257
+        }
+      ]
+    },
+    {
+      "literalId": 8877,
+      "source": "让睡莲生产植物",
+      "ru": "Заставь лилию производить растение",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 214
+        }
+      ]
+    },
+    {
+      "literalId": 8881,
+      "source": "让金瓜雨从天而降",
+      "ru": "Устрой золотой дождь из дынь",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 215
+        }
+      ]
+    },
+    {
+      "literalId": 8885,
+      "source": "让魅惑磁力菇召唤机械巨人僵尸",
+      "ru": "Гипно-магнитный гриб призывает механического гиганта",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 258
+        }
+      ]
+    },
+    {
+      "literalId": 8889,
+      "source": "该模式不能移动需要保护的植物",
+      "ru": "В этом режиме нельзя двигать охраняемое растение",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 259
+        }
+      ]
+    },
+    {
+      "literalId": 8909,
+      "source": "请先将手推车中的植物放下",
+      "ru": "Сначала выложи растение из тачки",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 170
+        }
+      ]
+    },
+    {
+      "literalId": 8913,
+      "source": "请先种下一株向日葵。",
+      "ru": "Сначала посади подсолнух.",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 171
+        }
+      ]
+    },
+    {
+      "literalId": 8941,
+      "source": "请选择禁用的植物",
+      "ru": "Выбери запрещённые растения",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 172
+        }
+      ]
+    },
+    {
+      "literalId": 8997,
+      "source": "超级伞+菜伞",
+      "ru": "Супер-зонт + Капустный зонт (рецепт)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 148
+        }
+      ]
+    },
+    {
+      "literalId": 9025,
+      "source": "超级大嘴花+樱桃大嘴花",
+      "ru": "Супер-хищник + Вишнёвый хищник",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 151
+        }
+      ]
+    },
+    {
+      "literalId": 9033,
+      "source": "超级投手+蒜瓜",
+      "ru": "Супер-метатель + Чесно-дыня",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 152
+        }
+      ]
+    },
+    {
+      "literalId": 9041,
+      "source": "超级机械海豚的移动速度翻倍",
+      "ru": "Скорость супер-механического дельфина ×2",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 103
+        }
+      ]
+    },
+    {
+      "literalId": 9045,
+      "source": "超级机械海豚获得50%伤害减免",
+      "ru": "Супер-механический дельфин: −50% получаемого урона",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 67
+        }
+      ]
+    },
+    {
+      "literalId": 9049,
+      "source": "超级杨桃+磁力仙人掌",
+      "ru": "Супер-звезда + Магнитный кактус",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 153
+        }
+      ]
+    },
+    {
+      "literalId": 9057,
+      "source": "超级樱桃射手+樱桃机枪射手",
+      "ru": "Супер-вишнестрел + Вишнёвый пулемётчик",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 154
+        }
+      ]
+    },
+    {
+      "literalId": 9093,
+      "source": "超级魅惑菇+磁力魅惑菇",
+      "ru": "Супер-гипногриб + Магнитный гипногриб",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 155
+        }
+      ]
+    },
+    {
+      "literalId": 9101,
+      "source": "距离植物休息完毕还有{0}秒",
+      "ru": "До конца отдыха растения: {0} сек",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 168
+        }
+      ]
+    },
+    {
+      "literalId": 9117,
+      "source": "跳跳舞会",
+      "ru": "Танцевальная вечеринка",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 264
+        }
+      ]
+    },
+    {
+      "literalId": 9121,
+      "source": "蹦极有概率空投究极僵尸,且额外获得90%减伤",
+      "ru": "Банджи может сбросить ультимативного зомби; −90% получаемого",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 68
+        }
+      ]
+    },
+    {
+      "literalId": 9125,
+      "source": "蹦极闪电战",
+      "ru": "Блицкриг банджи",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 265
+        }
+      ]
+    },
+    {
+      "literalId": 9129,
+      "source": "过载：僵尸一段时间没有受到攻击后，下次受到的伤害大幅增加",
+      "ru": "Перегрузка: после паузы в уроне следующий удар по зомби сильно усилен",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 149
+        }
+      ]
+    },
+    {
+      "literalId": 9133,
+      "source": "运斤如风：锤子冷却降低为6秒",
+      "ru": "Молот: КД 6 сек (перк)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 198
+        }
+      ]
+    },
+    {
+      "literalId": 9137,
+      "source": "还要啥地刺王啊",
+      "ru": "Зачем ещё шип-король? (мем-перк)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 267
+        }
+      ]
+    },
+    {
+      "literalId": 9157,
+      "source": "这关手套没有冷却，请放心使用",
+      "ru": "В этом уровне перчатка без КД — пользуйся смело",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 268
+        }
+      ]
+    },
+    {
+      "literalId": 9161,
+      "source": "这是鱼丸么？",
+      "ru": "Это фишболл? (мем)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 269
+        }
+      ]
+    },
+    {
+      "literalId": 9165,
+      "source": "这里是一些进阶挑战",
+      "ru": "Здесь продвинутые испытания",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 150
+        }
+      ]
+    },
+    {
+      "literalId": 9173,
+      "source": "这里有着许多有趣的新植物和新玩法。",
+      "ru": "Здесь много новых растений и механик.",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 187
+        }
+      ]
+    },
+    {
+      "literalId": 9181,
+      "source": "连锁反应",
+      "ru": "Цепная реакция",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 271
+        }
+      ]
+    },
+    {
+      "literalId": 9185,
+      "source": "选卡",
+      "ru": "Выбор карт",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 160
+        }
+      ]
+    },
+    {
+      "literalId": 9189,
+      "source": "通关冒险模式45关后解锁",
+      "ru": "Открывается после прохождения 45 уровня приключения",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 56
+        }
+      ]
+    },
+    {
+      "literalId": 9193,
+      "source": "通关挑战模式解锁配方",
+      "ru": "Пройди режим испытаний — открой рецепт",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 57
+        }
+      ]
+    },
+    {
+      "literalId": 9225,
+      "source": "配方已更新",
+      "ru": "Рецепты обновлены",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 161
+        }
+      ]
+    },
+    {
+      "literalId": 9229,
+      "source": "量子护盾：仙萤伞能量上限x10，回复速度x20，治疗速度x2",
+      "ru": "«Квантовый щит»: запас энергии Зонта-светлячка ×10, реген ×20, лечение ×2",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 69
+        }
+      ]
+    },
+    {
+      "literalId": 9233,
+      "source": "金伞+大蒜或金蒜+伞",
+      "ru": "Золотой зонт + Чеснок, или Золотой чеснок + Зонт",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 156
+        }
+      ]
+    },
+    {
+      "literalId": 9237,
+      "source": "金光闪闪：太阳神卷心菜的子弹获得阳光卷心菜子弹的效果",
+      "ru": "«Золотое сияние»: пули Капусты-солнцебога получают эффект пуль Солнечной капусты",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 70
+        }
+      ]
+    },
+    {
+      "literalId": 9241,
+      "source": "钢铁洪流",
+      "ru": "Стальной поток",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 161
+        }
+      ]
+    },
+    {
+      "literalId": 9245,
+      "source": "铁系植物！你前期的好伙伴！",
+      "ru": "Железные растения — лучшие друзья ранней игры!",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 162
+        }
+      ]
+    },
+    {
+      "literalId": 9269,
+      "source": "镭射激光：究极南瓜的僚机攻击力x3",
+      "ru": "«Лазер»: урон спутников Ультимативной тыквы ×3",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 71
+        }
+      ]
+    },
+    {
+      "literalId": 9273,
+      "source": "闪电洋葱不能死亡",
+      "ru": "Молниеносный лук не может умереть",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 163
+        }
+      ]
+    },
+    {
+      "literalId": 9277,
+      "source": "阳光保龄球",
+      "ru": "Солнечный боулинг",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 164
+        }
+      ]
+    },
+    {
+      "literalId": 9281,
+      "source": "阻冲之：究极炮塔的攻击力和击退强度大幅提高",
+      "ru": "«Стопор»: урон и отбрасывание ультимативной турели сильно выросли",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 265
+        }
+      ]
+    },
+    {
+      "literalId": 9285,
+      "source": "随机塔防",
+      "ru": "Случайная tower defense",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 50
+        }
+      ]
+    },
+    {
+      "literalId": 9297,
+      "source": "随机道具箱已刷新",
+      "ru": "Случайный ящик предметов обновлён",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 281
+        }
+      ]
+    },
+    {
+      "literalId": 9309,
+      "source": "难度：{0}",
+      "ru": "Сложность: {0}",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 194
+        }
+      ]
+    },
+    {
+      "literalId": 9313,
+      "source": "难度：开了",
+      "ru": "Сложность: включена (шутка)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 195
+        }
+      ]
+    },
+    {
+      "literalId": 9317,
+      "source": "雷区！",
+      "ru": "Минное поле!",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 283
+        }
+      ]
+    },
+    {
+      "literalId": 9321,
+      "source": "马奇诺防线！",
+      "ru": "Линия Мажино!",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 284
+        }
+      ]
+    },
+    {
+      "literalId": 9325,
+      "source": "高坚果作为紫卡只能放在坚果墙上",
+      "ru": "Высокий орех (фиолетовая карта) ставится только на ореховую стену",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 138
+        }
+      ]
+    },
+    {
+      "literalId": 9329,
+      "source": "高能射线：仙萤伞的普通攻击的倍率增加至300%，爆炸倍率增加至1000%，间隔降低为2秒",
+      "ru": "«Луч энергии»: обычная атака Зонта-светлячка ×300%, взрыв ×1000%, интервал 2 сек",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 72
+        }
+      ]
+    },
+    {
+      "literalId": 9345,
+      "source": "魔法师",
+      "ru": "Маг (мем-перк)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 286
+        }
+      ]
+    },
+    {
+      "literalId": 9349,
+      "source": "麦蔻也来了",
+      "ru": "Прибыл и Мэйкоу (мем)",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_2.md",
+          "line": 287
+        }
+      ]
+    },
+    {
+      "literalId": 9361,
+      "source": "黑橄榄将军将会出现",
+      "ru": "Появится генерал Чёрная оливка",
+      "references": [
+        {
+          "file": "analysis/sections/reference_cn_1.md",
+          "line": 262
+        }
+      ]
+    }
+  ],
+  "sourceTextLookup": {
+    "QQ弹弹！": "«Пружинка!» (QQ-текстура)",
+    "【僵尸血量获得大幅提升】任务目标：献祭你的全部究极加农炮\n任务奖励：解锁全部旅行词条": "[HP зомби сильно выросли] Цель: пожертвуй все Ультимативные пушки. Награда: все перки Путешествия",
+    "䷀一": "[мусор-глиф]",
+    "一个格子里可以放3个小喷菇": "В одну клетку помещаются 3 Малых Пыхтуна",
+    "一菇管5路": "Один гриб прикрывает 5 рядов",
+    "一针见血：魔法猫尾草的基础攻击力x5": "«Один точный укол»: базовый урон Кото-хвоста ×5",
+    "一ꀀ": "[мусор-глиф]",
+    "万籁俱寂：究极忧郁菇亡语伤害增加到1000000": "«Тишина»: урон по смерти Ультимативного мрачного гриба = 1 000 000",
+    "三三得九！": "Трижды три — девять!",
+    "三位一体：究极南瓜的僚机增加至3个": "«Троица»: спутники Ультимативной тыквы ×3",
+    "三叉戟僵尸现在随机挑选目标攻击": "Зомби-трезубец выбирает цель случайно",
+    "三尺之寒：提升究极大喷菇的冻结速度为3倍": "«Стужа»: скорость заморозки Ультимативного гриба ×3",
+    "上天入地": "Небо и земля",
+    "不使用坚果通关旅行生存": "Пройди выживание-Путешествие без орехов",
+    "不能吹走非僵尸": "Сдуть можно только зомби",
+    "不选词条通关旅行生存": "Пройди выживание-Путешествие без перков",
+    "与火共舞": "Танцуй с огнём",
+    "丑跳一定爆炸，且蓄力时间大幅降低": "Урод-прыгун всегда взрывается, время подготовки сильно снижено",
+    "两肋插刀：黑曜石高坚果会代替左右两株植物受伤": "«Нож в спину»: Обсидиановый высокий орех принимает урон за соседей слева/справа",
+    "中心爆破：究极大炮的中心点爆炸伤害x4": "«Центральный подрыв»: урон в центре взрыва Ультимативной пушки ×4",
+    "九死一生": "Девять жизней на волоске",
+    "事半功倍：降低究极窝炬生成窝瓜需要的子弹数至10": "«Малой кровью»: О-факелу нужно 10 пуль для тыквы",
+    "二爷战争": "Война «вторых господ» (мем про газетчиков)",
+    "人多势众：幻灭菇爆炸时召唤额外的魅惑巨人僵尸和魅惑冰车": "Сила в числе: взрыв Разочаровывающего гриба призывает гипнотизированных гигантов и зомбони",
+    "人工智能：绿宝石伞现在可以自动开大，并解锁亚种红宝石伞": "ИИ: Изумрудный зонт раскрывается сам; открыт подвид Рубиновый зонт",
+    "人造太阳：太阳神卷心菜召唤的小太阳伤害x3": "«Искусственное солнце»: урон малых солнц Капусты-солнцебога ×3",
+    "他射的是樱桃炸弹吗？": "Он стреляет вишнёвыми бомбами? (мем)",
+    "他看起来不好欺负": "Его не назовёшь слабаком",
+    "仙人掌+南瓜+三叶草": "Кактус + Тыква + Клевер (рецепт-подсказка)",
+    "令一只僵尸中毒": "Отравь зомби",
+    "以爆制爆：究极忧郁菇免疫爆炸，每吸收10000点爆炸伤害将释放毁灭菇爆炸": "«Взрыв на взрыв»: иммунитет к взрывам; каждые 10000 поглощённого взрывного урона — свой взрыв мрачного гриба",
+    "任务目标：击杀地图右侧出现的武装巨人\n任务奖励：究极加农炮x1": "Цель: убей Вооружённого гиганта справа. Награда: Ультимативная пушка ×1",
+    "任务目标：击败地图右侧出现的武装巨人！\n任务奖励：究极樱桃战神x2": "Цель: победи Вооружённого гиганта справа! Награда: Ультимативный Вишнёвый бог войны ×2",
+    "任务目标：合成8个寒冰机枪\n任务奖励：手套无cd+究极窝炬+他的两个词条": "Цель: собери 8 Ледяных пулемётов. Награда: перчатка без КД + Ультимативный О-факел + 2 его перка",
+    "任务目标：在30秒内击杀100个僵尸\n任务奖励：解锁全部究极植物": "Цель: убей 100 зомби за 30 сек. Награда: все ультимативные растения",
+    "任务目标：在30秒内击杀50个僵尸\n任务奖励：究极加农炮x1": "Цель: убей 50 зомби за 30 сек. Награда: Ультимативная пушка ×1",
+    "任务目标：存储5000阳光\n任务奖励：樱桃南瓜x2+究极忧郁菇x1": "Цель: накопи 5000 солнца. Награда: Вишнёвая тыква ×2 + Ультимативный Мрачный гриб ×1",
+    "任务目标：存储5000阳光\n任务奖励：连连看词条和模仿者减cd词条": "Цель: накопи 5000 солнца. Награда: перк «Лианлянкан» + перк снижения КД Имитатора",
+    "任务目标：种植6个樱桃机枪射手\n任务奖励：解锁究极樱桃射手配方以及他的两个词条": "Цель: посади 6 Вишнёвых пулемётчиков. Награда: рецепт Ультимативного вишнестрела + 2 перка",
+    "任务目标：融合4个火炮\n任务奖励：浴火三线x2": "Цель: собери 4 пушки. Награда: Огнерождённый трёхстрел ×2",
+    "任务目标：融合4个焦黑三线\n任务奖励：浴火三线的配方和他的两个词条": "Цель: собери 4 Обугленных трёхстрела. Награда: рецепт Огнерождённого трёхстрела + 2 перка",
+    "众星之力：究极杨桃的子弹基础攻击力翻倍并且攻击力不再有上限": "«Сила звёзд»: урон пуль Ультимативной звезды ×2, снят предел",
+    "传说有些僵尸被刺红温了更容易受伤": "Говорят, зомби, «раскалённые» шипами, получают больше урона",
+    "余额不足，购买需要：10000": "Недостаточно средств; цена 10000",
+    "你为你的卡库新增了一种卡牌": "В твою коллекцию карт добавлена новая карта",
+    "你为你的花园找到了一株植物": "Ты нашёл растение для своего сада",
+    "你已经完成全部任务，祝你好运！": "Все задачи выполнены. Удачи!",
+    "使一株植物的光照等级大于10": "Доведи уровень освещения растения до >10",
+    "使用三线地刺对抗冰车": "Останови зомбони тройными шипами",
+    "使用五叶草吸引杨桃子弹": "Притяни звёздные пули пятилистником",
+    "使用大坚果对同一个僵尸造成20000伤害": "Нанеси Большим орехом 20000 урона одному зомби",
+    "使用窝炬生产窝瓜": "Вырасти тыкву через О-факел",
+    "使用菜伞弹射植物子弹": "Отрази пули капустным зонтом",
+    "使用豌豆、双发、裂荚、机枪来传递胆小菇的子弹": "Передавай пули трусливого гриба через горох/двойной/расколотый/пулемёт",
+    "使用超级伞赚钱": "Заработай деньгами Супер-зонта",
+    "使用阳光帝果释放保龄球": "Выпусти боулинг Солнечным император-плодом",
+    "使用阳光炸弹炸到10个僵尸": "Подорви Солнечной бомбой 10 зомби",
+    "使用阳光磁力菇生产铁器": "Добудь железо Солнечным магнитным грибом",
+    "使究极杨桃的子弹伤害超过1800": "Превысь 1800 урона пулей Ультимативной звезды",
+    "使魅惑坚果召唤黄金盲盒僵尸": "Призови золотых «слепых ящиков» Гипно-орехом",
+    "僵尸受到伤害x2，持续15秒！": "Зомби получают ×2 урона, 15 сек!",
+    "僵尸的冻结值上限会随着冻结次数的增加而增加": "Предел заморозки растёт с каждым замораживанием",
+    "元": "юань (валюта)",
+    "全息制冷：卡牌冷却减半": "«Голограмма-холод»: КД карт ÷2 (перк)",
+    "全是套娃": "Сплошные матрёшки (мем-перк)",
+    "关卡编辑器": "Редактор уровней",
+    "兵贵神速：究极大炮的装填时间降为原来的1/3": "«Скорость решает»: перезарядка Ультимативной пушки ÷3",
+    "冒险模式：第{0}关": "Приключение: уровень {0}",
+    "冰桶挑战": "Вызов: ведро со льдом",
+    "冰淬火炼：黑曜石高坚果受到寒冰菇效果回血10000，火爆辣椒效果回满血": "«Закалка»: обсидиановый орех лечится на 10000 от Ледяного гриба и полностью от Халапеньо",
+    "冻住了": "Заморожено!",
+    "冻彻心扉：冰锥对冻结的单位造成伤害提升至10倍，并解锁亚种阳光机枪小喷菇": "«Пронизывающий холод»: лёд по замороженным ×10; открыт подвид Солнечный пулемётный пыхтун",
+    "凛风刺骨：究极大喷菇的攻击力x3": "«Ледяной ветер»: урон Ультимативного гриба ×3",
+    "分": "мин (единица времени)",
+    "初见泳池！": "Первая встреча с бассейном!",
+    "力大砖飞：植物的爆炸樱桃子弹伤害x3": "«Сила есть»: урон вишнёвых взрывных пуль ×3",
+    "势不可挡！": "Непреодолимо!",
+    "势如破竹：冰锥可以无限穿透，小冰机和小光机的攻击力增加50%": "«Пробивать как бамбук»: ледяные пули не теряют пробитие; +50% урона малым лёд-пулемёту и лёд-светилу",
+    "勇往直前": "Вперёд, без страха",
+    "十旗挑战：坚如磐石": "Вызов 10 флагов: Скала",
+    "十旗挑战：屋顶": "Вызов 10 флагов: Крыша",
+    "十旗挑战：末世重生": "Вызов 10 флагов: Возрождение апокалипсиса",
+    "十旗挑战：植物僵尸": "Вызов 10 флагов: Растения-зомби",
+    "十旗挑战：泳池": "Вызов 10 флагов: Бассейн",
+    "十旗挑战：浓雾": "Вызов 10 флагов: Густой туман",
+    "十旗挑战：白天": "Вызов 10 флагов: День",
+    "十旗挑战：究极随机": "Вызов 10 флагов: Ультимативная случайность",
+    "十旗挑战：等价交换": "Вызов 10 флагов: Эквивалентный обмен",
+    "十旗挑战：等价交换2": "Вызов 10 флагов: Эквивалентный обмен 2",
+    "十旗挑战：胆小菇之梦": "Вызов 10 флагов: Сон трусливого гриба",
+    "十旗挑战：诸神": "Вызов 10 флагов: Боги",
+    "十旗挑战：超级传送带": "Вызов 10 флагов: Супер-конвейер",
+    "十旗挑战：随机僵尸": "Вызов 10 флагов: Случайные зомби",
+    "十旗挑战：随机植物": "Вызов 10 флагов: Случайные растения",
+    "十旗挑战：随机植物VS随机僵尸": "Вызов 10 флагов: Случайные растения VS случайные зомби",
+    "十旗挑战：黑夜": "Вызов 10 флагов: Ночь",
+    "十旗挑战：黑夜舞会": "Вызов 10 флагов: Ночной бал",
+    "卑鄙的低矮植物！": "Подлые низкорослые растения!",
+    "单枪匹马": "Один в поле воин",
+    "南瓜武装": "Тыквенное вооружение",
+    "压路机": "Каток",
+    "参战植物数量增加到{0}": "Число боевых растений увеличено до {0}",
+    "发现一株会弹射的玉米卷": "Найден подбрасывающий кукурузный рулет",
+    "只能在上半地图放植物": "Растения можно ставить только на верхней половине карты",
+    "只能融合小喷菇！": "Скрещивать можно только Малый Пыхтун!",
+    "可以让大嘴花立即吞咽": "Хищник может сглотнуть немедленно",
+    "可控核聚变：所有毁灭菇爆炸不留弹坑，并解锁亚种贪欲菇": "«Управляемый синтез»: взрывы мрачных грибов без воронок; подвид «Гриб жадности»",
+    "合理投资：词条刷新次数+2": "Разумная инвестиция: +2 обновления перков",
+    "向狙击豌豆售卖机枪来获得奖励": "Продай пулемёт Снайперскому гороху за награду",
+    "咖啡豆对这株植物似乎没有效果": "Кофейное зерно на это растение не действует",
+    "商店": "Магазин",
+    "在一个磁力系统中连接50个植物": "Соедини 50 растений в одной магнитной системе",
+    "在一局旅行模式中消耗一百万阳光": "Потрать миллион солнца за забег Путешествия",
+    "在没有腐化词条的情况下10秒击杀黑曜石巨人": "Убей Обсидианового гиганта за 10 сек без перка «Порча»",
+    "在现实世界40分钟内通关一局旅行": "Пройди Путешествие за 40 минут реального времени",
+    "在边路种植三线射手，使三线在本行发射2发子弹": "Посади трёхстрел на краю, чтобы он стрелял 2 пули в своём ряду",
+    "坚果融合后可以回满血哦": "После фьюжна орех полностью восстанавливает HP",
+    "坚果辊压机": "Ореховый каток",
+    "培养一个血量大于100万的超级机械坚果": "Вырасти Супер-механический орех с HP > 1 000 000",
+    "基洛夫免疫三叶草效果，且飞行速度加快": "Киров иммунен к вертолётчику и летает быстрее",
+    "基洛夫的僚机血量大幅增加": "HP эскорта Кирова сильно увеличены",
+    "塔防：冰天雪地": "Tower defense: ледяные снега",
+    "多多益善：升级金盆的消耗不会超过8000": "«Чем больше, тем лучше»: улучшение золотого горшка ≤8000",
+    "大": "«Б» (шрифт/тикер)",
+    "大富翁：基于当前金钱数量增加摇钱火炬的子弹伤害比例，每1000增加2%": "«Монополист»: урон пуль денежного факела +2% за каждые 1000 монет",
+    "大招需要{0}金币": "Супер-способность стоит {0} монет",
+    "好运连连：摇钱三线火炬的子弹附带火焰豌豆一样的溅射效果": "«Полоса удачи»: пули денежного трёхфакела дают осколочный эффект огненного гороха",
+    "妙手回春：阳光帝果召唤消耗降低至200阳光": "«Золотые руки»: призыв Солнечного император-плода стоит 200 солнца",
+    "威武南瓜": "Могучая тыква",
+    "它怎么跑了？": "Куда он побежал?! (мем)",
+    "守夜菇": "Дозорный гриб",
+    "将肥料撒到睡莲上": "Насыпь удобрение на лилию",
+    "小喷菇是黑夜里十分重要的植物": "Малый Пыхтун очень важен ночью (туториал)",
+    "小心你没见过的僵尸！": "Осторожно: незнакомые зомби!",
+    "小荷才露尖尖角": "«Лотос только показал кончик» (мем-название)",
+    "尸愁之路！": "Путь скорби зомби!",
+    "尸王死亡的爆炸伤害不可被小丑南瓜等免疫": "Взрыв при смерти Зомби-короля не блокируется тыквой-клоуном и т.п.",
+    "尸王的冲刺间隔降低，且攻击力大幅增加": "Зомби-король: чаще рывки, сильно больше урона",
+    "巨人之怒": "Гнев гиганта",
+    "已开启全部词条": "Все перки включены",
+    "已经完成全部任务，解锁全部旅行词条，祝你好运！": "Все задачи выполнены, все перки Путешествия открыты. Удачи!",
+    "弱究可用": "«Слабые ультимативные доступны» (настройка)",
+    "弹射起步：绿宝石伞可以让子弹弹到前方其他绿宝石伞上并叠加伤害（无上限），且伤害增幅从75%增加到125%": "«Рикошет»: изумрудные зонты перекидывают пули друг другу со сложением урона без предела; усиление 75%→125%",
+    "弹道偏左": "Траектория смещена влево (отладка)",
+    "强力打击：植物的攻击力增加20%": "«Мощный удар»: урон растений +20%",
+    "当僵尸处于红温状态时会额外受到50%的伤害": "«Перегретый» зомби получает +50% урона",
+    "当前时间戳：": "Текущая метка времени (отладка)",
+    "当前能力值：{0}/100": "Текущее значение способности: {0}/100",
+    "往小喷菇聚落里面融合可以直接得到3个小喷菇的融合体": "Фьюжн внутрь «поселения» пыхтунов даёт сразу тройной фьюжн",
+    "忧郁菇作为紫卡只能放在大喷菇上": "Мрачный гриб (фиолетовая карта) ставится только на Большой гриб",
+    "快速填装：降低究极樱桃机枪的攻击间隔至1秒": "«Быстрая перезарядка»: интервал Ультимативного вишнёвого пулемёта 1 сек",
+    "怒火攻心：红温增伤幅度从50%增至150%，并且火焰豌豆类会对僵尸附加红温效果": "«Гнев»: бонус урона по перегретым 50%→150%; огненный горох накладывает перегрев",
+    "总之肥料总是可以让植物进入下一阶段": "Удобрение всегда переводит растение на следующую стадию",
+    "意外之喜！": "Неожиданная радость!",
+    "成功击败领袖，获得1250积分": "Лидер побеждён: +1250 очков",
+    "我是梦珞": "Я — Мэнло (имя/мем)",
+    "战神": "Бог войны",
+    "手里拿着植物时可以融合的植物会发光": "Совместимые для фьюжна растения светятся, когда несёшь растение",
+    "把坚果放到坚果上": "Положи орех на орех",
+    "把磁力植物练成线": "Соедини магнитные растения в цепь",
+    "按V键切换僵尸手套来挪动僵尸": "V — переключить перчатку зомби (двигать зомби)",
+    "按下鼠标左键返回": "ЛКМ — вернуться",
+    "挑战模式": "Режим испытаний",
+    "挥光如土": "Свет как грязь (перк)",
+    "损失场上一半的植物": "Потеряй половину растений на поле",
+    "探索的时光": "Время исследований",
+    "推进旅行冒险解锁": "Продвинь открытие Путешествия-приключения",
+    "撒豆成兵：魅帝召唤间隔从30秒减为10秒，并解锁亚种魅后菇": "«Бобы в воинов»: призыв Гипно-императора 30→10 сек; подвид Гипно-королева",
+    "攻守兼备！": "И атака, и защита!",
+    "敬请期待": "Ожидается (заглушка)",
+    "旅行冒险：第{0}关": "Путешествие-приключение: уровень {0}",
+    "旅行大师": "Мастер путешествий",
+    "无关痛痒：阳光帝果单次受伤降为10点": "«Не по щекоте»: разовый урон Солнечному император-плоду ≤10",
+    "星星相吸": "Звёзды притягиваются (перк)",
+    "普度众生：究极魅惑菇子弹的魅惑血量阈值从50%提高到100%": "«Спасение всех»: порог HP гипноза Ультимативного гипногриба 50%→100%",
+    "朗朗上口": "Легко запоминается (мем-перк)",
+    "木锤会送一只僵尸归西": "Деревянный молот отправит зомби к предкам",
+    "未知索引": "Неизвестный индекс",
+    "未选取此植物": "Растение не выбрано",
+    "本次消耗分数：{0}": "Израсходовано очков: {0}",
+    "来一点阳光": "Немного солнца",
+    "来硬的": "Вставить по-крутомому (мем-перк)",
+    "枕戈待旦：毁灭机枪不再需要休息，并解锁亚种毁灭机枪胆小菇": "«Наготове»: Мрачный пулемёт не отдыхает; подвид «Мрачный пулемёт-трусиха»",
+    "核弹攻击": "Ядерный удар",
+    "核能威慑：毁灭机枪每轮都能发射大子弹": "«Ядерное сдерживание»: мрачный пулемёт выпускает большую пулю каждый залп",
+    "植物大战僵尸融合版": "«Растения против зомби: Fusion» (титул)",
+    "植物娘": "«Девушки-растения» (plantgirls)",
+    "植物血量已满": "HP растения полны",
+    "欢迎来到植物大战僵尸融合版。": "Добро пожаловать в PvZ Fusion.",
+    "每一波出现的僵尸数量最大值增加到100": "Максимум зомби за волну — 100",
+    "每关都会出现舞王冰车，且死亡时额外召唤一个白舞王": "Зомбони-танцор в каждом уровне; при смерти призывает Белого короля танца",
+    "每日一光": "Ежедневный свет",
+    "每轮只能使用一次": "Один раз за раунд",
+    "永动机：究极魅惑菇永远处于高能状态，且攻击间隔缩短至1秒": "«Вечный двигатель»: Ультимативный гипногриб всегда на пике, интервал 1 сек",
+    "没有找到fallbackTarget": "Не найден fallbackTarget (отладка)",
+    "没有配对的植物了": "Больше нет пар (match-3)",
+    "泳池激斗": "Битва в бассейне",
+    "浴火重生": "Возрождение в огне",
+    "海妖菇": "Морской ведьмин гриб (KelpTorch?)",
+    "游戏的核心": "Суть игры",
+    "火辣辣的": "Обжигающий (мем)",
+    "点击僵尸掉落的铁桶，放到豌豆射手或者坚果墙上吧！": "Подбери выпавшее ведро и надень на горохострел или орех",
+    "热门景点": "Популярное место (мем-перк)",
+    "爆破专家": "Эксперт по подрыву",
+    "特制弹药：魔法猫尾草的僚机攻击力x3": "«Особые боеприпасы»: урон спутников Кото-хвоста ×3",
+    "狂战士：究极炮塔血量越低防御力越高，当血量低于100时免疫低于100的伤害": "«Берсерк»: чем меньше HP турели, тем выше защита; ниже 100 HP — иммунитет к урону <100",
+    "玉米卷是你的谎言": "Кукурузный рулет — ложь (мем)",
+    "球杆力度大幅增加": "Сила кия сильно увеличена (бильярд)",
+    "瓜林弹雨": "«Дынный шквал»",
+    "瓜熟蒂落：究极投手附带瓜盆效果": "«Спелая дыня»: Ультимативный метатель получает эффект дынного горшка",
+    "生存模式：旅行": "Выживание: Путешествие",
+    "用伞将瓜跳弹落地": "Зонт приземляет прыгающую дыню",
+    "用磁力仙人掌令飞艇坠机": "Магнитный кактус роняет дирижабль",
+    "用究极高坚果防御爆炸": "Ультимативный высокий орех держит взрывы",
+    "百步穿杨：浴火三线的子弹可以无限穿透": "«Сто шагов — стрела»: пули Огнерождённого трёхстрела не теряют пробитие",
+    "百炼成钢：玄钢地刺王现在获得95%减伤": "«Сто закалок»: Тёмностальной шип-король получает −95% урона",
+    "盆满钵满": "Полная чаша (про деньги)",
+    "目标场景：绿幕": "Целевая сцена: зелёный экран (хромакей)",
+    "真正的超级随机": "Настоящий супер-случайный",
+    "种子雨": "Семенной дождь",
+    "立即冷却手套完毕": "Перчатка немедленно перезаряжена",
+    "第1436关": "Уровень 1436 (шутка-пасхалка)",
+    "第{0}已完成": "Уровень {0} пройден",
+    "等价交换：金币数超出上限的部分将转化为阳光，转化率为2:1": "«Эквивалентный обмен»: излишек монет → солнце 2:1",
+    "类型的僵尸": "…типа (хвост сообщения об ошибке)",
+    "精兵强将：魅帝能召唤究极僵尸": "«Отборные войска»: Гипно-император призывает ультимативных зомби",
+    "精准打击：僵尸受到的伤害增加20%": "«Точный удар»: урон по зомби +20%",
+    "红温的僵尸死亡时会对附近的僵尸造成100点伤害并传递红温效果": "Смерть перегретого зомби: 100 урона соседям + передача перегрева",
+    "聚光盆：获得3000阳光然后使你的阳光翻倍，并使阳光上限增加到10万": "«Прожектор»: +3000 солнца, затем удвоение; лимит солнца 100 000",
+    "肉身成圣：魅惑僵尸获得1000%啃咬伤害加成和80%减伤": "«Святая плоть»: гипнотизированные зомби: укус +1000%, −80% получаемого",
+    "肥料可以充当紫卡的作用，直接升级一些植物": "Удобрение работает как фиолетовая карта — улучшает растение",
+    "腐化：僵尸每受到一次伤害，下次受到的伤害增加5%": "Порча: каждый следующий удар по зомби +5% урона",
+    "自定义！": "Кастомизация!",
+    "自给自足": "Самодостаточность",
+    "至极手速：手套挪动植物不再消耗冷却": "«Максимальная скорость»: перенос растений перчаткой без КД",
+    "致命一击：僵尸受到超过1800伤害（计算减伤之后）时额外受到1800伤害": "«Смертельный удар»: после 1800 урона (с учётом защиты) — ещё 1800",
+    "舞王冰车的移动速度大幅增加": "Скорость зомбони-танцора сильно увеличена",
+    "获得10%生命偷取，持续15秒！": "+10% вампиризма, 15 сек!",
+    "获得5000阳光": "Получи 5000 солнца",
+    "获得升级": "Получи улучшение",
+    "蘑菇啊！我已归来！": "Грибы! Я вернулся! (мем)",
+    "融合时代": "Эпоха фьюжна",
+    "补给已到达，参战植物数量增加到{0}": "Прибыло пополнение: боевых растений {0}",
+    "被一发樱桃子弹炸掉4株以上的植物": "4+ растения взорваны одной вишнёвой пулей",
+    "被小丑爆炸影响的小丑类僵尸会变成丑跳": "Клоуны после взрыва клоуна превращаются в уродов-прыгунов",
+    "见者有份：究极投手散射概率提升至100%": "«Всем по чуть-чуть»: шанс рассеивания Ультимативного метателя 100%",
+    "观察流星从天而降": "Увидь падение метеора",
+    "让三线射手浴火重生": "Возроди трёхстрела в огне (Обугленный → Огнерождённый)",
+    "让我们先从资源获取开始吧！": "Начнём с добычи ресурсов!",
+    "让睡莲生产植物": "Заставь лилию производить растение",
+    "让金瓜雨从天而降": "Устрой золотой дождь из дынь",
+    "让魅惑磁力菇召唤机械巨人僵尸": "Гипно-магнитный гриб призывает механического гиганта",
+    "该模式不能移动需要保护的植物": "В этом режиме нельзя двигать охраняемое растение",
+    "请先将手推车中的植物放下": "Сначала выложи растение из тачки",
+    "请先种下一株向日葵。": "Сначала посади подсолнух.",
+    "请选择禁用的植物": "Выбери запрещённые растения",
+    "超级伞+菜伞": "Супер-зонт + Капустный зонт (рецепт)",
+    "超级大嘴花+樱桃大嘴花": "Супер-хищник + Вишнёвый хищник",
+    "超级投手+蒜瓜": "Супер-метатель + Чесно-дыня",
+    "超级机械海豚的移动速度翻倍": "Скорость супер-механического дельфина ×2",
+    "超级机械海豚获得50%伤害减免": "Супер-механический дельфин: −50% получаемого урона",
+    "超级杨桃+磁力仙人掌": "Супер-звезда + Магнитный кактус",
+    "超级樱桃射手+樱桃机枪射手": "Супер-вишнестрел + Вишнёвый пулемётчик",
+    "超级魅惑菇+磁力魅惑菇": "Супер-гипногриб + Магнитный гипногриб",
+    "距离植物休息完毕还有{0}秒": "До конца отдыха растения: {0} сек",
+    "跳跳舞会": "Танцевальная вечеринка",
+    "蹦极有概率空投究极僵尸,且额外获得90%减伤": "Банджи может сбросить ультимативного зомби; −90% получаемого",
+    "蹦极闪电战": "Блицкриг банджи",
+    "过载：僵尸一段时间没有受到攻击后，下次受到的伤害大幅增加": "Перегрузка: после паузы в уроне следующий удар по зомби сильно усилен",
+    "运斤如风：锤子冷却降低为6秒": "Молот: КД 6 сек (перк)",
+    "还要啥地刺王啊": "Зачем ещё шип-король? (мем-перк)",
+    "这关手套没有冷却，请放心使用": "В этом уровне перчатка без КД — пользуйся смело",
+    "这是鱼丸么？": "Это фишболл? (мем)",
+    "这里是一些进阶挑战": "Здесь продвинутые испытания",
+    "这里有着许多有趣的新植物和新玩法。": "Здесь много новых растений и механик.",
+    "连锁反应": "Цепная реакция",
+    "选卡": "Выбор карт",
+    "通关冒险模式45关后解锁": "Открывается после прохождения 45 уровня приключения",
+    "通关挑战模式解锁配方": "Пройди режим испытаний — открой рецепт",
+    "配方已更新": "Рецепты обновлены",
+    "量子护盾：仙萤伞能量上限x10，回复速度x20，治疗速度x2": "«Квантовый щит»: запас энергии Зонта-светлячка ×10, реген ×20, лечение ×2",
+    "金伞+大蒜或金蒜+伞": "Золотой зонт + Чеснок, или Золотой чеснок + Зонт",
+    "金光闪闪：太阳神卷心菜的子弹获得阳光卷心菜子弹的效果": "«Золотое сияние»: пули Капусты-солнцебога получают эффект пуль Солнечной капусты",
+    "钢铁洪流": "Стальной поток",
+    "铁系植物！你前期的好伙伴！": "Железные растения — лучшие друзья ранней игры!",
+    "镭射激光：究极南瓜的僚机攻击力x3": "«Лазер»: урон спутников Ультимативной тыквы ×3",
+    "闪电洋葱不能死亡": "Молниеносный лук не может умереть",
+    "阳光保龄球": "Солнечный боулинг",
+    "阻冲之：究极炮塔的攻击力和击退强度大幅提高": "«Стопор»: урон и отбрасывание ультимативной турели сильно выросли",
+    "随机塔防": "Случайная tower defense",
+    "随机道具箱已刷新": "Случайный ящик предметов обновлён",
+    "难度：{0}": "Сложность: {0}",
+    "难度：开了": "Сложность: включена (шутка)",
+    "雷区！": "Минное поле!",
+    "马奇诺防线！": "Линия Мажино!",
+    "高坚果作为紫卡只能放在坚果墙上": "Высокий орех (фиолетовая карта) ставится только на ореховую стену",
+    "高能射线：仙萤伞的普通攻击的倍率增加至300%，爆炸倍率增加至1000%，间隔降低为2秒": "«Луч энергии»: обычная атака Зонта-светлячка ×300%, взрыв ×1000%, интервал 2 сек",
+    "魔法师": "Маг (мем-перк)",
+    "麦蔻也来了": "Прибыл и Мэйкоу (мем)",
+    "黑橄榄将军将会出现": "Появится генерал Чёрная оливка"
+  }
+}

@@ -5,6 +5,7 @@
 #include "NetConnection.h"
 #include "NetOnline.h"
 #include "NetCursorTarget.h"
+#include "../Fusion/FusionWire.h"
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -131,10 +132,11 @@ public:
 	bool RequestChooserMystery(bool theEnabled);
 	bool IsChooserMystery(int theSlot) const;
 	bool HasActiveMysteryDeck() const;
-	uint8_t GetChooserMysteryMask() const { return mChooserMysteryMask; }
+	uint8_t GetChooserMysteryMask() const;
 	void SendLobbyState();						// host: broadcast lobby
+	void NotifyContentModeChanged();				// host: invalidate old mode input/state, then echo the selection
 	void SetMyReady(bool theReady);
-	bool IsMyReady() const { return mPlayers[mMySlot].mReady != 0; }
+	bool IsMyReady() const;
 	int GetReadyCount() const;
 	int GetReadyEligibleCount() const;
 	bool AreAllPlayersReady() const;
@@ -189,6 +191,17 @@ public:
 	void AdvanceInputPhase(NetInputPhase thePhase, const char* theReason); // host barrier
 	void PurgePendingInputs(const char* theReason, int theSlot = -1);
 	bool PopPendingInput(NetRemoteInput& theInput);
+	bool SubmitFusionCommand(LawnFusion::FusionCommand theCommand);
+	bool SmokeSendSpectatorFusionIntent(LawnFusion::FusionCommand theCommand);
+	bool PopFusionCommand(uint8_t& theSlot, LawnFusion::FusionCommand& theCommand);
+	bool CanApplyFusionCommand(int theSlot) const;
+	bool TakeFusionRoom(NetBuffer& thePayload);
+	void ClearFusionTraffic();
+	void BroadcastFusionStart(const NetBuffer& thePayload);
+	void BroadcastFusionRoom(const NetBuffer& thePayload);
+	void SendFusionLateJoin(NetSession* theSession);
+	void ReportInvalidFusionState(const std::string& theReason);
+	void ReportFusionResourceFailure(const std::string& theReason);
 	bool IsRemoteHeatWaveShoutKeyActive();
 	uint32_t GetInputEpoch() const { return mInputEpoch; }
 	NetInputPhase GetInputPhase() const { return mInputPhase; }
@@ -219,6 +232,8 @@ private:
 
 	void HandleMessage(NetSession* theSession, uint8_t theMsgType, NetBuffer& thePayload);
 	void HandleMessageClient(uint8_t theMsgType, NetBuffer& thePayload);
+	void ReceiveFusionCommand(NetSession* theSession, NetBuffer& thePayload);
+	bool QueueFusionCommand(uint8_t theSlot, const LawnFusion::FusionCommand& theCommand);
 
 	// host-side message handlers
 	void OnHello(NetSession* theSession, NetBuffer& thePayload);
@@ -240,6 +255,7 @@ private:
 	// client-side message handlers
 	void OnLobbyState(NetBuffer& thePayload);
 	void OnWelcome(NetBuffer& thePayload);
+	void RejectHostState(const char* theContext, const std::string& theReason);
 	void OnStartGame(NetBuffer& thePayload);
 	void OnSnapshot(NetBuffer& thePayload);
 	void OnBoardEvent(NetBuffer& thePayload);
@@ -306,6 +322,11 @@ private:
 	std::mutex mSessionsMutex;
 	bool mDeferredDrop[NET_MAX_PLAYERS];		// never tear a session down inside its callback
 	std::deque<NetRemoteInput> mPendingInputs;
+	struct FusionPendingCommand { uint8_t slot; LawnFusion::FusionCommand command; };
+	std::deque<FusionPendingCommand> mFusionCommands;
+	size_t mFusionCommandCount[NET_MAX_PLAYERS] = {};
+	NetBuffer mFusionRoom;
+	bool mHasFusionRoom = false;
 	size_t mPendingInputCount[NET_MAX_PLAYERS];
 	uint32_t mLastInputSequence[NET_MAX_PLAYERS];
 	bool mRemoteHeatWaveQDown[NET_MAX_PLAYERS];
@@ -320,6 +341,8 @@ private:
 	NetConnection* mHostConn;
 	char mConnectStatus[128];
 	std::string mDisconnectReason;
+	bool mContentModeNegotiated = false;
+	bool mRejectClientState = false;
 	bool mKicked[NET_MAX_PLAYERS] = {};
 	uint32_t mKickDeadline[NET_MAX_PLAYERS] = {};
 

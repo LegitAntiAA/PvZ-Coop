@@ -1,0 +1,1601 @@
+{
+  "schema": 1,
+  "bindings": [
+    {
+      "plantKind": 249,
+      "resourceKind": 2000,
+      "sourcePrefab": "Resources/plants/starfruit/swordstar/SwordStarPrefab.prefab",
+      "sourceParticleFileId": 198000955326284023,
+      "sourceRendererFileId": 199397768327470545,
+      "nodePath": "Starfruit_body/Particle System",
+      "serializedParticleSha256": "f468a1fb7fcfc72c33d373dde5e56831e7b4a8b70fbea5751d9cc34a86f70bbe",
+      "serializedRendererSha256": "a8525d5569bcfb57bf2b059c1b6421d5fb4fc00121efb332c9163df90b03a95a",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 249,
+      "resourceKind": 2001,
+      "sourcePrefab": "Resources/plants/starfruit/swordstar/SwordStarPrefab.prefab",
+      "sourceParticleFileId": 198581786255902400,
+      "sourceRendererFileId": 199477046003934300,
+      "nodePath": "Starfruit_body/Particle System_1",
+      "serializedParticleSha256": "c4016416e106488f5a321c3dcd8fdb757c5d710a45a57d32be90951094e23067",
+      "serializedRendererSha256": "cba037aa7eabdcb4e5406087630edf12fb4e67fede971f11ab67f691689f604f",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 905,
+      "resourceKind": 2002,
+      "sourcePrefab": "Resources/plants/travel/supersunnut/SuperSunNutPrefab.prefab",
+      "sourceParticleFileId": 198336590748365959,
+      "sourceRendererFileId": 199256069497284392,
+      "nodePath": "Wallnut_cracked1/NutDust",
+      "serializedParticleSha256": "19022263e07e60abe4ca592d57f198f5c69d90ec40ac5100fa3b6022e59ee906",
+      "serializedRendererSha256": "2163b8e30fb6eb737018528cf4b09624c467a0a65d50390b7d4f7151926a0d35",
+      "defaultNodeActive": true,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 905,
+      "resourceKind": 2003,
+      "sourcePrefab": "Resources/plants/travel/supersunnut/SuperSunNutPrefab.prefab",
+      "sourceParticleFileId": 198313026266067498,
+      "sourceRendererFileId": 199621510681728303,
+      "nodePath": "Wallnut_cracked2/NutDust",
+      "serializedParticleSha256": "5582c373d38a0e5832ec3b442d89e38ad34a30d9c3fa077d60770704cfc9a552",
+      "serializedRendererSha256": "0171bf79e8fe72a1609d2259aa075d67e1743d6d8eddaaeeb101e1d1597bee09",
+      "defaultNodeActive": true,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 909,
+      "resourceKind": 2004,
+      "sourcePrefab": "Resources/plants/travel/ultimatestar/UltimateStarPrefab.prefab",
+      "sourceParticleFileId": 198354824845356902,
+      "sourceRendererFileId": 199770005084341472,
+      "nodePath": "LanternShine",
+      "serializedParticleSha256": "aa460808d14b0d45fd433f139ba65fa2478d7e25a62f98ff7cbf359310f43121",
+      "serializedRendererSha256": "b4e22992580435fd5f82002a8b6e8e5a82d66ca958554f0b217bcd81d5c40d14",
+      "defaultNodeActive": true,
+      "defaultEmissionEnabled": false,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 911,
+      "resourceKind": 2002,
+      "sourcePrefab": "Resources/plants/pumpkin/ultimatepumpkin/UltimatePumpkinPrefab.prefab",
+      "sourceParticleFileId": 198313026266067498,
+      "sourceRendererFileId": 199621510681728303,
+      "nodePath": "pumpkin_damage1/NutDust",
+      "serializedParticleSha256": "19022263e07e60abe4ca592d57f198f5c69d90ec40ac5100fa3b6022e59ee906",
+      "serializedRendererSha256": "2163b8e30fb6eb737018528cf4b09624c467a0a65d50390b7d4f7151926a0d35",
+      "defaultNodeActive": true,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 911,
+      "resourceKind": 2003,
+      "sourcePrefab": "Resources/plants/pumpkin/ultimatepumpkin/UltimatePumpkinPrefab.prefab",
+      "sourceParticleFileId": 198969106005120503,
+      "sourceRendererFileId": 199642988549198181,
+      "nodePath": "pumpkin_damage2/NutDust",
+      "serializedParticleSha256": "5582c373d38a0e5832ec3b442d89e38ad34a30d9c3fa077d60770704cfc9a552",
+      "serializedRendererSha256": "0171bf79e8fe72a1609d2259aa075d67e1743d6d8eddaaeeb101e1d1597bee09",
+      "defaultNodeActive": true,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 922,
+      "resourceKind": 2002,
+      "sourcePrefab": "Resources/plants/pumpkin/cherryultimatepumpkin/UltimatePumpkinPrefab.prefab",
+      "sourceParticleFileId": 198313026266067498,
+      "sourceRendererFileId": 199621510681728303,
+      "nodePath": "pumpkin_damage1/NutDust",
+      "serializedParticleSha256": "19022263e07e60abe4ca592d57f198f5c69d90ec40ac5100fa3b6022e59ee906",
+      "serializedRendererSha256": "2163b8e30fb6eb737018528cf4b09624c467a0a65d50390b7d4f7151926a0d35",
+      "defaultNodeActive": true,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 922,
+      "resourceKind": 2003,
+      "sourcePrefab": "Resources/plants/pumpkin/cherryultimatepumpkin/UltimatePumpkinPrefab.prefab",
+      "sourceParticleFileId": 198969106005120503,
+      "sourceRendererFileId": 199642988549198181,
+      "nodePath": "pumpkin_damage2/NutDust",
+      "serializedParticleSha256": "5582c373d38a0e5832ec3b442d89e38ad34a30d9c3fa077d60770704cfc9a552",
+      "serializedRendererSha256": "0171bf79e8fe72a1609d2259aa075d67e1743d6d8eddaaeeb101e1d1597bee09",
+      "defaultNodeActive": true,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 937,
+      "resourceKind": 2005,
+      "sourcePrefab": "Resources/plants/umbrellaleaf/laserumbrella/LaserUmbrellaPrefab.prefab",
+      "sourceParticleFileId": 198632746491512912,
+      "sourceRendererFileId": 199719342369648492,
+      "nodePath": "fightball/fightball_1",
+      "serializedParticleSha256": "aab33c49c2ae7dd27e8cc09ed9155df644101267095370c16ee9aa46b6c8f378",
+      "serializedRendererSha256": "b76889fd0b93b2e875c5978350b2be05bc4da3941172e575b36104455707e522",
+      "defaultNodeActive": true,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1089,
+      "resourceKind": 2002,
+      "sourcePrefab": "Resources/plants/pumpkin/starpumpkin/StarPumpkinPrefab.prefab",
+      "sourceParticleFileId": 198002669891404536,
+      "sourceRendererFileId": 199470112387431263,
+      "nodePath": "pumpkin_damage1/NutDust",
+      "serializedParticleSha256": "19022263e07e60abe4ca592d57f198f5c69d90ec40ac5100fa3b6022e59ee906",
+      "serializedRendererSha256": "2163b8e30fb6eb737018528cf4b09624c467a0a65d50390b7d4f7151926a0d35",
+      "defaultNodeActive": true,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1089,
+      "resourceKind": 2003,
+      "sourcePrefab": "Resources/plants/pumpkin/starpumpkin/StarPumpkinPrefab.prefab",
+      "sourceParticleFileId": 198634108722742392,
+      "sourceRendererFileId": 199302127217294661,
+      "nodePath": "pumpkin_damage2/NutDust",
+      "serializedParticleSha256": "5582c373d38a0e5832ec3b442d89e38ad34a30d9c3fa077d60770704cfc9a552",
+      "serializedRendererSha256": "0171bf79e8fe72a1609d2259aa075d67e1743d6d8eddaaeeb101e1d1597bee09",
+      "defaultNodeActive": true,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1104,
+      "resourceKind": 2004,
+      "sourcePrefab": "Resources/plants/starfruit/superstar/SuperStarPrefab.prefab",
+      "sourceParticleFileId": 198370222726513266,
+      "sourceRendererFileId": 199574304967836189,
+      "nodePath": "LanternShine",
+      "serializedParticleSha256": "54bc1a67fe99902b322b062fd6242969c9fe3551d35527f1165291dba932d87b",
+      "serializedRendererSha256": "4858b07bbb42ec6385db8d3fcddc589c635825d7170820a5094afc5c57d3db85",
+      "defaultNodeActive": true,
+      "defaultEmissionEnabled": false,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1110,
+      "resourceKind": 2002,
+      "sourcePrefab": "Resources/plants/pumpkin/superpumpkin/SuperPumpkinPrefab.prefab",
+      "sourceParticleFileId": 198002669891404536,
+      "sourceRendererFileId": 199470112387431263,
+      "nodePath": "pumpkin_damage1/NutDust",
+      "serializedParticleSha256": "19022263e07e60abe4ca592d57f198f5c69d90ec40ac5100fa3b6022e59ee906",
+      "serializedRendererSha256": "2163b8e30fb6eb737018528cf4b09624c467a0a65d50390b7d4f7151926a0d35",
+      "defaultNodeActive": true,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1110,
+      "resourceKind": 2003,
+      "sourcePrefab": "Resources/plants/pumpkin/superpumpkin/SuperPumpkinPrefab.prefab",
+      "sourceParticleFileId": 198634108722742392,
+      "sourceRendererFileId": 199302127217294661,
+      "nodePath": "pumpkin_damage2/NutDust",
+      "serializedParticleSha256": "5582c373d38a0e5832ec3b442d89e38ad34a30d9c3fa077d60770704cfc9a552",
+      "serializedRendererSha256": "0171bf79e8fe72a1609d2259aa075d67e1743d6d8eddaaeeb101e1d1597bee09",
+      "defaultNodeActive": true,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1147,
+      "resourceKind": 2006,
+      "sourcePrefab": "Resources/plants/wallnut/hypnonut/HypnoNutPrefab.prefab",
+      "sourceParticleFileId": 198336590748365959,
+      "sourceRendererFileId": 199256069497284392,
+      "nodePath": "Wallnut_cracked1/NutDust",
+      "serializedParticleSha256": "64f2bc9d664ce3eeb08f8c0ea4a6666c6ae7eb28307718a73a67dd904de405c5",
+      "serializedRendererSha256": "2163b8e30fb6eb737018528cf4b09624c467a0a65d50390b7d4f7151926a0d35",
+      "defaultNodeActive": true,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1147,
+      "resourceKind": 2007,
+      "sourcePrefab": "Resources/plants/wallnut/hypnonut/HypnoNutPrefab.prefab",
+      "sourceParticleFileId": 198313026266067498,
+      "sourceRendererFileId": 199621510681728303,
+      "nodePath": "Wallnut_cracked2/NutDust",
+      "serializedParticleSha256": "d248a299a7b864149829be53ec53f89095afce257d82354055343f2f62bc29b0",
+      "serializedRendererSha256": "0171bf79e8fe72a1609d2259aa075d67e1743d6d8eddaaeeb101e1d1597bee09",
+      "defaultNodeActive": true,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1164,
+      "resourceKind": 2002,
+      "sourcePrefab": "Resources/plants/pumpkin/cherrypumpkin/CherryPumpkinPrefab.prefab",
+      "sourceParticleFileId": 198002669891404536,
+      "sourceRendererFileId": 199470112387431263,
+      "nodePath": "pumpkin_damage1/NutDust",
+      "serializedParticleSha256": "19022263e07e60abe4ca592d57f198f5c69d90ec40ac5100fa3b6022e59ee906",
+      "serializedRendererSha256": "2163b8e30fb6eb737018528cf4b09624c467a0a65d50390b7d4f7151926a0d35",
+      "defaultNodeActive": true,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1164,
+      "resourceKind": 2003,
+      "sourcePrefab": "Resources/plants/pumpkin/cherrypumpkin/CherryPumpkinPrefab.prefab",
+      "sourceParticleFileId": 198634108722742392,
+      "sourceRendererFileId": 199302127217294661,
+      "nodePath": "pumpkin_damage2/NutDust",
+      "serializedParticleSha256": "5582c373d38a0e5832ec3b442d89e38ad34a30d9c3fa077d60770704cfc9a552",
+      "serializedRendererSha256": "0171bf79e8fe72a1609d2259aa075d67e1743d6d8eddaaeeb101e1d1597bee09",
+      "defaultNodeActive": true,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1178,
+      "resourceKind": 2008,
+      "sourcePrefab": "Resources/plants/torchwood/cherrytorch/CherryTorchPrefab.prefab",
+      "sourceParticleFileId": 198587397909062814,
+      "sourceRendererFileId": 199875609422105747,
+      "nodePath": "Torchwood_body/BombCloud",
+      "serializedParticleSha256": "7e496994a8bfef430242b3bb547549ae401fb0494209578cff1759557f0c96e5",
+      "serializedRendererSha256": "6191b3a652f23c16fe6fdc1e68541cb2d6d424cc42adaeb94949b405e31525f4",
+      "defaultNodeActive": true,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1027,
+      "resourceKind": 2027,
+      "sourcePrefab": "Resources/plants/tallnut/TallNutPrefab.prefab",
+      "sourceParticleFileId": 198336590748365959,
+      "sourceRendererFileId": 199256069497284392,
+      "nodePath": "tnf2/NutDust",
+      "serializedParticleSha256": "19022263e07e60abe4ca592d57f198f5c69d90ec40ac5100fa3b6022e59ee906",
+      "serializedRendererSha256": "2163b8e30fb6eb737018528cf4b09624c467a0a65d50390b7d4f7151926a0d35",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1027,
+      "resourceKind": 2028,
+      "sourcePrefab": "Resources/plants/tallnut/TallNutPrefab.prefab",
+      "sourceParticleFileId": 198313026266067498,
+      "sourceRendererFileId": 199621510681728303,
+      "nodePath": "tnf3/NutDust",
+      "serializedParticleSha256": "5582c373d38a0e5832ec3b442d89e38ad34a30d9c3fa077d60770704cfc9a552",
+      "serializedRendererSha256": "0171bf79e8fe72a1609d2259aa075d67e1743d6d8eddaaeeb101e1d1597bee09",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 24,
+      "resourceKind": 2024,
+      "sourcePrefab": "Resources/plants/pumpkin/PumpkinPrefab.prefab",
+      "sourceParticleFileId": 198161607090078389,
+      "sourceRendererFileId": 199002669891404536,
+      "nodePath": "pumpkin_damage1/NutDust",
+      "serializedParticleSha256": "19022263e07e60abe4ca592d57f198f5c69d90ec40ac5100fa3b6022e59ee906",
+      "serializedRendererSha256": "2163b8e30fb6eb737018528cf4b09624c467a0a65d50390b7d4f7151926a0d35",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 24,
+      "resourceKind": 2025,
+      "sourcePrefab": "Resources/plants/pumpkin/PumpkinPrefab.prefab",
+      "sourceParticleFileId": 198632457200066912,
+      "sourceRendererFileId": 199634108722742392,
+      "nodePath": "pumpkin_damage2/NutDust",
+      "serializedParticleSha256": "5582c373d38a0e5832ec3b442d89e38ad34a30d9c3fa077d60770704cfc9a552",
+      "serializedRendererSha256": "0171bf79e8fe72a1609d2259aa075d67e1743d6d8eddaaeeb101e1d1597bee09",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1003,
+      "resourceKind": 2600,
+      "sourcePrefab": "Resources/plants/_mixer/cherrynut/CherryNutPrefab.prefab",
+      "sourceParticleFileId": 198313026266067498,
+      "sourceRendererFileId": 199621510681728303,
+      "nodePath": "Wallnut_cracked1/NutDust",
+      "serializedParticleSha256": "19022263e07e60abe4ca592d57f198f5c69d90ec40ac5100fa3b6022e59ee906",
+      "serializedRendererSha256": "7ed76e1f28107b5702eea7218cc90c5efbc1a597bd1589a0e69a8b71f5efcfcc",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1003,
+      "resourceKind": 2601,
+      "sourcePrefab": "Resources/plants/_mixer/cherrynut/CherryNutPrefab.prefab",
+      "sourceParticleFileId": 198969106005120503,
+      "sourceRendererFileId": 199642988549198181,
+      "nodePath": "Wallnut_cracked2/NutDust",
+      "serializedParticleSha256": "5582c373d38a0e5832ec3b442d89e38ad34a30d9c3fa077d60770704cfc9a552",
+      "serializedRendererSha256": "b35070ea55e8bc2838abf21c7b39cba94b1378a60089df0c0e9497f184f73aed",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1004,
+      "resourceKind": 2602,
+      "sourcePrefab": "Resources/plants/_mixer/nutshooter/NutShooterPrefab.prefab",
+      "sourceParticleFileId": 198694121525821480,
+      "sourceRendererFileId": 199320256170494724,
+      "nodePath": "Wallnut_cracked1/NutDust",
+      "serializedParticleSha256": "12728b57a98f4cc4d95d73039f7fd80d5b4f207d8912ea00c8d9216009d8e7b1",
+      "serializedRendererSha256": "b0f6d6c9eaf1da0d2a3db9e9f652e095dbb3df3c22a63922f41125aa52ee6b2e",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1004,
+      "resourceKind": 2603,
+      "sourcePrefab": "Resources/plants/_mixer/nutshooter/NutShooterPrefab.prefab",
+      "sourceParticleFileId": 198900271049623953,
+      "sourceRendererFileId": 199472185465350827,
+      "nodePath": "Wallnut_cracked2/NutDust",
+      "serializedParticleSha256": "d1757c259bb0c584b077da88f23b36f4f36ffa99f989626284e756f6994841e3",
+      "serializedRendererSha256": "30a4f96b2a94d14c85b2f880a39be466bcdea9643340a31d31f0cbaed7ac8871",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1006,
+      "resourceKind": 2604,
+      "sourcePrefab": "Resources/plants/_mixer/sunnut/SunNutPrefab.prefab",
+      "sourceParticleFileId": 198336590748365959,
+      "sourceRendererFileId": 199256069497284392,
+      "nodePath": "Wallnut_cracked1/NutDust",
+      "serializedParticleSha256": "19022263e07e60abe4ca592d57f198f5c69d90ec40ac5100fa3b6022e59ee906",
+      "serializedRendererSha256": "2163b8e30fb6eb737018528cf4b09624c467a0a65d50390b7d4f7151926a0d35",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1006,
+      "resourceKind": 2605,
+      "sourcePrefab": "Resources/plants/_mixer/sunnut/SunNutPrefab.prefab",
+      "sourceParticleFileId": 198313026266067498,
+      "sourceRendererFileId": 199621510681728303,
+      "nodePath": "Wallnut_cracked2/NutDust",
+      "serializedParticleSha256": "5582c373d38a0e5832ec3b442d89e38ad34a30d9c3fa077d60770704cfc9a552",
+      "serializedRendererSha256": "0171bf79e8fe72a1609d2259aa075d67e1743d6d8eddaaeeb101e1d1597bee09",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1010,
+      "resourceKind": 2606,
+      "sourcePrefab": "Resources/plants/_mixer/potatonut/PotatoNutPrefab.prefab",
+      "sourceParticleFileId": 198711914853252429,
+      "sourceRendererFileId": 199918264173551851,
+      "nodePath": "PotatoMine_body2/NutDust",
+      "serializedParticleSha256": "19022263e07e60abe4ca592d57f198f5c69d90ec40ac5100fa3b6022e59ee906",
+      "serializedRendererSha256": "2163b8e30fb6eb737018528cf4b09624c467a0a65d50390b7d4f7151926a0d35",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1010,
+      "resourceKind": 2607,
+      "sourcePrefab": "Resources/plants/_mixer/potatonut/PotatoNutPrefab.prefab",
+      "sourceParticleFileId": 198694121525821480,
+      "sourceRendererFileId": 199320256170494724,
+      "nodePath": "PotatoMine_body3/NutDust",
+      "serializedParticleSha256": "5582c373d38a0e5832ec3b442d89e38ad34a30d9c3fa077d60770704cfc9a552",
+      "serializedRendererSha256": "0171bf79e8fe72a1609d2259aa075d67e1743d6d8eddaaeeb101e1d1597bee09",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1013,
+      "resourceKind": 2608,
+      "sourcePrefab": "Resources/plants/_mixer/superchomper/SuperChomperPrefab.prefab",
+      "sourceParticleFileId": 198518489005915545,
+      "sourceRendererFileId": 199220653531496868,
+      "nodePath": "Chomper_face_upper2/NutDust",
+      "serializedParticleSha256": "4fdc2f75fabcc4127398051a5deea6187784c0b5bbf04375df691f1839f5a0d8",
+      "serializedRendererSha256": "0171bf79e8fe72a1609d2259aa075d67e1743d6d8eddaaeeb101e1d1597bee09",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1013,
+      "resourceKind": 2609,
+      "sourcePrefab": "Resources/plants/_mixer/superchomper/SuperChomperPrefab.prefab",
+      "sourceParticleFileId": 198344419225485095,
+      "sourceRendererFileId": 199919942235722503,
+      "nodePath": "Chomper_face_upper1/NutDust",
+      "serializedParticleSha256": "2d717d1d97eab49bad98d4232583ba4b62dd58c979e65e1a5aef62799f729e15",
+      "serializedRendererSha256": "32a0ed9fc049560da8e72bd1424352b27ed0e6b6bf10ca3b22ad42cfb62c07e3",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1029,
+      "resourceKind": 2610,
+      "sourcePrefab": "Resources/plants/wallnut/IronNutPrefab.prefab",
+      "sourceParticleFileId": 198336590748365959,
+      "sourceRendererFileId": 199256069497284392,
+      "nodePath": "Wallnut_cracked1/NutDust",
+      "serializedParticleSha256": "19022263e07e60abe4ca592d57f198f5c69d90ec40ac5100fa3b6022e59ee906",
+      "serializedRendererSha256": "2163b8e30fb6eb737018528cf4b09624c467a0a65d50390b7d4f7151926a0d35",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1029,
+      "resourceKind": 2611,
+      "sourcePrefab": "Resources/plants/wallnut/IronNutPrefab.prefab",
+      "sourceParticleFileId": 198313026266067498,
+      "sourceRendererFileId": 199621510681728303,
+      "nodePath": "Wallnut_cracked2/NutDust",
+      "serializedParticleSha256": "5582c373d38a0e5832ec3b442d89e38ad34a30d9c3fa077d60770704cfc9a552",
+      "serializedRendererSha256": "0171bf79e8fe72a1609d2259aa075d67e1743d6d8eddaaeeb101e1d1597bee09",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1039,
+      "resourceKind": 2612,
+      "sourcePrefab": "Resources/plants/tallnut/TallIceNutPrefab.prefab",
+      "sourceParticleFileId": 198336590748365959,
+      "sourceRendererFileId": 199256069497284392,
+      "nodePath": "tnf2/NutDust",
+      "serializedParticleSha256": "aa3a0dedf515a73a986104fe327547388b351c11b4a8cfab7aad346af8bb8976",
+      "serializedRendererSha256": "2163b8e30fb6eb737018528cf4b09624c467a0a65d50390b7d4f7151926a0d35",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1039,
+      "resourceKind": 2613,
+      "sourcePrefab": "Resources/plants/tallnut/TallIceNutPrefab.prefab",
+      "sourceParticleFileId": 198313026266067498,
+      "sourceRendererFileId": 199621510681728303,
+      "nodePath": "tnf3/NutDust",
+      "serializedParticleSha256": "31cf7c24fffdf742ea5cdc578dea842591919ffc214f4aa53957ddefca60fee3",
+      "serializedRendererSha256": "0171bf79e8fe72a1609d2259aa075d67e1743d6d8eddaaeeb101e1d1597bee09",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1048,
+      "resourceKind": 2614,
+      "sourcePrefab": "Resources/plants/wallnut/caltropnut/CaltropNutPrefab.prefab",
+      "sourceParticleFileId": 198161607090078389,
+      "sourceRendererFileId": 199002669891404536,
+      "nodePath": "Wallnut_cracked1/NutDust",
+      "serializedParticleSha256": "e9a532505671d9672521166c393aa10791e1618f360f18ce27ebf2a0f6b1fcb1",
+      "serializedRendererSha256": "c1c2dcec2d2d7c472f1621ffa71e73c14b0f02199d65c3e3f47ab22693810579",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1048,
+      "resourceKind": 2615,
+      "sourcePrefab": "Resources/plants/wallnut/caltropnut/CaltropNutPrefab.prefab",
+      "sourceParticleFileId": 198302127217294661,
+      "sourceRendererFileId": 199969106005120503,
+      "nodePath": "Wallnut_cracked2/NutDust",
+      "serializedParticleSha256": "ea82c226300cfdef5632a0f01234dd7e11aca518739ab5fb873ef92f6caa9c44",
+      "serializedRendererSha256": "32a0ed9fc049560da8e72bd1424352b27ed0e6b6bf10ca3b22ad42cfb62c07e3",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1052,
+      "resourceKind": 2616,
+      "sourcePrefab": "Resources/plants/torchwood/supertorch/SuperTorchPrefab.prefab",
+      "sourceParticleFileId": 198621510681728303,
+      "sourceRendererFileId": 199632457200066912,
+      "nodePath": "Torchwood_body/FireParticle1",
+      "serializedParticleSha256": "725baccee4d10536edf7bd0e3570aeb7451659fbb3f936c0fbfdeaedd8e487ee",
+      "serializedRendererSha256": "e6cdfd7c86bb676cf04b59843cf60c11f9350a01c7b08c1167f0106ceb976319",
+      "defaultNodeActive": true,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1052,
+      "resourceKind": 2617,
+      "sourcePrefab": "Resources/plants/torchwood/supertorch/SuperTorchPrefab.prefab",
+      "sourceParticleFileId": 198302127217294661,
+      "sourceRendererFileId": 199969106005120503,
+      "nodePath": "Torchwood_body/FireParticle2",
+      "serializedParticleSha256": "367c9cdbc5a3f3cb4e1df4ef305265ba57d3fd7f984b9fbef74e7181eb5e8cc3",
+      "serializedRendererSha256": "7a205c2b1bd0bfa582c4668a1df4ebe78dea650882da3b0085488035c864d30d",
+      "defaultNodeActive": true,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1053,
+      "resourceKind": 2618,
+      "sourcePrefab": "Resources/plants/torchwood/jalatorch/JalaTorchPrefab.prefab",
+      "sourceParticleFileId": 198161607090078389,
+      "sourceRendererFileId": 199002669891404536,
+      "nodePath": "Torchwood_body/FireParticle",
+      "serializedParticleSha256": "4791d3446467d9d2ea39d187d130172186c65f2a3bac3b887aa5fd5b1e7f9e11",
+      "serializedRendererSha256": "55f293c63ba20089bdbed682c7a89c316ca74f5f512a37d27e985e5f14fb2750",
+      "defaultNodeActive": true,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1059,
+      "resourceKind": 2619,
+      "sourcePrefab": "Resources/plants/torchwood/squashtorch/SquashTorchPrefab.prefab",
+      "sourceParticleFileId": 198705390221481576,
+      "sourceRendererFileId": 199977153420339851,
+      "nodePath": "particle_fire",
+      "serializedParticleSha256": "98f7944c751ab8dd60539abdd019544b5d4ffa1c9dce6882cad603243297276f",
+      "serializedRendererSha256": "57a26984d1470f3e4fb5c282bf89c9bfb33a63982b11beadd1d92a07a49f24f3",
+      "defaultNodeActive": true,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1073,
+      "resourceKind": 2620,
+      "sourcePrefab": "Resources/plants/tallnut/TallFireNutPrefab.prefab",
+      "sourceParticleFileId": 198632457200066912,
+      "sourceRendererFileId": 199634108722742392,
+      "nodePath": "tnf2/NutDust",
+      "serializedParticleSha256": "50ef2e126b35ccf1aba0a1a9809adeef15bc15f7f3009fec156f001e23239b2a",
+      "serializedRendererSha256": "c1c2dcec2d2d7c472f1621ffa71e73c14b0f02199d65c3e3f47ab22693810579",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1073,
+      "resourceKind": 2621,
+      "sourcePrefab": "Resources/plants/tallnut/TallFireNutPrefab.prefab",
+      "sourceParticleFileId": 198918264173551851,
+      "sourceRendererFileId": 199587397909062814,
+      "nodePath": "tnf3/NutDust",
+      "serializedParticleSha256": "a93c2fb69069a4b067a679023f7a34806e8b4d6bb873d14db7470adac023c18e",
+      "serializedRendererSha256": "32a0ed9fc049560da8e72bd1424352b27ed0e6b6bf10ca3b22ad42cfb62c07e3",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1079,
+      "resourceKind": 2622,
+      "sourcePrefab": "Resources/plants/cactus/lanterncactus/LanternCactusPrefab.prefab",
+      "sourceParticleFileId": 198693329660128220,
+      "sourceRendererFileId": 199801075752484240,
+      "nodePath": "LanternShine",
+      "serializedParticleSha256": "078651528ced33b3448c6a72ede0d25e38cdfefaa11433aeea0b4b5dabf7851e",
+      "serializedRendererSha256": "f7ca3ea5942a4fb0241c74a2b3a46189d86491ec7dbb0039374d96ede2cb0046",
+      "defaultNodeActive": true,
+      "defaultEmissionEnabled": false,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1081,
+      "resourceKind": 2623,
+      "sourcePrefab": "Resources/plants/starfruit/lanternstar/LanternStarPrefab.prefab",
+      "sourceParticleFileId": 198900271049623953,
+      "sourceRendererFileId": 199472185465350827,
+      "nodePath": "LanternShine",
+      "serializedParticleSha256": "5f46f1d19a502ccfb18893aa73576a3ce24fc80ea9ce3699e0b96371f7b4ce66",
+      "serializedRendererSha256": "459c0bb1c5938f1db987f7d5e40507a5e6a34c56c3fdbf59fd5a5c8a25916933",
+      "defaultNodeActive": true,
+      "defaultEmissionEnabled": false,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1100,
+      "resourceKind": 2624,
+      "sourcePrefab": "Resources/plants/magnetshroom/lanternmagnet/LanternMagnetPrefab.prefab",
+      "sourceParticleFileId": 198630643969539439,
+      "sourceRendererFileId": 199370222726513266,
+      "nodePath": "LanternShine",
+      "serializedParticleSha256": "635aa027eedb3541661b50828feb6f633a798a27ee84e845c4cdc67b08d94fa4",
+      "serializedRendererSha256": "e77ea3b8504544dded83836d86e8ab7896e19030dd89306c715480f565461f0b",
+      "defaultNodeActive": true,
+      "defaultEmissionEnabled": false,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1189,
+      "resourceKind": 2625,
+      "sourcePrefab": "Resources/plants/wallnut/icenut/IceNutPrefab.prefab",
+      "sourceParticleFileId": 198336590748365959,
+      "sourceRendererFileId": 199256069497284392,
+      "nodePath": "Wallnut_cracked1/NutDust",
+      "serializedParticleSha256": "489ff9d63733cf40be04f047b4a3aa1fb2105cf5d98a189c15db8309a6b9ec0e",
+      "serializedRendererSha256": "2163b8e30fb6eb737018528cf4b09624c467a0a65d50390b7d4f7151926a0d35",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "plantKind": 1189,
+      "resourceKind": 2626,
+      "sourcePrefab": "Resources/plants/wallnut/icenut/IceNutPrefab.prefab",
+      "sourceParticleFileId": 198313026266067498,
+      "sourceRendererFileId": 199621510681728303,
+      "nodePath": "Wallnut_cracked2/NutDust",
+      "serializedParticleSha256": "5595e4e9adc00fd4392a624cd39f151c7f959039c0e1e7ddc0385f40896d62e0",
+      "serializedRendererSha256": "0171bf79e8fe72a1609d2259aa075d67e1743d6d8eddaaeeb101e1d1597bee09",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    }
+  ],
+  "resources": [
+    {
+      "resourceKind": 2000,
+      "sourceFactoryIndex": null,
+      "name": "Particle System",
+      "representativeKind": 249,
+      "prefab": "Resources/plants/starfruit/swordstar/SwordStarPrefab.prefab",
+      "componentFileId": 198000955326284023,
+      "status": "Passed",
+      "emitters": 1,
+      "folder": "work/fusion/batch40-269/embedded-particles/2000",
+      "effectSha256": "f11c474dddba45643a2c3594feaec48091fc6077ea631bf8e90679e37c37c639",
+      "package": "2000/effect.json",
+      "files": {
+        "effect.json": "f11c474dddba45643a2c3594feaec48091fc6077ea631bf8e90679e37c37c639",
+        "textures/96e55b0362ed85049a94ebf8c9e018df.png": "b14fc8500b6384627f5eb6053a880f83fe45d905ccd6e32778d358b374455cb9"
+      }
+    },
+    {
+      "resourceKind": 2001,
+      "sourceFactoryIndex": null,
+      "name": "Particle System_1",
+      "representativeKind": 249,
+      "prefab": "Resources/plants/starfruit/swordstar/SwordStarPrefab.prefab",
+      "componentFileId": 198581786255902400,
+      "status": "Passed",
+      "folder": "work/fusion/batch40-269/last2-particles/2001",
+      "package": "2001/effect.json",
+      "emitters": 1,
+      "effectSha256": "a8146149317b3bf0161c1b74414451dfd3d3fcf7393dc5949a7e47e3fc759fae",
+      "files": {
+        "effect.json": "a8146149317b3bf0161c1b74414451dfd3d3fcf7393dc5949a7e47e3fc759fae",
+        "textures/96e55b0362ed85049a94ebf8c9e018df.png": "b14fc8500b6384627f5eb6053a880f83fe45d905ccd6e32778d358b374455cb9"
+      }
+    },
+    {
+      "resourceKind": 2002,
+      "sourceFactoryIndex": null,
+      "name": "NutDust",
+      "representativeKind": 905,
+      "prefab": "Resources/plants/travel/supersunnut/SuperSunNutPrefab.prefab",
+      "componentFileId": 198336590748365959,
+      "status": "Passed",
+      "folder": "work/fusion/batch40-269/embedded-particles/2002",
+      "package": "2002/effect.json",
+      "emitters": 1,
+      "effectSha256": "a8a9119e33816e3f9797603219e24fad55c6979e63d011a29e9fcd3366133d87",
+      "files": {
+        "effect.json": "a8a9119e33816e3f9797603219e24fad55c6979e63d011a29e9fcd3366133d87",
+        "textures/3f69ef589224a22408a5cc9e842fe1de.png": "ed8c0c57d9ec0460bbb93a9beabf1e0acdfdd37627da11de680eac6dbe5701a6",
+        "textures/9b6cab00e5723004b8b7b365fec970fe.png": "ba164e4457d933a1bf6798af7d3403423a4f9f834eee0f11f8bc69f2f407e328",
+        "textures/e08e8d6372c84bf44ba9043a27f6e923.png": "b6996afd3cf7a7b7d1dd3c0b3ab721f526d1d5230b47d3ee0bb43818f68dae58",
+        "textures/f2e53f39fedc2244b84259cde37c300f.png": "988b5f7e1f23f7f5fe97558a8d9e3df55905af22d22cd5734c3d9006d34ff45d",
+        "textures/f429cf301d6d4934a81f2b5bfe5f6cd7.png": "143eefb90d05b3bc98ce6d749ae1f8c2408e126b0c1a6ca6331cfd2aeb43ef10",
+        "textures/sheet-ec10cf7099e14b8f.png": "ec10cf7099e14b8f9194cafaea2247ebf5b903b2d834ac6ddbecee3738d77642"
+      }
+    },
+    {
+      "resourceKind": 2003,
+      "sourceFactoryIndex": null,
+      "name": "NutDust",
+      "representativeKind": 905,
+      "prefab": "Resources/plants/travel/supersunnut/SuperSunNutPrefab.prefab",
+      "componentFileId": 198313026266067498,
+      "status": "Passed",
+      "folder": "work/fusion/batch40-269/embedded-particles/2003",
+      "package": "2003/effect.json",
+      "emitters": 1,
+      "effectSha256": "42d16e60f0fc30bad3a116798ce1a872aef00900c712f7b9a21ee1ca32a8422a",
+      "files": {
+        "effect.json": "42d16e60f0fc30bad3a116798ce1a872aef00900c712f7b9a21ee1ca32a8422a",
+        "textures/3f69ef589224a22408a5cc9e842fe1de.png": "ed8c0c57d9ec0460bbb93a9beabf1e0acdfdd37627da11de680eac6dbe5701a6",
+        "textures/9b6cab00e5723004b8b7b365fec970fe.png": "ba164e4457d933a1bf6798af7d3403423a4f9f834eee0f11f8bc69f2f407e328",
+        "textures/e08e8d6372c84bf44ba9043a27f6e923.png": "b6996afd3cf7a7b7d1dd3c0b3ab721f526d1d5230b47d3ee0bb43818f68dae58",
+        "textures/f2e53f39fedc2244b84259cde37c300f.png": "988b5f7e1f23f7f5fe97558a8d9e3df55905af22d22cd5734c3d9006d34ff45d",
+        "textures/f429cf301d6d4934a81f2b5bfe5f6cd7.png": "143eefb90d05b3bc98ce6d749ae1f8c2408e126b0c1a6ca6331cfd2aeb43ef10",
+        "textures/sheet-ec10cf7099e14b8f.png": "ec10cf7099e14b8f9194cafaea2247ebf5b903b2d834ac6ddbecee3738d77642"
+      }
+    },
+    {
+      "resourceKind": 2004,
+      "sourceFactoryIndex": null,
+      "name": "LanternShine",
+      "representativeKind": 909,
+      "prefab": "Resources/plants/travel/ultimatestar/UltimateStarPrefab.prefab",
+      "componentFileId": 198354824845356902,
+      "status": "Passed",
+      "folder": "work/fusion/batch40-269/embedded-particles/2004",
+      "package": "2004/effect.json",
+      "emitters": 1,
+      "effectSha256": "374f364b1616eee1a69045842d4e63f37aa298e650219f575c0fb8c446070609",
+      "files": {
+        "effect.json": "374f364b1616eee1a69045842d4e63f37aa298e650219f575c0fb8c446070609",
+        "textures/dfbb7ee51eceeac47a32bdac59df67f8.png": "fca23cfa2d55fc3bbf4fd1615d1bc2224c3f5a82bd8130ffcbe8a69f8f499fd7"
+      }
+    },
+    {
+      "resourceKind": 2005,
+      "sourceFactoryIndex": null,
+      "name": "fightball_1",
+      "representativeKind": 937,
+      "prefab": "Resources/plants/umbrellaleaf/laserumbrella/LaserUmbrellaPrefab.prefab",
+      "componentFileId": 198632746491512912,
+      "status": "Passed",
+      "folder": "work/fusion/batch40-269/last2-particles/2005",
+      "package": "2005/effect.json",
+      "emitters": 1,
+      "effectSha256": "64673c85b622077a3f90a79ba08b7725850ace03eac8d9f522685b548ebbe062",
+      "files": {
+        "effect.json": "64673c85b622077a3f90a79ba08b7725850ace03eac8d9f522685b548ebbe062",
+        "textures/59371d3919c0aa7469e82363b4a7de0b.png": "62fadea9d809b3e3857078c238560833da26bbdde4a0e3c1669734ed78c021ac"
+      }
+    },
+    {
+      "resourceKind": 2006,
+      "sourceFactoryIndex": null,
+      "name": "NutDust",
+      "representativeKind": 1147,
+      "prefab": "Resources/plants/wallnut/hypnonut/HypnoNutPrefab.prefab",
+      "componentFileId": 198336590748365959,
+      "status": "Passed",
+      "folder": "work/fusion/batch40-269/embedded-particles/2006",
+      "package": "2006/effect.json",
+      "emitters": 1,
+      "effectSha256": "0037fc14cac76bc364ee9f6e07d6bd67d20d4a7968ae4e9f0f98ab4beedb031a",
+      "files": {
+        "effect.json": "0037fc14cac76bc364ee9f6e07d6bd67d20d4a7968ae4e9f0f98ab4beedb031a",
+        "textures/00684abae0d25f6429d2fa1e67dc91da.png": "b9ebc0f87a7c3bb6a4b0c0d0ba05070ee385cbff76ceaca3d8b2b982e47f78f4",
+        "textures/c717c9a24490f8349bb37507541e890c.png": "6734ceace604f5aac21634cd6118b2b36ea19758d02bcc493a29c6bd53175079",
+        "textures/c7438188bb79e69449e9c4c303364222.png": "9051982ac968833bf5f9327920e05eaec839b5e917c4d5289e7d9dd74263248c",
+        "textures/d545108d5d55a034d97304593b4335ee.png": "dcfa18869922a5dd55cbbc589a5759f15de547b9a26d449cbcf4b333604cff49",
+        "textures/dd31c51cf5a7fab4eabc8f30cfef305d.png": "142487835f8535ce212b5e2e497a3219a7740094a01937a04c5e6f080e7780c1",
+        "textures/sheet-a28c3f8341e087a8.png": "a28c3f8341e087a8e4e9f3dcfe889814b8d6755fb482bd5dc3acb02b1d754a2d"
+      }
+    },
+    {
+      "resourceKind": 2007,
+      "sourceFactoryIndex": null,
+      "name": "NutDust",
+      "representativeKind": 1147,
+      "prefab": "Resources/plants/wallnut/hypnonut/HypnoNutPrefab.prefab",
+      "componentFileId": 198313026266067498,
+      "status": "Passed",
+      "folder": "work/fusion/batch40-269/embedded-particles/2007",
+      "package": "2007/effect.json",
+      "emitters": 1,
+      "effectSha256": "401d3e9326cb3da68494f0f99d13261f1370fb09b43d22787d5b7ff6703ce625",
+      "files": {
+        "effect.json": "401d3e9326cb3da68494f0f99d13261f1370fb09b43d22787d5b7ff6703ce625",
+        "textures/00684abae0d25f6429d2fa1e67dc91da.png": "b9ebc0f87a7c3bb6a4b0c0d0ba05070ee385cbff76ceaca3d8b2b982e47f78f4",
+        "textures/c717c9a24490f8349bb37507541e890c.png": "6734ceace604f5aac21634cd6118b2b36ea19758d02bcc493a29c6bd53175079",
+        "textures/c7438188bb79e69449e9c4c303364222.png": "9051982ac968833bf5f9327920e05eaec839b5e917c4d5289e7d9dd74263248c",
+        "textures/d545108d5d55a034d97304593b4335ee.png": "dcfa18869922a5dd55cbbc589a5759f15de547b9a26d449cbcf4b333604cff49",
+        "textures/dd31c51cf5a7fab4eabc8f30cfef305d.png": "142487835f8535ce212b5e2e497a3219a7740094a01937a04c5e6f080e7780c1",
+        "textures/sheet-a28c3f8341e087a8.png": "a28c3f8341e087a8e4e9f3dcfe889814b8d6755fb482bd5dc3acb02b1d754a2d"
+      }
+    },
+    {
+      "resourceKind": 2008,
+      "sourceFactoryIndex": null,
+      "name": "BombCloud",
+      "representativeKind": 1178,
+      "prefab": "Resources/plants/torchwood/cherrytorch/CherryTorchPrefab.prefab",
+      "componentFileId": 198587397909062814,
+      "status": "Passed",
+      "emitters": 1,
+      "folder": "work/fusion/batch40-269/embedded-particles/2008",
+      "effectSha256": "2b6bc8f629dfa802297156742da85c143dc15426e1af32143284cfab3845559f",
+      "package": "2008/effect.json",
+      "files": {
+        "effect.json": "2b6bc8f629dfa802297156742da85c143dc15426e1af32143284cfab3845559f",
+        "textures/12a197204b3b5204b84a351364a2715a.png": "44e41a3497baf75837cc534457d847ef15ba81d1e52d431bb49e61e5950aed8a"
+      }
+    },
+    {
+      "resourceKind": 2027,
+      "sourceFactoryIndex": null,
+      "representativeKind": 1027,
+      "prefab": "Resources/plants/tallnut/TallNutPrefab.prefab",
+      "componentFileId": 198336590748365959,
+      "status": "Passed",
+      "package": "2027/effect.json",
+      "effectSha256": "2f089ea23cf116bc5684cfa2c51ddaa15a844346328aa343c9337e25046861f3",
+      "files": {
+        "effect.json": "2f089ea23cf116bc5684cfa2c51ddaa15a844346328aa343c9337e25046861f3",
+        "textures/3f69ef589224a22408a5cc9e842fe1de.png": "ed8c0c57d9ec0460bbb93a9beabf1e0acdfdd37627da11de680eac6dbe5701a6",
+        "textures/9b6cab00e5723004b8b7b365fec970fe.png": "ba164e4457d933a1bf6798af7d3403423a4f9f834eee0f11f8bc69f2f407e328",
+        "textures/e08e8d6372c84bf44ba9043a27f6e923.png": "b6996afd3cf7a7b7d1dd3c0b3ab721f526d1d5230b47d3ee0bb43818f68dae58",
+        "textures/f2e53f39fedc2244b84259cde37c300f.png": "988b5f7e1f23f7f5fe97558a8d9e3df55905af22d22cd5734c3d9006d34ff45d",
+        "textures/f429cf301d6d4934a81f2b5bfe5f6cd7.png": "143eefb90d05b3bc98ce6d749ae1f8c2408e126b0c1a6ca6331cfd2aeb43ef10",
+        "textures/sheet-ec10cf7099e14b8f.png": "ec10cf7099e14b8f9194cafaea2247ebf5b903b2d834ac6ddbecee3738d77642"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2028,
+      "sourceFactoryIndex": null,
+      "representativeKind": 1027,
+      "prefab": "Resources/plants/tallnut/TallNutPrefab.prefab",
+      "componentFileId": 198313026266067498,
+      "status": "Passed",
+      "package": "2028/effect.json",
+      "effectSha256": "a3e28230d06c8a484eb18a9b58184501d041b0fdbddbb7440a1e051abee1a018",
+      "files": {
+        "effect.json": "a3e28230d06c8a484eb18a9b58184501d041b0fdbddbb7440a1e051abee1a018",
+        "textures/3f69ef589224a22408a5cc9e842fe1de.png": "ed8c0c57d9ec0460bbb93a9beabf1e0acdfdd37627da11de680eac6dbe5701a6",
+        "textures/9b6cab00e5723004b8b7b365fec970fe.png": "ba164e4457d933a1bf6798af7d3403423a4f9f834eee0f11f8bc69f2f407e328",
+        "textures/e08e8d6372c84bf44ba9043a27f6e923.png": "b6996afd3cf7a7b7d1dd3c0b3ab721f526d1d5230b47d3ee0bb43818f68dae58",
+        "textures/f2e53f39fedc2244b84259cde37c300f.png": "988b5f7e1f23f7f5fe97558a8d9e3df55905af22d22cd5734c3d9006d34ff45d",
+        "textures/f429cf301d6d4934a81f2b5bfe5f6cd7.png": "143eefb90d05b3bc98ce6d749ae1f8c2408e126b0c1a6ca6331cfd2aeb43ef10",
+        "textures/sheet-ec10cf7099e14b8f.png": "ec10cf7099e14b8f9194cafaea2247ebf5b903b2d834ac6ddbecee3738d77642"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2024,
+      "sourceFactoryIndex": null,
+      "representativeKind": 24,
+      "prefab": "Resources/plants/pumpkin/PumpkinPrefab.prefab",
+      "componentFileId": 198161607090078389,
+      "status": "Passed",
+      "package": "2024/effect.json",
+      "effectSha256": "bb70f02d2c9d64f94158541310db8d4b75252db537a4ba6417237ad3d52a4f72",
+      "files": {
+        "effect.json": "bb70f02d2c9d64f94158541310db8d4b75252db537a4ba6417237ad3d52a4f72",
+        "textures/3f69ef589224a22408a5cc9e842fe1de.png": "ed8c0c57d9ec0460bbb93a9beabf1e0acdfdd37627da11de680eac6dbe5701a6",
+        "textures/9b6cab00e5723004b8b7b365fec970fe.png": "ba164e4457d933a1bf6798af7d3403423a4f9f834eee0f11f8bc69f2f407e328",
+        "textures/e08e8d6372c84bf44ba9043a27f6e923.png": "b6996afd3cf7a7b7d1dd3c0b3ab721f526d1d5230b47d3ee0bb43818f68dae58",
+        "textures/f2e53f39fedc2244b84259cde37c300f.png": "988b5f7e1f23f7f5fe97558a8d9e3df55905af22d22cd5734c3d9006d34ff45d",
+        "textures/f429cf301d6d4934a81f2b5bfe5f6cd7.png": "143eefb90d05b3bc98ce6d749ae1f8c2408e126b0c1a6ca6331cfd2aeb43ef10",
+        "textures/sheet-ec10cf7099e14b8f.png": "ec10cf7099e14b8f9194cafaea2247ebf5b903b2d834ac6ddbecee3738d77642"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2025,
+      "sourceFactoryIndex": null,
+      "representativeKind": 24,
+      "prefab": "Resources/plants/pumpkin/PumpkinPrefab.prefab",
+      "componentFileId": 198632457200066912,
+      "status": "Passed",
+      "package": "2025/effect.json",
+      "effectSha256": "0f0a108d339a6864b8b9bd86df6359b753415f8812658d7f91f7db5c6bce5a53",
+      "files": {
+        "effect.json": "0f0a108d339a6864b8b9bd86df6359b753415f8812658d7f91f7db5c6bce5a53",
+        "textures/3f69ef589224a22408a5cc9e842fe1de.png": "ed8c0c57d9ec0460bbb93a9beabf1e0acdfdd37627da11de680eac6dbe5701a6",
+        "textures/9b6cab00e5723004b8b7b365fec970fe.png": "ba164e4457d933a1bf6798af7d3403423a4f9f834eee0f11f8bc69f2f407e328",
+        "textures/e08e8d6372c84bf44ba9043a27f6e923.png": "b6996afd3cf7a7b7d1dd3c0b3ab721f526d1d5230b47d3ee0bb43818f68dae58",
+        "textures/f2e53f39fedc2244b84259cde37c300f.png": "988b5f7e1f23f7f5fe97558a8d9e3df55905af22d22cd5734c3d9006d34ff45d",
+        "textures/f429cf301d6d4934a81f2b5bfe5f6cd7.png": "143eefb90d05b3bc98ce6d749ae1f8c2408e126b0c1a6ca6331cfd2aeb43ef10",
+        "textures/sheet-ec10cf7099e14b8f.png": "ec10cf7099e14b8f9194cafaea2247ebf5b903b2d834ac6ddbecee3738d77642"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2600,
+      "sourceFactoryIndex": null,
+      "representativeKind": 1003,
+      "prefab": "Resources/plants/_mixer/cherrynut/CherryNutPrefab.prefab",
+      "componentFileId": 198313026266067498,
+      "status": "Passed",
+      "package": "2600/effect.json",
+      "effectSha256": "05a87c80b25bdbe4a254f3b54d61c710facd579c41b9cd9e6304c6fc8b0cede1",
+      "files": {
+        "effect.json": "05a87c80b25bdbe4a254f3b54d61c710facd579c41b9cd9e6304c6fc8b0cede1",
+        "textures/3f69ef589224a22408a5cc9e842fe1de.png": "ed8c0c57d9ec0460bbb93a9beabf1e0acdfdd37627da11de680eac6dbe5701a6",
+        "textures/9b6cab00e5723004b8b7b365fec970fe.png": "ba164e4457d933a1bf6798af7d3403423a4f9f834eee0f11f8bc69f2f407e328",
+        "textures/e08e8d6372c84bf44ba9043a27f6e923.png": "b6996afd3cf7a7b7d1dd3c0b3ab721f526d1d5230b47d3ee0bb43818f68dae58",
+        "textures/f2e53f39fedc2244b84259cde37c300f.png": "988b5f7e1f23f7f5fe97558a8d9e3df55905af22d22cd5734c3d9006d34ff45d",
+        "textures/f429cf301d6d4934a81f2b5bfe5f6cd7.png": "143eefb90d05b3bc98ce6d749ae1f8c2408e126b0c1a6ca6331cfd2aeb43ef10",
+        "textures/sheet-ec10cf7099e14b8f.png": "ec10cf7099e14b8f9194cafaea2247ebf5b903b2d834ac6ddbecee3738d77642"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2601,
+      "sourceFactoryIndex": null,
+      "representativeKind": 1003,
+      "prefab": "Resources/plants/_mixer/cherrynut/CherryNutPrefab.prefab",
+      "componentFileId": 198969106005120503,
+      "status": "Passed",
+      "package": "2601/effect.json",
+      "effectSha256": "4c09d7ecd74d5abca186e0fcf0e0a6014ce909a7fc1df0d61ecf6f18713c878a",
+      "files": {
+        "effect.json": "4c09d7ecd74d5abca186e0fcf0e0a6014ce909a7fc1df0d61ecf6f18713c878a",
+        "textures/3f69ef589224a22408a5cc9e842fe1de.png": "ed8c0c57d9ec0460bbb93a9beabf1e0acdfdd37627da11de680eac6dbe5701a6",
+        "textures/9b6cab00e5723004b8b7b365fec970fe.png": "ba164e4457d933a1bf6798af7d3403423a4f9f834eee0f11f8bc69f2f407e328",
+        "textures/e08e8d6372c84bf44ba9043a27f6e923.png": "b6996afd3cf7a7b7d1dd3c0b3ab721f526d1d5230b47d3ee0bb43818f68dae58",
+        "textures/f2e53f39fedc2244b84259cde37c300f.png": "988b5f7e1f23f7f5fe97558a8d9e3df55905af22d22cd5734c3d9006d34ff45d",
+        "textures/f429cf301d6d4934a81f2b5bfe5f6cd7.png": "143eefb90d05b3bc98ce6d749ae1f8c2408e126b0c1a6ca6331cfd2aeb43ef10",
+        "textures/sheet-ec10cf7099e14b8f.png": "ec10cf7099e14b8f9194cafaea2247ebf5b903b2d834ac6ddbecee3738d77642"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2602,
+      "sourceFactoryIndex": null,
+      "representativeKind": 1004,
+      "prefab": "Resources/plants/_mixer/nutshooter/NutShooterPrefab.prefab",
+      "componentFileId": 198694121525821480,
+      "status": "Passed",
+      "package": "2602/effect.json",
+      "effectSha256": "88c1110c58ab43a03a4ba50bcc44af8d63cd9be54da4cb6dfa19dad6235508da",
+      "files": {
+        "effect.json": "88c1110c58ab43a03a4ba50bcc44af8d63cd9be54da4cb6dfa19dad6235508da",
+        "textures/3f69ef589224a22408a5cc9e842fe1de.png": "ed8c0c57d9ec0460bbb93a9beabf1e0acdfdd37627da11de680eac6dbe5701a6",
+        "textures/9b6cab00e5723004b8b7b365fec970fe.png": "ba164e4457d933a1bf6798af7d3403423a4f9f834eee0f11f8bc69f2f407e328",
+        "textures/e08e8d6372c84bf44ba9043a27f6e923.png": "b6996afd3cf7a7b7d1dd3c0b3ab721f526d1d5230b47d3ee0bb43818f68dae58",
+        "textures/f2e53f39fedc2244b84259cde37c300f.png": "988b5f7e1f23f7f5fe97558a8d9e3df55905af22d22cd5734c3d9006d34ff45d",
+        "textures/f429cf301d6d4934a81f2b5bfe5f6cd7.png": "143eefb90d05b3bc98ce6d749ae1f8c2408e126b0c1a6ca6331cfd2aeb43ef10",
+        "textures/sheet-ec10cf7099e14b8f.png": "ec10cf7099e14b8f9194cafaea2247ebf5b903b2d834ac6ddbecee3738d77642"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2603,
+      "sourceFactoryIndex": null,
+      "representativeKind": 1004,
+      "prefab": "Resources/plants/_mixer/nutshooter/NutShooterPrefab.prefab",
+      "componentFileId": 198900271049623953,
+      "status": "Passed",
+      "package": "2603/effect.json",
+      "effectSha256": "caca403599e157032980e237c8274bdb80ce43bfe54df2a2b908c5b38e144759",
+      "files": {
+        "effect.json": "caca403599e157032980e237c8274bdb80ce43bfe54df2a2b908c5b38e144759",
+        "textures/3f69ef589224a22408a5cc9e842fe1de.png": "ed8c0c57d9ec0460bbb93a9beabf1e0acdfdd37627da11de680eac6dbe5701a6",
+        "textures/9b6cab00e5723004b8b7b365fec970fe.png": "ba164e4457d933a1bf6798af7d3403423a4f9f834eee0f11f8bc69f2f407e328",
+        "textures/e08e8d6372c84bf44ba9043a27f6e923.png": "b6996afd3cf7a7b7d1dd3c0b3ab721f526d1d5230b47d3ee0bb43818f68dae58",
+        "textures/f2e53f39fedc2244b84259cde37c300f.png": "988b5f7e1f23f7f5fe97558a8d9e3df55905af22d22cd5734c3d9006d34ff45d",
+        "textures/f429cf301d6d4934a81f2b5bfe5f6cd7.png": "143eefb90d05b3bc98ce6d749ae1f8c2408e126b0c1a6ca6331cfd2aeb43ef10",
+        "textures/sheet-ec10cf7099e14b8f.png": "ec10cf7099e14b8f9194cafaea2247ebf5b903b2d834ac6ddbecee3738d77642"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2604,
+      "sourceFactoryIndex": null,
+      "representativeKind": 1006,
+      "prefab": "Resources/plants/_mixer/sunnut/SunNutPrefab.prefab",
+      "componentFileId": 198336590748365959,
+      "status": "Passed",
+      "package": "2604/effect.json",
+      "effectSha256": "1a42a587fd85539056911a848b4701f0473f3aec1600007c3c6507e075f06d7c",
+      "files": {
+        "effect.json": "1a42a587fd85539056911a848b4701f0473f3aec1600007c3c6507e075f06d7c",
+        "textures/3f69ef589224a22408a5cc9e842fe1de.png": "ed8c0c57d9ec0460bbb93a9beabf1e0acdfdd37627da11de680eac6dbe5701a6",
+        "textures/9b6cab00e5723004b8b7b365fec970fe.png": "ba164e4457d933a1bf6798af7d3403423a4f9f834eee0f11f8bc69f2f407e328",
+        "textures/e08e8d6372c84bf44ba9043a27f6e923.png": "b6996afd3cf7a7b7d1dd3c0b3ab721f526d1d5230b47d3ee0bb43818f68dae58",
+        "textures/f2e53f39fedc2244b84259cde37c300f.png": "988b5f7e1f23f7f5fe97558a8d9e3df55905af22d22cd5734c3d9006d34ff45d",
+        "textures/f429cf301d6d4934a81f2b5bfe5f6cd7.png": "143eefb90d05b3bc98ce6d749ae1f8c2408e126b0c1a6ca6331cfd2aeb43ef10",
+        "textures/sheet-ec10cf7099e14b8f.png": "ec10cf7099e14b8f9194cafaea2247ebf5b903b2d834ac6ddbecee3738d77642"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2605,
+      "sourceFactoryIndex": null,
+      "representativeKind": 1006,
+      "prefab": "Resources/plants/_mixer/sunnut/SunNutPrefab.prefab",
+      "componentFileId": 198313026266067498,
+      "status": "Passed",
+      "package": "2605/effect.json",
+      "effectSha256": "efd6592f5448de23bfb65043823de8560ad55af5602d92c4944c10ccb003d9e9",
+      "files": {
+        "effect.json": "efd6592f5448de23bfb65043823de8560ad55af5602d92c4944c10ccb003d9e9",
+        "textures/3f69ef589224a22408a5cc9e842fe1de.png": "ed8c0c57d9ec0460bbb93a9beabf1e0acdfdd37627da11de680eac6dbe5701a6",
+        "textures/9b6cab00e5723004b8b7b365fec970fe.png": "ba164e4457d933a1bf6798af7d3403423a4f9f834eee0f11f8bc69f2f407e328",
+        "textures/e08e8d6372c84bf44ba9043a27f6e923.png": "b6996afd3cf7a7b7d1dd3c0b3ab721f526d1d5230b47d3ee0bb43818f68dae58",
+        "textures/f2e53f39fedc2244b84259cde37c300f.png": "988b5f7e1f23f7f5fe97558a8d9e3df55905af22d22cd5734c3d9006d34ff45d",
+        "textures/f429cf301d6d4934a81f2b5bfe5f6cd7.png": "143eefb90d05b3bc98ce6d749ae1f8c2408e126b0c1a6ca6331cfd2aeb43ef10",
+        "textures/sheet-ec10cf7099e14b8f.png": "ec10cf7099e14b8f9194cafaea2247ebf5b903b2d834ac6ddbecee3738d77642"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2606,
+      "sourceFactoryIndex": null,
+      "representativeKind": 1010,
+      "prefab": "Resources/plants/_mixer/potatonut/PotatoNutPrefab.prefab",
+      "componentFileId": 198711914853252429,
+      "status": "Passed",
+      "package": "2606/effect.json",
+      "effectSha256": "d1a64f2528f41e00c84fda2940b87a73c2b6fcd046acd6630b405fc73351dfcc",
+      "files": {
+        "effect.json": "d1a64f2528f41e00c84fda2940b87a73c2b6fcd046acd6630b405fc73351dfcc",
+        "textures/3f69ef589224a22408a5cc9e842fe1de.png": "ed8c0c57d9ec0460bbb93a9beabf1e0acdfdd37627da11de680eac6dbe5701a6",
+        "textures/9b6cab00e5723004b8b7b365fec970fe.png": "ba164e4457d933a1bf6798af7d3403423a4f9f834eee0f11f8bc69f2f407e328",
+        "textures/e08e8d6372c84bf44ba9043a27f6e923.png": "b6996afd3cf7a7b7d1dd3c0b3ab721f526d1d5230b47d3ee0bb43818f68dae58",
+        "textures/f2e53f39fedc2244b84259cde37c300f.png": "988b5f7e1f23f7f5fe97558a8d9e3df55905af22d22cd5734c3d9006d34ff45d",
+        "textures/f429cf301d6d4934a81f2b5bfe5f6cd7.png": "143eefb90d05b3bc98ce6d749ae1f8c2408e126b0c1a6ca6331cfd2aeb43ef10",
+        "textures/sheet-ec10cf7099e14b8f.png": "ec10cf7099e14b8f9194cafaea2247ebf5b903b2d834ac6ddbecee3738d77642"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2607,
+      "sourceFactoryIndex": null,
+      "representativeKind": 1010,
+      "prefab": "Resources/plants/_mixer/potatonut/PotatoNutPrefab.prefab",
+      "componentFileId": 198694121525821480,
+      "status": "Passed",
+      "package": "2607/effect.json",
+      "effectSha256": "4144a4b7c8cbb6e3040dc557dc45c3f80f2aa982593143c312cad04ed276fe9c",
+      "files": {
+        "effect.json": "4144a4b7c8cbb6e3040dc557dc45c3f80f2aa982593143c312cad04ed276fe9c",
+        "textures/3f69ef589224a22408a5cc9e842fe1de.png": "ed8c0c57d9ec0460bbb93a9beabf1e0acdfdd37627da11de680eac6dbe5701a6",
+        "textures/9b6cab00e5723004b8b7b365fec970fe.png": "ba164e4457d933a1bf6798af7d3403423a4f9f834eee0f11f8bc69f2f407e328",
+        "textures/e08e8d6372c84bf44ba9043a27f6e923.png": "b6996afd3cf7a7b7d1dd3c0b3ab721f526d1d5230b47d3ee0bb43818f68dae58",
+        "textures/f2e53f39fedc2244b84259cde37c300f.png": "988b5f7e1f23f7f5fe97558a8d9e3df55905af22d22cd5734c3d9006d34ff45d",
+        "textures/f429cf301d6d4934a81f2b5bfe5f6cd7.png": "143eefb90d05b3bc98ce6d749ae1f8c2408e126b0c1a6ca6331cfd2aeb43ef10",
+        "textures/sheet-ec10cf7099e14b8f.png": "ec10cf7099e14b8f9194cafaea2247ebf5b903b2d834ac6ddbecee3738d77642"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2608,
+      "sourceFactoryIndex": null,
+      "representativeKind": 1013,
+      "prefab": "Resources/plants/_mixer/superchomper/SuperChomperPrefab.prefab",
+      "componentFileId": 198518489005915545,
+      "status": "Passed",
+      "package": "2608/effect.json",
+      "effectSha256": "7bb8983426b89ca6d738f0dbc695ba27fbafcca366d0a756603f08c314ddd319",
+      "files": {
+        "effect.json": "7bb8983426b89ca6d738f0dbc695ba27fbafcca366d0a756603f08c314ddd319",
+        "textures/2b260a2e62464934da45282732d6a50a.png": "3cbceffcf1c796ab20b76d0d49b6f2f6c4a5fde6be1f31ecbc8d13301373518b",
+        "textures/494e213e6a11ce54b91474ce65cfd77c.png": "e9b0b1a6fa36b8ee9900034a87062cad1973db60ebebb1632f070ca5a851ec3f",
+        "textures/4bf9e419a032d824791605de578decbb.png": "f409a074397f1afe277a13898ab4cba75f12184afc8ffd250d589f392c9eee68",
+        "textures/6547c7b14455df4498aef282b2d393e5.png": "79958c8f98bf04bb78c268f7045b8700750e597abb7bf1d3f04affb03d28a1fe",
+        "textures/e6510c146280b5b4499be2ef45132d42.png": "341c9620849a8587df03456e0d8f1b9352e7377eb8df9d2319bcbf77607969e3",
+        "textures/sheet-8f5db68c15236cd8.png": "8f5db68c15236cd8b7b1f8e78653837104aa4110ba4965a9f71cd9112ed97f85"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2609,
+      "sourceFactoryIndex": null,
+      "representativeKind": 1013,
+      "prefab": "Resources/plants/_mixer/superchomper/SuperChomperPrefab.prefab",
+      "componentFileId": 198344419225485095,
+      "status": "Passed",
+      "package": "2609/effect.json",
+      "effectSha256": "f159fc7d606555e53d0900ae1fe8954b950135e46c6859aded8b669fd7fe9012",
+      "files": {
+        "effect.json": "f159fc7d606555e53d0900ae1fe8954b950135e46c6859aded8b669fd7fe9012",
+        "textures/2b260a2e62464934da45282732d6a50a.png": "3cbceffcf1c796ab20b76d0d49b6f2f6c4a5fde6be1f31ecbc8d13301373518b",
+        "textures/494e213e6a11ce54b91474ce65cfd77c.png": "e9b0b1a6fa36b8ee9900034a87062cad1973db60ebebb1632f070ca5a851ec3f",
+        "textures/4bf9e419a032d824791605de578decbb.png": "f409a074397f1afe277a13898ab4cba75f12184afc8ffd250d589f392c9eee68",
+        "textures/6547c7b14455df4498aef282b2d393e5.png": "79958c8f98bf04bb78c268f7045b8700750e597abb7bf1d3f04affb03d28a1fe",
+        "textures/e6510c146280b5b4499be2ef45132d42.png": "341c9620849a8587df03456e0d8f1b9352e7377eb8df9d2319bcbf77607969e3",
+        "textures/sheet-8f5db68c15236cd8.png": "8f5db68c15236cd8b7b1f8e78653837104aa4110ba4965a9f71cd9112ed97f85"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2610,
+      "sourceFactoryIndex": null,
+      "representativeKind": 1029,
+      "prefab": "Resources/plants/wallnut/IronNutPrefab.prefab",
+      "componentFileId": 198336590748365959,
+      "status": "Passed",
+      "package": "2610/effect.json",
+      "effectSha256": "7ea52ce65f147a93c22c752f13c01e575a4ed5d2bf4c468716efa44e4152f526",
+      "files": {
+        "effect.json": "7ea52ce65f147a93c22c752f13c01e575a4ed5d2bf4c468716efa44e4152f526",
+        "textures/3f69ef589224a22408a5cc9e842fe1de.png": "ed8c0c57d9ec0460bbb93a9beabf1e0acdfdd37627da11de680eac6dbe5701a6",
+        "textures/9b6cab00e5723004b8b7b365fec970fe.png": "ba164e4457d933a1bf6798af7d3403423a4f9f834eee0f11f8bc69f2f407e328",
+        "textures/e08e8d6372c84bf44ba9043a27f6e923.png": "b6996afd3cf7a7b7d1dd3c0b3ab721f526d1d5230b47d3ee0bb43818f68dae58",
+        "textures/f2e53f39fedc2244b84259cde37c300f.png": "988b5f7e1f23f7f5fe97558a8d9e3df55905af22d22cd5734c3d9006d34ff45d",
+        "textures/f429cf301d6d4934a81f2b5bfe5f6cd7.png": "143eefb90d05b3bc98ce6d749ae1f8c2408e126b0c1a6ca6331cfd2aeb43ef10",
+        "textures/sheet-ec10cf7099e14b8f.png": "ec10cf7099e14b8f9194cafaea2247ebf5b903b2d834ac6ddbecee3738d77642"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2611,
+      "sourceFactoryIndex": null,
+      "representativeKind": 1029,
+      "prefab": "Resources/plants/wallnut/IronNutPrefab.prefab",
+      "componentFileId": 198313026266067498,
+      "status": "Passed",
+      "package": "2611/effect.json",
+      "effectSha256": "83898988f3c496408ce0a486492c822977aa2239c258a4a565695d3697df1cd8",
+      "files": {
+        "effect.json": "83898988f3c496408ce0a486492c822977aa2239c258a4a565695d3697df1cd8",
+        "textures/3f69ef589224a22408a5cc9e842fe1de.png": "ed8c0c57d9ec0460bbb93a9beabf1e0acdfdd37627da11de680eac6dbe5701a6",
+        "textures/9b6cab00e5723004b8b7b365fec970fe.png": "ba164e4457d933a1bf6798af7d3403423a4f9f834eee0f11f8bc69f2f407e328",
+        "textures/e08e8d6372c84bf44ba9043a27f6e923.png": "b6996afd3cf7a7b7d1dd3c0b3ab721f526d1d5230b47d3ee0bb43818f68dae58",
+        "textures/f2e53f39fedc2244b84259cde37c300f.png": "988b5f7e1f23f7f5fe97558a8d9e3df55905af22d22cd5734c3d9006d34ff45d",
+        "textures/f429cf301d6d4934a81f2b5bfe5f6cd7.png": "143eefb90d05b3bc98ce6d749ae1f8c2408e126b0c1a6ca6331cfd2aeb43ef10",
+        "textures/sheet-ec10cf7099e14b8f.png": "ec10cf7099e14b8f9194cafaea2247ebf5b903b2d834ac6ddbecee3738d77642"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2612,
+      "sourceFactoryIndex": null,
+      "representativeKind": 1039,
+      "prefab": "Resources/plants/tallnut/TallIceNutPrefab.prefab",
+      "componentFileId": 198336590748365959,
+      "status": "Passed",
+      "package": "2612/effect.json",
+      "effectSha256": "90bb8c1886c95d1473569099d87c156277ed93bee4133db55f9f05ef27d2ccb2",
+      "files": {
+        "effect.json": "90bb8c1886c95d1473569099d87c156277ed93bee4133db55f9f05ef27d2ccb2",
+        "textures/00684abae0d25f6429d2fa1e67dc91da.png": "b9ebc0f87a7c3bb6a4b0c0d0ba05070ee385cbff76ceaca3d8b2b982e47f78f4",
+        "textures/c717c9a24490f8349bb37507541e890c.png": "6734ceace604f5aac21634cd6118b2b36ea19758d02bcc493a29c6bd53175079",
+        "textures/c7438188bb79e69449e9c4c303364222.png": "9051982ac968833bf5f9327920e05eaec839b5e917c4d5289e7d9dd74263248c",
+        "textures/d545108d5d55a034d97304593b4335ee.png": "dcfa18869922a5dd55cbbc589a5759f15de547b9a26d449cbcf4b333604cff49",
+        "textures/dd31c51cf5a7fab4eabc8f30cfef305d.png": "142487835f8535ce212b5e2e497a3219a7740094a01937a04c5e6f080e7780c1",
+        "textures/sheet-a28c3f8341e087a8.png": "a28c3f8341e087a8e4e9f3dcfe889814b8d6755fb482bd5dc3acb02b1d754a2d"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2613,
+      "sourceFactoryIndex": null,
+      "representativeKind": 1039,
+      "prefab": "Resources/plants/tallnut/TallIceNutPrefab.prefab",
+      "componentFileId": 198313026266067498,
+      "status": "Passed",
+      "package": "2613/effect.json",
+      "effectSha256": "e04addd972fa5bfe9f38d82c06e639802da34b73c93c6dae4d32e3b0eccae34e",
+      "files": {
+        "effect.json": "e04addd972fa5bfe9f38d82c06e639802da34b73c93c6dae4d32e3b0eccae34e",
+        "textures/00684abae0d25f6429d2fa1e67dc91da.png": "b9ebc0f87a7c3bb6a4b0c0d0ba05070ee385cbff76ceaca3d8b2b982e47f78f4",
+        "textures/c717c9a24490f8349bb37507541e890c.png": "6734ceace604f5aac21634cd6118b2b36ea19758d02bcc493a29c6bd53175079",
+        "textures/c7438188bb79e69449e9c4c303364222.png": "9051982ac968833bf5f9327920e05eaec839b5e917c4d5289e7d9dd74263248c",
+        "textures/d545108d5d55a034d97304593b4335ee.png": "dcfa18869922a5dd55cbbc589a5759f15de547b9a26d449cbcf4b333604cff49",
+        "textures/dd31c51cf5a7fab4eabc8f30cfef305d.png": "142487835f8535ce212b5e2e497a3219a7740094a01937a04c5e6f080e7780c1",
+        "textures/sheet-a28c3f8341e087a8.png": "a28c3f8341e087a8e4e9f3dcfe889814b8d6755fb482bd5dc3acb02b1d754a2d"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2614,
+      "sourceFactoryIndex": null,
+      "representativeKind": 1048,
+      "prefab": "Resources/plants/wallnut/caltropnut/CaltropNutPrefab.prefab",
+      "componentFileId": 198161607090078389,
+      "status": "Passed",
+      "package": "2614/effect.json",
+      "effectSha256": "af049bed16480a951ae799629bac267f21fb0ac89528d468a6167f409b219e7b",
+      "files": {
+        "effect.json": "af049bed16480a951ae799629bac267f21fb0ac89528d468a6167f409b219e7b",
+        "textures/3f69ef589224a22408a5cc9e842fe1de.png": "ed8c0c57d9ec0460bbb93a9beabf1e0acdfdd37627da11de680eac6dbe5701a6",
+        "textures/9b6cab00e5723004b8b7b365fec970fe.png": "ba164e4457d933a1bf6798af7d3403423a4f9f834eee0f11f8bc69f2f407e328",
+        "textures/e08e8d6372c84bf44ba9043a27f6e923.png": "b6996afd3cf7a7b7d1dd3c0b3ab721f526d1d5230b47d3ee0bb43818f68dae58",
+        "textures/f2e53f39fedc2244b84259cde37c300f.png": "988b5f7e1f23f7f5fe97558a8d9e3df55905af22d22cd5734c3d9006d34ff45d",
+        "textures/f429cf301d6d4934a81f2b5bfe5f6cd7.png": "143eefb90d05b3bc98ce6d749ae1f8c2408e126b0c1a6ca6331cfd2aeb43ef10",
+        "textures/sheet-ec10cf7099e14b8f.png": "ec10cf7099e14b8f9194cafaea2247ebf5b903b2d834ac6ddbecee3738d77642"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2615,
+      "sourceFactoryIndex": null,
+      "representativeKind": 1048,
+      "prefab": "Resources/plants/wallnut/caltropnut/CaltropNutPrefab.prefab",
+      "componentFileId": 198302127217294661,
+      "status": "Passed",
+      "package": "2615/effect.json",
+      "effectSha256": "0077e9974891d3a18823874584c98900f669e54a08314d25d36e6811468ce65c",
+      "files": {
+        "effect.json": "0077e9974891d3a18823874584c98900f669e54a08314d25d36e6811468ce65c",
+        "textures/3f69ef589224a22408a5cc9e842fe1de.png": "ed8c0c57d9ec0460bbb93a9beabf1e0acdfdd37627da11de680eac6dbe5701a6",
+        "textures/9b6cab00e5723004b8b7b365fec970fe.png": "ba164e4457d933a1bf6798af7d3403423a4f9f834eee0f11f8bc69f2f407e328",
+        "textures/e08e8d6372c84bf44ba9043a27f6e923.png": "b6996afd3cf7a7b7d1dd3c0b3ab721f526d1d5230b47d3ee0bb43818f68dae58",
+        "textures/f2e53f39fedc2244b84259cde37c300f.png": "988b5f7e1f23f7f5fe97558a8d9e3df55905af22d22cd5734c3d9006d34ff45d",
+        "textures/f429cf301d6d4934a81f2b5bfe5f6cd7.png": "143eefb90d05b3bc98ce6d749ae1f8c2408e126b0c1a6ca6331cfd2aeb43ef10",
+        "textures/sheet-ec10cf7099e14b8f.png": "ec10cf7099e14b8f9194cafaea2247ebf5b903b2d834ac6ddbecee3738d77642"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2616,
+      "sourceFactoryIndex": null,
+      "representativeKind": 1052,
+      "prefab": "Resources/plants/torchwood/supertorch/SuperTorchPrefab.prefab",
+      "componentFileId": 198621510681728303,
+      "status": "Passed",
+      "package": "2616/effect.json",
+      "effectSha256": "1256e5f1a3cd80d50c852693deb8b557168b3f207f931a892baee03b4d5c0713",
+      "files": {
+        "effect.json": "1256e5f1a3cd80d50c852693deb8b557168b3f207f931a892baee03b4d5c0713",
+        "textures/d25d5447c9082674d9e3b4619552dc99.png": "2bb64e20c73dd3d29bb80e7d31f2c81d0cb312a240f554c3033d73e81b35ad6d"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2617,
+      "sourceFactoryIndex": null,
+      "representativeKind": 1052,
+      "prefab": "Resources/plants/torchwood/supertorch/SuperTorchPrefab.prefab",
+      "componentFileId": 198302127217294661,
+      "status": "Passed",
+      "package": "2617/effect.json",
+      "effectSha256": "f023a43ef74abed65a8697b41d106af8c810da565f366c0cd24224d2d4642c73",
+      "files": {
+        "effect.json": "f023a43ef74abed65a8697b41d106af8c810da565f366c0cd24224d2d4642c73",
+        "textures/d25d5447c9082674d9e3b4619552dc99.png": "2bb64e20c73dd3d29bb80e7d31f2c81d0cb312a240f554c3033d73e81b35ad6d"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2618,
+      "sourceFactoryIndex": null,
+      "representativeKind": 1053,
+      "prefab": "Resources/plants/torchwood/jalatorch/JalaTorchPrefab.prefab",
+      "componentFileId": 198161607090078389,
+      "status": "Passed",
+      "package": "2618/effect.json",
+      "effectSha256": "d93e1d69ce9a457fdc82c5d4b7f2727c0b371b0fa34bead7fb2f82844250646f",
+      "files": {
+        "effect.json": "d93e1d69ce9a457fdc82c5d4b7f2727c0b371b0fa34bead7fb2f82844250646f",
+        "textures/d25d5447c9082674d9e3b4619552dc99.png": "2bb64e20c73dd3d29bb80e7d31f2c81d0cb312a240f554c3033d73e81b35ad6d"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2619,
+      "sourceFactoryIndex": null,
+      "representativeKind": 1059,
+      "prefab": "Resources/plants/torchwood/squashtorch/SquashTorchPrefab.prefab",
+      "componentFileId": 198705390221481576,
+      "status": "Passed",
+      "package": "2619/effect.json",
+      "effectSha256": "b912115f1b15e1ccaaf28d39bdeb778b3d62e512ccad2f591baf6fe12150c831",
+      "files": {
+        "effect.json": "b912115f1b15e1ccaaf28d39bdeb778b3d62e512ccad2f591baf6fe12150c831",
+        "textures/d25d5447c9082674d9e3b4619552dc99.png": "2bb64e20c73dd3d29bb80e7d31f2c81d0cb312a240f554c3033d73e81b35ad6d"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2620,
+      "sourceFactoryIndex": null,
+      "representativeKind": 1073,
+      "prefab": "Resources/plants/tallnut/TallFireNutPrefab.prefab",
+      "componentFileId": 198632457200066912,
+      "status": "Passed",
+      "package": "2620/effect.json",
+      "effectSha256": "5712181eadab3b2a0cbf37e9f089abd8e0738c00f1a94a92575529867d2bdd35",
+      "files": {
+        "effect.json": "5712181eadab3b2a0cbf37e9f089abd8e0738c00f1a94a92575529867d2bdd35",
+        "textures/00684abae0d25f6429d2fa1e67dc91da.png": "b9ebc0f87a7c3bb6a4b0c0d0ba05070ee385cbff76ceaca3d8b2b982e47f78f4",
+        "textures/c717c9a24490f8349bb37507541e890c.png": "6734ceace604f5aac21634cd6118b2b36ea19758d02bcc493a29c6bd53175079",
+        "textures/c7438188bb79e69449e9c4c303364222.png": "9051982ac968833bf5f9327920e05eaec839b5e917c4d5289e7d9dd74263248c",
+        "textures/d545108d5d55a034d97304593b4335ee.png": "dcfa18869922a5dd55cbbc589a5759f15de547b9a26d449cbcf4b333604cff49",
+        "textures/dd31c51cf5a7fab4eabc8f30cfef305d.png": "142487835f8535ce212b5e2e497a3219a7740094a01937a04c5e6f080e7780c1",
+        "textures/sheet-a28c3f8341e087a8.png": "a28c3f8341e087a8e4e9f3dcfe889814b8d6755fb482bd5dc3acb02b1d754a2d"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2621,
+      "sourceFactoryIndex": null,
+      "representativeKind": 1073,
+      "prefab": "Resources/plants/tallnut/TallFireNutPrefab.prefab",
+      "componentFileId": 198918264173551851,
+      "status": "Passed",
+      "package": "2621/effect.json",
+      "effectSha256": "57d5cf87b80972e9b35cdce03a8046b753a268238988231f543666f62cfe49f4",
+      "files": {
+        "effect.json": "57d5cf87b80972e9b35cdce03a8046b753a268238988231f543666f62cfe49f4",
+        "textures/00684abae0d25f6429d2fa1e67dc91da.png": "b9ebc0f87a7c3bb6a4b0c0d0ba05070ee385cbff76ceaca3d8b2b982e47f78f4",
+        "textures/c717c9a24490f8349bb37507541e890c.png": "6734ceace604f5aac21634cd6118b2b36ea19758d02bcc493a29c6bd53175079",
+        "textures/c7438188bb79e69449e9c4c303364222.png": "9051982ac968833bf5f9327920e05eaec839b5e917c4d5289e7d9dd74263248c",
+        "textures/d545108d5d55a034d97304593b4335ee.png": "dcfa18869922a5dd55cbbc589a5759f15de547b9a26d449cbcf4b333604cff49",
+        "textures/dd31c51cf5a7fab4eabc8f30cfef305d.png": "142487835f8535ce212b5e2e497a3219a7740094a01937a04c5e6f080e7780c1",
+        "textures/sheet-a28c3f8341e087a8.png": "a28c3f8341e087a8e4e9f3dcfe889814b8d6755fb482bd5dc3acb02b1d754a2d"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2622,
+      "sourceFactoryIndex": null,
+      "representativeKind": 1079,
+      "prefab": "Resources/plants/cactus/lanterncactus/LanternCactusPrefab.prefab",
+      "componentFileId": 198693329660128220,
+      "status": "Passed",
+      "package": "2622/effect.json",
+      "effectSha256": "7c278ab087bedeef3429e703ed610549778ba3221484d9008d439e736157232f",
+      "files": {
+        "effect.json": "7c278ab087bedeef3429e703ed610549778ba3221484d9008d439e736157232f",
+        "textures/dfbb7ee51eceeac47a32bdac59df67f8.png": "fca23cfa2d55fc3bbf4fd1615d1bc2224c3f5a82bd8130ffcbe8a69f8f499fd7"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2623,
+      "sourceFactoryIndex": null,
+      "representativeKind": 1081,
+      "prefab": "Resources/plants/starfruit/lanternstar/LanternStarPrefab.prefab",
+      "componentFileId": 198900271049623953,
+      "status": "Passed",
+      "package": "2623/effect.json",
+      "effectSha256": "b4d534f593a7f9dee9745b8a56c63332ed2e87f5531aa5683f0de8ff8266ce4f",
+      "files": {
+        "effect.json": "b4d534f593a7f9dee9745b8a56c63332ed2e87f5531aa5683f0de8ff8266ce4f",
+        "textures/dfbb7ee51eceeac47a32bdac59df67f8.png": "fca23cfa2d55fc3bbf4fd1615d1bc2224c3f5a82bd8130ffcbe8a69f8f499fd7"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2624,
+      "sourceFactoryIndex": null,
+      "representativeKind": 1100,
+      "prefab": "Resources/plants/magnetshroom/lanternmagnet/LanternMagnetPrefab.prefab",
+      "componentFileId": 198630643969539439,
+      "status": "Passed",
+      "package": "2624/effect.json",
+      "effectSha256": "84235b3132ce2d9e607902b69c8fe0b0c6027bb1c29e33e99d5363b165b677e7",
+      "files": {
+        "effect.json": "84235b3132ce2d9e607902b69c8fe0b0c6027bb1c29e33e99d5363b165b677e7",
+        "textures/dfbb7ee51eceeac47a32bdac59df67f8.png": "fca23cfa2d55fc3bbf4fd1615d1bc2224c3f5a82bd8130ffcbe8a69f8f499fd7"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2625,
+      "sourceFactoryIndex": null,
+      "representativeKind": 1189,
+      "prefab": "Resources/plants/wallnut/icenut/IceNutPrefab.prefab",
+      "componentFileId": 198336590748365959,
+      "status": "Passed",
+      "package": "2625/effect.json",
+      "effectSha256": "de8ee86dbdaa27ddb22f61c8a21efdcb1cb27c91af58d51dd8078da8e351aa01",
+      "files": {
+        "effect.json": "de8ee86dbdaa27ddb22f61c8a21efdcb1cb27c91af58d51dd8078da8e351aa01",
+        "textures/00684abae0d25f6429d2fa1e67dc91da.png": "b9ebc0f87a7c3bb6a4b0c0d0ba05070ee385cbff76ceaca3d8b2b982e47f78f4",
+        "textures/c717c9a24490f8349bb37507541e890c.png": "6734ceace604f5aac21634cd6118b2b36ea19758d02bcc493a29c6bd53175079",
+        "textures/c7438188bb79e69449e9c4c303364222.png": "9051982ac968833bf5f9327920e05eaec839b5e917c4d5289e7d9dd74263248c",
+        "textures/d545108d5d55a034d97304593b4335ee.png": "dcfa18869922a5dd55cbbc589a5759f15de547b9a26d449cbcf4b333604cff49",
+        "textures/dd31c51cf5a7fab4eabc8f30cfef305d.png": "142487835f8535ce212b5e2e497a3219a7740094a01937a04c5e6f080e7780c1",
+        "textures/sheet-a28c3f8341e087a8.png": "a28c3f8341e087a8e4e9f3dcfe889814b8d6755fb482bd5dc3acb02b1d754a2d"
+      },
+      "emitters": 1
+    },
+    {
+      "resourceKind": 2626,
+      "sourceFactoryIndex": null,
+      "representativeKind": 1189,
+      "prefab": "Resources/plants/wallnut/icenut/IceNutPrefab.prefab",
+      "componentFileId": 198313026266067498,
+      "status": "Passed",
+      "package": "2626/effect.json",
+      "effectSha256": "d7a3bf628772a4279091dbfbb25296aedd76bdca493a7c525d28d281d6b00838",
+      "files": {
+        "effect.json": "d7a3bf628772a4279091dbfbb25296aedd76bdca493a7c525d28d281d6b00838",
+        "textures/00684abae0d25f6429d2fa1e67dc91da.png": "b9ebc0f87a7c3bb6a4b0c0d0ba05070ee385cbff76ceaca3d8b2b982e47f78f4",
+        "textures/c717c9a24490f8349bb37507541e890c.png": "6734ceace604f5aac21634cd6118b2b36ea19758d02bcc493a29c6bd53175079",
+        "textures/c7438188bb79e69449e9c4c303364222.png": "9051982ac968833bf5f9327920e05eaec839b5e917c4d5289e7d9dd74263248c",
+        "textures/d545108d5d55a034d97304593b4335ee.png": "dcfa18869922a5dd55cbbc589a5759f15de547b9a26d449cbcf4b333604cff49",
+        "textures/dd31c51cf5a7fab4eabc8f30cfef305d.png": "142487835f8535ce212b5e2e497a3219a7740094a01937a04c5e6f080e7780c1",
+        "textures/sheet-a28c3f8341e087a8.png": "a28c3f8341e087a8e4e9f3dcfe889814b8d6755fb482bd5dc3acb02b1d754a2d"
+      },
+      "emitters": 1
+    }
+  ],
+  "nativeLoader": "Not executed",
+  "acceptedDelta": 0,
+  "plants": [
+    {
+      "kind": 249,
+      "status": "Passed",
+      "count": 2
+    },
+    {
+      "kind": 905,
+      "status": "Passed",
+      "count": 2
+    },
+    {
+      "kind": 909,
+      "status": "Passed",
+      "count": 1
+    },
+    {
+      "kind": 911,
+      "status": "Passed",
+      "count": 2
+    },
+    {
+      "kind": 922,
+      "status": "Passed",
+      "count": 2
+    },
+    {
+      "kind": 937,
+      "status": "Passed",
+      "count": 1
+    },
+    {
+      "kind": 1089,
+      "status": "Passed",
+      "count": 2
+    },
+    {
+      "kind": 1104,
+      "status": "Passed",
+      "count": 1
+    },
+    {
+      "kind": 1110,
+      "status": "Passed",
+      "count": 2
+    },
+    {
+      "kind": 1147,
+      "status": "Passed",
+      "count": 2
+    },
+    {
+      "kind": 1164,
+      "status": "Passed",
+      "count": 2
+    },
+    {
+      "kind": 1178,
+      "status": "Passed",
+      "count": 1
+    },
+    {
+      "kind": 1027,
+      "status": "Passed",
+      "count": 2,
+      "scope": "Exact source NutDust PS binding; native-compatible Tod adapter"
+    },
+    {
+      "kind": 24,
+      "status": "Passed",
+      "count": 2,
+      "scope": "Exact source NutDust PS binding; native-compatible Tod adapter"
+    },
+    {
+      "kind": 1003,
+      "status": "Passed",
+      "count": 2,
+      "scope": "Source-exact complete particle binding; native-compatible Tod projection"
+    },
+    {
+      "kind": 1004,
+      "status": "Passed",
+      "count": 2,
+      "scope": "Source-exact complete particle binding; native-compatible Tod projection"
+    },
+    {
+      "kind": 1006,
+      "status": "Passed",
+      "count": 2,
+      "scope": "Source-exact complete particle binding; native-compatible Tod projection"
+    },
+    {
+      "kind": 1010,
+      "status": "Passed",
+      "count": 2,
+      "scope": "Source-exact complete particle binding; native-compatible Tod projection"
+    },
+    {
+      "kind": 1013,
+      "status": "Passed",
+      "count": 2,
+      "scope": "Source-exact complete particle binding; native-compatible Tod projection"
+    },
+    {
+      "kind": 1029,
+      "status": "Passed",
+      "count": 2,
+      "scope": "Source-exact complete particle binding; native-compatible Tod projection"
+    },
+    {
+      "kind": 1039,
+      "status": "Passed",
+      "count": 2,
+      "scope": "Source-exact complete particle binding; native-compatible Tod projection"
+    },
+    {
+      "kind": 1048,
+      "status": "Passed",
+      "count": 2,
+      "scope": "Source-exact complete particle binding; native-compatible Tod projection"
+    },
+    {
+      "kind": 1052,
+      "status": "Passed",
+      "count": 2,
+      "scope": "Source-exact complete particle binding; native-compatible Tod projection"
+    },
+    {
+      "kind": 1053,
+      "status": "Passed",
+      "count": 1,
+      "scope": "Source-exact complete particle binding; native-compatible Tod projection"
+    },
+    {
+      "kind": 1059,
+      "status": "Passed",
+      "count": 1,
+      "scope": "Source-exact complete particle binding; native-compatible Tod projection"
+    },
+    {
+      "kind": 1073,
+      "status": "Passed",
+      "count": 2,
+      "scope": "Source-exact complete particle binding; native-compatible Tod projection"
+    },
+    {
+      "kind": 1079,
+      "status": "Passed",
+      "count": 1,
+      "scope": "Source-exact complete particle binding; native-compatible Tod projection"
+    },
+    {
+      "kind": 1081,
+      "status": "Passed",
+      "count": 1,
+      "scope": "Source-exact complete particle binding; native-compatible Tod projection"
+    },
+    {
+      "kind": 1100,
+      "status": "Passed",
+      "count": 1,
+      "scope": "Source-exact complete particle binding; native-compatible Tod projection"
+    },
+    {
+      "kind": 1189,
+      "status": "Passed",
+      "count": 2,
+      "scope": "Source-exact complete particle binding; native-compatible Tod projection"
+    }
+  ],
+  "nativeRuntime": "Not executed"
+}

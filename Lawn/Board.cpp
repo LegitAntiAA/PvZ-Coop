@@ -3,6 +3,20 @@
 #include <stdexcept>
 #include "ZenGarden.h"
 #include "BoardInclude.h"
+#include "Fusion/FusionRuntime.h"
+#include "Fusion/FusionNative.h"
+#include "Fusion/FusionNativeLastPlants269.h"
+#include "Fusion/FusionNativeWorldRemainder269.h"
+#include "Fusion/FusionNativeDeath.h"
+#include "Fusion/FusionCherryRules.h"
+#include "Fusion/FusionPotatoRules.h"
+#include "Fusion/FusionNativeVisual.h"
+#include "Fusion/FusionNativeGlove.h"
+#include "Fusion/FusionNativeGloveUI.h"
+#include "Fusion/FusionNativeTools268.h"
+#include "Fusion/FusionNativeMoneyAction.h"
+#include "Fusion/FusionNativePlacement.h"
+#include "Fusion/FusionNativeFireActionBatch.h"
 #include "System/Music.h"
 #include "System/SaveGame.h"
 #include "Widget/LawnDialog.h"
@@ -34,6 +48,7 @@
 #include "Widget/AchievementsScreen.h"
 #include "../Sexy.TodLib/Definition.h"
 #include "Net/NetManager.h"
+#include "Net/NetPresentation.h"
 
 using namespace LawnNet;
 
@@ -461,6 +476,7 @@ int Board::CountUntriggerLawnMowers()
 //0x408C30
 void Board::TryToSaveGame()
 {
+	if (mApp && mApp->GetContentMode() == LawnFusion::ContentMode::Fusion) return;
 	if (mApp && mApp->mNetBlockProfileSave)
 	{
 		NetTrace("save game blocked entry=Board::TryToSaveGame level=%d mode=%d", mLevel, (int)mApp->mGameMode);
@@ -490,6 +506,7 @@ void Board::TryToSaveGame()
 //0x408DA0
 bool Board::NeedSaveGame()
 {
+	if (mApp && mApp->GetContentMode() == LawnFusion::ContentMode::Fusion) return false;
 	if (mApp && mApp->mNetBlockProfileSave)
 		return false;
 
@@ -596,7 +613,7 @@ GridItem* Board::GetZenToolAt(int theGridX, int theGridY)
 //0x408ED0
 bool Board::CanAddGraveStoneAt(int theGridX, int theGridY)
 {
-	if (mGridSquareType[theGridX][theGridY] != GridSquareType::GRIDSQUARE_GRASS && mGridSquareType[theGridX][theGridY] != GridSquareType::GRIDSQUARE_HIGH_GROUND)
+	if (GetGridSquareTypeAt(theGridX, theGridY) != GridSquareType::GRIDSQUARE_GRASS && GetGridSquareTypeAt(theGridX, theGridY) != GridSquareType::GRIDSQUARE_HIGH_GROUND)
 	{
 		return false;
 	}
@@ -1429,21 +1446,21 @@ void Board::PickBackground()
 		TOD_ASSERT();
 	}
 
-	for (int x = 0; x < MAX_GRID_SIZE_X; x++)
+	for (int x = 0; x < GetColumnCount(); x++)
 	{
 		for (int y = 0; y < MAX_GRID_SIZE_Y; y++)
 		{
 			if (mPlantRow[y] == PlantRowType::PLANTROW_DIRT)
 			{
-				mGridSquareType[x][y] = GridSquareType::GRIDSQUARE_DIRT;
+				GetGridSquareTypeAt(x, y) = GridSquareType::GRIDSQUARE_DIRT;
 			}
 			else if (mPlantRow[y] == PlantRowType::PLANTROW_POOL && x >= 0 && x <= 8)
 			{
-				mGridSquareType[x][y] = GridSquareType::GRIDSQUARE_POOL;
+				GetGridSquareTypeAt(x, y) = GridSquareType::GRIDSQUARE_POOL;
 			}
 			else if (mPlantRow[y] == PlantRowType::PLANTROW_HIGH_GROUND && x >= 4 && x <= 8)
 			{
-				mGridSquareType[x][y] = GridSquareType::GRIDSQUARE_HIGH_GROUND;
+				GetGridSquareTypeAt(x, y) = GridSquareType::GRIDSQUARE_HIGH_GROUND;
 			}
 		}
 	}
@@ -1826,6 +1843,12 @@ Rect Board::GetShovelButtonRect()
 //0x40AF00
 void Board::GetZenButtonRect(GameObjectType theObjectType, Rect& theRect)
 {
+	if (LawnFusion::IsNativeFusionBoard(this) && (theObjectType == OBJECT_TYPE_GLOVE || theObjectType == OBJECT_TYPE_MONEY_SIGN))
+	{
+		theRect = Rect(GetCellCenterX(GetColumnCount()-1, 0) + GetCellPitchX()/2,
+			theObjectType==OBJECT_TYPE_GLOVE?78:124, 38, 38);
+		return;
+	}
 	// 此函数与内测版的差异在于，内测版在此函数中通过下列语句先取得了铲子按钮矩形：
 	// Rect aRect = GetShovelButtonRect();
 	// 而原版需要在函数调用前先自行取得铲子按钮矩形，并将该矩形作为参数传递给此函数，
@@ -1990,6 +2013,28 @@ bool Board::ApplyTowerDefensePathToGrid()
 //0x40AF90
 void Board::InitLevel()
 {
+	if (mApp->mFusionRuntime)
+	{
+		mLevel = mApp->mFusionRuntime->Descriptor().level;
+		mBackground = BackgroundType::BACKGROUND_1_DAY;
+		mCutScene->mPreloaded = true;
+		mApp->mFusionRuntime->ConfigureBoard(this);
+		return;
+	}
+	if (mApp->GetContentMode() == LawnFusion::ContentMode::Fusion)
+	{
+		uint8_t aMask = 1;
+		if (mApp->mNetManager && mApp->mNetManager->IsActive())
+		{
+			aMask = 0;
+			for (int aSlot = 0; aSlot < LawnNet::NET_MAX_PLAYERS; ++aSlot)
+				if (mApp->mNetManager->GetPlayer(aSlot).mActive && !mApp->mNetManager->GetPlayer(aSlot).mSpectator)
+					aMask |= static_cast<uint8_t>(1U << aSlot);
+		}
+		if (!LawnFusion::InitializeNativeBoardContext(this, mApp->mNativeFusionEpoch, mBoardRandSeed,
+			mApp->mPlayerInfo ? mApp->mPlayerInfo->mLevel : 1,
+			mApp->mNetManager ? mApp->mNetManager->GetDifficulty() : 1, aMask)) return;
+	}
 	mMainCounter = 0;
 	mEnableGraveStones = false;
 	mSodPosition = 0;
@@ -2314,6 +2359,12 @@ void Board::InitLevel()
 		for (int i = 0; i < SEEDBANK_CAPACITY; i++)
 			mSeedBank->mSeedPackets[i].mNetOwnerSlot = LawnNet::NET_SHARED_OWNER;
 	}
+	if (LawnFusion::IsNativeFusionBoard(this))
+	{
+		if(LawnFusion::GetNativeContext(this)->validation){mSunMoney=500;mShowShovel=true;}
+		mTutorialState = TutorialState::TUTORIAL_OFF;
+		LawnFusion::SyncNativeSelectionPackets(this);
+	}
 }
 
 Reanimation* Board::CreateRakeReanim(float theRakeX, float theRakeY, int theRenderOrder)
@@ -2433,6 +2484,7 @@ void Board::InitLawnMowers()
 //0x40BD30
 bool Board::ChooseSeedsOnCurrentLevel()
 {
+	if (LawnFusion::IsNativeFusionBoard(this)) return true;
 	if (mApp->IsChallengeWithoutSeedBank() || HasConveyorBeltSeedBank())
 		return false;
 
@@ -2883,7 +2935,7 @@ void Board::ClearAdvice(AdviceType theHelpIndex)
 }
 
 //0x40CB10
-Coin* Board::AddCoin(int theX, int theY, CoinType theCoinType, CoinMotion theCoinMotion, SeedType theUsableSeedType)
+Coin* Board::AddCoin(int theX, int theY, CoinType theCoinType, CoinMotion theCoinMotion, SeedType theUsableSeedType, int theSunValueOverride, bool theFusionMoney)
 {
 	Coin* aCoin = mCoins.DataArrayAlloc();
 	aCoin->CoinInitialize(theX, theY, theCoinType, theCoinMotion);
@@ -2891,6 +2943,13 @@ Coin* Board::AddCoin(int theX, int theY, CoinType theCoinType, CoinMotion theCoi
 	// Assigning this at the call site after AddCoin used to race the client draw
 	// and fed SEED_NONE/garbage into the plant image cache.
 	aCoin->mUsableSeedType = theUsableSeedType;
+	if (LawnFusion::IsNativeFusionBoard(this) && aCoin->IsMoney() && !theSunValueOverride)
+	{
+		theSunValueOverride = theCoinType == COIN_SILVER ? 25 : theCoinType == COIN_GOLD ? 100 : 1000;
+		theFusionMoney = true;
+	}
+	if (theSunValueOverride && LawnFusion::IsNativeFusionBoard(this))
+		LawnFusion::AttachNativeCoinValue(this, aCoin, theSunValueOverride, theFusionMoney);
 	if (mApp->NetActive())
 	{
 		if (mApp->NetIsHost())
@@ -2972,21 +3031,44 @@ void Board::RefreshSeedPacketFromCursor()
 //0x40CE00
 bool Board::IsPoolSquare(int theGridX, int theGridY)
 {
-	if (theGridX >= 0 && theGridY >= 0)
+	if (IsValidGridCell(theGridX, theGridY))
 	{
-		TOD_ASSERT(theGridX < MAX_GRID_SIZE_X && theGridY < MAX_GRID_SIZE_Y);
-		return mGridSquareType[theGridX][theGridY] == GridSquareType::GRIDSQUARE_POOL;
+		return GetGridSquareTypeAt(theGridX, theGridY) == GridSquareType::GRIDSQUARE_POOL;
 	}
 	return false;
 }
 
 //0x40CE20
-Plant* Board::NewPlant(int theGridX, int theGridY, SeedType theSeedType, SeedType theImitaterType)
+Plant* Board::NewPlant(int theGridX, int theGridY, SeedType theSeedType, SeedType theImitaterType, const LawnFusion::NativePlantData* theFusionData)
 {
+	if (LawnFusion::IsNativeFusionBoard(this) && !IsValidGridCell(theGridX, theGridY)) return nullptr;
+	if (LawnFusion::IsNativeFusionBoard(this) && theFusionData && theFusionData->kind != LawnFusion::kFusionNoPlant)
+	{
+        if(!mApp->NetIsClient()&&theFusionData->kind==1056&&(!LawnFusion::EnsureNativeLastPlants269TorchConversions(this)||
+            !LawnFusion::EnsureNativeLastPlants269BirthEffect(this)))return nullptr;
+		std::string visualError;
+		if (!LawnFusion::EnsureNativePlantVisuals(this,theFusionData->kind,&visualError))
+		{
+			NetTrace("Fusion native factory resource admission rejected kind=%u error=%s",theFusionData->kind,visualError.c_str());
+			return nullptr;
+		}
+	}
 	Plant* aPlant = mPlants.DataArrayAlloc();
+	if (!aPlant) return nullptr;
 	aPlant->mIsOnBoard = true;
+	if (LawnFusion::IsNativeFusionBoard(this) && !mApp->NetIsClient())
+		aPlant->mNetId = NetAllocId(); // Source OnCreate can immediately bind real child/parent identities.
+	if (LawnFusion::IsNativeFusionBoard(this))
+	{
+		LawnFusion::NativePlantData aData;
+		if (theFusionData) aData = *theFusionData;
+		else if (theSeedType == SEED_PEASHOOTER) aData.kind = 0;
+		else if (theSeedType == SEED_SUNFLOWER) aData.kind = 1;
+		else if (theSeedType == SEED_CHERRYBOMB) aData.kind = 2;
+		if (aData.kind != LawnFusion::kFusionNoPlant) LawnFusion::AttachNativePlant(this, aPlant, aData);
+	}
 	aPlant->PlantInitialize(theGridX, theGridY, theSeedType, theImitaterType);
-	if (mApp->NetIsHost())
+	if (!aPlant->mNetId && (mApp->NetIsHost() || (LawnFusion::IsNativeFusionBoard(this) && !mApp->NetIsClient())))
 	{
 		aPlant->mNetId = NetAllocId();
 	}
@@ -2996,7 +3078,7 @@ Plant* Board::NewPlant(int theGridX, int theGridY, SeedType theSeedType, SeedTyp
 //0x40CE60
 void Board::DoPlantingEffects(int theGridX, int theGridY, Plant* thePlant)
 {
-	int aXPos = GridToPixelX(theGridX, theGridY) + 41;
+	int aXPos = LawnFusion::IsNativeFusionBoard(this) ? GetCellCenterX(theGridX, theGridY) : GridToPixelX(theGridX, theGridY) + 41;
 	int aYPos = GridToPixelY(theGridX, theGridY) + 74;
 	if (thePlant)
 	{
@@ -3044,14 +3126,16 @@ void Board::DoPlantingEffects(int theGridX, int theGridY, Plant* thePlant)
 
 //0x40D120
 // GOTY @Patoke: 0x40FA10
-Plant* Board::AddPlant(int theGridX, int theGridY, SeedType theSeedType, SeedType theImitaterType)
+Plant* Board::AddPlant(int theGridX, int theGridY, SeedType theSeedType, SeedType theImitaterType, const LawnFusion::NativePlantData* theFusionData)
 {
-	Plant* aPlant = NewPlant(theGridX, theGridY, theSeedType, theImitaterType);
+	Plant* aPlant = NewPlant(theGridX, theGridY, theSeedType, theImitaterType, theFusionData);
+	if (!aPlant) return nullptr;
 	DoPlantingEffects(theGridX, theGridY, aPlant);
 	mChallenge->PlantAdded(aPlant);
 
-	// co-op: tell clients about the new plant immediately
-	if (mApp->NetIsHost())
+	// Fusion publishes the native entity and its content metadata together in
+	// the existing Board snapshot, so clients never see an untyped replacement.
+	if (mApp->NetIsHost() && !LawnFusion::IsNativeFusionBoard(this))
 	{
 		NetBuffer anEvent;
 		anEvent.WriteU16(aPlant->mNetId);
@@ -3159,7 +3243,7 @@ void Board::GetPlantsOnLawn(int theGridX, int theGridY, PlantsOnLawn* thePlantOn
 	thePlantOnLawn->mFlyingPlant = nullptr;
 	thePlantOnLawn->mNormalPlant = nullptr;
 
-	if (theGridX < 0 || theGridX >= MAX_GRID_SIZE_X || theGridY < 0 || theGridY >= MAX_GRID_SIZE_Y)
+	if (!IsValidGridCell(theGridX, theGridY))
 		return;
 
 	if (mApp->IsWallnutBowlingLevel() && !mCutScene->IsInShovelTutorial())
@@ -3169,6 +3253,7 @@ void Board::GetPlantsOnLawn(int theGridX, int theGridY, PlantsOnLawn* thePlantOn
 	while (IteratePlants(aPlant))
 	{
 		if (aPlant->mBurnedCounter != -1) continue;
+		if (LawnFusion::NativeFireActionUntargetable(aPlant)) continue;
 
 		SeedType aSeedType = aPlant->mSeedType;
 		if (aSeedType == SeedType::SEED_IMITATER && aPlant->mImitaterType != SeedType::SEED_NONE)
@@ -3201,7 +3286,7 @@ void Board::GetPlantsOnLawn(int theGridX, int theGridY, PlantsOnLawn* thePlantOn
 		}
 
 		// 将植物写入 thePlantOnLawn 的记录
-		if (Plant::IsFlying(aPlant->mSeedType))
+		if (const auto* fusion=LawnFusion::GetNativePlantData(aPlant);fusion?LawnFusion::IsFusionSourceFlyingKind(fusion->kind):Plant::IsFlying(aPlant->mSeedType))
 		{
 			TOD_ASSERT(!thePlantOnLawn->mFlyingPlant);
 			thePlantOnLawn->mFlyingPlant = aPlant;
@@ -3224,7 +3309,7 @@ void Board::GetPlantsOnLawn(int theGridX, int theGridY, PlantsOnLawn* thePlantOn
 
 Plant* Board::GetTopPlantAt(int theGridX, int theGridY, PlantPriority thePriority)
 {
-	if (theGridX < 0 || theGridX >= MAX_GRID_SIZE_X || theGridY < 0 || theGridY >= MAX_GRID_SIZE_Y)
+	if (!IsValidGridCell(theGridX, theGridY))
 		return nullptr;
 
 	if (mApp->IsWallnutBowlingLevel() && !mCutScene->IsInShovelTutorial())
@@ -3356,7 +3441,7 @@ Projectile* Board::AddProjectile(int theX, int theY, int theRenderOrder, int the
 {
 	Projectile* aProjectile = mProjectiles.DataArrayAlloc();
 	aProjectile->ProjectileInitialize(theX, theY, theRenderOrder, theRow, theProjectileType);
-	if (mApp->NetIsHost())
+	if (mApp->NetIsHost() || (LawnFusion::IsNativeFusionBoard(this) && !mApp->NetIsClient()))
 	{
 		aProjectile->mNetId = NetAllocId();
 	}
@@ -3838,7 +3923,7 @@ bool Board::IsIceAt(int theGridX, int theGridY)
 PlantingReason Board::CanPlantAt(int theGridX, int theGridY, SeedType theSeedType)
 {
 	// 目标位置不在场地内，则返回“不能种在那里”
-	if (theGridX < 0 || theGridX >= MAX_GRID_SIZE_X || theGridY < 0 || theGridY >= MAX_GRID_SIZE_Y)
+	if (!IsValidGridCell(theGridX, theGridY))
 	{
 		return PlantingReason::PLANTING_NOT_HERE;
 	}
@@ -3921,7 +4006,7 @@ PlantingReason Board::CanPlantAt(int theGridX, int theGridY, SeedType theSeedTyp
 	{
 		return PlantingReason::PLANTING_NOT_HERE;
 	}
-	GridSquareType aGridSquare = mGridSquareType[theGridX][theGridY];
+	GridSquareType aGridSquare = GetGridSquareTypeAt(theGridX, theGridY);
 	if (aGridSquare == GridSquareType::GRIDSQUARE_DIRT || aGridSquare == GridSquareType::GRIDSQUARE_NONE)
 	{
 		return PlantingReason::PLANTING_NOT_HERE;
@@ -4212,6 +4297,7 @@ void Board::UpdateCursor()
 //0x40E760
 void Board::MouseMove(int x, int y)
 {
+	if (mApp->mFusionRuntime) { mApp->mFusionRuntime->OnMouseMove(x + mX, y + mY); return; }
 	Widget::MouseMove(x, y);
 	mChallenge->MouseMove(x, y);
 }
@@ -4219,6 +4305,7 @@ void Board::MouseMove(int x, int y)
 //0x40E760
 void Board::MouseDrag(int x, int y)
 {
+	if (mApp->mFusionRuntime) { mApp->mFusionRuntime->OnMouseMove(x + mX, y + mY); return; }
 	Widget::MouseDrag(x, y);
 	mChallenge->MouseMove(x, y);
 }
@@ -4308,6 +4395,11 @@ void Board::HighlightPlantsForMouse(int theMouseX, int theMouseY)
 		if (aPlant)
 		{
 			aPlant->mHighlighted = true;
+			if (LawnFusion::IsNativeFusionBoard(this) && mCursorObject->mCursorType == CURSOR_TYPE_MONEY_SIGN)
+			{
+				const int slot = mApp->mNetManager && mApp->mNetManager->IsActive() ? mApp->mNetManager->GetMySlot() : 0;
+				aPlant->mHighlighted = LawnFusion::IsNativeMoneyTargetApplicable(aPlant,slot);
+			}
 			if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN)
 			{
 				Plant* aFlowerPot = GetTopPlantAt(aPlant->mPlantCol, aPlant->mRow, PlantPriority::TOPPLANT_ONLY_UNDER_PLANT);
@@ -4587,7 +4679,7 @@ void Board::UpdateToolTip()
 		}
 		else if (aHitResult.mObjectType == GameObjectType::OBJECT_TYPE_MONEY_SIGN)
 		{
-			mToolTip->SetLabel(_S("[MONEY_SIGN_TOOLTIP]"));
+			mToolTip->SetLabel(LawnFusion::IsNativeFusionBoard(this)?_S("Усиление растений за деньги"):_S("[MONEY_SIGN_TOOLTIP]"));
 		}
 		else if (aHitResult.mObjectType == GameObjectType::OBJECT_TYPE_WHEELBARROW)
 		{
@@ -4847,6 +4939,30 @@ void Board::MouseDownCobcannonFire(int x, int y, int theClickCount)
 //0x40FD30
 void Board::MouseDownWithPlant(int x, int y, int theClickCount)
 {
+	if (LawnFusion::IsNativeFusionBoard(this))
+	{
+		if (theClickCount < 0) { ClearCursor(); return; }
+		// Remote planting must include the target observed by that client.
+		if (mApp->NetIsHost() && mApp->mNetManager->GetRawActingPlayerSlot() > 0) return;
+		if (theClickCount <= 0 || !mCursorObject || !mSeedBank || mCursorObject->mCursorType != CURSOR_TYPE_PLANT_FROM_BANK ||
+			mCursorObject->mSeedBankIndex < 0 || mCursorObject->mSeedBankIndex >= mSeedBank->mNumPackets) return;
+		const int aColumn = PixelToGridX(x, y), aRow = PixelToGridY(x, y);
+		if (!IsValidGridCell(aColumn, aRow)) return;
+		const auto& aPacket = mSeedBank->mSeedPackets[mCursorObject->mSeedBankIndex];
+		const auto* aPacketData = LawnFusion::GetNativePacketData(&aPacket);
+		Plant* aTarget = nullptr;
+		if (!aPacketData || !LawnFusion::ResolveNativeFusionPlacementTarget(this, aColumn, aRow, aPacketData->kind, aTarget)) return;
+		const auto* aTargetData = LawnFusion::GetNativePlantData(aTarget);
+		LawnFusion::FusionCommand aCommand;
+		aCommand.action = LawnFusion::FusionCommandKind::Plant;
+		aCommand.packetId = aPacket.mNetId;
+		aCommand.column = static_cast<uint8_t>(aColumn);
+		aCommand.row = static_cast<uint8_t>(aRow);
+		aCommand.targetId = aTarget ? aTarget->mNetId : 0;
+		aCommand.targetToken = aTargetData ? aTargetData->instanceToken : 0;
+		if (mApp->SubmitNativeFusionCommand(aCommand)) ClearCursor();
+		return;
+	}
 	if (mCursorObject->mCursorType == CursorType::CURSOR_TYPE_PLANT_FROM_BANK &&
 		mCursorObject->mSeedBankIndex >= 0 && mCursorObject->mSeedBankIndex < mSeedBank->mNumPackets &&
 		mSeedBank->mSeedPackets[mCursorObject->mSeedBankIndex].IsMysteryPending())
@@ -5217,56 +5333,7 @@ void Board::MouseDownWithPlant(int x, int y, int theClickCount)
 		}
 	}
 
-	// 设置教程状态相关
-	if (mTutorialState == TutorialState::TUTORIAL_LEVEL_1_PLANT_PEASHOOTER)
-	{
-		SetTutorialState(mPlants.mSize >= 2 ? TutorialState::TUTORIAL_LEVEL_1_COMPLETED : TutorialState::TUTORIAL_LEVEL_1_REFRESH_PEASHOOTER);
-	}
-	else if (mTutorialState == TutorialState::TUTORIAL_LEVEL_2_PLANT_SUNFLOWER)
-	{
-		int aSunFlowersCount = CountSunFlowers();
-		if (aPlantingSeedType == SeedType::SEED_SUNFLOWER && aSunFlowersCount == 2)
-		{
-			DisplayAdvice(_S("[ADVICE_MORE_SUNFLOWERS]"), MessageStyle::MESSAGE_STYLE_TUTORIAL_LEVEL2, AdviceType::ADVICE_NONE);
-			if (!mSeedBank->mSeedPackets[1].CanPickUp())
-			{
-				SetTutorialState(TutorialState::TUTORIAL_LEVEL_2_REFRESH_SUNFLOWER);
-			}
-			else
-			{
-				SetTutorialState(TutorialState::TUTORIAL_LEVEL_2_PICK_UP_SUNFLOWER);
-			}
-		}
-		else if (aSunFlowersCount >= 3)
-		{
-			SetTutorialState(TutorialState::TUTORIAL_LEVEL_2_COMPLETED);
-		}
-		else if (!mSeedBank->mSeedPackets[1].CanPickUp())
-		{
-			SetTutorialState(TutorialState::TUTORIAL_LEVEL_2_REFRESH_SUNFLOWER);
-		}
-		else
-		{
-			SetTutorialState(TutorialState::TUTORIAL_LEVEL_2_PICK_UP_SUNFLOWER);
-		}
-	}
-	else if (mTutorialState == TutorialState::TUTORIAL_MORESUN_PLANT_SUNFLOWER)
-	{
-		if (CountSunFlowers() >= 3)
-		{
-			SetTutorialState(TutorialState::TUTORIAL_MORESUN_COMPLETED);
-			DisplayAdvice(_S("[ADVICE_PLANT_SUNFLOWER5]"), MessageStyle::MESSAGE_STYLE_TUTORIAL_LATER, AdviceType::ADVICE_PLANT_SUNFLOWER5);
-			mTutorialTimer = -1;
-		}
-		else if (!mSeedBank->mSeedPackets[1].CanPickUp())
-		{
-			SetTutorialState(TutorialState::TUTORIAL_MORESUN_REFRESH_SUNFLOWER);
-		}
-		else
-		{
-			SetTutorialState(TutorialState::TUTORIAL_MORESUN_PICK_UP_SUNFLOWER);
-		}
-	}
+	OnSeedPacketPlanted(aPlantingSeedType);
 
 	// 保龄球关卡，播放保龄球滚动的音效
 	if (mApp->IsWallnutBowlingLevel())
@@ -5328,7 +5395,12 @@ void Board::MouseDownWithTool(int x, int y, int theClickCount, CursorType theCur
 		mApp->PlayFoley(FoleyType::FOLEY_DROP);
 		return;
 	}
-	
+	if (LawnFusion::IsNativeFusionBoard(this) && theCursorType == CURSOR_TYPE_SHOVEL)
+	{
+		Plant* target = ToolHitTest(x, y);
+		if (target && LawnFusion::IsNativeGlovePlantReserved(this, target, anActingSlot)) return;
+	}
+
 #ifdef _DS_MINIGAMES
 	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_HEAT_WAVE)
 	{
@@ -5392,7 +5464,7 @@ void Board::MouseDownWithTool(int x, int y, int theClickCount, CursorType theCur
 
 		mApp->PlayFoley(FoleyType::FOLEY_USE_SHOVEL);
 		mPlantsShoveled++;
-		aPlant->Die();
+		aPlant->Die(7);
 
 		if (aPlant->mSeedType == SeedType::SEED_CATTAIL && GetTopPlantAt(aPlant->mPlantCol, aPlant->mRow, PlantPriority::TOPPLANT_ONLY_PUMPKIN))
 		{
@@ -5592,7 +5664,7 @@ bool Board::MouseHitTest(int x, int y, HitResult* theHitResult)
 			return true;
 		}
 	}
-	if ((mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN || mApp->mGameMode == GameMode::GAMEMODE_TREE_OF_WISDOM) && CanInteractWithBoardButtons())
+	if ((mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN || mApp->mGameMode == GameMode::GAMEMODE_TREE_OF_WISDOM || LawnFusion::IsNativeFusionBoard(this)) && CanInteractWithBoardButtons())
 	{
 		for (int i = (int)GameObjectType::OBJECT_TYPE_WATERING_CAN; i <= (int)GameObjectType::OBJECT_TYPE_NEXT_GARDEN; i++)
 		{
@@ -5783,6 +5855,7 @@ static bool RemoteLastStandButtonHitTest(Board* theBoard, int theBoardX, int the
 //0x411F20
 void Board::MouseDown(int x, int y, int theClickCount)
 {
+	if (mApp->mFusionRuntime) { mApp->mFusionRuntime->OnMouseDown(x + mX, y + mY, theClickCount); return; }
 	Widget::MouseDown(x, y, theClickCount);
 
 	x -= mApp->mDDInterface->mWideScreenOffsetX;
@@ -5792,6 +5865,8 @@ void Board::MouseDown(int x, int y, int theClickCount)
 		return;
 	const bool aRemoteInput = mApp->NetIsHost() && mApp->mNetManager &&
 		mApp->mNetManager->GetRawActingPlayerSlot() > 0;
+	if (!aRemoteInput && (LawnFusion::HandleNativeMoneyPointer(this,theClickCount,x,y) ||
+		LawnFusion::HandleNativeGlovePointer(this, theClickCount, x, y))) return;
 	const bool aRemoteLastStandButton = aRemoteInput && theClickCount > 0 &&
 		RemoteLastStandButtonHitTest(this, x, y);
 
@@ -5942,6 +6017,8 @@ void Board::MouseDown(int x, int y, int theClickCount)
 void Board::ClearCursor()
 {
 	if (mApp->IsScreenSaver()) return;
+	LawnFusion::OnNativeGloveCursorClearing(this);
+	LawnFusion::OnNativeTools268CursorClearing(this);
 
 	if (mAdvice->mDuration > 0)
 	{
@@ -5979,7 +6056,7 @@ void Board::ClearCursor()
 	}
 	else if (mTutorialState == TutorialState::TUTORIAL_LEVEL_2_PLANT_SUNFLOWER || mTutorialState == TutorialState::TUTORIAL_LEVEL_2_REFRESH_SUNFLOWER)
 	{
-		if (!mSeedBank->mSeedPackets[1].CanPickUp())
+		if ((!GetTutorialSeedPacket(SEED_SUNFLOWER) || !GetTutorialSeedPacket(SEED_SUNFLOWER)->CanPickUp()))
 		{
 			SetTutorialState(TutorialState::TUTORIAL_LEVEL_2_REFRESH_SUNFLOWER);
 		}
@@ -5990,7 +6067,7 @@ void Board::ClearCursor()
 	}
 	else if (mTutorialState == TutorialState::TUTORIAL_MORESUN_PLANT_SUNFLOWER || mTutorialState == TutorialState::TUTORIAL_MORESUN_REFRESH_SUNFLOWER)
 	{
-		if (!mSeedBank->mSeedPackets[1].CanPickUp())
+		if ((!GetTutorialSeedPacket(SEED_SUNFLOWER) || !GetTutorialSeedPacket(SEED_SUNFLOWER)->CanPickUp()))
 		{
 			SetTutorialState(TutorialState::TUTORIAL_MORESUN_REFRESH_SUNFLOWER);
 		}
@@ -6039,6 +6116,7 @@ bool Board::CanInteractWithBoardButtons()
 //0x412540
 void Board::MouseUp(int x, int y, int theClickCount)
 {
+	if (mApp->mFusionRuntime) { mApp->mFusionRuntime->OnMouseUp(x + mX, y + mY, theClickCount); return; }
 	Widget::MouseUp(x, y, theClickCount);
 	if (mIgnoreMouseUp)
 	{
@@ -6414,6 +6492,9 @@ void Board::SpawnZombieWave()
 	else
 	{
 		TOD_ASSERT(mCurrentWave >= 0 && mCurrentWave < MAX_ZOMBIE_WAVES && mCurrentWave < mNumWaves);
+		const bool aFusionWave = mApp->IsFusionAdventure() && LawnFusion::IsNativeFusionBoard(this) &&
+			mTutorialState == TUTORIAL_OFF && (mBackground == BACKGROUND_2_NIGHT || StageHasPool());
+		bool aAllowFusionVehicle = aFusionWave && StageHasPool() && IsFlagWave(mCurrentWave);
 		for (int i = 0; i < MAX_ZOMBIES_IN_WAVE; i++)
 		{
 			ZombieType aZombieType = mZombiesInWave[mCurrentWave][i];
@@ -6431,6 +6512,17 @@ void Board::SpawnZombieWave()
 				{
 					aZombie = AddZombie(ZombieType::ZOMBIE_NORMAL, mCurrentWave);  // 生成 4 只普通僵尸以代替雪橇僵尸小队
 				}
+			}
+			else if (aFusionWave)
+			{
+				// Convert the selected slot without changing wave size, lane RNG or ice-making Zambonis.
+				const int aRow = PickRowForNewZombie(aZombieType, mCurrentWave);
+				aZombie = LawnFusion::TrySpawnNativeAdventureWaveVariant(this, aZombieType, aRow, mCurrentWave, aAllowFusionVehicle);
+				if (aAllowFusionVehicle)
+					if (const auto* aData = LawnFusion::GetNativeSourceZombieData(aZombie); aData && (aData->kind == 14 || aData->kind == 18))
+						aAllowFusionVehicle = false;
+				if (!aZombie)
+					aZombie = AddZombieInRow(aZombieType, aRow, mCurrentWave);
 			}
 			else
 			{
@@ -6807,6 +6899,7 @@ void Board::NextWaveComing()
 //0x413D00
 void Board::UpdateZombieSpawning()
 {
+	if (const auto* aFusion = LawnFusion::GetNativeContext(this); aFusion && aFusion->validation) return;
 	if (mApp->mGameMode == GameMode::GAMEMODE_UPSELL || mApp->mGameMode == GameMode::GAMEMODE_INTRO)
 		return;
 	if (mApp->mGameMode == GameMode::GAMEMODE_COOP_PVP)
@@ -7116,6 +7209,115 @@ void Board::UpdateProgressMeter()
 	}
 }
 
+SeedPacket* Board::GetTutorialSeedPacket(SeedType theSeedType)
+{
+	if (!mSeedBank) return nullptr;
+	if (!LawnFusion::IsNativeFusionBoard(this))
+		return &mSeedBank->mSeedPackets[theSeedType == SEED_SUNFLOWER ? 1 : 0];
+	SeedPacket* aFallback = nullptr;
+	const int aLocalSlot = mApp->NetActive() && mApp->mNetManager ? mApp->mNetManager->GetMySlot() : 0;
+	for (int i = 0; i < mSeedBank->mNumPackets; ++i)
+	{
+		auto* aPacket = &mSeedBank->mSeedPackets[i];
+		const auto* aData = LawnFusion::GetNativePacketData(aPacket);
+		if (!aData || aData->kind != (theSeedType == SEED_SUNFLOWER ? 1 : 0)) continue;
+		if (aPacket->CanPickUp()) return aPacket;
+		if (!aFallback || aData->owner == aLocalSlot) aFallback = aPacket;
+	}
+	return aFallback;
+}
+
+void Board::OnSeedPacketPickedUp(SeedType theSeedType)
+{
+	if ((mTutorialState == TutorialState::TUTORIAL_LEVEL_1_PICK_UP_PEASHOOTER || (LawnFusion::IsNativeFusionBoard(this) && mTutorialState == TutorialState::TUTORIAL_LEVEL_1_REFRESH_PEASHOOTER)))
+	{
+		SetTutorialState(TutorialState::TUTORIAL_LEVEL_1_PLANT_PEASHOOTER);
+	}
+	else if ((mTutorialState == TutorialState::TUTORIAL_LEVEL_2_PICK_UP_SUNFLOWER || (LawnFusion::IsNativeFusionBoard(this) && mTutorialState == TutorialState::TUTORIAL_LEVEL_2_REFRESH_SUNFLOWER)))
+	{
+		if (theSeedType == SeedType::SEED_SUNFLOWER)
+		{
+			SetTutorialState(TutorialState::TUTORIAL_LEVEL_2_PLANT_SUNFLOWER);
+		}
+		else
+		{
+			SetTutorialState(TutorialState::TUTORIAL_LEVEL_2_REFRESH_SUNFLOWER);
+		}
+	}
+	else if ((mTutorialState == TutorialState::TUTORIAL_MORESUN_PICK_UP_SUNFLOWER || (LawnFusion::IsNativeFusionBoard(this) && mTutorialState == TutorialState::TUTORIAL_MORESUN_REFRESH_SUNFLOWER)))
+	{
+		if (theSeedType == SeedType::SEED_SUNFLOWER)
+		{
+			SetTutorialState(TutorialState::TUTORIAL_MORESUN_PLANT_SUNFLOWER);
+		}
+		else
+		{
+			SetTutorialState(TutorialState::TUTORIAL_MORESUN_REFRESH_SUNFLOWER);
+		}
+	}
+	else if (mTutorialState == TutorialState::TUTORIAL_WHACK_A_ZOMBIE_PICK_SEED || mTutorialState == TutorialState::TUTORIAL_WHACK_A_ZOMBIE_BEFORE_PICK_SEED)
+	{
+		SetTutorialState(TutorialState::TUTORIAL_WHACK_A_ZOMBIE_COMPLETED);
+	}
+}
+
+void Board::OnSeedPacketPlanted(SeedType theSeedType)
+{
+	// A committed remote Fusion placement is also proof that its packet was picked up.
+	if (LawnFusion::IsNativeFusionBoard(this)) OnSeedPacketPickedUp(theSeedType);
+	auto* aSunflowerPacket = GetTutorialSeedPacket(SEED_SUNFLOWER);
+	// 设置教程状态相关
+	if (mTutorialState == TutorialState::TUTORIAL_LEVEL_1_PLANT_PEASHOOTER)
+	{
+		SetTutorialState(mPlants.mSize >= 2 ? TutorialState::TUTORIAL_LEVEL_1_COMPLETED : TutorialState::TUTORIAL_LEVEL_1_REFRESH_PEASHOOTER);
+	}
+	else if (mTutorialState == TutorialState::TUTORIAL_LEVEL_2_PLANT_SUNFLOWER)
+	{
+		int aSunFlowersCount = CountSunFlowers();
+		if (theSeedType == SeedType::SEED_SUNFLOWER && aSunFlowersCount == 2)
+		{
+			DisplayAdvice(_S("[ADVICE_MORE_SUNFLOWERS]"), MessageStyle::MESSAGE_STYLE_TUTORIAL_LEVEL2, AdviceType::ADVICE_NONE);
+			if ((!aSunflowerPacket || !aSunflowerPacket->CanPickUp()))
+			{
+				SetTutorialState(TutorialState::TUTORIAL_LEVEL_2_REFRESH_SUNFLOWER);
+			}
+			else
+			{
+				SetTutorialState(TutorialState::TUTORIAL_LEVEL_2_PICK_UP_SUNFLOWER);
+			}
+		}
+		else if (aSunFlowersCount >= 3)
+		{
+			SetTutorialState(TutorialState::TUTORIAL_LEVEL_2_COMPLETED);
+		}
+		else if ((!aSunflowerPacket || !aSunflowerPacket->CanPickUp()))
+		{
+			SetTutorialState(TutorialState::TUTORIAL_LEVEL_2_REFRESH_SUNFLOWER);
+		}
+		else
+		{
+			SetTutorialState(TutorialState::TUTORIAL_LEVEL_2_PICK_UP_SUNFLOWER);
+		}
+	}
+	else if (mTutorialState == TutorialState::TUTORIAL_MORESUN_PLANT_SUNFLOWER)
+	{
+		if (CountSunFlowers() >= 3)
+		{
+			SetTutorialState(TutorialState::TUTORIAL_MORESUN_COMPLETED);
+			DisplayAdvice(_S("[ADVICE_PLANT_SUNFLOWER5]"), MessageStyle::MESSAGE_STYLE_TUTORIAL_LATER, AdviceType::ADVICE_PLANT_SUNFLOWER5);
+			mTutorialTimer = -1;
+		}
+		else if ((!aSunflowerPacket || !aSunflowerPacket->CanPickUp()))
+		{
+			SetTutorialState(TutorialState::TUTORIAL_MORESUN_REFRESH_SUNFLOWER);
+		}
+		else
+		{
+			SetTutorialState(TutorialState::TUTORIAL_MORESUN_PICK_UP_SUNFLOWER);
+		}
+	}
+}
+
 //0x4144E0
 void Board::UpdateTutorial()
 {
@@ -7125,7 +7327,8 @@ void Board::UpdateTutorial()
 	if (mTutorialState == TutorialState::TUTORIAL_LEVEL_1_PICK_UP_PEASHOOTER && mTutorialTimer == 0)
 	{
 		DisplayAdvice(_S("[ADVICE_CLICK_PEASHOOTER]"), MessageStyle::MESSAGE_STYLE_TUTORIAL_LEVEL1_STAY, AdviceType::ADVICE_NONE);
-		TutorialArrowShow(mSeedBank->mX + mSeedBank->mSeedPackets[0].mX, mSeedBank->mY + mSeedBank->mSeedPackets[0].mY);
+		if (auto* aPacket = GetTutorialSeedPacket(SEED_PEASHOOTER))
+			TutorialArrowShow(mSeedBank->mX + aPacket->mX + aPacket->mOffsetX, mSeedBank->mY + aPacket->mY);
 		mTutorialTimer = -1;
 	}
 	else if (mTutorialState == TutorialState::TUTORIAL_LEVEL_2_PICK_UP_SUNFLOWER || 
@@ -7155,9 +7358,9 @@ void Board::UpdateTutorial()
 
 	// 冒险模式初期关卡，检测到向日葵数量小于 3 时，进入“更多向日葵”的教程
 	if (mApp->IsFirstTimeAdventureMode() && mLevel >= 3 && mLevel != 5 && mLevel <= 7 && mTutorialState == TutorialState::TUTORIAL_OFF &&
-		mCurrentWave >= 5 && !gShownMoreSunTutorial && mSeedBank->mSeedPackets[1].CanPickUp() && CountPlantByType(SeedType::SEED_SUNFLOWER) < 3)
+		mCurrentWave >= 5 && !gShownMoreSunTutorial && GetTutorialSeedPacket(SEED_SUNFLOWER) && GetTutorialSeedPacket(SEED_SUNFLOWER)->CanPickUp() && CountPlantByType(SeedType::SEED_SUNFLOWER) < 3)
 	{
-		TOD_ASSERT(!ChooseSeedsOnCurrentLevel());
+		TOD_ASSERT(!ChooseSeedsOnCurrentLevel() || LawnFusion::IsNativeFusionBoard(this));
 		DisplayAdvice(_S("[ADVICE_PLANT_SUNFLOWER4]"), MessageStyle::MESSAGE_STYLE_TUTORIAL_LATER_STAY, AdviceType::ADVICE_NONE);
 		gShownMoreSunTutorial = true;
 		SetTutorialState(TutorialState::TUTORIAL_MORESUN_PICK_UP_SUNFLOWER);
@@ -7173,8 +7376,9 @@ void Board::SetTutorialState(TutorialState theTutorialState)
 	case TutorialState::TUTORIAL_LEVEL_1_PICK_UP_PEASHOOTER:
 		if (mPlants.mSize == 0)
 		{
-			float aPosX = mSeedBank->mX + mSeedBank->mSeedPackets[0].mX;
-			float aPosY = mSeedBank->mY + mSeedBank->mSeedPackets[0].mY;
+			auto* aPacket = GetTutorialSeedPacket(SEED_PEASHOOTER);
+			float aPosX = mSeedBank->mX + (aPacket ? aPacket->mX + aPacket->mOffsetX : 0);
+			float aPosY = mSeedBank->mY + (aPacket ? aPacket->mY : 0);
 			TutorialArrowShow(aPosX, aPosY);
 			DisplayAdvice(_S("[ADVICE_CLICK_SEED_PACKET]"), MessageStyle::MESSAGE_STYLE_TUTORIAL_LEVEL1_STAY, AdviceType::ADVICE_NONE);
 		}
@@ -7211,7 +7415,8 @@ void Board::SetTutorialState(TutorialState theTutorialState)
 
 	case TutorialState::TUTORIAL_LEVEL_2_PICK_UP_SUNFLOWER:
 	case TutorialState::TUTORIAL_MORESUN_PICK_UP_SUNFLOWER:
-		TutorialArrowShow(mSeedBank->mX + mSeedBank->mSeedPackets[1].mX, mSeedBank->mY + mSeedBank->mSeedPackets[1].mY);
+		if (auto* aPacket = GetTutorialSeedPacket(SEED_SUNFLOWER))
+			TutorialArrowShow(mSeedBank->mX + aPacket->mX + aPacket->mOffsetX, mSeedBank->mY + aPacket->mY);
 		break;
 
 	case TutorialState::TUTORIAL_LEVEL_2_PLANT_SUNFLOWER:
@@ -7317,6 +7522,8 @@ int Board::GetSeedPacketCost(const SeedPacket& thePacket) const
 {
 	if (thePacket.IsMysteryPending() || thePacket.mPacketType == SEED_NONE)
 		return INT_MAX;
+	if (const auto* aFusionPacket = LawnFusion::GetNativePacketData(&thePacket))
+		return aFusionPacket->price;
 	int aBase = const_cast<Board*>(this)->GetCurrentPlantCost(thePacket.mPacketType, thePacket.mImitaterType);
 	const bool aPvP = mApp->mGameMode == GAMEMODE_COOP_PVP;
 	const bool aZombiePacket = mChallenge->IsZombieSeedType(thePacket.mPacketType);
@@ -7394,17 +7601,8 @@ bool Board::ResolveMysteryPackets()
 	std::vector<MysteryRoll> aRolls[NET_MAX_PLAYERS];
 	try
 	{
-		static bool aSmokeRngFaultConsumed = false;
-		const char* aMysterySmoke = getenv("PVZ_COOP_SMOKE_MYSTERY");
-		const char* aMysteryFault = getenv("PVZ_COOP_SMOKE_MYSTERY_FAULT");
-		if (!aSmokeRngFaultConsumed && mApp->CoopSmokeActive() &&
-			mApp->mCoopSmokeManifest.mScenario == NETSMOKE_SCENARIO_ADVENTURE_8_SOAK &&
-			aMysterySmoke && strcmp(aMysterySmoke, "1") == 0 &&
-			aMysteryFault && strcmp(aMysteryFault, "RngFailure") == 0)
-		{
-			aSmokeRngFaultConsumed = true;
+		if (mApp->CoopSmokeFailMysteryRngOnce())
 			throw std::runtime_error("isolated mystery RNG smoke fault");
-		}
 		std::random_device aDevice;
 		std::seed_seq aSeed{ aDevice(), aDevice(), aDevice(), aDevice(), aDevice(), aDevice() };
 		std::mt19937 anEngine(aSeed);
@@ -7572,6 +7770,8 @@ void Board::UpdateGame()
 		return;
 
 	mMainCounter++;
+	LawnFusion::UpdateNativeFireLight(this);
+    LawnFusion::UpdateNativeWorldRemainder269Board(this);
 	UpdateSunSpawning();
 	UpdateZombieSpawning();
 	UpdateIce();
@@ -7598,7 +7798,7 @@ void Board::UpdateGame()
 		mNukeCounter--;
 	}
 
-	if (mMainCounter == 1 && mApp->IsFirstTimeAdventureMode() && mApp->mPlayerInfo->GetLevel() <= 4)
+	if (mMainCounter == 1 && mApp->IsFirstTimeAdventureMode() && (mApp->IsFusionAdventure() || mApp->mPlayerInfo->GetLevel() <= 4))
 	{
 		if (mLevel == 1)
 		{
@@ -7618,6 +7818,8 @@ void Board::UpdateGame()
 //0x415D40
 void Board::Update()
 {
+	if (mApp->mFusionRuntime) { Widget::Update(); mApp->FusionTickNetwork(); MarkDirty(); return; }
+	if (LawnFusion::IsNativeFusionBoard(this)) mApp->NativeFusionTickNetwork();
 	TodHesitationBracket aHesitation("Board::Update");
 
 	// ---- co-op: the host owns gameplay, while clients still run the normal
@@ -8046,7 +8248,14 @@ void Board::DrawBackdrop(Graphics* g)
 		aBackdropTraceCount++;
 	}
 
-	if (mLevel == 1 && mApp->IsFirstTimeAdventureMode() /*&& mApp->mPlayerLevelRef <= 4*/)
+	const bool aNativeFusionField = mBackground == BackgroundType::BACKGROUND_1_DAY &&
+		LawnFusion::IsNativeFusionBoard(this) && LawnFusion::DrawNativeFusionField(g, this,
+			mApp->mNetManager && mApp->mNetManager->mConfig.mFusionClassicField);
+	if (aNativeFusionField)
+	{
+		// The shared native board/camera and entities are identical for both skins.
+	}
+	else if (mLevel == 1 && mApp->IsFirstTimeAdventureMode() /*&& mApp->mPlayerLevelRef <= 4*/)
 	{
 		g->DrawImageF(Sexy::IMAGE_BACKGROUND1UNSODDED, -BOARD_OFFSET + WIDESCREEN_OFFSETX, WIDESCREEN_OFFSETY);
 		int aWidth = TodAnimateCurve(0, 1000, mSodPosition, 0, Sexy::IMAGE_SOD1ROW->GetWidth(), TodCurves::CURVE_LINEAR);
@@ -8277,6 +8486,12 @@ static inline void AddUIRenderItem(RenderItem* theRenderList, int& theCurRenderI
 //0x416880
 void Board::DrawGameObjects(Graphics* g)
 {
+    LawnFusion::BeginNativeFusionWorldFrame(g,this);
+    struct NativeFusionWorldDrawScope
+    {
+        Board* board;
+        ~NativeFusionWorldDrawScope() { LawnFusion::EndNativeFusionWorldFrame(board); }
+    } nativeFusionDrawScope{this}; // Retire frame-only masks on every draw exit.
 	TodHesitationTrace("creating render list");
 
 	RenderItem aRenderList[MAX_RENDER_ITEMS];
@@ -8487,6 +8702,35 @@ void Board::DrawGameObjects(Graphics* g)
 	}
 	AddGameObjectRenderItemCursorPreview(aRenderList, aRenderItemCount, RenderObjectType::RENDER_ITEM_CURSOR_PREVIEW, mCursorPreview);
 
+    // The complete stock render list owns the budget first. Only confirmed
+    // appends suppress the source Grab branch in its ordinary plant pass.
+    Plant* sourceOverlayPlant=nullptr;
+    while(aRenderItemCount<MAX_RENDER_ITEMS&&IteratePlants(sourceOverlayPlant))
+    {
+        if(const auto* source=LawnFusion::GetNativePlantData(sourceOverlayPlant);source&&source->kind==937)
+        {
+            bool rows[6]={};int needed=0;
+            for(unsigned component=0;component<=8;++component)
+            {int row=-1;if(LawnFusion::GetNativeLaser269VisualRow(sourceOverlayPlant,component,row)&&row>=0&&row<6&&!rows[row]){rows[row]=true;++needed;}}
+            if(needed&&needed<=MAX_RENDER_ITEMS-aRenderItemCount)
+            {
+                for(int row=0;row<6;++row)if(rows[row])
+                {RenderItem& item=aRenderList[aRenderItemCount++];item.mRenderObjectType=RenderObjectType::RENDER_ITEM_PLANT_MAGNET_ITEMS;
+                 item.mZPos=MakeRenderOrder(RENDER_LAYER_PARTICLE,row,0);item.mPlant=sourceOverlayPlant;item.mSourceRow=row;}
+                LawnFusion::ConfirmNativeFusionPlantOverlayQueued(sourceOverlayPlant);
+            }
+            continue;
+        }
+        int sourceOrder=0;
+        if(!LawnFusion::GetNativeFusionPlantOverlayOrder(sourceOverlayPlant,sourceOrder))continue;
+        RenderItem& item=aRenderList[aRenderItemCount];
+        item.mRenderObjectType=RenderObjectType::RENDER_ITEM_PLANT_MAGNET_ITEMS;
+        item.mZPos=sourceOrder;
+        item.mPlant=sourceOverlayPlant;
+        ++aRenderItemCount;
+        LawnFusion::ConfirmNativeFusionPlantOverlayQueued(sourceOverlayPlant);
+    }
+
 	TodHesitationTrace("start sort");
 	std::sort(aRenderList, aRenderList + aRenderItemCount, RenderItemSortFunc);
 
@@ -8523,7 +8767,9 @@ void Board::DrawGameObjects(Graphics* g)
 			Plant* aPlant = aRenderItem.mPlant;
 			if (aPlant->BeginDraw(g))
 			{
-				aPlant->DrawMagnetItems(g);
+				if(aRenderItem.mSourceRow>=0)LawnFusion::DrawNativeLaser269Visuals(g,aPlant,aRenderItem.mSourceRow);
+				else if(!LawnFusion::DrawNativeFusionPlantOverlay(g,aPlant))
+					aPlant->DrawMagnetItems(g);
 				aPlant->EndDraw(g);
 			}
 			break;
@@ -9169,6 +9415,25 @@ void Board::DrawZenButtons(Graphics* g)
 		else
 		{
 			GetZenButtonRect(aTool, aButtonRect);
+			if (LawnFusion::IsNativeFusionBoard(this))
+			{
+				g->PushState();
+				g->SetColorizeImages(false);
+				TodDrawImageScaledF(g, Sexy::IMAGE_SHOVELBANK, aButtonRect.mX, aButtonRect.mY, 0.5f, 0.5f);
+				if (aTool == OBJECT_TYPE_GLOVE && mCursorObject->mCursorType != CURSOR_TYPE_GLOVE && mCursorObject->mCursorType != CURSOR_TYPE_PLANT_FROM_GLOVE)
+					TodDrawImageScaledF(g, Sexy::IMAGE_ZEN_GARDENGLOVE, aButtonRect.mX-3, aButtonRect.mY-2, 0.5f, 0.5f);
+				else if (aTool == OBJECT_TYPE_MONEY_SIGN && mCursorObject->mCursorType != CURSOR_TYPE_MONEY_SIGN)
+					TodDrawImageScaledF(g, Sexy::IMAGE_ZEN_MONEYSIGN, aButtonRect.mX-3, aButtonRect.mY-2, 0.5f, 0.5f);
+				const auto* context = LawnFusion::GetNativeContext(this);
+				if (aTool == OBJECT_TYPE_GLOVE && context && context->gloveCooldownTicks > 0)
+				{
+					g->SetColor(Color(0, 0, 0, 150));
+					g->FillRect(Rect(aButtonRect.mX, aButtonRect.mY, aButtonRect.mWidth,
+						aButtonRect.mHeight*context->gloveCooldownTicks/1000));
+				}
+				g->PopState();
+				continue;
+			}
 			g->DrawImage(Sexy::IMAGE_SHOVELBANK, aButtonRect.mX, aButtonRect.mY + aOffsetY);
 			if ((int)mCursorObject->mCursorType == (int)CursorType::CURSOR_TYPE_WATERING_CAN + (int)aTool - 6)
 			{
@@ -9248,6 +9513,9 @@ void Board::DrawZenButtons(Graphics* g)
 			else if (aTool == GameObjectType::OBJECT_TYPE_MONEY_SIGN)
 			{
 				g->DrawImage(Sexy::IMAGE_ZEN_MONEYSIGN, aButtonRect.mX - 5, aButtonRect.mY + aOffsetY - 4);
+				if (const auto* context=LawnFusion::GetNativeContext(this))
+					TodDrawString(g,StrFormat(_S("%d"),context->money),aButtonRect.mX+19,aButtonRect.mY+49,
+						Sexy::FONT_BRIANNETOD12,Color(255,230,140),DrawStringJustification::DS_ALIGN_CENTER);
 			}
 			else if (aTool == GameObjectType::OBJECT_TYPE_WHEELBARROW)
 			{
@@ -9633,11 +9901,11 @@ void Board::DrawDebugObjectRects(Graphics* g)
 		else
 		{
 			if (StageHasRoof())	g->mTransY += 10;
-			for (int x = 0; x < MAX_GRID_SIZE_X; x++)
+			for (int x = 0; x < GetColumnCount(); x++)
 			{
 				for (int y = 0; y < MAX_GRID_SIZE_Y; y++)
 				{
-					if (mGridSquareType[x][y] == GridSquareType::GRIDSQUARE_NONE || mGridSquareType[x][y] == GridSquareType::GRIDSQUARE_DIRT) continue;
+					if (GetGridSquareTypeAt(x, y) == GridSquareType::GRIDSQUARE_NONE || GetGridSquareTypeAt(x, y) == GridSquareType::GRIDSQUARE_DIRT) continue;
 
 					if (StageHasRoof() && x < 5) {
 						int topLX = GridToPixelX(x, y);
@@ -9654,7 +9922,7 @@ void Board::DrawDebugObjectRects(Graphics* g)
 					}
 					else
 					{
-						g->DrawRect(GridToPixelX(x, y), GridToPixelY(x, y), 80, StageHasRoof() || StageHas6Rows() ? 85 : 100);
+						g->DrawRect(GridToPixelX(x, y), GridToPixelY(x, y), GetCellPitchX(), StageHasRoof() || StageHas6Rows() ? 85 : 100);
 					}
 				}
 			}
@@ -9858,7 +10126,8 @@ void Board::DrawUICoinBank(Graphics* g)
 	if (mApp->mGameScene != GameScenes::SCENE_PLAYING && mApp->mCrazyDaveState == CrazyDaveState::CRAZY_DAVE_OFF)
 		return;
 
-	if (mCoinBankFadeCount <= 0)
+	const auto* aFusionContext = LawnFusion::GetNativeContext(this);
+	if (mCoinBankFadeCount <= 0 && !aFusionContext)
 		return;
 
 	int aPosX = 57;
@@ -9869,13 +10138,13 @@ void Board::DrawUICoinBank(Graphics* g)
 	}
 
 	g->SetColorizeImages(true);
-	int anAlpha = ClampInt(255 * mCoinBankFadeCount / 15, 0, 255);
+	int anAlpha = aFusionContext ? 255 : ClampInt(255 * mCoinBankFadeCount / 15, 0, 255);
 	g->SetColor(Color(255, 255, 255, anAlpha));
 	g->DrawImage(Sexy::IMAGE_COINBANK, aPosX, aPosY);
 
 	g->SetColor(Color(180, 255, 90, anAlpha));
 	g->SetFont(Sexy::FONT_CONTINUUMBOLD14);
-	SexyString aCoinLabel = mApp->GetMoneyString(mApp->mPlayerInfo->mCoins);
+	SexyString aCoinLabel = aFusionContext ? StrFormat(_S("$%d"),aFusionContext->money) : mApp->GetMoneyString(mApp->mPlayerInfo->mCoins);
 	g->DrawString(aCoinLabel, aPosX + 116 - Sexy::FONT_CONTINUUMBOLD14->StringWidth(aCoinLabel), aPosY + 24);
 	g->SetColorizeImages(false);
 }
@@ -10385,6 +10654,16 @@ void Board::DrawUITop(Graphics* g)
 	{
 		DrawTopRightUI(g);
 	}
+	if (const auto* context = LawnFusion::GetNativeContext(this); context && context->fieldButton)
+	{
+		g->PushState();
+		g->TranslateF(-mApp->mDDInterface->mWideScreenOffsetX, -mApp->mDDInterface->mWideScreenOffsetY);
+		context->fieldButton->Draw(g);
+		g->PopState();
+		// The Fusion tool sits below the bank, beyond the bottom-UI layer.
+		// Draw it with the other overlays so the foreground cannot cover it.
+		if (!mApp->IsScreenSaver()) DrawZenButtons(g);
+	}
 
 	if (mTimeStopCounter > 0)
 	{
@@ -10620,6 +10899,7 @@ void Board::DrawUITop(Graphics* g)
 //0x41ACF0
 void Board::Draw(Graphics* g)
 {
+	if (mApp->mFusionRuntime) { mApp->mFusionRuntime->Draw(g); return; }
 	if (mApp->GetDialog(Dialogs::DIALOG_STORE) || mApp->GetDialog(Dialogs::DIALOG_ALMANAC))
 		return;
 	g->PushState();
@@ -10840,8 +11120,9 @@ bool Board::HandleHotbarKey(KeyCode theKey, bool theRepeat)
 	int aDigit = (int)theKey;
 	if (theKey >= KEYCODE_NUMPAD0 && theKey <= KEYCODE_NUMPAD9)
 		aDigit = '0' + (theKey - KEYCODE_NUMPAD0);
-	const bool aShovel = (int)theKey == 'Q';
-	if (!aShovel && (aDigit < '0' || aDigit > '9')) return false;
+	const bool aShovel = (int)theKey == 'R';
+	const bool aFusionTool = LawnFusion::IsNativeFusionBoard(this) && ((int)theKey == 'V' || (int)theKey == 'Z');
+	if (!aShovel && !aFusionTool && (aDigit < '0' || aDigit > '9')) return false;
 	if (mApp->mGameScene != SCENE_PLAYING || mPaused || mTimeStopCounter > 0 ||
 		mApp->GetDialogCount() || mApp->mSeedChooserScreen || mApp->mNetChatTyping || !mCursorObject)
 		return false;
@@ -10849,9 +11130,10 @@ bool Board::HandleHotbarKey(KeyCode theKey, bool theRepeat)
 	const int aSlot = aNet ? aNet->GetMySlot() : 0;
 	if (mApp->NetActive() && (aNet->IsSpectator() || aNet->GetInputPhase() != NETINPUT_PLAYING ||
 		(mApp->NetIsClient() && aNet->mRemotePaused))) return true;
-	// Heat Wave retains Q for its native shout when no shovel is available.
+	// Q remains available for speed controls and Heat Wave's native shout.
 	if (aShovel && (!mShowShovel || !CanUsePlantTools(aSlot))) return false;
 	if (theRepeat) return true;
+	if (aFusionTool) return (int)theKey == 'V' ? LawnFusion::ToggleNativeGloveFromKeyboard(this) : LawnFusion::ToggleNativeMoneyFromKeyboard(this);
 
 	int aX = 0, aY = 0;
 	uint16_t aPacketId = 0;
@@ -10930,7 +11212,7 @@ bool Board::HandleHotbarKey(KeyCode theKey, bool theRepeat)
 	if (mApp->NetIsClient() || (mCursorObject->mCursorType != CURSOR_TYPE_NORMAL && mCursorObject->mCursorType != CURSOR_TYPE_HAMMER))
 		aClick(-1, 0, 0);
 	if (!aShovel || !aWasShovel) aClick(1, aX, aY);
-	NetTrace("hotbar key slot=%d key=%c packetId=%u client=%d", aSlot, aShovel ? 'Q' : aDigit,
+	NetTrace("hotbar key slot=%d key=%c packetId=%u client=%d", aSlot, aShovel ? 'R' : aDigit,
 		aPacketId, mApp->NetIsClient() ? 1 : 0);
 	return true;
 }
@@ -10938,6 +11220,12 @@ bool Board::HandleHotbarKey(KeyCode theKey, bool theRepeat)
 //0x41B820
 void Board::KeyDown(KeyCode theKey)
 {
+	if (mApp->mFusionRuntime) { mApp->mFusionRuntime->OnKeyDown(theKey); return; }
+	if (LawnFusion::IsNativeFusionBoard(this))
+	{
+		if ((int)theKey == 'V' && LawnFusion::ToggleNativeGloveFromKeyboard(this)) return;
+		if ((int)theKey == 'Z' && LawnFusion::ToggleNativeMoneyFromKeyboard(this)) return;
+	}
 	if (HandleHotbarKey(theKey)) return;
 	DoTypingCheck(theKey);
 
@@ -11922,6 +12210,7 @@ void Board::ProcessDeleteQueue()
 //0x41BE50
 bool Board::HasConveyorBeltSeedBank()
 {
+	if(mApp->IsFusionAdventure())return false;
 	return
 		mApp->IsFinalBossLevel() || 
 		mApp->IsMiniBossLevel() || 
@@ -11942,6 +12231,7 @@ bool Board::HasConveyorBeltSeedBank()
 //0x41BEE0
 int Board::GetNumSeedsInBank()
 {
+	if (const auto* aFusion = LawnFusion::GetNativeContext(this)) return aFusion->selection.State().targetCount;
 	if (mApp->mGameMode == GameMode::GAMEMODE_COOP_PVP)
 		return PVP_PACKET_COUNT;
 	if (mApp->IsCoopCustomMode())
@@ -12200,9 +12490,67 @@ int Board::PlantingPixelToGridY(int theX, int theY, SeedType theSeedType)
 	return aGridY;
 }
 
+int Board::GetColumnCount() const
+{
+	return LawnFusion::IsNativeFusionBoard(this) ? LawnFusion::kNativeFusionColumns : MAX_GRID_SIZE_X;
+}
+
+int Board::GetPlantOriginX(int theColumn, int theRow)
+{
+	return GridToPixelX(theColumn, theRow) + (GetCellPitchX() - 80) / 2;
+}
+
+int Board::GetCellPitchX() const
+{
+	return LawnFusion::IsNativeFusionBoard(this) ? LawnFusion::kNativeFusionCellPitchX : 80;
+}
+
+bool Board::IsValidGridCell(int theColumn, int theRow) const
+{
+	const int aRows = LawnFusion::IsNativeFusionBoard(this) ? LawnFusion::GetNativeFusionRowCount(this) : MAX_GRID_SIZE_Y;
+	return theColumn >= 0 && theColumn < GetColumnCount() && theRow >= 0 && theRow < aRows;
+}
+
+GridSquareType& Board::GetGridSquareTypeAt(int theColumn, int theRow)
+{
+	TOD_ASSERT(theColumn >= 0 && theColumn < GetColumnCount() && theRow >= 0 && theRow < MAX_GRID_SIZE_Y);
+	if (theColumn == MAX_GRID_SIZE_X && LawnFusion::IsNativeFusionBoard(this))
+		return mFusionNative->lastColumnTerrain[theRow];
+	return mGridSquareType[theColumn][theRow];
+}
+
+const GridSquareType& Board::GetGridSquareTypeAt(int theColumn, int theRow) const
+{
+	return const_cast<Board*>(this)->GetGridSquareTypeAt(theColumn, theRow);
+}
+
+int& Board::GetGridCelOffsetAt(int theColumn, int theRow, int theAxis)
+{
+	TOD_ASSERT(theColumn >= 0 && theColumn < GetColumnCount() && theRow >= 0 && theRow < MAX_GRID_SIZE_Y);
+	TOD_ASSERT(theAxis >= 0 && theAxis < 2);
+	if (theColumn == MAX_GRID_SIZE_X && LawnFusion::IsNativeFusionBoard(this))
+		return mFusionNative->lastColumnOffsets[theRow][theAxis];
+	return mGridCelOffset[theColumn][theRow][theAxis];
+}
+
+const int& Board::GetGridCelOffsetAt(int theColumn, int theRow, int theAxis) const
+{
+	return const_cast<Board*>(this)->GetGridCelOffsetAt(theColumn, theRow, theAxis);
+}
+
+int Board::GetCellCenterX(int theColumn, int theRow)
+{
+	return GridToPixelX(theColumn, theRow) + GetCellPitchX() / 2;
+}
+
 //0x41C4C0
 int Board::PixelToGridX(int theX, int theY)
 {
+	if (LawnFusion::IsNativeFusionBoard(this))
+	{
+		if (theX < LAWN_XMIN || theX >= LAWN_XMIN + GetColumnCount() * GetCellPitchX()) return -1;
+		return (theX - LAWN_XMIN) / GetCellPitchX();
+	}
 	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN)
 	{
 		if (mBackground == BackgroundType::BACKGROUND_GREENHOUSE || 
@@ -12222,6 +12570,8 @@ int Board::PixelToGridX(int theX, int theY)
 //0x41C530
 int Board::PixelToGridXKeepOnBoard(int theX, int theY)
 {
+	if (LawnFusion::IsNativeFusionBoard(this))
+		return ClampInt((theX - LAWN_XMIN) / GetCellPitchX(), 0, GetColumnCount() - 1);
 	int aGridX = PixelToGridX(theX, theY);
 	return max(aGridX, 0);
 }
@@ -12229,6 +12579,11 @@ int Board::PixelToGridXKeepOnBoard(int theX, int theY)
 //0x41C550
 int Board::PixelToGridY(int theX, int theY)
 {
+	if (LawnFusion::IsNativeFusionBoard(this))
+	{
+		if (PixelToGridX(theX, theY) < 0) return -1;
+		return LawnFusion::NativeFusionPixelToRow(static_cast<uint8_t>(mBackground),theY);
+	}
 	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN)
 	{
 		if (mBackground == BackgroundType::BACKGROUND_GREENHOUSE ||
@@ -12264,6 +12619,8 @@ int Board::PixelToGridY(int theX, int theY)
 //0x41C650
 int Board::PixelToGridYKeepOnBoard(int theX, int theY)
 {
+	if (LawnFusion::IsNativeFusionBoard(this))
+		return LawnFusion::NativeFusionPixelToRow(static_cast<uint8_t>(mBackground),theY,true);
 	int aGridY = PixelToGridY(max(theX, 80), theY);
 	return max(aGridY, 0);
 }
@@ -12271,7 +12628,7 @@ int Board::PixelToGridYKeepOnBoard(int theX, int theY)
 //0x41C680
 int Board::GridToPixelX(int theGridX, int theGridY)
 {
-	TOD_ASSERT(theGridX >= 0 && theGridX < MAX_GRID_SIZE_X);
+	TOD_ASSERT(theGridX >= 0 && theGridX < GetColumnCount());
 	TOD_ASSERT(theGridY >= 0 && theGridY < MAX_GRID_SIZE_Y);
 	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN)
 	{
@@ -12283,7 +12640,7 @@ int Board::GridToPixelX(int theGridX, int theGridY)
 		}
 	}
 
-	return theGridX * 80 + LAWN_XMIN;
+	return theGridX * GetCellPitchX() + LAWN_XMIN;
 }
 
 //0x41C6C0
@@ -12306,7 +12663,7 @@ float Board::GetPosYBasedOnRow(float thePosX, int theRow)
 //0x41C740
 int Board::GridToPixelY(int theGridX, int theGridY)
 {
-	TOD_ASSERT(theGridX >= 0 && theGridX < MAX_GRID_SIZE_X);
+	TOD_ASSERT(theGridX >= 0 && theGridX < GetColumnCount());
 	TOD_ASSERT(theGridY >= 0 && theGridY < MAX_GRID_SIZE_Y);
 	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN)
 	{
@@ -12341,7 +12698,7 @@ int Board::GridToPixelY(int theGridX, int theGridY)
 		aY = theGridY * 100 + LAWN_YMIN;
 	}
 
-	if (theGridX != -1 && mGridSquareType[theGridX][theGridY] == GridSquareType::GRIDSQUARE_HIGH_GROUND)
+	if (theGridX != -1 && GetGridSquareTypeAt(theGridX, theGridY) == GridSquareType::GRIDSQUARE_HIGH_GROUND)
 	{
 		aY -= HIGH_GROUND_HEIGHT;
 	}
@@ -12890,7 +13247,7 @@ void Board::DoFwoosh(int theRow)
 
 		float aPosX = 750.0f * i / 11.0f + 10.0f;
 		float aPosY = GetPosYBasedOnRow(aPosX + 10.0f, theRow) - 10.0f;
-		if (mGridSquareType[PixelToGridXKeepOnBoard(aPosX + 75, aPosY)][theRow] == GridSquareType::GRIDSQUARE_HIGH_GROUND)
+		if (GetGridSquareTypeAt(PixelToGridXKeepOnBoard(aPosX + 75, aPosY), theRow) == GridSquareType::GRIDSQUARE_HIGH_GROUND)
 			aPosY -= HIGH_GROUND_HEIGHT;
 		Reanimation* aFwoosh = mApp->AddReanimation(aPosX, aPosY, aRenderOrder, ReanimationType::REANIM_JALAPENO_FIRE);
 		aFwoosh->SetFramesForLayer("anim_flame");
@@ -12976,12 +13333,38 @@ bool Board::PlantingRequirementsMet(SeedType theSeedType)
 //0x41D8A0
 //0x41D8A0
 // GOTY @Patoke: 0x420670
-int Board::KillAllZombiesInRadius(int theRow, int theX, int theY, int theRadius, int theRowRange, bool theBurn, int theDamageRangeFlags)
+int Board::KillAllZombiesInRadius(int theRow, int theX, int theY, int theRadius, int theRowRange, bool theBurn, int theDamageRangeFlags, const Plant* theSourcePlant)
 {
+	const auto* aFusionPlant = theSourcePlant && theSourcePlant->mBoard == this ?
+		LawnFusion::GetNativePlantData(theSourcePlant) : nullptr;
+	const bool aFusionCherry = theBurn && aFusionPlant && aFusionPlant->kind == 2 &&
+		theSourcePlant->mSeedType == SEED_CHERRYBOMB && LawnFusion::IsNativeFusionBoard(this);
+	LawnFusion::FusionCherryArea aFusionArea;
+	if (aFusionCherry && (mApp->NetIsClient() || theSourcePlant->mNetGhost ||
+		!IsValidGridCell(theSourcePlant->mPlantCol, theSourcePlant->mRow) ||
+		!LawnFusion::TryMakeFusionCherryArea(GetCellCenterX(theSourcePlant->mPlantCol, theSourcePlant->mRow),
+			GridToPixelY(theSourcePlant->mPlantCol, theSourcePlant->mRow) + 50, aFusionArea))) return 0;
+	if (aFusionCherry)
+	{
+		LawnNet::NetTrace("Fusion native Cherry explosion plant=%u column=%d row=%d countdown=%d sourceDifficulty=%d nativeBoard=1",
+			theSourcePlant->mNetId, theSourcePlant->mPlantCol, theSourcePlant->mRow,
+			theSourcePlant->mDoSpecialCountdown, LawnFusion::kFusionSourceNormalDifficulty);
+		LawnNet::NetBroadcastParticle(mApp, static_cast<float>(theX), static_cast<float>(theY),
+			static_cast<int>(RenderLayer::RENDER_LAYER_TOP), ParticleEffect::PARTICLE_POWIE);
+	}
 	Zombie* aZombie = nullptr;
 	int aKilledZombies = 0; // @Patoke: implemented this
 	while (IterateZombies(aZombie))
 	{
+		if (aFusionCherry)
+		{
+			const int aRowDist = aZombie->mRow - theSourcePlant->mRow;
+			const Rect aRect = aZombie->GetZombieRect();
+			if (aRowDist >= -1 && aRowDist <= 1 &&
+				LawnFusion::FusionCherryRectOverlaps(aFusionArea, aRect.mX, aRect.mY, aRect.mWidth, aRect.mHeight) &&
+				LawnFusion::ApplyNativeFusionCherryDamage(aZombie)) ++aKilledZombies;
+			continue;
+		}
 		if (aZombie->EffectedByDamage(theDamageRangeFlags))
 		{
 			Rect aZombieRect = aZombie->GetZombieRect();
@@ -13014,12 +13397,24 @@ int Board::KillAllZombiesInRadius(int theRow, int theX, int theY, int theRadius,
 	{
 		if (aGridItem->mGridItemType == GridItemType::GRIDITEM_LADDER)
 		{
+			if (aFusionCherry)
+			{
+				const int aRowDist = aGridItem->mGridY - theSourcePlant->mRow;
+				if (!aGridItem->mDead && IsValidGridCell(aGridItem->mGridX, aGridItem->mGridY) &&
+					aRowDist >= -1 && aRowDist <= 1 && LawnFusion::FusionCherryLadderOverlaps(aFusionArea,
+						GetCellCenterX(aGridItem->mGridX, aGridItem->mGridY),
+						GridToPixelY(aGridItem->mGridX, aGridItem->mGridY) + 50)) aGridItem->GridItemDie();
+				continue;
+			}
 			if (GridInRange(aGridItem->mGridX, aGridItem->mGridY, aGridX, aGridY, theRowRange, theRowRange))
 			{
 				aGridItem->GridItemDie();
 			}
 		}
 	}
+
+    if (aFusionCherry)
+        LawnFusion::HealNativeCherryNutFromBlast(this,aFusionArea.centerX,aFusionArea.centerY,theSourcePlant->mRow);
 
 	return aKilledZombies;
 }
@@ -13080,6 +13475,9 @@ int Board::GetCurrentPlantCost(SeedType theSeedType, SeedType theImitaterType)
 //0x41DB40
 bool Board::CanUseGameObject(GameObjectType theGameObject)
 {
+	if (const auto* context = LawnFusion::GetNativeContext(this))
+		return (theGameObject == OBJECT_TYPE_GLOVE || theGameObject == OBJECT_TYPE_MONEY_SIGN) && mApp->mGameScene == SCENE_PLAYING &&
+			context->selection.State().phase == LawnFusion::FusionBankPhase::Playing;
 	if (mApp->mGameMode == GameMode::GAMEMODE_TREE_OF_WISDOM)
 	{
 		return theGameObject == GameObjectType::OBJECT_TYPE_TREE_FOOD || 
@@ -13246,12 +13644,26 @@ int Board::NukeBoard()
 	return aKilledZombies;
 }
 
-int Board::GetKilledlZombiesInRadius(int theRow, int theX, int theY, int theRadius, int theRowRange, bool theBurn, int theDamageRangeFlags)
+int Board::GetKilledlZombiesInRadius(int theRow, int theX, int theY, int theRadius, int theRowRange, bool theBurn, int theDamageRangeFlags, const Plant* theSourcePlant)
 {
+	const bool aFusionPotato = !theBurn && LawnFusion::IsNativeFusionPotato(theSourcePlant);
+	LawnFusion::FusionPotatoArea aFusionArea;
+	if (aFusionPotato && (mApp->NetIsClient() || theSourcePlant->mNetGhost || theSourcePlant->mBoard != this ||
+		!LawnFusion::TryMakeFusionPotatoArea(GetCellCenterX(theSourcePlant->mPlantCol, theSourcePlant->mRow),
+			GridToPixelY(theSourcePlant->mPlantCol, theSourcePlant->mRow) + 50, aFusionArea))) return 0;
 	Zombie* aZombie = nullptr;
 	int aKilledZombies = 0; // @Patoke: implemented this
 	while (IterateZombies(aZombie))
 	{
+		if (aFusionPotato)
+		{
+			const auto aRect = aZombie->GetZombieRect();
+			const int aSourceStatus = aZombie->IsDeadOrDying() ? 1 : 0;
+			if (LawnFusion::FusionPotatoCanDamage(aSourceStatus, aZombie->mRow == theRow, aZombie->mMindControlled) &&
+				LawnFusion::FusionPotatoBlastOverlaps(aFusionArea, aRect.mX, aRect.mY, aRect.mWidth, aRect.mHeight) &&
+				LawnFusion::ApplyNativeFusionPotatoDamage(aZombie)) ++aKilledZombies;
+			continue;
+		}
 		if (aZombie->EffectedByDamage(theDamageRangeFlags))
 		{
 			Rect aZombieRect = aZombie->GetZombieRect();
@@ -13278,6 +13690,8 @@ int Board::GetKilledlZombiesInRadius(int theRow, int theX, int theY, int theRadi
 		}
 	}
 
+	// Source SmallBombPotato damages zombies only, unlike the stock helper.
+	if (aFusionPotato) return aKilledZombies;
 	int aGridX = PixelToGridXKeepOnBoard(theX, theY);
 	int aGridY = PixelToGridYKeepOnBoard(theX, theY);
 	GridItem* aGridItem = nullptr;
@@ -13314,7 +13728,7 @@ void Board::MovePlant(Plant* thePlant, int theGridX, int theGridY)
 		aTopPlantAtGrid->mRenderOrder = Board::MakeRenderOrder(aLayer, aTopPlantAtGrid->mRow, anOrder * 5 - aTopPlantAtGrid->mX + 800);
 	}
 
-	int aPosX = GridToPixelX(theGridX, theGridY);
+	int aPosX = GetPlantOriginX(theGridX, theGridY);
 	int aPosY = GridToPixelY(theGridX, theGridY);
 
 	float aDeltaX = aPosX - thePlant->mX;

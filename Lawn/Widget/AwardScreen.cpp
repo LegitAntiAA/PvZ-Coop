@@ -64,7 +64,7 @@ AwardScreen::AwardScreen(LawnApp* theApp, AwardType theAwardType, bool theShowin
 		mApp->WriteCurrentUserConfig();
 	}
 
-	int aLevel = mApp->mPlayerInfo->GetLevel();
+	int aLevel = (mApp->GetContentMode()==LawnFusion::ContentMode::Fusion?mApp->GetFusionAdventureLevel():mApp->mPlayerInfo->GetLevel());
 	if (mAwardType == AWARD_CREDITS_ZOMBIENOTE)
 	{
 		TodLoadResources("DelayLoad_Background6");
@@ -243,7 +243,7 @@ bool AwardScreen::IsPaperNote()
 	if (mAwardType == AWARD_CREDITS_ZOMBIENOTE || mAwardType == AWARD_HELP_ZOMBIENOTE)
 		return true;
 
-	int aLevel = mApp->mPlayerInfo->GetLevel();
+	int aLevel = (mApp->GetContentMode()==LawnFusion::ContentMode::Fusion?mApp->GetFusionAdventureLevel():mApp->mPlayerInfo->GetLevel());
 	return mApp->IsAdventureMode() && (aLevel == 10 || aLevel == 20 || aLevel == 30 || aLevel == 40 || aLevel == 50);
 }
 
@@ -259,7 +259,7 @@ void AwardScreen::DrawBottom(Graphics* g, const SexyString& theTitle, const Sexy
 //0x4066A0
 void AwardScreen::DrawAwardSeed(Graphics* g)
 {
-	SeedType aSeedType = mApp->GetAwardSeedForLevel(mApp->mPlayerInfo->GetLevel() - 1);
+	SeedType aSeedType = mApp->GetAwardSeedForLevel((mApp->GetContentMode()==LawnFusion::ContentMode::Fusion?mApp->GetFusionAdventureLevel():mApp->mPlayerInfo->GetLevel()) - 1);
 	SexyString aAward = Plant::GetNameString(aSeedType, SEED_NONE);
 	SexyString aMessage;
 	if (mApp->IsTrialStageLocked() && aSeedType >= SEED_SQUASH && aSeedType != SEED_TANGLEKELP)
@@ -279,7 +279,7 @@ void AwardScreen::Draw(Graphics* g)
 {
 	g->SetLinearBlend(true);
 
-	int aLevel = mApp->mPlayerInfo->GetLevel();
+	int aLevel = (mApp->GetContentMode()==LawnFusion::ContentMode::Fusion?mApp->GetFusionAdventureLevel():mApp->mPlayerInfo->GetLevel());
 	if (mShowingAchievements) // @Patoke: add call
 		DrawAchievements(g);
 	else if (mAwardType == AWARD_CREDITS_ZOMBIENOTE)
@@ -485,7 +485,7 @@ void AwardScreen::StartButtonPressed()
 	}
 	else
 	{
-		int aLevel = mApp->mPlayerInfo->GetLevel();
+		int aLevel = (mApp->GetContentMode()==LawnFusion::ContentMode::Fusion?mApp->GetFusionAdventureLevel():mApp->mPlayerInfo->GetLevel());
 		if (aLevel == 1)
 		{
 			mApp->KillAwardScreen();
@@ -642,7 +642,7 @@ void AwardScreen::AchievementsContinuePressed() {
 		mContinueButton->mDisabled = true;
 		mContinueButton->mBtnNoDraw = true;
 		mShowingAchievements = false;
-		int level = mApp->mPlayerInfo->GetLevel();
+		int level = (mApp->GetContentMode()==LawnFusion::ContentMode::Fusion?mApp->GetFusionAdventureLevel():mApp->mPlayerInfo->GetLevel());
 		if (level == 1 && mApp->HasFinishedAdventure()) {
 			mApp->KillAwardScreen();
 			mApp->ShowAwardScreen(AWARD_CREDITS_ZOMBIENOTE, false);

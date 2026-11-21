@@ -1,0 +1,1926 @@
+{
+  "version": "Fusion 2.3.1",
+  "source_binary": "GameAssembly.dll",
+  "source_sha256": "b19cfc30b2061514689a93191a979e76335dd02f5c12e550e1bb62de9578b94f",
+  "table_capacity": 256,
+  "struct_fields": [
+    "attack_damage",
+    "max_health",
+    "first_armor_max_health",
+    "second_armor_max_health"
+  ],
+  "initialization_order": [
+    "InitZombieData base stores",
+    "PlantZombie",
+    "TravelZombie"
+  ],
+  "notes": [
+    "TravelZombie is called unconditionally by InitZombieData and initializes the 200+ series; these are source category rows, not conditional health multipliers.",
+    "Unassigned table entries default to zero. Runtime CreateZombie.GetZombieData applies board/travel health multipliers after copying stats; per-class behavior remains separate."
+  ],
+  "source_functions": [
+    {
+      "method": "InitZombieData",
+      "va": "0x1803BA5C0",
+      "native_packed_writes": 98,
+      "records": 49,
+      "decompiled_code_sha256": "c6c3605eed32c4af07383ac6fbf12c7bc6e69a43bb00cba34b8c2f079c54fe9c"
+    },
+    {
+      "method": "PlantZombie",
+      "va": "0x1803BB0E0",
+      "native_packed_writes": 40,
+      "records": 20,
+      "decompiled_code_sha256": "140a671e029f5701689c5f91c3d275e66823c0302b1d6bae56044220612c4194"
+    },
+    {
+      "method": "TravelZombie",
+      "va": "0x1803BB590",
+      "native_packed_writes": 50,
+      "records": 25,
+      "decompiled_code_sha256": "e58c0590584db04ec17f6ce7c3f77fbb0cea5272ee53bec2ddaecb34de5f63e0"
+    }
+  ],
+  "entries": [
+    {
+      "id": 0,
+      "enum_name": "NormalZombie",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 32,
+          "u64_hex": "0x10e00000032"
+        },
+        {
+          "array_byte_offset": 40,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 270,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 2,
+      "enum_name": "ConeZombie",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 64,
+          "u64_hex": "0x10e00000032"
+        },
+        {
+          "array_byte_offset": 72,
+          "u64_hex": "0x172"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 270,
+      "first_armor_max_health": 370,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 3,
+      "enum_name": "PolevaulterZombie",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 80,
+          "u64_hex": "0x2d000000032"
+        },
+        {
+          "array_byte_offset": 88,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 720,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 4,
+      "enum_name": "BucketZombie",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 96,
+          "u64_hex": "0x10e00000032"
+        },
+        {
+          "array_byte_offset": 104,
+          "u64_hex": "0x44c"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 270,
+      "first_armor_max_health": 1100,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 5,
+      "enum_name": "PaperZombie",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 112,
+          "u64_hex": "0x10e00000032"
+        },
+        {
+          "array_byte_offset": 120,
+          "u64_hex": "0xc800000000"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 270,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 200
+    },
+    {
+      "id": 6,
+      "enum_name": "DancePolZombie",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 128,
+          "u64_hex": "0x2d000000032"
+        },
+        {
+          "array_byte_offset": 136,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 720,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 7,
+      "enum_name": "DancePolZombie2",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 144,
+          "u64_hex": "0x10e00000032"
+        },
+        {
+          "array_byte_offset": 152,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 270,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 8,
+      "enum_name": "DoorZombie",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 160,
+          "u64_hex": "0x10e00000032"
+        },
+        {
+          "array_byte_offset": 168,
+          "u64_hex": "0x44c00000000"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 270,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 1100
+    },
+    {
+      "id": 9,
+      "enum_name": "FootballZombie",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 176,
+          "u64_hex": "0x10e00000032"
+        },
+        {
+          "array_byte_offset": 184,
+          "u64_hex": "0x578"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 270,
+      "first_armor_max_health": 1400,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 10,
+      "enum_name": "JacksonZombie",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 192,
+          "u64_hex": "0x2d000000032"
+        },
+        {
+          "array_byte_offset": 200,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 720,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 11,
+      "enum_name": "ZombieDuck",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 208,
+          "u64_hex": "0x10e00000032"
+        },
+        {
+          "array_byte_offset": 216,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 270,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 12,
+      "enum_name": "ConeZombieDuck",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 224,
+          "u64_hex": "0x10e00000032"
+        },
+        {
+          "array_byte_offset": 232,
+          "u64_hex": "0x172"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 270,
+      "first_armor_max_health": 370,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 13,
+      "enum_name": "BucketZombieDuck",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 240,
+          "u64_hex": "0x10e00000032"
+        },
+        {
+          "array_byte_offset": 248,
+          "u64_hex": "0x44c"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 270,
+      "first_armor_max_health": 1100,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 14,
+      "enum_name": "SubmarineZombie",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 256,
+          "u64_hex": "0x546000001f4"
+        },
+        {
+          "array_byte_offset": 264,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 500,
+      "max_health": 1350,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 15,
+      "enum_name": "ElitePaperZombie",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 272,
+          "u64_hex": "0x2d000000190"
+        },
+        {
+          "array_byte_offset": 280,
+          "u64_hex": "0x44c00000000"
+        }
+      ],
+      "attack_damage": 400,
+      "max_health": 720,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 1100
+    },
+    {
+      "id": 16,
+      "enum_name": "DriverZombie",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 288,
+          "u64_hex": "0x546000001f4"
+        },
+        {
+          "array_byte_offset": 296,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 500,
+      "max_health": 1350,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 17,
+      "enum_name": "SnorkleZombie",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 304,
+          "u64_hex": "0x10e00000032"
+        },
+        {
+          "array_byte_offset": 312,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 270,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 18,
+      "enum_name": "SuperDriver",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 320,
+          "u64_hex": "0xa8c000001f4"
+        },
+        {
+          "array_byte_offset": 328,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 500,
+      "max_health": 2700,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 19,
+      "enum_name": "Dolphinrider",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 336,
+          "u64_hex": "0x2d000000032"
+        },
+        {
+          "array_byte_offset": 344,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 720,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 20,
+      "enum_name": "DrownZombie",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 352,
+          "u64_hex": "0x2d000000032"
+        },
+        {
+          "array_byte_offset": 360,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 720,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 21,
+      "enum_name": "DollDiamond",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 368,
+          "u64_hex": "0x7d000000032"
+        },
+        {
+          "array_byte_offset": 376,
+          "u64_hex": "0x1130"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 2000,
+      "first_armor_max_health": 4400,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 22,
+      "enum_name": "DollGold",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 384,
+          "u64_hex": "0x7d000000032"
+        },
+        {
+          "array_byte_offset": 392,
+          "u64_hex": "0x898"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 2000,
+      "first_armor_max_health": 2200,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 23,
+      "enum_name": "DollSilver",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 400,
+          "u64_hex": "0x7d000000032"
+        },
+        {
+          "array_byte_offset": 408,
+          "u64_hex": "0x44c"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 2000,
+      "first_armor_max_health": 1100,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 24,
+      "enum_name": "JackboxZombie",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 416,
+          "u64_hex": "0x2d000000032"
+        },
+        {
+          "array_byte_offset": 424,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 720,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 25,
+      "enum_name": "BalloonZombie",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 432,
+          "u64_hex": "0x10e00000032"
+        },
+        {
+          "array_byte_offset": 440,
+          "u64_hex": "0x14"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 270,
+      "first_armor_max_health": 20,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 26,
+      "enum_name": "KirovZombie",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 448,
+          "u64_hex": "0x546000001f4"
+        },
+        {
+          "array_byte_offset": 456,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 500,
+      "max_health": 1350,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 27,
+      "enum_name": "SnowDolphinrider",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 464,
+          "u64_hex": "0x2d000000032"
+        },
+        {
+          "array_byte_offset": 472,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 720,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 28,
+      "enum_name": "MinerZombie",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 480,
+          "u64_hex": "0x2d000000032"
+        },
+        {
+          "array_byte_offset": 488,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 720,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 29,
+      "enum_name": "IronBallonZombie",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 496,
+          "u64_hex": "0x10e00000032"
+        },
+        {
+          "array_byte_offset": 504,
+          "u64_hex": "0x1f4"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 270,
+      "first_armor_max_health": 500,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 30,
+      "enum_name": "SuperJackboxZombie",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 512,
+          "u64_hex": "0x2d000000032"
+        },
+        {
+          "array_byte_offset": 520,
+          "u64_hex": "0x172"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 720,
+      "first_armor_max_health": 370,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 31,
+      "enum_name": "CatapultZombie",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 528,
+          "u64_hex": "0x352000001f4"
+        },
+        {
+          "array_byte_offset": 536,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 500,
+      "max_health": 850,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 32,
+      "enum_name": "PogoZombie",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 544,
+          "u64_hex": "0x2d000000032"
+        },
+        {
+          "array_byte_offset": 552,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 720,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 33,
+      "enum_name": "LadderZombie",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 560,
+          "u64_hex": "0x2d000000032"
+        },
+        {
+          "array_byte_offset": 568,
+          "u64_hex": "0x2d000000000"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 720,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 720
+    },
+    {
+      "id": 34,
+      "enum_name": "SuperPogoZombie",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 576,
+          "u64_hex": "0x10e00000032"
+        },
+        {
+          "array_byte_offset": 584,
+          "u64_hex": "0x898"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 270,
+      "first_armor_max_health": 2200,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 35,
+      "enum_name": "Gargantuar",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 592,
+          "u64_hex": "0xbb800000032"
+        },
+        {
+          "array_byte_offset": 600,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 3000,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 36,
+      "enum_name": "RedGargantuar",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 608,
+          "u64_hex": "0x177000000032"
+        },
+        {
+          "array_byte_offset": 616,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 6000,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 37,
+      "enum_name": "ImpZombie",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 624,
+          "u64_hex": "0x10e00000032"
+        },
+        {
+          "array_byte_offset": 632,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 270,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 38,
+      "enum_name": "IronGargantuar",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 640,
+          "u64_hex": "0xbb800000032"
+        },
+        {
+          "array_byte_offset": 648,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 3000,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 39,
+      "enum_name": "IronRedGargantuar",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 656,
+          "u64_hex": "0x177000000032"
+        },
+        {
+          "array_byte_offset": 664,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 6000,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 40,
+      "enum_name": "MachineNutZombie",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 672,
+          "u64_hex": "0x54600000032"
+        },
+        {
+          "array_byte_offset": 680,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 1350,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 41,
+      "enum_name": "SilverZombie",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 688,
+          "u64_hex": "0xc800000032"
+        },
+        {
+          "array_byte_offset": 696,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 200,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 42,
+      "enum_name": "GoldZombie",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 704,
+          "u64_hex": "0x12c00000032"
+        },
+        {
+          "array_byte_offset": 712,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 300,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 43,
+      "enum_name": "SuperGargantuar",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 720,
+          "u64_hex": "0x1f4000000032"
+        },
+        {
+          "array_byte_offset": 728,
+          "u64_hex": "0x5dc0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 8000,
+      "first_armor_max_health": 24000,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 44,
+      "enum_name": "ZombieBoss",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 736,
+          "u64_hex": "0xea6000000032"
+        },
+        {
+          "array_byte_offset": 744,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 60000,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 45,
+      "enum_name": "BungiZombie",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 752,
+          "u64_hex": "0x2d000000032"
+        },
+        {
+          "array_byte_offset": 760,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 720,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 46,
+      "enum_name": "ZombieBoss2",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 768,
+          "u64_hex": "0xea6000000032"
+        },
+        {
+          "array_byte_offset": 776,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 60000,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 47,
+      "enum_name": "SnowZombie",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 784,
+          "u64_hex": "0x54600000032"
+        },
+        {
+          "array_byte_offset": 792,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 1350,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 48,
+      "enum_name": "NewYearZombie",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 800,
+          "u64_hex": "0x22b800000032"
+        },
+        {
+          "array_byte_offset": 808,
+          "u64_hex": "0x22b8"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 8888,
+      "first_armor_max_health": 8888,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 49,
+      "enum_name": "SnowGunZombie",
+      "source_method": "InitZombieData",
+      "source_va": "0x1803BA5C0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 816,
+          "u64_hex": "0x2d000000032"
+        },
+        {
+          "array_byte_offset": 824,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 720,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 100,
+      "enum_name": "PeaShooterZombie",
+      "source_method": "PlantZombie",
+      "source_va": "0x1803BB0E0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 1632,
+          "u64_hex": "0x10e00000032"
+        },
+        {
+          "array_byte_offset": 1640,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 270,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 101,
+      "enum_name": "CherryShooterZombie",
+      "source_method": "PlantZombie",
+      "source_va": "0x1803BB0E0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 1648,
+          "u64_hex": "0x1f400000032"
+        },
+        {
+          "array_byte_offset": 1656,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 500,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 102,
+      "enum_name": "SuperCherryShooterZombie",
+      "source_method": "PlantZombie",
+      "source_va": "0x1803BB0E0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 1664,
+          "u64_hex": "0x1f400000032"
+        },
+        {
+          "array_byte_offset": 1672,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 500,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 103,
+      "enum_name": "WallNutZombie",
+      "source_method": "PlantZombie",
+      "source_va": "0x1803BB0E0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 1680,
+          "u64_hex": "0x10e00000032"
+        },
+        {
+          "array_byte_offset": 1688,
+          "u64_hex": "0x44c"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 270,
+      "first_armor_max_health": 1100,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 104,
+      "enum_name": "CherryPaperZombie",
+      "source_method": "PlantZombie",
+      "source_va": "0x1803BB0E0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 1696,
+          "u64_hex": "0x5dc00000032"
+        },
+        {
+          "array_byte_offset": 1704,
+          "u64_hex": "0xc800000000"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 1500,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 200
+    },
+    {
+      "id": 105,
+      "enum_name": "RandomZombie",
+      "source_method": "PlantZombie",
+      "source_va": "0x1803BB0E0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 1712,
+          "u64_hex": "0x10e00000032"
+        },
+        {
+          "array_byte_offset": 1720,
+          "u64_hex": "0x172"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 270,
+      "first_armor_max_health": 370,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 106,
+      "enum_name": "BucketNutZombie",
+      "source_method": "PlantZombie",
+      "source_va": "0x1803BB0E0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 1728,
+          "u64_hex": "0x10e00000032"
+        },
+        {
+          "array_byte_offset": 1736,
+          "u64_hex": "0x898"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 270,
+      "first_armor_max_health": 2200,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 107,
+      "enum_name": "CherryNutZombie",
+      "source_method": "PlantZombie",
+      "source_va": "0x1803BB0E0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 1744,
+          "u64_hex": "0x10e00000032"
+        },
+        {
+          "array_byte_offset": 1752,
+          "u64_hex": "0x44c"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 270,
+      "first_armor_max_health": 1100,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 108,
+      "enum_name": "IronPeaZombie",
+      "source_method": "PlantZombie",
+      "source_va": "0x1803BB0E0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 1760,
+          "u64_hex": "0x54600000032"
+        },
+        {
+          "array_byte_offset": 1768,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 1350,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 109,
+      "enum_name": "TallNutFootballZombie",
+      "source_method": "PlantZombie",
+      "source_va": "0x1803BB0E0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 1776,
+          "u64_hex": "0x10e00000032"
+        },
+        {
+          "array_byte_offset": 1784,
+          "u64_hex": "0x1130"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 270,
+      "first_armor_max_health": 4400,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 110,
+      "enum_name": "RandomPlusZombie",
+      "source_method": "PlantZombie",
+      "source_va": "0x1803BB0E0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 1792,
+          "u64_hex": "0x10e00000032"
+        },
+        {
+          "array_byte_offset": 1800,
+          "u64_hex": "0x2d0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 270,
+      "first_armor_max_health": 720,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 111,
+      "enum_name": "TallIceNutZombie",
+      "source_method": "PlantZombie",
+      "source_va": "0x1803BB0E0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 1808,
+          "u64_hex": "0x10e00000032"
+        },
+        {
+          "array_byte_offset": 1816,
+          "u64_hex": "0x898"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 270,
+      "first_armor_max_health": 2200,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 112,
+      "enum_name": "CherryCatapultZombie",
+      "source_method": "PlantZombie",
+      "source_va": "0x1803BB0E0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 1824,
+          "u64_hex": "0x54600000032"
+        },
+        {
+          "array_byte_offset": 1832,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 1350,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 113,
+      "enum_name": "DolphinPeaZombie",
+      "source_method": "PlantZombie",
+      "source_va": "0x1803BB0E0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 1840,
+          "u64_hex": "0x2d000000032"
+        },
+        {
+          "array_byte_offset": 1848,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 720,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 114,
+      "enum_name": "IronPeaDoorZombie",
+      "source_method": "PlantZombie",
+      "source_va": "0x1803BB0E0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 1856,
+          "u64_hex": "0x54600000032"
+        },
+        {
+          "array_byte_offset": 1864,
+          "u64_hex": "0x44c0000044c"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 1350,
+      "first_armor_max_health": 1100,
+      "second_armor_max_health": 1100
+    },
+    {
+      "id": 115,
+      "enum_name": "SquashZombie",
+      "source_method": "PlantZombie",
+      "source_va": "0x1803BB0E0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 1872,
+          "u64_hex": "0x1f400000032"
+        },
+        {
+          "array_byte_offset": 1880,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 500,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 116,
+      "enum_name": "JalaSquashZombie",
+      "source_method": "PlantZombie",
+      "source_va": "0x1803BB0E0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 1888,
+          "u64_hex": "0x5dc00000032"
+        },
+        {
+          "array_byte_offset": 1896,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 1500,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 117,
+      "enum_name": "JalapenoZombie",
+      "source_method": "PlantZombie",
+      "source_va": "0x1803BB0E0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 1904,
+          "u64_hex": "0x1f400000032"
+        },
+        {
+          "array_byte_offset": 1912,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 500,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 118,
+      "enum_name": "GatlingFootballZombie",
+      "source_method": "PlantZombie",
+      "source_va": "0x1803BB0E0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 1920,
+          "u64_hex": "0x10e00000032"
+        },
+        {
+          "array_byte_offset": 1928,
+          "u64_hex": "0x578"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 270,
+      "first_armor_max_health": 1400,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 119,
+      "enum_name": "IronBallonZombie2",
+      "source_method": "PlantZombie",
+      "source_va": "0x1803BB0E0",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 1936,
+          "u64_hex": "0x54600000032"
+        },
+        {
+          "array_byte_offset": 1944,
+          "u64_hex": "0x1f4"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 1350,
+      "first_armor_max_health": 500,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 200,
+      "enum_name": "SuperSubmarine",
+      "source_method": "TravelZombie",
+      "source_va": "0x1803BB590",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 3232,
+          "u64_hex": "0xbb8000001f4"
+        },
+        {
+          "array_byte_offset": 3240,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 500,
+      "max_health": 3000,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 201,
+      "enum_name": "JacksonDriver",
+      "source_method": "TravelZombie",
+      "source_va": "0x1803BB590",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 3248,
+          "u64_hex": "0x2ee0000001f4"
+        },
+        {
+          "array_byte_offset": 3256,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 500,
+      "max_health": 12000,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 202,
+      "enum_name": "FootballDrown",
+      "source_method": "TravelZombie",
+      "source_va": "0x1803BB590",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 3264,
+          "u64_hex": "0x10e00000032"
+        },
+        {
+          "array_byte_offset": 3272,
+          "u64_hex": "0x1d4c"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 270,
+      "first_armor_max_health": 7500,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 203,
+      "enum_name": "CherryPaperZ95",
+      "source_method": "TravelZombie",
+      "source_va": "0x1803BB590",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 3280,
+          "u64_hex": "0x5dc00000190"
+        },
+        {
+          "array_byte_offset": 3288,
+          "u64_hex": "0x5dc00000000"
+        }
+      ],
+      "attack_damage": 400,
+      "max_health": 1500,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 1500
+    },
+    {
+      "id": 204,
+      "enum_name": "BlackFootball",
+      "source_method": "TravelZombie",
+      "source_va": "0x1803BB590",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 3296,
+          "u64_hex": "0xbb800000064"
+        },
+        {
+          "array_byte_offset": 3304,
+          "u64_hex": "0x2ee0"
+        }
+      ],
+      "attack_damage": 100,
+      "max_health": 3000,
+      "first_armor_max_health": 12000,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 205,
+      "enum_name": "SuperKirov",
+      "source_method": "TravelZombie",
+      "source_va": "0x1803BB590",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 3312,
+          "u64_hex": "0xbb800000032"
+        },
+        {
+          "array_byte_offset": 3320,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 3000,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 206,
+      "enum_name": "SuperBombThrower",
+      "source_method": "TravelZombie",
+      "source_va": "0x1803BB590",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 3328,
+          "u64_hex": "0x1f400000032"
+        },
+        {
+          "array_byte_offset": 3336,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 500,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 207,
+      "enum_name": "QuickJacksonZombie",
+      "source_method": "TravelZombie",
+      "source_va": "0x1803BB590",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 3344,
+          "u64_hex": "0xbb800000032"
+        },
+        {
+          "array_byte_offset": 3352,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 3000,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 208,
+      "enum_name": "QingZombie",
+      "source_method": "TravelZombie",
+      "source_va": "0x1803BB590",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 3360,
+          "u64_hex": "0xbb8000001f4"
+        },
+        {
+          "array_byte_offset": 3368,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 500,
+      "max_health": 3000,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 209,
+      "enum_name": "JackboxJumpZombie",
+      "source_method": "TravelZombie",
+      "source_va": "0x1803BB590",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 3376,
+          "u64_hex": "0x2d000000032"
+        },
+        {
+          "array_byte_offset": 3384,
+          "u64_hex": "0x1130"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 720,
+      "first_armor_max_health": 4400,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 210,
+      "enum_name": "SuperMachineNutZombie",
+      "source_method": "TravelZombie",
+      "source_va": "0x1803BB590",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 3392,
+          "u64_hex": "0x54600000032"
+        },
+        {
+          "array_byte_offset": 3400,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 1350,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 211,
+      "enum_name": "LandSubmarine",
+      "source_method": "TravelZombie",
+      "source_va": "0x1803BB590",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 3408,
+          "u64_hex": "0xbb800000032"
+        },
+        {
+          "array_byte_offset": 3416,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 3000,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 212,
+      "enum_name": "UltimateGargantuar",
+      "source_method": "TravelZombie",
+      "source_va": "0x1803BB590",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 3424,
+          "u64_hex": "0x1f4000000032"
+        },
+        {
+          "array_byte_offset": 3432,
+          "u64_hex": "0x5dc0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 8000,
+      "first_armor_max_health": 24000,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 213,
+      "enum_name": "ObsidianImpZombie",
+      "source_method": "TravelZombie",
+      "source_va": "0x1803BB590",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 3440,
+          "u64_hex": "0x5dc000000c8"
+        },
+        {
+          "array_byte_offset": 3448,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 200,
+      "max_health": 1500,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 214,
+      "enum_name": "DolphinGatlingZombie",
+      "source_method": "TravelZombie",
+      "source_va": "0x1803BB590",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 3456,
+          "u64_hex": "0x5dc00000032"
+        },
+        {
+          "array_byte_offset": 3464,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 1500,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 215,
+      "enum_name": "DiamondRandomZombie",
+      "source_method": "TravelZombie",
+      "source_va": "0x1803BB590",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 3472,
+          "u64_hex": "0x4e2000000032"
+        },
+        {
+          "array_byte_offset": 3480,
+          "u64_hex": "0x44c"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 20000,
+      "first_armor_max_health": 1100,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 216,
+      "enum_name": "DrownpultZombie",
+      "source_method": "TravelZombie",
+      "source_va": "0x1803BB590",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 3488,
+          "u64_hex": "0x54600000032"
+        },
+        {
+          "array_byte_offset": 3496,
+          "u64_hex": "0x1130"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 1350,
+      "first_armor_max_health": 4400,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 217,
+      "enum_name": "SuperDancePolZombie",
+      "source_method": "TravelZombie",
+      "source_va": "0x1803BB590",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 3504,
+          "u64_hex": "0xbb800000032"
+        },
+        {
+          "array_byte_offset": 3512,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 3000,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 218,
+      "enum_name": "UltimateFootballDrown",
+      "source_method": "TravelZombie",
+      "source_va": "0x1803BB590",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 3520,
+          "u64_hex": "0x1f4000000032"
+        },
+        {
+          "array_byte_offset": 3528,
+          "u64_hex": "0x5dc0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 8000,
+      "first_armor_max_health": 24000,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 219,
+      "enum_name": "UltimateMachineNutZombie",
+      "source_method": "TravelZombie",
+      "source_va": "0x1803BB590",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 3536,
+          "u64_hex": "0x2ee000000032"
+        },
+        {
+          "array_byte_offset": 3544,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 12000,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 220,
+      "enum_name": "UltimateFootballZombie",
+      "source_method": "TravelZombie",
+      "source_va": "0x1803BB590",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 3552,
+          "u64_hex": "0x1f40000000c8"
+        },
+        {
+          "array_byte_offset": 3560,
+          "u64_hex": "0x5dc0"
+        }
+      ],
+      "attack_damage": 200,
+      "max_health": 8000,
+      "first_armor_max_health": 24000,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 221,
+      "enum_name": "UltimateKirovZombie",
+      "source_method": "TravelZombie",
+      "source_va": "0x1803BB590",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 3568,
+          "u64_hex": "0x2ee000000032"
+        },
+        {
+          "array_byte_offset": 3576,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 12000,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 222,
+      "enum_name": "UltimateJacksonDriver",
+      "source_method": "TravelZombie",
+      "source_va": "0x1803BB590",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 3584,
+          "u64_hex": "0x7d0000000032"
+        },
+        {
+          "array_byte_offset": 3592,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 32000,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    },
+    {
+      "id": 223,
+      "enum_name": "UltimatePaperZombie",
+      "source_method": "TravelZombie",
+      "source_va": "0x1803BB590",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 3600,
+          "u64_hex": "0x5dc00000032"
+        },
+        {
+          "array_byte_offset": 3608,
+          "u64_hex": "0x5dc00002ee0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 1500,
+      "first_armor_max_health": 12000,
+      "second_armor_max_health": 1500
+    },
+    {
+      "id": 224,
+      "enum_name": "UltimateJackboxZombie",
+      "source_method": "TravelZombie",
+      "source_va": "0x1803BB590",
+      "packed_native_stores": [
+        {
+          "array_byte_offset": 3616,
+          "u64_hex": "0x7d0000000032"
+        },
+        {
+          "array_byte_offset": 3624,
+          "u64_hex": "0x0"
+        }
+      ],
+      "attack_damage": 50,
+      "max_health": 32000,
+      "first_armor_max_health": 0,
+      "second_armor_max_health": 0
+    }
+  ]
+}
