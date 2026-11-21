@@ -19,6 +19,7 @@
 #include "FusionMorePlants269BackendRules.h"
 #include "FusionLastPlants269Rules.h"
 #include "FusionHostileProjectileRules.h"
+#include "FusionDayZombie273Rules.h"
 #include <limits>
 
 namespace LawnFusion
@@ -55,6 +56,7 @@ inline ProjectileType NativeProjectileMetadataType(const NativeProjectileData& d
 
 inline ProjectileMotion NativeProjectileMetadataMotion(const NativeProjectileData& data)
 {
+    if((data.kind==0||data.kind==11)&&data.specialType==9)return MOTION_BACKWARDS;
     if(data.kind==3&&data.specialType==9)return MOTION_BACKWARDS;
     if(data.kind==91)return data.specialType==6?MOTION_HOMING:MOTION_STRAIGHT;
     if(data.kind==30)return data.specialType==2?MOTION_STAR:MOTION_STRAIGHT;
@@ -188,9 +190,18 @@ inline bool NativeStar269MetadataValid(const NativeProjectileData& d,ProjectileT
             (d.specialType==0||d.specialType==1||d.specialType==2||d.specialType==9||d.specialType==6||d.specialType==10);
     return motion==MOTION_STAR&&(d.specialType==0||d.specialType==1||d.specialType==2||d.specialType==9);
 }
+inline bool NativeDay273ProjectileMetadataValid(const NativeProjectileData& data,
+    ProjectileType type,ProjectileMotion motion)
+{
+    return FusionDayZombie273ProjectileTuple(data.kind,data.damage,data.specialType,data.isZombieBullet)&&
+        type==PROJECTILE_PEA&&motion==(data.specialType==9?MOTION_BACKWARDS:MOTION_STRAIGHT)&&
+        NativeNew268ProjectileExtrasClear(data)&&!data.umbrellaed&&!data.goldAttracted&&
+        (!data.hitLatched||data.isZombieBullet);
+}
 inline bool NativeProjectileMetadataValid(const NativeProjectileData& data,
     ProjectileType type,ProjectileMotion motion,const NativeStar269ProjectileState* star=nullptr)
 {
+    if(!star&&NativeDay273ProjectileMetadataValid(data,type,motion))return true;
     if(data.kind==91)return type==PROJECTILE_SPIKE&&motion==(data.specialType==6?MOTION_HOMING:MOTION_STRAIGHT)&&
         (data.specialType==0||data.specialType==6||data.specialType==10)&&
         (data.damage==160||data.damage==480||data.damage==800)&&

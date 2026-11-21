@@ -30,6 +30,8 @@ struct NativeSourceZombieData
     uint32_t sourceParentToken=0;
     bool dieWithParent=false;
     uint8_t firstArmorStage=0; // Persistent appearance: first111/109, second15/104.
+    // Day273 status/armor/head variants live in their separately validated
+    // full-UID state; they must not overload these legacy Paper/vehicle fields.
     uint8_t paperShootTicks=0,paperShootEvent=0;
     LawnNet::NetZombieAnimState paperHead; // Actual attached native Reanimation, never a client clock.
     bool vehicleStopped=false; // Actual source18 beforeDying/collider-off presentation.

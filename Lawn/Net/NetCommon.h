@@ -20,6 +20,7 @@
 #include "NetSmokeScenario.h"
 #include "NetZombatar.h"
 #include "../Fusion/FusionMode.h"
+#include "../Fusion/FusionAdventureSession273.h"
 
 namespace LawnNet
 {
@@ -28,7 +29,7 @@ namespace LawnNet
 // (the host broadcasts the same sounds via events).
 extern bool gNetSuppressSounds;
 
-static const uint32_t NET_PROTOCOL_VERSION = 61; // Native Classic Adventure with Fusion plants; FNS25.
+static const uint32_t NET_PROTOCOL_VERSION = 62; // Source Fusion Adventure descriptor/view; FNS26.
 static const uint16_t NET_DEFAULT_PORT = 27713;			// PvZ co-op port
 static const int NET_MAX_PLAYERS = 4;					// 1 host + 3 clients
 static const int NET_MAX_NICK_CHARS = 16;
@@ -357,6 +358,7 @@ struct NetLobbyState
 
 struct NetStartGameState
 {
+	LawnFusion::FusionAdventureSession273 mSourceAdventure;
 	LawnFusion::ContentMode mContentMode = LawnFusion::ContentMode::Classic;
 	uint32_t mContentEpoch = 0;
 	uint8_t mGameMode = 0;
@@ -655,6 +657,7 @@ struct NetConfig
 	bool mSkipIntro;			// skip the startup video, not level cutscenes
 	bool mFusionClassicField;	// local presentation only; both skins use the same native10x5 board
 	int  mFusionAdventureLevel;	// separate Fusion campaign progress1..50; Classic profile is unchanged
+	LawnFusion::FusionAdventureProfile273 mFusionSourceProfile;
 	int  mBaseSnapshotHz;
 	int  mWindowWidth;			// 0 = default 1066
 	int  mWindowHeight;			// 0 = default 600
@@ -673,6 +676,7 @@ struct NetConfig
 		mSkipIntro = false;
 		mFusionClassicField = false;
 		mFusionAdventureLevel = 1;
+		mFusionSourceProfile = {};
 		mBaseSnapshotHz = NET_SNAPSHOT_HZ_DEFAULT;
 		mWindowWidth = 0;
 		mWindowHeight = 0;

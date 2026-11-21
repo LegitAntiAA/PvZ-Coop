@@ -2810,6 +2810,7 @@ void NetManager::BroadcastStartGame(int theGameMode, int theLevel, uint32_t theB
 	aState.mContentMode = mApp->GetContentMode();
 	aState.mGameMode = (uint8_t)theGameMode;
 	aState.mContentEpoch = mApp->GetContentMode() == LawnFusion::ContentMode::Fusion ? mApp->mNativeFusionEpoch : 0;
+	if(aState.mContentMode==LawnFusion::ContentMode::Fusion)aState.mSourceAdventure=mApp->mSourceAdventure;
 	aState.mLevel = theLevel;
 	aState.mPlayerCount = (uint8_t)GetPlayerCount();
 	aState.mBoardSeed = theBoardSeed;

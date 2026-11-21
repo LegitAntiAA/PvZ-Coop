@@ -199,6 +199,8 @@ int GetNativeFusionZombieStatus(const Zombie* zombie)
         if (native->EffectedByDamage(allegiance | (1U << DAMAGES_SUBMERGED))) return 16;
         return 7; // Native invulnerable, entering, jumping, or otherwise unavailable.
     }
+    int dayStatus=0;
+    if(GetNativeDayZombie273Status(zombie,dayStatus))return dayStatus;
     if (!IsNativeFusionGroundZombie(zombie)) return -1;
     int specialStatus=0;
     if(GetNativeSpecialZombie269Status(zombie,specialStatus))return specialStatus;

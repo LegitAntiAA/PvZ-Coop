@@ -1,5 +1,6 @@
 #include "FusionNativeVisual.h"
 #include "FusionNative.h"
+#include "FusionNativeProjectileMetadata.h"
 #include "FusionNativeCherryShooter.h"
 #include "FusionNativeBasePlants.h"
 #include "FusionNativeLobber.h"
@@ -2296,7 +2297,15 @@ bool NativeVisuals::DrawProjectile(Sexy::Graphics* graphics, Projectile* project
         data->kind == 2 || data->kind == 4 || data->kind == 5 || data->kind == 6 ? GetNativeRollingProjectileCenter(projectile, centerX, centerY) :
         IsNativeBatchProjectile(projectile) ? GetNativeBatchProjectileCenter(projectile,centerX,centerY) :
         IsNativeRecipientProjectile(projectile) ? GetNativeRecipientProjectileCenter(projectile,centerX,centerY) :
-        GetNativeTimedPeaProjectileCenter(projectile, centerX, centerY))) return true;
+        GetNativeTimedPeaProjectileCenter(projectile, centerX, centerY)))
+    {
+        // Loaded source bodies share the native center even when their gameplay
+        // family has no specialized center query (ordinary Sun/Puff, for example).
+        if(!NativeProjectileMetadataValid(*data,projectile->mProjectileType,projectile->mMotionType))return true;
+        centerX=projectile->mPosX+20;
+        centerY=projectile->mPosY+projectile->mPosZ+20;
+        if(!std::isfinite(centerX)||!std::isfinite(centerY))return true;
+    }
     if (hotPea)
     {
         auto options=visual.options; options.rootFlipX=data->specialType==1;

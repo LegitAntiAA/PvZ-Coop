@@ -98,7 +98,9 @@ NativeSourceEffects269::~NativeSourceEffects269()
 }
 bool NativeSourceEffects269::Ensure(Board* board,uint16_t kind,std::string& error)
 {
-    if(kind==35||kind==36||kind==49||kind==51||kind==99||kind==100||(kind>=2000&&kind<2100))
+    if(kind==23)
+        return WorldDefinition(board,5066,(ResourceRoot()/"zombies270"/"5066"/"effect.json").string(),error)!=nullptr;
+    if(kind==0||kind==11||kind==18||kind==35||kind==36||kind==49||kind==51||kind==99||kind==100||(kind>=2000&&kind<2100))
     {const auto path=kind<2000?ResourceRoot()/ ("source-"+std::to_string(kind))/"effect.json":ResourceRoot()/"embedded269"/std::to_string(kind)/"effect.json";
      return WorldDefinition(board,kind,path.string(),error)!=nullptr;}
 
@@ -183,8 +185,9 @@ TodParticleSystem* NativeSourceEffects269::Create(Board* board,uint16_t kind,flo
     }
     std::string error;if(!Ensure(board,kind,error)){LawnNet::NetTrace("Fusion source effect rejected kind=%u error=%s",kind,error.c_str());return nullptr;}
     if(kind!=52)
-    {const auto& resource=mImpl->worldDefinitions.at({kind,float(kFusionBasePixelsX),float(GetNativeFusionPixelsY(board))});
-     const auto effect=kind==35?PARTICLE_FUSION_SOURCE35:kind==36?PARTICLE_FUSION_SOURCE36:kind==49?PARTICLE_FUSION_SOURCE49:kind==51?PARTICLE_FUSION_SOURCE51:kind==99?PARTICLE_FUSION_SOURCE99:kind==100?PARTICLE_FUSION_SOURCE100:PARTICLE_FUSION_EMBEDDED269;
+    {const auto& resource=mImpl->worldDefinitions.at({kind==23?uint16_t(5066):kind,float(kFusionBasePixelsX),float(GetNativeFusionPixelsY(board))});
+     const int mapped=NativeSourceEffectParticle269(kind);
+     const auto effect=mapped<0?PARTICLE_FUSION_EMBEDDED269:ParticleEffect(mapped);
      return mImpl->holder->AllocParticleSystemFromDef(x,y,order,resource->Data(emission),effect);}
     auto& definition=mImpl->definitions.at({float(kFusionBasePixelsX),float(GetNativeFusionPixelsY(board))});
     return mImpl->holder->AllocParticleSystemFromDef(x,y,order,&definition->native,ParticleEffect::PARTICLE_FUSION_SOURCE52);
@@ -237,9 +240,33 @@ bool EnsureNativeSourceEffect269(Board* board,uint16_t kind,std::string* error)
     auto* assets=GetNativeSourceEffects269(board,true);std::string message;
     const bool result=assets&&assets->Ensure(board,kind,message);if(!assets)message="source particle resource cache unavailable";if(error)*error=message;return result;
 }
+int NativeSourceEffectParticle269(uint16_t kind)
+{
+    switch(kind)
+    {
+    case 0:return PARTICLE_FUSION_SOURCE0;
+    case 11:return PARTICLE_FUSION_SOURCE11;
+    case 18:return PARTICLE_FUSION_SOURCE18;
+    case 23:return PARTICLE_FUSION_SOURCE23;
+    case 35:return PARTICLE_FUSION_SOURCE35;
+    case 36:return PARTICLE_FUSION_SOURCE36;
+    case 49:return PARTICLE_FUSION_SOURCE49;
+    case 51:return PARTICLE_FUSION_SOURCE51;
+    case 52:return PARTICLE_FUSION_SOURCE52;
+    case 99:return PARTICLE_FUSION_SOURCE99;
+    case 100:return PARTICLE_FUSION_SOURCE100;
+    default:return -1;
+    }
+}
+bool NativeSourceEffectKind269(int effect,uint16_t& kind)
+{
+    for(uint16_t candidate:{0,11,18,23,35,36,49,51,52,99,100})
+        if(NativeSourceEffectParticle269(candidate)==effect){kind=candidate;return true;}
+    return false;
+}
 TodParticleSystem* SpawnNativeSourceEffect269(Board* board,uint16_t kind,float x,float y,int order,bool broadcast)
 {
-    const int effect=kind==35?PARTICLE_FUSION_SOURCE35:kind==36?PARTICLE_FUSION_SOURCE36:kind==49?PARTICLE_FUSION_SOURCE49:kind==51?PARTICLE_FUSION_SOURCE51:kind==52?PARTICLE_FUSION_SOURCE52:kind==99?PARTICLE_FUSION_SOURCE99:kind==100?PARTICLE_FUSION_SOURCE100:-1;
+    const int effect=NativeSourceEffectParticle269(kind);
     if(effect<0)return nullptr; // No arbitrary kind may masquerade as source100.
     auto* assets=GetNativeSourceEffects269(board,true);if(!assets)return nullptr;
     auto* system=assets->Create(board,kind,x,y,order);

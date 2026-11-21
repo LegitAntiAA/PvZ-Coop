@@ -633,8 +633,8 @@ bool ApplyNativeShooterBatchProjectileImpact(Projectile* p,Zombie* z)
     int damage=data.damage;
     if(data.kind==11||data.kind==90||data.kind==46)
     {
-        // IronStarBullet uses source secondArmorHealth; the two pea classes use firstArmorHealth.
-        if(!TryGetFusionIronDamage(damage,data.kind==46?z->mShieldHealth:z->mHelmHealth,damage)){Retire(p);return true;}
+        // Both IronPea IDs11/90 and IronStar46 add source secondArmorHealth.
+        if(!TryGetFusionIronDamage(damage,z->mShieldHealth,damage)){Retire(p);return true;}
         z->TakeDamage(damage,0U);
         if(data.kind!=46&&!z->mDead)
         {

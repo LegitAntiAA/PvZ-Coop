@@ -12,6 +12,7 @@
 #include "FusionNative.h"
 #include "FusionNativeShooterTiming.h"
 #include "FusionNativeRemainingPlants269.h"
+#include "FusionNativeDayZombie273Bridge.h"
 #include "../Board.h"
 #include "../Plant.h"
 #include "../Zombie.h"
@@ -295,6 +296,10 @@ bool UpdateNativeChomper(Plant* plant)
                 TryMakeFusionChomperBlast(kind,x,y,plant->mRow,blast) &&
                 CanStartNativeFusionBlast(plant->mBoard,blast);
         }
+        Coin* dayBucket=nullptr;int dayOldHelm=0,dayOldHealth=0;
+        // Direct source106 DropArmor precedes Die(2), including the mass bite.
+        // Capacity failure keeps this exact locked bite pending without sound.
+        if(eat&&!PrepareNativeDayZombie273ChomperArmor(target,dayBucket,dayOldHelm,dayOldHealth))return true;
         plant->mTargetZombieID = ZOMBIEID_NULL;
         plant->mApp->PlayFoley(FOLEY_BIGCHOMP);
         int actualDigest=profile->digestTicks;
@@ -330,6 +335,7 @@ bool UpdateNativeChomper(Plant* plant)
         }
         else
         {
+            RollbackNativeDayZombie273ChomperArmor(target,dayBucket,dayOldHelm,dayOldHealth);
             plant->mState = STATE_CHOMPER_BITING_MISSED;
             plant->mStateCountdown = timing.biteEnd - timing.bite;
             plant->mLaunchCounter = 0;

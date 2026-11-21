@@ -5,6 +5,7 @@
 #include "FusionNativeGloveUI.h"
 #include "FusionNativeMoneyAction.h"
 #include "FusionNativeTools268.h"
+#include "FusionNativeAdventure273.h"
 #include "../Board.h"
 #include "../CursorObject.h"
 #include "../Plant.h"
@@ -97,6 +98,7 @@ bool LawnApp::NativeFusionPointerDown(int button, int x, int y)
     x -= mBoard->mX + mDDInterface->mWideScreenOffsetX;
     y -= mBoard->mY + mDDInterface->mWideScreenOffsetY;
     if (LawnFusion::HandleNativeTools268Pointer(mBoard,button,x,y)) return true;
+    if (LawnFusion::HandleNativeSourceAdventurePointer273(mBoard,button,x,y)) return true;
     // Host Money/Glove retain their existing Board::MouseDown routing.
     if (!NetIsClient()) return false;
     if (LawnFusion::HandleNativeMoneyPointer(mBoard, button, x, y) ||

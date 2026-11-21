@@ -22,11 +22,6 @@
       "count": 2
     },
     {
-      "kind": 3,
-      "status": "Passed",
-      "count": 2
-    },
-    {
       "kind": 5,
       "status": "Passed",
       "count": 4
@@ -69,21 +64,6 @@
     {
       "kind": 20,
       "status": "Passed",
-      "count": 2
-    },
-    {
-      "kind": 21,
-      "status": "Blocked",
-      "count": 2
-    },
-    {
-      "kind": 22,
-      "status": "Blocked",
-      "count": 2
-    },
-    {
-      "kind": 23,
-      "status": "Blocked",
       "count": 2
     },
     {
@@ -182,11 +162,6 @@
       "count": 0
     },
     {
-      "kind": 100,
-      "status": "Passed",
-      "count": 1
-    },
-    {
       "kind": 101,
       "status": "Passed",
       "count": 1
@@ -198,6 +173,46 @@
     },
     {
       "kind": 103,
+      "status": "Passed",
+      "count": 1
+    },
+    {
+      "kind": 3,
+      "status": "Passed",
+      "count": 2
+    },
+    {
+      "kind": 21,
+      "status": "Passed",
+      "count": 2
+    },
+    {
+      "kind": 22,
+      "status": "Passed",
+      "count": 2
+    },
+    {
+      "kind": 23,
+      "status": "Passed",
+      "count": 2
+    },
+    {
+      "kind": 100,
+      "status": "Passed",
+      "count": 1
+    },
+    {
+      "kind": 106,
+      "status": "Passed",
+      "count": 1
+    },
+    {
+      "kind": 107,
+      "status": "Passed",
+      "count": 1
+    },
+    {
+      "kind": 108,
       "status": "Passed",
       "count": 1
     }
@@ -330,32 +345,6 @@
       "resourceKind": 5009,
       "status": "Passed",
       "sourceZombieKind": 104,
-      "defaultEmissionEnabled": true,
-      "defaultNodeActive": false
-    },
-    {
-      "sourcePrefab": "Resources/zombies/_prefab/PolevaulterZombie.prefab",
-      "sourceParticleFileId": 198693062532245359,
-      "sourceRendererFileId": 199630643969539439,
-      "nodePath": "LoseHead",
-      "serializedParticleSha256": "c172cb82002404c401a5e3cf1b211c56daad6409b7b03f09cf04e0d92aa59960",
-      "serializedRendererSha256": "cf29b8d2a8c7054a8ac203eb4bdd343a922fa1e27029563e49beeb537161c190",
-      "resourceKind": 5010,
-      "status": "Passed",
-      "sourceZombieKind": 3,
-      "defaultEmissionEnabled": true,
-      "defaultNodeActive": false
-    },
-    {
-      "sourcePrefab": "Resources/zombies/_prefab/PolevaulterZombie.prefab",
-      "sourceParticleFileId": 198574304967836189,
-      "sourceRendererFileId": 199009931292380359,
-      "nodePath": "LoseArm",
-      "serializedParticleSha256": "166d046dcd3453789d7149c59de3b7b67f4b1afbe41cabdd2c0e1f3d6a9ae8af",
-      "serializedRendererSha256": "c8b86688c4ffd1b678547071323afc7c2162540ad7381a25f7cffc31e04873a9",
-      "resourceKind": 5011,
-      "status": "Passed",
-      "sourceZombieKind": 3,
       "defaultEmissionEnabled": true,
       "defaultNodeActive": false
     },
@@ -633,84 +622,6 @@
       "defaultNodeActive": false
     },
     {
-      "sourcePrefab": "Resources/zombies/_prefab/DollDiamondZombie.prefab",
-      "sourceParticleFileId": 198571718729274231,
-      "sourceRendererFileId": 199581786255902400,
-      "nodePath": "LoseArm",
-      "serializedParticleSha256": "7edb0cef23f0f9862b8f65522a407fa6308b796e518847d1052441b667e16e5d",
-      "serializedRendererSha256": "3d04b56177283bd79a594943b1ff574b7927fb5e6cbcfb14ff46a097dfd21bad",
-      "resourceKind": 5033,
-      "status": "Passed",
-      "sourceZombieKind": 21,
-      "defaultEmissionEnabled": true,
-      "defaultNodeActive": false
-    },
-    {
-      "sourcePrefab": "Resources/zombies/_prefab/DollDiamondZombie.prefab",
-      "sourceParticleFileId": 198045458335737618,
-      "sourceRendererFileId": 199722951815217645,
-      "nodePath": "LoseCone",
-      "serializedParticleSha256": "bf3dccc4ee4643f69ea942428fcd0b3457959f2495093b3a3480d7ecec33e130",
-      "serializedRendererSha256": "13ded6ed425af734164ae46ef94a2dbb48067be6184236cec88e90f1ddd71cd2",
-      "resourceKind": 5034,
-      "status": "Blocked",
-      "sourceZombieKind": 21,
-      "defaultEmissionEnabled": false,
-      "defaultNodeActive": false
-    },
-    {
-      "sourcePrefab": "Resources/zombies/_prefab/DollGoldZombie.prefab",
-      "sourceParticleFileId": 198571718729274231,
-      "sourceRendererFileId": 199581786255902400,
-      "nodePath": "LoseArm",
-      "serializedParticleSha256": "7edb0cef23f0f9862b8f65522a407fa6308b796e518847d1052441b667e16e5d",
-      "serializedRendererSha256": "3d04b56177283bd79a594943b1ff574b7927fb5e6cbcfb14ff46a097dfd21bad",
-      "resourceKind": 5035,
-      "status": "Passed",
-      "sourceZombieKind": 22,
-      "defaultEmissionEnabled": true,
-      "defaultNodeActive": false
-    },
-    {
-      "sourcePrefab": "Resources/zombies/_prefab/DollGoldZombie.prefab",
-      "sourceParticleFileId": 198045458335737618,
-      "sourceRendererFileId": 199722951815217645,
-      "nodePath": "LoseCone",
-      "serializedParticleSha256": "bf3dccc4ee4643f69ea942428fcd0b3457959f2495093b3a3480d7ecec33e130",
-      "serializedRendererSha256": "13ded6ed425af734164ae46ef94a2dbb48067be6184236cec88e90f1ddd71cd2",
-      "resourceKind": 5036,
-      "status": "Blocked",
-      "sourceZombieKind": 22,
-      "defaultEmissionEnabled": false,
-      "defaultNodeActive": false
-    },
-    {
-      "sourcePrefab": "Resources/zombies/_prefab/DollSilverZombie.prefab",
-      "sourceParticleFileId": 198571718729274231,
-      "sourceRendererFileId": 199581786255902400,
-      "nodePath": "LoseArm",
-      "serializedParticleSha256": "7edb0cef23f0f9862b8f65522a407fa6308b796e518847d1052441b667e16e5d",
-      "serializedRendererSha256": "3d04b56177283bd79a594943b1ff574b7927fb5e6cbcfb14ff46a097dfd21bad",
-      "resourceKind": 5037,
-      "status": "Passed",
-      "sourceZombieKind": 23,
-      "defaultEmissionEnabled": true,
-      "defaultNodeActive": false
-    },
-    {
-      "sourcePrefab": "Resources/zombies/_prefab/DollSilverZombie.prefab",
-      "sourceParticleFileId": 198045458335737618,
-      "sourceRendererFileId": 199722951815217645,
-      "nodePath": "LoseCone",
-      "serializedParticleSha256": "bf3dccc4ee4643f69ea942428fcd0b3457959f2495093b3a3480d7ecec33e130",
-      "serializedRendererSha256": "13ded6ed425af734164ae46ef94a2dbb48067be6184236cec88e90f1ddd71cd2",
-      "resourceKind": 5038,
-      "status": "Blocked",
-      "sourceZombieKind": 23,
-      "defaultEmissionEnabled": false,
-      "defaultNodeActive": false
-    },
-    {
       "sourcePrefab": "Resources/zombies/_prefab/JackboxZombie.prefab",
       "sourceParticleFileId": 198094320201520353,
       "sourceRendererFileId": 199026196548002408,
@@ -971,19 +882,6 @@
       "defaultNodeActive": false
     },
     {
-      "sourcePrefab": "Resources/zombies/_prefab/PeaShooterZombie.prefab",
-      "sourceParticleFileId": 198689364072382846,
-      "sourceRendererFileId": 199043919389829319,
-      "nodePath": "LoseArm",
-      "serializedParticleSha256": "bbd0b66267cb54c7cc156e3b55ab91638174fd7e80d160826b81e8ddc3fc6371",
-      "serializedRendererSha256": "be442ce23e5a9174a0c6ff5dce1c82c45498b9eeb319c0a7a07d93f8dca36c68",
-      "resourceKind": 5059,
-      "status": "Passed",
-      "sourceZombieKind": 100,
-      "defaultEmissionEnabled": true,
-      "defaultNodeActive": false
-    },
-    {
       "sourcePrefab": "Resources/zombies/_prefab/CherryShooterZombie.prefab",
       "sourceParticleFileId": 198630643969539439,
       "sourceRendererFileId": 199370222726513266,
@@ -1021,6 +919,600 @@
       "sourceZombieKind": 103,
       "defaultEmissionEnabled": true,
       "defaultNodeActive": false
+    },
+    {
+      "sourceZombieKind": 3,
+      "resourceKind": 5010,
+      "sourcePrefab": "Resources/zombies/_prefab/PolevaulterZombie.prefab",
+      "sourceParticleFileId": 198693062532245359,
+      "sourceRendererFileId": 199630643969539439,
+      "nodePath": "LoseHead",
+      "serializedParticleSha256": "c172cb82002404c401a5e3cf1b211c56daad6409b7b03f09cf04e0d92aa59960",
+      "serializedRendererSha256": "cf29b8d2a8c7054a8ac203eb4bdd343a922fa1e27029563e49beeb537161c190",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed",
+      "emitters": 1
+    },
+    {
+      "sourceZombieKind": 3,
+      "resourceKind": 5011,
+      "sourcePrefab": "Resources/zombies/_prefab/PolevaulterZombie.prefab",
+      "sourceParticleFileId": 198574304967836189,
+      "sourceRendererFileId": 199009931292380359,
+      "nodePath": "LoseArm",
+      "serializedParticleSha256": "166d046dcd3453789d7149c59de3b7b67f4b1afbe41cabdd2c0e1f3d6a9ae8af",
+      "serializedRendererSha256": "c8b86688c4ffd1b678547071323afc7c2162540ad7381a25f7cffc31e04873a9",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed",
+      "emitters": 1
+    },
+    {
+      "sourceZombieKind": 21,
+      "resourceKind": 5033,
+      "sourcePrefab": "Resources/zombies/_prefab/DollDiamondZombie.prefab",
+      "sourceParticleFileId": 198571718729274231,
+      "sourceRendererFileId": 199581786255902400,
+      "nodePath": "LoseArm",
+      "serializedParticleSha256": "7edb0cef23f0f9862b8f65522a407fa6308b796e518847d1052441b667e16e5d",
+      "serializedRendererSha256": "3d04b56177283bd79a594943b1ff574b7927fb5e6cbcfb14ff46a097dfd21bad",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed",
+      "emitters": 1
+    },
+    {
+      "sourceZombieKind": 21,
+      "resourceKind": 5034,
+      "sourcePrefab": "Resources/zombies/_prefab/DollDiamondZombie.prefab",
+      "sourceParticleFileId": 198045458335737618,
+      "sourceRendererFileId": 199722951815217645,
+      "nodePath": "LoseCone",
+      "serializedParticleSha256": "bf3dccc4ee4643f69ea942428fcd0b3457959f2495093b3a3480d7ecec33e130",
+      "serializedRendererSha256": "13ded6ed425af734164ae46ef94a2dbb48067be6184236cec88e90f1ddd71cd2",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed",
+      "nativeLifecycle": "ownerDestroyedBeforeRender",
+      "lifecycleProof": {
+        "schema": 1,
+        "policy": "ownerDestroyedBeforeRender",
+        "sourceZombieClass": "DollZombie",
+        "sourceZombieKind": 21,
+        "sourcePrefab": "Resources/zombies/_prefab/DollDiamondZombie.prefab",
+        "sourcePrefabSha256": "418e4286bf5fd29c6c5e540710e0d3031d6ce56d08bc0e002fffa0676e5974b5",
+        "sourceParticleFileId": 198045458335737618,
+        "serializedParticleSha256": "bf3dccc4ee4643f69ea942428fcd0b3457959f2495093b3a3480d7ecec33e130",
+        "sourceRendererFileId": 199722951815217645,
+        "serializedRendererSha256": "13ded6ed425af734164ae46ef94a2dbb48067be6184236cec88e90f1ddd71cd2",
+        "nodePath": "LoseCone",
+        "modelNodeIndex": 20,
+        "sourceNodeGameObjectId": 1161607090078389,
+        "sourceNodeTransformId": 4477046003934300,
+        "sourceGameObjectSha256": "837e985f739d6e59f464f5f8dae6fd2cea0d6e45e88e4a3fe530154bc4bc4613",
+        "sourceTransformSha256": "91d965018e45783c31057b484d69db775e068ea99f3700f6028a473594689b1d",
+        "nodeDefaultInactive": true,
+        "nodeDeclaredComponentTypes": [
+          4,
+          198,
+          199
+        ],
+        "nodeComponentFileIds": [
+          4477046003934300,
+          198045458335737618,
+          199722951815217645
+        ],
+        "rootChain": [
+          {
+            "modelNodeIndex": 20,
+            "path": "LoseCone",
+            "parentIndex": 0,
+            "active": false,
+            "sourceTransformId": 4477046003934300
+          },
+          {
+            "modelNodeIndex": 0,
+            "path": "",
+            "parentIndex": -1,
+            "active": true,
+            "sourceTransformId": 4002669891404536,
+            "sourceTransformSha256": "ec1447d8a49e5f2916d15bdd39acdb8ea44731e9584567ca1ad0a81ed69cc8d8"
+          }
+        ],
+        "activationAnimationBindings": [],
+        "animationSourceHashes": [
+          {
+            "path": "Resources/zombies/zombie/anim/attack.anim",
+            "sha256": "bd7743c351bc5c9126682c626110bcb13994011c683aa712222e0f308eadca0f"
+          },
+          {
+            "path": "Resources/zombies/zombie/anim/die.anim",
+            "sha256": "3c9ff0f3a417a1e5a17d7d65a3a9f6c54d744c72c17eac7bda754dfe15af1b11"
+          },
+          {
+            "path": "Resources/zombies/zombie/anim/idle.anim",
+            "sha256": "8c6963e36ae163cf26e5d0e105924060270213a953b579250ebb9d981135f809"
+          },
+          {
+            "path": "Resources/zombies/zombie/anim/walk.anim",
+            "sha256": "8ba53789a9181f973d43181ac9f22e1a67a833e135666682ff3419c873690c92"
+          },
+          {
+            "path": "Resources/zombies/zombie/anim/walk2.anim",
+            "sha256": "caa0970ccd8983c8d837f0738cbdc02046f9afc3aa7fe7a7e973de1fc2fc2003"
+          },
+          {
+            "path": "Resources/zombies/zombie/anim/ZombieAn.controller",
+            "sha256": "40f3e4cce3950d4c63fae034ec4f4b6df2133666909cfa236c9c49c94f93e67c"
+          }
+        ],
+        "sourceClassChain": [
+          {
+            "class": "DollZombie",
+            "baseClass": "ConeZombie",
+            "script": "Scripts/Assembly-CSharp/DollZombie.cs",
+            "scriptSha256": "218d7ea261d456fa3a91cae37ba8f875bf147845be0b6e29f3b0e79e2d07bfda",
+            "dumpDeclarationSha256": "23865c49e1596d604ccc09b0c4107afac79457f8ad696da4696abb4d3fbc3074"
+          },
+          {
+            "class": "ConeZombie",
+            "baseClass": "ArmorZombie",
+            "script": "Scripts/Assembly-CSharp/ConeZombie.cs",
+            "scriptSha256": "d39ae30fb03b7a80a1f0b60823c81179edb007a94d362a42e28fe0cdfe31481d",
+            "dumpDeclarationSha256": "2cac5aab687a8d4c82e63690bdbb66dc16581092c34e51700f30233d1d0724b3"
+          },
+          {
+            "class": "ArmorZombie",
+            "baseClass": "Zombie",
+            "script": "Scripts/Assembly-CSharp/ArmorZombie.cs",
+            "scriptSha256": "859fd92d0b07e99a9c892bb582598453eff6e4f53e1c120ac11e4a3e22c3883a",
+            "dumpDeclarationSha256": "d0cadf9d50c895ad386e7a3253bbfe653747d20d0aaf93e35b100f8d7a3c7160"
+          }
+        ],
+        "sourceMethodBindings": [
+          {
+            "role": "Doll.FirstArmorFall",
+            "address": "0x18033CC10",
+            "decompiledCodeSha256": "ab2a1cf6a3689bb818b30446abf4649b2a40f06a07d6bf284f6c09e1b1763e2c"
+          },
+          {
+            "role": "Cone.FirstArmorFall",
+            "address": "0x18033B680",
+            "decompiledCodeSha256": "fae1b7fc3461f3c6caee4b26d7581d5f3cec8f32aadcb87ddba6d12e42a7527d"
+          },
+          {
+            "role": "Zombie.Die",
+            "address": "0x180381A20",
+            "decompiledCodeSha256": "e26b5ccffe103491d76b61bf37293c98c9f3b43ef04fc3438c588af52d378aff"
+          },
+          {
+            "role": "Zombie.OnDestroy",
+            "address": "0x1803869F0",
+            "decompiledCodeSha256": "258302cc366e37b10551be894171897c76bacc2cf691ce69a863211ee0547bef"
+          },
+          {
+            "role": "Zombie.emptyDieEvent",
+            "address": "0x18030F780",
+            "decompiledCodeSha256": "daa2703edae6c027d3b65a956623db330ba6a71780db2a05b23d16fd61a76a7f"
+          }
+        ],
+        "sourceCallChain": [
+          "Doll.FirstArmorFall",
+          "Doll.SummonZombie",
+          "Cone.FirstArmorFall",
+          "Zombie.Die(reason2)",
+          "Object.Destroy(rootGameObject)"
+        ],
+        "noYieldInActivationToDestroy": true,
+        "noReparentBeforeOwnerDestruction": true,
+        "noNodeMonoBehaviour": true,
+        "noEnabledSubEmitters": true,
+        "sourceEngineVersion": "2022.3.20f1c1",
+        "sourceEngineSemantics": "GameObject Destroy includes transform children before rendering",
+        "sourceEngineSemanticsUrl": "https://docs.unity3d.com/2022.3/Documentation/ScriptReference/Object.Destroy.html",
+        "sourceMetadataRetained": true,
+        "nativePersistentEmitterRequired": false,
+        "imageFallbackChosen": false
+      },
+      "canonicalProofSha256": "4cb918fe380100c4a163eef3bc4ad3dcb24c4b7fa4f3537618bddff7ea7568b5",
+      "sourceModelSha256": "d83ea3808a7c29e19c1898bc64d8ec7ab4b50b1bd72ca1762ea39c01a8df381c"
+    },
+    {
+      "sourceZombieKind": 22,
+      "resourceKind": 5035,
+      "sourcePrefab": "Resources/zombies/_prefab/DollGoldZombie.prefab",
+      "sourceParticleFileId": 198571718729274231,
+      "sourceRendererFileId": 199581786255902400,
+      "nodePath": "LoseArm",
+      "serializedParticleSha256": "7edb0cef23f0f9862b8f65522a407fa6308b796e518847d1052441b667e16e5d",
+      "serializedRendererSha256": "3d04b56177283bd79a594943b1ff574b7927fb5e6cbcfb14ff46a097dfd21bad",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed",
+      "emitters": 1
+    },
+    {
+      "sourceZombieKind": 22,
+      "resourceKind": 5036,
+      "sourcePrefab": "Resources/zombies/_prefab/DollGoldZombie.prefab",
+      "sourceParticleFileId": 198045458335737618,
+      "sourceRendererFileId": 199722951815217645,
+      "nodePath": "LoseCone",
+      "serializedParticleSha256": "bf3dccc4ee4643f69ea942428fcd0b3457959f2495093b3a3480d7ecec33e130",
+      "serializedRendererSha256": "13ded6ed425af734164ae46ef94a2dbb48067be6184236cec88e90f1ddd71cd2",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed",
+      "nativeLifecycle": "ownerDestroyedBeforeRender",
+      "lifecycleProof": {
+        "schema": 1,
+        "policy": "ownerDestroyedBeforeRender",
+        "sourceZombieClass": "DollZombie",
+        "sourceZombieKind": 22,
+        "sourcePrefab": "Resources/zombies/_prefab/DollGoldZombie.prefab",
+        "sourcePrefabSha256": "39ed14c131376cab1be269acfbb86d3f937eb7f5b5798b8d744cdb67d6432465",
+        "sourceParticleFileId": 198045458335737618,
+        "serializedParticleSha256": "bf3dccc4ee4643f69ea942428fcd0b3457959f2495093b3a3480d7ecec33e130",
+        "sourceRendererFileId": 199722951815217645,
+        "serializedRendererSha256": "13ded6ed425af734164ae46ef94a2dbb48067be6184236cec88e90f1ddd71cd2",
+        "nodePath": "LoseCone",
+        "modelNodeIndex": 20,
+        "sourceNodeGameObjectId": 1161607090078389,
+        "sourceNodeTransformId": 4477046003934300,
+        "sourceGameObjectSha256": "837e985f739d6e59f464f5f8dae6fd2cea0d6e45e88e4a3fe530154bc4bc4613",
+        "sourceTransformSha256": "91d965018e45783c31057b484d69db775e068ea99f3700f6028a473594689b1d",
+        "nodeDefaultInactive": true,
+        "nodeDeclaredComponentTypes": [
+          4,
+          198,
+          199
+        ],
+        "nodeComponentFileIds": [
+          4477046003934300,
+          198045458335737618,
+          199722951815217645
+        ],
+        "rootChain": [
+          {
+            "modelNodeIndex": 20,
+            "path": "LoseCone",
+            "parentIndex": 0,
+            "active": false,
+            "sourceTransformId": 4477046003934300
+          },
+          {
+            "modelNodeIndex": 0,
+            "path": "",
+            "parentIndex": -1,
+            "active": true,
+            "sourceTransformId": 4002669891404536,
+            "sourceTransformSha256": "ec1447d8a49e5f2916d15bdd39acdb8ea44731e9584567ca1ad0a81ed69cc8d8"
+          }
+        ],
+        "activationAnimationBindings": [],
+        "animationSourceHashes": [
+          {
+            "path": "Resources/zombies/zombie/anim/attack.anim",
+            "sha256": "bd7743c351bc5c9126682c626110bcb13994011c683aa712222e0f308eadca0f"
+          },
+          {
+            "path": "Resources/zombies/zombie/anim/die.anim",
+            "sha256": "3c9ff0f3a417a1e5a17d7d65a3a9f6c54d744c72c17eac7bda754dfe15af1b11"
+          },
+          {
+            "path": "Resources/zombies/zombie/anim/idle.anim",
+            "sha256": "8c6963e36ae163cf26e5d0e105924060270213a953b579250ebb9d981135f809"
+          },
+          {
+            "path": "Resources/zombies/zombie/anim/walk.anim",
+            "sha256": "8ba53789a9181f973d43181ac9f22e1a67a833e135666682ff3419c873690c92"
+          },
+          {
+            "path": "Resources/zombies/zombie/anim/walk2.anim",
+            "sha256": "caa0970ccd8983c8d837f0738cbdc02046f9afc3aa7fe7a7e973de1fc2fc2003"
+          },
+          {
+            "path": "Resources/zombies/zombie/anim/ZombieAn.controller",
+            "sha256": "40f3e4cce3950d4c63fae034ec4f4b6df2133666909cfa236c9c49c94f93e67c"
+          }
+        ],
+        "sourceClassChain": [
+          {
+            "class": "DollZombie",
+            "baseClass": "ConeZombie",
+            "script": "Scripts/Assembly-CSharp/DollZombie.cs",
+            "scriptSha256": "218d7ea261d456fa3a91cae37ba8f875bf147845be0b6e29f3b0e79e2d07bfda",
+            "dumpDeclarationSha256": "23865c49e1596d604ccc09b0c4107afac79457f8ad696da4696abb4d3fbc3074"
+          },
+          {
+            "class": "ConeZombie",
+            "baseClass": "ArmorZombie",
+            "script": "Scripts/Assembly-CSharp/ConeZombie.cs",
+            "scriptSha256": "d39ae30fb03b7a80a1f0b60823c81179edb007a94d362a42e28fe0cdfe31481d",
+            "dumpDeclarationSha256": "2cac5aab687a8d4c82e63690bdbb66dc16581092c34e51700f30233d1d0724b3"
+          },
+          {
+            "class": "ArmorZombie",
+            "baseClass": "Zombie",
+            "script": "Scripts/Assembly-CSharp/ArmorZombie.cs",
+            "scriptSha256": "859fd92d0b07e99a9c892bb582598453eff6e4f53e1c120ac11e4a3e22c3883a",
+            "dumpDeclarationSha256": "d0cadf9d50c895ad386e7a3253bbfe653747d20d0aaf93e35b100f8d7a3c7160"
+          }
+        ],
+        "sourceMethodBindings": [
+          {
+            "role": "Doll.FirstArmorFall",
+            "address": "0x18033CC10",
+            "decompiledCodeSha256": "ab2a1cf6a3689bb818b30446abf4649b2a40f06a07d6bf284f6c09e1b1763e2c"
+          },
+          {
+            "role": "Cone.FirstArmorFall",
+            "address": "0x18033B680",
+            "decompiledCodeSha256": "fae1b7fc3461f3c6caee4b26d7581d5f3cec8f32aadcb87ddba6d12e42a7527d"
+          },
+          {
+            "role": "Zombie.Die",
+            "address": "0x180381A20",
+            "decompiledCodeSha256": "e26b5ccffe103491d76b61bf37293c98c9f3b43ef04fc3438c588af52d378aff"
+          },
+          {
+            "role": "Zombie.OnDestroy",
+            "address": "0x1803869F0",
+            "decompiledCodeSha256": "258302cc366e37b10551be894171897c76bacc2cf691ce69a863211ee0547bef"
+          },
+          {
+            "role": "Zombie.emptyDieEvent",
+            "address": "0x18030F780",
+            "decompiledCodeSha256": "daa2703edae6c027d3b65a956623db330ba6a71780db2a05b23d16fd61a76a7f"
+          }
+        ],
+        "sourceCallChain": [
+          "Doll.FirstArmorFall",
+          "Doll.SummonZombie",
+          "Cone.FirstArmorFall",
+          "Zombie.Die(reason2)",
+          "Object.Destroy(rootGameObject)"
+        ],
+        "noYieldInActivationToDestroy": true,
+        "noReparentBeforeOwnerDestruction": true,
+        "noNodeMonoBehaviour": true,
+        "noEnabledSubEmitters": true,
+        "sourceEngineVersion": "2022.3.20f1c1",
+        "sourceEngineSemantics": "GameObject Destroy includes transform children before rendering",
+        "sourceEngineSemanticsUrl": "https://docs.unity3d.com/2022.3/Documentation/ScriptReference/Object.Destroy.html",
+        "sourceMetadataRetained": true,
+        "nativePersistentEmitterRequired": false,
+        "imageFallbackChosen": false
+      },
+      "canonicalProofSha256": "a797f4452feeff9ca28937ece6a5d3054a31a4630277377b646b3b8cbbb8416f",
+      "sourceModelSha256": "339a11cdf48a1be7899f9368ee00cabcbcb7442ea4ca8159796cd1cee9082703"
+    },
+    {
+      "sourceZombieKind": 23,
+      "resourceKind": 5037,
+      "sourcePrefab": "Resources/zombies/_prefab/DollSilverZombie.prefab",
+      "sourceParticleFileId": 198571718729274231,
+      "sourceRendererFileId": 199581786255902400,
+      "nodePath": "LoseArm",
+      "serializedParticleSha256": "7edb0cef23f0f9862b8f65522a407fa6308b796e518847d1052441b667e16e5d",
+      "serializedRendererSha256": "3d04b56177283bd79a594943b1ff574b7927fb5e6cbcfb14ff46a097dfd21bad",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed",
+      "emitters": 1
+    },
+    {
+      "sourceZombieKind": 23,
+      "resourceKind": 5038,
+      "sourcePrefab": "Resources/zombies/_prefab/DollSilverZombie.prefab",
+      "sourceParticleFileId": 198045458335737618,
+      "sourceRendererFileId": 199722951815217645,
+      "nodePath": "LoseCone",
+      "serializedParticleSha256": "bf3dccc4ee4643f69ea942428fcd0b3457959f2495093b3a3480d7ecec33e130",
+      "serializedRendererSha256": "13ded6ed425af734164ae46ef94a2dbb48067be6184236cec88e90f1ddd71cd2",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed",
+      "nativeLifecycle": "ownerDestroyedBeforeRender",
+      "lifecycleProof": {
+        "schema": 1,
+        "policy": "ownerDestroyedBeforeRender",
+        "sourceZombieClass": "DollZombie",
+        "sourceZombieKind": 23,
+        "sourcePrefab": "Resources/zombies/_prefab/DollSilverZombie.prefab",
+        "sourcePrefabSha256": "f8bc81b59cd11e6c6e9438473bee57d51c77588236e027108924284744aee480",
+        "sourceParticleFileId": 198045458335737618,
+        "serializedParticleSha256": "bf3dccc4ee4643f69ea942428fcd0b3457959f2495093b3a3480d7ecec33e130",
+        "sourceRendererFileId": 199722951815217645,
+        "serializedRendererSha256": "13ded6ed425af734164ae46ef94a2dbb48067be6184236cec88e90f1ddd71cd2",
+        "nodePath": "LoseCone",
+        "modelNodeIndex": 20,
+        "sourceNodeGameObjectId": 1161607090078389,
+        "sourceNodeTransformId": 4477046003934300,
+        "sourceGameObjectSha256": "837e985f739d6e59f464f5f8dae6fd2cea0d6e45e88e4a3fe530154bc4bc4613",
+        "sourceTransformSha256": "91d965018e45783c31057b484d69db775e068ea99f3700f6028a473594689b1d",
+        "nodeDefaultInactive": true,
+        "nodeDeclaredComponentTypes": [
+          4,
+          198,
+          199
+        ],
+        "nodeComponentFileIds": [
+          4477046003934300,
+          198045458335737618,
+          199722951815217645
+        ],
+        "rootChain": [
+          {
+            "modelNodeIndex": 20,
+            "path": "LoseCone",
+            "parentIndex": 0,
+            "active": false,
+            "sourceTransformId": 4477046003934300
+          },
+          {
+            "modelNodeIndex": 0,
+            "path": "",
+            "parentIndex": -1,
+            "active": true,
+            "sourceTransformId": 4002669891404536,
+            "sourceTransformSha256": "ec1447d8a49e5f2916d15bdd39acdb8ea44731e9584567ca1ad0a81ed69cc8d8"
+          }
+        ],
+        "activationAnimationBindings": [],
+        "animationSourceHashes": [
+          {
+            "path": "Resources/zombies/zombie/anim/attack.anim",
+            "sha256": "bd7743c351bc5c9126682c626110bcb13994011c683aa712222e0f308eadca0f"
+          },
+          {
+            "path": "Resources/zombies/zombie/anim/die.anim",
+            "sha256": "3c9ff0f3a417a1e5a17d7d65a3a9f6c54d744c72c17eac7bda754dfe15af1b11"
+          },
+          {
+            "path": "Resources/zombies/zombie/anim/idle.anim",
+            "sha256": "8c6963e36ae163cf26e5d0e105924060270213a953b579250ebb9d981135f809"
+          },
+          {
+            "path": "Resources/zombies/zombie/anim/walk.anim",
+            "sha256": "8ba53789a9181f973d43181ac9f22e1a67a833e135666682ff3419c873690c92"
+          },
+          {
+            "path": "Resources/zombies/zombie/anim/walk2.anim",
+            "sha256": "caa0970ccd8983c8d837f0738cbdc02046f9afc3aa7fe7a7e973de1fc2fc2003"
+          },
+          {
+            "path": "Resources/zombies/zombie/anim/ZombieAn.controller",
+            "sha256": "40f3e4cce3950d4c63fae034ec4f4b6df2133666909cfa236c9c49c94f93e67c"
+          }
+        ],
+        "sourceClassChain": [
+          {
+            "class": "DollZombie",
+            "baseClass": "ConeZombie",
+            "script": "Scripts/Assembly-CSharp/DollZombie.cs",
+            "scriptSha256": "218d7ea261d456fa3a91cae37ba8f875bf147845be0b6e29f3b0e79e2d07bfda",
+            "dumpDeclarationSha256": "23865c49e1596d604ccc09b0c4107afac79457f8ad696da4696abb4d3fbc3074"
+          },
+          {
+            "class": "ConeZombie",
+            "baseClass": "ArmorZombie",
+            "script": "Scripts/Assembly-CSharp/ConeZombie.cs",
+            "scriptSha256": "d39ae30fb03b7a80a1f0b60823c81179edb007a94d362a42e28fe0cdfe31481d",
+            "dumpDeclarationSha256": "2cac5aab687a8d4c82e63690bdbb66dc16581092c34e51700f30233d1d0724b3"
+          },
+          {
+            "class": "ArmorZombie",
+            "baseClass": "Zombie",
+            "script": "Scripts/Assembly-CSharp/ArmorZombie.cs",
+            "scriptSha256": "859fd92d0b07e99a9c892bb582598453eff6e4f53e1c120ac11e4a3e22c3883a",
+            "dumpDeclarationSha256": "d0cadf9d50c895ad386e7a3253bbfe653747d20d0aaf93e35b100f8d7a3c7160"
+          }
+        ],
+        "sourceMethodBindings": [
+          {
+            "role": "Doll.FirstArmorFall",
+            "address": "0x18033CC10",
+            "decompiledCodeSha256": "ab2a1cf6a3689bb818b30446abf4649b2a40f06a07d6bf284f6c09e1b1763e2c"
+          },
+          {
+            "role": "Cone.FirstArmorFall",
+            "address": "0x18033B680",
+            "decompiledCodeSha256": "fae1b7fc3461f3c6caee4b26d7581d5f3cec8f32aadcb87ddba6d12e42a7527d"
+          },
+          {
+            "role": "Zombie.Die",
+            "address": "0x180381A20",
+            "decompiledCodeSha256": "e26b5ccffe103491d76b61bf37293c98c9f3b43ef04fc3438c588af52d378aff"
+          },
+          {
+            "role": "Zombie.OnDestroy",
+            "address": "0x1803869F0",
+            "decompiledCodeSha256": "258302cc366e37b10551be894171897c76bacc2cf691ce69a863211ee0547bef"
+          },
+          {
+            "role": "Zombie.emptyDieEvent",
+            "address": "0x18030F780",
+            "decompiledCodeSha256": "daa2703edae6c027d3b65a956623db330ba6a71780db2a05b23d16fd61a76a7f"
+          }
+        ],
+        "sourceCallChain": [
+          "Doll.FirstArmorFall",
+          "Doll.SummonZombie",
+          "Cone.FirstArmorFall",
+          "Zombie.Die(reason2)",
+          "Object.Destroy(rootGameObject)"
+        ],
+        "noYieldInActivationToDestroy": true,
+        "noReparentBeforeOwnerDestruction": true,
+        "noNodeMonoBehaviour": true,
+        "noEnabledSubEmitters": true,
+        "sourceEngineVersion": "2022.3.20f1c1",
+        "sourceEngineSemantics": "GameObject Destroy includes transform children before rendering",
+        "sourceEngineSemanticsUrl": "https://docs.unity3d.com/2022.3/Documentation/ScriptReference/Object.Destroy.html",
+        "sourceMetadataRetained": true,
+        "nativePersistentEmitterRequired": false,
+        "imageFallbackChosen": false
+      },
+      "canonicalProofSha256": "a468ea2e0ec6ff7f78bf911b74d9cd460953e3a01801116550e2d82f5360b807",
+      "sourceModelSha256": "24acb26ca0edb834836f978ad8e84dd3a4cf4411665708b98bf852832b4fb0b4"
+    },
+    {
+      "sourceZombieKind": 100,
+      "resourceKind": 5059,
+      "sourcePrefab": "Resources/zombies/_prefab/PeaShooterZombie.prefab",
+      "sourceParticleFileId": 198689364072382846,
+      "sourceRendererFileId": 199043919389829319,
+      "nodePath": "LoseArm",
+      "serializedParticleSha256": "bbd0b66267cb54c7cc156e3b55ab91638174fd7e80d160826b81e8ddc3fc6371",
+      "serializedRendererSha256": "be442ce23e5a9174a0c6ff5dce1c82c45498b9eeb319c0a7a07d93f8dca36c68",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed",
+      "emitters": 1
+    },
+    {
+      "sourceZombieKind": 106,
+      "resourceKind": 5063,
+      "sourcePrefab": "Resources/zombies/_prefab/BucketNutZombie.prefab",
+      "sourceParticleFileId": 198632746491512912,
+      "sourceRendererFileId": 199719342369648492,
+      "nodePath": "LoseArm",
+      "serializedParticleSha256": "3a769eebf28e467c36ae64115f9002de45ea0c0af99a769f24cae00c0a19ae62",
+      "serializedRendererSha256": "7aa2237e1a88febeda04853695b44f8ef42a453f9de2161c2922c487ba49c81b",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed",
+      "emitters": 1
+    },
+    {
+      "sourceZombieKind": 107,
+      "resourceKind": 5064,
+      "sourcePrefab": "Resources/zombies/_prefab/CherryNutZombie.prefab",
+      "sourceParticleFileId": 198689364072382846,
+      "sourceRendererFileId": 199043919389829319,
+      "nodePath": "LoseArm",
+      "serializedParticleSha256": "bbd0b66267cb54c7cc156e3b55ab91638174fd7e80d160826b81e8ddc3fc6371",
+      "serializedRendererSha256": "be442ce23e5a9174a0c6ff5dce1c82c45498b9eeb319c0a7a07d93f8dca36c68",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed",
+      "emitters": 1
+    },
+    {
+      "sourceZombieKind": 108,
+      "resourceKind": 5065,
+      "sourcePrefab": "Resources/zombies/_prefab/IronPeaZombie.prefab",
+      "sourceParticleFileId": 198094320201520353,
+      "sourceRendererFileId": 199026196548002408,
+      "nodePath": "LoseArm",
+      "serializedParticleSha256": "7c005c80ad011fc8fd356e2da653eed1287302de0c212d27f0886044149f593e",
+      "serializedRendererSha256": "91c3825d9137b883ea1dd2f8ee0fb1cf67de41e33de0f3f33187ed0a4be0803b",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed",
+      "emitters": 1
     }
   ],
   "resources": [
@@ -1131,28 +1623,6 @@
       "files": {
         "effect.json": "c1e4f022dec2c97e184a14856ef35a803a43c44b5f8262722fa4b267b1c08f29",
         "textures/a232c79bbd9751a42b8950d4ea063fd1.png": "1e5614e3dba008ce73efd357f5aa4fb6398dae6d1c149283a8aa89ebf2043e76"
-      }
-    },
-    {
-      "resourceKind": 5010,
-      "package": "5010/effect.json",
-      "folder": "work/fusion/batch40-269/next-zombie40-art-common2/particles/5010",
-      "effectSha256": "26ce869c57db221cc098fddd122a482bcc7b73342d5715646e63ec7b644eb4b0",
-      "status": "Passed",
-      "files": {
-        "effect.json": "26ce869c57db221cc098fddd122a482bcc7b73342d5715646e63ec7b644eb4b0",
-        "textures/b62dd8f05576baa48979093b401fb48a.png": "d32a894a69e8007bfbe0774474be6afc74ed90dcbc48009d48dedd08ba4995f4"
-      }
-    },
-    {
-      "resourceKind": 5011,
-      "package": "5011/effect.json",
-      "folder": "work/fusion/batch40-269/next-zombie40-art-common2/particles/5011",
-      "effectSha256": "16fa5d7167b580e807e612e988c2d78f38fc067b14354d61b38d5e38ea78ba09",
-      "status": "Passed",
-      "files": {
-        "effect.json": "16fa5d7167b580e807e612e988c2d78f38fc067b14354d61b38d5e38ea78ba09",
-        "textures/d267652cb4669274a9e70f29dcba7dc9.png": "5bba2603a15c48a57e8f38866735ca3148e854779018f04fb6f72ff1e244ac5e"
       }
     },
     {
@@ -1386,39 +1856,6 @@
       }
     },
     {
-      "resourceKind": 5033,
-      "package": "5033/effect.json",
-      "folder": "work/fusion/batch40-269/next-zombie40-art-common2/particles/5033",
-      "effectSha256": "46bd11dd304d991205f958ed5e6e90f500d14ef95825a1e19c7aeff4022a7b78",
-      "status": "Passed",
-      "files": {
-        "effect.json": "46bd11dd304d991205f958ed5e6e90f500d14ef95825a1e19c7aeff4022a7b78",
-        "textures/2e67bba4fb3124540b8494d17fbd2d60.png": "3d273d923933f1084737800fcab5d50230bd8f388ca63cc8810a745d87c77bde"
-      }
-    },
-    {
-      "resourceKind": 5035,
-      "package": "5035/effect.json",
-      "folder": "work/fusion/batch40-269/next-zombie40-art-common2/particles/5035",
-      "effectSha256": "b23f690bfffa7fc15de3bad297781523e3913161f9a744005069df4bbded1130",
-      "status": "Passed",
-      "files": {
-        "effect.json": "b23f690bfffa7fc15de3bad297781523e3913161f9a744005069df4bbded1130",
-        "textures/2e67bba4fb3124540b8494d17fbd2d60.png": "3d273d923933f1084737800fcab5d50230bd8f388ca63cc8810a745d87c77bde"
-      }
-    },
-    {
-      "resourceKind": 5037,
-      "package": "5037/effect.json",
-      "folder": "work/fusion/batch40-269/next-zombie40-art-common2/particles/5037",
-      "effectSha256": "5ac3277cf9df8896092ab6f435600e5631dadd1671377dbac519bb8d34446af1",
-      "status": "Passed",
-      "files": {
-        "effect.json": "5ac3277cf9df8896092ab6f435600e5631dadd1671377dbac519bb8d34446af1",
-        "textures/2e67bba4fb3124540b8494d17fbd2d60.png": "3d273d923933f1084737800fcab5d50230bd8f388ca63cc8810a745d87c77bde"
-      }
-    },
-    {
       "resourceKind": 5039,
       "package": "5039/effect.json",
       "folder": "work/fusion/batch40-269/next-zombie40-art-common2/particles/5039",
@@ -1639,17 +2076,6 @@
       }
     },
     {
-      "resourceKind": 5059,
-      "package": "5059/effect.json",
-      "folder": "work/fusion/batch40-269/next-zombie40-art-common2/particles/5059",
-      "effectSha256": "aa49115ca9a0d93874c494b081f1717159a33cdfee0960ab2054df77ca23122e",
-      "status": "Passed",
-      "files": {
-        "effect.json": "aa49115ca9a0d93874c494b081f1717159a33cdfee0960ab2054df77ca23122e",
-        "textures/2e67bba4fb3124540b8494d17fbd2d60.png": "3d273d923933f1084737800fcab5d50230bd8f388ca63cc8810a745d87c77bde"
-      }
-    },
-    {
       "resourceKind": 5060,
       "package": "5060/effect.json",
       "folder": "work/fusion/batch40-269/next-zombie40-art-common2/particles/5060",
@@ -1680,6 +2106,126 @@
       "files": {
         "effect.json": "70b53d147c492f9c72322ec9cfcf32020e5f6d74fd254b839e61bfd602d89f82",
         "textures/2e67bba4fb3124540b8494d17fbd2d60.png": "3d273d923933f1084737800fcab5d50230bd8f388ca63cc8810a745d87c77bde"
+      }
+    },
+    {
+      "resourceKind": 5010,
+      "package": "5010/effect.json",
+      "effectSha256": "26ce869c57db221cc098fddd122a482bcc7b73342d5715646e63ec7b644eb4b0",
+      "sourcePrefab": "Resources/zombies/_prefab/PolevaulterZombie.prefab",
+      "sourceComponentFileId": 198693062532245359,
+      "status": "Passed",
+      "files": {
+        "effect.json": "26ce869c57db221cc098fddd122a482bcc7b73342d5715646e63ec7b644eb4b0",
+        "textures/b62dd8f05576baa48979093b401fb48a.png": "d32a894a69e8007bfbe0774474be6afc74ed90dcbc48009d48dedd08ba4995f4"
+      }
+    },
+    {
+      "resourceKind": 5011,
+      "package": "5011/effect.json",
+      "effectSha256": "16fa5d7167b580e807e612e988c2d78f38fc067b14354d61b38d5e38ea78ba09",
+      "sourcePrefab": "Resources/zombies/_prefab/PolevaulterZombie.prefab",
+      "sourceComponentFileId": 198574304967836189,
+      "status": "Passed",
+      "files": {
+        "effect.json": "16fa5d7167b580e807e612e988c2d78f38fc067b14354d61b38d5e38ea78ba09",
+        "textures/d267652cb4669274a9e70f29dcba7dc9.png": "5bba2603a15c48a57e8f38866735ca3148e854779018f04fb6f72ff1e244ac5e"
+      }
+    },
+    {
+      "resourceKind": 5033,
+      "package": "5033/effect.json",
+      "effectSha256": "46bd11dd304d991205f958ed5e6e90f500d14ef95825a1e19c7aeff4022a7b78",
+      "sourcePrefab": "Resources/zombies/_prefab/DollDiamondZombie.prefab",
+      "sourceComponentFileId": 198571718729274231,
+      "status": "Passed",
+      "files": {
+        "effect.json": "46bd11dd304d991205f958ed5e6e90f500d14ef95825a1e19c7aeff4022a7b78",
+        "textures/2e67bba4fb3124540b8494d17fbd2d60.png": "3d273d923933f1084737800fcab5d50230bd8f388ca63cc8810a745d87c77bde"
+      }
+    },
+    {
+      "resourceKind": 5035,
+      "package": "5035/effect.json",
+      "effectSha256": "b23f690bfffa7fc15de3bad297781523e3913161f9a744005069df4bbded1130",
+      "sourcePrefab": "Resources/zombies/_prefab/DollGoldZombie.prefab",
+      "sourceComponentFileId": 198571718729274231,
+      "status": "Passed",
+      "files": {
+        "effect.json": "b23f690bfffa7fc15de3bad297781523e3913161f9a744005069df4bbded1130",
+        "textures/2e67bba4fb3124540b8494d17fbd2d60.png": "3d273d923933f1084737800fcab5d50230bd8f388ca63cc8810a745d87c77bde"
+      }
+    },
+    {
+      "resourceKind": 5037,
+      "package": "5037/effect.json",
+      "effectSha256": "5ac3277cf9df8896092ab6f435600e5631dadd1671377dbac519bb8d34446af1",
+      "sourcePrefab": "Resources/zombies/_prefab/DollSilverZombie.prefab",
+      "sourceComponentFileId": 198571718729274231,
+      "status": "Passed",
+      "files": {
+        "effect.json": "5ac3277cf9df8896092ab6f435600e5631dadd1671377dbac519bb8d34446af1",
+        "textures/2e67bba4fb3124540b8494d17fbd2d60.png": "3d273d923933f1084737800fcab5d50230bd8f388ca63cc8810a745d87c77bde"
+      }
+    },
+    {
+      "resourceKind": 5059,
+      "package": "5059/effect.json",
+      "effectSha256": "aa49115ca9a0d93874c494b081f1717159a33cdfee0960ab2054df77ca23122e",
+      "sourcePrefab": "Resources/zombies/_prefab/PeaShooterZombie.prefab",
+      "sourceComponentFileId": 198689364072382846,
+      "status": "Passed",
+      "files": {
+        "effect.json": "aa49115ca9a0d93874c494b081f1717159a33cdfee0960ab2054df77ca23122e",
+        "textures/2e67bba4fb3124540b8494d17fbd2d60.png": "3d273d923933f1084737800fcab5d50230bd8f388ca63cc8810a745d87c77bde"
+      }
+    },
+    {
+      "resourceKind": 5063,
+      "package": "5063/effect.json",
+      "effectSha256": "ca532c088c8b5c85abe41a79eabe2283ca4fae39c072c63b68676802a0521b4b",
+      "sourcePrefab": "Resources/zombies/_prefab/BucketNutZombie.prefab",
+      "sourceComponentFileId": 198632746491512912,
+      "status": "Passed",
+      "files": {
+        "effect.json": "ca532c088c8b5c85abe41a79eabe2283ca4fae39c072c63b68676802a0521b4b",
+        "textures/2e67bba4fb3124540b8494d17fbd2d60.png": "3d273d923933f1084737800fcab5d50230bd8f388ca63cc8810a745d87c77bde"
+      }
+    },
+    {
+      "resourceKind": 5064,
+      "package": "5064/effect.json",
+      "effectSha256": "ff5d4519ce98e89f7945c3d165be60a4dd8aa91a303f44f2bf9a3ef48e9e9ef6",
+      "sourcePrefab": "Resources/zombies/_prefab/CherryNutZombie.prefab",
+      "sourceComponentFileId": 198689364072382846,
+      "status": "Passed",
+      "files": {
+        "effect.json": "ff5d4519ce98e89f7945c3d165be60a4dd8aa91a303f44f2bf9a3ef48e9e9ef6",
+        "textures/2e67bba4fb3124540b8494d17fbd2d60.png": "3d273d923933f1084737800fcab5d50230bd8f388ca63cc8810a745d87c77bde"
+      }
+    },
+    {
+      "resourceKind": 5065,
+      "package": "5065/effect.json",
+      "effectSha256": "f9a53becdd052139b7cb0b0b07a39b98dad7a13cc41c0f4036ffc2746b25b0b4",
+      "sourcePrefab": "Resources/zombies/_prefab/IronPeaZombie.prefab",
+      "sourceComponentFileId": 198094320201520353,
+      "status": "Passed",
+      "files": {
+        "effect.json": "f9a53becdd052139b7cb0b0b07a39b98dad7a13cc41c0f4036ffc2746b25b0b4",
+        "textures/2e67bba4fb3124540b8494d17fbd2d60.png": "3d273d923933f1084737800fcab5d50230bd8f388ca63cc8810a745d87c77bde"
+      }
+    },
+    {
+      "resourceKind": 5066,
+      "package": "5066/effect.json",
+      "effectSha256": "2a0f505e74b0f9016f024a68068328814e423353ed8986876c9e4e3f7216ea69",
+      "sourcePrefab": "Resources/Particle/Prefabs/Star.prefab",
+      "sourceFactoryIndex": 23,
+      "status": "Passed",
+      "files": {
+        "effect.json": "2a0f505e74b0f9016f024a68068328814e423353ed8986876c9e4e3f7216ea69",
+        "textures/16a9b694460271241873ba0f4090934c.png": "e2a1dccb53e1487310ec712cdde961c663f4298c883b52643d8bc9cdb3ab629c"
       }
     }
   ],

@@ -1,4 +1,6 @@
 #include "Plant.h"
+#include "Fusion/FusionNativeAdventure273.h"
+#include "Fusion/FusionNativeDayZombie273Bridge.h"
 #include <cmath>
 #include "Board.h"
 #include "Zombie.h"
@@ -4053,6 +4055,7 @@ void Zombie::DropHead(unsigned int theDamageFlags)
 {
     if (!CanLoseBodyParts() || !mHasHead)
         return;
+    if(!LawnFusion::PrepareNativeDayZombie273HeadLoss(this,theDamageFlags))return;
 
     if (!mNetGhost && mButteredCounter > 0)
     {
@@ -4063,6 +4066,8 @@ void Zombie::DropHead(unsigned int theDamageFlags)
 
     mHasHead = false;
     SetupReanimForLostHead();
+    if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);source&&(source->kind==106||source->kind==108))
+        return; // These source LoseHead callbacks create Items/Bucket, not a stock severed head.
     if (TestBit(theDamageFlags, DamageFlags::DAMAGE_DOESNT_LEAVE_BODY))
     {
         return;
@@ -5623,6 +5628,11 @@ void Zombie::UpdatePlaying()
             UpdateAnimSpeed();
     }
     LawnFusion::UpdateNativeSpecialZombie269PaperShoot(this,LawnFusion::GetNativeSourceZombie269NodePoint);
+    if(LawnFusion::IsNativeDayZombie273(this))
+    {
+        LawnFusion::UpdateNativeDayZombie273(this,LawnFusion::GetNativeDayZombie273Hooks());
+        if(mDead||IsDeadOrDying())return;
+    }
     if(LawnFusion::IsNativeSpecialZombie269Vehicle(this))
     {
         LawnFusion::MoveNativeSpecialZombie269Vehicle(this,LawnFusion::GetNativeSourceZombie269NodePoint);
@@ -8545,6 +8555,7 @@ void Zombie::CheckForHighGround()
 void Zombie::StartMindControlled()
 {
     if (LawnFusion::NativeSummon269RejectStatus(this)) return;
+    if(!mMindControlled)LawnFusion::RetireNativeSourceAdventureEnemy273(this);
     mApp->PlaySample(SOUND_MINDCONTROLLED);
     mMindControlled = true;
     mLastPortalX = -1;
@@ -8758,6 +8769,7 @@ void Zombie::EatZombie(Zombie* theZombie)
 //0x52FE50
 bool Zombie::TrySpawnLevelAward()
 {
+    if(LawnFusion::IsNativeSourceAdventure273(mBoard))return false;
     // Custom PvP objectives own their victory condition.  There are no stock
     // waves here, so killing the last currently spawned invader is not a win.
     if (mBoard && mBoard->IsPvPMode())
@@ -9012,6 +9024,7 @@ void Zombie::DropLoot()
 //0x5302F0
 void Zombie::DieWithLoot()
 {
+    LawnFusion::RetireNativeSourceAdventureEnemy273(this);
     LawnFusion::NativeSummon269MoneyDied(this);
     DieNoLoot();
     DropLoot();
@@ -9123,6 +9136,8 @@ void Zombie::BungeeDie()
 //0x530510
 void Zombie::DieNoLoot()
 {
+    LawnFusion::RetireNativeSourceAdventureEnemy273(this);
+    LawnFusion::NativeDayZombie273Removing(this);
     LawnFusion::NativeSpecialZombie269Removing(this);
     LawnFusion::NativeSummon269ZombieRemoving(this);
     LawnFusion::NativeRemaining269ZombieRemoving(this);
@@ -9688,6 +9703,8 @@ void Zombie::DropHelm(unsigned int theDamageFlags)
 //0x530FE0
 int Zombie::TakeHelmDamage(int theDamage, unsigned int theDamageFlags)
 {
+    int dayRemaining=0;
+    if(LawnFusion::ApplyNativeDayZombie273Armor(this,theDamage,dayRemaining,LawnFusion::GetNativeDayZombie273Hooks()))return dayRemaining;
     int sourceRemaining=theDamage;if(LawnFusion::ApplyNativeSourceZombie111Armor(this,theDamage,sourceRemaining))return sourceRemaining;
     if (!TestBit(theDamageFlags, (int)DamageFlags::DAMAGE_DOESNT_CAUSE_FLASH))
     {
@@ -10677,6 +10694,7 @@ void Zombie::MowDown()
 {
     if (mDead || mZombiePhase == ZombiePhase::PHASE_ZOMBIE_MOWERED || mZombieType == ZombieType::ZOMBIE_BOSS)
         return;
+    LawnFusion::RetireNativeSourceAdventureEnemy273(this);
 
     if (mZombieType == ZombieType::ZOMBIE_CATAPULT)
     {
@@ -10793,6 +10811,8 @@ void Zombie::ApplyBurn(bool forceDeath)
         TakeDamage(1800, 18U);
         return;
     }
+
+    LawnFusion::RetireNativeSourceAdventureEnemy273(this);
 
     if (mZombieType == ZombieType::ZOMBIE_SQUASH_HEAD && !mHasHead)
     {
@@ -11100,6 +11120,7 @@ void Zombie::PlayDeathAnim(unsigned int theDamageFlags)
     if (mZombiePhase == ZombiePhase::PHASE_ZOMBIE_DYING || mZombiePhase == ZombiePhase::PHASE_ZOMBIE_BURNED || mZombiePhase == ZombiePhase::PHASE_ZOMBIE_MOWERED)
         return;
 
+    LawnFusion::RetireNativeSourceAdventureEnemy273(this);
     Reanimation* aBodyReanim = mApp->ReanimationTryToGet(mBodyReanimID);
     if (aBodyReanim == nullptr || !aBodyReanim->TrackExists("anim_death"))
     {
@@ -11864,6 +11885,8 @@ void Zombie::GetShadowDrawParams(const ZombieDrawPosition& aDrawPos, ShadowDrawP
 
 void Zombie::DrawShadow(Graphics* g)
 {
+    if(LawnFusion::IsNativeDayZombie273(this))
+        if(const auto* state=LawnFusion::GetNativeDayZombie273(this);state&&!state->shadowEnabled)return;
     ZombieDrawPosition aDrawPos;
     GetDrawPos(aDrawPos);
     if (mApp->mGameScene == GameScenes::SCENE_ZOMBIES_WON && !SetupDrawZombieWon(g) || mZombiePhase == ZombiePhase::PHASE_ZOMBIE_BURNED)

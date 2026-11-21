@@ -74,6 +74,18 @@ def initial_color(text):
  if any(set(c)!={'r','g','b','a'} or any(not math.isfinite(v) or v<0 or v>64 for v in c.values()) for c in colors):raise ValueError('invalid initial source RGBA color')
  return colors
 
+def sprite_sequence(uv):
+ """Resolve every serialized frame; never silently discard null/malformed frames."""
+ entries=[v.strip()for v in re.findall(r'^ *- sprite: *(.*)$',block(uv,'sprites'),re.M)]
+ if not entries or len(entries)>16:raise ValueError('invalid source particle sprite sequence')
+ refs=[]
+ for entry in entries:
+  if entry=='{fileID: 0}':raise ValueError('source particle explicit null Sprite requires original engine image-binding proof')
+  match=re.fullmatch(r'\{fileID: 21300000, guid: ([0-9a-f]{32}), type: 2\}',entry)
+  if not match:raise ValueError('unsupported source particle sprite reference '+entry)
+  refs.append(match[1])
+ return refs
+
 
 def pad_sprite(path,w,h,lw,lh,pivot,offset):
  import struct,zlib,binascii
@@ -195,11 +207,15 @@ def projected_rectangle(assets,prefab,trans,objects,tid,shape,pose_model):
  return {'basis':basis,'halfSize':half,'normal':[0,0,1],'scalingMode':1,'ancestorTrs':records,'staticAncestorRotations':True,'staticParticleScale':True,'offset':[0,0,0],'shapeRotation':[0,0,0],'sourceModelSha256':hashlib.sha256(model_path.read_bytes()).hexdigest(),'sourcePrefabSha256':source_hash,'ancestorPaths':paths,'sourceProjectionPolicy':'Unity Local1: full ancestor rotation, only PS own local scale; actual node point supplies translation','sourceScalingModeReference':'https://docs.unity3d.com/kr/6000.0/ScriptReference/ParticleSystemScalingMode.Local.html'}
 
 
-def export(assets,prefab,output,source_id,scope_ids=None,pose_model=None):
+def export(assets,prefab,output,source_id,scope_ids=None,pose_model=None,guid_lookup=None):
  assets=pathlib.Path(assets);output=pathlib.Path(output);output.mkdir(parents=True,exist_ok=True)
- used=set();guids={}
+ used=set();guids=dict(guid_lookup)if guid_lookup is not None else{}
  def read(p):used.add(p);return p.read_text(encoding='utf-8')
  def resolve(g):
+  if guid_lookup is not None and g in guids:
+   meta=pathlib.Path(str(guids[g])+'.meta')
+   if not re.search(r'^guid: '+re.escape(g)+r'$',meta.read_text(encoding='utf-8'),re.M):raise ValueError('preindexed source GUID differs '+g)
+   used.add(meta)
   if g not in guids:
    r=subprocess.run(['rg','-l','--glob','*.meta','^guid: '+g+'$',str(assets)],capture_output=True,text=True,encoding='utf-8',check=False)
    found=[pathlib.Path(x) for x in r.stdout.splitlines()]
@@ -290,8 +306,7 @@ def export(assets,prefab,output,source_id,scope_ids=None,pose_model=None):
    else:
     if e.required(uv,'mode')!='1':raise ValueError('unsupported particle sprite-sheet mode')
     if e.required(uv,'flipU')!='0' or e.required(uv,'flipV')!='0':raise ValueError('particle UV flip requires adapter')
-    refs=re.findall(r'sprite: \{fileID: 21300000, guid: ([0-9a-f]{32}),',uv)
-    if not refs or len(refs)>16:raise ValueError('invalid source particle sprite sequence')
+    refs=sprite_sequence(uv)
     record['serializedUVModule']=uv
     for g in refs:
      if g not in sprite_cache:

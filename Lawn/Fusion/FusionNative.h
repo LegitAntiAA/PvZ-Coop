@@ -17,6 +17,9 @@
 #include "FusionNativeRemainingLeaves269.h"
 #include "FusionNativeWorldRemainder269.h"
 #include "FusionNativeHostileProjectile.h"
+#include "FusionAdventureSession273.h"
+#include "FusionAdventureScheduler273.h"
+#include "FusionNativeDayZombie273.h"
 #include "../../ConstEnums.h"
 #include <cstdint>
 #include <array>
@@ -209,6 +212,13 @@ struct NativeContext
     std::vector<int> temporaryLightDeadlines; // Host-only expiries on the real Board tick.
     uint16_t temporaryLightLevel = 0; // Source additive room-light leases; clients only adopt.
     bool validation = true;
+    FusionAdventureSession273 adventure;
+    FusionAdventureScheduler273State adventureScheduler; // Host-private; never serialized.
+    int adventureTick = -1;
+    int adventureEnemyCount = 0;
+    std::unordered_set<uint32_t> adventureEnemies; // Host generations, retired exactly once on death/MC.
+    int adventureSkySunTicks = 750;
+    bool adventureTeardown = false;
     bool selectionCommitted = false;
     bool restartChooserRequested = false;
     uint8_t pendingRosterMask = 0; // Host-only: preserve sealed Intro until private reveal.
@@ -252,6 +262,7 @@ struct NativeContext
     std::unordered_map<uint32_t, uint32_t> zombieInstanceTokens; // Local full generation -> opaque host generation.
     std::unordered_map<uint32_t, GarlicActionState> garlicZombies;
     std::unordered_map<uint32_t, NativeSourceZombieData> sourceZombies;
+    std::unordered_map<uint32_t, NativeDayZombie273State> dayZombies273;
     std::unordered_map<uint32_t, NativeSourceZombieCursor> sourceZombieCursors; // Host-only consumed native animation spans.
     FusionRollingHitHistory rollingHits; // Host-only full-generation impact history.
     std::unordered_map<uint32_t,std::unordered_set<uint32_t>> fireContacts; // Current native contact episodes only.

@@ -38,8 +38,9 @@ bool InstallRuntime(LawnApp* app, std::unique_ptr<LawnFusion::FusionRuntime> run
 bool LawnApp::IsFusionValidationFixture() const
 {
     const char* campaign=std::getenv("PVZ_COOP_SMOKE_FUSION_CAMPAIGN270");
+    const char* source=std::getenv("PVZ_COOP_SMOKE_FUSION_SOURCE273");
     return CoopSmokeActive() && mCoopSmokeManifest.mScenario == LawnNet::NETSMOKE_SCENARIO_FUSION_VALIDATION &&
-        !(campaign&&std::strcmp(campaign,"1")==0);
+        !(campaign&&std::strcmp(campaign,"1")==0)&&!(source&&std::strcmp(source,"1")==0);
 }
 
 int LawnApp::GetFusionAdventureLevel() const
@@ -80,6 +81,7 @@ bool LawnApp::StartFusionValidation(std::string* error)
         if (!IsFusionValidationFixture() || !NetIsHost()) return false;
         KillGameSelector();
         NetCloseTransientScreens();
+        mSourceAdventure={};
         PreNewGame(GAMEMODE_ADVENTURE, false, 1);
         return IsNativeFusionBoard(mBoard);
     }

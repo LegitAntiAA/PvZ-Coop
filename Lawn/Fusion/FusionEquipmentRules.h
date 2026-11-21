@@ -37,6 +37,9 @@ bool TryGetFusionEquipmentPrefabIndex(int type,int& index);
 bool FusionMagnetPumpkinMetalTarget(int firstArmor,int secondArmor,int uniqueArmor,int sourceZombieKind);
 // IMUL -> float32 -> MULSS speed -> CVTTSS2SI -> integer Water*2.
 bool TryGetFusionMagnetPumpkinDamage(int baseDamage,int magnetCount,float sourceSpeed,bool water,int& damage);
+// Source Plant.UseItem46A080: Bucket0 maps Pea0->1020 and WallNut3->1029.
+// A replacement is a fresh SetPlant(Default), not a fusion or health recovery.
+// Rejection leaves out unchanged; existing receiver item types remain distinct.
 bool TryGetFusionBucketReceiverEffect(uint16_t kind,int type,int health,int maximum,FusionBucketReceiverEffect& out);
 bool TryGetFusionBucketDeathRecovery(int type,int superMachineCount,int machineCount,uint16_t& receiverKind,int& amount);
 bool TryGetFusionBucketLifetime(float seconds,bool disappear,bool tutor,bool cursorHeld,bool alreadyFlashing,bool& startFlash,bool& expire);

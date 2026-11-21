@@ -20,6 +20,7 @@
 #include "Net/NetCommon.h"
 #include "Net/NetManager.h"
 #include "Fusion/FusionNative.h"
+#include "Fusion/FusionNativeAdventureProgress273.h"
 #include "Fusion/FusionNativeMoney.h"
 #include "Fusion/FusionNativeEquipment.h"
 #include "Fusion/FusionNativeEquipment268.h"
@@ -517,6 +518,8 @@ bool Coin::IsPresentWithAdvice()
 //0x4309D0
 void Coin::ScoreCoin()
 {
+    if(const auto* context=LawnFusion::GetNativeContext(mBoard);context&&context->adventure.enabled&&
+        LawnFusion::IsNativeFusionAdventureTrophy273(this,context->adventure.run))return;
     if (LawnFusion::IsNativeEquipmentCoin(this)) return;
     Die();
     if (LawnFusion::CreditNativeMoneyCoin(this)) return;
@@ -847,7 +850,12 @@ void Coin::UpdateCollected()
 //0x431500
 void Coin::Update()
 {
-    if(LawnFusion::UpdateNativeFertilize269(this)||LawnFusion::UpdateNativeDroppedCard269(this))return;
+    const auto* sourceContext=LawnFusion::GetNativeContext(mBoard);
+    if(sourceContext&&sourceContext->adventure.enabled&&
+        LawnFusion::UpdateNativeFusionAdventureTrophy273(this,sourceContext->adventure.run))return;
+    const bool sourceTutorial=sourceContext&&sourceContext->adventure.enabled&&
+        LawnFusion::FusionAdventureCardsIgnoreExpiry273(sourceContext->adventure.run);
+    if(LawnFusion::UpdateNativeFertilize269(this)||LawnFusion::UpdateNativeDroppedCard269(this,sourceTutorial))return;
     mCoinAge++;
     if (LawnFusion::UpdateNativeEquipmentCoin(this)) return;
     if (mApp->mGameScene != GameScenes::SCENE_PLAYING && mApp->mGameScene != GameScenes::SCENE_AWARD && mBoard && !mBoard->mCutScene->ShouldRunUpsellBoard())
@@ -1186,6 +1194,8 @@ void Coin::TryAutoCollectAfterLevelAward()
 //0x432060
 void Coin::Collect()
 {
+    if(const auto* context=LawnFusion::GetNativeContext(mBoard);context&&context->adventure.enabled&&
+        LawnFusion::IsNativeFusionAdventureTrophy273(this,context->adventure.run))return;
     if (LawnFusion::IsNativeEquipmentCoin(this)) return;
     if (mDead)
         return;

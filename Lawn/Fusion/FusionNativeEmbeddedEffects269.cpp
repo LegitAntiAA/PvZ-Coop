@@ -41,6 +41,29 @@ struct Binding
 {
     int64_t component=0;uint16_t resource=0;std::string path,package;bool emission=true;int sortingOrder=0;NativeWorldParticle269Definition* definition=nullptr;
 };
+void ValidateOwnerDestroyedParticle273(uint16_t kind,const Json& entry,const std::string& modelPath)
+{
+    // Source Doll.FirstArmorFall synchronously activates Cone.LoseCone and
+    // destroys its owning root with Die(2), before any rendering. Retain and
+    // verify both serialized components; this does not choose a null-Sprite
+    // fallback or permit other dormant/unimplemented particle systems.
+    const char* proofHash=kind==21?"4cb918fe380100c4a163eef3bc4ad3dcb24c4b7fa4f3537618bddff7ea7568b5":
+        kind==22?"a797f4452feeff9ca28937ece6a5d3054a31a4630277377b646b3b8cbbb8416f":
+        kind==23?"a468ea2e0ec6ff7f78bf911b74d9cd460953e3a01801116550e2d82f5360b807":nullptr;
+    const char* modelHash=kind==21?"d83ea3808a7c29e19c1898bc64d8ec7ab4b50b1bd72ca1762ea39c01a8df381c":
+        kind==22?"339a11cdf48a1be7899f9368ee00cabcbcb7442ea4ca8159796cd1cee9082703":
+        kind==23?"24acb26ca0edb834836f978ad8e84dd3a4cf4411665708b98bf852832b4fb0b4":nullptr;
+    const auto& proof=entry.at("lifecycleProof");
+    if(!proofHash||entry.at("nativeLifecycle")!="ownerDestroyedBeforeRender"||
+        entry.at("canonicalProofSha256")!=proofHash||Digest(proof.dump())!=proofHash||
+        entry.at("sourceModelSha256")!=modelHash)
+        throw std::runtime_error("source Doll particle lifecycle proof differs");
+    for(const char* field:{"sourceZombieKind","sourcePrefab","sourceParticleFileId","sourceRendererFileId",
+        "serializedParticleSha256","serializedRendererSha256","nodePath"})
+        if(proof.at(field)!=entry.at(field))throw std::runtime_error("source Doll lifecycle binding differs");
+    std::ifstream file(modelPath,std::ios::binary);const std::string bytes((std::istreambuf_iterator<char>(file)),{});
+    if(!file||Digest(bytes)!=modelHash)throw std::runtime_error("source Doll lifecycle model hierarchy differs");
+}
 std::vector<Binding> LoadBindings(uint16_t kind,const std::string& modelPath,const std::string& manifestPath,bool projectile=false,bool zombie=false)
 {
     const Json model=Read(modelPath),manifest=Read(manifestPath);if(manifest.at("schema")!=1)throw std::runtime_error("unknown embedded source manifest");
@@ -55,7 +78,7 @@ std::vector<Binding> LoadBindings(uint16_t kind,const std::string& modelPath,con
         if(!actual.emplace(key,component.at("serializedComponent").get<std::string>()).second)throw std::runtime_error("duplicate source particle component");
     }
     if(actual.empty())throw std::runtime_error("model has no source particle components");
-    std::set<std::pair<int,int64_t>> covered;std::vector<Binding> result;
+    std::set<std::pair<int,int64_t>> covered;std::vector<Binding> result;size_t bindingCount=0;
     for(const auto& entry:manifest.at("bindings"))if(entry.at(zombie?"sourceZombieKind":projectile?"modelKey":"plantKind")==kind)
     {
         if(entry.at("status")!="Passed"||entry.at("sourcePrefab")!=model.at("sourcePrefab"))throw std::runtime_error("embedded source binding differs");
@@ -65,6 +88,12 @@ std::vector<Binding> LoadBindings(uint16_t kind,const std::string& modelPath,con
             const auto found=actual.find(pair);if(found==actual.end()||!covered.insert(pair).second)throw std::runtime_error("foreign/duplicate embedded particle component");
             const auto hash=entry.at(pair.first==198?"serializedParticleSha256":"serializedRendererSha256").get<std::string>();
             if(Digest(found->second)!=hash)throw std::runtime_error("source particle component hash differs");
+        }
+        ++bindingCount;
+        if(entry.contains("nativeLifecycle"))
+        {
+            if(!zombie||projectile)throw std::runtime_error("foreign source particle lifecycle proof");
+            ValidateOwnerDestroyedParticle273(kind,entry,modelPath);continue;
         }
         Binding binding;binding.component=ps;const int id=entry.at("resourceKind").get<int>();if(id<1||id>65535)throw std::runtime_error("invalid native particle resource key");binding.resource=uint16_t(id);
         binding.path=entry.at("nodePath").get<std::string>();binding.emission=entry.at("defaultEmissionEnabled").get<bool>();
@@ -77,7 +106,7 @@ std::vector<Binding> LoadBindings(uint16_t kind,const std::string& modelPath,con
         const auto& raw=actual.at({199,renderer});const std::string tag="  m_SortingOrder: ";const auto at=raw.find(tag);if(at!=std::string::npos)binding.sortingOrder=std::stoi(raw.substr(at+tag.size()));
         result.push_back(std::move(binding));
     }
-    if(covered.size()!=actual.size()||result.size()!=plant->at("count").get<std::size_t>())throw std::runtime_error("unbound source particle/renderer component");return result;
+    if(covered.size()!=actual.size()||bindingCount!=plant->at("count").get<std::size_t>())throw std::runtime_error("unbound source particle/renderer component");return result;
 }
 }
 struct NativeEmbeddedEffects269::Impl

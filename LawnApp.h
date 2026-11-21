@@ -180,6 +180,8 @@ public:
 	LawnNet::NetLobbyPanel*			mNetLobbyPanel;
 	LawnFusion::ContentMode mContentMode;
 	int mNetFusionAdventureLevel = 1;
+	LawnFusion::FusionAdventureSession273 mSourceAdventure;
+	bool mStartingSourceAdventure = false;
 	LawnFusion::ContentMode mLocalContentModeBackup;
 	bool mHasRemoteContentMode;
 	std::unique_ptr<LawnFusion::FusionRuntime> mFusionRuntime;
@@ -237,6 +239,9 @@ public:
 	int GetActiveAdventureLevel() const;
 	bool IsFusionAdventure() const;
 	bool CanStartFusionClassicCampaign() const;
+	bool IsFusionSourceAdventure() const;
+	bool StartFusionSourceAdventure(int level = 0, bool disableTutorial = false);
+	void ProcessFusionSourceAdventureTransition();
 	bool CanSelectContentMode() const;
 	bool IsContentModeAvailable(LawnFusion::ContentMode theMode, std::string* theError = nullptr) const;
 	bool SetContentMode(LawnFusion::ContentMode theMode, std::string* theError = nullptr);

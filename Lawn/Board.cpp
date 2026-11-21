@@ -5,6 +5,7 @@
 #include "BoardInclude.h"
 #include "Fusion/FusionRuntime.h"
 #include "Fusion/FusionNative.h"
+#include "Fusion/FusionNativeAdventure273.h"
 #include "Fusion/FusionNativeLastPlants269.h"
 #include "Fusion/FusionNativeWorldRemainder269.h"
 #include "Fusion/FusionNativeDeath.h"
@@ -1660,6 +1661,13 @@ bool Board::IsZombieWaveDistributionOk()
 //0x40ABB0
 void Board::InitZombieWaves()
 {
+	if(mApp->IsFusionSourceAdventure())
+	{
+		mNumWaves=mApp->mSourceAdventure.maximumWaves;
+		memset(mZombieAllowed,false,sizeof(mZombieAllowed));
+		memset(mZombiesInWave,0xff,sizeof(mZombiesInWave));
+		return;
+	}
 	memset(mZombieAllowed, false, sizeof(mZombieAllowed));
 	if (mApp->IsAdventureMode())
 	{
@@ -2363,6 +2371,15 @@ void Board::InitLevel()
 	{
 		if(LawnFusion::GetNativeContext(this)->validation){mSunMoney=500;mShowShovel=true;}
 		mTutorialState = TutorialState::TUTORIAL_OFF;
+		if(mApp->mSourceAdventure.enabled)
+		{
+			std::string error;
+			if(!LawnFusion::InitializeNativeSourceAdventure273(this,mApp->mSourceAdventure,&error))
+			{
+				LawnNet::NetTrace("Fusion source Adventure273 initialization failed reason=%s",error.c_str());
+				mFusionNative.reset();return;
+			}
+		}
 		LawnFusion::SyncNativeSelectionPackets(this);
 	}
 }
@@ -2379,6 +2396,7 @@ Reanimation* Board::CreateRakeReanim(float theRakeX, float theRakeY, int theRend
 //0x40B9C0
 void Board::PlaceRake()
 {
+	if(mApp->IsFusionSourceAdventure())return;
 	if (!mApp->mPlayerInfo->mPurchases[(int)StoreItem::STORE_ITEM_RAKE])
 		return;
 
@@ -5867,6 +5885,7 @@ void Board::MouseDown(int x, int y, int theClickCount)
 		mApp->mNetManager->GetRawActingPlayerSlot() > 0;
 	if (!aRemoteInput && (LawnFusion::HandleNativeMoneyPointer(this,theClickCount,x,y) ||
 		LawnFusion::HandleNativeGlovePointer(this, theClickCount, x, y))) return;
+	if(!aRemoteInput&&LawnFusion::HandleNativeSourceAdventurePointer273(this,theClickCount,x,y))return;
 	const bool aRemoteLastStandButton = aRemoteInput && theClickCount > 0 &&
 		RemoteLastStandButtonHitTest(this, x, y);
 
@@ -6832,6 +6851,7 @@ bool Board::HasLevelAwardDropped()
 //0x413A70
 void Board::UpdateSunSpawning()
 {
+	if(LawnFusion::UpdateNativeSourceAdventureSun273(this))return;
 	if (StageIsNight() ||
 		HasLevelAwardDropped() || 
 		mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_RAINING_SEEDS || 
@@ -6899,6 +6919,7 @@ void Board::NextWaveComing()
 //0x413D00
 void Board::UpdateZombieSpawning()
 {
+	if(LawnFusion::UpdateNativeSourceAdventure273(this))return;
 	if (const auto* aFusion = LawnFusion::GetNativeContext(this); aFusion && aFusion->validation) return;
 	if (mApp->mGameMode == GameMode::GAMEMODE_UPSELL || mApp->mGameMode == GameMode::GAMEMODE_INTRO)
 		return;

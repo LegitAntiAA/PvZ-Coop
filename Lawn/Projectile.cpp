@@ -4,6 +4,7 @@
 #include "Cutscene.h"
 #include "Projectile.h"
 #include "Fusion/FusionNativeHostileProjectile.h"
+#include "Fusion/FusionNativeDayZombie273Bridge.h"
 #include "../LawnApp.h"
 #include "../Resources.h"
 #include "../GameConstants.h"
@@ -1164,6 +1165,7 @@ void Projectile::UpdateNormalMotion()
 //0x46DC70
 void Projectile::UpdateMotion()
 {
+    if(LawnFusion::UpdateNativeDayZombie273HostileProjectile(this,LawnFusion::GetNativeDayZombie273Hooks()))return;
     if(LawnFusion::UpdateNativeSourceSuperCherryProjectile(this,LawnFusion::QueueNativeSuperCherryStart))return;
     if(LawnFusion::UpdateNativeWorldRemainder269Aux(this)||LawnFusion::MoveNativeLastPlants269KelpProjectile(this))return;
     if(LawnFusion::MoveNativeWorldRemainder269Source91(this)){if(!mDead)HandleNativeWorldSource91Collision(this);return;}

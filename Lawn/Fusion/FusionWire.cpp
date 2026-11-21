@@ -229,7 +229,8 @@ bool ValidCommand(const FusionCommand& command)
     if (!command.epoch || !command.inputEpoch || !command.sequence) return false;
     if(command.action!=FusionCommandKind::CannonAim&&(command.boardTargetX||command.boardTargetY))return false;
     const bool newTool=command.action==FusionCommandKind::EquipmentPickup||command.action==FusionCommandKind::EquipmentUse||
-        command.action==FusionCommandKind::EquipmentCancel||command.action==FusionCommandKind::CannonAim;
+        command.action==FusionCommandKind::EquipmentCancel||command.action==FusionCommandKind::CannonAim||
+        command.action==FusionCommandKind::AdventureRewardCollect;
     if(newTool&&(command.kind!=kFusionNoPlant||command.isExtra||command.enabled||command.packetId||
         command.targetId||command.targetToken||(command.action!=FusionCommandKind::EquipmentUse&&(command.column||command.row))))return false;
     switch (command.action)
@@ -249,6 +250,7 @@ bool ValidCommand(const FusionCommand& command)
             (!command.targetToken || command.targetId);
     case FusionCommandKind::Shovel: case FusionCommandKind::CollectSun: return command.targetId != 0;
     case FusionCommandKind::GlovePickup: case FusionCommandKind::ActivatePlant: case FusionCommandKind::MoneyPlant:
+    case FusionCommandKind::AdventureRewardCollect:
         return command.sourceId && command.sourceToken;
     case FusionCommandKind::GlovePlace:
         return command.sourceId && command.sourceToken && command.column < 32 && command.row < 10 &&
@@ -283,7 +285,7 @@ template <typename IO> void CommandFields(IO& io, FusionCommand& command)
         io.U32(command.targetId); io.U32(command.targetToken); break;
     case FusionCommandKind::Shovel: case FusionCommandKind::CollectSun: io.U32(command.targetId); break;
     case FusionCommandKind::GlovePickup: case FusionCommandKind::GloveCancel: case FusionCommandKind::ActivatePlant: case FusionCommandKind::MoneyPlant:
-    case FusionCommandKind::EquipmentPickup: case FusionCommandKind::EquipmentCancel:
+    case FusionCommandKind::EquipmentPickup: case FusionCommandKind::EquipmentCancel: case FusionCommandKind::AdventureRewardCollect:
         io.U16(command.sourceId); io.U32(command.sourceToken); break;
     case FusionCommandKind::EquipmentUse:
         io.U16(command.sourceId); io.U32(command.sourceToken); io.U8(command.column); io.U8(command.row); break;

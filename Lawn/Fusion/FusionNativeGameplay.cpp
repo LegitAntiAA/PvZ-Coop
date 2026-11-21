@@ -18,6 +18,7 @@
 #include "FusionWire.h"
 #include "../Board.h"
 #include "../Coin.h"
+#include "FusionNativeAdventure273.h"
 #include "../Plant.h"
 #include "../Projectile.h"
 #include "../SeedPacket.h"
@@ -507,13 +508,18 @@ bool InitializeNativeBoardContext(Board* board, uint32_t epoch, uint32_t seed,
     context->epoch = epoch;
     context->seed = seed;
     context->level = level;
-    context->validation = board->mApp->IsFusionValidationFixture();
+    context->adventure = board->mApp->mSourceAdventure;
+    context->validation = !context->adventure.enabled&&board->mApp->IsFusionValidationFixture();
     for (size_t index = 0; index < FusionPlantCount(); ++index)
     {
         const auto* plant = FusionPlantAt(index);
         if (!plant || !IsNativeBasePlantKind(plant->id)) continue;
         const FusionPlantId kind = plant->id;
-        if(!context->validation)
+        if(context->adventure.enabled)
+        {
+            if(!FusionAdventureBaseUnlocked273(context->adventure.profile,kind))continue;
+        }
+        else if(!context->validation)
         {
             // Carrier seeds are implementation aliases (Torchwood uses Pea),
             // so unlock by the actual Classic counterpart instead.
@@ -560,6 +566,8 @@ bool HandleNativeFusionCommand(Board* board, int slot, const FusionCommand& comm
     NativeContext* context = GetNativeContext(board);
     if (!context || !Host(board) || command.epoch != context->epoch ||
         !Active(context->selection.State(), slot)) return false;
+    if(command.action==FusionCommandKind::AdventureRewardCollect)
+        return HandleNativeSourceAdventureRewardCommand273(board,slot,command);
     if(command.action==FusionCommandKind::DroppedCardPickup||command.action==FusionCommandKind::DroppedCardPutDown||command.action==FusionCommandKind::DroppedCardPlant)
         return HandleNativeDroppedCard269Command(board,slot,command.action==FusionCommandKind::DroppedCardPickup?NativeDroppedCard269Action::Pickup:
             command.action==FusionCommandKind::DroppedCardPutDown?NativeDroppedCard269Action::PutDown:NativeDroppedCard269Action::Plant,command);
@@ -721,6 +729,7 @@ void PruneNativeMetadata(Board* board)
     // Dead coins still allocated in the DataArray retain their value for
     // ScoreCoin, which asks GetSunValue after calling Die.
     Prune(board->mCoins, context->coinValues);
+    Prune(board->mZombies,context->dayZombies273);
     for (auto item = context->packets.begin(); item != context->packets.end(); )
     {
         bool live = false;

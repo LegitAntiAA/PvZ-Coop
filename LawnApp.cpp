@@ -132,6 +132,7 @@ namespace LawnNet
 	bool NetSmokeFusionResourceHostLost(LawnApp* theApp, const std::string& theReason);
 	bool NetSmokeUpdateCommunications(LawnApp* theApp);
 	bool NetSmokeControlsComplete(LawnApp* theApp);
+	bool NetSmokeUpdateFusionAdventure273(LawnApp* theApp);
 	bool NetSmokeUpdateZenGarden(LawnApp* theApp);
 	bool NetSmokeZenGardenAllowsStart(LawnApp* theApp, uint8_t theMode, int32_t theLevel);
 	bool NetSmokeUpdateMystery(LawnApp* theApp);
@@ -1244,6 +1245,7 @@ void LawnApp::Shutdown()
 //0x44F380
 void LawnApp::KillBoard()
 {
+	if(auto* context=LawnFusion::GetNativeContext(mBoard))context->adventureTeardown=true;
 	mFusionRuntime.reset();
 	if (mNetManager) mNetManager->ClearFusionTraffic();
 	// A remote Board callback may synchronously tear the board down while its
@@ -1385,7 +1387,13 @@ bool LawnApp::WriteCurrentUserConfig()
 //0x44F560
 void LawnApp::PreNewGame(GameMode theGameMode, bool theLookForSavedGame)
 {
-	if (GetContentMode()==LawnFusion::ContentMode::Fusion && !CanStartFusionClassicCampaign())
+	if (GetContentMode()==LawnFusion::ContentMode::Fusion && !mStartingSourceAdventure && !CanStartFusionClassicCampaign())
+	{
+		if(theGameMode==GAMEMODE_ADVENTURE)StartFusionSourceAdventure();
+		else DoDialog(DIALOG_INFO,true,_S("Fusion"),_S("Этот режим Fusion ещё не готов."),_S("[OK_LABEL]"),Dialog::BUTTONS_FOOTER);
+		return;
+	}
+	if (GetContentMode()==LawnFusion::ContentMode::Fusion && !mSourceAdventure.enabled && !CanStartFusionClassicCampaign())
 	{
 		if (!mGameSelector && !mBoard) ShowGameSelector();
 		DoDialog(DIALOG_INFO,true,_S("Fusion"),_S("Кампания Fusion пока недоступна."),_S("[OK_LABEL]"),Dialog::BUTTONS_FOOTER);
@@ -1447,7 +1455,13 @@ void LawnApp::PreNewGame(GameMode theGameMode, bool theLookForSavedGame)
 
 void LawnApp::PreNewGame(GameMode theGameMode, bool theLookForSavedGame, int theLevel)
 {
-	if (GetContentMode()==LawnFusion::ContentMode::Fusion && !CanStartFusionClassicCampaign())
+	if (GetContentMode()==LawnFusion::ContentMode::Fusion && !mStartingSourceAdventure && !CanStartFusionClassicCampaign())
+	{
+		if(theGameMode==GAMEMODE_ADVENTURE)StartFusionSourceAdventure(theLevel);
+		else DoDialog(DIALOG_INFO,true,_S("Fusion"),_S("Этот режим Fusion ещё не готов."),_S("[OK_LABEL]"),Dialog::BUTTONS_FOOTER);
+		return;
+	}
+	if (GetContentMode()==LawnFusion::ContentMode::Fusion && !mSourceAdventure.enabled && !CanStartFusionClassicCampaign())
 	{
 		if (!mGameSelector && !mBoard) ShowGameSelector();
 		DoDialog(DIALOG_INFO,true,_S("Fusion"),_S("Кампания Fusion пока недоступна."),_S("[OK_LABEL]"),Dialog::BUTTONS_FOOTER);
@@ -1647,7 +1661,7 @@ bool LawnApp::TryLoadGame(int theLevel)
 //0x44F890
 void LawnApp::NewGame()
 {
-	if (GetContentMode()==LawnFusion::ContentMode::Fusion && !CanStartFusionClassicCampaign())
+	if (GetContentMode()==LawnFusion::ContentMode::Fusion && !mSourceAdventure.enabled && !CanStartFusionClassicCampaign())
 	{
 		LawnNet::NetTrace("Fusion Classic campaign NewGame rejected: public entry disabled");
 		return;
@@ -2955,6 +2969,7 @@ void LawnApp::HandleCmdLineParam(const std::string& theParamName, const std::str
 //0x452310
 bool LawnApp::UpdatePlayerProfileForFinishingLevel()
 {
+	if(IsFusionSourceAdventure())return false; // Source trophy click commits its separate profile.
 	if(IsFusionAdventure()&&mBoard)
 	{
 		SetFusionAdventureLevel(mBoard->mLevel>=FINAL_LEVEL?1:mBoard->mLevel+1);
@@ -3277,6 +3292,7 @@ void LawnApp::UpdatePlayTimeStats()
 //0x452650
 void LawnApp::UpdateFrames()
 {
+	ProcessFusionSourceAdventureTransition();
 	if (auto* context = LawnFusion::GetNativeContext(mBoard);
 		context && context->restartChooserRequested && !NetIsClient() && mUpdateAppDepth <= 1)
 	{
@@ -4437,12 +4453,9 @@ Reanimation* LawnApp::AddReanimation(float theX, float theY, int theRenderOrder,
 //0x453C80
 TodParticleSystem* LawnApp::AddTodParticle(float theX, float theY, int theRenderOrder, ParticleEffect theEffect)
 {
-	if (theEffect == PARTICLE_FUSION_SOURCE52)
-		return LawnFusion::SpawnNativeSourceEffect269(mBoard,52,theX,theY,theRenderOrder,false);
-    if(theEffect==PARTICLE_FUSION_SOURCE35||theEffect==PARTICLE_FUSION_SOURCE36)
-        return LawnFusion::SpawnNativeSourceEffect269(mBoard,theEffect==PARTICLE_FUSION_SOURCE35?35:36,theX,theY,theRenderOrder,false);
-    if(theEffect==PARTICLE_FUSION_SOURCE99||theEffect==PARTICLE_FUSION_SOURCE100||theEffect==PARTICLE_FUSION_SOURCE49||theEffect==PARTICLE_FUSION_SOURCE51)
-        return LawnFusion::SpawnNativeSourceEffect269(mBoard,theEffect==PARTICLE_FUSION_SOURCE99?99:theEffect==PARTICLE_FUSION_SOURCE100?100:theEffect==PARTICLE_FUSION_SOURCE49?49:51,theX,theY,theRenderOrder,false);
+    uint16_t sourceKind=0;
+    if(LawnFusion::NativeSourceEffectKind269(theEffect,sourceKind))
+        return LawnFusion::SpawnNativeSourceEffect269(mBoard,sourceKind,theX,theY,theRenderOrder,false);
 	return mEffectSystem->mParticleHolder->AllocParticleSystem(theX, theY, theRenderOrder, theEffect);
 }
 
@@ -4617,6 +4630,7 @@ bool LawnApp::HasFinishedAdventure()
 //0x454190
 bool LawnApp::IsFirstTimeAdventureMode()
 {
+	if(IsFusionSourceAdventure())return false; // Source tutorial owns its own stages and full lawn.
 	if (GetContentMode() == LawnFusion::ContentMode::Fusion) return IsFusionAdventure();
 	return IsAdventureMode() && !HasFinishedAdventure();
 }
@@ -5829,7 +5843,8 @@ void LawnApp::CoopSmokeStartLifecycle()
 	if (!CoopSmokeActive() || mCoopSmokeLifecycleStarted || !mNetManager)
 		return;
 	mCoopSmokeLifecycleStarted = true;
-	if (IsFusionValidationFixture()||(CoopSmokeActive()&&getenv("PVZ_COOP_SMOKE_FUSION_CAMPAIGN270"))) mContentMode = LawnFusion::ContentMode::Fusion;
+	if (IsFusionValidationFixture()||(CoopSmokeActive()&&
+		(getenv("PVZ_COOP_SMOKE_FUSION_CAMPAIGN270")||getenv("PVZ_COOP_SMOKE_FUSION_SOURCE273")))) mContentMode = LawnFusion::ContentMode::Fusion;
 	mCoopSmokeScenarioRuntime.Reset(mCoopSmokeManifest.mScenario);
 	if (!LawnNet::NetSmokeAvatarBeforeConnect(this)) return;
 	const char* aReplayChooser = getenv("PVZ_COOP_SMOKE_REPLAY_CHOOSER");
@@ -5993,6 +6008,8 @@ void LawnApp::CoopSmokeUpdate()
 	if (LawnNet::NetSmokeUpdateFusionAlmanac(this))
 		return;
 	if (LawnNet::NetSmokeUpdateFusionPotato(this))
+		return;
+	if (LawnNet::NetSmokeUpdateFusionAdventure273(this))
 		return;
 	if (LawnNet::NetSmokeUpdateFusionWallnut(this))
 		return;
@@ -6386,7 +6403,9 @@ void LawnApp::NetOnStartGame(LawnNet::NetBuffer& thePayload)
 		return;
 	}
 	const uint8_t aMode = aStart.mGameMode;
-	if (aStart.mContentMode==LawnFusion::ContentMode::Fusion && !CanStartFusionClassicCampaign())
+	if (aStart.mContentMode==LawnFusion::ContentMode::Fusion &&
+		(!aStart.mSourceAdventure.enabled&&!CanStartFusionClassicCampaign() ||
+		 aStart.mSourceAdventure.enabled&&(aStart.mSourceAdventure.run.level>3||aStart.mSourceAdventure.run.cycle!=1)))
 	{
 		LawnNet::NetTrace("START_GAME rejected before app mutation: Fusion Classic campaign disabled");
 		return;
@@ -6401,16 +6420,18 @@ void LawnApp::NetOnStartGame(LawnNet::NetBuffer& thePayload)
 		const char* aNativeFixture = getenv("PVZ_COOP_SMOKE_FUSION_NATIVE");
 		const char* aRosterFixture = getenv("PVZ_COOP_SMOKE_FUSION_ROSTER");
 		const bool aFusionCampaign=getenv("PVZ_COOP_SMOKE_FUSION_CAMPAIGN270")!=nullptr;
+		const bool aFusionSource=getenv("PVZ_COOP_SMOKE_FUSION_SOURCE273")!=nullptr&&aStart.mSourceAdventure.enabled;
 		const char* aFusionWavesFixture=getenv("PVZ_COOP_SMOKE_FUSION_WAVES271");
 		const char* aFusionVehiclesFixture=getenv("PVZ_COOP_SMOKE_FUSION_WAVES272");
 		const bool aNativeRoster = aStart.mContentMode == LawnFusion::ContentMode::Fusion &&
 			IsFusionValidationFixture() && aNativeFixture && strcmp(aNativeFixture, "1") == 0 &&
 			aRosterFixture && strcmp(aRosterFixture, "1") == 0;
 		bool aValid = (aStart.mContentMode == LawnFusion::ContentMode::Classic ||
-			(aStart.mContentMode == LawnFusion::ContentMode::Fusion && (IsFusionValidationFixture()||aFusionCampaign) &&
+			(aStart.mContentMode == LawnFusion::ContentMode::Fusion && (IsFusionValidationFixture()||aFusionCampaign||aFusionSource) &&
 			 aNativeFixture && strcmp(aNativeFixture, "1") == 0 && aStart.mContentEpoch)) &&
 			((aMode == mCoopSmokeManifest.mGameMode && aLevel == mCoopSmokeManifest.mLevel) ||
 			 (aFusionCampaign&&aMode==GAMEMODE_ADVENTURE&&aLevel>=1&&aLevel<=2) ||
+			 (aFusionSource&&aMode==GAMEMODE_ADVENTURE&&aLevel>=1&&aLevel<=3) ||
 			 (aFusionCampaign&&aMode==GAMEMODE_ADVENTURE&&aLevel==11&&aFusionWavesFixture&&strcmp(aFusionWavesFixture,"1")==0) ||
 			 (aFusionCampaign&&aMode==GAMEMODE_ADVENTURE&&(aLevel==21||aLevel==31)&&aFusionVehiclesFixture&&atoi(aFusionVehiclesFixture)==aLevel) ||
 			 CoopSmokeFirstAdventureAllowsStart(aMode, aLevel) ||
@@ -6440,11 +6461,13 @@ void LawnApp::NetOnStartGame(LawnNet::NetBuffer& thePayload)
 
 	mNetBoardSeed = aBoardSeed;
 	mNativeFusionEpoch = aStart.mContentEpoch;
+	mSourceAdventure = aStart.mSourceAdventure;
 	mGameMode = (GameMode)aMode;
 	mNetCoopGameOverHandled = false;
 
-	// client always runs with the host's adventure level
-	if (mPlayerInfo && aMode == GameMode::GAMEMODE_ADVENTURE)
+	// The source campaign carries its own level/profile. Classic Adventure
+	// continues using the host's native level as before.
+	if (mPlayerInfo && aMode == GameMode::GAMEMODE_ADVENTURE && !aStart.mSourceAdventure.enabled)
 		mPlayerInfo->mLevel = aLevel;
 	if(GetContentMode()==LawnFusion::ContentMode::Fusion)SetFusionAdventureLevel(aLevel,false);
 

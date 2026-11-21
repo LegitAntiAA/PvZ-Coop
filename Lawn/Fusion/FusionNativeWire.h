@@ -10,7 +10,7 @@ namespace LawnNet { class NetBuffer; }
 
 namespace LawnFusion
 {
-constexpr uint16_t kNativeFusionSnapshotVersion=25;
+constexpr uint16_t kNativeFusionSnapshotVersion=26;
 struct NativeWheat269Snapshot {bool isFromWheat=false;float wheatTime=0;};
 struct NativeRollingActor269Snapshot:NativeRollingActor269State {int health=4000;}; // Actual native HP mirror, including source negative HP.
 // Pure admission of actual native raw fields; no timer or actor is duplicated.
@@ -42,6 +42,7 @@ template <typename T> struct NativeSnapshotRecord
 
 struct NativeSnapshotFrame
 {
+    FusionAdventureSession273 adventure;
     uint32_t epoch = 0;
     uint8_t background = BACKGROUND_1_DAY;
     bool selectionCommitted = false;
@@ -68,6 +69,7 @@ struct NativeSnapshotFrame
     std::vector<NativeSnapshotRecord<GarlicActionState>> garlicZombies;
     // Source identity/float truth for existing native Zombie generations only.
     std::vector<NativeSnapshotRecord<NativeSourceZombieData>> sourceZombies;
+    std::vector<NativeSnapshotRecord<NativeDayZombie273State>> dayZombies273;
     std::vector<NativeSnapshotRecord<NativeStar269PlantState>> star269Plants;
     std::vector<NativeSnapshotRecord<NativeStar269ProjectileState>> star269Projectiles;
     std::vector<NativeSnapshotRecord<NativeDoom269PlantState>> doom269Plants;

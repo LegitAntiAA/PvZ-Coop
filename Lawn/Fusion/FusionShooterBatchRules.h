@@ -32,7 +32,7 @@ bool TryGetFusionGatlingMilestone(uint32_t successfulCallbacks, float& speed, fl
 bool FusionShooterBatchInvulnerable(uint16_t kind, int remainingRageTicks);
 bool FusionSniperCanAcquire(int status, bool controlled, bool dying, double plantX,
     double zombieX, double visionX);
-bool TryGetFusionIronDamage(int baseDamage, int firstArmorHealth, int& damage);
+bool TryGetFusionIronDamage(int baseDamage, int secondArmorHealth, int& damage);
 bool FusionShooterBatchProjectileMetadataValid(uint16_t kind, int damage, int sun,
     uint8_t sourceWay, ProjectileType type, ProjectileMotion motion);
 bool TryMakeFusionShooterBatchProjectileRect(uint16_t kind, double centerX, double centerY,

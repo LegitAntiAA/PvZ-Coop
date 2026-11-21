@@ -31,6 +31,7 @@
 #include "NetZombatar.h"
 #include "../Fusion/FusionNative.h"
 #include "../Fusion/FusionNativeWire.h"
+#include "../Fusion/FusionNativeEffects269.h"
 #include "../Fusion/FusionNativeVisual.h"
 #include "../Fusion/FusionNativeZombieVisual.h"
 #include "../Fusion/NativeSpecialZombie269.h"
@@ -273,6 +274,12 @@ bool NetCaptureNativeFusionFrame(Board* board, LawnFusion::NativeSnapshotFrame& 
                     captured.paperShootEvent=uint8_t(zombie->mBossHeadCounter);
                 }
                 frame.sourceZombies.push_back({zombie->mNetId,captured});
+                if(const auto* day=LawnFusion::GetNativeDayZombie273(zombie))
+                {
+                    auto state=*day;
+                    if(!NetCaptureReanimState(board->mApp,zombie->mSpecialHeadReanimID,state.head))return false;
+                    frame.dayZombies273.push_back({zombie->mNetId,state});
+                }
 
             }
 			if (const auto* data = LawnFusion::GetNativeZombieColdData(zombie))
@@ -313,6 +320,7 @@ bool NetCaptureNativeFusionFrame(Board* board, LawnFusion::NativeSnapshotFrame& 
 			if (value != -1) frame.coins.push_back({coin->mNetId, {value,LawnFusion::IsNativeMoneyCoin(coin)}});
 		}
 	frame.money = context->money;
+	frame.adventure = context->adventure;
 	frame.temporaryLightLevel = context->temporaryLightLevel;
     LawnFusion::ProjectNativeStar269LiveTargets(frame);
 	return true;
@@ -428,6 +436,9 @@ bool NetPreflightNativeFusionBody(const NetBuffer& body, const LawnFusion::Nativ
 						type != static_cast<uint8_t>(LawnFusion::GetNativeSourceZombieCarrier(source->data.kind))) return false;
 					const auto* sourceProfile=LawnFusion::FindFusionZombieProfile(source->data.kind);
                     if(!NetPaperHeadFitsNativeFrames(source->data.paperHead))return false;
+                    const auto day=std::find_if(frame.dayZombies273.begin(),frame.dayZombies273.end(),
+                        [=](const auto& value){return value.id==id;});
+                    if(day!=frame.dayZombies273.end()&&!NetPaperHeadFitsNativeFrames(day->data.head))return false;
 					const int sourceRow=scan.mData[start+3];
 					if(sourceProfile&&sourceProfile->waterOnly&&(LawnFusion::NativeFusionRowsForBackground(frame.background)!=6||(sourceRow!=2&&sourceRow!=3)))return false;
 					const auto sourcePhase = sourceBody.ReadU8Or(), sourceHeight = sourceBody.ReadU8Or();
@@ -548,6 +559,7 @@ bool NetPreflightNativeFusionBody(const NetBuffer& body, const LawnFusion::Nativ
 	for (const auto& record : frame.zombieActions) if (!zombieIds.contains(record.id)) return false;
 	for (const auto& record : frame.garlicZombies) if (!zombieIds.contains(record.id)) return false;
 	for (const auto& record : frame.sourceZombies) if (!zombieIds.contains(record.id)) return false;
+    for(const auto& record:frame.dayZombies273)if(!zombieIds.contains(record.id))return false;
 	for (const auto& record : frame.coins) if (!coinIds.contains(record.id)) return false;
     for(const auto& record:frame.companions269)if(!projectileIds.contains(record.id))return false;
     for(const auto& record:frame.companionPlants269)if(!plantIds.contains(record.id))return false;
@@ -697,6 +709,26 @@ bool NetBindNativeFusionFrame(Board* board, const LawnFusion::NativeSnapshotFram
         }
 
     }
+	context->dayZombies273.clear();
+	for(const auto& record:frame.dayZombies273)
+	{
+		auto* zombie=board->NetGetGhostZombie(record.id);
+		const auto* source=LawnFusion::GetNativeSourceZombieData(zombie);
+		if(!zombie||!source)return false;
+		context->dayZombies273[board->mZombies.DataArrayGetID(zombie)]=record.data;
+		if(LawnFusion::FusionDayZombie273Shooter(source->kind))
+		{
+			// Precommit admission already requires this real attached resource.
+			// Never allocate a Day head after the raw snapshot has mutated actors.
+			if(record.data.head.mPresent&&!board->mApp->ReanimationTryToGet(zombie->mSpecialHeadReanimID))return false;
+			if(!record.data.head.mPresent)
+			{
+				board->mApp->RemoveReanimation(zombie->mSpecialHeadReanimID);
+				zombie->mSpecialHeadReanimID=REANIMATIONID_NULL;
+			}
+			NetApplyReanimState(board->mApp,zombie->mSpecialHeadReanimID,record.data.head);
+		}
+	}
 	// Removing a metadata record never clears the counters already decoded from
 	// the ordinary body. Only records present in this frame restore exact values.
 	context->coldZombies.clear();
@@ -734,6 +766,7 @@ bool NetBindNativeFusionFrame(Board* board, const LawnFusion::NativeSnapshotFram
 			!LawnFusion::RestoreNativeGarlicPresentation(zombie,record.data)) return false;
 	}
 	context->money = frame.money;
+	context->adventure = frame.adventure;
 	context->temporaryLightLevel = frame.temporaryLightLevel;
 	context->selection = selection;
 	context->selectionCommitted = frame.selectionCommitted;
@@ -859,6 +892,47 @@ uint32_t NetGetReanimationFrameCapacity(const Reanimation* theReanim)
 		theReanim->mDefinition->mTracks.tracks[0].mTransforms.count <= 0)
 		return 0;
 	return (uint32_t)theReanim->mDefinition->mTracks.tracks[0].mTransforms.count;
+}
+
+bool NetDay273CanAdoptWithoutAllocating(Board* board,const LawnFusion::NativeSnapshotFrame& frame)
+{
+    if(frame.dayZombies273.empty())return true;
+    const auto* context=LawnFusion::GetNativeContext(board);
+    if(!context||!board->mApp)return false;
+    // Temporary admission gate, NOT an estimated per-zombie capacity budget.
+    // AddZombieInRow can allocate a body plus variant/Zombatar attachments;
+    // earlier raw snapshot sections may allocate plant/projectile effects too.
+    // Until that complete batch has a reservation contract, Day frames may
+    // update only an already allocated, identical native generation and head.
+    for(const auto& record:frame.dayZombies273)
+    {
+        const auto incoming=std::find_if(frame.sourceZombies.begin(),frame.sourceZombies.end(),
+            [&](const auto& value){return value.id==record.id;});
+        auto* zombie=board->NetGetGhostZombie(record.id);
+        const auto* current=LawnFusion::GetNativeSourceZombieData(zombie);
+        if(incoming==frame.sourceZombies.end()||!zombie||!current||
+            current->kind!=incoming->data.kind||current->instanceToken!=incoming->data.instanceToken||
+            zombie->mZombieType!=LawnFusion::GetNativeSourceZombieCarrier(incoming->data.kind)||
+            !board->mApp->ReanimationTryToGet(zombie->mBodyReanimID))
+        {
+            NetTrace("Day273 snapshot admission deferred: body/generation allocation unreserved id=%u",record.id);
+            return false;
+        }
+        const auto generation=board->mZombies.DataArrayGetID(zombie);
+        const auto token=context->zombieInstanceTokens.find(generation);
+        if(token==context->zombieInstanceTokens.end()||token->second!=incoming->data.instanceToken)return false;
+        if(LawnFusion::FusionDayZombie273Shooter(incoming->data.kind)&&record.data.head.mPresent)
+        {
+            const auto* head=board->mApp->ReanimationTryToGet(zombie->mSpecialHeadReanimID);
+            if(!head||head->mReanimationType!=REANIM_PEASHOOTER||!head->mIsAttachment||
+                !NetZombieAnimStateFitsFrames(record.data.head,NetGetReanimationFrameCapacity(head)))
+            {
+                NetTrace("Day273 snapshot admission deferred: head allocation unreserved id=%u",record.id);
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 ReanimationID NetGetPlantReanimID(const Plant* thePlant, int theRole)
@@ -2443,11 +2517,12 @@ void Board::NetApplyEvent(NetBuffer& b)
 		const float aX = b.ReadF32Or();
 		const float aY = b.ReadF32Or();
 		const int aRenderOrder = b.ReadI32Or();
+		uint16_t aSourceEffect=0;
 		if (!_finite(aX) || !_finite(aY) || fabsf(aX) > 4096.0f || fabsf(aY) > 4096.0f ||
 			aRenderOrder < 0 || aRenderOrder > 1000000 ||
 			(aReanimation ? aType >= (int)ReanimationType::NUM_REANIMS :
 			 (aType >= (int)ParticleEffect::NUM_PARTICLES &&
-			  !(LawnFusion::IsNativeFusionBoard(this) && (aType == PARTICLE_FUSION_SOURCE52||aType==PARTICLE_FUSION_SOURCE99||aType==PARTICLE_FUSION_SOURCE100||aType==PARTICLE_FUSION_SOURCE49||aType==PARTICLE_FUSION_SOURCE51||aType==PARTICLE_FUSION_SOURCE35||aType==PARTICLE_FUSION_SOURCE36)))))
+			  !(LawnFusion::IsNativeFusionBoard(this) && LawnFusion::NativeSourceEffectKind269(aType,aSourceEffect)))))
 		{
 			NetTrace("presentation effect rejected type=%u pos=(%.2f,%.2f) order=%d", aType, aX, aY, aRenderOrder);
 			break;
@@ -2661,6 +2736,11 @@ void Board::NetApplyEvent(NetBuffer& b)
 	}
 	case BOARDEV_ZOMBIE_ADDED:
 	{
+        // Native Fusion actor identity and controller state arrive together in
+        // the complete FNS snapshot. The legacy event is published inside the
+        // carrier factory, before that metadata exists; allocating here would
+        // expose an untyped provisional actor and bypass snapshot admission.
+        if(LawnFusion::IsNativeFusionBoard(this))break;
 		uint16_t anId = b.ReadU16Or();
 		uint8_t aType = b.ReadU8Or();
 		uint8_t aRow = b.ReadU8Or();
@@ -2968,8 +3048,19 @@ void Board::NetApplySnapshot(NetBuffer& b, bool* theApplied)
 		NetBuffer wire = b, nativeBody;
 		aFusionSelection = context->selection;
 		if (!LawnFusion::DecodeNativeSnapshot(wire, context->eligible, context->epoch, aFusionFrame, nativeBody) ||
+			aFusionFrame.adventure.enabled!=context->adventure.enabled ||
+			(aFusionFrame.adventure.enabled &&
+			 (aFusionFrame.adventure.run.level!=context->adventure.run.level ||
+			  aFusionFrame.adventure.run.cycle!=context->adventure.run.cycle ||
+			  aFusionFrame.adventure.sourceDifficulty!=context->adventure.sourceDifficulty ||
+			  aFusionFrame.adventure.wave<context->adventure.wave ||
+			  aFusionFrame.adventure.run.tutorial.stage<context->adventure.run.tutorial.stage ||
+			  (context->adventure.run.over&&!aFusionFrame.adventure.run.over) ||
+			  (context->adventure.run.rewardCollected&&!aFusionFrame.adventure.run.rewardCollected) ||
+			  (aFusionFrame.adventure.profile.completedLevels|context->adventure.profile.completedLevels)!=aFusionFrame.adventure.profile.completedLevels)) ||
 			!aFusionSelection.ApplySnapshot(aFusionFrame.selection) ||
-			!NetPreflightNativeFusionBody(nativeBody, aFusionFrame))
+			!NetPreflightNativeFusionBody(nativeBody, aFusionFrame) ||
+            !NetDay273CanAdoptWithoutAllocating(this,aFusionFrame))
 		{
 			NetTrace("native Fusion snapshot preflight rejected epoch=%u bytes=%zu", context->epoch, b.Remaining());
 			return;

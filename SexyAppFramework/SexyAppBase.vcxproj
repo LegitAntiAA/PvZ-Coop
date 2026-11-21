@@ -681,6 +681,17 @@ EXIT /B 0</Command>
     <ClCompile Include="..\Lawn\Fusion\NativeSpecialZombie269.cpp" />
     <ClCompile Include="..\Lawn\Fusion\FusionZombieBatch270Rules.cpp" />
     <ClCompile Include="..\Lawn\Fusion\FusionCampaign272Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionAdventureScheduler273.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionAdventureProgress273.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionAdventureSession273.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeAdventureScheduler273.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeAdventureProgress273.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeAdventure273.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionAdventureApp273.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionDayZombie273Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeDayZombie273.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeDayZombie273Bridge.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionAdventure273Smoke.cpp" />
     <ClCompile Include="..\Lawn\Fusion\FusionParticleCollision269Rules.cpp" />
     <ClCompile Include="..\Lawn\Fusion\FusionZombieMotion.cpp" />
     <ClCompile Include="..\Lawn\Fusion\FusionNativeZombies.cpp" />

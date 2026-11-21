@@ -20,7 +20,8 @@ void Check(bool condition,int line)
 }
 #define CHECK(condition) Check(!!(condition),__LINE__)
 constexpr uint32_t kEpoch = 19;
-constexpr size_t kHeaderBytes = 14, kSourceRecordBytes = 50, kEmptyEquipmentTailBytes = 48;
+constexpr size_t kHeaderBytes = 14, kSourceRecordBytes = 50, kEmptyEquipmentTailBytes = 50; // Includes the FNS26 empty Day family count.
+constexpr size_t kDisabledAdventureSessionBytes=1; // FNS26, between temporaryLightLevel and Garlic count.
 const std::vector<FusionBankEligibleCard> eligible = {{0,false,100,7.5f},{1,false,50,7.5f}};
 
 NativeSnapshotFrame Example()
@@ -187,14 +188,15 @@ FusionSourceZombieWireTestResult RunFusionSourceZombieWireTests()
     // All byte truncations, including the appended record's final target token.
     for (size_t length=0;length<wire.Size();++length)
     { auto truncated=wire; truncated.mData.resize(length); RejectWireAtomically(truncated); }
-    for (uint16_t version : {uint16_t(13),uint16_t(14),uint16_t(15),uint16_t(16),uint16_t(17),uint16_t(18),uint16_t(19),uint16_t(20),uint16_t(21),uint16_t(22),uint16_t(23),uint16_t(24),uint16_t(26)})
+    for (uint16_t version : {uint16_t(13),uint16_t(14),uint16_t(15),uint16_t(16),uint16_t(17),uint16_t(18),uint16_t(19),uint16_t(20),uint16_t(21),uint16_t(22),uint16_t(23),uint16_t(24),uint16_t(25),uint16_t(27)})
     { auto wrongVersion=wire; PutU16(wrongVersion,4,version); RejectWireAtomically(wrongVersion); }
     // FNS18 action record id2+mask1+scale4+Doom/JalaedBool2+poisonI32*3+waterGrapI32*2 precedes the unchanged
     // coin/glove/money/light/Garlic/source tail. Noncanonical Bool must reject
     // without exposing an otherwise valid sourceZombie/body update.
     constexpr size_t actionRecordBytes=29;
-    const size_t firstAction=sourceCount-2-2-4-(kFusionBankPlayers*6+4)-2-frame.zombieActions.size()*actionRecordBytes;
+    const size_t firstAction=sourceCount-2-kDisabledAdventureSessionBytes-2-4-(kFusionBankPlayers*6+4)-2-frame.zombieActions.size()*actionRecordBytes;
     const size_t secondAction=firstAction+actionRecordBytes;
+    CHECK(wire.mData[sourceCount-2-kDisabledAdventureSessionBytes]==0&&U16(wire,sourceCount-2)==0);
     CHECK(U16(wire,firstAction)==41 && wire.mData[firstAction+7]==1 && wire.mData[firstAction+8]==1 &&
         U16(wire,secondAction)==42 && wire.mData[secondAction+7]==0 && wire.mData[secondAction+8]==0);
     CHECK(wire.mData[firstAction+9]==6 && wire.mData[firstAction+10]==0 &&

@@ -54,6 +54,7 @@ constexpr size_t kMaximumBytes = LawnNet::NET_MAX_FRAME - 8;
 struct Writer
 {
     LawnNet::NetBuffer& b;
+    bool valid = true;
     void U8(uint8_t& v) { b.WriteU8(v); }
     void U16(uint16_t& v) { b.WriteU16(v); }
     void U32(uint32_t& v) { b.WriteU32(v); }
@@ -72,6 +73,22 @@ struct Reader
     void F32(float& v) { if (valid) valid = b.ReadF32(&v); }
     void Bool(bool& v) { uint8_t n = 0; U8(n); if (n > 1) valid = false; if (valid) v = n != 0; }
 };
+
+template <typename IO> void DayFields273(IO& io,NativeDayZombie273State& state)
+{
+    io.F32(state.shootCountdown);io.U8(state.status);io.U8(state.armorStage);
+    io.U8(state.shootEvent);io.Bool(state.shadowEnabled);
+}
+void Fields(Writer& io,NativeDayZombie273State& state)
+{
+    DayFields273(io,state);
+    if(!LawnNet::NetEncodeZombieAnimState(state.head,io.b))io.valid=false;
+}
+void Fields(Reader& io,NativeDayZombie273State& state)
+{
+    DayFields273(io,state);
+    if(io.valid)io.valid=LawnNet::NetDecodeZombieAnimState(io.b,state.head);
+}
 template <typename IO> void Fields(IO& io, FusionBankState& v)
 {
     io.U32(v.epoch); io.U32(v.revision);
@@ -394,7 +411,22 @@ bool ValidateNativeSnapshotFrame(const NativeSnapshotFrame& frame, const std::ve
         !UniqueIds(frame.worldPlants269,1024)||!UniqueIds(frame.worldBeams269,1024)||!UniqueIds(frame.droppedCards269,128)||
         !UniqueIds(frame.rollingPlants269,1024)||!UniqueIds(frame.fertilizeCoins269,1024)||
         !UniqueIds(frame.worldRemainder269Aux,1024)||!UniqueIds(frame.worldRemainder269Shots,1024)||!UniqueIds(frame.wheatPlants269,1024)||
-        !NativeWorldRemainder269BoardStateValid(frame.worldRemainder269Board)||frame.money < 0 || frame.money > 99999) return false;
+        !UniqueIds(frame.dayZombies273,1024)||!NativeWorldRemainder269BoardStateValid(frame.worldRemainder269Board)||
+        !FusionAdventureSessionValid273(frame.adventure)||frame.money < 0 || frame.money > 99999) return false;
+    if(frame.adventure.enabled)
+    {
+        const int sourceBackground=(frame.adventure.run.level-1)/9;
+        if(frame.background!=sourceBackground)return false;
+    }
+    for(const auto& record:frame.dayZombies273)
+    {
+        const auto source=std::find_if(frame.sourceZombies.begin(),frame.sourceZombies.end(),
+            [&](const auto& value){return value.id==record.id;});
+        if(source==frame.sourceZombies.end()||!NativeDayZombie273StateValid(source->data.kind,record.data))return false;
+    }
+    for(const auto& source:frame.sourceZombies)
+        if(FindFusionDayZombie273Profile(source.data.kind)&&std::none_of(frame.dayZombies273.begin(),frame.dayZombies273.end(),
+            [&](const auto& value){return value.id==source.id;}))return false;
     const bool committedPhase = frame.selection.phase == FusionBankPhase::Intro || frame.selection.phase == FusionBankPhase::Playing;
     if (frame.selectionCommitted != committedPhase) return false;
     // Source duck variants require the actual Pool/Fog background.
@@ -807,6 +839,7 @@ bool EncodeNativeSnapshot(const NativeSnapshotFrame& frame, const std::vector<Fu
     GloveFields(writer, copy);
     writer.I32(copy.money);
     writer.U16(copy.temporaryLightLevel);
+    if(!EncodeFusionAdventureSession273(copy.adventure,metadata))return false;
     Vector(writer, copy.garlicZombies);
     Vector(writer, copy.sourceZombies);
     Vector(writer, copy.equipmentCoins);Vector(writer, copy.equipmentPlants);Vector(writer,copy.zombieIdentities);
@@ -818,6 +851,8 @@ bool EncodeNativeSnapshot(const NativeSnapshotFrame& frame, const std::vector<Fu
     Fields(writer,copy.worldRemainder269Board);writer.Bool(copy.goldHypnoSummoned);
     Vector(writer,copy.worldRemainder269Aux);Vector(writer,copy.worldRemainder269Shots);
     Vector(writer,copy.wheatPlants269);
+    Vector(writer,copy.dayZombies273);
+    if(!writer.valid)return false;
     constexpr size_t headerBytes = 14;
     if (metadata.Size() > 65535 || headerBytes + metadata.Size() > kMaximumBytes - nativeBody.Size()) return false;
     LawnNet::NetBuffer encoded;
@@ -846,6 +881,7 @@ bool DecodeNativeSnapshot(LawnNet::NetBuffer& wire, const std::vector<FusionBank
     GloveFields(reader, decoded);
     reader.I32(decoded.money);
     reader.U16(decoded.temporaryLightLevel);
+    if(reader.valid)reader.valid=DecodeFusionAdventureSession273(metadata,decoded.adventure);
     Vector(reader, decoded.garlicZombies, 1024);
     Vector(reader, decoded.sourceZombies, 1024);
     Vector(reader, decoded.equipmentCoins,1024);Vector(reader, decoded.equipmentPlants,1024);Vector(reader,decoded.zombieIdentities,1024);
@@ -857,6 +893,7 @@ bool DecodeNativeSnapshot(LawnNet::NetBuffer& wire, const std::vector<FusionBank
     Fields(reader,decoded.worldRemainder269Board);reader.Bool(decoded.goldHypnoSummoned);
     Vector(reader,decoded.worldRemainder269Aux,1024);Vector(reader,decoded.worldRemainder269Shots,1024);
     Vector(reader,decoded.wheatPlants269,1024);
+    Vector(reader,decoded.dayZombies273,1024);
     if (!reader.valid || metadata.Remaining() || decoded.epoch != expectedEpoch || !ValidateNativeSnapshotFrame(decoded, eligible)) return false;
     LawnNet::NetBuffer body;
     body.mData.resize(bodyBytes);

@@ -1,5 +1,7 @@
 #include "FusionNativeZombies.h"
 #include "FusionNative.h"
+#include "FusionNativeAdventure273.h"
+#include "FusionNativeDayZombie273Bridge.h"
 #include "FusionNativeZombieVisual.h"
 #include "FusionZombieMotion.h"
 #include "FusionGarlicRules.h"
@@ -73,9 +75,9 @@ bool SpeedFactor(Zombie* zombie,const NativeSourceZombieData& data,float& factor
 bool WalkCurve2(const NativeSourceZombieData& data)
 {return data.kind==111||(data.kind!=109&&data.originSpeed>kFusionZombieWalk2Threshold);}
 float WalkDuration(uint16_t kind){return kind==109?2.f:kFusionZombieWalkClipSeconds;}
-float AttackDuration(uint16_t kind){return kind==109?2.9166667f:kFusionZombieAttackClipSeconds;}
+float AttackDuration(uint16_t kind){return kind==3?2.25f:kind==109?2.9166667f:kFusionZombieAttackClipSeconds;}
 uint16_t MotionKind(const NativeSourceZombieData& data)
-{return data.kind==4||data.kind==111?0:data.kind;}
+{return data.kind==4||data.kind==111?0:FusionDayZombie273Doll(data.kind)?2:data.kind;}
 bool EatingBlocked(Zombie* zombie)
 {
     const auto* garlic=GetNativeZombieGarlicData(zombie);
@@ -147,7 +149,9 @@ int GetNativeSourceZombieCarrier(uint16_t kind)
 {
     switch(kind){case 0:case 11:case 41:case 42:return ZOMBIE_NORMAL;case 2:case 12:return ZOMBIE_TRAFFIC_CONE;
     case 4:case 13:case 111:return ZOMBIE_PAIL;case 109:return ZOMBIE_FOOTBALL;case 8:return ZOMBIE_DOOR;
-    case 15:case 104:return ZOMBIE_NEWSPAPER;case 14:case 18:return ZOMBIE_ZAMBONI;default:return -1;}
+    case 15:case 104:return ZOMBIE_NEWSPAPER;case 14:case 18:return ZOMBIE_ZAMBONI;
+    case 3:return ZOMBIE_POLEVAULTER;case 21:case 22:case 23:return ZOMBIE_TRAFFIC_CONE;
+    case 100:case 106:case 107:case 108:return ZOMBIE_NORMAL;default:return -1;}
 }
 bool ApplyNativeSourceZombie111Armor(Zombie* zombie,int damage,int& overkill)
 {
@@ -241,6 +245,14 @@ Zombie* SpawnNativeSourceZombie(Board* board,const NativeSourceZombieSpawnReques
         return nullptr;
     }
     if((kind==109||kind==18)&&board->mPlantRow[row]==PLANTROW_POOL)return nullptr;
+    if(FindFusionDayZombie273Profile(kind))
+    {
+        // These are the bounded ground families. A copied profile does not
+        // authorize a spawn, a new terrain or an incomplete transitive child.
+        std::string error;
+        if(board->mPlantRow[row]==PLANTROW_POOL||!CanSpawnNativeDayZombie273(board,kind,&error))
+        {LawnNet::NetTrace("Fusion Day273 spawn gated kind=%u row=%d reason=%s",kind,row,error.c_str());return nullptr;}
+    }
     if((kind==14||kind==18)&&!EnsureNativeSourceEffect269(board,kind==14?35:36))return nullptr;
     std::string resourceError;
     if (!EnsureNativeSourceZombieVisuals(board,kind,&resourceError))
@@ -258,12 +270,19 @@ Zombie* SpawnNativeSourceZombie(Board* board,const NativeSourceZombieSpawnReques
         // Allocation already applied native co-op/endless health scaling.
         // Zamboni's base body is1350; dividing every carrier by270 would
         // multiply both source vehicles byfive before their first Update.
-        const float carrierHealth=zombie->mZombieType==ZOMBIE_ZAMBONI?1350.f:270.f;
+        // The real Pole carrier initializes at500; only Normal/Cone/other
+        // admitted body aliases initialize at270. Never scale its720 by500/270.
+        const float carrierHealth=zombie->mZombieType==ZOMBIE_ZAMBONI?1350.f:
+            zombie->mZombieType==ZOMBIE_POLEVAULTER?500.f:270.f;
         const float scale=float(zombie->mBodyMaxHealth)/carrierHealth;
         zombie->mBodyHealth=zombie->mBodyMaxHealth=int(profile->maxHealth*scale);
         zombie->mHelmHealth=zombie->mHelmMaxHealth=int(profile->firstArmor*scale);
         zombie->mShieldHealth=zombie->mShieldMaxHealth=int(profile->secondArmor*scale);
     }
+    // Normal carriers have no native helmet by default; source armor still
+    // needs the existing TakeHelmDamage path before body subtraction.
+    if(kind==106)zombie->mHelmType=HELMTYPE_BUCKET;
+    if(kind==107)zombie->mHelmType=HELMTYPE_WALLNUT;
     NativeSourceZombieData data;
     data.kind=kind; data.instanceToken=board->mZombies.DataArrayGetID(zombie);
     data.originSpeed=spawn.originSpeed;
@@ -279,6 +298,8 @@ Zombie* SpawnNativeSourceZombie(Board* board,const NativeSourceZombieSpawnReques
            (kind==104&&!InitializeNativeSpecialZombie269PaperAddon(zombie)))
         {zombie->DieNoLoot();return nullptr;}
     }
+    if(FindFusionDayZombie273Profile(kind)&&!InitializeNativeDayZombie273(zombie))
+    {zombie->DieNoLoot();return nullptr;}
     if(request.positioned)
     {
         float x=0,y=0;if(!zombie->GetShadowCenter(x,y)){zombie->DieNoLoot();return nullptr;}
@@ -289,6 +310,7 @@ Zombie* SpawnNativeSourceZombie(Board* board,const NativeSourceZombieSpawnReques
     }
     if(request.friendly){if(request.withEffect)zombie->StartMindControlled();else{zombie->mMindControlled=true;zombie->mLastPortalX=-1;}}
     if(profile->nativeLocomotion)zombie->StartWalkAnim(0);else StartNativeSourceZombieWalk(zombie,0);
+    RegisterNativeSourceAdventureEnemy273(zombie);
     LawnNet::NetTrace("Fusion source Zombie spawn id=%u token=%u kind=%u preset=%d speed=%.9g body=%d max=%d helm=%d walk2=%d tick=%d",
         zombie->mNetId,data.instanceToken,kind,preset,data.originSpeed,zombie->mBodyHealth,zombie->mBodyMaxHealth,
         zombie->mHelmHealth,spawn.walk2?1:0,board->mMainCounter);
@@ -299,6 +321,7 @@ Zombie* SpawnNativeSourceZombie(Board* board,const NativeSourceZombieSpawnReques
 bool UpdateNativeSourceZombieHealth(Zombie* zombie)
 {
     if (!IsNativeSourceZombie(zombie) || !HostPlaying(zombie) || zombie->IsDeadOrDying()) return false;
+    if(UpdateNativeDayZombie273PendingHeadLoss(zombie))return true;
     auto* data=GetNativeSourceZombieData(zombie);
     if (static_cast<int>(data->health)<1)
     {
@@ -369,6 +392,7 @@ bool TryShrinkNativeSourceZombie(Zombie* zombie)
 
 bool UpdateNativeSourceZombieAnimation(Zombie* zombie)
 {
+    if(UpdateNativeDayZombie273Animation(zombie))return true;
     if(UpdateNativeSpecialZombie269VehicleAnimation(zombie))return true;
     if(UpdateNativeSpecialZombie269Animation(zombie))return true;
     if (!IsNativeSourceZombie(zombie)) return false;
@@ -411,6 +435,7 @@ bool UpdateNativeSourceZombieAnimation(Zombie* zombie)
 
 bool StartNativeSourceZombieWalk(Zombie* zombie,int blendTime)
 {
+    if(StartNativeDayZombie273Walk(zombie,blendTime))return true;
     if(StartNativeSpecialZombie269Vehicle(zombie))return true;
     if(StartNativeSpecialZombie269Walk(zombie,blendTime))return true;
     if (!IsNativeSourceZombie(zombie) || zombie->IsDeadOrDying()) return false;
@@ -435,6 +460,7 @@ bool StartNativeSourceZombieWalk(Zombie* zombie,int blendTime)
 
 bool UpdateNativeSourceZombieWalking(Zombie* zombie)
 {
+    if(MoveNativeDayZombie273(zombie))return true;
     if(IsNativeSpecialZombie269Vehicle(zombie))return true; // Exact source position callback is outside the stock action gate.
     if(MoveNativeSpecialZombie269Paper(zombie))return true;
     if (!IsNativeSourceZombie(zombie)) return false;
@@ -479,6 +505,7 @@ bool UpdateNativeSourceZombieAttack(Zombie* zombie)
     if (!HostPlaying(zombie)) return true;
     auto* data=GetNativeSourceZombieData(zombie); auto* cursor=Cursor(zombie); auto* body=Body(zombie);
     if (!cursor || !body) return true;
+    if(!NativeDayZombie273CanUseSharedBite(zombie)){ClearTarget(zombie,*data);return true;}
     if(FindFusionZombieProfile(data->kind)->noAttack){ClearTarget(zombie,*data);return true;}
     if (!FlatLive(zombie) || !zombie->mHasHead)
     { ClearTarget(zombie,*data); return true; }
@@ -517,6 +544,7 @@ bool UpdateNativeSourceZombieAttack(Zombie* zombie)
 
 bool GetNativeSourceZombiePresentation(const Zombie* zombie,const char*& stateName,float& normalizedPhase)
 {
+    if(GetNativeDayZombie273Presentation(zombie,stateName,normalizedPhase))return true;
     if(GetNativeSpecialZombie269Presentation(zombie,stateName,normalizedPhase))return true;
     if (!IsNativeSourceZombie(zombie)) return false;
     const auto* data=GetNativeSourceZombieData(zombie); const auto* body=Body(zombie);

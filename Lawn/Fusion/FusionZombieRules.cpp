@@ -1,5 +1,6 @@
 #include "FusionZombieRules.h"
 #include "SpecialZombie269Rules.h"
+#include "FusionDayZombie273Rules.h"
 #include <cmath>
 #include <limits>
 
@@ -23,7 +24,11 @@ bool ClipPositionValid(FusionZombieClipPosition position,float duration)
 { return std::isfinite(position.seconds) && position.seconds>=0 && position.seconds<=duration; }
 }
 const FusionZombieProfile* FindFusionZombieProfile(uint16_t kind)
-{ for (const auto& profile:profiles) if (profile.kind==kind) return &profile; return FindSpecialZombie269Profile(kind); }
+{
+    for (const auto& profile:profiles) if (profile.kind==kind) return &profile;
+    if(const auto* profile=FindSpecialZombie269Profile(kind))return profile;
+    return FindFusionDayZombie273Profile(kind); // Source facts; live creation has a separate complete-family gate.
+}
 
 bool TryPrepareFusionZombieSpawn(uint16_t kind, int sourcePreset, float draw, FusionZombieSpawn& output)
 {
@@ -46,6 +51,7 @@ bool TryGetFusionZombieStatusSpeedFactor(uint16_t kind, bool chilled, bool froze
 bool TryCountFusionZombieAttackEvents(uint16_t kind, FusionZombieClipPosition previous,
     FusionZombieClipPosition current, uint32_t& output)
 {
+    if(kind==3)return TryCountFusionDayZombie273Bites(kind,previous,current,output);
     const auto* profile=FindFusionZombieProfile(kind);
     const float duration=kind==109?2.9166667f:kFusionZombieAttackClipSeconds;
     if (!profile || profile->noAttack || !ClipPositionValid(previous,duration) || !ClipPositionValid(current,duration) ||

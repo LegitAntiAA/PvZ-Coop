@@ -30,6 +30,10 @@ private:
 // Root owns NativeContext unique_ptr and mode/receiver admission. Both validated
 // host and reliable cosmetic receiver may create this resource cache.
 NativeSourceEffects269* GetNativeSourceEffects269(Board*,bool create=false);
+// Explicit reliable-event mapping; dynamic cache resource IDs never enter the
+// native stock array or the network presentation event.
+int NativeSourceEffectParticle269(uint16_t sourceKind);
+bool NativeSourceEffectKind269(int particleEffect,uint16_t& sourceKind);
 TodParticleSystem* SpawnNativeSourceEffect269(Board*,uint16_t sourceKind,float x,float y,int order,bool broadcast);
 bool EnsureNativeSourceEffect269(Board*,uint16_t sourceKind,std::string* error=nullptr);
 // Actual native system creation succeeds before any source birth points publish.

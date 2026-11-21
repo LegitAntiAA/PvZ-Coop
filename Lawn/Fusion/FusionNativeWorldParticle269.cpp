@@ -178,7 +178,9 @@ bool NativeWorldParticle269Definition::Load(LawnApp* app,uint16_t kind,const std
     try
     {
         if(mImpl)throw std::runtime_error("cannot replace a live native particle definition");
-        if(!app||!kind||!std::isfinite(px)||!std::isfinite(py)||px<=0||py<=0)throw std::runtime_error("invalid native particle projection");
+        // Source factory index0 is PeaSplat; package identity below validates
+        // it exactly like every other recovered source effect.
+        if(!app||!std::isfinite(px)||!std::isfinite(py)||px<=0||py<=0)throw std::runtime_error("invalid native particle projection");
         std::ifstream input(path);if(!input)throw std::runtime_error("missing world particle package");const Json data=Json::parse(input);
         if(data.at("schema")!=2||data.at("sourceKind")!=kind||!data.at("ignoredBindings").empty()||!data.at("deferredComponents").empty()||data.at("emitters").empty()||data.at("emitters").size()>64)
             throw std::runtime_error("unsupported world particle package");

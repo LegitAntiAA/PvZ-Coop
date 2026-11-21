@@ -118,7 +118,10 @@ bool TryGetFusionBucketReceiverEffect(uint16_t kind,int type,int hp,int maximum,
 {
     if(!FusionEquipmentTypeValid(type)||hp<=0||maximum<=0||hp>maximum)return false;
     FusionBucketReceiverEffect e;
-    if(kind==1027){if(type!=1)return false;e.replacementKind=1028;}
+    // Plant.UseItem46A080: a genuine Bucket replaces these base actors
+    // through source SetPlant(Default), without recipe ancestry or HP transfer.
+    if(kind==0||kind==3){if(type!=0)return false;e.replacementKind=kind==0?1020:1029;}
+    else if(kind==1027){if(type!=1)return false;e.replacementKind=1028;}
     else if(kind==1028||kind==1029||kind==1097||kind==1098||kind==1099||kind==935||kind==1169)e.recoverHealth=500;
     else if(kind==1092)
     {if(type==0)e.replacementKind=1097;else if(type==2)e.replacementKind=1098;else if(type==3)e.replacementKind=1099;else {if(hp==maximum)return false;e.recoverHealth=500;}}

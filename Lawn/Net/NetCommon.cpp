@@ -1,4 +1,6 @@
 #include "NetCommon.h"
+#include "../Fusion/FusionCampaign272Rules.h"
+#include "../../ConstEnums.h"
 
 #include <cmath>
 #include <cstdarg>
@@ -100,6 +102,17 @@ bool NetValidLobbyPlayer(const NetPlayerInfo& thePlayer, int theSlot)
 bool NetValidStartGame(const NetStartGameState& theState, int theGameModeCount,
 	int theTowerDefenseMode)
 {
+	if (!LawnFusion::FusionAdventureSessionValid273(theState.mSourceAdventure)) return false;
+	if (theState.mSourceAdventure.enabled)
+	{
+		const auto& source=theState.mSourceAdventure;
+		LawnFusion::FusionSourceNativeProjection272 projection;
+		if (theState.mContentMode!=LawnFusion::ContentMode::Fusion ||
+			theState.mGameMode!=uint8_t(GameMode::GAMEMODE_ADVENTURE) ||
+			!LawnFusion::TryProjectFusionSourceAdventure272(source.run.level,projection) ||
+			theState.mLevel!=projection.layoutLevel || source.run.over || source.wave ||
+			source.hugeWarning || source.schedulerFailed) return false;
+	}
 	if (!LawnFusion::IsValidContentMode(theState.mContentMode) ||
 		(theState.mContentMode == LawnFusion::ContentMode::Fusion ? !theState.mContentEpoch : theState.mContentEpoch != 0) ||
 		theGameModeCount <= 0 || theState.mGameMode >= theGameModeCount ||
@@ -203,7 +216,11 @@ bool NetEncodeStartGame(const NetStartGameState& theState, NetBuffer& theBuffer,
 	aCandidate.WriteU32(theState.mBoardSeed);
 	aCandidate.WriteU8(static_cast<uint8_t>(theState.mTDPath.size()));
 	for (uint8_t aCell : theState.mTDPath) aCandidate.WriteU8(aCell);
-	if (theState.mContentMode == LawnFusion::ContentMode::Fusion) aCandidate.WriteU32(theState.mContentEpoch);
+	if (theState.mContentMode == LawnFusion::ContentMode::Fusion)
+	{
+		aCandidate.WriteU32(theState.mContentEpoch);
+		if (!LawnFusion::EncodeFusionAdventureSession273(theState.mSourceAdventure,aCandidate)) return false;
+	}
 	theBuffer.WriteBytes(aCandidate.Data(), aCandidate.Size());
 	return true;
 }
@@ -217,13 +234,15 @@ bool NetDecodeStartGame(NetBuffer& theBuffer, NetStartGameState& theState,
 	if (!LawnFusion::DecodeContentMode(aCandidate, aState.mContentMode) ||
 		!aCandidate.ReadU8(&aState.mGameMode) || !aCandidate.ReadI32(&aState.mLevel) ||
 		!aCandidate.ReadU8(&aState.mPlayerCount) || !aCandidate.ReadU32(&aState.mBoardSeed) ||
-		!aCandidate.ReadU8(&aPathLength) || aCandidate.Remaining() != aPathLength +
-			(aState.mContentMode == LawnFusion::ContentMode::Fusion ? 4U : 0U))
+		!aCandidate.ReadU8(&aPathLength) || aCandidate.Remaining() < aPathLength +
+			(aState.mContentMode == LawnFusion::ContentMode::Fusion ? 5U : 0U))
 		return false;
 	aState.mTDPath.resize(aPathLength);
 	if (aPathLength && !aCandidate.ReadBytes(aState.mTDPath.data(), aPathLength)) return false;
 	if (aState.mContentMode == LawnFusion::ContentMode::Fusion &&
-		(!aCandidate.ReadU32(&aState.mContentEpoch) || !aState.mContentEpoch)) return false;
+		(!aCandidate.ReadU32(&aState.mContentEpoch) || !aState.mContentEpoch ||
+		 !LawnFusion::DecodeFusionAdventureSession273(aCandidate,aState.mSourceAdventure))) return false;
+	if (aCandidate.Remaining()) return false;
 	if (!NetValidStartGame(aState, theGameModeCount, theTowerDefenseMode)) return false;
 	theState = aState;
 	theBuffer.mReadPos = aCandidate.mReadPos;
@@ -1224,6 +1243,14 @@ bool NetLoadConfig(NetConfig& theConfig)
 			const long aLevel = strtol(aValue.c_str(), nullptr, 10);
 			theConfig.mFusionAdventureLevel = aLevel < 1 ? 1 : aLevel > 50 ? 50 : static_cast<int>(aLevel);
 		}
+		else if(aKey=="fusion_source_completed"||aKey=="fusion_source_cycle"||aKey=="fusion_source_frontier")
+		{
+			char* end=nullptr;const auto number=strtoull(aValue.c_str(),&end,10);
+			const bool valid=!aValue.empty()&&end&&!*end;
+			if(aKey=="fusion_source_completed")theConfig.mFusionSourceProfile.completedLevels=valid?number:UINT64_MAX;
+			else if(aKey=="fusion_source_cycle")theConfig.mFusionSourceProfile.cycle=valid&&number<=INT32_MAX?uint32_t(number):0;
+			else theConfig.mFusionSourceProfile.frontierLevel=valid&&number<=UINT16_MAX?uint16_t(number):0;
+		}
 		else if (aKey == "base_snapshot_rate")
 			theConfig.mBaseSnapshotHz = atoi(aValue.c_str());
 		else if (aKey == "window_width")
@@ -1246,6 +1273,7 @@ bool NetLoadConfig(NetConfig& theConfig)
 	if (theConfig.mBaseSnapshotHz < NET_SNAPSHOT_HZ_MIN) theConfig.mBaseSnapshotHz = NET_SNAPSHOT_HZ_MIN;
 	if (theConfig.mBaseSnapshotHz > NET_SNAPSHOT_HZ_MAX) theConfig.mBaseSnapshotHz = NET_SNAPSHOT_HZ_MAX;
 	theConfig.mFusionAdventureLevel = max(1, min(50, theConfig.mFusionAdventureLevel));
+	if(!LawnFusion::FusionAdventureProfileValid273(theConfig.mFusionSourceProfile))theConfig.mFusionSourceProfile={};
 	theConfig.mHeldPlantTintAlpha = max(0, min(255, theConfig.mHeldPlantTintAlpha));
 	theConfig.mHotbarTintAlpha = max(0, min(255, theConfig.mHotbarTintAlpha));
 	theConfig.mHeldPlantOutlineAlpha = max(0, min(255, theConfig.mHeldPlantOutlineAlpha));
@@ -1268,6 +1296,11 @@ bool NetSaveConfig(const NetConfig& theConfig)
 	fprintf(aFile, "skipIntro=%d\n", theConfig.mSkipIntro ? 1 : 0);
 	fprintf(aFile, "fusion_classic_field=%d\n", theConfig.mFusionClassicField ? 1 : 0);
 	fprintf(aFile, "fusion_adventure_level=%d\n", max(1, min(50, theConfig.mFusionAdventureLevel)));
+	const auto sourceProfile=LawnFusion::FusionAdventureProfileValid273(theConfig.mFusionSourceProfile)?
+		theConfig.mFusionSourceProfile:LawnFusion::FusionAdventureProfile273{};
+	fprintf(aFile,"fusion_source_completed=%llu\n",static_cast<unsigned long long>(sourceProfile.completedLevels));
+	fprintf(aFile,"fusion_source_cycle=%u\n",sourceProfile.cycle);
+	fprintf(aFile,"fusion_source_frontier=%u\n",unsigned(sourceProfile.frontierLevel));
 	fprintf(aFile, "base_snapshot_rate=%d\n", theConfig.mBaseSnapshotHz);
 	fprintf(aFile, "window_width=%d\n", theConfig.mWindowWidth);
 	fprintf(aFile, "window_height=%d\n", theConfig.mWindowHeight);

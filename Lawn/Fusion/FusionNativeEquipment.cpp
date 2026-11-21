@@ -250,7 +250,7 @@ Plant* TryReplaceNativeEquipmentReceiver(Plant* old,uint16_t kind)
     if(!old||!Host(old->mBoard)||old->mNetGhost||old->mDead||!old->mIsOnBoard||old->mPlantHealth<=0||
         !CanApplyNativeFusionGameplay(old->mBoard))return nullptr;
     auto* b=old->mBoard;const auto* prior=GetNativePlantData(old);
-    const bool allowed=prior&&((prior->kind==3&&kind==1129)||(prior->kind==1027&&kind==1028)||
+    const bool allowed=prior&&((prior->kind==0&&kind==1020)||(prior->kind==3&&(kind==1029||kind==1129))||(prior->kind==1027&&kind==1028)||
         (prior->kind==1092&&(kind==1097||kind==1098||kind==1099)));
     if(!allowed||b->mPlants.DataArrayTryToGet(prior->instanceToken)!=old||
         b->mPlants.mSize>=b->mPlants.mMaxSize||!EnsureNativePlantVisuals(b,kind))return nullptr;

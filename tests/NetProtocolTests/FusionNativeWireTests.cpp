@@ -11,6 +11,7 @@
 #include "../../Lawn/Fusion/FusionPoisonRules.h"
 #include "../../Lawn/Fusion/FusionEconomyRules.h"
 #include "../../Lawn/Fusion/FusionNativeProjectileMetadata.h"
+#include "../../Lawn/Fusion/FusionNativeDayZombie273.h"
 #include "../../Lawn/Fusion/FusionNativeEquipment268.h"
 #include "../../Lawn/Fusion/FusionChomper268Rules.h"
 #include "../../Lawn/Fusion/FusionShulk268Rules.h"
@@ -28,7 +29,8 @@ namespace
 FusionNativeWireTestResult result;
 // These offset fixtures have empty Star/Doom/Companion/World/Card/Rolling/Fert
 // vectors. FNS23 adds a16-byte Board singleton and two U16 counts to FNS22.
-constexpr size_t empty269FamilyCountBytes=10*2+20+2; // FNS24 empty Wheat count.
+constexpr size_t empty269FamilyCountBytes=10*2+20+2+2; // FNS24 Wheat and FNS26 Day counts.
+constexpr size_t disabledAdventureSessionBytes=1; // FNS26, after temporaryLightLevel and before Garlic.
 void Check(bool condition, int line)
 {
     ++result.mChecks;
@@ -84,6 +86,8 @@ void RejectAtomically(LawnNet::NetBuffer forged,std::source_location caller=std:
     previous.zombieIdentities={{701,0xdeadbeef}};previous.plants[0].data.waterTargetId=702;previous.plants[0].data.waterTargetToken=0xcafebabe;
     LawnFusion::NativeEquipmentData equipment;equipment.instanceToken=33;previous.equipmentCoins={{703,equipment}};
     previous.wheatPlants269={{704,{true,31.5f}}};
+    LawnFusion::NativeDayZombie273State day;day.status=3;day.shadowEnabled=false;
+    previous.dayZombies273={{705,day}};
     previous.zombieActions.push_back({700,{42,2.0f,true,true,6,1234,37}});
     previous.garlicZombies.push_back({701,{LawnFusion::GarlicActionPhase::Waiting,true,44,0,32,-1,-1,0,0}});
     LawnNet::NetBuffer native; native.WriteU8(0x99);
@@ -105,6 +109,8 @@ void RejectAtomically(LawnNet::NetBuffer forged,std::source_location caller=std:
         previous.garlicZombies[0].data.faceTicks==32 && previous.zombieIdentities.size()==1&&previous.zombieIdentities[0].data==0xdeadbeef&&
         previous.plants[0].data.waterTargetId==702&&previous.plants[0].data.waterTargetToken==0xcafebabe&&
         previous.wheatPlants269.size()==1&&previous.wheatPlants269[0].id==704&&previous.wheatPlants269[0].data.isFromWheat&&previous.wheatPlants269[0].data.wheatTime==31.5f&&
+        previous.dayZombies273.size()==1&&previous.dayZombies273[0].id==705&&previous.dayZombies273[0].data.status==3&&
+        !previous.dayZombies273[0].data.shadowEnabled&&previous.dayZombies273[0].data.shootCountdown==1.5f&&
         previous.equipmentCoins.size()==1&&previous.equipmentCoins[0].id==703&&previous.equipmentCoins[0].data.instanceToken==33&&native.Size()==1 && native.mData[0]==0x99);
 }
 }
@@ -208,7 +214,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
     CHECK(wire.Remaining() == 0 && native.mData == original);
     CHECK(decoded.plants.size() == 1 && decoded.plants[0].data.kind == 1000);
     CHECK(decoded.plants[0].data.producerRewardFlags == 0 && decoded.plants[0].data.deathEventFlags == 0 &&
-        body.mData[4] == 25 && body.mData[5] == 0 && body.mData[18]==BACKGROUND_1_DAY && body.mData[19]==1);
+        body.mData[4] == 26 && body.mData[5] == 0 && body.mData[18]==BACKGROUND_1_DAY && body.mData[19]==1);
     CHECK(decoded.packets[0].id != decoded.packets[0].data.selectionId);
     CHECK(decoded.plants[0].data.firstParent == 0 && decoded.plants[0].data.secondParent == 1);
     CHECK(decoded.coins.size() == 1 && decoded.coins[0].data.value == 5 && !decoded.coins[0].data.money);
@@ -813,7 +819,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
         CHECK(!DecodeNativeSnapshot(forgedProducer, eligible, 19, preservedFrame, preservedBody));
         CHECK(forgedProducer.mReadPos == 0 && preservedFrame.epoch == 777 && preservedBody.Size() == 1 && preservedBody.mData[0] == 0x99);
     }
-    for (uint16_t version : {uint16_t(2), uint16_t(3), uint16_t(4), uint16_t(5), uint16_t(6), uint16_t(7), uint16_t(8), uint16_t(9), uint16_t(10), uint16_t(11), uint16_t(12), uint16_t(13), uint16_t(14), uint16_t(15), uint16_t(16), uint16_t(17), uint16_t(18), uint16_t(19), uint16_t(20), uint16_t(21), uint16_t(22),uint16_t(23),uint16_t(24),uint16_t(26)})
+    for (uint16_t version : {uint16_t(2), uint16_t(3), uint16_t(4), uint16_t(5), uint16_t(6), uint16_t(7), uint16_t(8), uint16_t(9), uint16_t(10), uint16_t(11), uint16_t(12), uint16_t(13), uint16_t(14), uint16_t(15), uint16_t(16), uint16_t(17), uint16_t(18), uint16_t(19), uint16_t(20), uint16_t(21), uint16_t(22),uint16_t(23),uint16_t(24),uint16_t(25),uint16_t(27)})
     {
         NetBuffer wrongVersion = producerWire; wrongVersion.mReadPos = 0;
         wrongVersion.mData[4] = static_cast<uint8_t>(version); wrongVersion.mData[5] = 0;
@@ -1014,7 +1020,8 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
     const size_t firstCoin=coinCount+2;
     const size_t moneyOffset=firstCoin+moneyFrame.coins.size()*7+moneyFrame.gloveHolds.size()*6+4;
     const size_t moneyMetadata=moneyWire.mData[6] | (static_cast<size_t>(moneyWire.mData[7])<<8);
-    CHECK(moneyOffset+16+empty269FamilyCountBytes==headerBytes+moneyMetadata && moneyWire.mData[actionCount]==2 && moneyWire.mData[coinCount]==6);
+    CHECK(moneyOffset+16+disabledAdventureSessionBytes+empty269FamilyCountBytes==headerBytes+moneyMetadata && moneyWire.mData[actionCount]==2 && moneyWire.mData[coinCount]==6);
+    CHECK(moneyWire.mData[moneyOffset+6]==0); // Canonical disabled source Adventure Session marker.
     CHECK(moneyWire.mData[firstAction+7]==1 && moneyWire.mData[firstAction+actionRecordBytes+7]==0 &&
         moneyWire.mData[moneyOffset+4]==255 && moneyWire.mData[moneyOffset+5]==255);
     CHECK(moneyWire.mData[firstAction+8]==1 && moneyWire.mData[firstAction+actionRecordBytes+8]==0 &&
@@ -2088,7 +2095,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
         {
             NativeSnapshotFrame decoded;NetBuffer opaque;CHECK(DecodeNativeSnapshot(encoded,eligible,19,decoded,opaque));
             CHECK(decoded.droppedCards269.size()==1&&decoded.droppedCards269[0].id==501&&decoded.droppedCards269[0].data.instanceToken==card.instanceToken&&decoded.droppedCards269[0].data.heldSlot==1&&decoded.droppedCards269[0].data.landed&&!decoded.droppedCards269[0].data.flashing&&opaque.mData==original);
-            const size_t end=14+(encoded.mData[6]|(size_t(encoded.mData[7])<<8)),firstCard=end-22-4-15;
+            const size_t end=14+(encoded.mData[6]|(size_t(encoded.mData[7])<<8)),firstCard=end-24-4-15;
             CHECK(encoded.mData[firstCard]==(501&255)&&encoded.mData[firstCard+12]==1&&encoded.mData[firstCard+13]==1&&encoded.mData[firstCard+14]==0);
             for(size_t flag:{firstCard+13,firstCard+14})for(uint8_t invalid:{uint8_t(2),uint8_t(255)})
             {auto forged=encoded;forged.mData[flag]=invalid;RejectAtomically(forged);}
@@ -2139,7 +2146,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
             if(invalid==4)bad.plants.clear();
             CHECK(!ValidateNativeSnapshotFrame(bad,eligible));
         }
-        const size_t end=14+(encoded.mData[6]|(size_t(encoded.mData[7])<<8)),firstRolling=end-22-2-34;
+        const size_t end=14+(encoded.mData[6]|(size_t(encoded.mData[7])<<8)),firstRolling=end-24-2-34;
         auto forged=encoded;forged.mData[firstRolling+6]^=1;RejectAtomically(forged); // Mismatched opaque actor token.
     }
     // FNS22 Fert extends a real Coin. Its nullable target is an opaque current
@@ -2154,7 +2161,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
         {
             NativeSnapshotFrame copy;NetBuffer opaque;CHECK(DecodeNativeSnapshot(encoded,eligible,19,copy,opaque));
             CHECK(copy.fertilizeCoins269.size()==1&&copy.fertilizeCoins269[0].id==541&&copy.fertilizeCoins269[0].data.instanceToken==item.instanceToken&&copy.fertilizeCoins269[0].data.targetId==item.targetId&&copy.fertilizeCoins269[0].data.targetToken==item.targetToken&&copy.fertilizeCoins269[0].data.phase==NativeFertilize269Phase::Using&&copy.fertilizeCoins269[0].data.phaseStartAge==10&&copy.fertilizeCoins269[0].data.anchorX==125&&opaque.mData==original);
-            const size_t end=14+(encoded.mData[6]|(size_t(encoded.mData[7])<<8)),firstFert=end-22-26;
+            const size_t end=14+(encoded.mData[6]|(size_t(encoded.mData[7])<<8)),firstFert=end-24-26;
             CHECK(encoded.mData[firstFert]==(541&255)&&encoded.mData[firstFert+12]==3&&encoded.mData[firstFert+13]==255);
             auto bad=encoded;bad.mData[firstFert+12]=4;RejectAtomically(bad); // Unknown phase cannot masquerade as a Bool.
         }
@@ -2190,7 +2197,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
         CHECK(DecodeNativeSnapshot(encoded,eligible,19,restored,opaque));
         CHECK(restored.wheatPlants269.size()==1&&restored.wheatPlants269[0].id==frame.plants[0].id&&
             restored.wheatPlants269[0].data.isFromWheat&&restored.wheatPlants269[0].data.wheatTime==time&&opaque.mData==original);
-        const size_t end=14+(encoded.mData[6]|(size_t(encoded.mData[7])<<8)),count=end-9,record=end-7;
+        const size_t end=14+(encoded.mData[6]|(size_t(encoded.mData[7])<<8)),count=end-11,record=end-9;
         CHECK(encoded.mData[count]==1&&encoded.mData[count+1]==0&&encoded.mData[record+2]==1);
         for(uint8_t badBool:{uint8_t(0),uint8_t(2),uint8_t(255)})
         {auto bad=encoded;bad.mData[record+2]=badBool;RejectAtomically(bad);}
@@ -2214,13 +2221,208 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
             CHECK(!ValidateNativeSnapshotFrame(invalid,eligible)&&!EncodeNativeSnapshot(invalid,eligible,preserved)&&preserved.mData==bytes);
         }
         // A duplicate wire entry still has a valid framing/body checksum.
-        auto duplicate=encoded;duplicate.mData.insert(duplicate.mData.begin()+end,encoded.mData.begin()+record,encoded.mData.begin()+end);
+        auto duplicate=encoded;duplicate.mData.insert(duplicate.mData.begin()+end-2,encoded.mData.begin()+record,encoded.mData.begin()+record+7);
         duplicate.mData[count]=2;const size_t metadata=end-14+7;duplicate.mData[6]=uint8_t(metadata);duplicate.mData[7]=uint8_t(metadata>>8);RejectAtomically(duplicate);
-        for(uint16_t badVersion:{uint16_t(23),uint16_t(24),uint16_t(26)})
+        for(uint16_t badVersion:{uint16_t(23),uint16_t(24),uint16_t(25),uint16_t(27)})
         {auto bad=encoded;bad.mData[4]=uint8_t(badVersion);bad.mData[5]=0;RejectAtomically(bad);}
         auto cleared=source;NetBuffer clearWire;clearWire.mData=original;
         CHECK(EncodeNativeSnapshot(cleared,eligible,clearWire)&&DecodeNativeSnapshot(clearWire,eligible,19,restored,opaque)&&restored.wheatPlants269.empty());
     }
+    // FNS26 Day state extends the SAME source/native Zombie identity. Profiles
+    // being understood by the codec does not admit their runtime factories.
+    const auto dayFrame=[&](uint16_t kind,unsigned variant)
+    {
+        auto frame=source;NativeSourceZombieData zombie;zombie.kind=kind;
+        zombie.instanceToken=0x27301;zombie.health=270;
+        frame.sourceZombies={{601,zombie}};frame.zombieIdentities={{601,zombie.instanceToken}};
+        NativeDayZombie273State state;
+        if(kind==3){state.status=variant==0?0:variant==1?2:3;state.shadowEnabled=state.status!=3;}
+        if(FusionDayZombie273Doll(kind)||kind==106||kind==107)state.armorStage=uint8_t(variant);
+        if(FusionDayZombie273Shooter(kind))
+        {state.shootCountdown=.625f+variant*.125f;state.shootEvent=uint8_t(variant);}
+        if(variant&&(FusionDayZombie273Shooter(kind)||FusionDayZombie273Doll(kind)))
+        {
+            auto& head=state.head;head.mPresent=true;head.mDead=variant==2;
+            head.mFrameStart=123;head.mFrameCount=20;head.mAnimTime=21845.f/65535.f;
+            head.mAnimRate=variant==1?1.25f:-1.25f;head.mLoopType=2;head.mLoopCount=7;
+        }
+        frame.dayZombies273={{601,state}};return frame;
+    };
+    const auto rejectDayFrame=[&](const NativeSnapshotFrame& frame)
+    {
+        NetBuffer preserved;preserved.mData=original;const auto before=preserved.mData;
+        CHECK(!ValidateNativeSnapshotFrame(frame,eligible));
+        CHECK(!EncodeNativeSnapshot(frame,eligible,preserved)&&preserved.mData==before);
+    };
+    for(uint16_t kind:{uint16_t(3),uint16_t(21),uint16_t(22),uint16_t(23),uint16_t(100),uint16_t(106),uint16_t(107),uint16_t(108)})
+        for(unsigned variant=0;variant<3;++variant)
+        {
+            auto frame=dayFrame(kind,variant);const auto& expected=frame.dayZombies273[0].data;
+            CHECK(ValidateNativeSnapshotFrame(frame,eligible));
+            NetBuffer encoded;encoded.mData=original;
+            const bool ok=EncodeNativeSnapshot(frame,eligible,encoded);CHECK(ok);if(!ok)continue;
+            const size_t end=14+(encoded.mData[6]|(size_t(encoded.mData[7])<<8));
+            constexpr size_t dayRecordBytes=2+8+LawnNet::NET_ZOMBIE_ANIM_WIRE_BYTES;
+            const size_t record=end-dayRecordBytes,count=record-2;
+            CHECK(dayRecordBytes==21&&encoded.mData[count]==1&&encoded.mData[count+1]==0&&
+                encoded.mData[record]==(601&255)&&encoded.mData[record+1]==(601>>8)&&
+                encoded.mData[record+6]==expected.status&&encoded.mData[record+7]==expected.armorStage&&
+                encoded.mData[record+8]==expected.shootEvent&&encoded.mData[record+9]==expected.shadowEnabled);
+            NetBuffer headWire;CHECK(LawnNet::NetEncodeZombieAnimState(expected.head,headWire));
+            CHECK(headWire.Size()==11&&std::equal(headWire.mData.begin(),headWire.mData.end(),encoded.mData.begin()+record+10));
+            NativeSnapshotFrame restored;NetBuffer opaque;
+            const bool read=DecodeNativeSnapshot(encoded,eligible,19,restored,opaque);CHECK(read);
+            CHECK(read&&restored.dayZombies273.size()==1&&restored.sourceZombies.size()==1&&opaque.mData==original);
+            if(read&&restored.dayZombies273.size()==1&&restored.sourceZombies.size()==1)
+            {
+                const auto& actual=restored.dayZombies273[0].data;const auto& a=actual.head;const auto& e=expected.head;
+                CHECK(restored.dayZombies273[0].id==601&&restored.sourceZombies[0].id==601&&
+                    restored.sourceZombies[0].data.kind==kind&&restored.sourceZombies[0].data.instanceToken==0x27301&&
+                    actual.shootCountdown==expected.shootCountdown&&actual.status==expected.status&&
+                    actual.armorStage==expected.armorStage&&actual.shootEvent==expected.shootEvent&&actual.shadowEnabled==expected.shadowEnabled);
+                CHECK(a.mPresent==e.mPresent&&a.mDead==e.mDead&&a.mFrameStart==e.mFrameStart&&a.mFrameCount==e.mFrameCount&&
+                    a.mAnimTime==e.mAnimTime&&a.mAnimRate==e.mAnimRate&&a.mLoopType==e.mLoopType&&a.mLoopCount==e.mLoopCount);
+                CHECK(!actual.dollFalling&&actual.poleEventFrame==-1&&!actual.poleEventValid&&
+                    actual.poleEvent.loop==0&&actual.poleEvent.seconds==0&&!actual.headDropPending&&!actual.headDropDamageFlags);
+                CHECK(EncodeNativeSnapshot(restored,eligible,opaque)&&opaque.mData==encoded.mData);
+            }
+            // These are host event-consumption/allocation guards, never peer clocks.
+            auto hostOnly=frame;auto& privateState=hostOnly.dayZombies273[0].data;
+            privateState.dollFalling=true;privateState.poleEventFrame=12345;
+            privateState.poleEvent={77,std::numeric_limits<float>::quiet_NaN()};privateState.poleEventValid=true;
+            privateState.headDropPending=true;privateState.headDropDamageFlags=0xffffffff;
+            NetBuffer privateWire;privateWire.mData=original;
+            CHECK(ValidateNativeSnapshotFrame(hostOnly,eligible)&&EncodeNativeSnapshot(hostOnly,eligible,privateWire)&&privateWire.mData==encoded.mData);
+        }
+    for(int fault=0;fault<18;++fault)
+    {
+        auto bad=dayFrame(3,0);auto& state=bad.dayZombies273[0].data;
+        if(fault==0)bad.sourceZombies.clear();
+        if(fault==1)bad.sourceZombies[0].data.kind=0; // Known ordinary NPC cannot acquire Day state.
+        if(fault==2)++bad.dayZombies273[0].id;
+        if(fault==3)bad.dayZombies273[0].id=0;
+        if(fault==4)bad.dayZombies273.push_back(bad.dayZombies273[0]);
+        if(fault==5)bad.dayZombies273.clear(); // Known Pole3 still REQUIRES its typed state.
+        if(fault==6)++bad.zombieIdentities[0].data;
+        if(fault==7)state.status=1;
+        if(fault==8)state.shadowEnabled=false;
+        if(fault==9)state.armorStage=1;
+        if(fault==10)state.shootEvent=1;
+        if(fault==11)state.shootCountdown=0;
+        if(fault==12){state.head.mPresent=true;state.head.mFrameCount=1;}
+        if(fault==13)state.head.mFrameCount=1; // Noncanonical absent head.
+        if(fault==14)state.shootCountdown=std::numeric_limits<float>::quiet_NaN();
+        if(fault==15)state.shootCountdown=-.011f;
+        if(fault==16)state.shootCountdown=1.601f;
+        if(fault==17)bad.dayZombies273.resize(1025,bad.dayZombies273[0]);
+        rejectDayFrame(bad);
+    }
+    // Reject actual-kind mismatches, even when BOTH source kinds are known.
+    {auto bad=dayFrame(3,2);bad.sourceZombies[0].data.kind=21;rejectDayFrame(bad);}
+    {auto bad=dayFrame(100,1);bad.sourceZombies[0].data.kind=106;rejectDayFrame(bad);}
+    for(float countdown:{-.01f,0.f,1.5f,1.6f})
+    {auto frame=dayFrame(100,1);frame.dayZombies273[0].data.shootCountdown=countdown;CHECK(ValidateNativeSnapshotFrame(frame,eligible));}
+    for(int fault=0;fault<9;++fault)
+    {
+        auto bad=dayFrame(100,1);auto& state=bad.dayZombies273[0].data;
+        if(fault==0)state.armorStage=1;
+        if(fault==1)state.shootEvent=3;
+        if(fault==2)state.head.mPresent=false;
+        if(fault==3)state.head.mFrameCount=0;
+        if(fault==4){state.head.mFrameStart=65530;state.head.mFrameCount=6;}
+        if(fault==5)state.head.mAnimTime=1.01f;
+        if(fault==6)state.head.mAnimRate=std::numeric_limits<float>::infinity();
+        if(fault==7)state.head.mLoopType=6;
+        if(fault==8)state.shadowEnabled=false;
+        rejectDayFrame(bad);
+    }
+    // Wire faults retain a valid opaque body/checksum and must be transactional.
+    {
+        auto frame=dayFrame(100,1);NetBuffer encoded;encoded.mData=original;
+        const bool ok=EncodeNativeSnapshot(frame,eligible,encoded);CHECK(ok);
+        if(ok)
+        {
+            const size_t end=14+(encoded.mData[6]|(size_t(encoded.mData[7])<<8)),record=end-21,count=record-2;
+            for(int fault=0;fault<12;++fault)
+            {
+                auto forged=encoded;
+                if(fault==0)forged.mData[record]=0; // Unknown ID in existing source vector.
+                if(fault==1)forged.mData[record+6]=2; // Shooter status must be0.
+                if(fault==2)forged.mData[record+7]=3;
+                if(fault==3)forged.mData[record+8]=3;
+                if(fault==4)forged.mData[record+9]=2; // Noncanonical Bool.
+                if(fault==5)forged.mData[record+9]=0;
+                if(fault==6){float n=std::numeric_limits<float>::quiet_NaN();std::memcpy(forged.mData.data()+record+2,&n,4);}
+                if(fault==7)forged.mData[record+20]=4; // Unknown head flags.
+                if(fault==8)forged.mData[record+20]=0; // Absent head with stale frame/time bytes.
+                if(fault==9)forged.mData[record+12]=forged.mData[record+13]=0; // Present head, empty frame span.
+                if(fault==10)forged.mData[record+18]=6;
+                if(fault==11){forged.mData[count]=1;forged.mData[count+1]=4;} // Count1025.
+                RejectAtomically(forged);
+            }
+            auto duplicate=encoded;
+            duplicate.mData.insert(duplicate.mData.begin()+end,encoded.mData.begin()+record,encoded.mData.begin()+end);
+            duplicate.mData[count]=2;const size_t larger=end-14+21;
+            duplicate.mData[6]=uint8_t(larger);duplicate.mData[7]=uint8_t(larger>>8);RejectAtomically(duplicate);
+            auto missing=encoded;missing.mData.erase(missing.mData.begin()+record,missing.mData.begin()+end);missing.mData[count]=0;
+            const size_t smaller=end-14-21;missing.mData[6]=uint8_t(smaller);missing.mData[7]=uint8_t(smaller>>8);RejectAtomically(missing);
+            // Truncate every head suffix while preserving the original native body.
+            for(size_t retained=0;retained<11;++retained)
+            {
+                auto truncated=encoded;const size_t cut=record+10+retained;
+                truncated.mData.erase(truncated.mData.begin()+cut,truncated.mData.begin()+end);
+                const size_t size=cut-14;truncated.mData[6]=uint8_t(size);truncated.mData[7]=uint8_t(size>>8);RejectAtomically(truncated);
+            }
+        }
+    }
+    // Day0/11 use the existing native projectile identity. Reflected friendly
+    // shots may double damage; a consumed hit latch belongs only to hostile shots.
+    for(uint16_t kind:{uint16_t(0),uint16_t(11)})for(uint8_t way:{uint8_t(0),uint8_t(9)})
+        for(bool hostile:{false,true})for(int multiplier:{1,2})for(bool latched:{false,true})
+        {
+            auto frame=source;auto& shot=frame.projectiles[0].data;shot={};shot.kind=kind;
+            shot.damage=(kind==0?20:80)*multiplier;shot.specialType=way;shot.isZombieBullet=hostile;shot.hitLatched=latched;
+            const auto motion=way==9?MOTION_BACKWARDS:MOTION_STRAIGHT;
+            const bool valid=(!hostile||multiplier==1)&&(!latched||hostile);
+            CHECK(NativeDay273ProjectileMetadataValid(shot,PROJECTILE_PEA,motion)==valid);
+            CHECK(NativeProjectileMetadataType(shot)==PROJECTILE_PEA&&NativeProjectileMetadataMotion(shot)==motion);
+            CHECK(!NativeDay273ProjectileMetadataValid(shot,PROJECTILE_SPIKE,motion));
+            CHECK(!NativeDay273ProjectileMetadataValid(shot,PROJECTILE_PEA,MOTION_LOBBED));
+            if(!valid){rejectDayFrame(frame);continue;}
+            CHECK(NativeProjectileMetadataValid(shot,PROJECTILE_PEA,motion));
+            NetBuffer encoded;encoded.mData=original;
+            const bool ok=EncodeNativeSnapshot(frame,eligible,encoded);CHECK(ok);if(!ok)continue;
+            NativeSnapshotFrame restored;NetBuffer opaque;
+            const bool read=DecodeNativeSnapshot(encoded,eligible,19,restored,opaque);CHECK(read);
+            if(read&&restored.projectiles.size()==1)
+            {
+                const auto& actual=restored.projectiles[0].data;
+                CHECK(restored.projectiles[0].id==frame.projectiles[0].id&&actual.kind==kind&&actual.damage==shot.damage&&
+                    actual.specialType==way&&actual.isZombieBullet==hostile&&actual.hitLatched==latched&&
+                    !actual.sunOnHit&&!actual.fireState&&!actual.lastTorchId&&!actual.lastTorchToken&&!actual.melonEnhanced&&
+                    !actual.effectVariant&&!actual.umbrellaed&&!actual.goldAttracted&&opaque.mData==original);
+                CHECK(EncodeNativeSnapshot(restored,eligible,opaque)&&opaque.mData==encoded.mData);
+            }
+            else CHECK(false);
+            if(hostile&&way==9&&!latched)
+            {
+                for(size_t offset:{size_t(8),size_t(13),size_t(14),size_t(16),size_t(20),size_t(21),size_t(24),size_t(25)})
+                {auto forged=encoded;forged.mData[firstProjectile+offset]=1;RejectAtomically(forged);}
+                for(int fault=0;fault<8;++fault)
+                {
+                    auto bad=frame;auto& data=bad.projectiles[0].data;
+                    if(fault==0)data.sunOnHit=1;if(fault==1)data.fireState=1;
+                    if(fault==2)data.lastTorchId=1;if(fault==3)data.lastTorchToken=1;
+                    if(fault==4)data.melonEnhanced=true;if(fault==5)data.effectVariant=1;
+                    if(fault==6)data.umbrellaed=true;if(fault==7)data.goldAttracted=true;
+                    CHECK(!NativeDay273ProjectileMetadataValid(data,PROJECTILE_PEA,motion));rejectDayFrame(bad);
+                }
+            }
+        }
+    // The exact Day helper must not claim another family's otherwise valid tuple.
+    {NativeProjectileData foreign;foreign.kind=3;foreign.damage=300;foreign.specialType=9;foreign.isZombieBullet=true;
+        CHECK(!NativeDay273ProjectileMetadataValid(foreign,PROJECTILE_PEA,MOTION_BACKWARDS));
+        CHECK(NativeProjectileMetadataValid(foreign,PROJECTILE_PEA,MOTION_BACKWARDS));}
     std::printf(result.mFailures ? "[  FAILED  ] Fusion.NativeWire\n" : "[       OK ] Fusion.NativeWire\n");
     return result;
 }

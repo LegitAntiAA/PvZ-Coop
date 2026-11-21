@@ -351,7 +351,7 @@ def source_unbound_bindings(assets, prefab, docs, clips, clip_sources, node_path
 
 def export(assets, prefab_path, output, active_only=False, sprite_prefix=None, allow_unused_sprite_bones=False, extra_sprites=(),
            guid_lookup=None, sprite_renderer_file_id=None, source_features=(), particle_binding_proof=None,
-           portrait_game_object_file_id=None):
+           portrait_game_object_file_id=None, source_hierarchy_proof=None):
     features=set(source_features)
     if features-{"spriteMaskV1","spriteSkinV1"}:raise ValueError("unsupported source renderer feature")
     masks_enabled="spriteMaskV1" in features
@@ -475,6 +475,7 @@ def export(assets, prefab_path, output, active_only=False, sprite_prefix=None, a
     transforms = {}
     sprite_docs = []
     animator = None
+    animator_docs = []
     nonrendering = []
     source_rect_transforms=[]
     for kind, ident, text in docs:
@@ -493,9 +494,7 @@ def export(assets, prefab_path, output, active_only=False, sprite_prefix=None, a
         elif kind == 212:
             sprite_docs.append((ident, text))
         elif kind == 95:
-            if animator is not None:
-                raise ValueError("pilot accepts one Animator only")
-            animator = text
+            animator_docs.append((ident,text))
         elif kind in (50, 58, 60, 61, 82, 114, 198, 199, 210, 331):
             nonrendering.append({"typeId": kind, "fileId": ident, "serializedComponent": text})
         else:
@@ -515,6 +514,14 @@ def export(assets, prefab_path, output, active_only=False, sprite_prefix=None, a
         parent = transform_ids.index(node["parentId"]) if node["parentId"] else -1
         nodes.append(dict(objects[node["object"]], parent=parent, path=node_path(ident),
                           position=node["position"], rotation=node["rotation"], scale=node["scale"]))
+    # Independent Unity Animators resolve paths relative to their own GameObject.
+    # Preserve every controller; flatten only its namespace into existing native
+    # layers, never merge two controllers' clip keys or dispatch their events.
+    animator_docs.sort(key=lambda row:(nodes[object_to_node[reference(row[1],"m_GameObject")]]["path"].count('/'),
+        len(nodes[object_to_node[reference(row[1],"m_GameObject")]]["path"]),row[0]))
+    if len({reference(text,"m_GameObject")for _,text in animator_docs})!=len(animator_docs):
+        raise ValueError("multiple Animators on one source GameObject are ambiguous")
+    animator = animator_docs[0][1] if animator_docs else None
     animator_path = nodes[object_to_node[reference(animator, "m_GameObject")]]["path"] if animator is not None else ""
     textures = {}
     sprite_variants = {}
@@ -650,39 +657,56 @@ def export(assets, prefab_path, output, active_only=False, sprite_prefix=None, a
     controller_guid = re.search(r"guid: ([0-9a-f]{32})", required(animator, "m_Controller"))[1] if animator is not None else None
     controller_path = resolve_guid(controller_guid) if controller_guid else None
     controller_text = read(controller_path) if controller_path else ""
-    controller_docs = documents(controller_text)
-    state_machines = {ident: text for kind, ident, text in controller_docs if kind == 1107}
     layers = []
-    controller_main = next((text for kind, ident, text in controller_docs if kind == 91), "")
-    layer_section = section(controller_main, "m_AnimatorLayers")
-    for layer in re.split(r"\n  - serializedVersion: 5\n", layer_section)[1:]:
-        state_machine = state_machines[reference(layer, "m_StateMachine")]
-        state_ids = [int(value) for value in re.findall(r"m_State: \{fileID: (-?\d+)\}", state_machine)]
-        layers.append({"name": required(layer, "m_Name"), "blendingMode": int(required(layer, "m_BlendingMode")),
-                       "defaultState": reference(state_machine, "m_DefaultState"), "states": state_ids,
-                       "defaultWeight": float(required(layer, "m_DefaultWeight"))})
     states = []
     clips = {}
     clip_sources = {}
-    for kind, ident, text in controller_docs:
-        if kind != 1102:
-            continue
-        motion = required(text, "m_Motion")
-        motion_guid = re.search(r"guid: ([0-9a-f]{32})", motion)
-        clip_name = None
-        if motion_guid:
-            clip_path = resolve_guid(motion_guid[1])
-            used.add(clip_path)
-            clip = read_clip(clip_path, skins_enabled)
-            for curve in clip["curves"]:
-                curve["sourceBindingPath"] = curve["path"]
-                curve["path"] = "/".join(filter(None, (animator_path, curve["path"])))
-            clip_name = clip["name"]
-            clips[clip_name] = clip
-            clip_sources[clip_name] = clip_path
-        states.append({"id": ident, "name": required(text, "m_Name"), "clip": clip_name,
-                       "speed": float(required(text, "m_Speed")), "speedParameterActive": bool(int(required(text, "m_SpeedParameterActive"))),
-                       "speedParameter": field(text, "m_SpeedParameter", "")})
+    clip_roots = {}
+    source_animators = []
+    used_state_ids = set()
+    for ordinal,(animator_id,animator_text) in enumerate(animator_docs):
+        root_path=nodes[object_to_node[reference(animator_text,"m_GameObject")]]["path"]
+        scope=root_path+"::" if ordinal else ""
+        guid=re.search(r"guid: ([0-9a-f]{32})",required(animator_text,"m_Controller"))[1]
+        source_controller=read(resolve_guid(guid));source_docs=documents(source_controller)
+        state_machines={ident:text for kind,ident,text in source_docs if kind==1107}
+        remap={};next_id=-1
+        for kind,ident,text in source_docs:
+            if kind!=1102:continue
+            if not ordinal:remap[ident]=ident
+            else:
+                while next_id in used_state_ids:next_id-=1
+                remap[ident]=next_id;next_id-=1
+            used_state_ids.add(remap[ident])
+        first_layer=len(layers)
+        main=next((text for kind,ident,text in source_docs if kind==91),"")
+        for layer in re.split(r"\n  - serializedVersion: 5\n",section(main,"m_AnimatorLayers"))[1:]:
+            machine=state_machines[reference(layer,"m_StateMachine")]
+            original_ids=[int(value)for value in re.findall(r"m_State: \{fileID: (-?\d+)\}",machine)]
+            default=reference(machine,"m_DefaultState")
+            layers.append({"name":scope+required(layer,"m_Name"),"blendingMode":int(required(layer,"m_BlendingMode")),
+                "defaultState":remap[default]if default else 0,"states":[remap[x]for x in original_ids],
+                "defaultWeight":float(required(layer,"m_DefaultWeight"))})
+        for kind,ident,text in source_docs:
+            if kind!=1102:continue
+            motion_guid=re.search(r"guid: ([0-9a-f]{32})",required(text,"m_Motion"));clip_name=None
+            if motion_guid:
+                clip_path=resolve_guid(motion_guid[1]);used.add(clip_path);clip=read_clip(clip_path,skins_enabled)
+                for curve in clip["curves"]:
+                    curve["sourceBindingPath"]=curve["path"]
+                    curve["path"]="/".join(filter(None,(root_path,curve["path"])))
+                clip_name=scope+clip["name"];clip["name"]=clip_name
+                if clip_name in clips and clip_sources[clip_name]!=clip_path:raise ValueError("ambiguous source clip name")
+                clips[clip_name]=clip;clip_sources[clip_name]=clip_path;clip_roots[clip_name]=root_path
+            state={"id":remap[ident],"name":scope+required(text,"m_Name"),"clip":clip_name,
+                "speed":float(required(text,"m_Speed")),"speedParameterActive":bool(int(required(text,"m_SpeedParameterActive"))),
+                "speedParameter":field(text,"m_SpeedParameter","")}
+            if ordinal:state.update(sourceStateId=ident,sourceStateName=required(text,"m_Name"),sourceAnimatorFileId=animator_id)
+            states.append(state)
+        source_animators.append({"fileId":animator_id,"path":root_path,"node":object_to_node[reference(animator_text,"m_GameObject")],
+            "enabled":bool(int(required(animator_text,"m_Enabled"))),"applyRootMotion":bool(int(required(animator_text,"m_ApplyRootMotion"))),
+            "controllerGuid":guid,"serializedAnimator":animator_text,"serializedController":source_controller,
+            "layers":list(range(first_layer,len(layers))),"primary":ordinal==0})
     node_paths = {node["path"] for node in nodes}
     colliders = []
     for component in nonrendering:
@@ -738,6 +762,12 @@ def export(assets, prefab_path, output, active_only=False, sprite_prefix=None, a
             assets, prefab, docs, clips, clip_sources, node_paths, sprite_variants, resolve_guid, read, masks_enabled, particle_binding_proof)
         proven_paths = {record["path"] for record in unbound_bindings}
         ignored_bindings = [path for path in ignored_bindings if path not in proven_paths]
+        if ignored_bindings and source_hierarchy_proof is not None:
+            from source_animators import unbound_bindings as prove_unbound
+            unbound_bindings,unbound_proof=prove_unbound(docs,nodes,clips,clip_sources,clip_roots,assets,prefab,
+                resolve_guid,read,field,required,reference,section,source_hierarchy_proof)
+            proven_paths={record["path"]for record in unbound_bindings}
+            ignored_bindings=[path for path in ignored_bindings if path not in proven_paths]
     anchors = {}
     world_transforms = {}
     shadow_index = next((index for index, node in enumerate(nodes) if node["path"] == "Shadow"), None)
@@ -808,6 +838,9 @@ def export(assets, prefab_path, output, active_only=False, sprite_prefix=None, a
         package["sourceUnboundHierarchyProof"] = unbound_proof
     if empty_sprite_variants:package['sourceEmptySprites']=empty_sprite_variants
     if source_rect_transforms:package['sourceWorldRectTransforms']=source_rect_transforms
+    if len(source_animators)>1:
+        package['sourceAnimators']=source_animators
+        package['independentAnimatorDispatch']='Source Animator roots retain independent controller state; caller must supply extraStates with exact exported layer IDs. No shared-clock or event broadcast is implied.'
     if portrait_extraction is not None:
         package["uiPortraitExtraction"] = portrait_extraction
     (output / "animation.json").write_text(json.dumps(package, ensure_ascii=False, indent=2, allow_nan=False) + "\n", encoding="utf-8", newline="\n")
@@ -825,5 +858,6 @@ if __name__ == "__main__":
     parser.add_argument("--allow-unused-sprite-bones", action="store_true", help="only after confirming the selected prefab has no SpriteSkin; original bone/mesh metadata is preserved verbatim")
     parser.add_argument("--extra-sprite", action="append", default=[], help="source-relative Sprite asset used by a verified runtime appearance override")
     parser.add_argument("--source-feature",action="append",default=[],choices=["spriteMaskV1","spriteSkinV1"],help="staging-only source renderer metadata; requires matching native renderer implementation")
+    parser.add_argument("--source-hierarchy-proof",type=pathlib.Path,help="exact startup class-chain evidence for absent Unity path bindings; does not admit deferred renderer components")
     args = parser.parse_args()
-    print(json.dumps(export(args.assets.resolve(), args.prefab, args.output.resolve(), args.active_only, args.sprite_prefix, args.allow_unused_sprite_bones, args.extra_sprite, source_features=args.source_feature), ensure_ascii=True))
+    print(json.dumps(export(args.assets.resolve(), args.prefab, args.output.resolve(), args.active_only, args.sprite_prefix, args.allow_unused_sprite_bones, args.extra_sprite, source_features=args.source_feature,source_hierarchy_proof=args.source_hierarchy_proof), ensure_ascii=True))

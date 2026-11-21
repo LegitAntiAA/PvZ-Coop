@@ -67,6 +67,12 @@ int RunFusionTools268CommandTests(int& checks);
 #include "FusionSourceZombieWireTests.h"
 #include "FusionModeTests.h"
 #include "FusionCampaign272Tests.h"
+#include "FusionAdventureScheduler273Tests.h"
+#include "FusionAdventureProgress273Tests.h"
+#include "FusionAdventureSession273Tests.h"
+#include "FusionAdventureStart273Tests.h"
+#include "FusionDayZombie273Tests.h"
+#include "FusionBucketReceivers274Tests.h"
 #include "FusionSimulationTests.h"
 #include "FusionWireTests.h"
 #include "FusionRoomWireTests.h"
@@ -1184,6 +1190,16 @@ int main(int argc, char** argv)
 	const auto aFusionCampaign272Result = RunFusionCampaign272Tests();
 	gChecks += aFusionCampaign272Result.mChecks;
 	gFailures += aFusionCampaign272Result.mFailures;
+	const auto aScheduler273=RunFusionAdventureScheduler273Tests();
+	gChecks+=aScheduler273.mChecks;gFailures+=aScheduler273.mFailures;
+	const auto aProgress273=RunFusionAdventureProgress273Tests();
+	gChecks+=aProgress273.mChecks;gFailures+=aProgress273.mFailures;
+	const auto aSession273=RunFusionAdventureSession273Tests();
+	gChecks+=aSession273.mChecks;gFailures+=aSession273.mFailures;
+	const auto aStart273=RunFusionAdventureStart273Tests();
+	gChecks+=aStart273.mChecks;gFailures+=aStart273.mFailures;
+	int aDay273Checks=0;gFailures+=RunFusionDayZombie273Tests(aDay273Checks);gChecks+=aDay273Checks;
+	int aBucket274Checks=0;gFailures+=RunFusionBucketReceivers274Tests(aBucket274Checks);gChecks+=aBucket274Checks;
 	gChecks += aFusionModeResult.mChecks;
 	gFailures += aFusionModeResult.mFailures;
 	const auto aFusionSimulationResult = RunFusionSimulationTests();

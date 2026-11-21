@@ -4,6 +4,7 @@
 #include "FusionNativeZombies.h"
 #include "NativeSpecialZombie269.h"
 #include "FusionNativeEmbeddedEffects269.h"
+#include "FusionNativeDayZombie273.h"
 #include "../Board.h"
 #include "../Zombie.h"
 #include "../Net/NetCommon.h"
@@ -39,7 +40,26 @@ const char* PackageName(uint16_t kind)
     if(kind==109)return "zombie-batch-109-native22";
     switch(kind){case 14:return "zombie270-14";case 15:return "zombie270-15";
     case 18:return "zombie270-18";case 104:return "zombie270-104";}
+    switch(kind){case 3:return "zombie273-3";case 21:return "zombie273-21";case 22:return "zombie273-22";
+    case 23:return "zombie273-23";case 100:return "zombie273-100";case 106:return "zombie273-106";
+    case 107:return "zombie273-107";case 108:return "zombie273-108";}
     return nullptr;
+}
+
+const char* DayPrefab273(uint16_t kind)
+{
+    switch(kind)
+    {
+    case 3:return "Resources/zombies/_prefab/PolevaulterZombie.prefab";
+    case 21:return "Resources/zombies/_prefab/DollDiamondZombie.prefab";
+    case 22:return "Resources/zombies/_prefab/DollGoldZombie.prefab";
+    case 23:return "Resources/zombies/_prefab/DollSilverZombie.prefab";
+    case 100:return "Resources/zombies/_prefab/PeaShooterZombie.prefab";
+    case 106:return "Resources/zombies/_prefab/BucketNutZombie.prefab";
+    case 107:return "Resources/zombies/_prefab/CherryNutZombie.prefab";
+    case 108:return "Resources/zombies/_prefab/IronPeaZombie.prefab";
+    default:return nullptr;
+    }
 }
 
 std::filesystem::path PackagePath(const char* name)
@@ -59,10 +79,47 @@ struct ZombieModel
     std::vector<std::string> headPaths, handPaths, upperArmPaths;
     std::string damagedArm, conePath, damagedCone[2],shieldPath,damagedShield[2];
     std::string damagedPaper[2],damagedDriver[5];
+    std::string dayArmorPath;
     std::vector<std::string> shieldHandPaths;
     std::vector<std::string> rootChildren;
     std::map<std::string,float> durations;
 };
+
+void IndependentAnimators273(const Json& package,ZombieModel& model)
+{
+    if(!package.contains("sourceAnimators"))return;
+    const auto& states=package.at("controller").at("states");const auto& layers=package.at("controller").at("layers");
+    std::set<std::string> paths;for(const auto& node:package.at("nodes"))paths.insert(node.at("path").get<std::string>());
+    std::set<int> usedLayers;int primary=0;
+    for(const auto& animator:package.at("sourceAnimators"))
+    {
+        if(!paths.contains(animator.at("path").get<std::string>()))throw std::runtime_error("missing independent Animator root");
+        const bool main=animator.at("primary").get<bool>();if(main)++primary;
+        bool first=true;
+        for(const auto& rawLayer:animator.at("layers"))
+        {
+            const int layer=rawLayer.get<int>();
+            if(layer<0||layer>=int(layers.size())||!usedLayers.insert(layer).second)
+                throw std::runtime_error("ambiguous independent Animator layer");
+            const auto& sourceLayer=layers.at(layer);const bool effective=first||sourceLayer.at("defaultWeight").get<float>()>0;first=false;
+            if(main||!animator.at("enabled").get<bool>()||!effective)continue;
+            const int64_t id=sourceLayer.at("defaultState").get<int64_t>();if(!id)continue;
+            const auto state=std::find_if(states.begin(),states.end(),[&](const Json& s){return s.at("id")==id;});
+            if(state==states.end()||state->at("sourceAnimatorFileId")!=animator.at("fileId"))
+                throw std::runtime_error("independent Animator default state identity differs");
+            if(state->at("clip").is_null())continue;
+            const auto& clip=package.at("clips").at(state->at("clip").get<std::string>());
+            // Existing extraStates has a separate elapsed value/layer, but no
+            // independent parameter/transition machine. Admit only an inert
+            // source default, retaining every other source state for later use.
+            for(const auto& curve:clip.at("curves"))if(paths.contains(curve.at("path").get<std::string>()))
+                throw std::runtime_error("independent Animator default has effective bindings; clock contract required");
+            if(!clip.at("events").empty())throw std::runtime_error("independent Animator default has unimplemented events");
+            model.options.extraStates.push_back({state->at("name").get<std::string>(),0.0f,layer});
+        }
+    }
+    if(primary!=1||usedLayers.size()!=layers.size())throw std::runtime_error("incomplete independent Animator layer ownership");
+}
 
 std::string ExtraSprite(const Json& package,const char* path)
 {
@@ -81,6 +138,8 @@ std::unique_ptr<ZombieModel> LoadModel(Board* board,uint16_t kind,const std::fil
     if (package.at("schema").get<int>() != 1 || !package.at("ignoredBindings").empty() ||
         !package.at("omittedInactiveNodes").empty())
         throw std::runtime_error("incomplete source Zombie hierarchy/animation bindings");
+    const bool day=DayPrefab273(kind)!=nullptr;
+    if(day&&package.at("sourcePrefab")!=DayPrefab273(kind))throw std::runtime_error("Day Zombie source prefab identity differs");
     if(kind==111||kind==109)
     {
         const auto& missing=package.at(kind==111?"source111MissingTargetProof":"source109MissingTargetProof");
@@ -119,6 +178,12 @@ std::unique_ptr<ZombieModel> LoadModel(Board* board,uint16_t kind,const std::fil
             throw std::runtime_error("source111 incomplete particle proof");
     }
     auto model = std::make_unique<ZombieModel>();
+    if(day)
+    {
+        if(FusionDayZombie273Doll(kind)&&(!package.contains("sourceAnimators")||package.at("sourceAnimators").size()!=2))
+            throw std::runtime_error("source Doll requires both independent Animators");
+        IndependentAnimators273(package,*model);
+    }
     const auto& shadow = package.at("anchors").at("shadow");
     if (!shadow.at("relativeToRuntimeRoot").get<bool>())
         throw std::runtime_error("source Zombie Shadow must be root-relative");
@@ -141,6 +206,7 @@ std::unique_ptr<ZombieModel> LoadModel(Board* board,uint16_t kind,const std::fil
         if ((kind==4||kind==13)&&nodePath=="Zombie_head/Bucket") model->conePath=nodePath;
         if(kind==8&&nodePath=="Zombie_screendoor1")model->shieldPath=nodePath;
         if(kind==8&&(nodePath=="Zombie_outerarm_screendoor"||nodePath=="Zombie_innerarm_screendoor_hand"||nodePath=="Zombie_innerarm_screendoor"))model->shieldHandPaths.push_back(nodePath);
+        if(day&&nodePath==(FusionDayZombie273Doll(kind)?"Zombie_head/Cone":"Zombie_head"))model->dayArmorPath=nodePath;
     }
     const bool money=kind==41||kind==42,vehicle=kind==14||kind==18,helmet=kind==2||kind==4||kind==12||kind==13;
     if (shadowPath.empty() || !foundShadow || (!money&&!vehicle&&(model->headPaths.empty() ||
@@ -149,7 +215,27 @@ std::unique_ptr<ZombieModel> LoadModel(Board* board,uint16_t kind,const std::fil
         throw std::runtime_error("missing source Zombie appearance tags/Shadow/Cone");
     // The real native shadow remains in Board's separate shadow render pass.
     model->options.hiddenNodePaths.push_back(shadowPath);
-    if(!money)model->damagedArm = ExtraSprite(package,"Resources/zombies/image/reanim/Zombie_outerarm_upper2.asset");
+    if(!money)model->damagedArm = ExtraSprite(package,kind==3?
+        "Resources/zombies/zombie_polevaulter/Zombie_polevaulter_outerarm_upper2.asset":
+        "Resources/zombies/image/reanim/Zombie_outerarm_upper2.asset");
+    if(FusionDayZombie273Doll(kind)||kind==106||kind==107)
+    {
+        if(model->dayArmorPath.empty())throw std::runtime_error("missing exact Day Zombie first-armor node");
+        int armorSprites=0;
+        for(const auto& sprite:package.at("sprites"))
+            if(package.at("nodes").at(sprite.at("node").get<size_t>()).at("path")==model->dayArmorPath)++armorSprites;
+        if(armorSprites!=1)throw std::runtime_error("Day Zombie first armor requires its exact SpriteRenderer");
+        const char* first=nullptr;const char* second=nullptr;
+        switch(kind)
+        {
+        case 21:first="Resources/zombies/zombie/DiamondDoll2.asset";second="Resources/zombies/zombie/DiamondDoll3.asset";break;
+        case 22:first="Resources/zombies/zombie/GoldDoll2.asset";second="Resources/zombies/zombie/GoldDoll3.asset";break;
+        case 23:first="Resources/zombies/zombie/SilverDoll2.asset";second="Resources/zombies/zombie/SilverDoll3.asset";break;
+        case 106:first="Resources/zombies/plantzombie/ironNut2.asset";second="Resources/zombies/plantzombie/ironNut3.asset";break;
+        case 107:first="Resources/plants/_mixer/cherrynut/crack1.asset";second="Resources/plants/_mixer/cherrynut/crack2.asset";break;
+        }
+        model->damagedCone[0]=ExtraSprite(package,first);model->damagedCone[1]=ExtraSprite(package,second);
+    }
     if (kind == 2||kind==12)
     {
         model->damagedCone[0] = ExtraSprite(package,"Resources/zombies/image/reanim/Zombie_cone2.asset");
@@ -172,7 +258,7 @@ std::unique_ptr<ZombieModel> LoadModel(Board* board,uint16_t kind,const std::fil
     }
     std::string error;
     std::vector<int64_t> particleComponents;
-    if(FindSpecialZombie269Profile(kind))
+    if(FindSpecialZombie269Profile(kind)||day)
     {
         for(const auto& component:package.at("nonRenderingComponents"))
             if(component.at("typeId")==198||component.at("typeId")==199)particleComponents.push_back(component.at("fileId").get<int64_t>());
@@ -188,6 +274,13 @@ std::unique_ptr<ZombieModel> LoadModel(Board* board,uint16_t kind,const std::fil
     if(kind==11||kind==12||kind==13)required.insert(required.end(),{"swim","attackinwater","drowning"});
     if(kind==8)required.insert(required.end(),{"walk_","walk1_","attack_"});
     if(kind==0||kind==2||kind==4)required.push_back("attack2");
+    if(day)
+    {
+        required=kind==3?std::vector<const char*>{"idle","walk","jump","walk2","attack","die"}:
+            FusionDayZombie273Doll(kind)?std::vector<const char*>{"idle","walk","walk2","attack","attack2","die"}:
+            std::vector<const char*>{"idle","walk","attack","die"};
+        if(FusionDayZombie273Shooter(kind))required.push_back("shoot");
+    }
     for (const char* state : required)
     {
         const float speed = model->animation.GetStateSpeed(state);
@@ -244,6 +337,55 @@ void SpecialPose(const Zombie* zombie,const ZombieModel& model,FusionAnimationDr
         }
         options.nodeActivityOverrides.push_back({"Zombie_zamboni_2/SmokePos",stage==2||zombie->mFlatTires});
     }
+}
+
+bool SourcePose273(const Zombie* zombie,const char*& state,float& phase)
+{
+    const auto* data=GetNativeSourceZombieData(zombie);
+    if(data&&DayPrefab273(data->kind)&&!FusionDayZombie273Doll(data->kind))
+        return GetNativeDayZombie273Presentation(zombie,state,phase);
+    return GetNativeSourceZombiePresentation(zombie,state,phase);
+}
+
+bool DayPose273(const Zombie* zombie,const ZombieModel& model,FusionAnimationDrawOptions& options)
+{
+    const auto* data=GetNativeSourceZombieData(zombie);if(!data||!DayPrefab273(data->kind))return true;
+    const auto* day=GetNativeDayZombie273(zombie);
+    if(!day||!NativeDayZombie273StateValid(data->kind,*day))return false;
+    const char* head=nullptr;float phase=0;
+    if(GetNativeDayZombie273HeadPose(zombie,head,phase))
+    {
+        if(!head)return false;
+        const auto duration=model.durations.find(head);
+        if(duration==model.durations.end())return false;
+        options.extraStates.push_back({head,phase*duration->second,model.animation.GetStateLayer(head)});
+    }
+    if(!zombie->mHasHead)options.hiddenNodePaths.insert(options.hiddenNodePaths.end(),model.headPaths.begin(),model.headPaths.end());
+    if(!zombie->mHasArm)
+    {
+        options.hiddenNodePaths.insert(options.hiddenNodePaths.end(),model.handPaths.begin(),model.handPaths.end());
+        for(const auto& path:model.upperArmPaths)
+        {
+            ReplaceSprite(options,path,model.damagedArm);
+            // Zombie.ChangeArmSpirte380B60 writes localScale(4,4,4).
+            // Pole's36EDD0 override only changes its actual Pole sprite.
+            if(data->kind!=3)
+            {
+                auto& replacement=options.spriteReplacements.back();replacement.overrideScale=true;
+                replacement.scaleX=replacement.scaleY=replacement.scaleZ=4.0f;
+            }
+        }
+    }
+    if(FusionDayZombie273Doll(data->kind))
+    {
+        if(zombie->mHelmHealth<=0)options.hiddenNodePaths.push_back(model.dayArmorPath);
+        else if(day->armorStage)ReplaceSprite(options,model.dayArmorPath,model.damagedCone[day->armorStage-1]);
+    }
+    else if((data->kind==106||data->kind==107)&&day->armorStage)
+        // WallNutZ clears the FirstArmor reference but retains its last head
+        // sprite; helm depletion must not remove the actual Zombie_head node.
+        ReplaceSprite(options,model.dayArmorPath,model.damagedCone[day->armorStage-1]);
+    return true;
 }
 }
 
@@ -329,8 +471,8 @@ bool NativeZombieVisuals::Draw(Sexy::Graphics* graphics,Zombie* zombie) const
     if (!swimming&&nativePosition.mClipHeight > CLIP_HEIGHT_LIMIT) return false;
     const char* state = nullptr;
     float phase = 0, groundX = 0, groundY = 0;
-    if (!GetNativeSourceZombiePresentation(zombie,state,phase) || !state ||
-        !zombie->GetShadowCenter(groundX,groundY)) return false;
+    if (!SourcePose273(zombie,state,phase) || !state)return DayPrefab273(data->kind)!=nullptr;
+    if(!zombie->GetShadowCenter(groundX,groundY))return false;
     if(data->kind==8&&zombie->mShieldHealth<=0&&!zombie->IsDeadOrDying())
         state=zombie->mIsEating?"attack_":data->originSpeed>kFusionZombieWalk2Threshold?"walk1_":"walk_";
     const auto& model = *found->second;
@@ -338,9 +480,10 @@ bool NativeZombieVisuals::Draw(Sexy::Graphics* graphics,Zombie* zombie) const
     if (duration == model.durations.end()) return false;
     FusionAnimationDrawOptions options = model.options;
     SpecialPose(zombie,model,options);
-    if (!zombie->mHasHead)
+    if(!DayPose273(zombie,model,options))return true; // Unadmitted Day state never renders a native carrier alias.
+    if (!DayPrefab273(data->kind)&&!zombie->mHasHead)
         options.hiddenNodePaths.insert(options.hiddenNodePaths.end(),model.headPaths.begin(),model.headPaths.end());
-    if (!zombie->mHasArm)
+    if (!DayPrefab273(data->kind)&&!zombie->mHasArm)
     {
         options.hiddenNodePaths.insert(options.hiddenNodePaths.end(),model.handPaths.begin(),model.handPaths.end());
         for (const auto& path : model.upperArmPaths) ReplaceSprite(options,path,model.damagedArm);
@@ -396,10 +539,10 @@ bool NativeZombieVisuals::Node(const Zombie* zombie,const char* path,float& x,fl
     if(!data||!path||zombie->mApp!=mImpl->app||!std::isfinite(zombie->mScaleZombie)||zombie->mScaleZombie<=0)return false;
     const auto found=mImpl->models.find(data->kind);if(found==mImpl->models.end())return false;
     const auto& model=*found->second;const char* state=nullptr;float phase=0,sx=0,sy=0;
-    if(!GetNativeSourceZombiePresentation(zombie,state,phase)||!state||
+    if(!SourcePose273(zombie,state,phase)||!state||
        !const_cast<Zombie*>(zombie)->GetShadowCenter(sx,sy))return false;
     const auto duration=model.durations.find(state);if(duration==model.durations.end())return false;
-    auto options=model.options;SpecialPose(zombie,model,options);
+    auto options=model.options;SpecialPose(zombie,model,options);if(!DayPose273(zombie,model,options))return false;
     options.rootFlipX=const_cast<Zombie*>(zombie)->IsWalkingBackwards();
     float nx=0,ny=0;
     if(!model.animation.TryGetNodeOffset(path,nx,ny,state,phase*duration->second,nullptr,-1,1,&options))return false;
@@ -408,6 +551,30 @@ bool NativeZombieVisuals::Node(const Zombie* zombie,const char* path,float& x,fl
     x=sx-(options.rootFlipX?-model.shadowX:model.shadowX)*pixels+nx*pixels;
     y=sy+model.shadowY*pixels-ny*pixels;
     return std::isfinite(x)&&std::isfinite(y);
+}
+
+bool NativeZombieVisuals::CanQueryRoot(uint16_t kind) const
+{
+    const auto found=mImpl->models.find(kind);
+    if(found==mImpl->models.end())return false;
+    const auto& model=*found->second;
+    if(!std::isfinite(model.shadowX)||!std::isfinite(model.shadowY))return false;
+    const std::vector<const char*> states=DayPrefab273(kind)&&kind!=3&&!FusionDayZombie273Doll(kind)?
+        std::vector<const char*>{"idle","walk"}:std::vector<const char*>{"idle","walk","walk2"};
+    for(const auto* state:states)
+    {
+        if(!model.durations.contains(state))return false;
+        float x=0,y=0;
+        if(!model.animation.TryGetNodeOffset("",x,y,state,0,nullptr,-1,1,&model.options)||
+            !std::isfinite(x)||!std::isfinite(y))return false;
+    }
+    return true;
+}
+
+bool CanQueryNativeSourceZombieRoot273(Board* board,uint16_t kind)
+{
+    const auto* context=GetNativeContext(board);
+    return context&&context->zombieVisuals&&context->zombieVisuals->CanQueryRoot(kind);
 }
 
 bool EnsureNativeSourceZombieVisuals(Board* board,uint16_t kind,std::string* error)

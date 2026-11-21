@@ -1,0 +1,16 @@
+#pragma once
+#include "FusionAdventureScheduler273.h"
+#include <string>
+class Board;
+namespace LawnFusion
+{
+// Initial native world admission: real Day source1..3, not native level slots.
+// Caller supplies the existing Board RNG callbacks; these never run on client.
+FusionAdventureScheduler273Result InitializeNativeAdventureScheduler273(
+    Board*,FusionAdventureScheduler273State&,int sourceLevel,int cycle,int sourceDifficulty,
+    const FusionAdventureScheduler273Random&,std::string* error=nullptr);
+FusionAdventureScheduler273Result UpdateNativeAdventureScheduler273(
+    Board*,FusionAdventureScheduler273State&,const FusionAdventureScheduler273Input&,
+    const FusionAdventureScheduler273Random&,FusionAdventureScheduler273Events&,
+    std::string* error=nullptr);
+}

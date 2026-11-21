@@ -128,7 +128,7 @@ FusionModeTestResult RunFusionModeTests()
 			if (tower) start.mTDPath = {2, 8, 2, 7};
 			NetBuffer wire;
 			Check(NetEncodeStartGame(start, wire, modeCount, towerMode), "start encodes");
-			Check(wire.Size() == 12 + start.mTDPath.size() + (content == ContentMode::Fusion ? 4 : 0) && wire.mData[0] == (uint8_t)content,
+			Check(wire.Size() == 12 + start.mTDPath.size() + (content == ContentMode::Fusion ? 5 : 0) && wire.mData[0] == (uint8_t)content,
 				"start has explicit content mode prefix");
 			NetStartGameState decoded;
 			Check(NetDecodeStartGame(wire, decoded, modeCount, towerMode) && wire.Remaining() == 0 &&

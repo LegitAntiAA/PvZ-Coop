@@ -182,6 +182,16 @@
     <ClCompile Include="..\..\Lawn\Fusion\FusionZombieBatch270Rules.cpp" />
     <ClCompile Include="..\..\Lawn\Fusion\FusionCampaign272Rules.cpp" />
     <ClCompile Include="FusionCampaign272Tests.cpp" />
+    <ClCompile Include="..\..\Lawn\Fusion\FusionAdventureScheduler273.cpp" />
+    <ClCompile Include="..\..\Lawn\Fusion\FusionAdventureProgress273.cpp" />
+    <ClCompile Include="..\..\Lawn\Fusion\FusionAdventureSession273.cpp" />
+    <ClCompile Include="FusionAdventureScheduler273Tests.cpp" />
+    <ClCompile Include="FusionAdventureProgress273Tests.cpp" />
+    <ClCompile Include="FusionAdventureSession273Tests.cpp" />
+    <ClCompile Include="FusionAdventureStart273Tests.cpp" />
+    <ClCompile Include="..\..\Lawn\Fusion\FusionDayZombie273Rules.cpp" />
+    <ClCompile Include="FusionDayZombie273Tests.cpp" />
+    <ClCompile Include="FusionBucketReceivers274Tests.cpp" />
     <ClCompile Include="..\..\Lawn\Fusion\FusionParticleCollision269Rules.cpp" />
     <ClCompile Include="FusionParticleCollision269Tests.cpp" />
     <ClCompile Include="SpecialZombie269Tests.cpp" />
