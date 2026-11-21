@@ -2,9 +2,9 @@
 
 Fusion plant drawing returned before the native HP tail, and Classic zombie head/damage-target eligibility suppressed typed source/friendly/vehicle actors. Shared Plant::DrawHealthBar is called from both paths; typed source health uses safe float sums and retained native bar UI. Money source1 was misleadingly highlighted although absent from the actual source reinforcement whitelist. Shared quote/availability now governs hover/action, and rejected client clicks use native advice.65g owned paired smoke Passed107common/5frames: actual host Tab propagated, client HP frame inspected, actual client Z/hover/LMB preserved source1 ID/token/HP and wallet3000 with no highlight and exact advice. Full NPC AI and all Money skills are not established by this bounded case.
 
-## TEST-CONTROLS-272 — FOUND / IN_PROGRESS
+## TEST-CONTROLS-272 — VERIFIED
 
-Controls65i Adventure1 timed out before R: host prepared CTL_PICK_GO, client applied647snapshots but did not complete the base scenario or enter controls. E3 investigating fixture/runtime sequencing. Production R implementation is compiled, runtime acceptance pending; do not mark the timeout as an R gameplay regression without evidence.
+Controls65i Adventure1 timed out before R: host baseline had0plants and immediately planted; client captured1plant as baseline, then applied647snapshots without observing another plant. E3 added a generic smoke scenario/slot-specific baseline handshake before the real action (retry850ms, bounded30s); real action detection/IsComplete/post-action snapshots unchanged. Controls65j Adventure1 and Adventure5BowlingClient both Passed, including actual host/client R pickup/cancel and chat/pause gates; Root inspected both client shovel frames. This was a test sequencing race, not an R gameplay failure.
 
 ## FUSION-SYNC-271 and FUSION-ALMANAC-271 — VERIFIED
 

@@ -2,14 +2,15 @@
 
 - FUSION-HP-272: DONE bounded. Root; shared native health rendering and source zombie eligibility.65g paired Passed107common/5frames, client HP frame inspected; full NPC AI parity outside scope.
 - FUSION-MONEY-272: DONE bounded. E1/Root; source whitelist/shared preview/native rejection advice. Actual client Z->hover->LMB on source1 at3000 preserves money/identity/health, no misleading highlight;65g Passed.
-- FUSION-SHOVEL-R-272: IN_TESTING. E3/Root; production/help/smoke Q->R implemented, Q speed/HeatWave retained.65i controls FAILED before R because client baseline never completed; E3 investigating.
+- FUSION-SHOVEL-R-272: DONE bounded. E3/Root; production/help/smoke Q->R implemented, Q speed/HeatWave retained.65j Adventure1 and Adventure5BowlingClient controls Passed actual host/client SDL R pickup/cancel, chat and pause gates; client frames inspected.
+- TEST-BASELINE-272: DONE. E3/Root;65i host planted before client baseline capture, making its action invisible to the fixture. Generic scenario/slot baseline handshake preserves the existing real action/post-snapshot criteria; both65j controls scenarios Passed.
 - FUSION-LEGACY-GATE-272: IN_REVIEW. Root/E2; user requires preserving but disabling original campaign with Fusion plants. Public PreNewGame/NewGame/TryLoadGame/network start guarded; source code retained, smoke exception explicit. App65i Passed; public UI route not runtime-tested.
 - FUSION-VEHICLE-WAVES-272: DONE bounded. E1/Root; source14 native birth no longer warped into lawn; guarded wave-slot admission preserves native row RNG/birth. Controlled Pool/Fog four-kind wave smokes Passed107/97common,7frames total. This does not prove all source AI or full campaign composition.
 - FUSION-SOURCE-LEVELS-272: DONE data/pure rules only. E2/Root;45 Adventure/122 challenge definitions,35 unlock conditions,49 weights; registered in62962/0/0 suite. Actual scheduler/tutorial/reward/challenge gameplay remains BACKLOG; no new level/minigame acceptance.
-- FUSION-PUBLISH-272: IN_PROGRESS. Root; publish accumulated code/resources to current branch via authenticated gh, preserve advanced remote main. No push completed yet; no release requested.
-- FUSION-CAMPAIGN-273: READY investigation. E1 read-only contract for first source levels and six missing Day NPC dependencies. Root integrates only with exact source rules and readiness gates; no silent missing-NPC fallback.
+- FUSION-PUBLISH-272: DONE checkpoint. Root; accumulated source/assets commit295189bc successfully pushed to codex/fusion-coop-20261113 through authenticated gh; GitHub ref SHA verified. Advanced remote main preserved, no release created. This follow-up includes the passing controls and baseline-handshake fix; continue regular logical commits/pushes.
+- FUSION-CAMPAIGN-273: READY implementation contract. E1 static report in FUSION_SOURCE_CAMPAIGN_273.md; source1–3 need no new NPC, first9 miss3/21/100/106/107/108. Scheduler/tutorial/reward and source state must be integrated and verified before public entry; no silent missing-NPC fallback.
 
-Historical plant acceptance280/281 and admitted sourceNPC15 unchanged; Gold938/next6NPC staged. Current app65i Passed, unit62962/0/0. Evidence and remaining boundaries: SESSION.md top checkpoint and work/fusion/stage272.
+Historical plant acceptance280/281 and admitted sourceNPC15 unchanged; Gold938/next6NPC staged. Current app65j Passed, unit62962/0/0, both controls65j scenarios Passed. Evidence and remaining boundaries: SESSION.md top checkpoint and work/fusion/stage272.
 
 ## ROOT 271 — 2026-11-21 14:17:58 +03:00
 

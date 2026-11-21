@@ -165,6 +165,7 @@ private:
 	uint32_t mIntroLastActionTick;
 	uint32_t mPlayingTick;
 	uint32_t mActionTick;
+	uint32_t mBaselineReadyTick;
 	int mIntroLastCutsceneTime;
 	int mIntroLastDaveMessage;
 	int mIntroLastTutorialState;
@@ -183,6 +184,7 @@ private:
 	bool mIntroSawDave;
 	bool mChooserStartIssued;
 	bool mBaselineCaptured;
+	bool mBaselineSynchronized;
 	bool mActionIssued;
 	bool mActionApplied;
 	bool mBowlingNutObserved;

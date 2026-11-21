@@ -913,6 +913,7 @@ void NetSmokeScenarioRuntime::Reset(NetSmokeScenarioId theScenario)
 	mIntroLastActionTick = 0;
 	mPlayingTick = 0;
 	mActionTick = 0;
+	mBaselineReadyTick = 0;
 	mIntroLastCutsceneTime = -1;
 	mIntroLastDaveMessage = -2;
 	mIntroLastTutorialState = -1;
@@ -931,6 +932,7 @@ void NetSmokeScenarioRuntime::Reset(NetSmokeScenarioId theScenario)
 	mIntroSawDave = false;
 	mChooserStartIssued = false;
 	mBaselineCaptured = false;
+	mBaselineSynchronized = false;
 	mActionIssued = false;
 	mActionApplied = false;
 	mBowlingNutObserved = false;
@@ -3193,6 +3195,42 @@ bool NetSmokeScenarioRuntime::Update(LawnApp* theApp, const NetSmokeManifest& th
                 }
                 return true;
         }
+
+	// An owner must not plant before the other peer captures its baseline.
+	// Otherwise the replicated action becomes that peer's baseline, so it can
+	// never observe the required change or collect post-action snapshots.
+	if (!mBaselineSynchronized)
+	{
+		const std::string aMarker = std::string("SMOKE_BASELINE_READY:") + aDefinition->mName;
+		const int aLocalSlot = theApp->mNetManager->GetMySlot();
+		const int aPeerSlot = theManifest.IsHost() ? 1 : 0;
+		bool aLocalReady = false;
+		bool aPeerReady = false;
+		for (const auto& aLine : theApp->mNetManager->mChatLines)
+		{
+			if (aLine.mText != aMarker) continue;
+			if (aLine.mSlot == aLocalSlot) aLocalReady = true;
+			if (aLine.mSlot == aPeerSlot) aPeerReady = true;
+		}
+		const uint32_t aNow = GetTickCount();
+		if (!aLocalReady && (!mBaselineReadyTick || aNow - mBaselineReadyTick >= 850U))
+		{
+			theApp->mNetManager->SendChat(aMarker);
+			mBaselineReadyTick = aNow;
+		}
+		if (!aLocalReady || !aPeerReady)
+		{
+			if (aNow - mActionTick >= 30000U)
+			{
+				theFailure = "smoke peers did not synchronize captured baselines within 30 seconds";
+				return false;
+			}
+			return true;
+		}
+		mBaselineSynchronized = true;
+		NetTrace("SMOKE_BASELINE_SYNC role=%s scenario=%s localSlot=%d peerSlot=%d",
+			theManifest.IsHost() ? "host" : "client", aDefinition->mName, aLocalSlot, aPeerSlot);
+	}
 
         if (!mActionIssued && aDefinition->mActionIsClientOwned == theManifest.IsClient())
 	{
