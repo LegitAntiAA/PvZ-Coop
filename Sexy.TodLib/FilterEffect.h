@@ -2,6 +2,7 @@
 #define __FILTEREFFECT_H__
 
 #include <map>
+#include "FilterEffectEnum.h"
 #include "../SexyAppFramework/SDL3Image.h"
 
 namespace Sexy
@@ -10,15 +11,6 @@ namespace Sexy
     class MemoryImage;
 }
 using namespace Sexy;
-
-enum FilterEffect
-{
-    FILTER_EFFECT_NONE = -1,
-    FILTER_EFFECT_WASHED_OUT,
-    FILTER_EFFECT_LESS_WASHED_OUT,
-    FILTER_EFFECT_WHITE,
-    NUM_FILTER_EFFECTS
-};
 
 typedef std::map<Image*, Image*> ImageFilterMap;
 extern ImageFilterMap gFilterMap[FilterEffect::NUM_FILTER_EFFECTS];

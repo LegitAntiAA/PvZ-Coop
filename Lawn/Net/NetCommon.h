@@ -29,7 +29,7 @@ namespace LawnNet
 // (the host broadcasts the same sounds via events).
 extern bool gNetSuppressSounds;
 
-static const uint32_t NET_PROTOCOL_VERSION = 68; // FNS27 canonical Jackson controller view.
+static const uint32_t NET_PROTOCOL_VERSION = 69; // FNS28 source family controller views.
 static const uint16_t NET_DEFAULT_PORT = 27713;			// PvZ co-op port
 static const int NET_MAX_PLAYERS = 4;					// 1 host + 3 clients
 static const int NET_MAX_NICK_CHARS = 16;
@@ -212,7 +212,8 @@ enum NetBoardEvent : uint8_t
 	BOARDEV_PRESENTATION_PARTICLE = 25, // u16 type, f32 x/y, i32 render order
 	BOARDEV_PRESENTATION_REANIM = 26,   // u16 type, f32 x/y, i32 order, animation state
 	BOARDEV_PRESENTATION_FWOOSH = 27,   // u8 row; native Board owns the finite effect lifecycle.
-	BOARDEV_FUSION_LIMB276 = 28        // Exact26-byte NetFusionLimbEvent276 payload; source callback, not raw resource/path.
+	BOARDEV_FUSION_LIMB276 = 28,       // Exact26-byte NetFusionLimbEvent276 payload; source callback, not raw resource/path.
+    BOARDEV_FUSION_CHARRED315 = 29     // Immutable standalone source pose; may outlive its owner.
 };
 
 // Exact payload sizes for coin/sun board events.  Keep these shared by the

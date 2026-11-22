@@ -2,6 +2,7 @@
 #define __ATTACHMENT_H__
 
 #include "DataArray.h"
+#include "AttachmentLimits.h"
 #include "../ConstEnums.h"
 #include "../SexyAppFramework/SexyMatrix.h"
 
@@ -10,8 +11,6 @@ namespace Sexy
     class Graphics;
 }
 using namespace Sexy;
-
-#define MAX_EFFECTS_PER_ATTACHMENT 16
 
 class Trail;
 class Reanimation;

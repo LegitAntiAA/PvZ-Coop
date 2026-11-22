@@ -19,6 +19,7 @@ protected:
 	LPDIRECTSOUNDBUFFER		mSoundBuffer;
 	bool					mAutoRelease;
 	bool					mHasPlayed;
+    bool mPaused = false, mLooping = false;
 	bool					mReleased;
 
 	int						mBasePan;
@@ -47,6 +48,9 @@ public:
 
 	virtual bool			Play(bool looping, bool autoRelease);
 	virtual void			Stop();
+    bool Pause() override;
+    bool Resume() override;
+    bool IsPaused() override { return mPaused; }
 	virtual bool			IsPlaying();
 	virtual bool			IsReleased();
 	virtual double			GetVolume();

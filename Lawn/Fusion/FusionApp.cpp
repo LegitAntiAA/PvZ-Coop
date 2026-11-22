@@ -5,6 +5,7 @@
 #include "../System/PlayerInfo.h"
 #include <algorithm>
 #include "../Net/NetManager.h"
+#include "../Net/NetFusionZombie313Smoke.h"
 #include <cstdlib>
 #include <cstring>
 
@@ -79,10 +80,12 @@ bool LawnApp::StartFusionValidation(std::string* error)
     if (nativeFixture && std::strcmp(nativeFixture, "1") == 0)
     {
         if (!IsFusionValidationFixture() || !NetIsHost()) return false;
+        const int requested=LawnNet::NetSmokeFusionZombie313Level325(this);
+        if(requested<0){if(error)*error="Invalid private zombie313 biome.";return false;}
         KillGameSelector();
         NetCloseTransientScreens();
         mSourceAdventure={};
-        PreNewGame(GAMEMODE_ADVENTURE, false, 1);
+        PreNewGame(GAMEMODE_ADVENTURE, false, requested?requested:1);
         return IsNativeFusionBoard(mBoard);
     }
     if (!IsFusionValidationFixture() || !NetIsHost() || !mNetManager || !mFusionNextEpoch)

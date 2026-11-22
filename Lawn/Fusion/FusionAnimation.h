@@ -57,7 +57,10 @@ struct FusionAnimationDrawOptions
         float incomingWeight = 1;
     };
     bool rootFlipX = false; // Reflect the complete source hierarchy around its placed root.
+    bool restPoseOnly = false; // Explicit read-only pre-Animator query. DrawPose refuses it.
     std::array<int,4> colorMultiplierRGBA{255,255,255,255};
+    float brightnessGain = 1.0f; // Source material gain, per sprite before the next sprite.
+    std::optional<float> nativeMaskClipBottom; // Explicit Miner28 native ground-plane adaptation; interaction2 only.
     float attackSpeed = 1.0f; // Verified source Animator parameter, distinct from Speed.
     // Optional source-parent attachment projection, in Board pixels per
     // source unit. Translation stays in the ordinary DrawPose x/y arguments.
@@ -84,6 +87,10 @@ struct FusionAnimationDrawOptions
         std::string stateName;
         float elapsedSeconds;
         int layer = -1; // Exact source layer; -1 keeps the existing first-name lookup.
+        float weight = 1.0f; // Source additive-layer fade, supplied by its real clock.
+        // Same additive layer, two source samples from ONE preceding pose.
+        // No clock/event ownership; null-motion states retain that baseline.
+        std::optional<BaseBlend> baseBlend;
     };
     struct SpriteReplacement
     {
@@ -91,6 +98,13 @@ struct FusionAnimationDrawOptions
         std::string spriteGuid;
         float scaleX = 1.0f, scaleY = 1.0f, scaleZ = 1.0f;
         bool overrideScale = true;
+    };
+    // Runtime SpriteRenderer.enabled. This changes only the renderer, leaving
+    // its Transform, active children, physics box and SpriteMask component intact.
+    struct SpriteEnabled
+    {
+        std::string nodePath;
+        bool enabled;
     };
     struct SpriteSorting
     {
@@ -113,6 +127,7 @@ struct FusionAnimationDrawOptions
     uint64_t maskScope=0;
     std::span<const FusionMask269View> worldMasks;
     std::string spritePathPrefix; // Optional filtered source-node pass; empty draws all sprites.
+    std::vector<SpriteEnabled> spriteEnabledOverrides;
     std::vector<SpriteSorting> spriteSortingOverrides;
     std::vector<SortingGroup> sortingGroupOverrides;
     std::vector<MaskSorting> maskSortingOverrides;

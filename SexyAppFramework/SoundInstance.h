@@ -24,6 +24,10 @@ public:
 
 	virtual bool			Play(bool looping, bool autoRelease) = NULL;	
 	virtual void			Stop() = NULL;
+    // Optional cursor-preserving pause; existing backends retain their behavior.
+    virtual bool Pause() { return false; }
+    virtual bool Resume() { return false; }
+    virtual bool IsPaused() { return false; }
 	virtual bool			IsPlaying() = NULL;
 	virtual bool			IsReleased() = NULL;
 	virtual double			GetVolume() = NULL;

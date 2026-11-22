@@ -74,6 +74,18 @@ struct Reader
     void Bool(bool& v) { uint8_t n = 0; U8(n); if (n > 1) valid = false; if (valid) v = n != 0; }
 };
 
+#include "FusionNative313Fields.inc"
+#include "FusionNativeCaptured314Fields.inc"
+
+template<class IO>void Fields(IO& io,FusionSourceObstacle313View& v)
+{
+    uint8_t kind=uint8_t(v.kind);io.U8(kind);v.kind=FusionSourceObstacle313Kind(kind);
+    io.U32(v.instanceToken);io.U16(v.ownerId);io.U16(v.targetPlantId);io.U32(v.ownerToken);io.U32(v.targetPlantToken);
+    io.Bool(v.landed);io.Bool(v.hit);io.Bool(v.fromHypno);io.Bool(v.exploded);
+    io.U8(v.variant);io.U8(v.hitCount);io.U32(v.lastHitAge);Fields(io,v.clock);
+    io.I32(v.ageTicks);io.F32(v.velocityX);io.F32(v.velocityY);io.F32(v.velocityZ);io.F32(v.accelerationZ);
+}
+
 template <typename IO> void DayFields273(IO& io,NativeDayZombie273State& state)
 {
     io.F32(state.shootCountdown);io.U8(state.status);io.U8(state.armorStage);
@@ -148,6 +160,18 @@ template <typename IO> void Fields(IO& io,FusionNightZombie281View& v)
     io.F32(v.outgoingSourceSeconds);io.F32(v.transitionElapsed);io.F32(v.transitionTotal);
 }
 
+template <typename IO> void Fields(IO& io,FusionJackbox300View& v)
+{
+    uint8_t phase=static_cast<uint8_t>(v.phase),outgoing=static_cast<uint8_t>(v.outgoing);
+    uint8_t flags=uint8_t(v.boxPresent)|(uint8_t(v.popTriggered)<<1)|(uint8_t(v.audioPlaying)<<2);
+    io.U8(phase);io.U8(outgoing);io.U8(flags);
+    if(flags&0xf8)io.valid=false;
+    v.phase=static_cast<FusionJackbox300Phase>(phase);v.outgoing=static_cast<FusionJackbox300Phase>(outgoing);
+    v.boxPresent=bool(flags&1);v.popTriggered=bool(flags&2);v.audioPlaying=bool(flags&4);
+    io.F32(v.countdown);io.F32(v.originalCountdown);io.F32(v.outgoingSeconds);
+    io.F32(v.transitionElapsed);io.F32(v.transitionTotal);
+}
+
 template <typename IO> void Fields(IO& io, NativeSourceZombieData& v)
 {
     io.U16(v.kind); io.U32(v.instanceToken); io.F32(v.originSpeed); io.F32(v.health);
@@ -160,6 +184,8 @@ template <typename IO> void Fields(IO& io, NativeSourceZombieData& v)
     io.Bool(head.mPresent);io.Bool(head.mDead);io.U16(head.mFrameStart);io.U16(head.mFrameCount);
     io.F32(head.mAnimTime);io.F32(head.mAnimRate);io.U8(head.mLoopType);io.U8(head.mLoopCount);
     io.Bool(v.vehicleStopped);
+    io.Bool(v.beforeDying);
+    io.I32(v.sourceStatusLevel);
 }
 
 void Fields(Writer& io,NativeStar269PlantState& v)
@@ -267,7 +293,7 @@ void Fields(Reader& io,NativeCompanions269PlantState& v)
 template <typename IO> void Fields(IO& io, GarlicActionState& v)
 {
     uint8_t phase = static_cast<uint8_t>(v.phase); io.U8(phase); v.phase = static_cast<GarlicActionPhase>(phase);
-    io.Bool(v.certainRow); io.U16(v.waitTicks); io.U16(v.moveElapsedTicks); io.U16(v.faceTicks);
+    io.Bool(v.certainRow); io.U16(v.waitTicks); io.U16(v.moveElapsedTicks); io.U16(v.faceTicks); io.U16(v.moveDurationTicks);
     uint8_t origin = static_cast<uint8_t>(v.originRow), target = static_cast<uint8_t>(v.targetRow);
     io.U8(origin); io.U8(target);
     // Decode the maximum native terrain first; frame validation applies its
@@ -422,13 +448,66 @@ bool ValidateNativeSnapshotFrame(const NativeSnapshotFrame& frame, const std::ve
         !UniqueIds(frame.worldPlants269,1024)||!UniqueIds(frame.worldBeams269,1024)||!UniqueIds(frame.droppedCards269,128)||
         !UniqueIds(frame.rollingPlants269,1024)||!UniqueIds(frame.fertilizeCoins269,1024)||
         !UniqueIds(frame.worldRemainder269Aux,1024)||!UniqueIds(frame.worldRemainder269Shots,1024)||!UniqueIds(frame.wheatPlants269,1024)||
-        !UniqueIds(frame.dayZombies273,1024)||!UniqueIds(frame.nightZombies281,1024)||!NativeWorldRemainder269BoardStateValid(frame.worldRemainder269Board)||
-        !FusionAdventureSessionValid273(frame.adventure)||frame.money < 0 || frame.money > 99999) return false;
+        !UniqueIds(frame.dayZombies273,1024)||!UniqueIds(frame.nightZombies281,1024)||!UniqueIds(frame.jackboxZombies300,1024)||!NativeWorldRemainder269BoardStateValid(frame.worldRemainder269Board)||
+        !FusionAdventureSessionValid273(frame.adventure)||frame.money < 0 || frame.money > 99999||
+        !UniqueIds(frame.sourceGraphs313,1024)||!UniqueIds(frame.waterZombies313,1024)||
+        !UniqueIds(frame.heavyZombies313,1024)||!UniqueIds(frame.extendedZombies313,1024)||
+        !UniqueIds(frame.sourceObstacles313,1024)||!UniqueIds(frame.capturedPlants314,1024)||
+        !std::isfinite(frame.sourcePoints)||frame.sourcePoints<0||frame.extendedBoard313.ultimateCount<0||
+        !std::isfinite(frame.extendedBoard313.punishTime)||frame.extendedBoard313.punishTime<0) return false;
+    const auto family313=[&](const auto& records,const auto& owns,const auto& valid)
+    {
+        for(const auto& record:records)
+        {
+            const auto source=std::find_if(frame.sourceZombies.begin(),frame.sourceZombies.end(),[&](const auto& s){return s.id==record.id;});
+            if(source==frame.sourceZombies.end()||!owns(source->data.kind)||!valid(source->data.kind,record.data))return false;
+        }
+        for(const auto& source:frame.sourceZombies)
+            if(owns(source.data.kind)&&std::none_of(records.begin(),records.end(),[&](const auto& v){return v.id==source.id;}))return false;
+        return true;
+    };
+    if(!family313(frame.sourceGraphs313,[](uint16_t k){return FindFusionSourceGraph313(k)!=nullptr;},Native313GraphViewValid)||
+       !family313(frame.waterZombies313,FusionWaterZombie313Kind,Native313WaterViewValid)||
+       !family313(frame.heavyZombies313,NativeHeavyZombie313BKind,Native313HeavyViewValid)||
+       !family313(frame.extendedZombies313,[](uint16_t k){return FindFusionExtendedZombie313Profile(k)!=nullptr;},Native313ExtendedViewValid))return false;
+    if((!frame.sourceGraphs313.empty()||!frame.waterZombies313.empty()||!frame.sourceObstacles313.empty())&&frame.background>BACKGROUND_4_FOG)return false;
+    std::set<uint32_t> obstacleTokens;
+    for(const auto& record:frame.sourceObstacles313)
+    {
+        const auto& v=record.data;
+        if(!FusionSourceObstacle313ViewValid(v)||!obstacleTokens.insert(v.instanceToken).second||
+           std::any_of(frame.projectiles.begin(),frame.projectiles.end(),[&](const auto& p){return p.id==record.id;}))return false;
+        const auto owner=std::find_if(frame.sourceZombies.begin(),frame.sourceZombies.end(),[&](const auto& z){return z.id==v.ownerId&&z.data.instanceToken==v.ownerToken;});
+        const uint16_t expected=v.kind==FusionSourceObstacle313Kind::DrownWeapon?20:v.kind==FusionSourceObstacle313Kind::KirovBomb?26:
+            v.kind==FusionSourceObstacle313Kind::SuperBall?(v.variant?212:43):40;
+        if(owner!=frame.sourceZombies.end()&&owner->data.kind!=expected)return false;
+    }
+    std::set<std::pair<uint16_t,uint32_t>> capturedOriginals;
+    for(const auto& record:frame.capturedPlants314)
+    {
+        const auto& v=record.data;
+        if(record.id!=v.ownerId||v.epoch!=frame.epoch||!CapturedSourcePlant314ViewValid(v)||
+           !capturedOriginals.insert({v.plantId,v.plantToken}).second)return false;
+        const auto owner=std::find_if(frame.sourceZombies.begin(),frame.sourceZombies.end(),[&](const auto& z){return z.id==v.ownerId&&z.data.instanceToken==v.ownerToken&&z.data.kind==45;});
+        if(owner==frame.sourceZombies.end())return false;
+        const auto original=std::find_if(frame.plants.begin(),frame.plants.end(),[&](const auto& p){return p.id==v.plantId;});
+        if(v.retainedActor?(original==frame.plants.end()||original->data.instanceToken!=v.plantToken||original->data.kind!=v.kind):original!=frame.plants.end())return false;
+    }
     if(frame.adventure.enabled)
     {
         const int sourceBackground=(frame.adventure.run.level-1)/9;
         if(frame.background!=sourceBackground)return false;
     }
+    for(const auto& record:frame.jackboxZombies300)
+    {
+        const auto source=std::find_if(frame.sourceZombies.begin(),frame.sourceZombies.end(),
+            [&](const auto& value){return value.id==record.id;});
+        if(source==frame.sourceZombies.end()||!FusionJackbox300ViewValid(source->data.kind,record.data)||
+            !FusionJackbox300RuntimeSpeedValid(source->data.kind,record.data,source->data.originSpeed))return false;
+    }
+    for(const auto& source:frame.sourceZombies)
+        if(FusionJackbox300Kind(source.data.kind)&&std::none_of(frame.jackboxZombies300.begin(),frame.jackboxZombies300.end(),
+            [&](const auto& value){return value.id==source.id;}))return false;
     for(const auto& record:frame.nightZombies281)
     {
         const auto source=std::find_if(frame.sourceZombies.begin(),frame.sourceZombies.end(),
@@ -871,7 +950,10 @@ bool EncodeNativeSnapshot(const NativeSnapshotFrame& frame, const std::vector<Fu
     Fields(writer,copy.worldRemainder269Board);writer.Bool(copy.goldHypnoSummoned);
     Vector(writer,copy.worldRemainder269Aux);Vector(writer,copy.worldRemainder269Shots);
     Vector(writer,copy.wheatPlants269);
-    Vector(writer,copy.dayZombies273);Vector(writer,copy.nightZombies281);
+    Vector(writer,copy.dayZombies273);Vector(writer,copy.nightZombies281);Vector(writer,copy.jackboxZombies300);
+    Vector(writer,copy.sourceGraphs313);Vector(writer,copy.waterZombies313);Vector(writer,copy.heavyZombies313);Vector(writer,copy.extendedZombies313);
+    Vector(writer,copy.sourceObstacles313);Vector(writer,copy.capturedPlants314);
+    writer.F32(copy.sourcePoints);writer.I32(copy.extendedBoard313.ultimateCount);writer.F32(copy.extendedBoard313.punishTime);
     if(!writer.valid)return false;
     constexpr size_t headerBytes = 14;
     if (metadata.Size() > 65535 || headerBytes + metadata.Size() > kMaximumBytes - nativeBody.Size()) return false;
@@ -913,7 +995,10 @@ bool DecodeNativeSnapshot(LawnNet::NetBuffer& wire, const std::vector<FusionBank
     Fields(reader,decoded.worldRemainder269Board);reader.Bool(decoded.goldHypnoSummoned);
     Vector(reader,decoded.worldRemainder269Aux,1024);Vector(reader,decoded.worldRemainder269Shots,1024);
     Vector(reader,decoded.wheatPlants269,1024);
-    Vector(reader,decoded.dayZombies273,1024);Vector(reader,decoded.nightZombies281,1024);
+    Vector(reader,decoded.dayZombies273,1024);Vector(reader,decoded.nightZombies281,1024);Vector(reader,decoded.jackboxZombies300,1024);
+    Vector(reader,decoded.sourceGraphs313,1024);Vector(reader,decoded.waterZombies313,1024);Vector(reader,decoded.heavyZombies313,1024);Vector(reader,decoded.extendedZombies313,1024);
+    Vector(reader,decoded.sourceObstacles313,1024);Vector(reader,decoded.capturedPlants314,1024);
+    reader.F32(decoded.sourcePoints);reader.I32(decoded.extendedBoard313.ultimateCount);reader.F32(decoded.extendedBoard313.punishTime);
     if (!reader.valid || metadata.Remaining() || decoded.epoch != expectedEpoch || !ValidateNativeSnapshotFrame(decoded, eligible)) return false;
     LawnNet::NetBuffer body;
     body.mData.resize(bodyBytes);

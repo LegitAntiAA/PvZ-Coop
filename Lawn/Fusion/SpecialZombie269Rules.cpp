@@ -99,7 +99,7 @@ bool StepSpecialZombie269PaperShootCounter(int& ticks,bool angry,bool stopped,bo
 }
 bool TryPlanSpecialZombie269Crash(uint16_t sourceKind,uint16_t plantKind,bool caltrop,bool isNut,int level,SpecialZombie269CrashPlan& out)
 {
-    if((sourceKind!=14&&sourceKind!=18)||level<0)return false;
+    if((sourceKind!=14&&sourceKind!=18&&sourceKind!=40)||level<0)return false;
     SpecialZombie269CrashPlan p;
     if(!caltrop)
     {

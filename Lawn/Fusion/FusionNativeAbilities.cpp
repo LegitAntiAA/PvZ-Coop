@@ -1,4 +1,5 @@
 #include "FusionNative.h"
+#include "FusionNativeSourceDamage315.h"
 #include "FusionNativeVisual.h"
 #include "FusionCherryRules.h"
 #include "FusionPotatoRules.h"
@@ -350,6 +351,7 @@ bool ApplyNativeFusionCherryDamage(Zombie* zombie)
     if (!HasNativeContext(zombie) || zombie->mApp->NetIsClient() || zombie->mNetGhost ||
         zombie->mDead || zombie->IsDeadOrDying() || zombie->mMindControlled ||
         !IsNativeFusionGroundZombie(zombie)) return false;
+    if(GetNativeSourceZombieData(zombie))return ApplyNativeSourceCharred315(zombie,1800);
     FusionCherryDamage result;
     if (!TryResolveFusionCherryDamage(kFusionSourceNormalDifficulty,
         static_cast<float>(zombie->mBodyHealth), zombie->mHelmHealth, result)) return false;

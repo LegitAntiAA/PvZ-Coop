@@ -1,5 +1,6 @@
 #include "FusionNativePoison.h"
 #include "FusionNative.h"
+#include "FusionNativeZombie313Dispatch.h"
 #include "FusionNativeSummon269.h"
 #include "../Board.h"
 #include "../Zombie.h"
@@ -12,6 +13,7 @@ namespace
 {
 bool HostActor(const Zombie* z)
 {
+    bool source313=false;if(NativeZombie313StatusTarget(z,FusionExtendedEffect313::Poison,source313))return source313;
     return z&&z->mApp&&!z->mApp->NetIsClient()&&!z->mNetGhost&&z->mApp->mBoard==z->mBoard&&
         IsNativeFusionBoard(z->mBoard)&&NativeFusionBackgroundValid(static_cast<uint8_t>(z->mBoard->mBackground))&&
         IsNativeFusionGroundZombie(z);

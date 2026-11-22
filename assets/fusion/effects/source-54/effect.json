@@ -817,5 +817,17 @@
     "Shader HDR/soft-particle material edge behavior bounded; native alpha blend",
     "Every source sprite retained; random starting UV phase uses native frame0; native lifetime animation approximates Unity phase",
     "Fractional UV crops conservatively quantized <1texel/edge; sequence canvases center-padded preserving original source pixels/PPU"
-  ]
+  ],
+  "sourceFactoryRootPose": {
+    "method": "CreateParticle.SetParticle",
+    "address": "0x180444630",
+    "rotation": "Quaternion.identity",
+    "prefabRotation": {
+      "x": 0.0,
+      "y": 0.0,
+      "z": 0.0,
+      "w": 1.0
+    },
+    "scale": "prefab preserved"
+  }
 }

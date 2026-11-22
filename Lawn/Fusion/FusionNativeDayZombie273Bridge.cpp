@@ -1,5 +1,11 @@
 #include "FusionNativeDayZombie273Bridge.h"
 #include "FusionNativeAdventure273.h"
+#include "FusionNativeSourceClock313.h"
+#include "FusionNativeSourceGraph313.h"
+#include "FusionNativeZombie313Dispatch.h"
+#include "FusionNativeHeavyZombie313BBridge.h"
+#include "FusionNativeExtendedZombie313Bridge.h"
+#include "FusionNativeWaterZombie313.h"
 #include "FusionNativeNightZombie281.h"
 #include "FusionNativeZombiePreflight280.h"
 #include "FusionSourceZombieClosure280.h"
@@ -15,6 +21,7 @@
 #include "FusionNativeRemainingPlants269.h"
 #include "FusionNativeProjectileMetadata.h"
 #include "FusionNativeWire.h"
+#include "FusionNativeJackbox309Bridge.h"
 #include "NativeSpecialZombie269.h"
 #include "SpecialZombie269Rules.h"
 #include "../Board.h"
@@ -42,22 +49,48 @@ bool GroundController(uint16_t kind)
     if(FindFusionDayZombie273Profile(kind)||SpecialZombie269PaperKind(kind))return true;
     // Existing actual ordinary, Door, TallIceNut and Football mechanisms.
     // Jackson additionally requires the FNS27 source controller contract below.
-    return kind==0||kind==2||kind==4||kind==8||kind==111||kind==9||kind==109||kind==10;
+    return kind==0||kind==2||kind==4||kind==8||kind==111||kind==9||kind==109||kind==10||FusionJackbox300Kind(kind);
+}
+bool Coexisting313Controller(uint16_t kind)
+{return FusionWaterZombie313Kind(kind)||FindFusionSourceGraph313(kind);}
+bool Coexisting313Actor(Zombie* z)
+{
+    NativeZombie313Semantics semantics;
+    if(!GetNativeZombie313Semantics(z,semantics))return false;
+    if(FusionWaterZombie313Kind(semantics.kind))
+        return NativeWaterZombie313WorldValid(z->mBoard,semantics.kind,z->mRow,nullptr,z->mMindControlled);
+    const auto* graph=GetNativeSourceGraph313(z);
+    const auto uid=z->mBoard->mZombies.DataArrayGetID(z);
+    if(!graph||!graph->initialized||graph->failed||graph->localUID!=uid)return false;
+    if(NativeHeavyZombie313BKind(semantics.kind))
+    {
+        const auto* state=GetNativeHeavyZombie313B(z);
+        return state&&state->initialized&&!state->failed;
+    }
+    const auto* state=GetNativeExtendedZombie313(z);
+    return state&&state->initialized&&!state->failed;
 }
 bool OrdinarySourceGrass(Board* b,uint16_t candidate,std::vector<uint16_t>& closure)
 {
-    if(!IsNativeSourceAdventureGrassWorld281(b)||!GroundController(candidate))return false;
+    // Birth closure remains dry/no-grid: Pole GetLadder has not been ported.
+    // This is a world/controller requirement, independent of the scheduler.
+    if(!IsNativeSourceWorld313(b)||GetNativeFusionRowCount(b)!=5||b->mGridItems.mSize||
+        !GroundController(candidate))return false;
     std::vector<uint16_t> roots{candidate};Zombie* actor=nullptr;
     while(b->IterateZombies(actor))
     {
+        if(actor->mDead)continue;
         const auto* source=GetNativeSourceZombieData(actor);
-        if(!source||!GroundController(source->kind))return false;
+        const auto uid=b->mZombies.DataArrayGetID(actor);
+        if(!IsNativeSourceZombie(actor)||!source||!uid||source->instanceToken!=uid||
+            actor->mRow<0||actor->mRow>=5)return false;
+        if(!GroundController(source->kind)&&!Coexisting313Actor(actor))return false;
         roots.push_back(source->kind);
     }
-    // The wave roster is not the actor roster: genuine plant/child callbacks
-    // may create a different supported source family. Check its real closure.
+    // Keep the complete source child closure, including known independent
+    // A/B/C controllers; these are never substituted with a Day controller.
     if(!BuildFusionSourceZombieClosure280(roots,closure))return false;
-    for(auto kind:closure)if(!GroundController(kind))return false;
+    for(auto kind:closure)if(!GroundController(kind)&&!Coexisting313Controller(kind))return false;
     return true;
 }
 bool Host(const Zombie* z)
@@ -230,6 +263,9 @@ bool CanSpawnNativeGrassZombie284(Board* b,uint16_t kind,std::string* error)
     if(kNativeFusionSnapshotVersion<26)return reject("Source controller state is absent from the native wire contract.");
     for(auto dependency:closure)
     {
+        if(FusionJackbox300Kind(dependency)&&(kNativeFusionSnapshotVersion<28||
+            !LawnNet::NetSourceJackbox309Ready(b->mApp)||!FxReady(b,42,error)))
+            return reject("Jackbox requires FNS28, genuine per-owner sound and source effect42.");
         if(dependency==10&&(kNativeFusionSnapshotVersion<27||!LawnNet::NetSourceSound284Ready(b->mApp,69)||!FxReady(b,11,error)))
             return reject("Jackson requires FNS27, real Sound69 and source effect11.");
         if(!EnsureNativeSourceZombieVisuals(b,dependency,error))return false;
@@ -239,12 +275,15 @@ bool CanSpawnNativeGrassZombie284(Board* b,uint16_t kind,std::string* error)
             (Sexy::SOUND_GRASSSTEP<0||Sexy::SOUND_POLEVAULT<0||!FxReady(b,23,error)))return false;
         if((FusionDayZombie273Doll(dependency)||dependency==6)&&!FxReady(b,11,error))return false;
         if(dependency==100&&!FxReady(b,0,error))return false;
+        if(dependency==101&&!FxReady(b,10,error))return false;
+        if(dependency==102&&!FxReady(b,16,error))return false;
         if(dependency==108&&!FxReady(b,18,error))return false;
         if((dependency==106||dependency==108)&&!CanCreateNativeEquipmentVisual(b,FusionEquipmentType::Bucket))
             return reject("Actual source Bucket item resource is unavailable.");
         if(FusionDayZombie273Shooter(dependency))
         {
-            NativeProjectileData shot;shot.kind=dependency==100?0:11;shot.damage=dependency==100?20:80;shot.specialType=9;shot.isZombieBullet=true;
+            FusionDayZombie273Shot sourceShot;if(!TryMakeFusionDayZombie273Shot(dependency,0,false,false,0,false,sourceShot))return false;
+            NativeProjectileData shot;shot.kind=sourceShot.kind;shot.damage=sourceShot.damage;shot.specialType=sourceShot.way;shot.isZombieBullet=sourceShot.hostile;
             if(!NativeProjectileMetadataValid(shot,PROJECTILE_PEA,MOTION_BACKWARDS)||!EnsureNativeProjectileVisuals(b,shot.kind))
                 return reject("Source hostile projectile family is not ready.");
         }

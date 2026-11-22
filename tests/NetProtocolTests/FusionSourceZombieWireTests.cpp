@@ -20,7 +20,7 @@ void Check(bool condition,int line)
 }
 #define CHECK(condition) Check(!!(condition),__LINE__)
 constexpr uint32_t kEpoch = 19;
-constexpr size_t kHeaderBytes = 14, kSourceRecordBytes = 50, kEmptyEquipmentTailBytes = 52; // Includes empty Day and Jackson family counts.
+constexpr size_t kHeaderBytes = 14, kSourceRecordBytes = 55, kEmptyEquipmentTailBytes = 78; // Existing54 + FNS28 six empty313/314 counts12 + Board ledger12.
 constexpr size_t kDisabledAdventureSessionBytes=1; // FNS26, between temporaryLightLevel and Garlic count.
 const std::vector<FusionBankEligibleCard> eligible = {{0,false,100,7.5f},{1,false,50,7.5f}};
 
@@ -143,6 +143,14 @@ FusionSourceZombieWireTestResult RunFusionSourceZombieWireTests()
     const size_t sourceCount=SourceCountOffset(wire), first=sourceCount+2, second=first+kSourceRecordBytes;
     CHECK(U16(wire,sourceCount)==2 && U16(wire,first)==41 && U16(wire,first+2)==0);
     CHECK(U16(wire,second)==42 && U16(wire,second+2)==2);
+    CHECK(wire.mData[first+50]==0&&wire.mData[second+50]==0);
+    for(uint8_t invalid:{uint8_t(2),uint8_t(255)})
+    {auto bad=wire;bad.mData[first+50]=invalid;RejectWireAtomically(bad);}
+    {
+        auto dying=frame;dying.sourceZombies[0].data.beforeDying=true;dying.sourceZombies[0].data.sourceStatusLevel=3;
+        auto encoded=Encode(dying);NativeSnapshotFrame restored;NetBuffer body;
+        CHECK(DecodeNativeSnapshot(encoded,eligible,kEpoch,restored,body)&&restored.sourceZombies.size()==2&&restored.sourceZombies[0].data.beforeDying&&restored.sourceZombies[0].data.sourceStatusLevel==3);
+    }
     const size_t equipmentTail=second+kSourceRecordBytes;
     CHECK(equipmentTail+kEmptyEquipmentTailBytes==kHeaderBytes+U16(wire,6));
     CHECK(U16(wire,equipmentTail)==0 && U16(wire,equipmentTail+2)==0 && U16(wire,equipmentTail+4)==0);
@@ -188,7 +196,7 @@ FusionSourceZombieWireTestResult RunFusionSourceZombieWireTests()
     // All byte truncations, including the appended record's final target token.
     for (size_t length=0;length<wire.Size();++length)
     { auto truncated=wire; truncated.mData.resize(length); RejectWireAtomically(truncated); }
-    for (uint16_t version : {uint16_t(13),uint16_t(14),uint16_t(15),uint16_t(16),uint16_t(17),uint16_t(18),uint16_t(19),uint16_t(20),uint16_t(21),uint16_t(22),uint16_t(23),uint16_t(24),uint16_t(25),uint16_t(26),uint16_t(28)})
+    for (uint16_t version : {uint16_t(13),uint16_t(14),uint16_t(15),uint16_t(16),uint16_t(17),uint16_t(18),uint16_t(19),uint16_t(20),uint16_t(21),uint16_t(22),uint16_t(23),uint16_t(24),uint16_t(25),uint16_t(26),uint16_t(27),uint16_t(29)})
     { auto wrongVersion=wire; PutU16(wrongVersion,4,version); RejectWireAtomically(wrongVersion); }
     // FNS18 action record id2+mask1+scale4+Doom/JalaedBool2+poisonI32*3+waterGrapI32*2 precedes the unchanged
     // coin/glove/money/light/Garlic/source tail. Noncanonical Bool must reject

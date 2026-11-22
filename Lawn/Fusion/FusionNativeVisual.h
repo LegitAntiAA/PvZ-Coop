@@ -19,6 +19,9 @@ namespace LawnFusion
 {
 enum class FusionCompanion269Family:uint8_t;
 enum class NativeWorldRemainder269Family:uint8_t;
+struct FrozenSourcePose314;
+struct FusionAnimationMask;
+using CapturedMatrix314=std::array<float,6>;
 struct NativeFieldView277
 {
     uint8_t background=0;
@@ -69,6 +72,12 @@ public:
     void ConfirmPlantOverlayQueued(Plant*);
     bool DrawPlantOverlay(Sexy::Graphics*,Plant*) const;
     bool DrawPlant(Sexy::Graphics* graphics, Plant* plant) const;
+    bool CapturePlant314(Plant*,FrozenSourcePose314&,uint16_t& modelKind,bool& nativeArtwork,CapturedMatrix314& world,std::string&);
+    void PinCapturedPlant314(uint16_t kind,bool pin);
+    bool DrawCapturedPlant314(Sexy::Graphics*,uint16_t,const FrozenSourcePose314&,const CapturedMatrix314&) const;
+    bool CapturedPlantNode314(uint16_t,const FrozenSourcePose314&,const CapturedMatrix314&,const char*,float&,float&,bool&) const;
+    bool CollectCapturedPlantMasks314(Sexy::Graphics*,uint16_t,const FrozenSourcePose314&,const CapturedMatrix314&,std::vector<FusionAnimationMask>&) const;
+
     bool GetPlantNodePoint(const Plant* plant,const char* path,float& x,float& y) const;
     bool GetPlantNodeActivity(const Plant*,const char* path,bool& active) const;
     bool GetPlantNodeTransform(const Plant* plant,const char* path,std::array<float,6>& out) const;

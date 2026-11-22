@@ -1,0 +1,276 @@
+{
+  "schema": 1,
+  "sourcePrefab": "Resources/items/KirovBomb.prefab",
+  "unitsPerNativePixel": 0.01,
+  "applyRootMotion": false,
+  "static": true,
+  "root": 0,
+  "nodes": [
+    {
+      "name": "KirovBomb",
+      "active": true,
+      "tag": "Untagged",
+      "parent": -1,
+      "path": "",
+      "position": {
+        "x": 4.4575,
+        "y": 2.7224998,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5
+      }
+    }
+  ],
+  "sourceHierarchy": null,
+  "sprites": [
+    {
+      "texture": "textures/c6be7b713f82.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Zombie_jackbox_box\n  m_Rect:\n    serializedVersion: 2\n    x: 645\n    y: 489\n    width: 84\n    height: 85\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    86045b78efa48aa4ebd0b5099b50825d: 8786254923438094982\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: e69a4a0337caf294a8bde5d3fd86e063, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 12\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 6\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 050004000300000003000400010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 6\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 128\n      _typelessdata: ec51b83e9a99d93e000000003d0ad73e9a99d9be000000003d0ad73e85eb913e000000001f856bbe9a99d9be000000003d0ad7be9a99d93e000000003d0ad7be6666a6be000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 645\n      y: 489\n      width: 84\n      height: 85\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 687, z: 100, w: 531.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.36000001430511475,
+            "y": 0.42500001192092896,
+            "z": 0.0,
+            "u": 0.7060546888969839,
+            "v": 0.7197265619179234
+          },
+          {
+            "x": 0.41999998688697815,
+            "y": -0.42500001192092896,
+            "z": 0.0,
+            "u": 0.7119140612194315,
+            "v": 0.7612304693320766
+          },
+          {
+            "x": 0.41999998688697815,
+            "y": 0.2849999964237213,
+            "z": 0.0,
+            "u": 0.7119140612194315,
+            "v": 0.726562500174623
+          },
+          {
+            "x": -0.23000000417232513,
+            "y": -0.42500001192092896,
+            "z": 0.0,
+            "u": 0.6484374995925464,
+            "v": 0.7612304693320766
+          },
+          {
+            "x": -0.41999998688697815,
+            "y": 0.42500001192092896,
+            "z": 0.0,
+            "u": 0.6298828137805685,
+            "v": 0.7197265619179234
+          },
+          {
+            "x": -0.41999998688697815,
+            "y": -0.32499998807907104,
+            "z": 0.0,
+            "u": 0.6298828137805685,
+            "v": 0.7563476556679234
+          }
+        ],
+        "indices": [
+          5,
+          4,
+          3,
+          0,
+          3,
+          4,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/kirovzombie/Zombie_jackbox_box.asset",
+      "textureRect": {
+        "x": 645.0,
+        "y": 489.0,
+        "width": 84.0,
+        "height": 85.0,
+        "yTop": 1474.0
+      },
+      "logicalSize": {
+        "width": 84.0,
+        "height": 85.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "d8e43670c688c1a4fb0c4a363bbfc67a",
+      "node": 0,
+      "sortingOrder": 1,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false,
+      "maskInteraction": 0
+    }
+  ],
+  "spriteVariants": {
+    "d8e43670c688c1a4fb0c4a363bbfc67a": {
+      "texture": "textures/c6be7b713f82.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Zombie_jackbox_box\n  m_Rect:\n    serializedVersion: 2\n    x: 645\n    y: 489\n    width: 84\n    height: 85\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    86045b78efa48aa4ebd0b5099b50825d: 8786254923438094982\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: e69a4a0337caf294a8bde5d3fd86e063, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 12\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 6\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 050004000300000003000400010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 6\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 128\n      _typelessdata: ec51b83e9a99d93e000000003d0ad73e9a99d9be000000003d0ad73e85eb913e000000001f856bbe9a99d9be000000003d0ad7be9a99d93e000000003d0ad7be6666a6be000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 645\n      y: 489\n      width: 84\n      height: 85\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 687, z: 100, w: 531.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.36000001430511475,
+            "y": 0.42500001192092896,
+            "z": 0.0,
+            "u": 0.7060546888969839,
+            "v": 0.7197265619179234
+          },
+          {
+            "x": 0.41999998688697815,
+            "y": -0.42500001192092896,
+            "z": 0.0,
+            "u": 0.7119140612194315,
+            "v": 0.7612304693320766
+          },
+          {
+            "x": 0.41999998688697815,
+            "y": 0.2849999964237213,
+            "z": 0.0,
+            "u": 0.7119140612194315,
+            "v": 0.726562500174623
+          },
+          {
+            "x": -0.23000000417232513,
+            "y": -0.42500001192092896,
+            "z": 0.0,
+            "u": 0.6484374995925464,
+            "v": 0.7612304693320766
+          },
+          {
+            "x": -0.41999998688697815,
+            "y": 0.42500001192092896,
+            "z": 0.0,
+            "u": 0.6298828137805685,
+            "v": 0.7197265619179234
+          },
+          {
+            "x": -0.41999998688697815,
+            "y": -0.32499998807907104,
+            "z": 0.0,
+            "u": 0.6298828137805685,
+            "v": 0.7563476556679234
+          }
+        ],
+        "indices": [
+          5,
+          4,
+          3,
+          0,
+          3,
+          4,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/kirovzombie/Zombie_jackbox_box.asset",
+      "textureRect": {
+        "x": 645.0,
+        "y": 489.0,
+        "width": 84.0,
+        "height": 85.0,
+        "yTop": 1474.0
+      },
+      "logicalSize": {
+        "width": 84.0,
+        "height": 85.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    }
+  },
+  "extraSpriteGuids": {},
+  "anchors": {},
+  "visualBounds": {
+    "minX": -0.20999999344348907,
+    "maxX": 0.20999999344348907,
+    "minY": -0.21250000596046448,
+    "maxY": 0.21250000596046448
+  },
+  "clips": {},
+  "controller": {
+    "states": [],
+    "layers": [],
+    "serializedController": ""
+  },
+  "nonRenderingComponents": [],
+  "colliders": [],
+  "ignoredBindings": [],
+  "omittedInactiveNodes": [],
+  "spritePrefix": null,
+  "unusedSpriteBonesExplicitlyAllowed": false,
+  "sources": [
+    {
+      "path": "Resources/items/KirovBomb.prefab",
+      "sha256": "707dcd73a9167a9e09d1a589932084af8ad4d502e246eaa2800a35ff55ec9b93"
+    },
+    {
+      "path": "Resources/zombies/kirovzombie/KirovAirship.png",
+      "sha256": "c6be7b713f82297b67aa196b302cefb4552eb26acf9cc649ce6c9e350c546e3b"
+    },
+    {
+      "path": "Resources/zombies/kirovzombie/KirovAirship.png.meta",
+      "sha256": "e1a41bfe8a185685415ad6505018e9a46568005dda77372ff351ea24d992efe3"
+    },
+    {
+      "path": "Resources/zombies/kirovzombie/Zombie_jackbox_box.asset",
+      "sha256": "b2ecd858610e78f94cee896a292112cc4171afcd338ace18322f5f2d2c833b16"
+    },
+    {
+      "path": "Resources/zombies/kirovzombie/Zombie_jackbox_box.asset.meta",
+      "sha256": "7ad91a2c37897fd77a51ce2c4473efc427956723ae475e8ba7e95c0423ce0a85"
+    }
+  ],
+  "deferredComponents": [],
+  "validation": "Exported source data. Native rendering and source-runtime comparison are separate verification steps.",
+  "rendererFeatures": [
+    "spriteMaskV1",
+    "spriteSkinV1"
+  ],
+  "sourceMasks": [],
+  "sourceSkins": []
+}

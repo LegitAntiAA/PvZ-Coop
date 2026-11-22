@@ -6,6 +6,8 @@
 #include "Attachment.h"
 #include "ReanimAtlas.h"
 #include "EffectSystem.h"
+#include "../Lawn/Fusion/FusionNativeCharred311.h"
+#include "../Lawn/Fusion/FusionNativeSourceClock313.h"
 #include "../GameConstants.h"
 #include "../SexyAppFrameWork/Font.h"
 #include "../SexyAppFrameWork/PerfTimer.h"
@@ -430,6 +432,7 @@ void Reanimation::ReanimationInitialize(float theX, float theY, ReanimatorDefini
 // GOTY @Patoke: 0x4761C0
 void Reanimation::Update()
 {
+    if(LawnFusion::NativeSourceGraph313OwnsClock(this))return;
 	if (mFrameCount == 0 || mDead)
 		return;
 
@@ -967,6 +970,7 @@ void Reanimation::DrawRenderGroup(Graphics* g, int theRenderGroup)
 
 void Reanimation::Draw(Graphics* g)
 { 
+	if (LawnFusion::DrawNativeSourceCharred311(g,this)) return;
 	DrawRenderGroup(g, RENDER_GROUP_NORMAL);
 }
 

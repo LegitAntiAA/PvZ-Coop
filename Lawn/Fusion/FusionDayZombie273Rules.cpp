@@ -10,7 +10,8 @@ namespace
 constexpr FusionZombieProfile profiles[]={
     {3,720,0,0,50,false},{6,720,0,0,50,false},{7,270,0,0,50,false},{21,2000,4400,0,50,false},
     {22,2000,2200,0,50,false},{23,2000,1100,0,50,false},
-    {100,270,0,0,50,false},{106,270,2200,0,50,false},
+    {100,270,0,0,50,false},{101,500,0,0,50,false},{102,500,0,0,50,false},
+    {103,270,1100,0,50,false},{106,270,2200,0,50,false},
     {107,270,1100,0,50,false},{108,1350,0,0,50,false}};
 constexpr uint16_t danceDeps[]={7},jacksonDeps[]={6,7};
 constexpr uint16_t diamondDeps[]={22,23,2},goldDeps[]={23,2},silverDeps[]={2};
@@ -76,7 +77,9 @@ const FusionZombieProfile* FindFusionDayZombie273Profile(uint16_t kind)
 {for(const auto& p:profiles)if(p.kind==kind)return &p;return nullptr;}
 bool FusionDayZombie273Pole(uint16_t kind){return kind==3||kind==6||kind==7;}
 bool FusionDayZombie273Doll(uint16_t kind){return kind==21||kind==22||kind==23;}
-bool FusionDayZombie273Shooter(uint16_t kind){return kind==100||kind==108;}
+bool FusionDayZombie273Shooter(uint16_t kind){return kind==100||kind==101||kind==102||kind==108;}
+bool FusionDayZombie273NutArmor(uint16_t kind){return kind==103||kind==106||kind==107;}
+float FusionDayZombie273ShootInterval(uint16_t kind){return FusionDayZombie273Shooter(kind)?(kind==102?3.f:1.5f):0.f;}
 std::span<const uint16_t> FusionDayZombie273NpcDependencies(uint16_t kind)
 {
     if(kind==10)return jacksonDeps;if(kind==6)return danceDeps;if(kind==21)return diamondDeps;if(kind==22)return goldDeps;if(kind==23)return silverDeps;
@@ -88,8 +91,9 @@ uint32_t FusionDayZombie273RequiredCapabilities(uint16_t kind)
     uint32_t result=Day273Model|Day273Wire|Day273SharedBody|Day273BodyParts;
     if(FusionDayZombie273Pole(kind))return result|Day273Pole|Day273PlantContact|Day273Fx;
     if(FusionDayZombie273Doll(kind))return result|Day273Armor|Day273DollFall|Day273Fx|Day273HeadClock;
-    if(kind==106||kind==107)return result|Day273Armor|(kind==106?Day273BucketItem:0);
-    return result|Day273HeadClock|Day273PlantContact|Day273Fx|(kind==100?Day273Bullet0:Day273Bullet11|Day273BucketItem);
+    if(FusionDayZombie273NutArmor(kind))return result|Day273Armor|(kind==106?Day273BucketItem:0);
+    return result|Day273HeadClock|Day273PlantContact|Day273Fx|(kind==100?Day273Bullet0:
+        kind==101?Day273BulletCherry:kind==102?Day273BulletSuperCherry:Day273Bullet11|Day273BucketItem);
 }
 bool FusionDayZombie273CapabilitiesReady(uint16_t kind,uint32_t actual)
 {const auto needed=FusionDayZombie273RequiredCapabilities(kind);return needed&&(actual&needed)==needed;}
@@ -119,7 +123,7 @@ bool TryGetFusionDayZombie273Clip(uint16_t kind,int status,bool eating,FusionDay
             (kind==6?"Zombie_polevaulter_jump 1":"Zombie_polevaulter_jump"):status==1?
             "Zombie_polevaulter_die":eating?"Zombie_polevaulter_eat":"Zombie_polevaulter_walk";
     }
-    else if(FusionDayZombie273Shooter(kind)||kind==106||kind==107)
+    else if(FusionDayZombie273Shooter(kind)||FusionDayZombie273NutArmor(kind))
     {
         if(status==1)c={"die","anim_death",1.3333334f,1,false};
         else if(status==0)c=eating?FusionDayZombie273Clip{"attack","anim_eat",1.35f,1,true}:
@@ -133,7 +137,7 @@ bool TryGetFusionDayZombie273RootDelta(uint16_t kind,int status,FusionZombieClip
     FusionZombieClipPosition after,bool right,double projection,double& out)
 {
     if(!std::isfinite(projection)||projection<0)return false;
-    if(FusionDayZombie273Shooter(kind)||kind==106||kind==107)
+    if(FusionDayZombie273Shooter(kind)||FusionDayZombie273NutArmor(kind))
         return status==0&&TryGetFusionZombieRootDelta(0,true,before,after,right,out,projection);
     if(!FusionDayZombie273Pole(kind))return false;
     std::span<const RootKey> keys;float duration=0;
@@ -177,13 +181,15 @@ bool TryStepFusionDayZombie273Shoot(uint16_t kind,float before,float interval,fl
 bool TryMakeFusionDayZombie273Shot(uint16_t kind,int status,bool pending,bool changing,int move,bool controlled,FusionDayZombie273Shot& out)
 {
     if(!FusionDayZombie273Shooter(kind)||status==1||pending||changing||(move!=0&&move!=1))return false;
-    FusionDayZombie273Shot shot;shot.kind=kind==100?0:11;shot.damage=kind==100?20:80;
-    shot.way=move==0?9:0;shot.hostile=!controlled;shot.offsetX=move==0?-.4f:.4f;out=shot;return true;
+    FusionDayZombie273Shot shot;shot.kind=kind==100?0:kind==101?1:kind==102?3:11;
+    shot.damage=kind==100?20:kind==101?60:kind==102?300:80;
+    shot.way=move==0?9:0;shot.hostile=!controlled;
+    shot.offsetX=kind==102?(controlled?.1f:-.1f):(move==0?-.4f:.4f);out=shot;return true;
 }
 bool FusionDayZombie273ProjectileTuple(uint16_t kind,int damage,uint8_t way,bool hostile)
 {
-    if((kind!=0&&kind!=11)||(way!=0&&way!=9))return false;
-    const int original=kind==0?20:80;
+    if((kind!=0&&kind!=1&&kind!=11)||(way!=0&&way!=9))return false;
+    const int original=kind==0?20:kind==1?60:80;
     return damage==original||(!hostile&&damage==original*2);
 }
 bool FusionDayZombie273ProjectileCanHit(int status)
@@ -194,9 +200,9 @@ bool FusionDayZombie273ProjectileCanHit(int status)
 }
 bool TryPlanFusionDayZombie273ZombieHit(uint16_t kind,uint8_t way,int damage,int secondArmor,bool controlled,FusionDayZombie273ZombieHit& out)
 {
-    if((kind!=0&&kind!=11)||(way!=0&&way!=9)||damage<0||secondArmor<0)return false;
+    if((kind!=0&&kind!=1&&kind!=11)||(way!=0&&way!=9)||damage<0||secondArmor<0)return false;
     FusionDayZombie273ZombieHit hit;hit.damage=damage;
-    if(kind==0)hit.sourceDamageType=way==9?4:0;
+    if(kind==0||kind==1)hit.sourceDamageType=way==9?4:0;
     else
     {
         const uint32_t sum=uint32_t(damage)+uint32_t(secondArmor);
@@ -207,9 +213,9 @@ bool TryPlanFusionDayZombie273ZombieHit(uint16_t kind,uint8_t way,int damage,int
 }
 bool TryGetFusionDayZombie273ArmorStage(uint16_t kind,int health,int maximum,uint8_t previous,uint8_t& stage,int& sprite)
 {
-    if((!FusionDayZombie273Doll(kind)&&kind!=106&&kind!=107)||maximum<=0||health<0||health>maximum||previous>2)return false;
+    if((!FusionDayZombie273Doll(kind)&&!FusionDayZombie273NutArmor(kind))||maximum<=0||health<0||health>maximum||previous>2)return false;
     uint8_t next=previous;
-    if(kind==107)
+    if(kind==103||kind==107)
     {
         const uint32_t twice=uint32_t(maximum)*2U;
         const int64_t wrapped=twice&0x80000000U?int64_t(twice)-0x100000000LL:twice;
@@ -224,12 +230,12 @@ bool TryGetFusionDayZombie273ArmorStage(uint16_t kind,int health,int maximum,uin
     stage=next;
     // GameAPP.zombieSprite indices:21=44/45,22=46/47,23=48/49,
     // BucketNut=14/15, CherryNut=16/17. stage0 retains original prefab sprite.
-    const int base=FusionDayZombie273Doll(kind)?44+(kind-21)*2:kind==106?14:16;
+    const int base=FusionDayZombie273Doll(kind)?44+(kind-21)*2:kind==103?8:kind==106?14:16;
     sprite=next?base+int(next)-1:-1;return true;
 }
 bool TryStepFusionDayZombie273Armor(uint16_t kind,int before,int damage,int& after,int& overkill)
 {
-    if((!FusionDayZombie273Doll(kind)&&kind!=106&&kind!=107)||before<0||damage<0)return false;
+    if((!FusionDayZombie273Doll(kind)&&!FusionDayZombie273NutArmor(kind))||before<0||damage<0)return false;
     after=before>damage?before-damage:0;overkill=damage>before?damage-before:0;return true;
 }
 bool TryGetFusionDayZombie273DollChild(uint16_t kind,uint16_t& child)

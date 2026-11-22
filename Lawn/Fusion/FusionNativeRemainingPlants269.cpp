@@ -1,5 +1,6 @@
 #include "FusionNativeRemainingPlants269.h"
 #include "FusionNative.h"
+#include "FusionNativeZombie313Dispatch.h"
 #include "FusionNativeShooterTiming.h"
 #include "FusionNativeVisual.h"
 #include "FusionNativePlantDamage.h"
@@ -55,7 +56,8 @@ void GrabHit(Plant* p)
 {
     if(auto* z=ResolveTarget(p))
     {
-        float x=0,y=0;if(z->GetShadowCenter(x,y))
+        bool source313=false;const bool knockAllowed=!NativeZombie313StatusTarget(z,FusionExtendedEffect313::Knockback,source313)||source313;
+        float x=0,y=0;if(knockAllowed&&z->GetShadowCenter(x,y))
         {auto* b=p->mBoard;const double origin=b->GetCellCenterX(0,z->mRow),sx=(x-origin)/kFusionBasePixelsX-4.8;
          const double right=1.35*(b->GetColumnCount()-1)-4.8+4.;double moved=sx;
          if(TryGetFusionFireKnockBack(sx,right,1.5,moved)){z->mPosX+=float((moved-sx)*kFusionBasePixelsX);z->mX=int(z->mPosX);}}

@@ -17,6 +17,7 @@
 #include "../Sexy.TodLib/EffectSystem.h"
 #include "../Sexy.TodLib/FilterEffect.h"
 #include "Fusion/FusionNative.h"
+#include "Fusion/FusionNativeSourceObstacleFactory313.h"
 #include "Fusion/FusionNativeMorePlants269Backend.h"
 #include "Fusion/FusionNativeCherryShooter.h"
 #include "Fusion/FusionNativeBasePlants.h"
@@ -1568,6 +1569,7 @@ void Projectile::DoImpact(Zombie* theZombie)
 //0x46E460
 void Projectile::Update()
 {
+    if(LawnFusion::UpdateNativeSourceObstacle313(this))return;
 	mProjectileAge++;
 	if (mApp->mGameScene != GameScenes::SCENE_PLAYING && !mBoard->mCutScene->ShouldRunUpsellBoard())
 		return;
@@ -1631,6 +1633,7 @@ void Projectile::Update()
 void Projectile::Draw(Graphics* g)
 {
 	Graphics gProj(*g);
+    if(LawnFusion::DrawNativeSourceObstacle313(&gProj,this))return;
 	if(LawnFusion::DrawNativeCompanion269(&gProj,this))return;
 	if(LawnFusion::IsNativeWorld269Beam(this)){Graphics world(gProj);world.Translate(-mX,-mY);LawnFusion::DrawNativeWorld269Beam(&world,this);return;}
 	gProj.SetColorizeImages(true);
@@ -1799,6 +1802,7 @@ void Projectile::Draw(Graphics* g)
 //0x46E8C0
 void Projectile::DrawShadow(Graphics* g)
 {
+    if(LawnFusion::GetNativeSourceObstacle313(this))return;
 	if(LawnFusion::IsNativeCompanion269(this)||LawnFusion::IsNativeWorld269Beam(this))return;
 	if (LawnFusion::IsNativeCannon268Projectile(this)) return; // Source way14 owns its phase-visible shadow.
 	if (mIsPlayingImpactAnimation)	return;
@@ -1916,6 +1920,7 @@ void Projectile::DrawShadow(Graphics* g)
 //0x46EB20
 void Projectile::Die()
 {
+    LawnFusion::NativeSourceObstacle313Removing(this);
 	LawnFusion::NativeCompanion269Removing(this,true);
     LawnFusion::NativeRemainingLeaves269ProjectileRemoving(this);
 	LawnFusion::NativeStar269ProjectileRemoving(this);
@@ -1938,6 +1943,7 @@ void Projectile::Die()
 Rect Projectile::GetProjectileRect()
 {
 	Rect aNativeCherryRect;
+    if(LawnFusion::GetNativeSourceObstacle313Rect(this,aNativeCherryRect))return aNativeCherryRect;
     if(LawnFusion::GetNativeWorldRemainder269Source91Rect(this,aNativeCherryRect)||LawnFusion::GetNativeLastPlants269KelpProjectileRect(this,aNativeCherryRect))return aNativeCherryRect;
     if(LawnFusion::GetNativeRemainingLeaves269ProjectileRect(this,aNativeCherryRect))return aNativeCherryRect;
     if (LawnFusion::GetNativeStar269ProjectileRect(this,aNativeCherryRect) ||

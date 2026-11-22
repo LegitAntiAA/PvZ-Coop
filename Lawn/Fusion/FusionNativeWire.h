@@ -4,13 +4,15 @@
 #include "FusionNative.h"
 #include "FusionCannon268Rules.h"
 #include "FusionNativeProjectileMetadata.h"
+#include "FusionNative313Snapshot.h"
+#include "FusionNativeCapturedSourcePlant314.h"
 #include <cmath>
 
 namespace LawnNet { class NetBuffer; }
 
 namespace LawnFusion
 {
-constexpr uint16_t kNativeFusionSnapshotVersion=27;
+constexpr uint16_t kNativeFusionSnapshotVersion=28;
 struct NativeWheat269Snapshot {bool isFromWheat=false;float wheatTime=0;};
 struct NativeRollingActor269Snapshot:NativeRollingActor269State {int health=4000;}; // Actual native HP mirror, including source negative HP.
 // Pure admission of actual native raw fields; no timer or actor is duplicated.
@@ -72,6 +74,16 @@ struct NativeSnapshotFrame
     std::vector<NativeSnapshotRecord<NativeDayZombie273State>> dayZombies273;
     // Canonical Jackson presentation; private references and cursors stay host-only.
     std::vector<NativeSnapshotRecord<FusionNightZombie281View>> nightZombies281;
+    // Same real actors; countdown/blend/box presentation only, never host cursors.
+    std::vector<NativeSnapshotRecord<FusionJackbox300View>> jackboxZombies300;
+    std::vector<NativeSnapshotRecord<NativeSourceGraph313Snapshot>> sourceGraphs313;
+    std::vector<NativeSnapshotRecord<FusionWaterZombie313View>> waterZombies313;
+    std::vector<NativeSnapshotRecord<NativeHeavyZombie313Snapshot>> heavyZombies313;
+    std::vector<NativeSnapshotRecord<FusionExtendedZombie313View>> extendedZombies313;
+    std::vector<NativeSnapshotRecord<FusionSourceObstacle313View>> sourceObstacles313;
+    std::vector<NativeSnapshotRecord<CapturedSourcePlant314View>> capturedPlants314;
+    float sourcePoints=500;
+    FusionExtendedBoard313State extendedBoard313;
     std::vector<NativeSnapshotRecord<NativeStar269PlantState>> star269Plants;
     std::vector<NativeSnapshotRecord<NativeStar269ProjectileState>> star269Projectiles;
     std::vector<NativeSnapshotRecord<NativeDoom269PlantState>> doom269Plants;

@@ -750,11 +750,26 @@ bool FusionAnimation::Load(LawnApp* app, const std::string& path, std::string& e
             {const auto kind=curve.at("kind").get<std::string>();if(kind!="position"&&kind!="scale"&&kind!="euler")legacyUnmaskedBackground=false;}
         }
         const auto declaredFeatures=data.value("rendererFeatures",Json::array());
+        // Genuine Miner28 references Unity's unavailable builtin sprite10905.
+        // Only this audited complete package may use the explicit native
+        // Digger ground clip. No source alpha pixels are invented or omitted.
+        bool nativeTunnel313=false;
+        if(std::any_of(declaredFeatures.begin(),declaredFeatures.end(),[](const Json& f){return f=="nativeTunnelClip313";}))
+        {
+            std::ifstream original(path,std::ios::binary);
+            const std::vector<unsigned char> bytes((std::istreambuf_iterator<char>(original)),std::istreambuf_iterator<char>());
+            Sha256 hash;
+            if(data.value("sourcePrefab",std::string())!="Resources/zombies/_prefab/MinerZombie.prefab"||
+               !original||hash.Digest(bytes)!="763ba0f3a71857e4e5efc3c2612c6535858a270e16d289a24f5f8415cfb059f1"||
+               data.at("externalSpriteMasks313").size()!=1||!data.at("sourceMasks").empty())
+                throw std::runtime_error("native Miner tunnel projection proof differs");
+            nativeTunnel313=true;
+        }
         const bool nativeMasks=data.contains("sourceMasks")&&!data.at("sourceMasks").empty()&&
             std::any_of(declaredFeatures.begin(),declaredFeatures.end(),[](const Json& feature){return feature=="spriteMaskV1";});
         for(const auto& deferred:data.value("deferredComponents",Json::array()))
         {
-            if(deferred==331&&(legacyUnmaskedBackground||nativeMasks))continue;
+            if(deferred==331&&(legacyUnmaskedBackground||nativeMasks||nativeTunnel313))continue;
             if((deferred!=198&&deferred!=199)||sourceParticles.empty())throw std::runtime_error("unsupported deferred source renderer component");
         }
         bool skinFeature=false,maskFeature=false;
@@ -763,6 +778,7 @@ bool FusionAnimation::Load(LawnApp* app, const std::string& path, std::string& e
             const auto name=feature.get<std::string>();
             if(name=="spriteSkinV1")skinFeature=true;
             else if(name=="spriteMaskV1")maskFeature=true;
+            else if(name=="nativeTunnelClip313"&&nativeTunnel313)continue;
             else throw std::runtime_error("unsupported source renderer feature: "+name);
         }
         auto result = std::make_unique<Impl>();
@@ -1044,19 +1060,24 @@ bool FusionAnimation::Load(LawnApp* app, const std::string& path, std::string& e
         const auto defaultId = layers.empty() ? int64_t(0) : layers[0].at("defaultState").get<int64_t>();
         for (const auto& item : data.at("controller").at("states"))
         {
-            if (item.at("clip").is_null()) continue;
-            State state; state.clip = item.at("clip").get<std::string>(); state.speed = item.at("speed").get<float>(); state.speedParameter = item.at("speedParameterActive").get<bool>();
+            const bool nullMotion=item.at("clip").is_null();
+            State state; state.clip = nullMotion?std::string():item.at("clip").get<std::string>();
+            if(!nullMotion&&!result->clips.contains(state.clip))throw std::runtime_error("controller state references an unavailable animation clip");
+            state.speed = item.at("speed").get<float>(); state.speedParameter = item.at("speedParameterActive").get<bool>();
             if (!std::isfinite(state.speed) || state.speed <= 0) throw std::runtime_error("invalid controller state speed");
             state.speedParameterName = item.at("speedParameter").get<std::string>();
             // Keep unrequested source states without pretending that a custom
             // gameplay parameter is the shared animator Speed value.
-            state.supported = !state.speedParameter || state.speedParameterName == "Speed" || state.speedParameterName == "attackSpeed";
+            state.supported = !state.speedParameter || state.speedParameterName == "Speed" || state.speedParameterName == "attackSpeed" || state.speedParameterName == "jumpSpeed";
             const auto id = item.at("id").get<int64_t>();
             if (const auto found = writeDefaults.find(id); found != writeDefaults.end())
             { state.writeDefaultsKnown = true; state.writeDefaults = found->second; }
+            // A no-motion WD1 state samples the genuine rest/prior-layer pose.
+            // WD0 would retain history that this stateless sampler does not own.
+            if(nullMotion)state.supported=state.supported&&state.writeDefaultsKnown&&state.writeDefaults;
             for (size_t layer = 0; layer < layers.size(); ++layer) for (const auto& stateId : layers[layer].at("states")) if (stateId.get<int64_t>() == id)
             { state.layer = static_cast<int>(layer); state.additive = layers[layer].at("blendingMode").get<int>() == 1; }
-            if (state.additive)
+            if (state.additive&&!nullMotion)
                 for (const auto& curve : result->clips.at(state.clip).curves)
                     if (curve.kind == CurveKind::FlipX || curve.kind == CurveKind::FlipY)
                         throw std::runtime_error("additive SpriteRenderer flip requires proved reference semantics");
@@ -1111,14 +1132,17 @@ float FusionAnimation::GetStateDurationSeconds(const char* state, float animator
 {
     const State* found = mImpl ? mImpl->FindState(state) : nullptr;
     if (!found || animatorSpeed <= 0) return 0;
-    return mImpl->clips.at(found->clip).duration/(found->speed*(found->speedParameter ? animatorSpeed : 1.0f));
+    const auto clip=mImpl->clips.find(found->clip);if(clip==mImpl->clips.end())return 0;
+    const bool externalParameter=found->speedParameter&&found->speedParameterName!="jumpSpeed";
+    return clip->second.duration/(found->speed*(externalParameter ? animatorSpeed : 1.0f));
 }
 
 const std::vector<FusionAnimationEvent>& FusionAnimation::GetEvents(const char* state) const
 {
     static const std::vector<FusionAnimationEvent> empty;
     const State* found = mImpl ? mImpl->FindState(state) : nullptr;
-    return found ? mImpl->clips.at(found->clip).events : empty;
+    if(!found)return empty;const auto clip=mImpl->clips.find(found->clip);
+    return clip==mImpl->clips.end()?empty:clip->second.events;
 }
 
 void FusionAnimation::Draw(Sexy::Graphics* graphics, float x, float y, float scale, float idleElapsed, float shootElapsed, float speed) const
@@ -1129,9 +1153,12 @@ void FusionAnimation::Draw(Sexy::Graphics* graphics, float x, float y, float sca
 bool FusionAnimation::Impl::SamplePose(const char* baseName,float baseElapsed,const char* actionName,float actionElapsed,float speed,const FusionAnimationDrawOptions* options,std::vector<Pose>& pose) const
 {
     if(!std::isfinite(baseElapsed)||!std::isfinite(actionElapsed)||!std::isfinite(speed)||speed<=0)return false;
-    const State* base = FindState(baseName);
-    if (!base && !isStatic) return false;
+    const bool restOnly=options&&options->restPoseOnly;
+    const State* base = restOnly?nullptr:FindState(baseName);
+    if (!base && !isStatic&&!restOnly) return false;
     if (options && (!std::isfinite(options->attackSpeed) || options->attackSpeed <= 0)) return false;
+    if(options && (!std::isfinite(options->brightnessGain) || options->brightnessGain<1 || options->brightnessGain>4 ||
+       (options->nativeMaskClipBottom && !std::isfinite(*options->nativeMaskClipBottom))))return false;
     if(options)
     {
         const auto ambiguous=[&](const auto& values)
@@ -1141,14 +1168,19 @@ bool FusionAnimation::Impl::SamplePose(const char* baseName,float baseElapsed,co
             ambiguous(options->nodeActivityOverrides)||ambiguous(options->nodeRotations)||
             ambiguous(options->nodeWorldPositions)||ambiguous(options->spriteReplacements)||
             ambiguous(options->spriteSortingOverrides)||ambiguous(options->sortingGroupOverrides)||
-            ambiguous(options->maskSortingOverrides))return false;
+            ambiguous(options->maskSortingOverrides)||ambiguous(options->spriteEnabledOverrides))return false;
     }
     const auto parameterSpeed = [&](const State& state)
-    { return state.speedParameterName == "attackSpeed" ? (options ? options->attackSpeed : 1.0f) : speed; };
+    {
+        // The source graph supplies jumpSpeed through its real native clock;
+        // elapsed already contains it, so sampling must not apply it twice.
+        if(state.speedParameterName=="jumpSpeed")return 1.0f;
+        return state.speedParameterName == "attackSpeed" ? (options ? options->attackSpeed : 1.0f) : speed;
+    };
     pose.clear(); pose.reserve(nodes.size());
     for (const Node& node : nodes) pose.push_back(node.rest);
     if (base) Apply(pose, *base, baseElapsed, parameterSpeed(*base), false);
-    if (options && options->baseBlend)
+    if (options && !restOnly && options->baseBlend)
     {
         const auto& blend = *options->baseBlend;
         const State* outgoing = FindState(blend.outgoingState.c_str());
@@ -1162,18 +1194,56 @@ bool FusionAnimation::Impl::SamplePose(const char* baseName,float baseElapsed,co
         Apply(previous,*outgoing,blend.outgoingElapsedSeconds,parameterSpeed(*outgoing),false);
         if (!BlendBasePoses(previous,pose,sprites,blend.incomingWeight)) return false;
     }
-    const State* action = FindState(actionName);
+    const State* action = restOnly?nullptr:FindState(actionName);
     if (action && actionElapsed >= 0)
     {
         if (!action->additive && base && action->layer == base->layer)
             for (size_t i = 0; i < pose.size(); ++i) pose[i] = nodes[i].rest;
         Apply(pose, *action, actionElapsed, parameterSpeed(*action), action->additive);
     }
-    if (options)
+    if (options&&!restOnly)
         for (const auto& extra : options->extraStates)
+        {
+            if (!std::isfinite(extra.weight) || extra.weight < 0 || extra.weight > 1) return false;
+            if (extra.baseBlend)
+            {
+                const auto& blend = *extra.baseBlend;
+                const State* incoming = FindState(extra.stateName.c_str(),extra.layer);
+                const State* outgoing = FindState(blend.outgoingState.c_str(),extra.layer);
+                if (!incoming || !outgoing || !incoming->additive || !outgoing->additive ||
+                    incoming->layer < 0 || incoming->layer != outgoing->layer ||
+                    !incoming->writeDefaultsKnown || !outgoing->writeDefaultsKnown ||
+                    !incoming->writeDefaults || !outgoing->writeDefaults ||
+                    !std::isfinite(extra.elapsedSeconds) || extra.elapsedSeconds < 0 ||
+                    !std::isfinite(blend.outgoingElapsedSeconds) || blend.outgoingElapsedSeconds < 0 ||
+                    !std::isfinite(blend.incomingWeight) || blend.incomingWeight < 0 || blend.incomingWeight > 1) return false;
+                if (extra.weight == 0) continue;
+                const auto baseline = pose;
+                auto previous = baseline;
+                Apply(previous,*outgoing,blend.outgoingElapsedSeconds,parameterSpeed(*outgoing),true);
+                Apply(pose,*incoming,extra.elapsedSeconds,parameterSpeed(*incoming),true);
+                if (!BlendBasePoses(previous,pose,sprites,blend.incomingWeight)) return false;
+                if (extra.weight < 1 && !BlendBasePoses(baseline,pose,sprites,extra.weight)) return false;
+                continue;
+            }
             if (std::isfinite(extra.elapsedSeconds) && extra.elapsedSeconds >= 0)
                 if (const State* state = FindState(extra.stateName.c_str(),extra.layer))
-                    Apply(pose,*state,extra.elapsedSeconds,parameterSpeed(*state),state->additive);
+                {
+                    if (extra.weight == 0) continue;
+                    if (extra.weight == 1)
+                        Apply(pose,*state,extra.elapsedSeconds,parameterSpeed(*state),state->additive);
+                    else
+                    {
+                        // The admitted partial layer is additive. Blend its
+                        // local delta through the same TRS/color/discrete rules
+                        // as base fades, retaining the already sampled base.
+                        if (!state->additive) return false;
+                        const auto previous = pose;
+                        Apply(pose,*state,extra.elapsedSeconds,parameterSpeed(*state),true);
+                        if (!BlendBasePoses(previous,pose,sprites,extra.weight)) return false;
+                    }
+                }
+        }
     // CreatePlant/board placement overwrites the prefab's editor world position.
     // Root motion belongs to the authoritative simulation rather than this draw.
     pose[root].position = {0.0f, 0.0f, 0.0f};
@@ -1185,6 +1255,9 @@ bool FusionAnimation::Impl::SamplePose(const char* baseName,float baseElapsed,co
                 pose[i].active = false;
             for (const auto& activity : options->nodeActivityOverrides)
                 if (activity.nodePath == nodes[i].path) pose[i].active = activity.active;
+            for (const auto& renderer : options->spriteEnabledOverrides)
+                if (renderer.nodePath == nodes[i].path)
+                { pose[i].enabled=renderer.enabled;pose[i].enabledChanged=true; }
             for (const auto& rotation : options->nodeRotations)
                 if (rotation.nodePath == nodes[i].path && std::isfinite(rotation.radiansZ))
                 {
@@ -1356,7 +1429,9 @@ bool FusionAnimation::CollectMasks(Sexy::Graphics* graphics,float x,float y,floa
 
 void FusionAnimation::DrawPose(Sexy::Graphics* graphics, float x, float y, float scale, const char* baseName, float baseElapsed, const char* actionName, float actionElapsed, float speed, const FusionAnimationDrawOptions* options) const
 {
+    if(options&&options->restPoseOnly)return; // Never a rendering or client-prediction fallback.
     if (!mImpl || !graphics || !std::isfinite(x) || !std::isfinite(y) || !std::isfinite(scale) || !std::isfinite(baseElapsed) || !std::isfinite(actionElapsed) || !std::isfinite(speed) || speed <= 0) return;
+    if(options&&options->brightnessGain>1&&graphics->mDrawMode!=Sexy::Graphics::DRAWMODE_NORMAL)return;
     if(options&&options->useBoardBasis)
         for(float value:options->boardBasis)if(!std::isfinite(value))return;
     std::vector<Pose> pose;
@@ -1437,6 +1512,28 @@ void FusionAnimation::DrawPose(Sexy::Graphics* graphics, float x, float y, float
                 color.mBlue*std::clamp(tint[2],0,255)/255,
                 color.mAlpha*std::clamp(tint[3],0,255)/255);
         }
+        // One source material pass belongs to one sprite. Keep every additive
+        // contribution before the next sprite so overlapping children retain
+        // SRCOVER order. Fractional gain scales alpha, not clamped RGB.
+        Sexy::Graphics spriteGraphics(*graphics);
+        if(options&&options->nativeMaskClipBottom&&sprite.maskInteraction==2)
+        {
+            const int bottom=int(std::floor(*options->nativeMaskClipBottom+graphics->mTransY));
+            spriteGraphics.mClipRect.mHeight=(std::max)(0,(std::min)(spriteGraphics.mClipRect.mY+spriteGraphics.mClipRect.mHeight,bottom)-spriteGraphics.mClipRect.mY);
+        }
+        const auto drawPasses=[&](auto&& draw)
+        {
+            draw(spriteGraphics,color);
+            float remaining=options?options->brightnessGain-1:0;
+            spriteGraphics.mDrawMode=Sexy::Graphics::DRAWMODE_ADDITIVE;
+            while(remaining>0)
+            {
+                auto extra=color;const float fraction=(std::min)(remaining,1.f);
+                extra.mAlpha=int(std::floor(extra.mAlpha*fraction+.5f));
+                if(extra.mAlpha)draw(spriteGraphics,extra);
+                remaining-=fraction;
+            }
+        };
         Sexy::Image* image = variant->pixels;
         if (!image) continue;
         const Matrix& transform = world[sprite.node];
@@ -1483,15 +1580,17 @@ void FusionAnimation::DrawPose(Sexy::Graphics* graphics, float x, float y, float
             if(sprite.maskInteraction)
             {
                 if(!mImpl->maskScratch)mImpl->maskScratch=std::make_unique<Sexy::MemoryImage>();
-                FusionMask269DrawTriangles(*graphics,*image,projected,variant->indices,color,sprite.maskInteraction,spriteSort(sprite),masks,*mImpl->maskScratch);
+                drawPasses([&](Sexy::Graphics& g,const Sexy::Color& c){FusionMask269DrawTriangles(g,*image,projected,variant->indices,c,sprite.maskInteraction,spriteSort(sprite),masks,*mImpl->maskScratch);});
                 continue;
             }
             for(size_t j=0;j<variant->indices.size();++j)
             {const auto& v=projected[variant->indices[j]];triangles[j/3][j%3]=Sexy::TriVertex(float(v.x),float(v.y),float(v.u),float(v.v));}
             const auto raw = reinterpret_cast<const Sexy::TriVertex (*)[3]>(triangles.data());
-            if (auto target = dynamic_cast<Sexy::SDL3Image*>(graphics->mDestImage))
-                target->BltTrianglesTex(image, raw, static_cast<int>(triangles.size()), graphics->mClipRect, color, graphics->mDrawMode, 0, 0, graphics->mLinearBlend, graphics->mPixelArtBlend);
-            else graphics->mDestImage->BltTrianglesTex(image, raw, static_cast<int>(triangles.size()), graphics->mClipRect, color, graphics->mDrawMode, 0, 0, graphics->mLinearBlend);
+            drawPasses([&](Sexy::Graphics& g,const Sexy::Color& c){
+                if(auto target=dynamic_cast<Sexy::SDL3Image*>(g.mDestImage))
+                    target->BltTrianglesTex(image,raw,static_cast<int>(triangles.size()),g.mClipRect,c,g.mDrawMode,0,0,g.mLinearBlend,g.mPixelArtBlend);
+                else g.mDestImage->BltTrianglesTex(image,raw,static_cast<int>(triangles.size()),g.mClipRect,c,g.mDrawMode,0,0,g.mLinearBlend);
+            });
             continue;
         }
         const float centerX = flipX*(variant->rect.mWidth*0.5f-variant->logicalWidth*variant->pivotX+variant->offsetX)/variant->pixelsPerUnit;
@@ -1515,7 +1614,7 @@ void FusionAnimation::DrawPose(Sexy::Graphics* graphics, float x, float y, float
             matrix.m02=x+a[0]*wx+a[2]*wy+graphics->mTransX;
             matrix.m12=y+a[1]*wx+a[3]*wy+graphics->mTransY;
         }
-        TodBltMatrix(graphics, image, matrix, graphics->mClipRect, color, graphics->mDrawMode, variant->rect);
+        drawPasses([&](Sexy::Graphics& g,const Sexy::Color& c){TodBltMatrix(&g,image,matrix,g.mClipRect,c,g.mDrawMode,variant->rect);});
     }
 }
 }

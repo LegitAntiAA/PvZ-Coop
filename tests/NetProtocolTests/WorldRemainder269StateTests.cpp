@@ -91,7 +91,15 @@ int RunWorldRemainder269StateTests(int& checks)
         decoded.worldRemainder269Aux[1].data.nextShotAge==110&&decoded.worldRemainder269Shots[0].data.ageTicks==42&&raw.Size()==1&&raw.mData[0]==0x42);
     auto empty=Example();LawnNet::NetBuffer emptyWire;CHECK(EncodeNativeSnapshot(empty,eligible,emptyWire));
     const size_t meta=size_t(emptyWire.mData[6])|(size_t(emptyWire.mData[7])<<8),end=14+meta;
-    auto forged=emptyWire;forged.mData[end-5]=2; // Gold singleton Bool immediately before two vector counts.
+    // Locate this semantic Bool by a single-field encoded probe. Later FNS
+    // vectors/board fields may be appended without changing this assertion.
+    auto goldProbe=empty;goldProbe.goldHypnoSummoned=true;LawnNet::NetBuffer goldWire;
+    CHECK(EncodeNativeSnapshot(goldProbe,eligible,goldWire));CHECK(goldWire.Size()==emptyWire.Size());
+    size_t boolOffset=end,differences=0;
+    for(size_t i=14;i<end;++i)if(goldWire.mData[i]!=emptyWire.mData[i]){boolOffset=i;++differences;}
+    CHECK(differences==1&&boolOffset<end&&emptyWire.mData[boolOffset]==0&&goldWire.mData[boolOffset]==1);
+    if(differences!=1||boolOffset>=end)return failures;
+    auto forged=emptyWire;forged.mData[boolOffset]=2;
     NativeSnapshotFrame retained;retained.epoch=777;LawnNet::NetBuffer retainedBody;retainedBody.WriteU8(0x99);
     CHECK(!DecodeNativeSnapshot(forged,eligible,19,retained,retainedBody)&&forged.mReadPos==0&&retained.epoch==777&&retainedBody.mData[0]==0x99);
 #undef CHECK

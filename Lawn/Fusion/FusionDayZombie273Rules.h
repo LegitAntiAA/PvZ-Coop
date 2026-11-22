@@ -11,13 +11,16 @@ const FusionZombieProfile* FindFusionDayZombie273Profile(uint16_t kind);
 bool FusionDayZombie273Pole(uint16_t kind);
 bool FusionDayZombie273Doll(uint16_t kind);
 bool FusionDayZombie273Shooter(uint16_t kind);
+bool FusionDayZombie273NutArmor(uint16_t kind);
+float FusionDayZombie273ShootInterval(uint16_t kind);
 std::span<const uint16_t> FusionDayZombie273NpcDependencies(uint16_t kind);
 enum FusionDayZombie273Capability : uint32_t
 {
     Day273Model=1, Day273Wire=2, Day273SharedBody=4, Day273Armor=8,
     Day273DollFall=16, Day273Pole=32, Day273HeadClock=64,
     Day273Bullet0=128, Day273Bullet11=256, Day273PlantContact=512,
-    Day273Fx=1024, Day273BodyParts=2048, Day273BucketItem=4096
+    Day273Fx=1024, Day273BodyParts=2048, Day273BucketItem=4096,
+    Day273BulletCherry=8192, Day273BulletSuperCherry=16384
 };
 uint32_t FusionDayZombie273RequiredCapabilities(uint16_t kind);
 bool FusionDayZombie273CapabilitiesReady(uint16_t kind,uint32_t actual);

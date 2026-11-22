@@ -79,6 +79,12 @@ int RunFusionTools268CommandTests(int& checks);
 int RunFusionNightZombie281Tests(int& checks);
 int RunNetSoundEvent284Tests(int& checks);
 int RunFusionJackson291Tests(int& checks);
+int RunFusionJackbox300Tests(int& checks);
+int RunFusionSourceDamage315Tests(int& checks);
+int RunFusionSourceAnimated317Tests(int& checks);
+int RunFusionWaterBridge321Tests(int& checks);
+int RunFusionZombieBatch313WireTests(int& checks);
+int RunFusionSourceGraph313Tests(int& checks);
 #include "FusionSimulationTests.h"
 #include "FusionWireTests.h"
 #include "FusionRoomWireTests.h"
@@ -1213,6 +1219,12 @@ int main(int argc, char** argv)
 	int aNight281Checks=0;gFailures+=RunFusionNightZombie281Tests(aNight281Checks);gChecks+=aNight281Checks;
 	int aSourceSound284Checks=0;gFailures+=RunNetSoundEvent284Tests(aSourceSound284Checks);gChecks+=aSourceSound284Checks;
 	int aJackson291Checks=0;gFailures+=RunFusionJackson291Tests(aJackson291Checks);gChecks+=aJackson291Checks;
+	int aJackbox300Checks=0;gFailures+=RunFusionJackbox300Tests(aJackbox300Checks);gChecks+=aJackbox300Checks;
+    int aSource315Checks=0;gFailures+=RunFusionSourceDamage315Tests(aSource315Checks);gChecks+=aSource315Checks;
+    int aAnimated317Checks=0;gFailures+=RunFusionSourceAnimated317Tests(aAnimated317Checks);gChecks+=aAnimated317Checks;
+    int aWater321Checks=0;gFailures+=RunFusionWaterBridge321Tests(aWater321Checks);gChecks+=aWater321Checks;
+    int aBatch313WireChecks=0;gFailures+=RunFusionZombieBatch313WireTests(aBatch313WireChecks);gChecks+=aBatch313WireChecks;
+    int aGraph313Checks=0;gFailures+=RunFusionSourceGraph313Tests(aGraph313Checks);gChecks+=aGraph313Checks;
 	gChecks += aFusionModeResult.mChecks;
 	gFailures += aFusionModeResult.mFailures;
 	const auto aFusionSimulationResult = RunFusionSimulationTests();

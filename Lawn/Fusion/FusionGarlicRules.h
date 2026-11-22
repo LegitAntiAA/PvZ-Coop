@@ -12,6 +12,7 @@ struct GarlicActionState
     uint16_t waitTicks = 0, moveElapsedTicks = 0, faceTicks = 0;
     int8_t originRow = -1, targetRow = -1;
     float startY = 0.0f, targetY = 0.0f;
+    uint16_t moveDurationTicks = 100; // Appended to preserve existing aggregate callers.
 };
 struct GarlicBitePlan { int plantDamage = 0; bool certainRow = false; };
 struct GarlicRowPlan { int randomZeroRow = -1, randomOneRow = -1; };
@@ -35,6 +36,7 @@ bool TryPlanFusionGarlicRow(int row, int rows, bool upCompatible, bool downCompa
 bool TryStartFusionGarlicRow(GarlicActionState& state, int rows, int originRow, int targetRow, float startY, float targetY);
 // Only exact speed0 pauses movement; a nonzero slow does not rescale its1s.
 bool TryAdvanceFusionGarlicAction(GarlicActionState& state, int rows, bool paused, float effectiveMovementSpeed, GarlicActionStep& step);
+bool TryStartFusionSourceRowDuration313(GarlicActionState&,int rows,int from,int target,float startY,float targetY,float seconds);
 int FusionGarlicLogicalRow(const GarlicActionState& state, int currentRow);
 int FusionGarlicSortingRow(const GarlicActionState& state, int currentRow);
 }

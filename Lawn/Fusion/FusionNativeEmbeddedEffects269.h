@@ -11,6 +11,7 @@ namespace LawnFusion
 // Exact source callback nodes; the reliable payload carries a bounded part,
 // never a resource ID or arbitrary asset path.
 const char* NativeSourceZombiePartNode284(uint8_t part);
+const char* NativeSourceZombiePartNode313(uint16_t kind,uint8_t part);
 class NativeWorldParticle269Definition;
 // Root callbacks into the existing NativeSourceEffects269 resource cache.
 NativeWorldParticle269Definition* EnsureNativeEmbeddedParticle269Resource(Board*,uint16_t resourceKind,const std::string& effectJson,std::string& error);
@@ -48,6 +49,8 @@ public:
     // Canonical host event, including before owner birth/after owner deletion.
     // Consume once per epoch/id/token/kind/part; no actor lookup or phase clock.
     bool PlayZombieLimbEvent(Board*,const LawnNet::NetFusionLimbEvent276&,bool& newEvent);
+    void CapturePlant314(Board*,uint32_t oldPlantUID,uint32_t ownerUID,uint32_t captureToken,uint16_t kind);
+    void ReleaseCapturedPlant314(uint32_t ownerUID,uint32_t captureToken);
     void Update(Board*);
     // Exact source emission-module callbacks may override a dormant module;
     // absence of this callback never silently enables source-disabled emission.

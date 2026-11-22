@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <array>
 
 class Board;
 class LawnApp;
@@ -12,6 +13,7 @@ namespace Sexy { class Graphics; }
 
 namespace LawnFusion
 {
+struct FusionAnimationBoxCollider303;
 // Board-owned source body resources only. No actors, simulation or phase clock.
 class NativeZombieVisuals
 {
@@ -27,6 +29,8 @@ public:
     bool Draw(Sexy::Graphics* graphics, Zombie* zombie) const;
     bool Node(const Zombie*,const char* path,float& x,float& y,bool* active=nullptr,bool actualBodyPose=false) const;
     bool CanQueryRoot(uint16_t kind) const;
+    bool Box313(const Zombie*,FusionAnimationBoxCollider303&) const;
+    bool Matrix313(const Zombie*,const char*,std::array<float,6>&) const;
 
 private:
     struct Impl;
@@ -47,6 +51,12 @@ bool GetNativeSourceZombie269NodeActivity(const Zombie*,const char*,bool&);
 // a lethal hit before PlayDeathAnim changes it. Never select a pose from HP.
 bool GetNativeSourceZombieLimbBirthPoint276(const Zombie*,const char*,float&,float&);
 bool CanQueryNativeSourceZombieRoot273(Board*,uint16_t kind);
+// SAME sampled runtime options as Draw/Node. Box corners remain source units
+// relative to the placed root. Kirov26 genuinely has no BoxCollider2D.
+bool GetNativeSourceZombieBox313(const Zombie*,FusionAnimationBoxCollider303&);
+// Complete source node transform composed once into Board pixels, [a,b,c,d,x,y].
+// Local UID and opaque host token remain outside presentation calculations.
+bool GetNativeSourceZombieMatrix313(const Zombie*,const char* nodePath,std::array<float,6>&);
 }
 
 #endif

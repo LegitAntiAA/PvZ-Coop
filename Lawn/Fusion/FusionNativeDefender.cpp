@@ -1,5 +1,6 @@
 #include "FusionNativeDefender.h"
 #include "FusionNative.h"
+#include "FusionNativeZombie313Dispatch.h"
 #include "FusionNativeCold.h"
 #include "FusionNativeFire.h"
 #include "../Board.h"
@@ -111,7 +112,7 @@ void NativeDefenderBeforeBite(Zombie* biter, Plant* victim, int biteDamage)
         {
             // EatEffect first overwrites SetCold10, then adds10 levels. The
             // existing cold primitive alone owns threshold/freeze behavior.
-            biter->SetColdCounters(effect.chilledTicks,biter->mIceTrapCounter);
+            if(!NativeZombie313ApplyCold(biter,false,effect.chilledTicks))biter->SetColdCounters(effect.chilledTicks,biter->mIceTrapCounter);
             cold->chilledTicks = biter->mChilledCounter;
             cold->frozenTicks = biter->mIceTrapCounter;
             AddNativeColdLevel(biter,effect.coldLevels);

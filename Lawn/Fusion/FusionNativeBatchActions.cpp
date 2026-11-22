@@ -3,6 +3,7 @@
 #include "FusionNativeSummonPlants269.h"
 #include "FusionNativeLastPlants269.h"
 #include "FusionNative.h"
+#include "FusionNativeZombie313Dispatch.h"
 #include "FusionNativeProjectileMetadata.h"
 #include "FusionNativeShooterTiming.h"
 #include "FusionNativePlacement.h"
@@ -218,12 +219,25 @@ void HitArea(Plant* plant,bool squash)
             std::vector<ZombieID> drivers;Zombie* driver=nullptr;
             const double px=kFusionBasePixelsX,py=GetNativeFusionPixelsY(plant->mBoard);
             while(plant->mBoard->IterateZombies(driver))
-                if(Normal(driver)&&driver->mRow==plant->mRow&&IsNativeSpecialZombie269Vehicle(driver)&&
-                   NativeSpecialZombie269VehicleTouchesRect(driver,GetNativeSourceZombie269NodePoint,x-px*.5,y-py*.5,px,py))
-                    drivers.push_back(plant->mBoard->ZombieGetID(driver));
+                if(Normal(driver)&&driver->mRow==plant->mRow)
+                {
+                    bool touches=IsNativeSpecialZombie269Vehicle(driver)&&
+                        NativeSpecialZombie269VehicleTouchesRect(driver,GetNativeSourceZombie269NodePoint,x-px*.5,y-py*.5,px,py);
+                    const auto* source=GetNativeSourceZombieData(driver);
+                    if(source&&(source->kind==16||source->kind==31))
+                    {
+                        // The shared typed rect uses the actual303 source box,
+                        // never a NORMAL/ZAMBONI carrier rectangle.
+                        const auto body=driver->GetZombieRect();
+                        touches=body.mWidth>0&&body.mHeight>0&&body.mX<=x+px*.5&&body.mX+body.mWidth>=x-px*.5&&
+                            body.mY<=y+py*.5&&body.mY+body.mHeight>=y-py*.5;
+                    }
+                    if(touches)drivers.push_back(plant->mBoard->ZombieGetID(driver));
+                }
             for(auto driverId:drivers)if((driver=plant->mBoard->ZombieTryToGet(driverId))&&Normal(driver))
             {
                 if(GetNativeSourceZombieData(driver)->kind==18)HandleNativeSpecialZombie269DriverCaltrop(driver);
+                else NativeZombie313Caltrop(driver);
                 // Source14's inherited KillByCaltrop is empty; the spike still
                 // consumes itself and continues its already captured Damage4.
                 plant->mApp->PlayFoley(FOLEY_TIRE_POP);

@@ -21,6 +21,13 @@
 #include "FusionAdventureScheduler273.h"
 #include "FusionNativeDayZombie273.h"
 #include "FusionNativeNightZombie281.h"
+#include "FusionNativeJackbox300.h"
+#include "FusionNativeSourceGraph313.h"
+#include "FusionNativeWaterZombie313.h"
+#include "FusionNativeExtendedZombie313.h"
+#include "FusionNativeHeavyZombie313B.h"
+#include "FusionSourceBoard313.h"
+#include "FusionNativeObstacle313.h"
 #include "../../ConstEnums.h"
 #include <cstdint>
 #include <array>
@@ -35,6 +42,7 @@ class Zombie;
 class Coin;
 class SeedPacket;
 class GameButton;
+namespace LawnNet { class NetJackbox309Audio; }
 
 namespace LawnFusion
 {
@@ -93,6 +101,8 @@ void ApplyNativeSourceRealDamage(Zombie* zombie, int damage);
 bool CanApplyNativeFusionGameplay(Board* board);
 class NativeVisuals;
 class NativeZombieVisuals;
+class NativeSourceCharred311;
+class NativeCapturedPlants314;
 class NativeGloveUIState;
 struct FusionCommand;
 struct FusionSplitEmissionSpec;
@@ -265,8 +275,26 @@ struct NativeContext
     std::unordered_map<uint32_t, uint32_t> zombieInstanceTokens; // Local full generation -> opaque host generation.
     std::unordered_map<uint32_t, GarlicActionState> garlicZombies;
     std::unordered_map<uint32_t, NativeSourceZombieData> sourceZombies;
+    std::unordered_map<uint32_t, uint64_t> sourceZombieBirthOrdinals; // HOST actual birth order, not sparse IDs.
+    uint64_t sourceZombieBirthSequence=0;
+    std::unordered_set<uint32_t> sourceGraphClocks313; // LOCAL full R generations; no source clock is duplicated.
+    std::unordered_set<uint32_t> sourceZombieInitializations313; // HOST synchronous factory scope only.
+    std::unordered_set<uint32_t> sourceDeathPoints313; // HOST once-only source Die points per LOCAL generation.
+    std::unordered_map<uint32_t, NativeSourceGraph313State> sourceGraphs313;
+    std::unordered_map<uint32_t, NativeWaterZombie313State> waterZombies313;
+    std::unordered_map<uint32_t, NativeExtendedZombie313State> extendedZombies313;
+    std::unordered_map<uint32_t, NativeHeavyZombie313BState> heavyZombies313B;
+    float sourcePoints=500.f; // Source Board.thePoints124, distinct from native sun and Fusion money.
+    FusionExtendedBoard313State extendedBoard313;
+    uint32_t sourceAnimatedSerial317=0; // HOST cosmetic birth identity; never a simulation clock.
+    std::unordered_map<uint32_t, NativeSourceObstacle313Data> sourceObstacles313;
+    std::unique_ptr<NativeSourceObstacle313Visuals> sourceObstacleVisuals313;
     std::unordered_map<uint32_t, NativeDayZombie273State> dayZombies273;
     std::unordered_map<uint32_t, NativeNightZombie281State> nightZombies281;
+    std::unordered_map<uint32_t, NativeJackbox300State> jackboxZombies300;
+    std::unique_ptr<LawnNet::NetJackbox309Audio> jackboxAudio309;
+    std::unique_ptr<NativeSourceCharred311> sourceCharred311;
+    std::unique_ptr<NativeCapturedPlants314> capturedPlants314;
     std::unordered_map<uint32_t, NativeSourceZombieCursor> sourceZombieCursors; // Host-only consumed native animation spans.
     FusionRollingHitHistory rollingHits; // Host-only full-generation impact history.
     std::unordered_map<uint32_t,std::unordered_set<uint32_t>> fireContacts; // Current native contact episodes only.

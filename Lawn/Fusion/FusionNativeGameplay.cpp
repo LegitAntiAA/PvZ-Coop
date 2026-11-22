@@ -1,4 +1,6 @@
 #include "FusionNative.h"
+#include "FusionNativeCapturedSourcePlant314.h"
+#include "FusionNativeSourceClock313.h"
 #include "FusionNativeZombieVisual.h"
 #include "FusionNativePlacement.h"
 #include "FusionNativeVisual.h"
@@ -842,6 +844,7 @@ void PruneNativeMetadata(Board* board)
     NativeContext* context = GetNativeContext(board);
     if (!context) return;
     UpdateNativeGloveState(board);
+    if(context->capturedPlants314)context->capturedPlants314->Prune();
     if(auto* effects=GetNativeSourceEffects269(board,false))effects->UpdateEmbedded(board);
     Prune(board->mPlants, context->plants);
     Prune(board->mPlants, context->lobberAims);
@@ -859,6 +862,15 @@ void PruneNativeMetadata(Board* board)
     Prune(board->mZombies, context->butterZombies);
     Prune(board->mZombies, context->zombieActions);
     Prune(board->mZombies, context->sourceZombies);
+    for(auto it=context->sourceDeathPoints313.begin();it!=context->sourceDeathPoints313.end();)
+        if(!board->mZombies.DataArrayTryToGet(*it))it=context->sourceDeathPoints313.erase(it);else ++it;
+    Prune(board->mZombies, context->sourceZombieBirthOrdinals);
+    Prune(board->mZombies, context->sourceGraphs313);
+    Prune(board->mZombies, context->waterZombies313);
+    Prune(board->mZombies, context->extendedZombies313);
+    Prune(board->mZombies, context->heavyZombies313B);
+    Prune(board->mProjectiles, context->sourceObstacles313);
+    PruneNativeSourceGraph313Clocks(board);
     Prune(board->mZombies, context->sourceZombieCursors);
     Prune(board->mZombies, context->zombieInstanceTokens);
     Prune(board->mCoins, context->equipmentCoins);
@@ -876,6 +888,7 @@ void PruneNativeMetadata(Board* board)
     Prune(board->mCoins, context->coinValues);
     Prune(board->mZombies,context->dayZombies273);
     Prune(board->mZombies,context->nightZombies281);
+    Prune(board->mZombies,context->jackboxZombies300);
     for (auto item = context->packets.begin(); item != context->packets.end(); )
     {
         bool live = false;

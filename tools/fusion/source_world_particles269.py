@@ -207,7 +207,7 @@ def projected_rectangle(assets,prefab,trans,objects,tid,shape,pose_model,station
  return {'basis':basis,'halfSize':half,'normal':[0,0,1],'scalingMode':1,'ancestorTrs':records,'staticAncestorRotations':True,'staticParticleScale':True,'offset':[0,0,0],'shapeRotation':[0,0,0],'sourceModelSha256':hashlib.sha256(model_path.read_bytes()).hexdigest(),'sourcePrefabSha256':source_hash,'ancestorPaths':paths,'sourceProjectionPolicy':'Unity Local1: full ancestor rotation, only PS own local scale; actual node point supplies translation','sourceScalingModeReference':'https://docs.unity3d.com/kr/6000.0/ScriptReference/ParticleSystemScalingMode.Local.html'}
 
 
-def export(assets,prefab,output,source_id,scope_ids=None,pose_model=None,guid_lookup=None):
+def export(assets,prefab,output,source_id,scope_ids=None,pose_model=None,guid_lookup=None,factory_identity_root=False):
  assets=pathlib.Path(assets);output=pathlib.Path(output);output.mkdir(parents=True,exist_ok=True)
  used=set();guids=dict(guid_lookup)if guid_lookup is not None else{}
  def read(p):used.add(p);return p.read_text(encoding='utf-8')
@@ -226,10 +226,15 @@ def export(assets,prefab,output,source_id,scope_ids=None,pose_model=None,guid_lo
  if scope_ids is None and any(k not in allowed for k,_,_ in docs):raise ValueError('unsupported source effect component')
  objects={i:t for k,i,t in docs if k==1};trans={i:t for k,i,t in docs if k==4}
  root=next(i for i,t in trans.items() if not e.reference(t,'m_Father'))
+ if factory_identity_root and scope_ids is not None:raise ValueError('factory pose applies only to standalone CreateParticle.SetParticle births')
+ # CreateParticle.SetParticle444630 supplies Quaternion.identity to Instantiate.
+ # Preserve the prefab bytes as evidence, but sample the real spawned root pose.
+ original_root_rotation=e.vector(trans[root],'m_LocalRotation')
+ def effective_rotation(tid):return {'x':0.,'y':0.,'z':0.,'w':1.} if factory_identity_root and tid==root else e.vector(trans[tid],'m_LocalRotation')
  children=[int(x) for x in re.findall(r'fileID: (-?\d+)',block(trans[root],'m_Children'))]
  if scope_ids is None and len(trans)!=len(children)+1:raise ValueError('nested particle transform hierarchy needs composed export')
  root_scale=e.vector(trans[root],'m_LocalScale') if scope_ids is None else {'x':1.,'y':1.,'z':1.}
- if max(root_scale.values())-min(root_scale.values())>1e-6 or min(root_scale.values())<=0 or (scope_ids is None and e.vector(trans[root],'m_LocalRotation')!={'x':0.,'y':0.,'z':0.,'w':1.}):raise ValueError('nonuniform/rotated source root requires composed projection')
+ if max(root_scale.values())-min(root_scale.values())>1e-6 or min(root_scale.values())<=0 or (scope_ids is None and effective_rotation(root)!={'x':0.,'y':0.,'z':0.,'w':1.}):raise ValueError('nonuniform/rotated source root requires composed projection')
  ps={e.reference(t,'m_GameObject'):t for k,_,t in docs if k==198};render={e.reference(t,'m_GameObject'):t for k,_,t in docs if k==199}
  emitters=[];sprite_cache={};sources=[]
  selected=[i for i,t in trans.items() if any(k==198 and j in scope_ids and e.reference(v,'m_GameObject')==e.reference(t,'m_GameObject') for k,j,v in docs)] if scope_ids is not None else [root]+children
@@ -254,7 +259,7 @@ def export(assets,prefab,output,source_id,scope_ids=None,pose_model=None,guid_lo
    if len(bursts)!=int(e.required(emission,'m_BurstCount')):raise ValueError('burst count differs')
   scale={k:v*root_scale['x'] for k,v in e.vector(t,'m_LocalScale').items()} if tid!=root else root_scale
   if min(scale.values())<=0:raise ValueError('invalid source particle local scale')
-  record={'nodeName':e.required(objects[oid],'m_Name'),'nodeIndex':ordinal-1,'sourceTransformFileId':tid,'sourcePosition':{k:v*root_scale['x'] for k,v in e.vector(t,'m_LocalPosition').items()} if scope_ids is None and tid!=root else {'x':0.,'y':0.,'z':0.},'sourceRotation':e.vector(t,'m_LocalRotation'),'sourceScale':scale,'sourceActive':True if scope_ids is not None else bool(int(e.required(objects[oid],'m_IsActive'))),'rendererEnabled':bool(int(e.required(r,'m_Enabled'))),'duration':float(e.required(p,'lengthInSec')),'delay':constant(p,'startDelay'),'lifetime':range_value(init,'startLifetime')[1],'speed':range_value(init,'startSpeed')[1],'size':range_value(init,'startSize')[1],'rotation':signed_range(init,'startRotation')[1],'rate':constant(emission,'rateOverTime'),'maxActive':int(e.required(init,'maxNumParticles')),'sourceStopAction':int(e.required(p,'stopAction')),'sourceSimulationSpace':int(e.required(p,'moveWithTransform')),'sourceScalingMode':int(e.required(p,'scalingMode')),'enabledModules':enabled,'sizeCurve':[[0,1],[1,1]],'shape':{'type':-1,'radius':0,'scale':{'x':1,'y':1,'z':1},'angle':0},'sprite':None,'material':e.required(r,'m_Materials')}
+  record={'nodeName':e.required(objects[oid],'m_Name'),'nodeIndex':ordinal-1,'sourceTransformFileId':tid,'sourcePosition':{k:v*root_scale['x'] for k,v in e.vector(t,'m_LocalPosition').items()} if scope_ids is None and tid!=root else {'x':0.,'y':0.,'z':0.},'sourceRotation':effective_rotation(tid),'sourceScale':scale,'sourceActive':True if scope_ids is not None else bool(int(e.required(objects[oid],'m_IsActive'))),'rendererEnabled':bool(int(e.required(r,'m_Enabled'))),'duration':float(e.required(p,'lengthInSec')),'delay':constant(p,'startDelay'),'lifetime':range_value(init,'startLifetime')[1],'speed':range_value(init,'startSpeed')[1],'size':range_value(init,'startSize')[1],'rotation':signed_range(init,'startRotation')[1],'rate':constant(emission,'rateOverTime'),'maxActive':int(e.required(init,'maxNumParticles')),'sourceStopAction':int(e.required(p,'stopAction')),'sourceSimulationSpace':int(e.required(p,'moveWithTransform')),'sourceScalingMode':int(e.required(p,'scalingMode')),'enabledModules':enabled,'sizeCurve':[[0,1],[1,1]],'shape':{'type':-1,'radius':0,'scale':{'x':1,'y':1,'z':1},'angle':0},'sprite':None,'material':e.required(r,'m_Materials')}
   col=block(init,'startColor')
   colors=initial_color(col);record['color']=colors[-1]
   if len(colors)==2:
@@ -285,7 +290,7 @@ def export(assets,prefab,output,source_id,scope_ids=None,pose_model=None,guid_lo
    if ty==18:record['shape']['projectedRectangle']=projected_rectangle(assets,prefab,trans,objects,tid,shape,pose_model,record['speedRange']==[0.,0.])
    if ty==10:
     arc=block(shape,'arc')
-    if record['speed']!=0 or e.vector(t,'m_LocalRotation')!={'x':0.,'y':0.,'z':0.,'w':1.} or float(e.required(shape,'radiusThickness'))!=1 or float(e.required(arc,'value'))!=360 or int(e.required(arc,'mode'))!=0 or float(e.required(arc,'spread'))!=0:raise ValueError('circle particle requires full static disk/identity/zero launch speed')
+    if record['speed']!=0 or effective_rotation(tid)!={'x':0.,'y':0.,'z':0.,'w':1.} or float(e.required(shape,'radiusThickness'))!=1 or float(e.required(arc,'value'))!=360 or int(e.required(arc,'mode'))!=0 or float(e.required(arc,'spread'))!=0:raise ValueError('circle particle requires full static disk/identity/zero launch speed')
     record['shape'].update(arc=360,radiusThickness=1,nativePolicy='source Circle10 full stationary disk -> native CIRCLE; native radial RNG distribution')
   if 'SizeModule' in enabled:
    if e.required(size,'separateAxes')!='0':raise ValueError('separate size axes unsupported')
@@ -373,8 +378,9 @@ def export(assets,prefab,output,source_id,scope_ids=None,pose_model=None,guid_lo
   emitters.append(record)
  for p in sorted(used):sources.append({'path':p.relative_to(assets).as_posix(),'sha256':hashlib.sha256(p.read_bytes()).hexdigest()})
  result={'schema':2,'sourceKind':source_id,'sourcePrefab':prefab,'sourcePrefabSha256':hashlib.sha256((assets/prefab).read_bytes()).hexdigest(),'bindingScope':'embeddedParticleComponents' if scope_ids is not None else 'sourceFactoryEffect','sourceComponentIds':scope_ids,'nativeAdapter':'TodParticleSystem source-compatible gradient/ranged-size/speed-curve subset','emitters':emitters,'birthPoints':[],'sources':sources,'ignoredBindings':[],'deferredComponents':[],'limits':['Native2D sphere/cone projection and random distribution differ from Unity3D','Native10ms quantization and stopAction child-tree shutdown not Unity runtime verified','Shader HDR/soft-particle material edge behavior bounded; native alpha blend','Every source sprite retained; random starting UV phase uses native frame0; native lifetime animation approximates Unity phase','Fractional UV crops conservatively quantized <1texel/edge; sequence canvases center-padded preserving original source pixels/PPU']}
+ if factory_identity_root:result['sourceFactoryRootPose']={'method':'CreateParticle.SetParticle','address':'0x180444630','rotation':'Quaternion.identity','prefabRotation':original_root_rotation,'scale':'prefab preserved'}
  (output/'effect.json').write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8');return result
 
 if __name__=='__main__':
  import argparse
- p=argparse.ArgumentParser();p.add_argument('assets');p.add_argument('prefab');p.add_argument('output');p.add_argument('--source-id',type=int,required=True);a=p.parse_args();q=export(pathlib.Path(a.assets),a.prefab,pathlib.Path(a.output),a.source_id);print('Source effect',q['sourceKind'],'strict native-subset emitters',len(q['emitters']),'birthPoints',len(q['birthPoints']))
+ p=argparse.ArgumentParser();p.add_argument('assets');p.add_argument('prefab');p.add_argument('output');p.add_argument('--source-id',type=int,required=True);p.add_argument('--factory-identity-root',action='store_true',help='only for source CreateParticle.SetParticle444630, which overwrites the root rotation');a=p.parse_args();q=export(pathlib.Path(a.assets),a.prefab,pathlib.Path(a.output),a.source_id,factory_identity_root=a.factory_identity_root);print('Source effect',q['sourceKind'],'strict native-subset emitters',len(q['emitters']),'birthPoints',len(q['birthPoints']))

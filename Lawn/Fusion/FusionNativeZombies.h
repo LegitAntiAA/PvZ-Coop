@@ -37,6 +37,8 @@ struct NativeSourceZombieData
     uint8_t paperShootTicks=0,paperShootEvent=0;
     LawnNet::NetZombieAnimState paperHead; // Actual attached native Reanimation, never a client clock.
     bool vehicleStopped=false; // Actual source18 beforeDying/collider-off presentation.
+    bool beforeDying=false; // Source base BodyTakeDamage latch, independent of deferred limb presentation.
+    int32_t sourceStatusLevel=0; // Source Zombie.statusLevel(E0), distinct from current status(2C).
 };
 
 // Host-only consumed positions of the existing body Reanimation. No timer,
@@ -59,9 +61,10 @@ inline bool NativeSourceZombieDataValid(const NativeSourceZombieData& data,int m
         head.mAnimRate||head.mLoopType||head.mLoopCount))return false;
     if(data.kind!=104&&(data.paperShootTicks||data.paperShootEvent||head.mPresent))return false;
     if(data.kind!=18&&data.vehicleStopped)return false;
-    if(((data.kind==9||data.kind==111||data.kind==109||data.kind==5||data.kind==15||data.kind==104)?data.firstArmorStage>2:data.firstArmorStage!=0)||!FindFusionZombieProfile(data.kind)||!data.instanceToken||
+    if(data.sourceStatusLevel<0||data.sourceStatusLevel>1000000)return false;
+    if(((data.kind==9||data.kind==111||data.kind==109||data.kind==5||data.kind==15||data.kind==104||data.kind==30)?data.firstArmorStage>2:data.firstArmorStage!=0)||!FindFusionZombieProfile(data.kind)||!data.instanceToken||
         !std::isfinite(data.originSpeed)||data.originSpeed<kFusionZombieMinimumOriginSpeed||
-        data.originSpeed>kFusionZombieMaximumOriginSpeed||!FusionZombieHealthFitsMaximum(data.health,maximumHealth)||
+        data.originSpeed>(data.kind==30?2*kFusionZombieMaximumOriginSpeed:kFusionZombieMaximumOriginSpeed)||!FusionZombieHealthFitsMaximum(data.health,maximumHealth)||
         bool(data.sourceParentId)!=bool(data.sourceParentToken)||(data.dieWithParent&&!data.sourceParentId))return false;
     if(data.targetEntity==NativeZombieTargetEntity::None)return !data.targetId&&!data.targetGeneration;
     return (data.targetEntity==NativeZombieTargetEntity::Plant||data.targetEntity==NativeZombieTargetEntity::Zombie)&&data.targetId&&data.targetGeneration;
@@ -120,6 +123,14 @@ bool UpdateNativeSourceZombieAnimation(Zombie* zombie);
 bool StartNativeSourceZombieWalk(Zombie* zombie,int blendTime);
 bool UpdateNativeSourceZombieWalking(Zombie* zombie);
 bool UpdateNativeSourceZombieAttack(Zombie* zombie);
+
+// Shared source clock-only contact/bites; real native entity/full-generation identity.
+bool NativeClockOnlyZombieContact309(Zombie*,bool canAttack);
+void NativeClockOnlyZombieBite309(Zombie*);
+// Owning source controller must preflight/consume its event before this call.
+// Reuses real locked-target/native Eat callbacks; owns no event timer/cursor.
+void NativeClockOnlyZombieBite313(Zombie*);
+void NativeClockOnlyZombieClear309(Zombie*);
 
 // Source Jackson contact/real native bites without a stock body-track switch.
 // contact(canAttack=false) is a read-only eligibility probe: no target assignment.

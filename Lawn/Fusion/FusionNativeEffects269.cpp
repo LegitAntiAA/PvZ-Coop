@@ -5,7 +5,7 @@
 #include "FusionNative.h"
 #include "FusionNativeZombieVisual.h"
 #include "FusionNativeDayZombie273.h"
-#include "FusionNativeAdventure273.h"
+#include "FusionNativeSourceClock313.h"
 #include "FusionBasePlantRules.h"
 #include "../Board.h"
 #include "../Plant.h"
@@ -104,7 +104,7 @@ bool NativeSourceEffects269::Ensure(Board* board,uint16_t kind,std::string& erro
 {
     if(kind==23)
         return WorldDefinition(board,5066,(ResourceRoot()/"zombies270"/"5066"/"effect.json").string(),error)!=nullptr;
-    if(kind==0||kind==11||kind==16||kind==18||kind==35||kind==36||kind==49||kind==51||kind==99||kind==100||(kind>=2000&&kind<2100))
+    if(kind==0||kind==10||kind==11||kind==16||kind==18||kind==32||kind==34||kind==35||kind==36||kind==41||kind==42||kind==49||kind==51||kind==54||kind==62||kind==63||kind==64||kind==99||kind==100||(kind>=2000&&kind<2100))
     {const auto path=kind<2000?ResourceRoot()/ ("source-"+std::to_string(kind))/"effect.json":ResourceRoot()/"embedded269"/std::to_string(kind)/"effect.json";
      return WorldDefinition(board,kind,path.string(),error)!=nullptr;}
 
@@ -224,7 +224,7 @@ bool PlayNativeSourceZombieLimbEvent276(Board* board,const LawnNet::NetFusionLim
 {
     const auto* context=GetNativeContext(board);
     if(!board||!board->mApp||board->mApp->mBoard!=board||!context||context->epoch!=event.mEpoch||
-        !IsNativeSourceAdventureGrassWorld281(board)||
+        !IsNativeSourceWorld313(board)||event.mRow>=GetNativeFusionRowCount(board)||
         !LawnNet::NetFusionLimbEvent276Valid(event))return false;
     auto* cache=GetNativeSourceEffects269(board,true);bool newEvent=false;
     return cache&&cache->PlayZombieLimbEvent(board,event,newEvent);
@@ -234,14 +234,15 @@ namespace
 bool CaptureSourcePart284(Zombie* zombie,LawnNet::NetFusionZombiePart284 part,LawnNet::NetFusionLimbEvent276& event)
 {
     if(!zombie||zombie->mNetGhost||!zombie->mApp||zombie->mApp->NetIsClient()||
-        !IsNativeSourceAdventureGrassWorld281(zombie->mBoard))return false;
+        !IsNativeSourceWorld313(zombie->mBoard)||zombie->mRow<0||
+        zombie->mRow>=GetNativeFusionRowCount(zombie->mBoard))return false;
     auto* board=zombie->mBoard;const auto* context=GetNativeContext(board);
     const auto* data=GetNativeSourceZombieData(zombie);
     if(!context||!data||!LawnNet::NetFusionZombiePart284Supported(data->kind,part)||
         !EnsureNativeSourceZombieVisuals(board,data->kind))return false;
     event.mEpoch=context->epoch;event.mZombieId=zombie->mNetId;event.mZombieToken=data->instanceToken;
     event.mSourceKind=data->kind;event.mPart=part;event.mRow=uint8_t(zombie->mRow);event.mRenderOrder=zombie->mRenderOrder;
-    if(!GetNativeSourceZombieLimbBirthPoint276(zombie,NativeSourceZombiePartNode284(uint8_t(part)),event.mX,event.mY))
+    if(!GetNativeSourceZombieLimbBirthPoint276(zombie,NativeSourceZombiePartNode313(data->kind,uint8_t(part)),event.mX,event.mY))
     {
         LawnNet::NetTrace("Fusion Day limb276 producer rejected epoch=%u kind=%u id=%u token=%u part=%u reason=body-pose",
             event.mEpoch,event.mSourceKind,event.mZombieId,event.mZombieToken,uint8_t(part));return false;
@@ -281,6 +282,12 @@ bool PlayNativeSourceZombieArmor284(Zombie* zombie,bool firstArmor)
     LawnNet::NetFusionLimbEvent276 event;
     return CaptureSourcePart284(zombie,firstArmor?LawnNet::NetFusionZombiePart284::FirstArmor:
         LawnNet::NetFusionZombiePart284::SecondArmor,event)&&CommitSourcePart284(zombie,event);
+}
+bool EmitNativeSourceZombiePart313(Zombie* zombie,uint8_t sourcePart)
+{
+    if(sourcePart>uint8_t(LawnNet::NetFusionZombiePart284::Glasses))return false;
+    LawnNet::NetFusionLimbEvent276 event;
+    return CaptureSourcePart284(zombie,LawnNet::NetFusionZombiePart284(sourcePart),event)&&CommitSourcePart284(zombie,event);
 }
 bool NativeSourceEffects269::EnsureEmbeddedProjectile(Board* board,uint16_t kind,const std::string& model,std::string& error)
 {
@@ -340,15 +347,24 @@ int NativeSourceEffectParticle269(uint16_t kind)
     switch(kind)
     {
     case 0:return PARTICLE_FUSION_SOURCE0;
+    case 10:return PARTICLE_FUSION_SOURCE10;
     case 11:return PARTICLE_FUSION_SOURCE11;
     case 16:return PARTICLE_FUSION_SOURCE16;
     case 18:return PARTICLE_FUSION_SOURCE18;
     case 23:return PARTICLE_FUSION_SOURCE23;
+    case 32:return PARTICLE_FUSION_SOURCE32;
+    case 34:return PARTICLE_FUSION_SOURCE34;
     case 35:return PARTICLE_FUSION_SOURCE35;
     case 36:return PARTICLE_FUSION_SOURCE36;
+    case 41:return PARTICLE_FUSION_SOURCE41;
+    case 42:return PARTICLE_FUSION_SOURCE42;
     case 49:return PARTICLE_FUSION_SOURCE49;
     case 51:return PARTICLE_FUSION_SOURCE51;
     case 52:return PARTICLE_FUSION_SOURCE52;
+    case 54:return PARTICLE_FUSION_SOURCE54;
+    case 62:return PARTICLE_FUSION_SOURCE62;
+    case 63:return PARTICLE_FUSION_SOURCE63;
+    case 64:return PARTICLE_FUSION_SOURCE64;
     case 99:return PARTICLE_FUSION_SOURCE99;
     case 100:return PARTICLE_FUSION_SOURCE100;
     default:return -1;
@@ -356,7 +372,7 @@ int NativeSourceEffectParticle269(uint16_t kind)
 }
 bool NativeSourceEffectKind269(int effect,uint16_t& kind)
 {
-    for(uint16_t candidate:{0,11,16,18,23,35,36,49,51,52,99,100})
+    for(uint16_t candidate:{0,10,11,16,18,23,32,34,35,36,41,42,49,51,52,54,62,63,64,99,100})
         if(NativeSourceEffectParticle269(candidate)==effect){kind=candidate;return true;}
     return false;
 }
@@ -382,4 +398,11 @@ bool CreateNativeIceDoom269Cloud(Plant* plant,float x,float y,std::array<NativeD
     LawnNet::NetTrace("Fusion source52 birth system=%u emitters=17 points=8 x=%.9g y=%.9g tick=%d",unsigned(plant->mApp->ParticleGetID(system)),x,y,plant->mBoard->mMainCounter);
     return true;
 }
+}
+
+namespace LawnFusion {
+void NativeSourceEffects269::CapturePlant314(Board* board,uint32_t oldUID,uint32_t ownerUID,uint32_t token,uint16_t kind)
+{if(mImpl->embedded)mImpl->embedded->CapturePlant314(board,oldUID,ownerUID,token,kind);}
+void NativeSourceEffects269::ReleaseCapturedPlant314(uint32_t ownerUID,uint32_t token)
+{if(mImpl->embedded)mImpl->embedded->ReleaseCapturedPlant314(ownerUID,token);}
 }

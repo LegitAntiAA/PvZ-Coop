@@ -29,8 +29,12 @@ namespace
 FusionNativeWireTestResult result;
 // These offset fixtures have empty Star/Doom/Companion/World/Card/Rolling/Fert
 // vectors. FNS23 adds a16-byte Board singleton and two U16 counts to FNS22.
-constexpr size_t empty269FamilyCountBytes=10*2+20+2+2+2; // Wheat, Day and Jackson family counts.
-constexpr size_t emptyNight291CountBytes=2; // U16 count after the existing Day vector.
+// FNS28 suffix: six U16 empty graph/water/heavy/extended/obstacle/captured
+// vectors, sourcePoints F32, ultimateCount I32, punishTime F32.
+constexpr size_t empty313TailBytes=6*2+4+4+4;
+constexpr size_t empty269FamilyCountBytes=10*2+20+2+2+2+2+empty313TailBytes;
+constexpr size_t emptyNight291CountBytes=4+empty313TailBytes; // Jackson/Jackbox counts +313 suffix after Day.
+constexpr size_t emptyJackbox306CountBytes=2+empty313TailBytes;
 constexpr size_t disabledAdventureSessionBytes=1; // FNS26, after temporaryLightLevel and before Garlic.
 void Check(bool condition, int line)
 {
@@ -210,6 +214,9 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
     const auto original = body.mData;
     CHECK(EncodeNativeSnapshot(source, eligible, body));
     CHECK(body.Size() > original.size());
+    constexpr std::array<uint8_t,24> empty313Golden={0,0,0,0,0,0,0,0,0,0,0,0,0,0,250,67,0,0,0,0,0,0,0,0}; //500.f,0,0.f.
+    const size_t defaultMetadataEnd=14+body.mData[6]+(size_t(body.mData[7])<<8);
+    CHECK(empty313TailBytes==empty313Golden.size()&&std::equal(empty313Golden.begin(),empty313Golden.end(),body.mData.begin()+defaultMetadataEnd-empty313TailBytes));
     NativeSnapshotFrame decoded;
     NetBuffer native;
     NetBuffer wire = body;
@@ -217,7 +224,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
     CHECK(wire.Remaining() == 0 && native.mData == original);
     CHECK(decoded.plants.size() == 1 && decoded.plants[0].data.kind == 1000);
     CHECK(decoded.plants[0].data.producerRewardFlags == 0 && decoded.plants[0].data.deathEventFlags == 0 &&
-        body.mData[4] == 27 && body.mData[5] == 0 && body.mData[18]==BACKGROUND_1_DAY && body.mData[19]==1);
+        body.mData[4] == 28 && body.mData[5] == 0 && body.mData[18]==BACKGROUND_1_DAY && body.mData[19]==1);
     CHECK(decoded.packets[0].id != decoded.packets[0].data.selectionId);
     CHECK(decoded.plants[0].data.firstParent == 0 && decoded.plants[0].data.secondParent == 1);
     CHECK(decoded.coins.size() == 1 && decoded.coins[0].data.value == 5 && !decoded.coins[0].data.money);
@@ -275,7 +282,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
         const auto& before=garlicFrame.garlicZombies[index];const auto& after=garlicDecoded.garlicZombies[index];
         CHECK(before.id==after.id && before.data.phase==after.data.phase && before.data.certainRow==after.data.certainRow &&
             before.data.waitTicks==after.data.waitTicks && before.data.moveElapsedTicks==after.data.moveElapsedTicks &&
-            before.data.faceTicks==after.data.faceTicks && before.data.originRow==after.data.originRow &&
+            before.data.faceTicks==after.data.faceTicks && before.data.moveDurationTicks==after.data.moveDurationTicks && before.data.originRow==after.data.originRow &&
             before.data.targetRow==after.data.targetRow && before.data.startY==after.data.startY && before.data.targetY==after.data.targetY);
     }
     CHECK(EncodeNativeSnapshot(garlicDecoded,eligible,garlicBody) && garlicBody.mData==garlicWire.mData);
@@ -295,28 +302,39 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
         CHECK(EncodeNativeSnapshot(restored,eligible,poolBody) && poolBody.mData==encoded.mData);
         auto day=encoded;day.mData[18]=BACKGROUND_1_DAY;RejectAtomically(day);
         const size_t end=14+(encoded.mData[6] | (static_cast<size_t>(encoded.mData[7])<<8));
-        const size_t rowRecord=end-empty269FamilyCountBytes-8-20; // Empty source/equipment/269 counts follow this sole Garlic record.
+        const size_t rowRecord=end-empty269FamilyCountBytes-8-22; // Empty source/equipment/269 counts follow this sole Garlic record.
         for (int variant=0;variant<4;++variant)
         {
             auto forged=encoded;
-            if(variant==0)forged.mData[rowRecord+10]=6;
-            if(variant==1)forged.mData[rowRecord+11]=5;
+            if(variant==0)forged.mData[rowRecord+12]=6;
+            if(variant==1)forged.mData[rowRecord+13]=5;
             const uint32_t wrongY=variant==2?0x44098000u:0x43e10000u; // Day row5 Y550 / row4 Y450.
-            if(variant>=2)for(int byte=0;byte<4;++byte)forged.mData[rowRecord+(variant==2?12:16)+byte]=static_cast<uint8_t>(wrongY>>(byte*8));
+            if(variant>=2)for(int byte=0;byte<4;++byte)forged.mData[rowRecord+(variant==2?14:18)+byte]=static_cast<uint8_t>(wrongY>>(byte*8));
             RejectAtomically(forged);
         }
     }
     const size_t garlicMetadata=garlicWire.mData[6] | (static_cast<size_t>(garlicWire.mData[7])<<8);
     const size_t baseMetadata=body.mData[6] | (static_cast<size_t>(body.mData[7])<<8);
-    constexpr size_t garlicRecordBytes=20;
+    constexpr size_t garlicRecordBytes=22; // id2 + phase/bool2 + fourU16 + rows2 + twoF32.
     const size_t garlicCount=14+garlicMetadata-empty269FamilyCountBytes-10-garlicFrame.garlicZombies.size()*garlicRecordBytes;
     const size_t firstGarlic=garlicCount+2;
     CHECK(garlicMetadata==baseMetadata+5*garlicRecordBytes && garlicCount==14+baseMetadata-empty269FamilyCountBytes-10);
     CHECK(std::equal(body.mData.begin()+14,body.mData.begin()+garlicCount,garlicWire.mData.begin()+14));
     CHECK(garlicWire.mData[garlicCount]==5 && garlicWire.mData[garlicCount+1]==0 &&
         garlicWire.mData[firstGarlic]==51 && garlicWire.mData[firstGarlic+2]==1 && garlicWire.mData[firstGarlic+3]==1 &&
-        garlicWire.mData[firstGarlic+4]==100 && garlicWire.mData[firstGarlic+10]==255 && garlicWire.mData[firstGarlic+11]==255);
-    for (int variant=0;variant<21;++variant)
+        garlicWire.mData[firstGarlic+4]==100 && garlicWire.mData[firstGarlic+10]==100 && garlicWire.mData[firstGarlic+11]==0 &&
+        garlicWire.mData[firstGarlic+12]==255 && garlicWire.mData[firstGarlic+13]==255);
+    for(uint16_t duration:{uint16_t(1),uint16_t(250),uint16_t(10000)})
+    {
+        auto timed=source;auto moving=movingDown;moving.moveDurationTicks=duration;moving.moveElapsedTicks=0;
+        timed.garlicZombies={{52,moving}};CHECK(NativeGarlicActionStateValid(moving));
+        NetBuffer encoded;encoded.mData=original;CHECK(EncodeNativeSnapshot(timed,eligible,encoded));
+        NativeSnapshotFrame restored;NetBuffer opaque;CHECK(DecodeNativeSnapshot(encoded,eligible,19,restored,opaque));
+        CHECK(restored.garlicZombies.size()==1&&restored.garlicZombies[0].data.moveDurationTicks==duration&&restored.garlicZombies[0].data.moveElapsedTicks==0);
+        const size_t end=14+encoded.mData[6]+(size_t(encoded.mData[7])<<8),record=end-empty269FamilyCountBytes-8-garlicRecordBytes;
+        CHECK(encoded.mData[record+10]==uint8_t(duration)&&encoded.mData[record+11]==uint8_t(duration>>8)&&encoded.mData[record+12]==1&&encoded.mData[record+13]==2);
+    }
+    for (int variant=0;variant<23;++variant)
     {
         NetBuffer forged=garlicWire;
         const size_t move=firstGarlic+garlicRecordBytes;
@@ -333,16 +351,18 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
         if(variant==8)forged.mData[firstGarlic+8]=151;
         if(variant==9)forged.mData[move+6]=100;
         if(variant==10)forged.mData[move+4]=1;
-        if(variant==11)forged.mData[move+10]=255;
-        if(variant==12)forged.mData[move+11]=5;
-        if(variant==13)write32(move+12,0x7fc00000u); // NaN.
-        if(variant==14)write32(move+16,0x7f800000u); // Infinity.
-        if(variant==15)write32(move+12,0x43170000u); //151 instead of source-normal row1 Y150.
-        if(variant==16)write32(move+16,0x437b0000u); //251 instead of row2 Y250.
-        if(variant==17)forged.mData[move+11]=1; // Same row is not a Moving action.
-        if(variant==18)forged.mData[move+11]=3; // Non-adjacent rows.
-        if(variant==19)write32(firstGarlic+12,0x3f800000u); // Waiting has no captured Ys.
+        if(variant==11)forged.mData[move+12]=255;
+        if(variant==12)forged.mData[move+13]=5;
+        if(variant==13)write32(move+14,0x7fc00000u); // NaN.
+        if(variant==14)write32(move+18,0x7f800000u); // Infinity.
+        if(variant==15)write32(move+14,0x43170000u); //151 instead of source-normal row1 Y150.
+        if(variant==16)write32(move+18,0x437b0000u); //251 instead of row2 Y250.
+        if(variant==17)forged.mData[move+13]=1; // Same row is not a Moving action.
+        if(variant==18)forged.mData[move+13]=3; // Non-adjacent rows.
+        if(variant==19)write32(firstGarlic+14,0x3f800000u); // Waiting has no captured Ys.
         if(variant==20)forged.mData[firstGarlic+4*garlicRecordBytes+3]=1; // Idle cannot retain certainRow.
+        if(variant==21)forged.mData[move+10]=forged.mData[move+11]=0; // Duration must be positive.
+        if(variant==22){forged.mData[move+10]=0x11;forged.mData[move+11]=0x27;} //10001 exceeds source maximum.
         RejectAtomically(forged);
     }
     for (int variant=0;variant<6;++variant)
@@ -822,7 +842,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
         CHECK(!DecodeNativeSnapshot(forgedProducer, eligible, 19, preservedFrame, preservedBody));
         CHECK(forgedProducer.mReadPos == 0 && preservedFrame.epoch == 777 && preservedBody.Size() == 1 && preservedBody.mData[0] == 0x99);
     }
-    for (uint16_t version : {uint16_t(2), uint16_t(3), uint16_t(4), uint16_t(5), uint16_t(6), uint16_t(7), uint16_t(8), uint16_t(9), uint16_t(10), uint16_t(11), uint16_t(12), uint16_t(13), uint16_t(14), uint16_t(15), uint16_t(16), uint16_t(17), uint16_t(18), uint16_t(19), uint16_t(20), uint16_t(21), uint16_t(22),uint16_t(23),uint16_t(24),uint16_t(25),uint16_t(26),uint16_t(28)})
+    for (uint16_t version : {uint16_t(2), uint16_t(3), uint16_t(4), uint16_t(5), uint16_t(6), uint16_t(7), uint16_t(8), uint16_t(9), uint16_t(10), uint16_t(11), uint16_t(12), uint16_t(13), uint16_t(14), uint16_t(15), uint16_t(16), uint16_t(17), uint16_t(18), uint16_t(19), uint16_t(20), uint16_t(21), uint16_t(22),uint16_t(23),uint16_t(24),uint16_t(25),uint16_t(26),uint16_t(27),uint16_t(29)})
     {
         NetBuffer wrongVersion = producerWire; wrongVersion.mReadPos = 0;
         wrongVersion.mData[4] = static_cast<uint8_t>(version); wrongVersion.mData[5] = 0;
@@ -2226,7 +2246,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
         // A duplicate wire entry still has a valid framing/body checksum.
         auto duplicate=encoded;duplicate.mData.insert(duplicate.mData.begin()+end-emptyNight291CountBytes-2,encoded.mData.begin()+record,encoded.mData.begin()+record+7);
         duplicate.mData[count]=2;const size_t metadata=end-14+7;duplicate.mData[6]=uint8_t(metadata);duplicate.mData[7]=uint8_t(metadata>>8);RejectAtomically(duplicate);
-        for(uint16_t badVersion:{uint16_t(23),uint16_t(24),uint16_t(25),uint16_t(26),uint16_t(28)})
+        for(uint16_t badVersion:{uint16_t(23),uint16_t(24),uint16_t(25),uint16_t(26),uint16_t(27),uint16_t(29)})
         {auto bad=encoded;bad.mData[4]=uint8_t(badVersion);bad.mData[5]=0;RejectAtomically(bad);}
         auto cleared=source;NetBuffer clearWire;clearWire.mData=original;
         CHECK(EncodeNativeSnapshot(cleared,eligible,clearWire)&&DecodeNativeSnapshot(clearWire,eligible,19,restored,opaque)&&restored.wheatPlants269.empty());
@@ -2486,7 +2506,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
         good.moonWalkFinished=true;good.outgoingSourceSeconds=1;good.transitionTotal=.25f;good.transitionElapsed=.125f;
         const auto encoded=roundtripNight(good);
         const size_t metadata=size_t(encoded.mData[6])+(size_t(encoded.mData[7])<<8);
-        const size_t first=14+metadata-17; // id U16, two phases/flags U8,3F32.
+        const size_t first=14+metadata-17-emptyJackbox306CountBytes; // id U16, two phases/flags U8,3F32.
         for(unsigned fault=0;fault<14;++fault)
         {
             auto bad=nightFrame(good);auto& view=bad.nightZombies281[0].data;
@@ -2519,6 +2539,85 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
         auto privateCopy=nightFrame(static_cast<const FusionNightZombie281View&>(state));
         NetBuffer canonical;canonical.mData=original;
         CHECK(EncodeNativeSnapshot(privateCopy,eligible,canonical)&&canonical.mData==encoded.mData);
+    }
+    // FNS28: the same real Jackbox generation owns one canonical view.
+    // Its runtime speed may double only with the source box already absent.
+    {
+        using Phase=FusionJackbox300Phase;
+        const auto makeJackbox=[](uint16_t kind,const FusionJackbox300View& view,float speed=1.f)
+        {
+            auto frame=Example();NativeSourceZombieData source;
+            source.kind=kind;source.instanceToken=0x30001;source.health=720;source.originSpeed=speed;
+            frame.sourceZombies={{701,source}};frame.zombieIdentities={{701,source.instanceToken}};
+            frame.jackboxZombies300={{701,view}};return frame;
+        };
+        const auto rejectJackbox=[&](const NativeSnapshotFrame& frame)
+        {
+            NetBuffer body;body.mData=original;
+            CHECK(!ValidateNativeSnapshotFrame(frame,eligible));
+            CHECK(!EncodeNativeSnapshot(frame,eligible,body)&&body.mData==original);
+        };
+        const auto roundtripJackbox=[&](const NativeSnapshotFrame& frame)
+        {
+            NetBuffer encoded;encoded.mData=original;
+            CHECK(ValidateNativeSnapshotFrame(frame,eligible));
+            const bool written=EncodeNativeSnapshot(frame,eligible,encoded);CHECK(written);
+            NativeSnapshotFrame actual;NetBuffer input=encoded,body;
+            const bool read=written&&DecodeNativeSnapshot(input,eligible,frame.epoch,actual,body);
+            CHECK(read&&actual.jackboxZombies300.size()==1&&body.mData==original);
+            if(read)CHECK(EncodeNativeSnapshot(actual,eligible,body)&&body.mData==encoded.mData);
+            return encoded;
+        };
+        FusionJackbox300View good;good.phase=Phase::Eat;good.outgoing=Phase::Walk;
+        good.countdown=3;good.originalCountdown=4.4f;good.outgoingSeconds=.75f;
+        good.transitionTotal=.25f;good.transitionElapsed=.125f;
+        const auto encoded=roundtripJackbox(makeJackbox(24,good));
+        roundtripJackbox(makeJackbox(30,good));
+        for(unsigned phase=0;phase<4;++phase)
+        {
+            FusionJackbox300View view;view.phase=Phase(phase);
+            if(view.phase==Phase::Pop){view.countdown=0;view.popTriggered=true;}
+            roundtripJackbox(makeJackbox(24,view));
+        }
+        auto disarmed=good;disarmed.boxPresent=false;disarmed.audioPlaying=false;
+        roundtripJackbox(makeJackbox(30,disarmed,3.6f));
+        rejectJackbox(makeJackbox(30,good,3.6f));
+        rejectJackbox(makeJackbox(24,disarmed,3.6f));
+        for(unsigned fault=0;fault<16;++fault)
+        {
+            auto bad=makeJackbox(30,good);auto& view=bad.jackboxZombies300[0].data;
+            if(fault==0)bad.jackboxZombies300.clear();
+            if(fault==1)bad.sourceZombies.clear();
+            if(fault==2)bad.sourceZombies[0].data.kind=0;
+            if(fault==3)bad.jackboxZombies300.push_back(bad.jackboxZombies300[0]);
+            if(fault==4)bad.jackboxZombies300[0].id=702;
+            if(fault==5)view.phase=Phase(255);
+            if(fault==6)view.outgoing=Phase(255);
+            if(fault==7)view.originalCountdown=8;
+            if(fault==8)view.countdown=-1;
+            if(fault==9)view.boxPresent=false,view.audioPlaying=true;
+            if(fault==10)view.popTriggered=true;
+            if(fault==11)view.transitionTotal=.5f;
+            if(fault==12)view.transitionElapsed=.3f;
+            if(fault==13)view.outgoingSeconds=2;
+            if(fault==14)view.transitionElapsed=std::numeric_limits<float>::quiet_NaN();
+            if(fault==15)view.countdown=std::numeric_limits<float>::infinity();
+            rejectJackbox(bad);
+        }
+        const size_t metadata=size_t(encoded.mData[6])+(size_t(encoded.mData[7])<<8);
+        const size_t first=14+metadata-empty313TailBytes-25; // id2, phase/outgoing/flags3, five F32.
+        for(size_t at:{first+2,first+3,first+4})
+        {auto bad=encoded;bad.mData[at]=255;RejectAtomically(bad);}
+        for(size_t at:{first+5,first+9,first+13,first+17,first+21})
+        {
+            auto bad=encoded;const uint32_t bits=0x7fc00000;
+            for(unsigned i=0;i<4;++i)bad.mData[at+i]=uint8_t(bits>>(8*i));RejectAtomically(bad);
+        }
+        NativeJackbox300State privateState;static_cast<FusionJackbox300View&>(privateState)=good;
+        privateState.localUID=0xffffffff;privateState.tick=234;privateState.incomingPosition={9,.75f};
+        privateState.outgoingPosition={7,.2f};privateState.initialized=true;
+        NetBuffer canonical;canonical.mData=original;
+        CHECK(EncodeNativeSnapshot(makeJackbox(24,static_cast<const FusionJackbox300View&>(privateState)),eligible,canonical)&&canonical.mData==encoded.mData);
     }
     std::printf(result.mFailures ? "[  FAILED  ] Fusion.NativeWire\n" : "[       OK ] Fusion.NativeWire\n");
     return result;

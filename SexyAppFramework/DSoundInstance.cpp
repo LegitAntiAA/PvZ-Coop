@@ -97,7 +97,8 @@ bool DSoundInstance::Play(bool looping, bool autoRelease)
 	Stop();
 
 	mHasPlayed = true;	
-	mAutoRelease = autoRelease;	
+	mAutoRelease = autoRelease;
+    mLooping = looping;	
 
 	if (mSoundBuffer == NULL)
 	{
@@ -122,6 +123,7 @@ bool DSoundInstance::Play(bool looping, bool autoRelease)
 
 void DSoundInstance::Stop()
 {
+    mPaused = false; mLooping = false;
 	if (mSoundBuffer != NULL)
 	{
 		mSoundBuffer->Stop();
@@ -146,6 +148,22 @@ void DSoundInstance::AdjustPitch(double theNumSteps)
 	}
 }
 
+bool DSoundInstance::Pause()
+{
+    if(mPaused)return true;
+    if(mReleased||!mHasPlayed||!mSoundBuffer||mSoundBuffer->Stop()!=DS_OK)return false;
+    // DirectSound Stop retains the cursor. The existing Stop() API
+    // deliberately resets it; AudioSource.Pause must not call that wrapper.
+    mPaused=true;return true;
+}
+
+bool DSoundInstance::Resume()
+{
+    if(!mPaused||mReleased||!mSoundBuffer)return false;
+    if(mSoundBuffer->Play(0,0,mLooping?DSBPLAY_LOOPING:0)!=DS_OK)return false;
+    mPaused=false;return true;
+}
+
 bool DSoundInstance::IsPlaying()
 {
 	if (!mHasPlayed)
@@ -164,7 +182,7 @@ bool DSoundInstance::IsPlaying()
 
 bool DSoundInstance::IsReleased()
 {
-	if ((!mReleased) && (mAutoRelease) && (mHasPlayed) && (!IsPlaying()))	
+	if ((!mReleased) && (mAutoRelease) && (mHasPlayed) && (!mPaused) && (!IsPlaying()))	
 		Release();	
 
 	return mReleased;

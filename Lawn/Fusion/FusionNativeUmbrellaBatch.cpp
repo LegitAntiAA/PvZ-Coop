@@ -1,6 +1,7 @@
 #include "FusionNativeUmbrellaBatch.h"
 #include "FusionNativeUmbrella.h"
 #include "FusionNative.h"
+#include "FusionNativeZombie313Dispatch.h"
 #include "FusionNativeAction267.h"
 #include "FusionNativeBasePlants.h"
 #include "FusionNativeButter.h"
@@ -47,6 +48,7 @@ bool Target(Zombie* z)
 bool Converting(uint16_t kind){return kind==916||kind==923||kind==1148;}
 void Knock(Zombie* z,double distance)
 {
+    bool source313=false;if(NativeZombie313StatusTarget(z,FusionExtendedEffect313::Knockback,source313)&&!source313)return;
     float x=0,y=0;if(!GetNativeBaseZombieGroundAnchor(z,x,y))return;auto* b=z->mBoard;
     const double origin=b->GetCellCenterX(0,z->mRow),sourceX=(x-origin)/kFusionBasePixelsX-4.8;
     const double right=1.35*(b->GetColumnCount()-1)-4.8+4;double moved=sourceX;

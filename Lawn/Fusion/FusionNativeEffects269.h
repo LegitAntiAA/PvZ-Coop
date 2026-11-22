@@ -28,6 +28,8 @@ public:
     void ReconcileField277(Board*,uint16_t scene,bool enabled,float x,float y,int order);
     bool QueryField277(const Board*,uint16_t& resource,uint32_t& system,float& x,float& y) const;
     bool PlayZombieLimbEvent(Board*,const LawnNet::NetFusionLimbEvent276&,bool& newEvent);
+    void CapturePlant314(Board*,uint32_t oldPlantUID,uint32_t ownerUID,uint32_t captureToken,uint16_t kind);
+    void ReleaseCapturedPlant314(uint32_t ownerUID,uint32_t captureToken);
     void UpdateEmbedded(Board*);
     bool BirthPoints(Board*,uint16_t sourceKind,float x,float y,std::array<NativeDoom269Point,8>&) const;
 private:
@@ -39,6 +41,9 @@ NativeSourceEffects269* GetNativeSourceEffects269(Board*,bool create=false);
 // Presentation only: invoked by actual native loss callbacks, never hydration.
 // Host/offline builds an authoritative birth DTO; clients only use the receiver.
 bool PlayNativeSourceZombieLimb276(Zombie*,bool head);
+// Exact source AnimLoseActive callback, including Iron-head loss that does not
+// change the base native HasHead flag. Caller owns gameplay/status changes.
+bool EmitNativeSourceZombiePart313(Zombie*,uint8_t sourcePart);
 // Source First/SecondArmorFall, synchronous before destructive retirement.
 // False refuses resource admission; acknowledged cosmetic capacity drops do not retry.
 bool PlayNativeSourceZombieArmor284(Zombie*,bool firstArmor);

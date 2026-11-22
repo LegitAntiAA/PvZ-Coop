@@ -1,4 +1,5 @@
 #include "FusionNativeVisual.h"
+#include "FusionNativeCapturedSourcePlant314.h"
 #include "FusionNative.h"
 #include "FusionNativeEffects269.h"
 #include "FusionNativeProjectileMetadata.h"
@@ -662,6 +663,8 @@ struct NativeVisuals::Impl
         FusionAnimationDrawOptions damageOptions[3];
         FusionAnimationDrawOptions pumpkinBackOptions;
         bool pumpkin = false;
+        std::vector<std::string> independentAnimators314;
+        std::vector<std::string> capturedSpritePaths314;
         std::string baseState, actionState;
         std::vector<FusionAnimationDrawOptions::ExtraState> idleLayers, shotLayers, sourceDefaultLayers;
         std::map<uint16_t,std::string> bodySpriteVariants;
@@ -692,6 +695,7 @@ struct NativeVisuals::Impl
     static std::unique_ptr<Sexy::MemoryImage> BakePortrait(LawnApp* app, const std::filesystem::path& root, const PlantPackage& package);
     std::map<uint16_t, std::unique_ptr<Sexy::MemoryImage>> portraits;
     std::map<uint16_t, std::unique_ptr<PlantVisual>> plants;
+    std::map<uint16_t,size_t> capturePins314;
     std::map<uint8_t,std::unique_ptr<FusionAnimation>> equipment;
     std::unique_ptr<FusionAnimation> fertilize269;
     std::map<int,std::unique_ptr<FusionAnimation>> companions;
@@ -769,6 +773,9 @@ std::unique_ptr<NativeVisuals::Impl::PlantVisual> NativeVisuals::Impl::LoadPlant
             throw std::runtime_error("source particle binding/resource preflight rejected: "+error);
     }
     LoadAnimation(visual->animation, app, plantPath,particleProof);
+    for(const auto& animator:plant.value("sourceAnimators",Json::array()))
+        if(!animator.value("primary",false)&&animator.value("enabled",false))visual->independentAnimators314.push_back(animator.at("path").get<std::string>());
+    for(const auto& sprite:plant.at("sprites"))visual->capturedSpritePaths314.push_back(plant.at("nodes").at(sprite.at("node").get<int>()).at("path").get<std::string>());
     if((package.kind==1104||package.kind==1089)&&particleProof.empty())
     {
         const auto& bounded=plant.at("boundedDormantParticles");
@@ -1761,7 +1768,7 @@ void NativeVisuals::ReleaseUnused(Board* board)
             if (item.second.kind != kFusionNoPlant) portraits.insert(item.second.kind);
         bool changed = false;
         for (auto it = mImpl->plants.begin(); it != mImpl->plants.end();)
-            if (!needs.plants.contains(it->first)) { it = mImpl->plants.erase(it); changed = true; } else ++it;
+            if (!needs.plants.contains(it->first)&&!mImpl->capturePins314.contains(it->first)) { it = mImpl->plants.erase(it); changed = true; } else ++it;
         for (auto it = mImpl->projectiles.begin(); it != mImpl->projectiles.end();)
             if (!needs.projectiles.contains(it->first)) { it = mImpl->projectiles.erase(it); changed = true; } else ++it;
         for (auto it = mImpl->portraits.begin(); it != mImpl->portraits.end();)
@@ -2172,6 +2179,7 @@ bool NativeVisuals::BeginWorldFrame(Sexy::Graphics* graphics,Board* board)
         }
         mImpl->framePlants.emplace(generation,std::move(entry));
     }
+    if(auto* captures=GetNativeCapturedPlants314(board))if(!captures->CollectMasks(graphics,mImpl->frameMasks))return false;
     for(const auto& mask:mImpl->frameMasks)mImpl->frameMaskViews.push_back(mask.View());
     mImpl->frameBoard=board;mImpl->frameDestination=graphics->mDestImage;mImpl->frameScope=scope;
     return true;
@@ -2764,4 +2772,58 @@ void ReconcileNativeFusionField277(Board* board)
 {auto* context=GetNativeContext(board);if(context&&context->visuals)context->visuals->ReconcileField(board);}
 bool QueryNativeFusionField277(const Board* board,NativeFieldView277& out)
 {out={};const auto* context=GetNativeContext(board);return context&&context->visuals&&context->visuals->QueryField(board,out);}
+}
+
+namespace LawnFusion
+{
+bool NativeVisuals::CapturePlant314(Plant* p,FrozenSourcePose314& out,uint16_t& modelKind,bool& nativeArtwork,CapturedMatrix314& world,std::string& error)
+{
+ const auto* data=GetNativePlantData(p);if(!mImpl||!data||p->mDead)return false;
+ nativeArtwork=NativePlantArtwork(data->kind);modelKind=IsNativeRollingActor269(p)?GetNativeRollingActor269ArtworkKind(p):data->kind;
+ if(nativeArtwork){out={};world={1,0,0,1,float(p->mX),float(p->mY)};error.clear();return true;}
+ const auto found=mImpl->plants.find(modelKind);if(found==mImpl->plants.end()){error="captured source model is not resident";return false;}
+ const auto& visual=*found->second;
+ if(!visual.independentAnimators314.empty())
+ {error="retained independent Animator requires actual clock/state binding: kind="+std::to_string(data->kind)+" path="+visual.independentAnimators314.front();return false;}
+ Impl::PlantPose pose;float gx=0,gy=0;if(!mImpl->BuildPlantPose(p,visual,pose)||!p->GetShadowCenter(gx,gy))return false;
+ FrozenSourcePose314 next;next.baseState=pose.baseState?pose.baseState:"";next.actionState=pose.actionState?pose.actionState:"";
+ next.baseSeconds=pose.baseSeconds;next.actionSeconds=pose.actionSeconds;next.speed=data->animationSpeed;
+ next.options=OwnCapturedSourceOptions314(pose.options);
+ // Source AnimCatch overwrites every retained child Renderer order with26.
+ for(const auto& path:visual.capturedSpritePaths314)next.options.spriteSortingOverrides.push_back({path,0,26});
+ world={kNativePixelsPerWorldUnit,0,0,-kNativePixelsPerWorldUnit,
+  gx+p->mShakeOffsetX-visual.shadowX*kNativePixelsPerWorldUnit,gy+p->mShakeOffsetY+visual.shadowY*kNativePixelsPerWorldUnit};
+ if(!CapturedMatrix314Valid(world))return false;out=std::move(next);error.clear();return true;
+}
+void NativeVisuals::PinCapturedPlant314(uint16_t kind,bool pin)
+{
+ if(!mImpl)return;if(pin){++mImpl->capturePins314[kind];return;}
+ const auto at=mImpl->capturePins314.find(kind);if(at!=mImpl->capturePins314.end()&&!--at->second)mImpl->capturePins314.erase(at);
+}
+bool NativeVisuals::DrawCapturedPlant314(Sexy::Graphics* g,uint16_t kind,const FrozenSourcePose314& pose,const CapturedMatrix314& matrix) const
+{
+ if(!mImpl||!g||!CapturedMatrix314Valid(matrix))return false;const auto found=mImpl->plants.find(kind);if(found==mImpl->plants.end())return false;
+ auto options=DrawCapturedSourceOptions314(pose.options);options.useBoardBasis=true;options.boardBasis={matrix[0],matrix[1],matrix[2],matrix[3]};
+ if(mImpl->frameBoard&&mImpl->frameDestination==g->mDestImage)
+ {options.useWorldMaskScope=true;options.maskScope=mImpl->frameScope;options.worldMasks=mImpl->frameMaskViews;}
+ found->second->animation.DrawPose(g,matrix[4],matrix[5],1,pose.baseState.empty()?nullptr:pose.baseState.c_str(),pose.baseSeconds,
+  pose.actionState.empty()?nullptr:pose.actionState.c_str(),pose.actionSeconds,pose.speed,&options);return true;
+}
+bool NativeVisuals::CapturedPlantNode314(uint16_t kind,const FrozenSourcePose314& pose,const CapturedMatrix314& matrix,const char* path,float& x,float& y,bool& active) const
+{
+ if(!mImpl||!path||!CapturedMatrix314Valid(matrix))return false;const auto found=mImpl->plants.find(kind);if(found==mImpl->plants.end())return false;
+ const auto options=DrawCapturedSourceOptions314(pose.options);float sx=0,sy=0;bool enabled=false;
+ const auto* base=pose.baseState.empty()?nullptr:pose.baseState.c_str();const auto* action=pose.actionState.empty()?nullptr:pose.actionState.c_str();
+ if(!found->second->animation.TryGetNodeOffset(path,sx,sy,base,pose.baseSeconds,action,pose.actionSeconds,pose.speed,&options)||
+  !found->second->animation.TryGetNodeActivity(path,enabled,base,pose.baseSeconds,action,pose.actionSeconds,pose.speed,&options))return false;
+ const float px=matrix[0]*sx+matrix[2]*sy+matrix[4],py=matrix[1]*sx+matrix[3]*sy+matrix[5];
+ if(!std::isfinite(px)||!std::isfinite(py))return false;x=px;y=py;active=enabled;return true;
+}
+bool NativeVisuals::CollectCapturedPlantMasks314(Sexy::Graphics* g,uint16_t kind,const FrozenSourcePose314& pose,const CapturedMatrix314& matrix,std::vector<FusionAnimationMask>& masks) const
+{
+ if(!mImpl||!g||!CapturedMatrix314Valid(matrix))return false;const auto found=mImpl->plants.find(kind);if(found==mImpl->plants.end())return false;
+ auto options=DrawCapturedSourceOptions314(pose.options);options.useBoardBasis=true;options.boardBasis={matrix[0],matrix[1],matrix[2],matrix[3]};options.maskScope=mImpl->frameSerial;
+ return found->second->animation.CollectMasks(g,matrix[4],matrix[5],1,pose.baseState.empty()?nullptr:pose.baseState.c_str(),pose.baseSeconds,
+  pose.actionState.empty()?nullptr:pose.actionState.c_str(),pose.actionSeconds,pose.speed,&options,masks);
+}
 }

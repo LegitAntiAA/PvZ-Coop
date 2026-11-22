@@ -3,7 +3,18 @@
 #include "Fusion/FusionNativeAdventureProgress273.h"
 #include "Fusion/FusionNativeDayZombie273Bridge.h"
 #include "Fusion/FusionNativeNightZombie291Bridge.h"
+#include "Fusion/FusionNativeJackbox309Bridge.h"
+#include "Fusion/FusionNativeSourceDamage315.h"
+#include "Fusion/FusionNativeZombie313Dispatch.h"
+#include "Fusion/FusionNativeWaterZombie313Bridge.h"
+#include "Fusion/FusionNativeHeavyZombie313BBridge.h"
+#include "Fusion/FusionNativeExtendedZombie313Bridge.h"
+#include "Fusion/FusionNativeSourceLifecycle313.h"
+#include "Fusion/FusionNativeSourceClock313.h"
+#include "Fusion/FusionSourceZombieTypes313.h"
+#include "Fusion/FusionAnimation.h"
 #include <cmath>
+#include <limits>
 #include "Board.h"
 #include "Zombie.h"
 #include "Fusion/NativeSpecialZombie269.h"
@@ -45,6 +56,121 @@
 #ifdef _HAS_ZOMBATAR
 #include "Widget/ZombatarScreen.h"
 #endif
+
+namespace LawnFusion
+{
+bool IsNativeZombie313(const Zombie* z)
+{const auto* d=GetNativeSourceZombieData(z);return d&&(FusionWaterZombie313Kind(d->kind)||NativeHeavyZombie313BKind(d->kind)||FindFusionExtendedZombie313Profile(d->kind));}
+bool GetNativeZombie313Semantics(const Zombie* z,NativeZombie313Semantics& out)
+{
+ if(!z||!IsNativeZombie313(z))return false;const auto* d=GetNativeSourceZombieData(z);NativeZombie313Semantics v;v.kind=d->kind;v.beforeDying=d->beforeDying;
+ if(FusionWaterZombie313Kind(v.kind))
+ {if(!GetNativeWaterZombie313Semantics(z,v.status,v.beforeDying,v.colliderEnabled,v.inWater,v.rootFlip))return false;v.submerged=v.kind==17&&v.status==7;v.offGround=(v.kind==19||v.kind==27)&&v.status==9;v.ownBodyDamage=v.kind==16;}
+ else if(NativeHeavyZombie313BKind(v.kind))
+ {if(!GetNativeHeavyZombie313BSemantics(z,v.status,v.beforeDying,v.colliderEnabled,v.rootFlip))return false;v.inWater=z->mInPool;v.underground=v.kind==28&&v.status==12;v.offGround=v.kind==34&&v.status==20;v.ownBodyDamage=v.kind==31;}
+ else
+ {
+  const auto* s=GetNativeExtendedZombie313(z);if(!s||!FusionExtendedZombie313ViewValid(v.kind,*s))return false;
+  // This getter must stay independent of Node/Draw/ground-anchor queries:
+  // GetShadowCenter calls IsWalkingBackwards/IsFlying during those queries.
+  v.status=s->sourceStatus;v.beforeDying=s->beforeDying;v.rootFlip=s->rootFlip;
+  v.inWater=z->mBoard&&z->mRow>=0&&z->mRow<GetNativeFusionRowCount(z->mBoard)&&z->mBoard->mPlantRow[z->mRow]==PLANTROW_POOL;
+  v.flying=v.kind==26||((v.kind==25||v.kind==29)&&v.status==10);
+  v.offGround=(v.kind==37&&(v.status==16||v.status==17))||(v.kind==213&&v.status==16);
+  v.colliderEnabled=v.kind!=26&&(v.kind!=37||s->visible);
+  v.ownBodyDamage=FusionExtendedZombie313OwnBodyDamage(v.kind);
+ }
+ if(v.status==1||z->mDead)v.colliderEnabled=false;out=v;return true;
+}
+namespace
+{
+bool Source313Host(const Zombie* z)
+{return z&&z->mApp&&z->mBoard&&z->mApp->mBoard==z->mBoard&&!z->mNetGhost&&!z->mApp->NetIsClient()&&!z->mDead;}
+bool Source313Effect(const NativeZombie313Semantics& v,FusionExtendedEffect313 effect,int ticks,FusionExtendedEffectAction313& action,int& adjusted)
+{
+ action=FusionExtendedEffectAction313::Normal;adjusted=ticks;
+ if(FindFusionExtendedZombie313Profile(v.kind))
+ {float result=0;if(!TryPlanFusionExtendedEffect313(v.kind,v.status,effect,float(ticks)*.01f,action,result))return false;const double native=std::ceil(double(result)*100.-1e-5);if(!std::isfinite(native)||native<0||native>(std::numeric_limits<int>::max)())return false;adjusted=int(native);}
+ if(v.status==1)action=FusionExtendedEffectAction313::Suppress;
+ if(v.kind==16&&(effect==FusionExtendedEffect313::Cold||effect==FusionExtendedEffect313::Freeze))action=FusionExtendedEffectAction313::Suppress;
+ if(v.kind==28&&effect==FusionExtendedEffect313::Cold&&!FusionMiner313BCanCold(uint8_t(v.status)))action=FusionExtendedEffectAction313::Suppress;
+ if((v.kind==203||v.kind==223)&&((effect==FusionExtendedEffect313::MindControl&&v.kind==223)||(effect==FusionExtendedEffect313::Knockback&&v.kind==223)||
+   ((effect==FusionExtendedEffect313::Freeze||effect==FusionExtendedEffect313::Butter)&&v.status==5)))action=FusionExtendedEffectAction313::Suppress;
+ if(v.kind==45&&effect==FusionExtendedEffect313::Knockback)action=FusionExtendedEffectAction313::Suppress;
+ // Source base Buttered/SetFreeze/Garliced restrictions, independent of the
+ // NORMAL/ZAMBONI carrier. Exact predicates are saved in primary313C.
+ if(effect==FusionExtendedEffect313::Butter&&(v.beforeDying||v.kind==16||v.kind==17||v.status==3||v.status==9||v.status==10||v.status==12||v.status==13||v.status==14||v.status==19||v.status==20||v.status==22||v.status==23||v.status==24))action=FusionExtendedEffectAction313::Suppress;
+ if(effect==FusionExtendedEffect313::Garlic&&(FusionSourceZombieIsDriver313(v.kind)||v.status==16||v.status==17))action=FusionExtendedEffectAction313::Suppress;
+ if(effect==FusionExtendedEffect313::Freeze&&action==FusionExtendedEffectAction313::Normal&&(v.status==3||v.status==9||v.status==10||v.status==16))
+ {action=FusionExtendedEffectAction313::ColdInstead;adjusted=1000;}
+ return true;
+}
+bool Source313Update(Zombie* z)
+{
+ if(!IsNativeZombie313(z))return false;if(!Source313Host(z)||z->mBoard->mPaused||z->mApp->mGameScene!=SCENE_PLAYING)return true;
+ // The native DYING branch skips UpdatePlaying's ordinary status decay. Source
+ // Update still runs StatusUpdate before its death-controller callbacks.
+ if(z->mZombiePhase==PHASE_ZOMBIE_DYING&&z->mChilledCounter>0)--z->mChilledCounter;
+ auto* app=z->mApp;auto* board=z->mBoard;const uint32_t uid=board->mZombies.DataArrayGetID(z);
+ if(FusionWaterZombie313Kind(GetNativeSourceZombieData(z)->kind))UpdateNativeWaterZombie313Actor(z);
+ else if(NativeHeavyZombie313BKind(GetNativeSourceZombieData(z)->kind))UpdateNativeHeavyZombie313BActor(z);
+ else UpdateNativeExtendedZombie313Bridge(z);
+ if(app->mBoard==board)if(auto* live=board->mZombies.DataArrayTryToGet(uid);live&&!live->mDead&&GetNativeExtendedZombie313(live))MoveNativeExtendedZombie313Physics(live);
+ return true;
+}
+bool Source313BodyRect(Zombie* z,Sexy::Rect& out)
+{
+ if(!IsNativeZombie313(z))return false;NativeZombie313Semantics v;FusionAnimationBoxCollider303 box;float x=0,y=0;
+ if(!GetNativeZombie313Semantics(z,v)||!v.colliderEnabled||!GetNativeSourceZombieBox313(z,box)||!box.enabled||!box.nodeActive||!GetNativeSourceZombie269NodePoint(z,"",x,y)){out={0,0,0,0};return true;}
+ const float scale=60*z->mScaleZombie;const float l=x+scale*box.aabb[0],t=y-scale*box.aabb[3],r=x+scale*box.aabb[2],b=y-scale*box.aabb[1];
+ const int left=int(std::floor(l)),top=int(std::floor(t));out={left,top,int(std::ceil(r))-left,int(std::ceil(b))-top};return true;
+}
+bool Source313FirstArmor(Zombie* z,int damage,int& overflow)
+{
+ const auto* d=GetNativeSourceZombieData(z);if(!d||(d->kind!=43&&d->kind!=212))return false;
+ overflow=0;if(!Source313Host(z)||damage<0)return true;auto* s=EditNativeExtendedZombie313(z);if(!s)return true;
+ const int hp=z->mHelmHealth;if(hp>0&&damage>=hp&&!PlayNativeSourceZombieArmor284(z,true))return true;
+ z->mHelmHealth=(std::max)(0,hp-damage);overflow=(std::max)(0,damage-hp);
+ if(!z->mHelmHealth)z->mHelmType=HELMTYPE_NONE;
+ else {if(z->mHelmHealth<int(int64_t(z->mHelmMaxHealth)*2/3)&&s->firstArmorStage<1)s->firstArmorStage=1;if(z->mHelmHealth<z->mHelmMaxHealth/3&&s->firstArmorStage<2)s->firstArmorStage=2;}
+ return true;
+}
+}
+bool NativeZombie313StatusTarget(const Zombie* z,FusionExtendedEffect313 effect,bool& eligible)
+{
+ if(!IsNativeZombie313(z))return false;eligible=false;NativeZombie313Semantics v;FusionExtendedEffectAction313 action;int ticks=0;
+ if(Source313Host(z)&&GetNativeZombie313Semantics(z,v)&&Source313Effect(v,effect,0,action,ticks))eligible=action!=FusionExtendedEffectAction313::Suppress;
+ return true;
+}
+bool NativeZombie313MindControlAllowed(uint16_t kind,int status,int level)
+{
+ NativeZombie313Semantics v;v.kind=kind;v.status=status;FusionExtendedEffectAction313 action;int ticks=0;
+ return Source313Effect(v,FusionExtendedEffect313::MindControl,0,action,ticks)&&
+   action!=FusionExtendedEffectAction313::Suppress&&
+   (action!=FusionExtendedEffectAction313::CustomMindControl||level>=1);
+}
+bool NativeZombie313ApplyCold(Zombie* z,bool freeze,int sourceTicks)
+{
+ if(!IsNativeZombie313(z))return false;if(!Source313Host(z)||sourceTicks<0)return true;
+ NativeZombie313Semantics v;FusionExtendedEffectAction313 action;int ticks=0;
+ if(!GetNativeZombie313Semantics(z,v)||!Source313Effect(v,freeze?FusionExtendedEffect313::Freeze:FusionExtendedEffect313::Cold,sourceTicks,action,ticks))return true;
+ if(action==FusionExtendedEffectAction313::Suppress)return true;
+ if(freeze&&NativeHeavyZombie313BKind(v.kind)&&ApplyNativeHeavyFreeze313B(z,sourceTicks))return true;
+ if(!freeze||action==FusionExtendedEffectAction313::ColdInstead)z->SetColdCounters(ticks,z->mIceTrapCounter);
+ else if(!z->mIceTrapCounter){if(ticks>(std::numeric_limits<int>::max)()-1000)return true;z->SetColdCounters(ticks+1000,ticks);}
+ else if(ticks>z->mIceTrapCounter)z->SetColdCounters(z->mChilledCounter,ticks);
+ return true;
+}
+bool NativeZombie313Caltrop(Zombie* z)
+{if(!IsNativeZombie313(z))return false;if(!Source313Host(z))return true;const auto k=GetNativeSourceZombieData(z)->kind;if(k==16)NativeWaterZombie313ActorCaltrop(z);else if(k==31)NativeHeavyZombie313BActorCaltrop(z);return true;}
+bool NativeZombie313LoseEquipment(Zombie* z,int reason)
+{
+ if(!IsNativeZombie313(z))return false;if(!Source313Host(z))return true;
+ const auto k=GetNativeSourceZombieData(z)->kind;if(NativeHeavyZombie313BKind(k))NativeHeavyZombie313BActorLoseObject(z,reason);
+ else if(auto* s=EditNativeExtendedZombie313(z);s&&(k==25||k==29))FallNativeExtendedZombie313(z,*s,GetNativeExtendedZombie313Hooks());
+ return true;
+}
+}
 
 ZombieDefinition gZombieDefs[NUM_ZOMBIE_TYPES] = {  //0x69DA80
     { ZOMBIE_NORMAL,            REANIM_ZOMBIE,              1,      1,      1,      4000,   _S("ZOMBIE") },
@@ -1690,6 +1816,7 @@ void Zombie::UpdateZombieBungee()
 //0x525350
 void Zombie::PogoBreak(unsigned int theDamageFlags)
 {
+    if(LawnFusion::NativeZombie313LoseEquipment(this))return;
     if (!mHasObject)
         return;
 
@@ -1970,6 +2097,7 @@ void Zombie::UpdateZombieCatapult()
 //0x525B60
 void Zombie::LandFlyer(unsigned int theDamageFlags)
 {
+    if(LawnFusion::NativeZombie313LoseEquipment(this))return;
     if (!TestBit(theDamageFlags, (int)DamageFlags::DAMAGE_DOESNT_LEAVE_BODY) && (mZombiePhase == ZombiePhase::PHASE_BALLOON_FLYING || mZombiePhase == ZombiePhase::PHASE_BALLOON_SWING))
     {
         mApp->PlaySample(SOUND_BALLOON_POP);
@@ -4031,6 +4159,7 @@ void Zombie::DropPole()
 
 bool Zombie::CanLoseBodyParts()
 {
+    LawnFusion::NativeZombie313Semantics v;if(LawnFusion::IsNativeZombie313(this))return LawnFusion::GetNativeZombie313Semantics(this,v)&&!v.ownBodyDamage;
     return 
         mZombieType != ZombieType::ZOMBIE_ZAMBONI && 
         mZombieType != ZombieType::ZOMBIE_BUNGEE &&
@@ -4059,7 +4188,17 @@ void Zombie::DropHead(unsigned int theDamageFlags)
 {
     if (!CanLoseBodyParts() || !mHasHead)
         return;
+    if(LawnFusion::IsNativeZombie313(this))
+    {
+        if(mNetGhost||mApp->NetIsClient())return;
+        LawnFusion::NativeZombie313Semantics v;if(!LawnFusion::GetNativeZombie313Semantics(this,v)||v.ownBodyDamage)return;
+        if(v.kind==17)LawnFusion::NativeWaterZombie313ActorHeadLost(this);
+        else if(v.kind==32||v.kind==34)LawnFusion::NativeHeavyZombie313BActorHeadLost(this);
+        else if(v.kind==37)mVelX=mVelZ=0; // Genuine Imp LoseHeadEvent357070.
+        if(mDead)return;
+    }
     if(!LawnFusion::PrepareNativeDayZombie273HeadLoss(this,theDamageFlags))return;
+    LawnFusion::NativeJackbox309LoseHead(this);
 
     if (!mNetGhost && mButteredCounter > 0)
     {
@@ -4071,7 +4210,7 @@ void Zombie::DropHead(unsigned int theDamageFlags)
     mHasHead = false;
     SetupReanimForLostHead();
     if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);
-        LawnFusion::IsNativeDayZombie273(this)||(source&&LawnNet::NetFusionZombiePart284Supported(source->kind,LawnNet::NetFusionZombiePart284::Arm)))
+        LawnFusion::IsNativeZombie313(this)||LawnFusion::IsNativeDayZombie273(this)||(source&&LawnNet::NetFusionZombiePart284Supported(source->kind,LawnNet::NetFusionZombiePart284::Arm)))
     {
         // Flags/stump and source106/108 Bucket gameplay above are independent
         // of the genuine cosmetic callback. Other Day heads have no fall PS.
@@ -4463,7 +4602,7 @@ void Zombie::SetupReanimForLostArm(unsigned int theDamageFlags)
     }
 
     if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);
-        LawnFusion::IsNativeDayZombie273(this)||(source&&LawnNet::NetFusionZombiePart284Supported(source->kind,LawnNet::NetFusionZombiePart284::Arm)))
+        LawnFusion::IsNativeZombie313(this)||LawnFusion::IsNativeDayZombie273(this)||(source&&LawnNet::NetFusionZombiePart284Supported(source->kind,LawnNet::NetFusionZombiePart284::Arm)))
         return; // Hydration-safe native stump only; actual DropArm owns the event.
 
     if (!mInPool && !TestBit(theDamageFlags, DamageFlags::DAMAGE_DOESNT_LEAVE_BODY))
@@ -4566,6 +4705,7 @@ void Zombie::SetupReanimForLostArm(unsigned int theDamageFlags)
 //0x529EF0
 void Zombie::DropArm(unsigned int theDamageFlags)
 {
+    if(LawnFusion::IsNativeZombie313(this)&&(mNetGhost||mApp->NetIsClient()))return;
     if (!CanLoseBodyParts())
     {
         return;
@@ -4589,7 +4729,7 @@ void Zombie::DropArm(unsigned int theDamageFlags)
     mHasArm = false;
     SetupReanimForLostArm(theDamageFlags);
     if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);
-        LawnFusion::IsNativeDayZombie273(this)||(source&&LawnNet::NetFusionZombiePart284Supported(source->kind,LawnNet::NetFusionZombiePart284::Arm)))
+        LawnFusion::IsNativeZombie313(this)||LawnFusion::IsNativeDayZombie273(this)||(source&&LawnNet::NetFusionZombiePart284Supported(source->kind,LawnNet::NetFusionZombiePart284::Arm)))
         LawnFusion::PlayNativeSourceZombieLimb276(this,false);
     mApp->PlayFoley(FoleyType::FOLEY_LIMBS_POP);
 }
@@ -4597,6 +4737,12 @@ void Zombie::DropArm(unsigned int theDamageFlags)
 //0x52A470
 void Zombie::UpdateDamageStates(unsigned int theDamageFlags)
 {
+    if(LawnFusion::IsNativeZombie313(this))
+    {
+        if(mNetGhost||mApp->NetIsClient())return;
+        LawnFusion::NativeZombie313Semantics v;if(!LawnFusion::GetNativeZombie313Semantics(this,v)||v.ownBodyDamage)return;
+        if(auto* s=LawnFusion::EditNativeExtendedZombie313(this))if(const auto* d=LawnFusion::GetNativeSourceZombieData(this);d&&d->beforeDying)s->beforeDying=true;
+    }
     if (!CanLoseBodyParts())
         return;
 
@@ -4851,6 +4997,7 @@ void Zombie::UpdateLadder()
 //0x52AA40
 void Zombie::UpdateZombieWalking()
 {
+    if(LawnFusion::IsNativeZombie313(this))return; // Source Update/graph already consumed movement once.
     if (LawnFusion::NativeWater268ZombieCaptured(this)) return;
     if (LawnFusion::UpdateNativeSourceZombieWalking(this)) return;
     if (ZombieNotWalking())
@@ -5087,6 +5234,7 @@ void Zombie::CheckForZombieStep()
 //0x52AD30
 void Zombie::UpdateZombiePosition()
 {
+    if(LawnFusion::IsNativeZombie313(this))return; // Keep source axis/altitude; no stock lane correction.
     if (mZombieType == ZombieType::ZOMBIE_BUNGEE || mZombieType == ZombieType::ZOMBIE_BOSS || 
         mZombiePhase == ZombiePhase::PHASE_RISING_FROM_GRAVE || mZombieHeight == ZombieHeight::HEIGHT_ZOMBIQUARIUM)
         return;
@@ -5127,7 +5275,8 @@ void Zombie::UpdateZombiePosition()
     // pull a zombie off every vertical segment toward the centre of mRow.
     const auto* aGarlicAction = LawnFusion::GetNativeZombieGarlicData(this);
     if (!aUseTowerDefensePath && mZombieHeight == ZombieHeight::HEIGHT_ZOMBIE_NORMAL &&
-        !(aGarlicAction && aGarlicAction->phase == LawnFusion::GarlicActionPhase::Moving))
+        !(aGarlicAction && aGarlicAction->phase == LawnFusion::GarlicActionPhase::Moving) &&
+        !LawnFusion::NativeJackbox309RowMoving(this))
     {
         float aDesiredY = GetPosYBasedOnRow(mRow);
         if (mPosY < aDesiredY)
@@ -5165,6 +5314,7 @@ void Zombie::UpdateBurn()
 //0x52AE60
 void Zombie::Update()
 {
+    if(LawnFusion::IsNativeZombie313(this)&&(mNetGhost||mApp->NetIsClient()))return; // Ghosts adopt actual host state/clocks only.
     TOD_ASSERT(!mDead);
 
     mZombieAge++;
@@ -5199,7 +5349,7 @@ void Zombie::Update()
         }
         else
         {
-            if (mPhaseCounter > 0 && !IsImmobilizied())
+            if (mPhaseCounter > 0 && !IsImmobilizied() && !LawnFusion::NativeHeavyZombie313BOwnsPhaseCounter(this))
             {
                 if (IsMovingAtChilledSpeed() && mZombiePhase != ZombiePhase::PHASE_DANCER_RISING && 
                     mZombieAge % 2 == 0 && mZombieAge > 0)
@@ -5308,6 +5458,7 @@ void Zombie::UpdateClimbingLadder()
 //0x52B110
 void Zombie::UpdateActions()
 {
+    if(LawnFusion::IsNativeZombie313(this))return;
     if(LawnFusion::UpdateNativeSpecialZombie269(this))return;
     if (mZombieHeight == ZombieHeight::HEIGHT_UP_LADDER)
     {
@@ -5650,6 +5801,7 @@ void Zombie::UpdatePlaying()
         if (LawnFusion::UpdateNativeGarlicAction(this,*garlic,speed) && previousPhase != garlic->phase)
             UpdateAnimSpeed();
     }
+    if(LawnFusion::Source313Update(this))return;
     LawnFusion::UpdateNativeSpecialZombie269PaperShoot(this,LawnFusion::GetNativeSourceZombie269NodePoint);
     if(LawnFusion::UpdateNativeJackson291(this)&& (mDead||IsDeadOrDying()))return;
     if(LawnFusion::IsNativeDayZombie273(this))
@@ -6205,6 +6357,7 @@ void Zombie::DrawZombie(Graphics* g, const ZombieDrawPosition& theDrawPos)
 //0x52BEE0
 bool Zombie::IsWalkingBackwards()
 {
+    LawnFusion::NativeZombie313Semantics source313;if(LawnFusion::GetNativeZombie313Semantics(this,source313))return source313.rootFlip;
     if (mMindControlled)
         return true;
 
@@ -8145,6 +8298,8 @@ void Zombie::ApplyAnimRate(float theAnimRate)
 //0x52F050
 void Zombie::UpdateAnimSpeed()
 {
+    if(LawnFusion::IsNativeZombie313(this))
+    {if(!mNetGhost&&!mApp->NetIsClient())if(auto* state=LawnFusion::EditNativeWaterZombie313(this))LawnFusion::UpdateNativeWaterZombie313Animation(this,*state);return;}
     if (LawnFusion::UpdateNativeSourceZombieAnimation(this)) return;
     if (!IsOnBoard())
         return;
@@ -8235,7 +8390,8 @@ void Zombie::ConvertToNormalZombie()
 //0x52F250
 void Zombie::StartEating()
 {
-    if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);source&&source->kind==10)
+    if(LawnFusion::IsNativeZombie313(this)){mIsEating=true;return;}
+    if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);source&&(source->kind==10||LawnFusion::FusionJackbox300Kind(source->kind)))
     {mIsEating=true;return;} // The source controller owns the existing body clock.
     if (mIsEating)
         return;
@@ -8289,6 +8445,7 @@ void Zombie::StartEating()
 //0x52F2E0
 void Zombie::StartWalkAnim(int theBlendTime)
 {
+    if(LawnFusion::IsNativeZombie313(this))return;
     if (LawnFusion::StartNativeSourceZombieWalk(this,theBlendTime)) return;
     Reanimation* aBodyReanim = mApp->ReanimationTryToGet(mBodyReanimID);
     if (aBodyReanim == nullptr)
@@ -8352,7 +8509,8 @@ void Zombie::StartWalkAnim(int theBlendTime)
 //0x52F440
 void Zombie::StopEating()
 {
-    if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);source&&source->kind==10)
+    if(LawnFusion::IsNativeZombie313(this)){mIsEating=false;return;}
+    if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);source&&(source->kind==10||LawnFusion::FusionJackbox300Kind(source->kind)))
     {mIsEating=false;return;}
     if (!mIsEating)
         return;
@@ -8392,6 +8550,7 @@ void Zombie::StopEating()
 //0x52F4C0
 void Zombie::CheckIfPreyCaught()
 {
+    if(LawnFusion::IsNativeZombie313(this))return; // Contact/target acquisition belongs to the typed family.
     if (LawnFusion::UpdateNativeSourceZombieAttack(this)) return;
     if (const auto* garlic = LawnFusion::GetNativeZombieGarlicData(this))
         if (LawnFusion::FusionGarlicPreventsEating(*garlic)) return;
@@ -8584,6 +8743,14 @@ void Zombie::CheckForHighGround()
 //0x52FA60
 void Zombie::StartMindControlled()
 {
+    if(LawnFusion::IsNativeZombie313(this))
+    {
+        bool eligible=false;if(!LawnFusion::NativeZombie313StatusTarget(this,LawnFusion::FusionExtendedEffect313::MindControl,eligible)||!eligible)return;
+        if(const auto* s=LawnFusion::GetNativeExtendedZombie313(this);s&&(LawnFusion::GetNativeSourceZombieData(this)->kind==38||LawnFusion::GetNativeSourceZombieData(this)->kind==39))
+            LawnFusion::MindControlNativeExtendedZombie313(this,0,LawnFusion::GetNativeExtendedZombie313Hooks());
+        else LawnFusion::ApplyNativeSourceMindControl313(this,0);
+        return;
+    }
     if (LawnFusion::NativeSummon269RejectStatus(this)) return;
     if(!mMindControlled)LawnFusion::RetireNativeSourceAdventureEnemy273(this);
     mApp->PlaySample(SOUND_MINDCONTROLLED);
@@ -9166,6 +9333,23 @@ void Zombie::BungeeDie()
 //0x530510
 void Zombie::DieNoLoot()
 {
+    if(!mNetGhost&&!mApp->NetIsClient()&&LawnFusion::GetNativeSourceZombieData(this)&&
+       !LawnFusion::IsNativeSourceRetiring313(this)&&!LawnFusion::IsNativeSourceZombieInitializing313(this))
+    {LawnFusion::RetireNativeSourceZombie313(this,2);return;}
+    if(LawnFusion::IsNativeZombie313(this))
+    {
+        if(LawnFusion::GetNativeWaterZombie313State(this))LawnFusion::RemoveNativeWaterZombie313Actor(this);
+        if(LawnFusion::GetNativeExtendedZombie313(this))LawnFusion::RemoveNativeExtendedZombie313Bridge(this);
+    }
+    if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);source&&LawnFusion::FusionJackbox300Kind(source->kind))
+    {
+        if(!LawnFusion::IsNativeSourceRetiring313(this))
+        {
+            const auto result=LawnFusion::BeginNativeJackbox309Death(this,2);
+            if(result==LawnFusion::NativeJackbox300DeathResult::Refused||result==LawnFusion::NativeJackbox300DeathResult::OwnerRetired)return;
+        }
+        LawnFusion::NativeJackbox309Removing(this);
+    }
     LawnFusion::RetireNativeSourceAdventureEnemy273(this);
     LawnFusion::NativeDayZombie273Removing(this);
     LawnFusion::NativeSpecialZombie269Removing(this);
@@ -9336,6 +9520,7 @@ void Zombie::StopZombieSound()
 //0x530950
 void Zombie::ApplyChill(bool theIsIceTrap)
 {
+    if(LawnFusion::IsNativeZombie313(this)){LawnFusion::ApplyNativeColdSlow(this);return;}
     if (!CanBeChilled())
         return;
 
@@ -9347,6 +9532,8 @@ void Zombie::SetColdCounters(int theChilledTicks, int theFrozenTicks)
 {
     if ((theChilledTicks > 0 || theFrozenTicks > 0) && LawnFusion::NativeSummon269RejectCold(this)) return;
     if (theChilledTicks < 0 || theFrozenTicks < 0) return;
+    if(LawnFusion::IsNativeZombie313(this)&&(mNetGhost||mApp->NetIsClient()))return;
+    // Virtual source duration is applied by NativeCold BEFORE this raw commit.
     const bool wasFrozen = mIceTrapCounter > 0;
     if (mChilledCounter == 0)
     {
@@ -9358,6 +9545,7 @@ void Zombie::SetColdCounters(int theChilledTicks, int theFrozenTicks)
             mShieldJustGotShotCounter = 25;
         }
     }
+    if(!wasFrozen&&theFrozenTicks>0)LawnFusion::NativeJackbox309AudioStatus(this,true);
     mChilledCounter = theChilledTicks;
     mIceTrapCounter = theFrozenTicks;
     if (!wasFrozen && theFrozenTicks > 0) StartIceTrapEffects();
@@ -9368,6 +9556,7 @@ void Zombie::SetColdCounters(int theChilledTicks, int theFrozenTicks)
 //0x530A00
 void Zombie::DropShield(unsigned int theDamageFlags)
 {
+    if(LawnFusion::IsNativeZombie313(this)){if(mShieldType!=SHIELDTYPE_NONE)TakeShieldDamage(mShieldHealth,theDamageFlags);return;}
     if(LawnFusion::BeginNativeSpecialZombie269PaperFall(this))return;
     if (mShieldType == ShieldType::SHIELDTYPE_NONE)
         return;
@@ -9519,6 +9708,8 @@ void Zombie::DropShield(unsigned int theDamageFlags)
 //0x530BC0
 int Zombie::TakeShieldDamage(int theDamage, unsigned int theDamageFlags)
 {
+    if(LawnFusion::IsNativeZombie313(this)&&(mNetGhost||mApp->NetIsClient()||mDead))return 0;
+    int typed313=0;if(LawnFusion::ApplyNativeHeavyArmorDamage313B(this,false,theDamage,typed313))return typed313;
     if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);
         source&&source->kind==5&&!mNetGhost&&!mApp->NetIsClient()&&mShieldHealth>0&&theDamage>=mShieldHealth&&
         !LawnFusion::PlayNativeSourceZombieArmor284(this,false))return 0;
@@ -9603,6 +9794,7 @@ int Zombie::TakeShieldDamage(int theDamage, unsigned int theDamageFlags)
 //0x530E30
 void Zombie::DropHelm(unsigned int theDamageFlags)
 {
+    if(LawnFusion::IsNativeZombie313(this)){if(mHelmType!=HELMTYPE_NONE)TakeHelmDamage(mHelmHealth,theDamageFlags);return;}
     if (mHelmType == HelmType::HELMTYPE_NONE)
         return;
     if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);source&&source->kind==9)
@@ -9742,6 +9934,13 @@ void Zombie::DropHelm(unsigned int theDamageFlags)
 //0x530FE0
 int Zombie::TakeHelmDamage(int theDamage, unsigned int theDamageFlags)
 {
+    if(LawnFusion::IsNativeZombie313(this)&&(mNetGhost||mApp->NetIsClient()||mDead))return 0;
+    int typed313=0;
+    if(LawnFusion::Source313FirstArmor(this,theDamage,typed313))return typed313;
+    if(LawnFusion::ApplyNativeHeavyArmorDamage313B(this,true,theDamage,typed313))return typed313;
+    if(auto* state=LawnFusion::EditNativeExtendedZombie313(this);state&&LawnFusion::ApplyNativeExtendedZombie313ArmorDamage(this,*state,theDamage,typed313,LawnFusion::GetNativeExtendedZombie313Hooks()))return typed313;
+    int jackboxRemaining=0;
+    if(LawnFusion::ApplyNativeJackbox309Armor(this,theDamage,jackboxRemaining))return jackboxRemaining;
     if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);
         source&&source->kind==9&&!mNetGhost&&!mApp->NetIsClient()&&mHelmHealth>0&&theDamage>=mHelmHealth&&
         !LawnFusion::PlayNativeSourceZombieArmor284(this,true))return 0;
@@ -9869,6 +10068,7 @@ int Zombie::TakeHelmDamage(int theDamage, unsigned int theDamageFlags)
 
 int Zombie::TakeFlyingDamage(int theDamage, unsigned int theDamageFlags)
 {
+    if(LawnFusion::IsNativeZombie313(this))return theDamage; // Actual source first armor owns Balloon Fall, never stock LandFlyer.
     if (!TestBit(theDamageFlags, (int)DamageFlags::DAMAGE_DOESNT_CAUSE_FLASH))
     {
         mJustGotShotCounter = 25;
@@ -9904,6 +10104,13 @@ int Zombie::TakeFlyingDamage(int theDamage, unsigned int theDamageFlags)
 //0x5312D0
 void Zombie::TakeBodyDamage(int theDamage, unsigned int theDamageFlags)
 {
+    if(LawnFusion::IsNativeZombie313(this))
+    {
+        if(mNetGhost||mApp->NetIsClient()||mDead||IsDeadOrDying())return;
+        if(!TestBit(theDamageFlags,DamageFlags::DAMAGE_DOESNT_CAUSE_FLASH))mJustGotShotCounter=25;
+        if(LawnFusion::ApplyNativeWaterZombie313BodyDamage(this,theDamage)||LawnFusion::ApplyNativeHeavyBodyDamage313B(this,theDamage,theDamageFlags))return;
+        if(auto* s=LawnFusion::EditNativeExtendedZombie313(this);s&&LawnFusion::ApplyNativeExtendedZombie313BodyDamage(this,*s,theDamage,LawnFusion::GetNativeExtendedZombie313Hooks()))return;
+    }
     if(LawnFusion::ApplyNativeSpecialZombie269VehicleBodyDamage(this,theDamage,LawnFusion::EmitNativeSpecialZombie269VehicleFx))return;
     // Direct source Real6/native body callers must retain Money's same
     // body-only override, without native limbs/death animation callbacks.
@@ -10072,6 +10279,14 @@ void Zombie::TakeBodyDamage(int theDamage, unsigned int theDamageFlags)
     if (mBodyHealth <= 0)
     {
         mBodyHealth = 0;
+        if(LawnFusion::GetNativeSourceZombieData(this))
+        {
+            auto* app=mApp;auto* board=mBoard;const uint32_t uid=board->mZombies.DataArrayGetID(this);
+            PlayDeathAnim(theDamageFlags);
+            if(app->mBoard==board)
+                if(auto* live=board->mZombies.DataArrayTryToGet(uid);live&&!live->mDead)live->DropLoot();
+            return;
+        }
         PlayDeathAnim(theDamageFlags);
         DropLoot();
     }
@@ -10080,9 +10295,29 @@ void Zombie::TakeBodyDamage(int theDamage, unsigned int theDamageFlags)
 //0x5317C0
 void Zombie::TakeDamage(int theDamage, unsigned int theDamageFlags, const LawnFusion::FusionColdDamageContext* theColdContext)
 {
+    if(LawnFusion::IsNativeZombie313(this)&&(mNetGhost||mApp->NetIsClient()||mDead))return;
+    int sourceFiltered=theDamage;
+    if(LawnFusion::FilterNativeJackbox309Damage(this,theDamage,sourceFiltered))
+    {theDamage=sourceFiltered;if(theDamage<=0)return;}
     if (LawnFusion::NativeSummon269MoneyDamage(this,theDamage)) return;
     if (mZombiePhase == ZombiePhase::PHASE_JACK_IN_THE_BOX_POPPING && !TestBit(theDamageFlags, 18)  || IsDeadOrDying())
         return;
+
+    if(LawnFusion::GetNativeSourceZombieData(this)&&!mNetGhost&&!mApp->NetIsClient())
+    {
+        int sourceResolved=0;
+        if(!LawnFusion::ResolveNativeSourceBaseDamage315(this,theDamage,false,sourceResolved))return;
+        theDamage=LawnFusion::ResolveNativeHeavyDamage313B(this,sourceResolved);
+        if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);source&&LawnFusion::FindFusionExtendedZombie313Profile(source->kind))
+            if(!LawnFusion::TryCapFusionExtendedZombie313Damage(source->kind,theDamage,theDamage))return;
+        int sourceType=TestBit(theDamageFlags,DamageFlags::DAMAGE_BYPASSES_SHIELD)?4:TestBit(theDamageFlags,DamageFlags::DAMAGE_HITS_SHIELD_AND_BODY)?1:0;
+        if(theColdContext)
+        {
+            if(theColdContext->delivery!=LawnFusion::FusionColdDamageDelivery::ProjectileProfile)sourceType=int(theColdContext->delivery);
+            else if(const auto* p=LawnFusion::FindFusionColdProjectileProfile(theColdContext->projectileKind))sourceType=p->coldThroughShield?3:2;
+        }
+        if(LawnFusion::ApplyNativeHeavyTakeDamage313B(this,theDamage,sourceType))return;
+    }
 
     int aDamageRemaining = theDamage;
 
@@ -10147,6 +10382,7 @@ Zombie::~Zombie()
 //0x531990
 bool Zombie::CanBeChilled()
 {
+    bool eligible313=false;if(LawnFusion::NativeZombie313StatusTarget(this,LawnFusion::FusionExtendedEffect313::Cold,eligible313))return eligible313;
     if (LawnFusion::NativeSummon269RejectStatus(this)) return false;
     if ((mZombieType == ZombieType::ZOMBIE_ZAMBONI&&LawnFusion::GetNativeFusionZombieKind(this)!=14) || IsBobsledTeamWithSled())
         return false;
@@ -10175,6 +10411,7 @@ bool Zombie::CanBeChilled()
 //0x531A10
 bool Zombie::CanBeFrozen()
 {
+    bool eligible313=false;if(LawnFusion::NativeZombie313StatusTarget(this,LawnFusion::FusionExtendedEffect313::Freeze,eligible313))return eligible313;
     if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);source&&
        LawnFusion::SpecialZombie269RejectEffect(source->kind,LawnFusion::GetNativeFusionZombieStatus(this),LawnFusion::SpecialZombie269StatusEffect::Freeze))return false;
     if (!CanBeChilled())
@@ -10202,6 +10439,16 @@ bool Zombie::CanBeFrozen()
 //0x531A80
 bool Zombie::EffectedByDamage(unsigned int theDamageRangeFlags)
 {
+    if(LawnFusion::IsNativeZombie313(this))
+    {
+        LawnFusion::NativeZombie313Semantics v;if(!LawnFusion::GetNativeZombie313Semantics(this,v)||!v.colliderEnabled)return false;
+        if(!TestBit(theDamageRangeFlags,DAMAGES_DYING)&&(IsDeadOrDying()||v.status==1))return false;
+        if(TestBit(theDamageRangeFlags,DAMAGES_ONLY_MINDCONTROLLED)!=mMindControlled)return false;
+        if(v.offGround)return TestBit(theDamageRangeFlags,DAMAGES_OFF_GROUND);
+        if(v.underground)return TestBit(theDamageRangeFlags,DAMAGES_UNDERGROUND);
+        if(v.submerged)return TestBit(theDamageRangeFlags,DAMAGES_SUBMERGED);
+        return TestBit(theDamageRangeFlags,v.flying?DAMAGES_FLYING:DAMAGES_GROUND);
+    }
     // Physics acquisition/collision only. Direct TakeDamage and status clocks
     // deliberately remain available to effects applied before capture.
     if (LawnFusion::NativeWater268ZombieCaptured(this)) return false;
@@ -10442,6 +10689,7 @@ bool Zombie::ZombieTypeCanGoOnHighGround(ZombieType theZombieType)
 //0x5320B0
 Rect Zombie::GetZombieRect()
 {
+    Rect source313;if(LawnFusion::Source313BodyRect(this,source313))return source313;
     Rect aZombieRect = mZombieRect;
     if (IsWalkingBackwards())
     {
@@ -10472,6 +10720,7 @@ Rect Zombie::GetZombieRect()
 //0x532140
 Rect Zombie::GetZombieAttackRect()
 {
+    Rect source313;if(LawnFusion::Source313BodyRect(this,source313))return source313; // No stock NORMAL attack box for typed families.
     Rect aAttackRect = mZombieAttackRect;
     if (mZombiePhase == ZombiePhase::PHASE_POLEVAULTER_IN_VAULT || mZombiePhase == ZombiePhase::PHASE_DOLPHIN_IN_JUMP)
     {
@@ -10531,6 +10780,7 @@ Reanimation* Zombie::AddAttachedReanim(int thePosX, int thePosY, ReanimationType
 void Zombie::RemoveIceTrap()
 {
     mIceTrapCounter = 0;
+    LawnFusion::NativeJackbox309AudioStatus(this,mButteredCounter>0||mYampolineCounter>0);
     if (mZombieType == ZombieType::ZOMBIE_BALLOON)
     {
         BalloonPropellerHatSpin(true);
@@ -10652,6 +10902,7 @@ void Zombie::BalloonPropellerHatSpin(bool theSpinning)
 //0x532570
 void Zombie::RemoveButter()
 {
+    LawnFusion::NativeJackbox309AudioStatus(this,mIceTrapCounter>0||mYampolineCounter>0);
     if (mZombieType == ZombieType::ZOMBIE_BALLOON)
     {
         BalloonPropellerHatSpin(true);
@@ -10686,6 +10937,13 @@ void Zombie::RemoveButter()
 //0x5326D0
 void Zombie::ApplyButter(int theTicks)
 {
+    if(LawnFusion::IsNativeZombie313(this))
+    {
+        bool eligible=false;LawnFusion::NativeZombie313Semantics v;LawnFusion::FusionExtendedEffectAction313 action;int ticks;
+        if(!LawnFusion::NativeZombie313StatusTarget(this,LawnFusion::FusionExtendedEffect313::Butter,eligible)||!eligible||
+           !LawnFusion::GetNativeZombie313Semantics(this,v)||!LawnFusion::Source313Effect(v,LawnFusion::FusionExtendedEffect313::Butter,theTicks,action,ticks))return;
+        mButteredCounter=ticks;UpdateAnimSpeed();return;
+    }
     if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);source&&
        LawnFusion::SpecialZombie269RejectEffect(source->kind,LawnFusion::GetNativeFusionZombieStatus(this),LawnFusion::SpecialZombie269StatusEffect::Butter))return;
     if (!mHasHead || !CanBeFrozen())
@@ -10694,6 +10952,7 @@ void Zombie::ApplyButter(int theTicks)
     if ((mZombieType == ZombieType::ZOMBIE_ZAMBONI&&LawnFusion::GetNativeFusionZombieKind(this)!=14) || mZombieType == ZombieType::ZOMBIE_BOSS || IsTangleKelpTarget() || IsBobsledTeamWithSled() || IsFlying())
         return;
 
+    if(theTicks>0)LawnFusion::NativeJackbox309AudioStatus(this,true);
     mButteredCounter = theTicks;
     Zombie* aZombie = mBoard->ZombieTryToGet(mRelatedZombieID);
     if (aZombie && aZombie->mZombieType != ZombieType::ZOMBIE_DANCER && aZombie->mZombieType != ZombieType::ZOMBIE_BACKUP_DANCER 
@@ -10845,6 +11104,8 @@ void Zombie::ApplyBurn(bool forceDeath)
 {
     if (mDead || mZombiePhase == ZombiePhase::PHASE_ZOMBIE_BURNED)
         return;
+    if(LawnFusion::GetNativeSourceZombieData(this))
+    {LawnFusion::ApplyNativeSourceCharred315(this,forceDeath?(std::numeric_limits<int>::max)():1800);return;}
 
     int currentHealth = mBodyHealth + mHelmHealth + mShieldHealth + mFlyingHealth;
 
@@ -11159,9 +11420,21 @@ void Zombie::ReanimShowTrack(const char* theTrackName, int theRenderGroup)
 //0x533240
 void Zombie::PlayDeathAnim(unsigned int theDamageFlags)
 {
+    if(!mNetGhost&&!mApp->NetIsClient()&&LawnFusion::GetNativeSourceZombieData(this)&&!LawnFusion::IsNativeSourceRetiring313(this))
+    {LawnFusion::RetireNativeSourceZombie313(this,TestBit(theDamageFlags,DamageFlags::DAMAGE_DOESNT_LEAVE_BODY)?2:0);return;}
     if (mZombiePhase == ZombiePhase::PHASE_ZOMBIE_DYING || mZombiePhase == ZombiePhase::PHASE_ZOMBIE_BURNED || mZombiePhase == ZombiePhase::PHASE_ZOMBIE_MOWERED)
         return;
 
+    if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);source&&LawnFusion::FusionJackbox300Kind(source->kind))
+    {
+        const bool immediate=TestBit(theDamageFlags,DamageFlags::DAMAGE_DOESNT_LEAVE_BODY);
+        const auto result=LawnFusion::BeginNativeJackbox309Death(this,immediate?2:0);
+        if(result==LawnFusion::NativeJackbox300DeathResult::Refused||result==LawnFusion::NativeJackbox300DeathResult::OwnerRetired)return;
+        if(immediate){DieNoLoot();return;}
+        LawnFusion::RetireNativeSourceAdventureEnemy273(this);
+        mVelX=0;mIsEating=false;mZombiePhase=PHASE_ZOMBIE_DYING;
+        LawnFusion::NativeBatchZombieDying(this);return;
+    }
     if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);source&&source->kind==10)
     {
         // Capture the actual outgoing source pose before stock track selection.
@@ -11414,6 +11687,7 @@ void Zombie::DoDaisies()
 //0x5336B0
 void Zombie::UpdateDeath()
 {
+    if(LawnFusion::Source313Update(this))return; // Death markers stay on the actual source body/aux clocks.
     if(LawnFusion::UpdateNativeSourceZombieDeath284(this))return;
     Reanimation* aBodyReanim = mApp->ReanimationTryToGet(mBodyReanimID);
     if (aBodyReanim == nullptr)
@@ -11991,6 +12265,7 @@ void Zombie::GetTrackPosition(const char* theTrackName, float& thePosX, float& t
 //0x534680
 bool Zombie::IsFlying()
 {
+    LawnFusion::NativeZombie313Semantics source313;if(LawnFusion::GetNativeZombie313Semantics(this,source313))return source313.flying;
     return mZombiePhase == ZombiePhase::PHASE_BALLOON_SWING || mZombiePhase == ZombiePhase::PHASE_BALLOON_FLYING || mZombiePhase == ZombiePhase::PHASE_BALLOON_POPPING 
 #ifdef _HAS_BLOOM_AND_DOOM_CONTENTS
         || mZombiePhase == ZombiePhase::PHASE_PROPELLER_FLYING
@@ -13432,6 +13707,7 @@ void Zombie::DropNewsPaperGlasses()
 
 void Zombie::DropBalloonPropeller()
 {
+    if(LawnFusion::NativeZombie313LoseEquipment(this))return;
     if (mZombieType != ZombieType::ZOMBIE_BALLOON)   return;
 
     int aRenderOrder = mRenderOrder + 1;
@@ -13471,6 +13747,7 @@ void Zombie::DropBalloonPropeller()
 
 void Zombie::DropPogoGlasses()
 {
+    if(LawnFusion::NativeZombie313LoseEquipment(this))return;
     if (mZombieType != ZombieType::ZOMBIE_POGO)   return;
 
     int aRenderOrder = mRenderOrder + 1;
@@ -13559,6 +13836,7 @@ void Zombie::DropJackInTheBox()
 
 void Zombie::DropDiggerAxe()
 {
+    if(LawnFusion::NativeZombie313LoseEquipment(this))return;
     if (mZombieType != ZombieType::ZOMBIE_DIGGER)   return;
 
     int aRenderOrder = mRenderOrder + 1;

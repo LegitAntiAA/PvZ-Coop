@@ -1,0 +1,322 @@
+{
+  "schema": 1,
+  "sourcePrefab": "Resources/zombies/gargantuar/ultimategargantuar/UltimateBall.prefab",
+  "unitsPerNativePixel": 0.01,
+  "applyRootMotion": false,
+  "static": true,
+  "root": 0,
+  "nodes": [
+    {
+      "name": "UltimateBall",
+      "active": true,
+      "tag": "Untagged",
+      "parent": -1,
+      "path": "",
+      "position": {
+        "x": 0.09335126,
+        "y": 2.409039,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": -0.00063703646,
+        "w": 0.9999998
+      },
+      "scale": {
+        "x": 0.461808,
+        "y": 0.461808,
+        "z": 0.461808
+      }
+    }
+  ],
+  "sourceHierarchy": null,
+  "sprites": [
+    {
+      "texture": "textures/9b07c32ae53e.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: ball\n  m_Rect:\n    serializedVersion: 2\n    x: 926\n    y: 485\n    width: 420\n    height: 436\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    f2a8ee264a2857041a2e47740b50647e: 1515293171308030426\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: aee77193b207fdd429e63294dfb1cb2c, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 18\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 8\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 070006000400050004000600000004000500030004000000010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 8\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 160\n      _typelessdata: ec51d83f1f850b4000000000666606403d0af7bf0000000066660640f628fc3f00000000713dca3f1f850bc000000000295c4fbf1f850bc000000000f628fcbf1f850b4000000000666606c0713dca3f00000000666606c0c3f5c8bf0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 926\n      y: 485\n      width: 420\n      height: 436\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 1136, z: 100, w: 703}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 1.690000057220459,
+            "y": 2.180000066757202,
+            "z": 0.0,
+            "u": 0.6372070340439677,
+            "v": 0.550292965490371
+          },
+          {
+            "x": 2.0999999046325684,
+            "y": -1.9299999475479126,
+            "z": 0.0,
+            "u": 0.6572265578433871,
+            "v": 0.7509765599388629
+          },
+          {
+            "x": 2.0999999046325684,
+            "y": 1.9700000286102295,
+            "z": 0.0,
+            "u": 0.6572265578433871,
+            "v": 0.5605468736030161
+          },
+          {
+            "x": 1.5800000429153442,
+            "y": -2.180000066757202,
+            "z": 0.0,
+            "u": 0.6318359395954758,
+            "v": 0.763183597009629
+          },
+          {
+            "x": -0.8100000023841858,
+            "y": -2.180000066757202,
+            "z": 0.0,
+            "u": 0.5151367186335847,
+            "v": 0.763183597009629
+          },
+          {
+            "x": -1.9700000286102295,
+            "y": 2.180000066757202,
+            "z": 0.0,
+            "u": 0.45849609235301614,
+            "v": 0.550292965490371
+          },
+          {
+            "x": -2.0999999046325684,
+            "y": 1.5800000429153442,
+            "z": 0.0,
+            "u": 0.4521484421566129,
+            "v": 0.5795898416545242
+          },
+          {
+            "x": -2.0999999046325684,
+            "y": -1.5700000524520874,
+            "z": 0.0,
+            "u": 0.4521484421566129,
+            "v": 0.7333984400611371
+          }
+        ],
+        "indices": [
+          7,
+          6,
+          4,
+          5,
+          4,
+          6,
+          0,
+          4,
+          5,
+          3,
+          4,
+          0,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/gargantuar/ultimategargantuar/ball.asset",
+      "textureRect": {
+        "x": 926.0,
+        "y": 485.0,
+        "width": 420.0,
+        "height": 436.0,
+        "yTop": 1127.0
+      },
+      "logicalSize": {
+        "width": 420.0,
+        "height": 436.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "f863329c0094b45488131d9450a8bfbf",
+      "node": 0,
+      "sortingOrder": 14,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false,
+      "maskInteraction": 0
+    }
+  ],
+  "spriteVariants": {
+    "f863329c0094b45488131d9450a8bfbf": {
+      "texture": "textures/9b07c32ae53e.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: ball\n  m_Rect:\n    serializedVersion: 2\n    x: 926\n    y: 485\n    width: 420\n    height: 436\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    f2a8ee264a2857041a2e47740b50647e: 1515293171308030426\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: aee77193b207fdd429e63294dfb1cb2c, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 18\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 8\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 070006000400050004000600000004000500030004000000010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 8\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 160\n      _typelessdata: ec51d83f1f850b4000000000666606403d0af7bf0000000066660640f628fc3f00000000713dca3f1f850bc000000000295c4fbf1f850bc000000000f628fcbf1f850b4000000000666606c0713dca3f00000000666606c0c3f5c8bf0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 926\n      y: 485\n      width: 420\n      height: 436\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 1136, z: 100, w: 703}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 1.690000057220459,
+            "y": 2.180000066757202,
+            "z": 0.0,
+            "u": 0.6372070340439677,
+            "v": 0.550292965490371
+          },
+          {
+            "x": 2.0999999046325684,
+            "y": -1.9299999475479126,
+            "z": 0.0,
+            "u": 0.6572265578433871,
+            "v": 0.7509765599388629
+          },
+          {
+            "x": 2.0999999046325684,
+            "y": 1.9700000286102295,
+            "z": 0.0,
+            "u": 0.6572265578433871,
+            "v": 0.5605468736030161
+          },
+          {
+            "x": 1.5800000429153442,
+            "y": -2.180000066757202,
+            "z": 0.0,
+            "u": 0.6318359395954758,
+            "v": 0.763183597009629
+          },
+          {
+            "x": -0.8100000023841858,
+            "y": -2.180000066757202,
+            "z": 0.0,
+            "u": 0.5151367186335847,
+            "v": 0.763183597009629
+          },
+          {
+            "x": -1.9700000286102295,
+            "y": 2.180000066757202,
+            "z": 0.0,
+            "u": 0.45849609235301614,
+            "v": 0.550292965490371
+          },
+          {
+            "x": -2.0999999046325684,
+            "y": 1.5800000429153442,
+            "z": 0.0,
+            "u": 0.4521484421566129,
+            "v": 0.5795898416545242
+          },
+          {
+            "x": -2.0999999046325684,
+            "y": -1.5700000524520874,
+            "z": 0.0,
+            "u": 0.4521484421566129,
+            "v": 0.7333984400611371
+          }
+        ],
+        "indices": [
+          7,
+          6,
+          4,
+          5,
+          4,
+          6,
+          0,
+          4,
+          5,
+          3,
+          4,
+          0,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/gargantuar/ultimategargantuar/ball.asset",
+      "textureRect": {
+        "x": 926.0,
+        "y": 485.0,
+        "width": 420.0,
+        "height": 436.0,
+        "yTop": 1127.0
+      },
+      "logicalSize": {
+        "width": 420.0,
+        "height": 436.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    }
+  },
+  "extraSpriteGuids": {},
+  "anchors": {},
+  "visualBounds": {
+    "minX": -0.9707197206829036,
+    "maxX": 0.9709550714486211,
+    "minY": -1.0076702893317668,
+    "maxY": 1.0078997563336018
+  },
+  "clips": {},
+  "controller": {
+    "states": [],
+    "layers": [],
+    "serializedController": ""
+  },
+  "nonRenderingComponents": [
+    {
+      "typeId": 114,
+      "fileId": 114618682377417806,
+      "serializedComponent": "MonoBehaviour:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1709254077376921}\n  m_Enabled: 1\n  m_EditorHideFlags: 0\n  m_Script: {fileID: 11500000, guid: fbc1728b73b638618088575d0e0d53da, type: 3}\n  m_Name:\n  m_EditorClassIdentifier:\n  theRow: 0\n"
+    }
+  ],
+  "colliders": [],
+  "ignoredBindings": [],
+  "omittedInactiveNodes": [],
+  "spritePrefix": null,
+  "unusedSpriteBonesExplicitlyAllowed": false,
+  "sources": [
+    {
+      "path": "Resources/zombies/gargantuar/ultimategargantuar/ball.asset",
+      "sha256": "6c231f794816ba222ff07a7df77dc4c7c9dcdecc3e41a7cd6c2e07b5245207a5"
+    },
+    {
+      "path": "Resources/zombies/gargantuar/ultimategargantuar/ball.asset.meta",
+      "sha256": "34c4706f19f4f8467ad9eb1a45f9e5a54d5f0aba2b519591bd994ef33a197198"
+    },
+    {
+      "path": "Resources/zombies/gargantuar/ultimategargantuar/UltimateBall.prefab",
+      "sha256": "b589e90185435adbd5871e315dcc527a6a955b5f4a42795eb36cbce64d3eba44"
+    },
+    {
+      "path": "Resources/zombies/gargantuar/ultimategargantuar/UltimateGargantuar.png",
+      "sha256": "9b07c32ae53e2fc45431422eed6bb4cb0ee0dd57d1b9038f7009a4c216e4ff5e"
+    },
+    {
+      "path": "Resources/zombies/gargantuar/ultimategargantuar/UltimateGargantuar.png.meta",
+      "sha256": "3ec43d6fafe6673719422596843aea85d2dd132d0feea140f473e8cdd209b24f"
+    }
+  ],
+  "deferredComponents": [],
+  "validation": "Exported source data. Native rendering and source-runtime comparison are separate verification steps.",
+  "rendererFeatures": [
+    "spriteMaskV1",
+    "spriteSkinV1"
+  ],
+  "sourceMasks": [],
+  "sourceSkins": []
+}

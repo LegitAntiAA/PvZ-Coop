@@ -1,5 +1,6 @@
 #include "FusionNativeGarlic.h"
 #include "FusionNative.h"
+#include "FusionNativeZombie313Dispatch.h"
 #include "FusionNativeSummon269.h"
 #include "FusionNativeDefender.h"
 #include "FusionDefenderRules.h"
@@ -26,17 +27,23 @@ bool CurrentBoard(Board* board)
         if (board->mPlantRow[row] != PLANTROW_NORMAL && board->mPlantRow[row] != PLANTROW_POOL) return false;
     return true;
 }
-bool CurrentZombie(Zombie* zombie)
+bool MachineRow(const Zombie* z,const GarlicActionState* state=nullptr)
+{const auto* d=GetNativeSourceZombieData(z);if(!state)state=GetNativeZombieGarlicData(z);return d&&state&&FusionSourceMachineRowMoving323(d->kind,*state);}
+bool CurrentZombie(Zombie* zombie,const GarlicActionState* movement=nullptr)
 {
     return zombie && CurrentBoard(zombie->mBoard) && zombie->mApp == zombie->mBoard->mApp &&
         !zombie->mDead && !zombie->IsDeadOrDying() && zombie->mBodyHealth > 0 && zombie->mHasHead &&
         IsNativeFusionGroundZombie(zombie) && zombie->mZombiePhase == PHASE_ZOMBIE_NORMAL &&
-        zombie->mZombieHeight == HEIGHT_ZOMBIE_NORMAL && !zombie->mMindControlled &&
+        zombie->mZombieHeight == HEIGHT_ZOMBIE_NORMAL && (!zombie->mMindControlled||MachineRow(zombie,movement)) &&
         !zombie->mOnHighGround && zombie->mRow >= 0 && zombie->mRow < Rows(zombie->mBoard) &&
         std::isfinite(zombie->mPosX) && std::isfinite(zombie->mPosY);
 }
 bool HostZombie(Zombie* zombie)
 {
+    bool source313=false;
+    if(MachineRow(zombie))return CurrentZombie(zombie)&&!zombie->mNetGhost&&!zombie->mApp->NetIsClient()&&zombie->mApp->mGameScene==SCENE_PLAYING;
+    if(NativeZombie313StatusTarget(zombie,FusionExtendedEffect313::Garlic,source313))return source313&&CurrentZombie(zombie)&&
+        !zombie->mMindControlled&&zombie->mApp->mGameScene==SCENE_PLAYING;
     return CurrentZombie(zombie) && !zombie->mNetGhost && !zombie->mApp->NetIsClient() &&
         zombie->mApp->mGameScene == SCENE_PLAYING;
 }
@@ -102,7 +109,7 @@ bool RestoreNativeGarlicPresentation(Zombie* zombie, const GarlicActionState& st
         SortingRow(zombie,zombie->mRow);
         return true;
     }
-    if (!CurrentZombie(zombie) || !ValidateFusionGarlicAction(state,Rows(zombie->mBoard)) ||
+    if (!CurrentZombie(zombie,&state) || !ValidateFusionGarlicAction(state,Rows(zombie->mBoard)) ||
         FusionGarlicLogicalRow(state,zombie->mRow) != zombie->mRow || !zombie->mApp->ReanimationTryToGet(zombie->mBodyReanimID)) return false;
     // The native mYuckyFace flag also stops movement/attacks. Source reaction
     // images are adopted directly so they cannot activate that Classic clock.
@@ -146,6 +153,26 @@ bool UpdateNativeGarlicAction(Zombie* zombie, GarlicActionState& state, float sp
         }
     }
     return RestoreNativeGarlicPresentation(zombie,state);
+}
+bool BeginNativeSourceRowDuration313(Zombie* z,float seconds)
+{
+    // Source380C50/385130: same adjacent-row/terrain policy and coroutine,
+    // with NO Garlic face, sound, waiting bite, or stock body-track changes.
+    if(!z||!CurrentBoard(z->mBoard)||z->mDead||z->mNetGhost||z->mApp->NetIsClient()||z->mBoard->mPaused||
+       !CanApplyNativeFusionGameplay(z->mBoard)||!std::isfinite(seconds)||seconds<=0||seconds>100)return false;
+    auto* state=GetOrCreateNativeZombieGarlicData(z);const int rows=Rows(z->mBoard),from=z->mRow;
+    if(!state||!ValidateFusionGarlicAction(*state,rows)||state->phase!=GarlicActionPhase::Idle||from<0||from>=rows)return false;
+    const auto compatible=[&](int row){return row>=0&&row<rows&&
+        (z->mBoard->mPlantRow[row]==PLANTROW_POOL)==(z->mBoard->mPlantRow[from]==PLANTROW_POOL);};
+    GarlicRowPlan plan;if(!TryPlanFusionGarlicRow(from,rows,compatible(from-1),compatible(from+1),false,plan))return false;
+    // Full validation precedes the sole actual native RNG draw.
+    GarlicActionState probe=*state;
+    if(!TryStartFusionSourceRowDuration313(probe,rows,from,plan.randomZeroRow,z->mPosY,z->mPosY,seconds))return false;
+    const int target=plan.randomZeroRow==plan.randomOneRow?plan.randomZeroRow:
+        (RandRangeInt(0,1)==0?plan.randomZeroRow:plan.randomOneRow);
+    const float y=z->GetPosYBasedOnRow(target);
+    if(!TryStartFusionSourceRowDuration313(*state,rows,from,target,z->mPosY,y,seconds))return false;
+    z->SetRow(FusionGarlicLogicalRow(*state,from));SortingRow(z,FusionGarlicSortingRow(*state,from));return true;
 }
 void NativeGarlicHealthChanged(Plant* plant)
 {

@@ -1,6 +1,7 @@
 #include "FusionNativeButter.h"
 #include "FusionButterRules.h"
 #include "FusionNative.h"
+#include "FusionNativeZombie313Dispatch.h"
 #include "../Board.h"
 #include "../Zombie.h"
 #include "../../LawnApp.h"
@@ -13,8 +14,10 @@ bool ApplyNativeFusionButter(Zombie* zombie, int ticks, bool showSprite)
         zombie->mApp->NetIsClient() || zombie->mNetGhost || zombie->mDead ||
         !IsNativeFusionBoard(zombie->mBoard) || !NativeFusionBackgroundValid(static_cast<uint8_t>(zombie->mBoard->mBackground)) ||
         !IsNativeFusionGroundZombie(zombie) || zombie->IsDeadOrDying() || zombie->mBodyHealth <= 0 ||
-        zombie->mMindControlled || !zombie->mHasHead || !zombie->CanBeFrozen() ||
-        zombie->IsTangleKelpTarget() || zombie->IsBobsledTeamWithSled() || zombie->IsFlying()) return false;
+        zombie->mMindControlled) return false;
+    bool source313=false;
+    if(NativeZombie313StatusTarget(zombie,FusionExtendedEffect313::Butter,source313)){if(!source313)return false;}
+    else if(!zombie->mHasHead||!zombie->CanBeFrozen()||zombie->IsTangleKelpTarget()||zombie->IsBobsledTeamWithSled()||zombie->IsFlying())return false;
 
     const auto* before = GetNativeZombieButterData(zombie);
     const int beforeTicks = zombie->mButteredCounter;

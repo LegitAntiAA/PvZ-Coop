@@ -1,6 +1,7 @@
 #include "FusionNativeCold.h"
 #include "FusionColdRules.h"
 #include "FusionNative.h"
+#include "FusionNativeZombie313Dispatch.h"
 #include "FusionNativeSummon269.h"
 #include "FusionNativeDefender.h"
 #include "FusionNativeExtras268.h"
@@ -35,6 +36,7 @@ bool HostTarget(Zombie* zombie)
 {
     if(!HostObject(zombie)||zombie->IsDeadOrDying()||zombie->mBodyHealth<=0||
         zombie->mMindControlled||(GetNativeSourceZombieData(zombie)&&zombie->mOnHighGround))return false;
+    if(IsNativeZombie313(zombie)){NativeZombie313Semantics v;return GetNativeZombie313Semantics(zombie,v)&&v.status!=1;}
     if(!NativeFusionGroundTerrainAllowed(static_cast<uint8_t>(zombie->mBoard->mBackground),zombie->mRow,zombie->mInPool))return false;
     const auto* source=GetNativeSourceZombieData(zombie);
     const bool paper=source&&(source->kind==15||source->kind==104)&&
@@ -46,7 +48,7 @@ FusionColdState ReadState(Zombie* zombie, const NativeZombieColdData& data)
 {
     return {data.level,data.threshold,zombie->mChilledCounter,zombie->mIceTrapCounter};
 }
-void Commit(Zombie* zombie, NativeZombieColdData& data, const FusionColdState& requested)
+void Commit(Zombie* zombie, NativeZombieColdData& data, const FusionColdState& requested,int sourceOperation=0,int sourceTicks=0)
 {
     auto state=requested;
     if(const auto* source=GetNativeSourceZombieData(zombie))
@@ -64,6 +66,13 @@ void Commit(Zombie* zombie, NativeZombieColdData& data, const FusionColdState& r
         // generation. Retain its counters without recreating removed effects.
         zombie->mChilledCounter = state.chilledTicks;
         zombie->mIceTrapCounter = state.frozenTicks;
+    }
+    else if(IsNativeZombie313(zombie))
+    {
+        if(sourceOperation==1)NativeZombie313ApplyCold(zombie,false,sourceTicks);
+        else if(sourceOperation==2)NativeZombie313ApplyCold(zombie,true,sourceTicks);
+        else if(state.frozenTicks>zombie->mIceTrapCounter)NativeZombie313ApplyCold(zombie,true,state.frozenTicks);
+        else zombie->SetColdCounters(state.chilledTicks,state.frozenTicks);
     }
     else zombie->SetColdCounters(state.chilledTicks,state.frozenTicks);
     // These are snapshot mirrors, never ticked here.
@@ -206,7 +215,7 @@ void ApplyNativeColdSlow(Zombie* target)
     if (!HostTarget(target) || NativeSummon269RejectCold(target)) return;
     auto* data = GetOrCreateNativeZombieColdData(target);
     FusionColdState next;
-    if (data && TrySetFusionColdSlow(ReadState(target,*data),next)) Commit(target,*data,next);
+    if (data && TrySetFusionColdSlow(ReadState(target,*data),next)) Commit(target,*data,next,1,kFusionColdSlowTicks);
 }
 bool ApplyNativeColdFreeze(Zombie* target, int ticks)
 {
@@ -216,7 +225,7 @@ bool ApplyNativeColdFreeze(Zombie* target, int ticks)
     auto* data=GetOrCreateNativeZombieColdData(target);
     FusionColdState next;
     if (!data || !TrySetFusionColdFreeze(ReadState(target,*data),ticks,next)) return false;
-    Commit(target,*data,next);
+    Commit(target,*data,next,2,ticks);
     return true;
 }
 bool UpdateNativeColdContact(Plant* plant)

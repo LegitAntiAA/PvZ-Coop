@@ -56,7 +56,7 @@ inline ProjectileType NativeProjectileMetadataType(const NativeProjectileData& d
 
 inline ProjectileMotion NativeProjectileMetadataMotion(const NativeProjectileData& data)
 {
-    if((data.kind==0||data.kind==11)&&data.specialType==9)return MOTION_BACKWARDS;
+    if((data.kind==0||data.kind==1||data.kind==11)&&data.specialType==9)return MOTION_BACKWARDS;
     if(data.kind==3&&data.specialType==9)return MOTION_BACKWARDS;
     if(data.kind==91)return data.specialType==6?MOTION_HOMING:MOTION_STRAIGHT;
     if(data.kind==30)return data.specialType==2?MOTION_STAR:MOTION_STRAIGHT;

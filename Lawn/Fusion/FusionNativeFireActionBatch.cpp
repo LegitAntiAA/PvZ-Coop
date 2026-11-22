@@ -3,6 +3,7 @@
 #include "FusionNativeShooter267.h"
 #include "FusionShooter267Rules.h"
 #include "FusionNative.h"
+#include "FusionNativeZombie313Dispatch.h"
 #include "FusionNativeMorePlants269Backend.h"
 #include "FusionNativeUmbrellaBatch.h"
 #include "FusionNativeSeaLantern267.h"
@@ -81,6 +82,7 @@ bool Area(Plant* p,Zombie* z,double width)
 }
 void KnockBack(Zombie* z,double distance)
 {
+    bool source313=false;if(NativeZombie313StatusTarget(z,FusionExtendedEffect313::Knockback,source313)&&!source313)return;
     float x=0,y=0;if(!GetNativeBaseZombieGroundAnchor(z,x,y))return;
     auto* b=z->mBoard;
     const double origin=b->GetCellCenterX(0,z->mRow);

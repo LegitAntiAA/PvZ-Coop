@@ -10,7 +10,7 @@ bool RowsValid(int rows) { return rows >= 2 && rows <= 6; }
 void ClearMove(GarlicActionState& state)
 {
     state.phase = GarlicActionPhase::Idle; state.certainRow = false;
-    state.waitTicks = 0; state.moveElapsedTicks = 0;
+    state.waitTicks = 0; state.moveElapsedTicks = 0; state.moveDurationTicks=kFusionGarlicMoveTicks;
     state.originRow = -1; state.targetRow = -1; state.startY = 0; state.targetY = 0;
 }
 }
@@ -19,8 +19,9 @@ bool ValidateFusionGarlicAction(const GarlicActionState& s, int rows)
 {
     if (!RowsValid(rows) || s.faceTicks > kFusionGarlicFaceTicks || !std::isfinite(s.startY) || !std::isfinite(s.targetY)) return false;
     if (s.phase == GarlicActionPhase::Moving)
-        return !s.waitTicks && s.moveElapsedTicks < kFusionGarlicMoveTicks && s.originRow >= 0 &&
+        return !s.waitTicks && s.moveDurationTicks>=1&&s.moveDurationTicks<=10000&&s.moveElapsedTicks < s.moveDurationTicks && s.originRow >= 0 &&
             s.originRow < rows && s.targetRow >= 0 && s.targetRow < rows && std::abs(int(s.targetRow)-s.originRow) == 1;
+    if(s.moveDurationTicks!=kFusionGarlicMoveTicks)return false;
     if (s.originRow != -1 || s.targetRow != -1 || s.startY != 0 || s.targetY != 0 || s.moveElapsedTicks) return false;
     if (s.phase == GarlicActionPhase::Waiting) return s.waitTicks > 0 && s.waitTicks <= kFusionGarlicWaitTicks;
     return s.phase == GarlicActionPhase::Idle && !s.waitTicks && !s.certainRow;
@@ -100,13 +101,22 @@ bool TryAdvanceFusionGarlicAction(GarlicActionState& s, int rows, bool paused, f
         else if (s.phase == GarlicActionPhase::Moving && speed != 0)
         {
             ++s.moveElapsedTicks; next.positionChanged = true; next.targetRow = s.targetRow;
-            next.positionY = static_cast<float>(double(s.startY)+(double(s.targetY)-s.startY)*s.moveElapsedTicks/kFusionGarlicMoveTicks);
-            if (s.moveElapsedTicks == kFusionGarlicMoveTicks)
+            next.positionY = static_cast<float>(double(s.startY)+(double(s.targetY)-s.startY)*s.moveElapsedTicks/s.moveDurationTicks);
+            if (s.moveElapsedTicks == s.moveDurationTicks)
             { next.rowFinished = true; next.positionY = s.targetY; ClearMove(s); }
         }
     }
     step = next;
     return true;
+}
+bool TryStartFusionSourceRowDuration313(GarlicActionState& s,int rows,int from,int target,float startY,float targetY,float seconds)
+{
+    if(!ValidateFusionGarlicAction(s,rows)||s.phase!=GarlicActionPhase::Idle||from<0||from>=rows||target<0||target>=rows||
+       std::abs(target-from)>1||!std::isfinite(startY)||!std::isfinite(targetY)||!std::isfinite(seconds)||seconds<=0||seconds>100)return false;
+    if(from==target)return true;
+    auto next=s;next.phase=GarlicActionPhase::Moving;next.certainRow=false;
+    next.moveDurationTicks=uint16_t(std::ceil(double(seconds)*100));next.moveElapsedTicks=0;next.waitTicks=0;
+    next.originRow=int8_t(from);next.targetRow=int8_t(target);next.startY=startY;next.targetY=targetY;s=next;return true;
 }
 int FusionGarlicLogicalRow(const GarlicActionState& s, int row)
 { return s.phase == GarlicActionPhase::Moving ? (std::max)(int(s.originRow),int(s.targetRow)) : row; }

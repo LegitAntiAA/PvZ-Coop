@@ -1386,7 +1386,10 @@ void Board::PickBackground()
 		mPlantRow[4] = PlantRowType::PLANTROW_NORMAL;
 		mPlantRow[5] = PlantRowType::PLANTROW_DIRT;
 
-		if (mApp->IsAdventureMode() && mApp->IsFirstTimeAdventureMode() /*&& mApp->mPlayerLevelRef <= 4*/)
+		// Native validation probes the complete real grass world. Keep the
+		// stock first-adventure sod/row progression for Classic and source boot.
+		const auto* native = LawnFusion::GetNativeContext(this);
+		if (mApp->IsAdventureMode() && mApp->IsFirstTimeAdventureMode() && !(native && native->validation))
 		{
 			if (mLevel == 1)
 			{
@@ -1456,7 +1459,7 @@ void Board::PickBackground()
 			{
 				GetGridSquareTypeAt(x, y) = GridSquareType::GRIDSQUARE_DIRT;
 			}
-			else if (mPlantRow[y] == PlantRowType::PLANTROW_POOL && x >= 0 && x <= 8)
+			else if (mPlantRow[y] == PlantRowType::PLANTROW_POOL && x >= 0 && x < GetColumnCount())
 			{
 				GetGridSquareTypeAt(x, y) = GridSquareType::GRIDSQUARE_POOL;
 			}
@@ -12355,6 +12358,9 @@ bool Board::StageHasGraveStones()
 	// This predicate is queried during stock InitLevel before NativeContext
 	// exists. Ordinary source Night has no Classic grave bootstrap.
 	if (mApp->IsFusionSourceAdventure()) return false;
+	// InitLevel installs the native validation context before PickBackground.
+	// Its ordinary empty world uses no Classic bootstrap/rising graves.
+	if (const auto* native=LawnFusion::GetNativeContext(this); native&&native->validation) return false;
 	if (mApp->IsWallnutBowlingLevel() ||
 		mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_POGO_PARTY ||
 		mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_BEGHOULED ||

@@ -6,6 +6,12 @@
 #include "FusionNativeZombieVisual.h"
 #include "FusionNativeDayZombie273Bridge.h"
 #include "FusionNativeNightZombie291Bridge.h"
+#include "FusionNativeJackbox309Bridge.h"
+#include "FusionNativeSourceClock313.h"
+#include "FusionNativeSourceLifecycle313.h"
+#include "FusionNativeWaterZombie313Bridge.h"
+#include "FusionNativeHeavyZombie313BBridge.h"
+#include "FusionNativeExtendedZombie313Bridge.h"
 #include "FusionNativeWire.h"
 #include "../Net/NetPresentation.h"
 #include "FusionNativeEffects269.h"
@@ -67,19 +73,30 @@ bool EnsureNativeSourceZombieClosure280(Board* board,std::span<const uint16_t> r
         std::string detail;
         if(!EnsureNativeSourceZombieVisuals(board,kind,&detail))return Reject(kind,detail,error);
         if(!CanQueryNativeSourceZombieRoot273(board,kind))return Reject(kind,"actual loaded model root/state pose is unavailable",error);
+        if(FusionWaterZombie313Kind(kind)&&!EnsureNativeWaterZombie313Resources(board,kind,&detail))return Reject(kind,detail,error);
+        if(NativeHeavyZombie313BKind(kind)&&!EnsureNativeHeavyZombie313BResources(board,kind,&detail))return Reject(kind,detail,error);
+        if(FindFusionExtendedZombie313Profile(kind)&&!EnsureNativeExtendedZombie313Resources(board,kind,&detail))return Reject(kind,detail,error);
         const auto effect=[&](uint16_t fx)
         {return EnsureNativeSourceEffect269(board,fx,&detail);};
         if((FusionDayZombie273Doll(kind)||kind==6||kind==10)&&!effect(11))return Reject(kind,detail,error);
+        if(FusionJackbox300Kind(kind))
+        {
+            if(kNativeFusionSnapshotVersion<28||!LawnNet::NetSourceJackbox309Ready(board->mApp)||!effect(42))
+                return Reject(kind,"Jackbox FNS28/owner audio/explosion42 unavailable: "+detail,error);
+            if(!board->mApp->NetIsClient()&&!CanSpawnNativeJackbox309(board,kind,&detail))return Reject(kind,detail,error);
+        }
         if(kind==10&&kNativeFusionSnapshotVersion<27)return Reject(kind,"Jackson view requires FNS27",error);
         if(kind==10&&!LawnNet::NetSourceSound284Ready(board->mApp,69))return Reject(kind,"source Sound69 unavailable",error);
         if(kind==10&&!board->mApp->NetIsClient()&&!CanSpawnNativeJackson291(board,&detail))return Reject(kind,detail,error);
         if(FusionDayZombie273Pole(kind)&&(Sexy::SOUND_GRASSSTEP<0||Sexy::SOUND_POLEVAULT<0||!effect(23)))return Reject(kind,"Pole sound/effect23 dependency unavailable: "+detail,error);
         if(kind==100&&!effect(0))return Reject(kind,detail,error);
+        if(kind==101&&!effect(10))return Reject(kind,detail,error);
+        if(kind==102&&!effect(16))return Reject(kind,detail,error);
         if(kind==108&&!effect(18))return Reject(kind,detail,error);
         if((kind==14||kind==18)&&!effect(kind==14?35:36))return Reject(kind,detail,error);
         if((kind==106||kind==108)&&!CanCreateNativeEquipmentVisual(board,FusionEquipmentType::Bucket))
             return Reject(kind,"actual source Bucket item visual is unavailable",error);
-        if(kind==100||kind==108||kind==104)
+        if(FusionDayZombie273Shooter(kind)||kind==104)
         {
             const auto body=GetZombieDefinition(static_cast<ZombieType>(GetNativeSourceZombieCarrier(kind))).mReanimationType;
             if(!TrackReady(body,"anim_head1")||!TrackReady(REANIM_PEASHOOTER,"anim_shooting"))
@@ -110,6 +127,11 @@ bool EnsureNativeSourceZombieClosure280(Board* board,std::span<const uint16_t> r
 bool CanAllocateNativeSourceZombieBatch280(Board* board,std::span<const uint16_t> actualKinds,std::string* error)
 {
     if(!EnsureNativeSourceZombieClosure280(board,actualKinds,error))return false;
+    if(std::any_of(actualKinds.begin(),actualKinds.end(),[](uint16_t kind){return FindFusionSourceGraph313(kind)||FusionWaterZombie313Kind(kind)||FusionJackbox300Kind(kind);}))
+    {
+        FusionSourceDeathBudget319 peak;
+        return IsNativeSourceWorld313(board)&&GetNativeSourceZombieBirthBudget319(board,actualKinds,peak,error)&&CanAllocateNativeSourceBudget319(board,peak,error);
+    }
     if(board->mApp->NetIsClient()||board->mPaused||board->mApp->mGameScene!=SCENE_PLAYING||!board->mTDPath.empty()||board->mGridItems.mSize)
     {if(error)*error="Source NPC batch requires the active host ordinary world without Tower/grid initializers.";return false;}
     std::vector<uint16_t> unique;if(!BuildFusionSourceZombieClosure280(actualKinds,unique,error))return false;

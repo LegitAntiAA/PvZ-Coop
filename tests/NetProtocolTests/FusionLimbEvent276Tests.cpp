@@ -36,7 +36,7 @@ int RunFusionLimbEvent276Tests(int& checks)
     using namespace LawnNet;int failures=0;
     const auto check=[&](bool okay,int line){++checks;if(!okay){++failures;std::printf("FusionLimbEvent276Tests:%d failed\n",line);}};
 #define CHECK(x) check(bool(x),__LINE__)
-    CHECK(NET_PROTOCOL_VERSION==68&&BOARDEV_PRESENTATION_FWOOSH==27&&BOARDEV_FUSION_LIMB276==28);
+    CHECK(NET_PROTOCOL_VERSION==69&&BOARDEV_PRESENTATION_FWOOSH==27&&BOARDEV_FUSION_LIMB276==28&&BOARDEV_FUSION_CHARRED315==29);
     CHECK(NET_FUSION_LIMB276_WIRE_BYTES==26);
     constexpr std::array<uint8_t,26> golden={
         0x04,0x03,0x02,0x01,0x05,0x06,0x07,0x08,0x09,0x0a,0x03,0x00,0x01,0x04,
@@ -56,8 +56,10 @@ int RunFusionLimbEvent276Tests(int& checks)
     struct CallbackOracle {uint16_t kind;uint8_t parts;};
     constexpr CallbackOracle callbacks[]={
         {3,0x03},{5,0x1b},{6,0x03},{7,0x03},{9,0x07},
-        {21,0x01},{22,0x01},{23,0x01},{100,0x01},{106,0x01},{107,0x01},{108,0x01},
-        {0,0},{1,0},{2,0},{4,0},{8,0},{10,0x03},{15,0},{104,0},{109,0},{111,0},{203,0},{65535,0}};
+        {21,0x01},{22,0x01},{23,0x01},{24,0x03},{30,0x07},{100,0x01},{101,0x01},{102,0x01},{103,0x01},{106,0x01},{107,0x01},{108,0x01},
+        {0,0},{1,0},{2,0},{4,0},{8,0},{10,0x03},{15,0},{25,0x01},{29,0x01},
+        {37,0x02},{38,0x02},{39,0x02},{43,0x04},{212,0x04},{213,0x02},
+        {104,0},{109,0},{111,0},{203,0},{65535,0}};
     for(size_t i=0;i<std::size(callbacks);++i)for(uint8_t part=0;part<5;++part)
     {
         auto e=valid;e.mSourceKind=callbacks[i].kind;e.mPart=NetFusionZombiePart284(part);e.mRow=uint8_t(i%5);
@@ -84,7 +86,7 @@ int RunFusionLimbEvent276Tests(int& checks)
     }
     // Legacy Head3 byte1 is unchanged. New armor/glasses use that same single
     // byte position; the complete other24 bytes retain their established layout.
-    constexpr uint8_t newGoldenParts[][2]={{9,2},{5,3},{5,4},{10,0},{10,1}};
+    constexpr uint8_t newGoldenParts[][2]={{9,2},{5,3},{5,4},{10,0},{10,1},{24,0},{24,1},{30,2},{101,0},{102,0},{103,0}};
     for(const auto& oracle:newGoldenParts)
     {
         auto e=valid;e.mSourceKind=oracle[0];e.mPart=NetFusionZombiePart284(oracle[1]);
@@ -95,7 +97,7 @@ int RunFusionLimbEvent276Tests(int& checks)
     }
     // Inclusive coordinate/render boundaries, opaque full-width identities,
     // all source rows, and bit-preserving negative zero.
-    for(int row=0;row<5;++row)for(float x:{-4096.f,-0.f,0.f,4096.f})for(float y:{-4096.f,-0.f,0.f,4096.f})
+    for(int row=0;row<6;++row)for(float x:{-4096.f,-0.f,0.f,4096.f})for(float y:{-4096.f,-0.f,0.f,4096.f})
     {
         auto e=valid;e.mEpoch=UINT32_MAX;e.mZombieId=UINT16_MAX;e.mZombieToken=UINT32_MAX;
         e.mRow=uint8_t(row);e.mX=x;e.mY=y;e.mRenderOrder=row%2?0:1000000;NetBuffer wire;
@@ -120,7 +122,7 @@ int RunFusionLimbEvent276Tests(int& checks)
     {bad=valid;bad.mSourceKind=kind;invalid.push_back(bad);}
     for(uint8_t part:{uint8_t(5),uint8_t(127),uint8_t(255)})
     {bad=valid;bad.mPart=NetFusionZombiePart284(part);invalid.push_back(bad);}
-    for(uint8_t row:{uint8_t(5),uint8_t(255)}){bad=valid;bad.mRow=row;invalid.push_back(bad);}
+    for(uint8_t row:{uint8_t(6),uint8_t(255)}){bad=valid;bad.mRow=row;invalid.push_back(bad);}
     for(float value:{-4096.5f,4096.5f,std::numeric_limits<float>::infinity(),-std::numeric_limits<float>::infinity(),std::numeric_limits<float>::quiet_NaN()})
     {bad=valid;bad.mX=value;invalid.push_back(bad);bad=valid;bad.mY=value;invalid.push_back(bad);}
     for(int32_t order:{int32_t(-1),int32_t(1000001),(std::numeric_limits<int32_t>::min)(),(std::numeric_limits<int32_t>::max)()})

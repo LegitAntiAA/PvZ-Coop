@@ -1,11 +1,12 @@
 #include "FusionNativeEmbeddedEffects269.h"
+#include "FusionNativeCapturedSourcePlant314.h"
 #include "FusionNativeWorldParticle269.h"
 #include "FusionNative.h"
 #include "FusionNativeVisual.h"
 #include "FusionNativeLaserConnections269.h"
 #include "FusionNativeZombieVisual.h"
 #include "FusionNativeDayZombie273.h"
-#include "FusionNativeAdventure273.h"
+#include "FusionNativeSourceClock313.h"
 #include "../Board.h"
 #include "../Plant.h"
 #include "../Projectile.h"
@@ -32,6 +33,11 @@ const char* NativeSourceZombiePartNode284(uint8_t part)
 {
     const char* paths[]={"LoseArm","LoseHead","LoseCone","LosePaper","LoseHead/LoseGlasses"};
     return part<std::size(paths)?paths[part]:nullptr;
+}
+const char* NativeSourceZombiePartNode313(uint16_t kind,uint8_t part)
+{
+    if((kind==43||kind==212)&&part==uint8_t(LawnNet::NetFusionZombiePart284::FirstArmor))return "LoseBucket";
+    return NativeSourceZombiePartNode284(part);
 }
 namespace
 {
@@ -162,6 +168,9 @@ struct NativeEmbeddedEffects269::Impl
     LawnApp* app=nullptr;TodParticleHolder* holder=nullptr;
     std::map<uint16_t,std::vector<Binding>> bindings;
     std::map<std::pair<uint32_t,int64_t>,Lease> leases;
+    std::map<uint32_t,std::pair<uint32_t,uint16_t>> capturedOwners314; // actual ownerLocalUID -> captureToken/kind.
+    std::map<std::tuple<uint32_t,uint32_t,uint16_t,int64_t>,Lease> capturedLeases314;
+
     // Separate real DataArray domain: a Plant and Projectile may have the same
     // generation. Model key also distinguishes source AUX families/components.
     std::map<uint16_t,std::vector<Binding>> projectileBindings;
@@ -187,7 +196,7 @@ struct NativeEmbeddedEffects269::Impl
 };
 NativeEmbeddedEffects269::NativeEmbeddedEffects269(LawnApp* app):mImpl(std::make_unique<Impl>())
 {mImpl->app=app;mImpl->holder=app&&app->mEffectSystem?app->mEffectSystem->mParticleHolder:nullptr;}
-NativeEmbeddedEffects269::~NativeEmbeddedEffects269(){mImpl->StopField();for(auto& entry:mImpl->leases)mImpl->Kill(entry.second);for(auto& entry:mImpl->projectileLeases)mImpl->Kill(entry.second);for(auto& entry:mImpl->derivedPlantLeases)mImpl->Kill(entry.second);for(auto& entry:mImpl->zombieLeases)mImpl->Kill(entry.second);for(auto& entry:mImpl->limbEvents)if(auto* system=mImpl->System(entry.second))system->ParticleSystemDie();}
+NativeEmbeddedEffects269::~NativeEmbeddedEffects269(){mImpl->StopField();for(auto& entry:mImpl->leases)mImpl->Kill(entry.second);for(auto& entry:mImpl->capturedLeases314)mImpl->Kill(entry.second);for(auto& entry:mImpl->projectileLeases)mImpl->Kill(entry.second);for(auto& entry:mImpl->derivedPlantLeases)mImpl->Kill(entry.second);for(auto& entry:mImpl->zombieLeases)mImpl->Kill(entry.second);for(auto& entry:mImpl->limbEvents)if(auto* system=mImpl->System(entry.second))system->ParticleSystemDie();}
 bool NativeEmbeddedEffects269::Ensure(Board* board,uint16_t kind,const std::string& model,const std::string& manifest,std::string& error)
 {
     try
@@ -282,7 +291,7 @@ bool NativeEmbeddedEffects269::PlayZombieLimbEvent(Board* board,const LawnNet::N
     newEvent=false;
     const auto* context=GetNativeContext(board);
     if(!mImpl->Valid(board)||!context||context->epoch!=event.mEpoch||
-        !IsNativeSourceAdventureGrassWorld281(board)||
+        !IsNativeSourceWorld313(board)||event.mRow>=GetNativeFusionRowCount(board)||
         !LawnNet::NetFusionLimbEvent276Valid(event))return false;
     if(mImpl->limbEpoch!=event.mEpoch)
     {
@@ -290,7 +299,7 @@ bool NativeEmbeddedEffects269::PlayZombieLimbEvent(Board* board,const LawnNet::N
         mImpl->limbEvents.clear();mImpl->limbEpoch=event.mEpoch;
     }
     const uint8_t part=uint8_t(event.mPart);
-    const char* path=NativeSourceZombiePartNode284(part);
+    const char* path=NativeSourceZombiePartNode313(event.mSourceKind,part);
     const char* names[]={"arm","head","first-armor","second-armor","glasses"};
     const char* partName=names[part]; // Canonical event validation bounds part.
     const Impl::LimbKey key{event.mEpoch,event.mZombieId,event.mZombieToken,event.mSourceKind,part};
@@ -390,6 +399,29 @@ void NativeEmbeddedEffects269::Update(Board* board)
         }
     }
     for(auto it=mImpl->leases.begin();it!=mImpl->leases.end();)if(!observed.contains(it->first)){mImpl->Kill(it->second);it=mImpl->leases.erase(it);}else ++it;
+    // Plant.Die5 removed only the source Plant component/main Animator. The
+    // retained actual Tod leases stay under the real capture owner generation.
+    for(const auto& item:mImpl->capturedOwners314)
+    {
+        const auto ownerUID=item.first,token=item.second.first;const auto kind=item.second.second;
+        const auto found=mImpl->bindings.find(kind);if(found==mImpl->bindings.end())continue;
+        for(const auto& binding:found->second)
+        {
+            auto& lease=mImpl->capturedLeases314[{ownerUID,token,kind,binding.component}];
+            bool active=false;float x=0,y=0;int order=0;
+            if(!binding.definition||!GetCapturedSourcePlant314Node(board,ownerUID,kind,binding.path.c_str(),x,y,active,order)||!active)
+            {mImpl->Kill(lease);lease.active=false;continue;}
+            if(lease.stopped)continue;const bool emission=lease.emission<0?binding.emission:lease.emission!=0;
+            if(!lease.active)
+            {
+                // Late join starts a genuine CURRENT continuous presentation.
+                // Historical transient particles/trail segments are not replayed.
+                if(auto* ps=CreateNativeEmbeddedParticle269System(board,binding.resource,binding.definition,x,y,order,emission))lease.system=uint32_t(mImpl->app->ParticleGetID(ps));
+                else continue;lease.active=true;
+            }
+            if(auto* ps=mImpl->System(lease.system)){binding.definition->SetEmission(ps,emission);ps->SystemMove(x,y);ps->mRenderOrder=order;}
+        }
+    }
     for(auto& entry:mImpl->projectileBindings)for(auto& binding:entry.second)
     {
         std::string error;auto* definition=EnsureNativeEmbeddedParticle269Resource(board,binding.resource,binding.package,error);
@@ -467,7 +499,7 @@ void NativeEmbeddedEffects269::Update(Board* board)
             // owner disappears. A hydrated missing part never starts a lease.
             bool reliable=false;
             for(uint8_t part=0;part<=uint8_t(LawnNet::NetFusionZombiePart284::Glasses);++part)
-                if(binding.path==NativeSourceZombiePartNode284(part)&&
+                if(binding.path==NativeSourceZombiePartNode313(data->kind,part)&&
                     LawnNet::NetFusionZombiePart284Supported(data->kind,LawnNet::NetFusionZombiePart284(part)))reliable=true;
             if(reliable||(IsNativeDayZombie273(zombie)&&binding.path.starts_with("LoseHead/")))continue;
             auto& lease=mImpl->zombieLeases[key];bool active=false;float x=0,y=0;
@@ -515,5 +547,22 @@ bool NativeEmbeddedEffects269::StopAndClear(Plant* plant,const char* path)
 {
     const auto* data=GetNativePlantData(plant);if(!data||!path||!mImpl->Valid(plant->mBoard))return false;const auto found=mImpl->bindings.find(data->kind);if(found==mImpl->bindings.end())return false;
     for(const auto& binding:found->second)if(binding.path==path){auto& lease=mImpl->leases[{plant->mBoard->mPlants.DataArrayGetID(plant),binding.component}];mImpl->Kill(lease);lease.stopped=true;return true;}return false;
+}
+}
+
+namespace LawnFusion {
+void NativeEmbeddedEffects269::CapturePlant314(Board* board,uint32_t oldUID,uint32_t ownerUID,uint32_t token,uint16_t kind)
+{
+ if(!mImpl->Valid(board)||!ownerUID||!token)return;
+ mImpl->capturedOwners314[ownerUID]={token,kind};const auto found=mImpl->bindings.find(kind);if(found==mImpl->bindings.end())return;
+ for(const auto& binding:found->second)
+ {const auto at=mImpl->leases.find({oldUID,binding.component});if(at==mImpl->leases.end())continue;
+  mImpl->capturedLeases314[{ownerUID,token,kind,binding.component}]=std::move(at->second);mImpl->leases.erase(at);}
+}
+void NativeEmbeddedEffects269::ReleaseCapturedPlant314(uint32_t ownerUID,uint32_t token)
+{
+ for(auto at=mImpl->capturedLeases314.begin();at!=mImpl->capturedLeases314.end();)
+  if(std::get<0>(at->first)==ownerUID&&std::get<1>(at->first)==token){mImpl->Kill(at->second);at=mImpl->capturedLeases314.erase(at);}else ++at;
+ const auto at=mImpl->capturedOwners314.find(ownerUID);if(at!=mImpl->capturedOwners314.end()&&at->second.first==token)mImpl->capturedOwners314.erase(at);
 }
 }

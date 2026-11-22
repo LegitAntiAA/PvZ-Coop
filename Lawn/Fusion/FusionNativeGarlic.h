@@ -19,6 +19,7 @@ bool BeginNativeGarliced(Zombie* zombie,bool certainRow = false);
 bool UpdateNativeGarlicAction(Zombie* zombie, GarlicActionState& state, float effectiveMovementSpeed);
 // Snapshot-only client adoption: image/sorting presentation, never a timer/RNG.
 bool RestoreNativeGarlicPresentation(Zombie* zombie, const GarlicActionState& state);
+bool BeginNativeSourceRowDuration313(Zombie*,float sourceSeconds);
 void NativeGarlicHealthChanged(Plant* plant);
 }
 #endif

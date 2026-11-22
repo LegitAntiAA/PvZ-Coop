@@ -6,6 +6,8 @@
 #include "Lawn/Fusion/FusionNativeAdventure273.h"
 #include "Lawn/Fusion/FusionNativeEffects269.h"
 #include "Lawn/Net/NetFusion269Smoke.h"
+#include "Lawn/Net/NetJackbox309Audio.h"
+#include "Lawn/Net/NetFusionZombie313Smoke.h"
 #include "Lawn/Net/NetFusion270Smoke.h"
 #include "Lawn/Net/NetFusionEmperor270Smoke.h"
 #include "Lawn/Net/NetFusionCampaign270Smoke.h"
@@ -3302,6 +3304,7 @@ void LawnApp::UpdatePlayTimeStats()
 void LawnApp::UpdateFrames()
 {
 	ProcessFusionSourceAdventureTransition();
+    LawnNet::NetUpdateSourceJackbox309Audio(mBoard);
 	if (auto* context = LawnFusion::GetNativeContext(mBoard);
 		context && context->restartChooserRequested && !NetIsClient() && mUpdateAppDepth <= 1)
 	{
@@ -6006,6 +6009,7 @@ void LawnApp::CoopSmokeUpdate()
 	}
 	if (!mCoopSmokeLifecycleStarted || !mNetManager)
 		return;
+    if (LawnNet::NetSmokeUpdateFusionZombie313(this))return;
 	if (LawnNet::NetSmokeUpdateHelp(this))
 		return;
 	if (LawnNet::NetSmokeUpdateGameModes(this))
@@ -6463,6 +6467,8 @@ void LawnApp::NetOnStartGame(LawnNet::NetBuffer& thePayload)
 			 (aFusionCampaign&&aMode==GAMEMODE_ADVENTURE&&(aLevel==21||aLevel==31)&&aFusionVehiclesFixture&&atoi(aFusionVehiclesFixture)==aLevel) ||
 			 CoopSmokeFirstAdventureAllowsStart(aMode, aLevel) ||
 			 LawnNet::NetSmokeNativeUiAllowsStart(this, aMode, aLevel) ||
+			 (aMode==GAMEMODE_ADVENTURE&&LawnNet::NetSmokeFusionZombie313Level325(this)>0&&
+                aLevel==LawnNet::NetSmokeFusionZombie313Level325(this)) ||
 			 LawnNet::NetSmokeZenGardenAllowsStart(this, aMode, aLevel)) && aBoardSeed == mCoopSmokeManifest.mSeed &&
 			(aPlayerCount == 2 || (aPlayerCount == 3 && aNativeRoster) || (aPlayerCount == 3 &&
 				getenv("PVZ_COOP_SMOKE_SPECTATOR") && strcmp(getenv("PVZ_COOP_SMOKE_SPECTATOR"), "1") == 0 &&

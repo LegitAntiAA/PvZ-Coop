@@ -1,4 +1,10 @@
 #include "FusionNative.h"
+#include "FusionNativeCharred311.h"
+#include "FusionNativeObstacle313.h"
+#include "FusionNativeCapturedSourcePlant314.h"
+#include "FusionNativeZombie313Dispatch.h"
+#include "FusionNativeJackbox309Bridge.h"
+#include "../Net/NetJackbox309Audio.h"
 #include "NativeSpecialZombie269.h"
 #include "FusionDefenderRules.h"
 #include "FusionBatchActionRules.h"
@@ -50,7 +56,15 @@ NativeContext::NativeContext()
 {
     for (auto& terrain : lastColumnTerrain) terrain = GRIDSQUARE_GRASS;
 }
-NativeContext::~NativeContext() = default;
+NativeContext::~NativeContext()
+{if(capturedPlants314)capturedPlants314->Clear();}
+
+NativeCapturedPlants314* GetNativeCapturedPlants314(Board* board)
+{
+    auto* context=GetNativeContext(board);if(!context)return nullptr;
+    if(!context->capturedPlants314)context->capturedPlants314=std::make_unique<NativeCapturedPlants314>(board);
+    return context->capturedPlants314.get();
+}
 
 NativeSourceEffects269* GetNativeSourceEffects269(Board* board,bool create)
 {
@@ -152,6 +166,11 @@ bool AttachNativeSourceZombieData(Board* board, Zombie* zombie, const NativeSour
         zombie->mZombieType != GetNativeSourceZombieCarrier(data.kind)) return false;
     const uint32_t id = LiveId(board->mZombies,zombie);
     if (!id) return false;
+    if(!board->mApp->NetIsClient()&&!zombie->mNetGhost&&!context->sourceZombieBirthOrdinals.contains(id))
+    {
+        if(context->sourceZombieBirthSequence==UINT64_MAX)return false;
+        context->sourceZombieBirthOrdinals.emplace(id,++context->sourceZombieBirthSequence);
+    }
     context->sourceZombies[id] = data;
     return true;
 }
@@ -186,6 +205,8 @@ bool IsNativeFusionGroundZombie(const Zombie* zombie)
 int GetNativeFusionZombieStatus(const Zombie* zombie)
 {
     if (!zombie) return -1;
+    NativeZombie313Semantics semantic;
+    if(GetNativeZombie313Semantics(zombie,semantic))return semantic.status;
     if (!GetNativeSourceZombieData(zombie))
     {
         auto* native = const_cast<Zombie*>(zombie);
@@ -200,6 +221,7 @@ int GetNativeFusionZombieStatus(const Zombie* zombie)
         return 7; // Native invulnerable, entering, jumping, or otherwise unavailable.
     }
     int dayStatus=0;
+    if(const auto* jackbox=GetNativeJackbox309(zombie))return FusionJackbox300SourceStatus(*jackbox);
     if(GetNativeDayZombie273Status(zombie,dayStatus))return dayStatus;
     if (!IsNativeFusionGroundZombie(zombie)) return -1;
     int specialStatus=0;

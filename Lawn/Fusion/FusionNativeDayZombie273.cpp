@@ -218,9 +218,9 @@ bool UpdateNativeDayZombie273(Zombie* z,const NativeDayZombie273Hooks& hooks)
     if(!head||!Factor(z,factor))return true;
     head->mAnimRate=head->mFrameCount*2*GetNativeSourceZombieData(z)->originSpeed*factor; // shoot1s, controller speed2.
     float after=s->shootCountdown;bool play=false;
-    if(TryStepFusionDayZombie273Shoot(Kind(z),s->shootCountdown,1.5f,.01f,0,z->mBoard->mTimeStopCounter>0,!z->mHasHead,0,after,play))
+    if(TryStepFusionDayZombie273Shoot(Kind(z),s->shootCountdown,FusionDayZombie273ShootInterval(Kind(z)),.01f,0,z->mBoard->mTimeStopCounter>0,!z->mHasHead,0,after,play))
     {
-        if(play)after=1.5f+RandRangeFloat(-.1f,.1f);
+        if(play)after=FusionDayZombie273ShootInterval(Kind(z))+RandRangeFloat(-.1f,.1f);
         s->shootCountdown=after;
         if(play){head->PlayReanim("anim_shooting",REANIM_PLAY_ONCE_AND_HOLD,0,head->mAnimRate);s->shootEvent=1;}
     }
@@ -253,7 +253,7 @@ bool NativeDayZombie273CanUseSharedBite(const Zombie* z)
 {const auto* s=GetNativeDayZombie273(z);return !FusionDayZombie273Pole(Kind(z))||(s&&s->status==0);}
 bool ApplyNativeDayZombie273Armor(Zombie* z,int damage,int& overkill,const NativeDayZombie273Hooks& hooks)
 {
-    const auto kind=Kind(z);if(!IsNativeDayZombie273(z)||(!FusionDayZombie273Doll(kind)&&kind!=106&&kind!=107))return false;
+    const auto kind=Kind(z);if(!IsNativeDayZombie273(z)||(!FusionDayZombie273Doll(kind)&&!FusionDayZombie273NutArmor(kind)))return false;
     overkill=0;
     if(!Host(z)||z->mDead||z->IsDeadOrDying())return true;
     auto* s=EditNativeDayZombie273(z);int after=0,excess=0;
@@ -308,7 +308,7 @@ Projectile* CreateNativeDayZombie273Shot(Zombie* z)
 {
     if(!IsNativeDayZombie273(z)||!Host(z))return nullptr;
     const auto* s=GetNativeDayZombie273(z);FusionDayZombie273Shot shot;
-    if(!s||!TryMakeFusionDayZombie273Shot(Kind(z),z->IsDeadOrDying()?1:s->status,!z->mHasHead||z->IsDeadOrDying(),ChangingRow(z),
+    if(!s||!TryMakeFusionDayZombie273Shot(Kind(z),z->IsDeadOrDying()?1:s->status,GetNativeSourceZombieData(z)->beforeDying||z->IsDeadOrDying(),ChangingRow(z),
         z->mMindControlled?1:0,z->mMindControlled,shot))return nullptr;
     float x=0,y=0;if(!GetNativeSourceZombie269NodePoint(z,"Zombie_head/Shoot",x,y))return nullptr;
     NativeProjectileData d;d.kind=shot.kind;d.damage=shot.damage;d.specialType=shot.way;d.isZombieBullet=shot.hostile;
@@ -363,7 +363,7 @@ bool UpdateNativeDayZombie273HostileProjectile(Projectile* p,const NativeDayZomb
             return true;
         }
         Plant* selected=SelectNativeSuperCherryPlantTarget(p,plant);if(!selected)return true;
-        const uint16_t fx=d->kind==0?0:18;
+        const uint16_t fx=d->kind==0?0:d->kind==1?10:18;
         // Admission requires this actual effect resource, no missing-FX alias.
         if(!EnsureNativeSourceEffect269(b,fx))return true;
         ApplyNativeSourcePlantDamage(selected,d->damage,0);
@@ -378,9 +378,9 @@ bool UpdateNativeDayZombie273HostileProjectile(Projectile* p,const NativeDayZomb
             NativeWater268ZombieCaptured(z)||GetRectOverlap(rect,z->GetZombieRect())<=0)continue;
         FusionDayZombie273ZombieHit hit;
         if(!hooks.projectileHitZombie||!TryPlanFusionDayZombie273ZombieHit(d->kind,d->specialType,d->damage,
-            z->mShieldHealth,z->mMindControlled,hit)||!EnsureNativeSourceEffect269(b,d->kind==0?0:18))return true;
+            z->mShieldHealth,z->mMindControlled,hit)||!EnsureNativeSourceEffect269(b,d->kind==0?0:d->kind==1?10:18))return true;
         if(!hooks.projectileHitZombie(p,z,hit.sourceDamageType,hit.damage,hit.knockback))return true;
-        SpawnNativeSourceEffect269(b,d->kind==0?0:18,p->mPosX+20,p->mPosY+20,p->mRenderOrder,true);
+        SpawnNativeSourceEffect269(b,d->kind==0?0:d->kind==1?10:18,p->mPosX+20,p->mPosY+20,p->mRenderOrder,true);
         p->mApp->PlayFoley(FOLEY_SPLAT);p->Die();return true;
     }
     return true;

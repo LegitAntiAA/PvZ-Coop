@@ -33,10 +33,10 @@ const NativeDayZombie273State* GetNativeDayZombie273(const Zombie*);
 inline bool NativeDayZombie273ControllerValid(uint16_t kind,const NativeDayZombie273State& s)
 {
     if(!FindFusionDayZombie273Profile(kind)||s.armorStage>2||s.shootEvent>2||!std::isfinite(s.shootCountdown)||
-        s.shootCountdown<-.01f||s.shootCountdown>1.6f)return false;
+        s.shootCountdown<-.01f||s.shootCountdown>(kind==102?3.1f:1.6f))return false;
     if(FusionDayZombie273Pole(kind)){if(s.status!=0&&s.status!=2&&s.status!=3)return false;if(s.shadowEnabled!=(s.status!=3))return false;}
     else if(s.status||!s.shadowEnabled)return false;
-    if(!FusionDayZombie273Doll(kind)&&kind!=106&&kind!=107&&s.armorStage)return false;
+    if(!FusionDayZombie273Doll(kind)&&!FusionDayZombie273NutArmor(kind)&&s.armorStage)return false;
     return FusionDayZombie273Shooter(kind)||(!s.shootEvent&&s.shootCountdown==1.5f);
 }
 inline bool NativeDayZombie273StateValid(uint16_t kind,const NativeDayZombie273State& s)

@@ -6,6 +6,14 @@
 #include "FusionNativeEmbeddedEffects269.h"
 #include "FusionNativeDayZombie273.h"
 #include "FusionNativeNightZombie281.h"
+#include "FusionNativeJackbox300.h"
+#include "FusionNativeSourceClock313.h"
+#include "FusionNativeWaterZombie313.h"
+#include "FusionNativeSourceGraph313.h"
+#include "FusionNativeHeavyZombie313B.h"
+#include "FusionNativeExtendedZombie313.h"
+#include "FusionNativeProjection313.h"
+
 #include "../Board.h"
 #include "../Zombie.h"
 #include "../Net/NetCommon.h"
@@ -32,8 +40,76 @@ namespace
 using Json = nlohmann::json;
 constexpr float kPixelsPerSourceUnit = 60.0f;
 
+
+const char* CohortPrefab316(uint16_t kind)
+{
+    switch(kind)
+    {
+    case 16:return "Resources/zombies/_prefab/DriverZombie.prefab";
+    case 17:return "Resources/zombies/_prefab/SnorkleZombie.prefab";
+    case 19:return "Resources/zombies/_prefab/DolphinriderZombie.prefab";
+    case 20:return "Resources/zombies/_prefab/DrownZombie.prefab";
+    case 25:return "Resources/zombies/_prefab/BalloonZombie.prefab";
+    case 26:return "Resources/zombies/_prefab/AirshipZombie.prefab";
+    case 27:return "Resources/zombies/_prefab/SnowDolphinriderZombie.prefab";
+    case 28:return "Resources/zombies/_prefab/MinerZombie.prefab";
+    case 29:return "Resources/zombies/_prefab/IronBalloonZombie.prefab";
+    case 31:return "Resources/zombies/_prefab/CatapultZombie.prefab";
+    case 32:return "Resources/zombies/_prefab/PogoZombie.prefab";
+    case 33:return "Resources/zombies/_prefab/LadderZombie.prefab";
+    case 34:return "Resources/zombies/_prefab/SuperPogoZombie.prefab";
+    case 35:return "Resources/zombies/_prefab/Gargantuar.prefab";
+    case 36:return "Resources/zombies/_prefab/RedGargantuar.prefab";
+    case 37:return "Resources/zombies/_prefab/ImpZombie.prefab";
+    case 38:return "Resources/zombies/_prefab/IronGargantuar.prefab";
+    case 39:return "Resources/zombies/_prefab/RedIronGargantuar.prefab";
+    case 40:return "Resources/zombies/_prefab/MachineNutZombie.prefab";
+    case 43:return "Resources/zombies/_prefab/SuperGargantuar.prefab";
+    case 45:return "Resources/zombies/_prefab/BungiZombie.prefab";
+    case 203:return "Resources/zombies/_prefab/EliteCherryPaperZombie.prefab";
+    case 212:return "Resources/zombies/_prefab/UltimateGargantuar.prefab";
+    case 213:return "Resources/zombies/_prefab/ObsidianImpZombie.prefab";
+    case 223:return "Resources/zombies/_prefab/UltimatePaperZombie.prefab";
+    default:return nullptr;
+    }
+}
+
+const char* CohortPackage316(uint16_t kind)
+{
+    switch(kind)
+    {
+    case 16:return "zombie313-16";
+    case 17:return "zombie313-17";
+    case 19:return "zombie313-19";
+    case 20:return "zombie313-20";
+    case 25:return "zombie313-25";
+    case 26:return "zombie313-26";
+    case 27:return "zombie313-27";
+    case 28:return "zombie313-28";
+    case 29:return "zombie313-29";
+    case 31:return "zombie313-31";
+    case 32:return "zombie313-32";
+    case 33:return "zombie313-33";
+    case 34:return "zombie313-34";
+    case 35:return "zombie313-35";
+    case 36:return "zombie313-36";
+    case 37:return "zombie313-37";
+    case 38:return "zombie313-38";
+    case 39:return "zombie313-39";
+    case 40:return "zombie313-40";
+    case 43:return "zombie313-43";
+    case 45:return "zombie313-45";
+    case 203:return "zombie313-203";
+    case 212:return "zombie313-212";
+    case 213:return "zombie313-213";
+    case 223:return "zombie313-223";
+    default:return nullptr;
+    }
+}
+
 const char* PackageName(uint16_t kind)
 {
+    if(const auto* name=CohortPackage316(kind))return name;
     if (kind == 0) return "zombie";
     if (kind == 2) return "zombie-cone";
     switch(kind){case 4:return "zombie-batch-4";case 8:return "zombie-batch-8";
@@ -44,10 +120,13 @@ const char* PackageName(uint16_t kind)
     switch(kind){case 14:return "zombie270-14";case 15:return "zombie270-15";
     case 18:return "zombie270-18";case 104:return "zombie270-104";}
     switch(kind){case 3:return "zombie273-3";case 21:return "zombie273-21";case 22:return "zombie273-22";
-    case 23:return "zombie273-23";case 100:return "zombie273-100";case 106:return "zombie273-106";
+    case 23:return "zombie273-23";case 100:return "zombie273-100";
+    case 101:return "zombie313-101";case 102:return "zombie313-102";case 103:return "zombie313-103";case 106:return "zombie273-106";
     case 107:return "zombie273-107";case 108:return "zombie273-108";}
     switch(kind){case 5:return "zombie282-5";case 6:return "zombie282-6";
     case 7:return "zombie282-7";case 9:return "zombie282-9";case 10:return "zombie282-10";}
+    if(kind==24)return "zombie307-24";
+    if(kind==30)return "zombie307-30";
     return nullptr;
 }
 
@@ -64,6 +143,13 @@ const char* BatchPrefab282(uint16_t kind)
     }
 }
 
+const char* JackboxPrefab300(uint16_t kind)
+{
+    if(kind==24)return "Resources/zombies/_prefab/JackboxZombie.prefab";
+    if(kind==30)return "Resources/zombies/_prefab/SuperJackboxZombie.prefab";
+    return nullptr;
+}
+
 const char* DayPrefab273(uint16_t kind)
 {
     switch(kind)
@@ -74,6 +160,9 @@ const char* DayPrefab273(uint16_t kind)
     case 22:return "Resources/zombies/_prefab/DollGoldZombie.prefab";
     case 23:return "Resources/zombies/_prefab/DollSilverZombie.prefab";
     case 100:return "Resources/zombies/_prefab/PeaShooterZombie.prefab";
+    case 101:return "Resources/zombies/_prefab/CherryShooterZombie.prefab";
+    case 102:return "Resources/zombies/_prefab/SuperCherryZombie.prefab";
+    case 103:return "Resources/zombies/_prefab/WallNutZombie.prefab";
     case 106:return "Resources/zombies/_prefab/BucketNutZombie.prefab";
     case 107:return "Resources/zombies/_prefab/CherryNutZombie.prefab";
     case 108:return "Resources/zombies/_prefab/IronPeaZombie.prefab";
@@ -93,6 +182,14 @@ std::filesystem::path PackagePath(const char* name)
 struct ZombieModel
 {
     FusionAnimation animation;
+    int64_t rootBox313=0;
+    std::map<std::string,std::string,std::less<>> extras316;
+    std::vector<std::string> unique316;
+    std::map<std::string,std::string,std::less<>> child316,sprite316;
+    std::map<std::string,std::vector<std::string>,std::less<>> children316;
+    std::vector<std::string> spriteNodes316;
+    std::set<std::string,std::less<>> nodePaths316;
+
     FusionAnimationDrawOptions options;
     float shadowX = 0, shadowY = 0;
     std::vector<std::string> headPaths, handPaths, upperArmPaths;
@@ -157,6 +254,136 @@ std::string ExtraSprite(const Json& package,const char* path)
     return guid;
 }
 
+
+std::unique_ptr<ZombieModel> LoadCohort316(Board* board,uint16_t kind,const std::filesystem::path& path,const Json& package)
+{
+    if(package.at("sourcePrefab")!=CohortPrefab316(kind))throw std::runtime_error("source313 prefab identity differs");
+    auto model=std::make_unique<ZombieModel>();
+    const auto& shadow=package.at("anchors").at("shadow");
+    if(!shadow.at("relativeToRuntimeRoot").get<bool>())throw std::runtime_error("source313 Shadow is not root relative");
+    model->shadowX=shadow.at("x").get<float>();model->shadowY=shadow.at("y").get<float>();
+    if(!std::isfinite(model->shadowX)||!std::isfinite(model->shadowY))throw std::runtime_error("source313 invalid Shadow");
+    const auto shadowPath=shadow.at("path").get<std::string>();bool foundShadow=false;
+    for(const auto& node:package.at("nodes"))
+    {
+        const auto nodePath=node.at("path").get<std::string>();const auto tag=node.value("tag",std::string());
+        model->nodePaths316.insert(nodePath);
+        if(nodePath==shadowPath)foundShadow=true;
+        if(node.at("parent")==0)model->rootChildren.push_back(nodePath);
+        if(tag=="ZombieHead")model->headPaths.push_back(nodePath);
+        if(tag=="ZombieHand")model->handPaths.push_back(nodePath);
+        if(tag=="ZombieArmUpper")model->upperArmPaths.push_back(nodePath);
+        const int parent=node.at("parent").get<int>();
+        if(parent>=0)
+        {
+            const auto parentPath=package.at("nodes").at(parent).at("path").get<std::string>();
+            model->child316.try_emplace(parentPath,nodePath);model->children316[parentPath].push_back(nodePath);
+        }
+    }
+    for(const auto& sprite:package.at("sprites"))
+    {
+        const auto node=package.at("nodes").at(sprite.at("node").get<size_t>()).at("path").get<std::string>();
+        model->spriteNodes316.push_back(node);
+        if(!model->sprite316.emplace(node,sprite.at("guid").is_null()?std::string():sprite.at("guid").get<std::string>()).second)
+            throw std::runtime_error("source313 ambiguous node SpriteRenderer");
+    }
+    if(!foundShadow)throw std::runtime_error("source313 missing Shadow");
+    if(kind==29)model->conePath="Zombie_balloon_head/ironNut1";
+    if(kind==43||kind==212)model->conePath="Zombie_gargantuar_head/SuperGargantuar_helmet";
+    model->options.hiddenNodePaths.push_back(shadowPath);
+    for(auto it=package.at("extraSpriteGuids").begin();it!=package.at("extraSpriteGuids").end();++it)
+        model->extras316.emplace(it.key(),ExtraSprite(package,it.key().c_str()));
+    const auto requireExtra=[&](const char* asset)
+    {if(!model->extras316.contains(asset))throw std::runtime_error(std::string("source313 missing genuine runtime replacement: ")+asset);};
+    switch(kind)
+    {
+    case 16:requireExtra("Resources/zombies/zombie_driver/Zombie_zamboni_1_damage1.asset");
+        requireExtra("Resources/zombies/zombie_driver/Zombie_zamboni_1_damage2.asset");requireExtra("Resources/zombies/zombie_driver/Zombie_zamboni_2_damage2.asset");break;
+    case 17:requireExtra("Resources/zombies/zombie_snorkle/Zombie_snorkle_outerarm_upper2.asset");break;
+    case 19:requireExtra("Resources/zombies/zombie_dolphinrider/Zombie_dolphinrider_outerarm_upper2.asset");break;
+    case 20:requireExtra("Resources/zombies/zombie_drown/losearm.asset");break;
+    case 27:requireExtra("Resources/zombies/zombie_dolphinrider/snowdolphinrider/arm.asset");break;
+    case 25:case 29:requireExtra("Resources/zombies/balloonzombie/upperarm2.asset");
+        if(kind==29){requireExtra("Resources/zombies/plantzombie/ironNut2.asset");requireExtra("Resources/zombies/plantzombie/ironNut3.asset");}break;
+    case 43:case 212:requireExtra("Resources/zombies/jackbox/superjackboxzombie/SuperJackbox_cone2.asset");
+        requireExtra("Resources/zombies/jackbox/superjackboxzombie/SuperJackbox_cone3.asset");break;
+    case 28:requireExtra("Resources/zombies/zombie_digger/Zombie_digger_outerarm_upper2.asset");break;
+    case 203:requireExtra("Resources/zombies/paperzombie/paper_bone1.asset");
+        requireExtra("Resources/Zombies/PlantZombie/Paper/CherryPaper1.asset");requireExtra("Resources/Zombies/PlantZombie/Paper/CherryPaper2.asset");break;
+    }
+    // Read the actual root collider component identity; never infer a collider
+    // from sprite bounds (the genuine Airship26 intentionally has none).
+    for(const auto& box:package.at("colliders"))if(box.at("type")=="box"&&box.at("node")==0)
+    {
+        if(model->rootBox313)throw std::runtime_error("source313 ambiguous root BoxCollider2D");
+        model->rootBox313=box.at("fileId").get<int64_t>();
+    }
+    if((kind==26)!=(!model->rootBox313))throw std::runtime_error("source313 root BoxCollider2D identity missing");
+    std::vector<int64_t> particles;
+    for(const auto& c:package.at("nonRenderingComponents"))if(c.at("typeId")==198||c.at("typeId")==199)particles.push_back(c.at("fileId").get<int64_t>());
+    std::string error;
+    if(!particles.empty()&&!EnsureNativeEmbedded269ZombieModel(board,kind,path.string(),&error))throw std::runtime_error(error);
+    if(!model->animation.Load(board->mApp,path.string(),error,particles))throw std::runtime_error(error);
+    const auto* graph=FindFusionSourceGraph313(kind);
+    const auto& states=package.at("controller").at("states");
+    const auto layerOf=[&](const Json& state)
+    {
+        int found=-1;const auto& layers=package.at("controller").at("layers");
+        for(size_t i=0;i<layers.size();++i)for(const auto& id:layers.at(i).at("states"))if(id==state.at("id"))
+        {if(found!=-1)throw std::runtime_error("source313 ambiguous state layer");found=int(i);}
+        return found;
+    };
+    for(const auto& state:states)
+    {
+        const auto name=state.at("name").get<std::string>();
+        if(layerOf(state)==0)
+        {
+            const float duration=state.at("clip").is_null()?0:model->animation.GetStateDurationSeconds(name.c_str(),1);
+            if(!std::isfinite(duration)||duration<0)throw std::runtime_error("source313 invalid base state duration");
+            if(!model->durations.emplace(name,duration).second)throw std::runtime_error("source313 ambiguous base state name");
+        }
+    }
+    if(graph)
+    {
+        if(package.at("controller").at("layers").size()!=graph->layerCount)throw std::runtime_error("source313 graph/model layer count differs");
+        for(uint8_t layer=0;layer<graph->layerCount;++layer)for(uint8_t n=0;n<graph->layers[layer].stateCount;++n)
+        {
+            if(package.at("controller").at("layers").at(layer).at("blendingMode").get<int>()!=int(graph->layers[layer].additive))
+                throw std::runtime_error("source313 graph/model layer blend differs");
+            const auto& expected=graph->states[graph->layers[layer].states[n]];const Json* found=nullptr;
+            for(const auto& state:states)if(state.at("name")==expected.name&&layerOf(state)==layer)
+            {if(found)throw std::runtime_error("source313 duplicate graph state");found=&state;}
+            if(!found||found->at("clip").is_null()!=expected.nullMotion||
+               std::abs(found->at("speed").get<float>()-expected.speed)>1e-6f||
+               found->at("speedParameterActive").get<bool>()!=(expected.speedParameter!=0)||
+               (expected.speedParameter&&found->at("speedParameter")!=(expected.speedParameter==1?"Speed":"jumpSpeed")))
+                throw std::runtime_error("source313 graph/model state differs");
+            if(!expected.nullMotion&&(std::abs(package.at("clips").at(found->at("clip").get<std::string>()).at("duration").get<float>()-expected.duration)>1e-5f||
+               package.at("clips").at(found->at("clip").get<std::string>()).at("loop").get<bool>()!=expected.loop))
+                throw std::runtime_error("source313 graph/model clip duration differs");
+            float x=0,y=0;auto options=model->options;
+            if(layer)options.extraStates.push_back({expected.name,0,layer});
+            const auto& base=graph->states[graph->layers[0].defaultState];
+            if(!model->animation.TryGetNodeOffset("",x,y,layer?base.name:expected.name,0,nullptr,-1,1,&options))
+                throw std::runtime_error("source313 graph/model pose cannot sample");
+        }
+    }
+    else if(!FusionWaterZombie313Kind(kind))throw std::runtime_error("source313 absent controller");
+    else for(uint8_t phase=0;phase<=uint8_t(FusionWaterZombie313Phase::DrownDeath);++phase)
+    {
+        FusionWaterZombie313Clip expected;if(!TryGetFusionWaterZombie313Clip(kind,FusionWaterZombie313Phase(phase),expected))continue;
+        const Json* found=nullptr;for(const auto& state:states)if(state.at("name")==expected.state&&layerOf(state)==0)
+        {if(found)throw std::runtime_error("source313 ambiguous water state");found=&state;}
+        if(!found||found->at("clip").is_null()||std::abs(found->at("speed").get<float>()-expected.multiplier)>1e-6f||
+           found->at("speedParameterActive").get<bool>()!=expected.speedParameter||
+           (expected.speedParameter&&found->at("speedParameter")!="Speed"))throw std::runtime_error("source313 water state differs");
+        const auto& clip=package.at("clips").at(found->at("clip").get<std::string>());
+        if(std::abs(clip.at("duration").get<float>()-expected.seconds)>1e-5f||clip.at("loop").get<bool>()!=expected.loop)
+            throw std::runtime_error("source313 water clip differs");
+    }
+    return model;
+}
+
 std::unique_ptr<ZombieModel> LoadModel(Board* board,uint16_t kind,const std::filesystem::path& path)
 {
     auto* app=board->mApp;
@@ -166,8 +393,9 @@ std::unique_ptr<ZombieModel> LoadModel(Board* board,uint16_t kind,const std::fil
     if (package.at("schema").get<int>() != 1 || !package.at("ignoredBindings").empty() ||
         !package.at("omittedInactiveNodes").empty())
         throw std::runtime_error("incomplete source Zombie hierarchy/animation bindings");
-    const bool day=DayPrefab273(kind)!=nullptr;
-    const char* expectedPrefab=day?DayPrefab273(kind):BatchPrefab282(kind);
+    if(CohortPrefab316(kind))return LoadCohort316(board,kind,path,package);
+    const bool day=DayPrefab273(kind)!=nullptr,jackbox=FusionJackbox300Kind(kind);
+    const char* expectedPrefab=day?DayPrefab273(kind):jackbox?JackboxPrefab300(kind):BatchPrefab282(kind);
     if(expectedPrefab&&package.at("sourcePrefab").get<std::string>()!=expectedPrefab)
         throw std::runtime_error("source Zombie prefab identity differs");
     if(kind==111||kind==109)
@@ -208,6 +436,8 @@ std::unique_ptr<ZombieModel> LoadModel(Board* board,uint16_t kind,const std::fil
             throw std::runtime_error("source111 incomplete particle proof");
     }
     auto model = std::make_unique<ZombieModel>();
+    for(const auto& box:package.at("colliders"))if(box.at("type")=="box"&&box.at("node")==0)
+    {if(model->rootBox313)throw std::runtime_error("ambiguous root source collider");model->rootBox313=box.at("fileId").get<int64_t>();}
     if(day)
     {
         if(FusionDayZombie273Doll(kind)&&(!package.contains("sourceAnimators")||package.at("sourceAnimators").size()!=2))
@@ -241,18 +471,37 @@ std::unique_ptr<ZombieModel> LoadModel(Board* board,uint16_t kind,const std::fil
     }
     const bool money=kind==41||kind==42,vehicle=kind==14||kind==18,helmet=kind==2||kind==4||kind==9||kind==12||kind==13;
     if (shadowPath.empty() || !foundShadow || (!money&&!vehicle&&(model->headPaths.empty() ||
-        model->handPaths.empty() || (kind!=109&&kind!=9&&model->upperArmPaths.empty()))) || (helmet && model->conePath.empty())||
+        (!jackbox&&model->handPaths.empty()) || (kind!=109&&kind!=9&&model->upperArmPaths.empty()))) || (helmet && model->conePath.empty())||
         (kind==8&&(model->shieldPath.empty()||model->shieldHandPaths.size()!=3)))
         throw std::runtime_error("missing source Zombie appearance tags/Shadow/Cone");
+    if(jackbox)
+    {
+        // Jackbox.ChangeArmSpirte3686C0 replaces sprite58 on the actual lower
+        // arm tag; this family has NO ZombieHand and changes NO Transform scale.
+        if(model->headPaths!=std::vector<std::string>{"Zombie_jackbox_jaw","Zombie_jackbox_head"}||
+           !model->handPaths.empty()||model->upperArmPaths!=std::vector<std::string>{"Zombie_jackbox_outerarm_lower"})
+            throw std::runtime_error("Jackbox source part tags differ");
+        for(const char* node:{"Zombie_jackbox_box","Zombie_jackbox_handle","LoseHead","LoseArm"})
+            if(std::count_if(package.at("nodes").begin(),package.at("nodes").end(),[&](const Json& n){return n.at("path")==node;})!=1)
+                throw std::runtime_error("missing/ambiguous Jackbox source node");
+        if(kind==30)
+        {
+            model->conePath="Zombie_jackbox_head/SuperJackbox_cone";
+            for(const auto& node:{model->conePath,std::string("LoseCone")})
+                if(std::count_if(package.at("nodes").begin(),package.at("nodes").end(),[&](const Json& n){return n.at("path")==node;})!=1)
+                    throw std::runtime_error("missing/ambiguous SuperJackbox armor node");
+        }
+    }
     // The real native shadow remains in Board's separate shadow render pass.
     model->options.hiddenNodePaths.push_back(shadowPath);
     // Football.ChangeArmSpirte is a no-op and has no ZombieArmUpper tag.
-    if(!money&&kind!=9)model->damagedArm = ExtraSprite(package,FusionDayZombie273Pole(kind)?
+    if(!money&&kind!=9)model->damagedArm = ExtraSprite(package,jackbox?
+        "Resources/zombies/jackbox/Zombie_jackbox_outerarm_lower2.asset":FusionDayZombie273Pole(kind)?
         "Resources/zombies/zombie_polevaulter/Zombie_polevaulter_outerarm_upper2.asset":
         kind==5?"Resources/zombies/paperzombie/paper_bone.asset":
         kind==10?"Resources/zombies/zombie_jackson/Zombie_Jackson_outerarm_upper2.asset":
         "Resources/zombies/image/reanim/Zombie_outerarm_upper2.asset");
-    if(FusionDayZombie273Doll(kind)||kind==106||kind==107)
+    if(FusionDayZombie273Doll(kind)||FusionDayZombie273NutArmor(kind))
     {
         if(model->dayArmorPath.empty())throw std::runtime_error("missing exact Day Zombie first-armor node");
         int armorSprites=0;
@@ -265,10 +514,16 @@ std::unique_ptr<ZombieModel> LoadModel(Board* board,uint16_t kind,const std::fil
         case 21:first="Resources/zombies/zombie/DiamondDoll2.asset";second="Resources/zombies/zombie/DiamondDoll3.asset";break;
         case 22:first="Resources/zombies/zombie/GoldDoll2.asset";second="Resources/zombies/zombie/GoldDoll3.asset";break;
         case 23:first="Resources/zombies/zombie/SilverDoll2.asset";second="Resources/zombies/zombie/SilverDoll3.asset";break;
+        case 103:first="Resources/plants/WallNut/crackedA.asset";second="Resources/plants/WallNut/crackedB.asset";break;
         case 106:first="Resources/zombies/plantzombie/ironNut2.asset";second="Resources/zombies/plantzombie/ironNut3.asset";break;
         case 107:first="Resources/plants/_mixer/cherrynut/crack1.asset";second="Resources/plants/_mixer/cherrynut/crack2.asset";break;
         }
         model->damagedCone[0]=ExtraSprite(package,first);model->damagedCone[1]=ExtraSprite(package,second);
+    }
+    if(kind==30)
+    {
+        model->damagedCone[0]=ExtraSprite(package,"Resources/zombies/jackbox/superjackboxzombie/SuperJackbox_cone2.asset");
+        model->damagedCone[1]=ExtraSprite(package,"Resources/zombies/jackbox/superjackboxzombie/SuperJackbox_cone3.asset");
     }
     if (kind == 2||kind==12)
     {
@@ -298,7 +553,7 @@ std::unique_ptr<ZombieModel> LoadModel(Board* board,uint16_t kind,const std::fil
     }
     std::string error;
     std::vector<int64_t> particleComponents;
-    if(FindSpecialZombie269Profile(kind)||day||BatchPrefab282(kind))
+    if(FindSpecialZombie269Profile(kind)||day||BatchPrefab282(kind)||jackbox)
     {
         for(const auto& component:package.at("nonRenderingComponents"))
             if(component.at("typeId")==198||component.at("typeId")==199)particleComponents.push_back(component.at("fileId").get<int64_t>());
@@ -320,6 +575,22 @@ std::unique_ptr<ZombieModel> LoadModel(Board* board,uint16_t kind,const std::fil
             FusionDayZombie273Doll(kind)?std::vector<const char*>{"idle","walk","walk2","attack","attack2","die"}:
             std::vector<const char*>{"idle","walk","attack","die"};
         if(FusionDayZombie273Shooter(kind))required.push_back("shoot");
+    }
+    if(jackbox)required={"idle","walk","eat","pop","death"};
+    if(jackbox)
+    {
+        for(const auto phase:{FusionJackbox300Phase::Walk,FusionJackbox300Phase::Eat,FusionJackbox300Phase::Pop,FusionJackbox300Phase::Death})
+        {
+            FusionJackbox300Clip expected;if(!TryGetFusionJackbox300Clip(phase,expected))throw std::runtime_error("missing Jackbox source clip contract");
+            const Json* found=nullptr;
+            for(const auto& state:package.at("controller").at("states"))if(state.at("name")==expected.state)
+            {if(found)throw std::runtime_error("ambiguous Jackbox source state");found=&state;}
+            if(!found||found->at("clip")!=expected.state||!found->at("speedParameterActive").get<bool>()||
+               found->at("speedParameter")!="Speed"||!std::isfinite(found->at("speed").get<float>())||
+               std::abs(found->at("speed").get<float>()-expected.multiplier)>1e-6f||
+               std::abs(package.at("clips").at(expected.state).at("duration").get<float>()-expected.seconds)>1e-6f)
+                throw std::runtime_error("Jackbox source clip/speed differs");
+        }
     }
     if(kind==10)required={"idle","walk","point","walk1","armraise","eatfromwalk","eatfromraise","death"};
     if(kind==10)
@@ -380,6 +651,22 @@ std::unique_ptr<ZombieModel> LoadModel(Board* board,uint16_t kind,const std::fil
                     !std::isfinite(x)||!std::isfinite(y)||
                     !model->animation.TryGetNodeActivity(nodePath.c_str(),active,state.c_str(),phase*duration,nullptr,-1,1,&options))
                     throw std::runtime_error("source Zombie original node/state probe failed: "+state+"/"+nodePath);
+            }
+    }
+    if(jackbox)
+    {
+        // All three source phase transitions are fixed .25s. Validate the same
+        // WD1/common sampler used by Draw, Node and synchronous part callbacks.
+        for(const char* from:{"walk","eat","pop","death"})for(const char* to:{"walk","eat","pop","death"})
+            for(float weight:{0.f,.5f,1.f})for(const auto& node:package.at("nodes"))
+            {
+                const auto path=node.at("path").get<std::string>();float x=0,y=0;bool active=false;
+                auto options=model->options;
+                options.baseBlend=FusionAnimationDrawOptions::BaseBlend{from,.125f,weight};
+                if(!model->animation.TryGetNodeOffset(path.c_str(),x,y,to,.125f,nullptr,-1,1,&options)||
+                   !std::isfinite(x)||!std::isfinite(y)||
+                   !model->animation.TryGetNodeActivity(path.c_str(),active,to,.125f,nullptr,-1,1,&options))
+                    throw std::runtime_error("Jackbox source blended node probe failed");
             }
     }
     if(kind==10)
@@ -501,9 +788,56 @@ bool JacksonPose292(const Zombie* zombie,const ZombieModel& model,FusionAnimatio
     return true;
 }
 
+const NativeJackbox300State* JackboxState300(const Zombie* zombie)
+{
+    const auto* context=GetNativeContext(zombie?zombie->mBoard:nullptr);
+    const auto* data=GetNativeSourceZombieData(zombie);
+    if(!context||!data||!FusionJackbox300Kind(data->kind))return nullptr;
+    const uint32_t uid=zombie->mBoard->mZombies.DataArrayGetID(const_cast<Zombie*>(zombie));
+    const auto found=context->jackboxZombies300.find(uid);
+    // Ghost lookup is keyed by the local full generation. The adopted source
+    // instanceToken is opaque; it is never compared with or replaced by uid.
+    return uid&&found!=context->jackboxZombies300.end()?&found->second:nullptr;
+}
+
+bool JackboxPose300(const Zombie* zombie,const ZombieModel& model,FusionAnimationDrawOptions& options)
+{
+    const auto* data=GetNativeSourceZombieData(zombie);if(!data||!FusionJackbox300Kind(data->kind))return true;
+    const auto* controller=JackboxState300(zombie);if(!controller)return false;
+    const char* outgoing=nullptr;float elapsed=0,weight=1;
+    if(!GetNativeJackbox300Blend(zombie,*controller,outgoing,elapsed,weight))return false;
+    if(outgoing)options.baseBlend=FusionAnimationDrawOptions::BaseBlend{outgoing,elapsed,weight};
+    else options.baseBlend.reset();
+    if(!controller->boxPresent)
+    {
+        options.nodeActivityOverrides.push_back({"Zombie_jackbox_box",false});
+        options.nodeActivityOverrides.push_back({"Zombie_jackbox_handle",false});
+    }
+    // These describe source subtrees only; reliable host semantic callbacks
+    // own detached PS birth. Neither Draw nor a baseline sample emits a PS.
+    options.nodeActivityOverrides.push_back({"LoseHead",!zombie->mHasHead});
+    options.nodeActivityOverrides.push_back({"LoseArm",!zombie->mHasArm});
+    if(!zombie->mHasHead)options.hiddenNodePaths.insert(options.hiddenNodePaths.end(),model.headPaths.begin(),model.headPaths.end());
+    if(!zombie->mHasArm)for(const auto& path:model.upperArmPaths)ReplaceSprite(options,path,model.damagedArm);
+    if(data->kind==30)
+    {
+        if(data->firstArmorStage>2)return false;
+        const bool lost=zombie->mHelmType==HELMTYPE_NONE||zombie->mHelmHealth<=0;
+        options.nodeActivityOverrides.push_back({"LoseCone",lost});
+        if(lost)options.hiddenNodePaths.push_back(model.conePath);
+        else if(data->firstArmorStage)ReplaceSprite(options,model.conePath,model.damagedCone[data->firstArmorStage-1]);
+    }
+    return true;
+}
+
 bool SourcePose273(const Zombie* zombie,const char*& state,float& phase)
 {
     const auto* data=GetNativeSourceZombieData(zombie);
+    if(data&&FusionJackbox300Kind(data->kind))
+    {
+        const auto* controller=JackboxState300(zombie);
+        return controller&&GetNativeJackbox300Presentation(zombie,*controller,state,phase);
+    }
     if(data&&DayPrefab273(data->kind)&&!FusionDayZombie273Doll(data->kind))
         return GetNativeDayZombie273Presentation(zombie,state,phase);
     return GetNativeSourceZombiePresentation(zombie,state,phase);
@@ -517,6 +851,11 @@ bool SourceBodyPose276(const Zombie* zombie,const char*& state,float& phase)
     {
         const auto* controller=JacksonState292(zombie);
         return controller&&GetNativeJackson281Presentation(zombie,*controller,state,phase);
+    }
+    if(FusionJackbox300Kind(data->kind))
+    {
+        const auto* controller=JackboxState300(zombie);
+        return controller&&GetNativeJackbox300Presentation(zombie,*controller,state,phase);
     }
     if(!IsNativeDayZombie273(zombie)&&!SpecialZombie269PaperKind(data->kind)&&data->kind!=9)return false;
     auto* body=zombie->mApp->ReanimationTryToGet(zombie->mBodyReanimID);
@@ -589,12 +928,601 @@ bool DayPose273(const Zombie* zombie,const ZombieModel& model,FusionAnimationDra
         if(zombie->mHelmHealth<=0)options.hiddenNodePaths.push_back(model.dayArmorPath);
         else if(day->armorStage)ReplaceSprite(options,model.dayArmorPath,model.damagedCone[day->armorStage-1]);
     }
-    else if((data->kind==106||data->kind==107)&&day->armorStage)
+    else if(FusionDayZombie273NutArmor(data->kind)&&day->armorStage)
         // WallNutZ clears the FirstArmor reference but retains its last head
         // sprite; helm depletion must not remove the actual Zombie_head node.
         ReplaceSprite(options,model.dayArmorPath,model.damagedCone[day->armorStage-1]);
     return true;
 }
+void ExtendedMutations316(uint16_t kind,const FusionExtendedZombie313View& state,FusionAnimationDrawOptions& options)
+{
+    switch(kind)
+    {
+    case 35:
+        if(state.bodyStage==1)
+        {
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_body1/Zombie_gargantuar_body1_2",true});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_body1/Zombie_gargantuar_body1_3",false});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_outerarm_lower/Zombie_gargantuar_outerarm_lower2",true});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_outerleg_foot/Zombie_gargantuar_foot2",true});
+            options.spriteEnabledOverrides.push_back({"Zombie_gargantuar_body1",false});
+            options.spriteEnabledOverrides.push_back({"Zombie_gargantuar_outerarm_lower",false});
+            options.spriteEnabledOverrides.push_back({"Zombie_gargantuar_outerleg_foot",false});
+        }
+        if(state.bodyStage==2)
+        {
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_body1/Zombie_gargantuar_body1_2",false});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_body1/Zombie_gargantuar_body1_3",true});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_head/Zombie_gargantuar_head2",true});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_outerarm_lower/Zombie_gargantuar_outerarm_lower2",true});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_outerleg_foot/Zombie_gargantuar_foot2",true});
+            options.spriteEnabledOverrides.push_back({"Zombie_gargantuar_body1",false});
+            options.spriteEnabledOverrides.push_back({"Zombie_gargantuar_head",false});
+            options.spriteEnabledOverrides.push_back({"Zombie_gargantuar_outerarm_lower",false});
+            options.spriteEnabledOverrides.push_back({"Zombie_gargantuar_outerleg_foot",false});
+        }
+        if(state.weapon==0)
+        {
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_telephonepole/Zombie_gargantuar_zombie",true});
+            options.spriteEnabledOverrides.push_back({"Zombie_gargantuar_telephonepole",false});
+        }
+        if(state.weapon==1)
+        {
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_telephonepole/Zombie_gargantuar_duckxing",true});
+            options.spriteEnabledOverrides.push_back({"Zombie_gargantuar_telephonepole",false});
+        }
+        if(state.carriedImpRemoved)
+        {
+            options.nodeActivityOverrides.push_back({"Zombie_imp_outerarm_lower",false});
+            options.nodeActivityOverrides.push_back({"Zombie_imp_outerarm_upper",false});
+            options.nodeActivityOverrides.push_back({"Zombie_imp_innerarm_lower",false});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_whiterope",false});
+            options.nodeActivityOverrides.push_back({"Zombie_imp_jaw",false});
+            options.nodeActivityOverrides.push_back({"Zombie_imp_head",false});
+            options.nodeActivityOverrides.push_back({"Zombie_imp_body1",false});
+            options.nodeActivityOverrides.push_back({"Zombie_imp_body2",false});
+            options.nodeActivityOverrides.push_back({"Zombie_imp_outerleg_upper",false});
+            options.nodeActivityOverrides.push_back({"Zombie_imp_outerleg_lower",false});
+            options.nodeActivityOverrides.push_back({"Zombie_imp_outerleg_foot",false});
+            options.nodeActivityOverrides.push_back({"Zombie_imp_innerleg_upper",false});
+            options.nodeActivityOverrides.push_back({"Zombie_imp_innerleg_lower",false});
+            options.nodeActivityOverrides.push_back({"Zombie_imp_innerleg_foot",false});
+            options.nodeActivityOverrides.push_back({"Zombie_imp_innerarm_upper",false});
+        }
+        break;
+    case 36:
+        if(state.bodyStage==1)
+        {
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_body1/Zombie_gargantuar_body1_2",true});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_body1/Zombie_gargantuar_body1_3",false});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_outerarm_lower/Zombie_gargantuar_outerarm_lower2",true});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_outerleg_foot/Zombie_gargantuar_foot2",true});
+            options.spriteEnabledOverrides.push_back({"Zombie_gargantuar_body1",false});
+            options.spriteEnabledOverrides.push_back({"Zombie_gargantuar_outerarm_lower",false});
+            options.spriteEnabledOverrides.push_back({"Zombie_gargantuar_outerleg_foot",false});
+        }
+        if(state.bodyStage==2)
+        {
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_body1/Zombie_gargantuar_body1_2",false});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_body1/Zombie_gargantuar_body1_3",true});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_head/Zombie_gargantuar_head2",true});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_outerarm_lower/Zombie_gargantuar_outerarm_lower2",true});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_outerleg_foot/Zombie_gargantuar_foot2",true});
+            options.spriteEnabledOverrides.push_back({"Zombie_gargantuar_body1",false});
+            options.spriteEnabledOverrides.push_back({"Zombie_gargantuar_head",false});
+            options.spriteEnabledOverrides.push_back({"Zombie_gargantuar_outerarm_lower",false});
+            options.spriteEnabledOverrides.push_back({"Zombie_gargantuar_outerleg_foot",false});
+        }
+        if(state.weapon==0)
+        {
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_telephonepole/Zombie_gargantuar_zombie",true});
+            options.spriteEnabledOverrides.push_back({"Zombie_gargantuar_telephonepole",false});
+        }
+        if(state.weapon==1)
+        {
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_telephonepole/Zombie_gargantuar_duckxing",true});
+            options.spriteEnabledOverrides.push_back({"Zombie_gargantuar_telephonepole",false});
+        }
+        if(state.carriedImpRemoved)
+        {
+            options.nodeActivityOverrides.push_back({"Zombie_imp_outerarm_lower",false});
+            options.nodeActivityOverrides.push_back({"Zombie_imp_outerarm_upper",false});
+            options.nodeActivityOverrides.push_back({"Zombie_imp_innerarm_lower",false});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_whiterope",false});
+            options.nodeActivityOverrides.push_back({"Zombie_imp_jaw",false});
+            options.nodeActivityOverrides.push_back({"Zombie_imp_head",false});
+            options.nodeActivityOverrides.push_back({"Zombie_imp_body1",false});
+            options.nodeActivityOverrides.push_back({"Zombie_imp_body2",false});
+            options.nodeActivityOverrides.push_back({"Zombie_imp_outerleg_upper",false});
+            options.nodeActivityOverrides.push_back({"Zombie_imp_outerleg_lower",false});
+            options.nodeActivityOverrides.push_back({"Zombie_imp_outerleg_foot",false});
+            options.nodeActivityOverrides.push_back({"Zombie_imp_innerleg_upper",false});
+            options.nodeActivityOverrides.push_back({"Zombie_imp_innerleg_lower",false});
+            options.nodeActivityOverrides.push_back({"Zombie_imp_innerleg_foot",false});
+            options.nodeActivityOverrides.push_back({"Zombie_imp_innerarm_upper",false});
+        }
+        break;
+    case 38:
+        if(state.bodyStage>=1||state.uniqueType==0)
+        {
+            options.spriteEnabledOverrides.push_back({"Zombie_robotgargantuar_head(2)",false});
+            options.spriteEnabledOverrides.push_back({"Zombie_robotgargantuar_body1",false});
+            options.spriteEnabledOverrides.push_back({"Zombie_robotgargantuar_outerarm_lower",false});
+            options.spriteEnabledOverrides.push_back({"Zombie_robotgargantuar_foot-1",false});
+            options.spriteEnabledOverrides.push_back({"Zombie_robotgargantuar_head(2)/head_damage",true});
+            options.spriteEnabledOverrides.push_back({"Zombie_robotgargantuar_body1/body_damage",true});
+            options.spriteEnabledOverrides.push_back({"Zombie_robotgargantuar_outerarm_lower/arm_damage",true});
+            options.spriteEnabledOverrides.push_back({"Zombie_robotgargantuar_foot-1/footdamage",true});
+        }
+        break;
+    case 39:
+        if(state.bodyStage>=1||state.uniqueType==0)
+        {
+            options.spriteEnabledOverrides.push_back({"Zombie_robotgargantuar_head(2)",false});
+            options.spriteEnabledOverrides.push_back({"Zombie_robotgargantuar_body1",false});
+            options.spriteEnabledOverrides.push_back({"Zombie_robotgargantuar_outerarm_lower",false});
+            options.spriteEnabledOverrides.push_back({"Zombie_robotgargantuar_foot-1",false});
+            options.spriteEnabledOverrides.push_back({"Zombie_robotgargantuar_head(2)/head_damage",true});
+            options.spriteEnabledOverrides.push_back({"Zombie_robotgargantuar_body1/body_damage",true});
+            options.spriteEnabledOverrides.push_back({"Zombie_robotgargantuar_outerarm_lower/arm_damage",true});
+            options.spriteEnabledOverrides.push_back({"Zombie_robotgargantuar_foot-1/footshadow",true});
+        }
+        break;
+    case 43:
+        if(state.bodyStage==1)
+        {
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_body1/Zombie_gargantuar_body1_2",true});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_body1/Zombie_gargantuar_body1_3",false});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_outerarm_lower/Zombie_gargantuar_outerarm_lower_1",true});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_outerarm_lower/Zombie_gargantuar_outerarm_lower_2",false});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_outerleg_foot/Zombie_gargantuar_foot2",true});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_outerarm_upper/Zombie_gargantuar_outerarm_upper_1",false});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_outerarm_upper/Zombie_gargantuar_outerarm_upper_2",true});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_outerarm_upper/Zombie_gargantuar_outerarm_upper_3",false});
+            options.spriteEnabledOverrides.push_back({"Zombie_gargantuar_body1",false});
+            options.spriteEnabledOverrides.push_back({"Zombie_gargantuar_outerarm_lower",false});
+            options.spriteEnabledOverrides.push_back({"Zombie_gargantuar_outerleg_foot",false});
+        }
+        if(state.bodyStage==2)
+        {
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_body1/Zombie_gargantuar_body1_2",false});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_body1/Zombie_gargantuar_body1_3",true});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_head/Zombie_gargantuar_head2",true});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_outerarm_lower/Zombie_gargantuar_outerarm_lower_1",false});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_outerarm_lower/Zombie_gargantuar_outerarm_lower_2",true});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_outerleg_foot/Zombie_gargantuar_foot2",true});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_outerarm_upper/Zombie_gargantuar_outerarm_upper_1",false});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_outerarm_upper/Zombie_gargantuar_outerarm_upper_2",false});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_outerarm_upper/Zombie_gargantuar_outerarm_upper_3",true});
+            options.spriteEnabledOverrides.push_back({"Zombie_gargantuar_body1",false});
+            options.spriteEnabledOverrides.push_back({"Zombie_gargantuar_head",false});
+            options.spriteEnabledOverrides.push_back({"Zombie_gargantuar_outerarm_lower",false});
+            options.spriteEnabledOverrides.push_back({"Zombie_gargantuar_outerleg_foot",false});
+        }
+        if(state.ballRemoved)
+        {
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_body1/SuperGargantuar_ball1",false});
+        }
+        break;
+    case 37:
+        break;
+    case 40:
+        if(state.bodyStage==1)
+        {
+            options.nodeActivityOverrides.push_back({"yuan1",false});
+            options.nodeActivityOverrides.push_back({"yuan2",true});
+            options.nodeActivityOverrides.push_back({"yuan3",false});
+        }
+        if(state.bodyStage==2)
+        {
+            options.nodeActivityOverrides.push_back({"yuan1",false});
+            options.nodeActivityOverrides.push_back({"yuan2",false});
+            options.nodeActivityOverrides.push_back({"yuan3",true});
+        }
+        if(state.machineType==1)
+        {
+            options.nodeActivityOverrides.push_back({"yuan1/yuan1_2",true});
+            options.nodeActivityOverrides.push_back({"yuan2/yuan2_2",true});
+            options.nodeActivityOverrides.push_back({"yuan3/yuan3_2",true});
+            options.spriteEnabledOverrides.push_back({"yuan1",false});
+            options.spriteEnabledOverrides.push_back({"yuan2",false});
+            options.spriteEnabledOverrides.push_back({"yuan3",false});
+        }
+        if(state.machineType==2)
+        {
+            options.nodeActivityOverrides.push_back({"yuan1/yuan1_1",true});
+            options.nodeActivityOverrides.push_back({"yuan2/yuan2_1",true});
+            options.nodeActivityOverrides.push_back({"yuan3/yuan3_1",true});
+            options.spriteEnabledOverrides.push_back({"yuan1",false});
+            options.spriteEnabledOverrides.push_back({"yuan2",false});
+            options.spriteEnabledOverrides.push_back({"yuan3",false});
+        }
+        break;
+    case 212:
+        if(state.bodyStage==1)
+        {
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_body1/Zombie_gargantuar_body1_2",true});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_body1/Zombie_gargantuar_body1_3",false});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_outerarm_lower/Zombie_gargantuar_outerarm_lower_1",true});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_outerarm_lower/Zombie_gargantuar_outerarm_lower_2",false});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_outerleg_foot/Zombie_gargantuar_foot2",true});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_outerarm_upper/Zombie_gargantuar_outerarm_upper_1",false});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_outerarm_upper/Zombie_gargantuar_outerarm_upper_2",true});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_outerarm_upper/Zombie_gargantuar_outerarm_upper_3",false});
+            options.spriteEnabledOverrides.push_back({"Zombie_gargantuar_body1",false});
+            options.spriteEnabledOverrides.push_back({"Zombie_gargantuar_outerarm_lower",false});
+            options.spriteEnabledOverrides.push_back({"Zombie_gargantuar_outerleg_foot",false});
+        }
+        if(state.bodyStage==2)
+        {
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_body1/Zombie_gargantuar_body1_2",false});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_body1/Zombie_gargantuar_body1_3",true});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_head/Zombie_gargantuar_head2",true});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_outerarm_lower/Zombie_gargantuar_outerarm_lower_1",false});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_outerarm_lower/Zombie_gargantuar_outerarm_lower_2",true});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_outerleg_foot/Zombie_gargantuar_foot2",true});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_outerarm_upper/Zombie_gargantuar_outerarm_upper_1",false});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_outerarm_upper/Zombie_gargantuar_outerarm_upper_2",false});
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_outerarm_upper/Zombie_gargantuar_outerarm_upper_3",true});
+            options.spriteEnabledOverrides.push_back({"Zombie_gargantuar_body1",false});
+            options.spriteEnabledOverrides.push_back({"Zombie_gargantuar_head",false});
+            options.spriteEnabledOverrides.push_back({"Zombie_gargantuar_outerarm_lower",false});
+            options.spriteEnabledOverrides.push_back({"Zombie_gargantuar_outerleg_foot",false});
+        }
+        if(state.ballRemoved)
+        {
+            options.nodeActivityOverrides.push_back({"Zombie_gargantuar_body1/SuperGargantuar_ball1",false});
+        }
+        break;
+    case 213:
+        break;
+    case 25:
+        break;
+    case 29:
+        break;
+    case 26:
+        if(state.bodyStage==1)
+        {
+            options.nodeActivityOverrides.push_back({"11",false});
+            options.nodeActivityOverrides.push_back({"21",true});
+            options.nodeActivityOverrides.push_back({"31",false});
+        }
+        if(state.bodyStage==2)
+        {
+            options.nodeActivityOverrides.push_back({"11",false});
+            options.nodeActivityOverrides.push_back({"21",false});
+            options.nodeActivityOverrides.push_back({"31",true});
+        }
+        break;
+    }
+}
+
+
+struct Pose316
+{
+    FusionAnimationDrawOptions options;const char* state=nullptr;float seconds=0;
+    float rootX=0,rootY=0,pixels=0;bool visible=true,collider=true;
+};
+template<class Map>const typename Map::mapped_type* State316(const Zombie* z,const Map& map)
+{
+    const uint32_t uid=z->mBoard->mZombies.DataArrayGetID(const_cast<Zombie*>(z));
+    const auto it=map.find(uid);return uid&&it!=map.end()?&it->second:nullptr;
+}
+Reanimation* GraphClock316(Zombie* z,uint8_t layer)
+{
+    const auto* graph=GetNativeSourceGraph313(z);if(!graph||layer>2)return nullptr;
+    return z->mApp->ReanimationTryToGet(layer?ReanimationID(graph->auxiliaryUIDs[layer-1]):z->mBodyReanimID);
+}
+bool GraphPose316(const Zombie* z,Pose316& out)
+{
+    const auto* data=GetNativeSourceZombieData(z);const auto* graph=GetNativeSourceGraph313(z);
+    const auto* source=data?FindFusionSourceGraph313(data->kind):nullptr;
+    if(!source||!graph||!graph->initialized||graph->failed)return false;
+    NativeSourceGraph313Hooks hooks;hooks.clock=GraphClock316;
+    for(uint8_t layer=0;layer<source->layerCount;++layer)
+    {
+        const auto& view=graph->layers[layer];const char* incoming=nullptr,*outgoing=nullptr;float seconds=0,oldSeconds=0,weight=1;
+        if(!GetNativeSourceGraph313Presentation(const_cast<Zombie*>(z),*graph,layer,hooks,incoming,seconds,outgoing,oldSeconds,weight))return false;
+        // Source non-loop motions hold their last sample even while their
+        // real native callback clock exceeds the clip end. Legacy one-shot
+        // action overlays keep their existing Apply() expiry semantics.
+        const auto clampSample=[&](uint8_t index,float value)
+        {
+            const auto& state=source->states[index];
+            return !state.nullMotion&&!state.loop?(std::min)(value,state.duration/state.speed):value;
+        };
+        seconds=clampSample(view.state,seconds);
+        if(view.fadeDuration)oldSeconds=clampSample(view.outgoing,oldSeconds);
+        // A null-motion state retains the real baseline. Its genuine state
+        // name selects the sampler's no-op; no substitute clip or clock.
+        if(!incoming)incoming=source->states[view.state].name;
+        if(view.fadeDuration&&!outgoing)outgoing=source->states[view.outgoing].name;
+        if(!layer)
+        {out.state=incoming;out.seconds=seconds;if(outgoing)out.options.baseBlend=FusionAnimationDrawOptions::BaseBlend{outgoing,oldSeconds,weight};}
+        else
+        {
+            FusionAnimationDrawOptions::ExtraState extra{incoming,seconds,layer};
+            if(outgoing)extra.baseBlend=FusionAnimationDrawOptions::BaseBlend{outgoing,oldSeconds,weight};
+            out.options.extraStates.push_back(std::move(extra));
+        }
+    }
+    return out.state!=nullptr;
+}
+bool Extra316(const ZombieModel& model,FusionAnimationDrawOptions& options,const std::string& node,const char* asset,float scale=0)
+{
+    const auto found=model.extras316.find(asset);if(found==model.extras316.end()||node.empty())return false;
+    ReplaceSprite(options,node,found->second);
+    if(scale){auto& r=options.spriteReplacements.back();r.overrideScale=true;r.scaleX=r.scaleY=r.scaleZ=scale;}
+    return true;
+}
+bool BrokenChildren316(const ZombieModel& model,FusionAnimationDrawOptions& options,const std::string& parent,int stage)
+{
+    if(!stage)return true;
+    const auto children=model.children316.find(parent);
+    if(stage<1||stage>2||children==model.children316.end()||children->second.size()<2)return false;
+    options.spriteEnabledOverrides.push_back({parent,false});
+    options.nodeActivityOverrides.push_back({children->second[0],stage==1});
+    options.nodeActivityOverrides.push_back({children->second[1],stage==2});return true;
+}
+bool NewPose316(const Zombie* z,const ZombieModel& model,Pose316& out)
+{
+    const auto* data=GetNativeSourceZombieData(z);const auto* context=GetNativeContext(z?z->mBoard:nullptr);
+    if(!data||!context||!CohortPrefab316(data->kind)||!std::isfinite(z->mScaleZombie)||z->mScaleZombie<=0||z->mScaleZombie>8)return false;
+    Pose316 pose;pose.options=model.options;pose.pixels=kPixelsPerSourceUnit*z->mScaleZombie;
+    float sx=0,sy=0;if(!NativeSourceGroundAnchor313(z,sx,sy)||!std::isfinite(sx)||!std::isfinite(sy)||!std::isfinite(z->mAltitude))return false;
+    const auto kind=data->kind;
+    if(FusionWaterZombie313Kind(kind))
+    {
+        const auto* state=State316(z,context->waterZombies313);const char* incoming=nullptr,*outgoing=nullptr;float phase=0,time=0,weight=1;
+        if(!state||!GetNativeWaterZombie313Presentation(z,*state,incoming,phase)||!GetNativeWaterZombie313Blend(z,*state,outgoing,time,weight))return false;
+        const auto duration=model.durations.find(incoming);if(duration==model.durations.end())return false;
+        pose.state=incoming;pose.seconds=phase*duration->second;pose.options.rootFlipX=state->facingRight;pose.collider=state->colliderEnabled;
+        if(outgoing)pose.options.baseBlend=FusionAnimationDrawOptions::BaseBlend{outgoing,time,weight};
+        if(kind!=20)
+        {
+            const char* aux=nullptr;float seconds=0,w=0;int layer=-1;
+            if(!GetNativeWaterZombie313Auxiliary(z,*state,aux,seconds,w,layer))return false;
+            pose.options.extraStates.push_back({aux,seconds,layer,w});
+        }
+        if(kind==16)
+        {
+            pose.options.nodeActivityOverrides.push_back({"Zombie_zamboni_2/SmokePos",state->driverStage==2});
+            if(state->driverStage>=1&&!Extra316(model,pose.options,"Zombie_zamboni_1","Resources/zombies/zombie_driver/Zombie_zamboni_1_damage1.asset"))return false;
+            if(state->driverStage>=2)
+            {
+                pose.options.spriteReplacements.clear();
+                if(!Extra316(model,pose.options,"Zombie_zamboni_1","Resources/zombies/zombie_driver/Zombie_zamboni_1_damage2.asset")||
+                   !Extra316(model,pose.options,"Zombie_zamboni_2","Resources/zombies/zombie_driver/Zombie_zamboni_2_damage2.asset"))return false;
+            }
+        }
+        else
+        {
+            if(!z->mHasHead)pose.options.hiddenNodePaths.insert(pose.options.hiddenNodePaths.end(),model.headPaths.begin(),model.headPaths.end());
+            const bool arm=!z->mHasArm&&(!(kind==19||kind==27)||(state->sourceStatus!=8&&state->sourceStatus!=9));
+            if(arm)
+            {
+                pose.options.hiddenNodePaths.insert(pose.options.hiddenNodePaths.end(),model.handPaths.begin(),model.handPaths.end());
+                const char* asset=kind==17?"Resources/zombies/zombie_snorkle/Zombie_snorkle_outerarm_upper2.asset":kind==19?
+                    "Resources/zombies/zombie_dolphinrider/Zombie_dolphinrider_outerarm_upper2.asset":kind==20?
+                    "Resources/zombies/zombie_drown/losearm.asset":"Resources/zombies/zombie_dolphinrider/snowdolphinrider/arm.asset";
+                for(const auto& node:model.upperArmPaths)if(!Extra316(model,pose.options,node,asset,kind==20?1.5f:kind==27?1.f:0.f))return false;
+            }
+        }
+    }
+    else
+    {
+        if(!GraphPose316(z,pose))return false;
+        if(const auto* state=State316(z,context->extendedZombies313))
+        {
+            pose.options.rootFlipX=state->rootFlip;pose.visible=state->visible;
+            ExtendedMutations316(kind,*state,pose.options);
+            if(kind==37)
+            {
+                // The genuine one-source-frame yield then enables every
+                // renderer except the retained bone child. No new clock.
+                for(const auto& node:model.spriteNodes316)
+                    pose.options.spriteEnabledOverrides.push_back({node,node!="Zombie_imp_outerarm_upper/bone"});
+                if(!z->mHasHead)pose.options.hiddenNodePaths.insert(pose.options.hiddenNodePaths.end(),model.headPaths.begin(),model.headPaths.end());
+                if(!z->mHasArm)
+                {
+                    pose.options.hiddenNodePaths.insert(pose.options.hiddenNodePaths.end(),model.handPaths.begin(),model.handPaths.end());
+                    for(const auto& node:model.upperArmPaths)
+                    {
+                        pose.options.spriteEnabledOverrides.push_back({node,false});
+                        const auto child=model.child316.find(node);if(child==model.child316.end())return false;
+                        pose.options.spriteEnabledOverrides.push_back({child->second,true});
+                    }
+                }
+            }
+            else if(kind==25||kind==29||kind==213)
+            {
+                if(!z->mHasHead)pose.options.hiddenNodePaths.insert(pose.options.hiddenNodePaths.end(),model.headPaths.begin(),model.headPaths.end());
+                if(!z->mHasArm)
+                {
+                    pose.options.hiddenNodePaths.insert(pose.options.hiddenNodePaths.end(),model.handPaths.begin(),model.handPaths.end());
+                    for(const auto& node:model.upperArmPaths)
+                        if(!Extra316(model,pose.options,node,kind==213?"Resources/zombies/image/reanim/Zombie_outerarm_upper2.asset":
+                            "Resources/zombies/balloonzombie/upperarm2.asset",kind==213?4.f:0.f))return false;
+                }
+            }
+            if(kind==29&&state->firstArmorStage&&!Extra316(model,pose.options,model.conePath,state->firstArmorStage==1?
+                "Resources/zombies/plantzombie/ironNut2.asset":"Resources/zombies/plantzombie/ironNut3.asset"))return false;
+            if((kind==43||kind==212)&&state->firstArmorStage)
+            {
+                // Actual first-armor reference is loaded below from the
+                // genuine prefab, independently of the custom body damage.
+                if(!model.conePath.empty()&&!Extra316(model,pose.options,model.conePath,state->firstArmorStage==1?
+                    "Resources/zombies/jackbox/superjackboxzombie/SuperJackbox_cone2.asset":
+                    "Resources/zombies/jackbox/superjackboxzombie/SuperJackbox_cone3.asset"))return false;
+            }
+            // Base FirstArmorTakeDamage384BA0 destroys the actual helmet.
+            // IronBalloon29 overrides it and retains the last sprite instead.
+            if((kind==43||kind==212)&&(z->mHelmType==HELMTYPE_NONE||z->mHelmHealth<=0))
+                pose.options.hiddenNodePaths.push_back(model.conePath);
+        }
+        else if(const auto* heavy=State316(z,context->heavyZombies313B))
+        {
+            // Same source-facing predicate as the heavy gameplay bridge.
+            pose.options.rootFlipX=z->mMindControlled!=heavy->lookBack;
+            if(kind==28&&!heavy->axePresent)pose.options.hiddenNodePaths.push_back("Zombie_digger_pickaxe");
+            if(kind==32&&(heavy->lostJumper||heavy->status==0))for(const char* node:{"Zombie_pogo_stick2","Zombie_pogo_stick3"})pose.options.hiddenNodePaths.push_back(node);
+            if(kind==33&&!heavy->ladderVisible)pose.options.hiddenNodePaths.push_back("Zombie_ladder_1");
+            if(kind==31)
+            {
+                // Source3515B0 permanently switches its damaged renderers.
+                // The canonical latch survives a later legitimate heal.
+                if(heavy->armorStage)for(size_t index:{size_t(1),size_t(2)})
+                {
+                    if(model.rootChildren.size()<=index)return false;
+                    const auto& parent=model.rootChildren[index];const auto child=model.child316.find(parent);
+                    if(child==model.child316.end())return false;
+                    pose.options.spriteEnabledOverrides.push_back({parent,false});
+                    pose.options.spriteEnabledOverrides.push_back({child->second,true});
+                }
+            }
+            else
+            {
+                if(!z->mHasHead)pose.options.hiddenNodePaths.insert(pose.options.hiddenNodePaths.end(),model.headPaths.begin(),model.headPaths.end());
+                if(!z->mHasArm)
+                {
+                    pose.options.hiddenNodePaths.insert(pose.options.hiddenNodePaths.end(),model.handPaths.begin(),model.handPaths.end());
+                    if(kind==32||kind==34)
+                    {
+                        for(const auto& parent:model.upperArmPaths)
+                        {
+                            const auto child=model.child316.find(parent);if(child==model.child316.end())return false;
+                            const auto sprite=model.sprite316.find(child->second);if(sprite==model.sprite316.end())return false;
+                            ReplaceSprite(pose.options,parent,sprite->second);
+                        }
+                        if(model.rootChildren.empty())return false;
+                        const auto& parent=model.rootChildren.front();const auto child=model.child316.find(parent);
+                        if(child==model.child316.end())return false;
+                        pose.options.spriteEnabledOverrides.push_back({parent,false});
+                        pose.options.spriteEnabledOverrides.push_back({child->second,true});
+                    }
+                    else if(kind==33||kind==223)
+                        for(const auto& parent:model.upperArmPaths)
+                        {
+                            const auto child=model.child316.find(parent);if(child==model.child316.end())return false;
+                            pose.options.spriteEnabledOverrides.push_back({parent,false});
+                            pose.options.nodeActivityOverrides.push_back({child->second,true});
+                        }
+                    else if(kind==28||kind==203)
+                        for(const auto& parent:model.upperArmPaths)
+                            if(!Extra316(model,pose.options,parent,kind==28?
+                                "Resources/zombies/zombie_digger/Zombie_digger_outerarm_upper2.asset":
+                                "Resources/zombies/paperzombie/paper_bone1.asset"))return false;
+                    // Bungi.ChangeArm30F780 is genuinely empty. Its upper-arm
+                    // renderer must not receive an invented base replacement.
+                }
+            }
+            if(kind==34&&!BrokenChildren316(model,pose.options,"Zombie_pogo_head",heavy->armorStage))return false;
+            if(kind==33)
+            {
+                if(heavy->ladderVisible&&!BrokenChildren316(model,pose.options,"Zombie_ladder_1",heavy->armorStage))return false;
+            }
+            if(kind==223)
+            {
+                if(z->mHelmType==HELMTYPE_NONE||z->mHelmHealth<=0)pose.options.hiddenNodePaths.push_back("Head/GatlingPea_helmet");
+                else if(heavy->gold.firstStage)
+                    // Genuine UltimatePaper first-armor uses child0 for BOTH lower-third
+                    // branches. Preserve that source oddity, not filename order.
+                    if(!BrokenChildren316(model,pose.options,"Head/GatlingPea_helmet",1))return false;
+                if(z->mShieldType==SHIELDTYPE_NONE||z->mShieldHealth<=0)pose.options.hiddenNodePaths.push_back("book1");
+                else if(!BrokenChildren316(model,pose.options,"book1",heavy->gold.secondStage))return false;
+            }
+            if(kind==203)
+            {
+                if(z->mShieldHealth<=0||z->mShieldType==SHIELDTYPE_NONE)pose.options.hiddenNodePaths.push_back("Zombie_paper_paper1");
+                else if(heavy->gold.secondStage&&!Extra316(model,pose.options,"Zombie_paper_paper1",heavy->gold.secondStage==1?
+                    "Resources/Zombies/PlantZombie/Paper/CherryPaper1.asset":"Resources/Zombies/PlantZombie/Paper/CherryPaper2.asset"))return false;
+            }
+            if(kind==45)
+            {
+                const auto cord=model.sprite316.find("BungeeCord");if(cord==model.sprite316.end())return false;
+                ReplaceSprite(pose.options,"BungeeCord",cord->second);
+                auto& replacement=pose.options.spriteReplacements.back();replacement.overrideScale=true;
+                replacement.scaleX=heavy->bungee.cordScaleX;replacement.scaleY=heavy->bungee.cordScaleY;replacement.scaleZ=heavy->bungee.cordScaleZ;
+                pose.options.spriteEnabledOverrides.push_back({"BungeeCord",true});
+                pose.options.nodeActivityOverrides.push_back({"BungeeTarget",heavy->bungee.markerVisible});
+                pose.collider=heavy->bungee.status!=24;
+            }
+            // Native ground clipping is the explicitly approved Digger
+            // presentation adaptation for unavailable built-in sprite10905.
+            if(kind==28)
+            {
+                bool mask=false;
+                if(!model.animation.TryGetNodeActivity("Mask",mask,pose.state,pose.seconds,nullptr,-1,1,&pose.options))return false;
+                if(mask)pose.options.nativeMaskClipBottom=sy-z->mY;
+            }
+        }
+        else return false;
+    }
+    const bool baseParts=kind==17||kind==19||kind==20||kind==27||kind==25||kind==29||kind==37||kind==213||
+        kind==28||kind==32||kind==33||kind==34||kind==45||kind==203||kind==223;
+    if(baseParts)
+    {
+        if(model.nodePaths316.contains("LoseHead"))pose.options.nodeActivityOverrides.push_back({"LoseHead",!z->mHasHead});
+        if(model.nodePaths316.contains("LoseArm"))pose.options.nodeActivityOverrides.push_back({"LoseArm",!z->mHasArm});
+    }
+    if(kind==203&&model.nodePaths316.contains("LosePaper"))pose.options.nodeActivityOverrides.push_back({"LosePaper",z->mShieldHealth<=0});
+    const int alpha=z->mZombieFade<0?255:int((std::clamp)(255LL*z->mZombieFade/10,0LL,255LL));
+    if(z->mMindControlled)pose.options.colorMultiplierRGBA={128,64,192,alpha};
+    else if(z->mChilledCounter>0||z->mIceTrapCounter>0)pose.options.colorMultiplierRGBA={75,75,255,alpha};
+    else pose.options.colorMultiplierRGBA={255,255,255,alpha};
+    pose.rootX=sx-(pose.options.rootFlipX?-model.shadowX:model.shadowX)*pose.pixels;
+    pose.rootY=sy+model.shadowY*pose.pixels-z->mAltitude;
+    if(kind==37)pose.options.nodeWorldPositions.push_back({"RealShadow",(sx-pose.rootX)/pose.pixels,(pose.rootY-sy)/pose.pixels});
+    if(kind==45)
+    {
+        const auto* state=State316(z,context->heavyZombies313B);float px=0,py=0;
+        if(!state||!NativeSourcePointToBoard313(z->mBoard,state->bungee.targetRow,sy,state->bungee.targetX,state->bungee.markerY,px,py))return false;
+        pose.options.nodeWorldPositions.push_back({"BungeeTarget",(px-pose.rootX)/pose.pixels,(pose.rootY-py)/pose.pixels});
+    }
+    out=std::move(pose);return true;
+}
+
+
+bool SharedPose316(const Zombie* z,const ZombieModel& model,Pose316& out,bool allowFactoryRest=false)
+{
+    const auto* data=GetNativeSourceZombieData(z);if(!data)return false;
+    if(allowFactoryRest&&!z->mNetGhost&&!z->mApp->NetIsClient()&&IsNativeSourceZombieInitializing313(z))
+    {
+        const auto* graph=GetNativeSourceGraph313(z);
+        if(!graph||!graph->initialized)
+        {
+            float sx=0,sy=0;if(!NativeSourceGroundAnchor313(z,sx,sy))return false;
+            Pose316 rest;rest.options=model.options;rest.options.restPoseOnly=true;rest.options.rootFlipX=z->mMindControlled;
+            rest.pixels=kPixelsPerSourceUnit*z->mScaleZombie;
+            if(!std::isfinite(rest.pixels)||rest.pixels<=0||!std::isfinite(z->mAltitude))return false;
+            rest.rootX=sx-(rest.options.rootFlipX?-model.shadowX:model.shadowX)*rest.pixels;
+            rest.rootY=sy+model.shadowY*rest.pixels-z->mAltitude;
+            out=std::move(rest);return true;
+        }
+    }
+    if(CohortPrefab316(data->kind))return NewPose316(z,model,out);
+    if(!FusionJackbox300Kind(data->kind)&&data->kind!=101&&data->kind!=102&&data->kind!=103)return false;
+    const char* name=nullptr;float phase=0,sx=0,sy=0;
+    if(!SourcePose273(z,name,phase)||!name||!const_cast<Zombie*>(z)->GetShadowCenter(sx,sy))return false;
+    name=PresentationState(model,name);if(!name)return false;
+    const auto duration=model.durations.find(name);if(duration==model.durations.end())return false;
+    Pose316 pose;pose.state=name;pose.seconds=phase*duration->second;pose.options=model.options;
+    SpecialPose(z,model,pose.options);if(!DayPose273(z,model,pose.options))return false;
+    pose.options.rootFlipX=const_cast<Zombie*>(z)->IsWalkingBackwards();
+    if(!JackboxPose300(z,model,pose.options))return false;
+    const int alpha=z->mZombieFade<0?255:int((std::clamp)(255LL*z->mZombieFade/10,0LL,255LL));
+    if(z->mMindControlled)pose.options.colorMultiplierRGBA={128,64,192,alpha};
+    else if(z->mChilledCounter>0||z->mIceTrapCounter>0)pose.options.colorMultiplierRGBA={75,75,255,alpha};
+    else pose.options.colorMultiplierRGBA={255,255,255,alpha};
+    pose.pixels=kPixelsPerSourceUnit*z->mScaleZombie;
+    pose.rootX=sx-(pose.options.rootFlipX?-model.shadowX:model.shadowX)*pose.pixels;
+    pose.rootY=sy+model.shadowY*pose.pixels;
+    if(!std::isfinite(pose.rootX)||!std::isfinite(pose.rootY)||!std::isfinite(pose.pixels)||pose.pixels<=0)return false;
+    out=std::move(pose);return true;
+}
+bool SharedKind316(uint16_t kind)
+{return CohortPrefab316(kind)||FusionJackbox300Kind(kind)||kind==101||kind==102||kind==103;}
+
 }
 
 struct NativeZombieVisuals::Impl
@@ -654,12 +1582,20 @@ void NativeZombieVisuals::ReleaseUnused(Board* board)
 bool NativeZombieVisuals::Draw(Sexy::Graphics* graphics,Zombie* zombie) const
 {
     const auto* data = GetNativeSourceZombieData(zombie);
+    const bool cohort=data&&SharedKind316(data->kind);
+    const bool canonical=data&&(cohort||data->kind==10||FusionJackbox300Kind(data->kind));
     // The native mower locator overlays the real body; it has no own artwork.
-    if(data&&data->kind==10&&zombie->mZombiePhase==PHASE_ZOMBIE_MOWERED)return false;
+    if(canonical&&zombie->mZombiePhase==PHASE_ZOMBIE_MOWERED)return false;
     if (!graphics || !data || zombie->mApp != mImpl->app ||
-        int(zombie->mZombieType)!=GetNativeSourceZombieCarrier(data->kind)) return data&&data->kind==10;
+        int(zombie->mZombieType)!=GetNativeSourceZombieCarrier(data->kind)) return canonical;
     const auto found = mImpl->models.find(data->kind);
-    if (found == mImpl->models.end()) return data->kind==10;
+    if (found == mImpl->models.end()) return canonical;
+    if(cohort)
+    {
+        Pose316 pose;if(!SharedPose316(zombie,*found->second,pose)||!pose.visible)return true;
+        found->second->animation.DrawPose(graphics,pose.rootX-zombie->mX,pose.rootY-zombie->mY,pose.pixels/100,
+            pose.state,pose.seconds,nullptr,-1,1,&pose.options);return true;
+    }
     if((data->kind==111||data->kind==109)&&(!zombie->mHasArm||!zombie->mHasHead))
     {
         if(zombie->mZombieAge%100==0)LawnNet::NetTrace("Fusion source nutZombie visual bounded refusal id=%u kind=%u arm=%d head=%d reason=activeLoseArmParticleNotCompiled",zombie->mNetId,data->kind,zombie->mHasArm?1:0,zombie->mHasHead?1:0);
@@ -673,29 +1609,29 @@ bool NativeZombieVisuals::Draw(Sexy::Graphics* graphics,Zombie* zombie) const
         (zombie->mZombiePhase != PHASE_ZOMBIE_NORMAL && zombie->mZombiePhase != PHASE_ZOMBIE_DYING&&
          !FindSpecialZombie269Profile(data->kind)) ||
         !std::isfinite(zombie->mScaleZombie) ||
-        zombie->mScaleZombie <= 0 || zombie->mScaleZombie > 8) return data->kind==10;
+        zombie->mScaleZombie <= 0 || zombie->mScaleZombie > 8) return canonical;
     ZombieDrawPosition nativePosition;
     zombie->GetDrawPos(nativePosition);
     // Source swim clips hide the legs and animate the actual duck/whitewater.
     // Applying the native body clip a second time would crop this source pose.
-    if (!swimming&&nativePosition.mClipHeight > CLIP_HEIGHT_LIMIT) return data->kind==10;
+    if (!swimming&&nativePosition.mClipHeight > CLIP_HEIGHT_LIMIT) return canonical;
     const char* state = nullptr;
     float phase = 0, groundX = 0, groundY = 0;
     if (!SourcePose273(zombie,state,phase) || !state)
-        return DayPrefab273(data->kind)!=nullptr||BatchPrefab282(data->kind)!=nullptr;
-    if(!zombie->GetShadowCenter(groundX,groundY))return data->kind==10;
+        return DayPrefab273(data->kind)!=nullptr||BatchPrefab282(data->kind)!=nullptr||FusionJackbox300Kind(data->kind);
+    if(!zombie->GetShadowCenter(groundX,groundY))return canonical;
     if(data->kind==8&&zombie->mShieldHealth<=0&&!zombie->IsDeadOrDying())
         state=zombie->mIsEating?"attack_":data->originSpeed>kFusionZombieWalk2Threshold?"walk1_":"walk_";
     const auto& model = *found->second;
     state=PresentationState(model,state);if(!state)return true;
     const auto duration = model.durations.find(state);
-    if (duration == model.durations.end()) return data->kind==10;
+    if (duration == model.durations.end()) return canonical;
     FusionAnimationDrawOptions options = model.options;
     SpecialPose(zombie,model,options);
     if(!DayPose273(zombie,model,options))return true; // Unadmitted Day state never renders a native carrier alias.
-    if (!DayPrefab273(data->kind)&&data->kind!=10&&!zombie->mHasHead)
+    if (!DayPrefab273(data->kind)&&data->kind!=10&&!FusionJackbox300Kind(data->kind)&&!zombie->mHasHead)
         options.hiddenNodePaths.insert(options.hiddenNodePaths.end(),model.headPaths.begin(),model.headPaths.end());
-    if (!DayPrefab273(data->kind)&&data->kind!=10&&!zombie->mHasArm)
+    if (!DayPrefab273(data->kind)&&data->kind!=10&&!FusionJackbox300Kind(data->kind)&&!zombie->mHasArm)
     {
         options.hiddenNodePaths.insert(options.hiddenNodePaths.end(),model.handPaths.begin(),model.handPaths.end());
         for (const auto& path : model.upperArmPaths) ReplaceSprite(options,path,model.damagedArm);
@@ -741,7 +1677,7 @@ bool NativeZombieVisuals::Draw(Sexy::Graphics* graphics,Zombie* zombie) const
         options.colorMultiplierRGBA = {75,75,255,alpha};
     else options.colorMultiplierRGBA = {255,255,255,alpha};
     options.rootFlipX = zombie->IsWalkingBackwards();
-    if(!JacksonPose292(zombie,model,options))return true;
+    if(!JacksonPose292(zombie,model,options)||!JackboxPose300(zombie,model,options))return true;
     const float pixels = kPixelsPerSourceUnit*zombie->mScaleZombie;
     const float shadowX = options.rootFlipX ? -model.shadowX : model.shadowX;
     // BeginDraw already supplied entity/camera translation; source root scale is
@@ -757,14 +1693,23 @@ bool NativeZombieVisuals::Node(const Zombie* zombie,const char* path,float& x,fl
     const auto* data=GetNativeSourceZombieData(zombie);
     if(!data||!path||zombie->mApp!=mImpl->app||!std::isfinite(zombie->mScaleZombie)||zombie->mScaleZombie<=0)return false;
     const auto found=mImpl->models.find(data->kind);if(found==mImpl->models.end())return false;
-    const auto& model=*found->second;const char* state=nullptr;float phase=0,sx=0,sy=0;
+    const auto& model=*found->second;
+    if(SharedKind316(data->kind))
+    {
+        Pose316 pose;if(!SharedPose316(zombie,model,pose,true))return false;float nx=0,ny=0;bool enabled=false;
+        if(!model.animation.TryGetNodeOffset(path,nx,ny,pose.state,pose.seconds,nullptr,-1,1,&pose.options)||
+           (active&&!model.animation.TryGetNodeActivity(path,enabled,pose.state,pose.seconds,nullptr,-1,1,&pose.options)))return false;
+        const float px=pose.rootX+nx*pose.pixels,py=pose.rootY-ny*pose.pixels;
+        if(!std::isfinite(px)||!std::isfinite(py))return false;x=px;y=py;if(active)*active=enabled;return true;
+    }
+    const char* state=nullptr;float phase=0,sx=0,sy=0;
     if(!(actualBodyPose?SourceBodyPose276(zombie,state,phase):SourcePose273(zombie,state,phase))||!state||
        !const_cast<Zombie*>(zombie)->GetShadowCenter(sx,sy))return false;
     state=PresentationState(model,state);if(!state)return false;
     const auto duration=model.durations.find(state);if(duration==model.durations.end())return false;
     auto options=model.options;SpecialPose(zombie,model,options);if(!DayPose273(zombie,model,options))return false;
     options.rootFlipX=const_cast<Zombie*>(zombie)->IsWalkingBackwards();
-    if(!JacksonPose292(zombie,model,options))return false;
+    if(!JacksonPose292(zombie,model,options)||!JackboxPose300(zombie,model,options))return false;
     float nx=0,ny=0;
     if(!model.animation.TryGetNodeOffset(path,nx,ny,state,phase*duration->second,nullptr,-1,1,&options))return false;
     if(active&&!model.animation.TryGetNodeActivity(path,*active,state,phase*duration->second,nullptr,-1,1,&options))return false;
@@ -772,6 +1717,28 @@ bool NativeZombieVisuals::Node(const Zombie* zombie,const char* path,float& x,fl
     x=sx-(options.rootFlipX?-model.shadowX:model.shadowX)*pixels+nx*pixels;
     y=sy+model.shadowY*pixels-ny*pixels;
     return std::isfinite(x)&&std::isfinite(y);
+}
+
+bool NativeZombieVisuals::Box313(const Zombie* zombie,FusionAnimationBoxCollider303& result) const
+{
+    const auto* data=GetNativeSourceZombieData(zombie);if(!data||!SharedKind316(data->kind)||zombie->mApp!=mImpl->app)return false;
+    const auto found=mImpl->models.find(data->kind);if(found==mImpl->models.end()||!found->second->rootBox313)return false;
+    const auto& model=*found->second;Pose316 pose;if(!SharedPose316(zombie,model,pose,true))return false;
+    FusionAnimationBoxCollider303 pending;
+    if(!model.animation.TryGetBoxCollider303(model.rootBox313,pending,pose.state,pose.seconds,nullptr,-1,1,&pose.options))return false;
+    pending.enabled=pending.enabled&&pose.collider;result=pending;return true;
+}
+bool NativeZombieVisuals::Matrix313(const Zombie* zombie,const char* path,std::array<float,6>& result) const
+{
+    const auto* data=GetNativeSourceZombieData(zombie);if(!data||!path||!SharedKind316(data->kind)||zombie->mApp!=mImpl->app)return false;
+    const auto found=mImpl->models.find(data->kind);if(found==mImpl->models.end())return false;
+    const auto& model=*found->second;Pose316 pose;if(!SharedPose316(zombie,model,pose,true))return false;
+    std::array<float,6> value;
+    if(!model.animation.TryGetNodeTransform(path,value,pose.state,pose.seconds,nullptr,-1,1,&pose.options))return false;
+    const std::array<float,6> pending{pose.pixels*value[0],-pose.pixels*value[1],pose.pixels*value[2],-pose.pixels*value[3],
+        pose.rootX+pose.pixels*value[4],pose.rootY-pose.pixels*value[5]};
+    if(!std::all_of(pending.begin(),pending.end(),[](float f){return std::isfinite(f);}))return false;
+    result=pending;return true;
 }
 
 bool NativeZombieVisuals::CanQueryRoot(uint16_t kind) const
@@ -785,7 +1752,7 @@ bool NativeZombieVisuals::CanQueryRoot(uint16_t kind) const
     for(const auto& [state,duration]:model.durations)
     {
         float x=0,y=0;
-        if(!std::isfinite(duration)||duration<=0||!model.animation.TryGetNodeOffset("",x,y,state.c_str(),0,nullptr,-1,1,&model.options)||
+        if(!std::isfinite(duration)||duration<0||!model.animation.TryGetNodeOffset("",x,y,state.c_str(),0,nullptr,-1,1,&model.options)||
             !std::isfinite(x)||!std::isfinite(y))return false;
     }
     return true;
@@ -832,7 +1799,7 @@ bool DrawNativeSourceZombie(Sexy::Graphics* graphics,Zombie* zombie)
 {
     auto* context = GetNativeContext(zombie ? zombie->mBoard : nullptr);
     const auto* data=GetNativeSourceZombieData(zombie);
-    if(data&&data->kind==10&&(!context||!context->zombieVisuals))return true;
+    if(data&&(CohortPrefab316(data->kind)||data->kind==10||FusionJackbox300Kind(data->kind))&&(!context||!context->zombieVisuals))return true;
     return context && context->zombieVisuals && context->zombieVisuals->Draw(graphics,zombie);
 }
 bool GetNativeSourceZombie269NodePoint(const Zombie* zombie,const char* path,float& x,float& y)
@@ -850,4 +1817,15 @@ bool GetNativeSourceZombieLimbBirthPoint276(const Zombie* zombie,const char* pat
     auto* context=GetNativeContext(zombie?zombie->mBoard:nullptr);
     return context&&context->zombieVisuals&&context->zombieVisuals->Node(zombie,path,x,y,nullptr,true);
 }
+bool GetNativeSourceZombieBox313(const Zombie* zombie,FusionAnimationBoxCollider303& result)
+{
+    const auto* context=GetNativeContext(zombie?zombie->mBoard:nullptr);
+    return context&&context->zombieVisuals&&context->zombieVisuals->Box313(zombie,result);
+}
+bool GetNativeSourceZombieMatrix313(const Zombie* zombie,const char* path,std::array<float,6>& result)
+{
+    const auto* context=GetNativeContext(zombie?zombie->mBoard:nullptr);
+    return context&&context->zombieVisuals&&context->zombieVisuals->Matrix313(zombie,path,result);
+}
+
 }
