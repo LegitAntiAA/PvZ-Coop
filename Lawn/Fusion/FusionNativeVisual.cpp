@@ -544,6 +544,14 @@ bool NativePlantArtwork(uint16_t kind)
 {
     switch (kind) { case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 10: case 18: return true; default: return false; }
 }
+struct NativePlantRestAnchor289 {uint16_t kind;float shadowX,shadowY;};
+// Source-loader-verified runtime prefabs, exact serialized ROOT -> Shadow
+// rest TRS, composed with the same root-position normalizer as animation.json
+// anchors.shadow. Native artwork deliberately has no source sprite model.
+constexpr NativePlantRestAnchor289 nativePlantRestAnchors289[]={
+    {0,0.f,.184f},{1,.0768900132f,.198f},{2,-.033f,.1089f},
+    {3,.006f,.105f},{4,.025f,.2625f},{5,-.08f,.16f},
+    {6,.0045f,.0885f},{7,-.069f,.171f},{10,.018f,.15f},{18,-.0108f,.1512f}};
 bool NativeProjectileArtwork(uint16_t kind)
 {
     switch (kind) { case 0: case 8: case 9: case 52: case 59: case 60: return true; default: return false; }
@@ -2068,6 +2076,21 @@ bool NativeVisuals::GetPlantNodeTransform(const Plant* source,const char* path,s
 
 bool NativeVisuals::GetPlantNodePoint(const Plant* plant,const char* path,float& x,float& y) const
 {
+    if(!mImpl||!plant||!path)return false;
+    if(!path[0])if(const auto* data=GetNativePlantData(plant);data&&NativePlantArtwork(data->kind))
+    {
+        if(plant->mSeedType!=GetNativeSeedForPlant(data->kind))return false;
+        const NativePlantRestAnchor289* found=nullptr;
+        for(const auto& anchor:nativePlantRestAnchors289)if(anchor.kind==data->kind){found=&anchor;break;}
+        if(!found)return false;
+        float gx=0,gy=0;if(!const_cast<Plant*>(plant)->GetShadowCenter(gx,gy))return false;
+        // Source ROOT is0,0 after placement; shadow rest is relative to that
+        // root. This is the current model projection with sourceTransform=0.
+        const float px=gx+plant->mShakeOffsetX-found->shadowX*kNativePixelsPerWorldUnit;
+        const float py=gy+plant->mShakeOffsetY+found->shadowY*kNativePixelsPerWorldUnit;
+        if(!std::isfinite(px)||!std::isfinite(py))return false;
+        x=px;y=py;return true;
+    }
     std::array<float,6> transform;
     if(!GetPlantNodeTransform(plant,path,transform))return false;
     x=transform[4];y=transform[5];return true;

@@ -5,6 +5,7 @@
 #include "../Board.h"
 #include "../Plant.h"
 #include "../Zombie.h"
+#include "../Projectile.h"
 #include "../Coin.h"
 #include "../CursorObject.h"
 #include "../Cutscene.h"
@@ -20,9 +21,18 @@
 #include "../Fusion/FusionNativeEquipment.h"
 #include "../Fusion/FusionNativeZombies.h"
 #include "../Fusion/FusionRecipe.h"
+#include "../Fusion/FusionNativeRemainingLeaves269.h"
+#include "../Fusion/FusionNativeTools268.h"
+#include "../Fusion/FusionNativeVisual.h"
+#include "../Fusion/FusionNativeZombieVisual.h"
+#include "../Fusion/FusionNativeCold.h"
 #include "../../Sexy.TodLib/Reanimator.h"
+#include "../../Sexy.TodLib/EffectSystem.h"
+#include "../../Sexy.TodLib/TodParticle.h"
 #include "../../SexyAppFramework/ScrollbarWidget.h"
 #include "../../SexyAppFramework/DDInterface.h"
+#include "../../SexyAppFramework/Image.h"
+#include "../../SexyAppFramework/WidgetManager.h"
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -49,14 +59,23 @@ struct State
     std::string checkpoint;std::set<std::string> frames;std::map<std::string,int> draws;
 }s;
 bool Enabled(const char* key){const auto* v=std::getenv(key);return v&&std::strcmp(v,"1")==0;}
+bool Lesson1315(){return Enabled("PVZ_COOP_SMOKE_FUSION_LESSON1315_288");}
+struct NightLesson288
+{
+    Ref nut,tall,chomper;std::array<Ref,2> items{};std::array<Ref,6> plants{};std::array<Ref,3> enemies{};
+    std::array<bool,2> held{},used{};
+    std::array<int,9> messageAt={-1,-1,-1,-1,-1,-1,-1,-1,-1};
+    bool hpPreference=false,fxSeen=false,coldSeen=false,shotSeen=false,cohort=false,countdownSeen=false;
+    float countdown=0;uint32_t effectUID=0;
+}night;
 int Slot(LawnApp* a){return a->mNetManager->GetMySlot();}
 const char* Role(LawnApp* a){return a->NetIsHost()?"host":"client";}
 uint32_t Samples(LawnApp* a){return a->NetIsHost()?a->mCoopSmokeSnapshotsSent:a->mCoopSmokeSnapshotsApplied;}
 bool Require(LawnApp* a,bool valid,const char* why){if(!valid)a->CoopSmokeFail(why);return valid;}
-FusionAdventureProfile273 Profile(int level){return {level==7?uint64_t(63):uint64_t(127),1,uint16_t(level)};}
+FusionAdventureProfile273 Profile(int level){return {(uint64_t{1}<<(level-1))-1,1,uint16_t(level)};}
 bool Same(const FusionAdventureProfile273& x,const FusionAdventureProfile273& y)
 {return x.completedLevels==y.completedLevels&&x.cycle==y.cycle&&x.frontierLevel==y.frontierLevel;}
-std::string Tag(const std::string& label){return "L78278_"+std::to_string(s.epoch)+"_"+label;}
+std::string Tag(const std::string& label){return std::string(Lesson1315()?"L1315_288_":"L78278_")+std::to_string(s.epoch)+"_"+label;}
 bool Has(LawnApp* a,int slot,const std::string& value)
 {for(const auto& line:a->mNetManager->mChatLines)if(line.mSlot==slot&&line.mText==value)return true;return false;}
 bool Send(LawnApp* a,const std::string& value)
@@ -70,7 +89,7 @@ bool Barrier(LawnApp* a,const std::string& label)
 {const auto tag=Tag(label);Send(a,tag);return Has(a,0,tag)&&Has(a,1,tag);}
 std::string Identity(const Ref& r){return std::to_string(r.id)+"_"+std::to_string(r.token);}
 void Advance(LawnApp* a,int stage)
-{s.stage=stage;s.input=0;s.since=GetTickCount();NetTrace("SMOKE_LESSON78_278_STAGE role=%s level=%d stage=%d epoch=%u",Role(a),s.level,stage,s.epoch);}
+{s.stage=stage;s.input=0;s.since=GetTickCount();NetTrace(Lesson1315()?"SMOKE_LESSON1315_288_STAGE role=%s level=%d stage=%d epoch=%u":"SMOKE_LESSON78_278_STAGE role=%s level=%d stage=%d epoch=%u",Role(a),s.level,stage,s.epoch);}
 bool Click(LawnApp* a,float x,float y,bool click=true)
 {
     SDL_Event m{};m.type=SDL_EVENT_MOUSE_MOTION;m.motion.windowID=SDL_GetWindowID(a->mSDLWindow);m.motion.x=x;m.motion.y=y;
@@ -91,11 +110,11 @@ bool Escape(LawnApp* a)
 }
 bool Capture(LawnApp* a,const char* suffix)
 {
-    const auto name="fusion_lesson78_278_"+std::to_string(s.level)+"_"+suffix;if(s.frames.contains(name))return true;
+    const auto name=std::string(Lesson1315()?"fusion_lesson1315_288_":"fusion_lesson78_278_")+std::to_string(s.level)+"_"+suffix;if(s.frames.contains(name))return true;
     if(!s.draws.contains(name))s.draws[name]=a->mDrawCount;
     const int draw=s.draws[name]+2;if(!a->CoopSmokeEnsureFreshFrameAfterDraw(draw))return false;
     if(!Require(a,a->CoopSmokeCaptureFrame(name.c_str()),"Lesson78 fresh native BMP failed"))return false;
-    s.frames.insert(name);NetTrace("SMOKE_LESSON78_278_RENDER role=%s frame=%s requestedDraw=%d capturedDraw=%d",Role(a),name.c_str(),draw,a->mCoopSmokeFrameDrawCount);return true;
+    s.frames.insert(name);NetTrace(Lesson1315()?"SMOKE_LESSON1315_288_RENDER role=%s frame=%s requestedDraw=%d capturedDraw=%d":"SMOKE_LESSON78_278_RENDER role=%s frame=%s requestedDraw=%d capturedDraw=%d",Role(a),name.c_str(),draw,a->mCoopSmokeFrameDrawCount);return true;
 }
 Plant* PlantBy(Board* b,const Ref& ref)
 {
@@ -133,6 +152,19 @@ bool FreshPlant(LawnApp* a,Plant* p,uint16_t kind,int owner,uint16_t packet,bool
 bool World(LawnApp* a)
 {
     auto* b=a->mBoard;const auto* c=GetNativeContext(b);if(!c||!c->adventure.enabled)return false;const auto& v=c->adventure;
+    if(Lesson1315())
+    {
+        int waves=0;
+        if(!Require(a,TryGetFusionSourceAdventureWaves272(s.level,1,waves)&&IsNativeSourceAdventure273(b)&&!c->validation&&!a->mFusionRuntime&&
+            v.run.level==s.level&&v.run.cycle==1&&v.sourceDifficulty==2&&!v.run.replay&&!v.run.over&&!v.schedulerFailed&&v.wave==0&&v.maximumWaves==waves&&
+            Same(v.profile,Profile(s.level))&&Same(a->mNetManager->mConfig.mFusionSourceProfile,a->NetIsHost()?Profile(s.level):s.localProfile)&&
+            b->mBackground==BACKGROUND_2_NIGHT&&b->GetColumnCount()==10&&GetNativeFusionRowCount(b)==5&&b->mGridItems.mSize==0&&
+            c->money==3000&&b->mSunMoney==150&&a->mShowHealthBar==night.hpPreference&&
+            a->mPlayerInfo&&a->mPlayerInfo->mLevel==s.classicLevel&&a->mPlayerInfo->mFinishedAdventure==s.classicFinished,
+            "Lesson1315 source Night world/profile/economy/HP preference differs"))return false;
+        if(!s.epoch)s.epoch=c->epoch;
+        return Require(a,c->epoch==s.epoch&&c->epoch!=s.previousEpoch,"Lesson1315 fresh source epoch differs");
+    }
     if(!Require(a,IsNativeSourceAdventure273(b)&&!c->validation&&!a->mFusionRuntime&&v.run.level==s.level&&v.run.cycle==1&&
         v.sourceDifficulty==2&&!v.run.replay&&!v.run.over&&!v.schedulerFailed&&v.wave==0&&v.maximumWaves==30&&
         Same(v.profile,Profile(s.level))&&Same(a->mNetManager->mConfig.mFusionSourceProfile,a->NetIsHost()?Profile(s.level):s.localProfile)&&
@@ -145,6 +177,31 @@ bool World(LawnApp* a)
 bool Message(LawnApp* a)
 {
     const auto& t=GetNativeContext(a->mBoard)->adventure.run.tutorial;SexyString text;unsigned bit=0;
+    if(Lesson1315())
+    {
+        const SexyString text13[]={_S("Вы открыли удобрение. Оно периодически появляется в левом верхнем углу поля."),
+            _S("Удобрение мгновенно выращивает солнечный гриб."),_S("Хищник может сглотнуть немедленно"),
+            _S("Удобрение всегда переводит растение на следующую стадию"),_S("Попробуйте применить удобрение к этому ореху."),
+            _S("Удобрение работает как фиолетовая карта — улучшает растение"),_S("Теперь примените удобрение к этому ореху-пожирателю."),
+            _S("Удобрение полностью восстанавливает здоровье растения."),_S("Высаживайте растения и защищайтесь от зомби!")};
+        const SexyString text15[]={_S("Познакомимся с новой механикой ледяных растений — шкалой заморозки."),
+            _S("Ледяные атаки заполняют шкалу заморозки. Полная шкала замораживает зомби и обнуляется. Замороженный зомби получает вчетверо больше урона от ледяных снарядов."),
+            _S("Предел заморозки растёт с каждым замораживанием"),_S("Высаживайте растения и защищайтесь от зомби!")};
+        if(t.message==FusionAdventureMessage273::None)return true;
+        const int index=int(t.message)-int(s.level==13?FusionAdventureMessage273::FertilizeIntro:FusionAdventureMessage273::IceIntro);
+        if(!Require(a,index>=0&&index<(s.level==13?9:4),"Lesson1315 unrelated source Advice message"))return false;
+        if(!t.messageTicks)return true;text=s.level==13?text13[index]:text15[index];bit=1U<<index;
+        auto* w=a->mBoard->mAdvice;
+        if(!Require(a,w&&w->mLabel==text&&w->mDuration>0&&w->mDisplayTime==FusionAdventureMessageDuration273(t.message),
+            "Lesson1315 source Advice/native duration differs"))return false;
+        if(!(s.messages&bit))
+        {
+            night.messageAt[size_t(index)]=a->mBoard->mMainCounter;
+            NetTrace("SMOKE_LESSON1315_288_MESSAGE role=%s level=%d stage=%u message=%u ticks=%u timer=%u nativeTick=%d nativeAdvice=1",
+                Role(a),s.level,unsigned(t.stage),unsigned(t.message),unsigned(t.messageTicks),unsigned(t.timerTicks),a->mBoard->mMainCounter);
+        }
+        s.messages|=bit;return true;
+    }
     switch(t.message)
     {
     case FusionAdventureMessage273::None:return true;
@@ -172,13 +229,35 @@ bool Choose(LawnApp* a)
     auto* b=a->mBoard;const auto* c=GetNativeContext(b);auto* chooser=a->mSeedChooserScreen;
     if(!chooser||!chooser->mNativeFusionChooser||!chooser->mMouseVisible||chooser->mSeedsInFlight||!b->mCutScene->mSeedChoosing)return false;
     const auto& bank=c->selection.State();const int slot=Slot(a);std::vector<std::pair<uint16_t,bool>> wanted;
-    if(slot==0)wanted={{0,false},{2,false},{1,false},{3,false},{4,false},{5,false}};
+    // Mouse visibility is authoritative before the client's interpolated panel
+    // reaches that position. Never queue an SDL pick against a moving widget.
+    const int wideX=a->mDDInterface->mWideScreenOffsetX,wideY=a->mDDInterface->mWideScreenOffsetY;
+    const auto& intro=b->mNetIntroTargets;
+    const int targetX=a->NetIsClient()&&intro.mValid?intro.mChooserX+wideX:wideX;
+    const int targetY=a->NetIsClient()&&intro.mValid?intro.mChooserY+wideY:wideY;
+    if((a->NetIsClient()&&!intro.mValid)||targetX!=wideX||targetY!=wideY||chooser->mX!=targetX||chooser->mY!=targetY)
+    {
+        if(!s.diagnostic||GetTickCount()-s.diagnostic>=1000)
+        {s.diagnostic=GetTickCount();NetTrace("SMOKE_LESSON_CHOOSER_MOVING role=%s level=%d actual=(%d,%d) authoritativeTarget=(%d,%d) cutscene=%d",Role(a),s.level,chooser->mX,chooser->mY,targetX,targetY,b->mCutScene->mCutsceneTime);}
+        return false;
+    }
+    if(chooser->mNativeFusionEpoch!=bank.epoch||chooser->mNativeFusionRevision!=bank.revision)return false;
+    if(Lesson1315())
+    {
+        const size_t first=slot?bank.quotas[0]:0;
+        for(size_t i=first;i<first+bank.quotas[slot]&&i<c->eligible.size();++i)wanted.emplace_back(c->eligible[i].kind,c->eligible[i].isExtra);
+    }
+    else if(slot==0)wanted={{0,false},{2,false},{1,false},{3,false},{4,false},{5,false}};
     else wanted={{256,false},{0,true},{1,true},{2,true},{3,true},{4,true},{5,true}};
     if(!Require(a,bank.activeMask==3&&bank.targetCount==(std::min)(kNativeFusionBankCapacity,c->eligible.size())&&
         bank.quotas[0]+bank.quotas[1]==bank.targetCount&&bank.quotas[slot]>=2&&bank.quotas[slot]<=wanted.size(),
         "Lesson78 native chooser quotas/required real card identities differ"))return false;
     int own=0;for(const auto& p:bank.packets)if(p.owner==slot)
-    {if(!Require(a,own<int(wanted.size())&&p.kind==wanted[size_t(own)].first&&p.isExtra==wanted[size_t(own)].second,"Lesson78 selected native packet identity differs"))return false;++own;}
+    {
+        const bool matches=own<int(wanted.size())&&p.kind==wanted[size_t(own)].first&&p.isExtra==wanted[size_t(own)].second;
+        if(!matches)NetTrace("SMOKE_LESSON_CHOOSER_MISMATCH role=%s level=%d ownIndex=%d actual=%u actualExtra=%d expected=%u expectedExtra=%d quota0=%u quota1=%u waiting=%d eligible=%zu",Role(a),s.level,own,p.kind,p.isExtra?1:0,own<int(wanted.size())?wanted[size_t(own)].first:65535,own<int(wanted.size())&&wanted[size_t(own)].second?1:0,unsigned(bank.quotas[0]),unsigned(bank.quotas[1]),s.waiting,c->eligible.size());
+        if(!Require(a,matches,"Lesson78 selected native packet identity differs"))return false;++own;
+    }
     if(own<s.waiting)return false;
     if(own<bank.quotas[slot])
     {
@@ -193,7 +272,17 @@ bool Choose(LawnApp* a)
             SDL_Event w{};w.type=SDL_EVENT_MOUSE_WHEEL;w.wheel.windowID=m.motion.windowID;w.wheel.y=cy<158?1.f:-1.f;
             Require(a,SDL_PushEvent(&m)&&SDL_PushEvent(&w),"Lesson78 native chooser scroll failed");return false;
         }
-        if(std::abs(chooser->mScrollAmount)<=.05f&&Click(a,float(chooser->mX+x+25),float(chooser->mY)+cy))s.waiting=own+1;return false;
+        if(std::abs(chooser->mScrollAmount)>.05f)return false;
+        const int screenX=chooser->mX+x+25,screenY=chooser->mY+int(cy);
+        int localX=0,localY=0;
+        auto* widget=a->mWidgetManager->GetWidgetAt(screenX,screenY,&localX,&localY);
+        // NativeFusionMouseDown uses these same dense eligible identities and
+        // native rectangles. The Classic semantic cursor helper rejects Fusion.
+        if(widget!=chooser||!Rect(x,y-int(chooser->mScrollbar->mScrollValue),50,70).Contains(localX,localY))return false;
+        if(a->mWidgetManager->mLastMouseX!=screenX||a->mWidgetManager->mLastMouseY!=screenY)
+        {Click(a,float(screenX),float(screenY),false);return false;}
+        NetTrace("SMOKE_LESSON_CHOOSER_INPUT role=%s level=%d ownIndex=%d kind=%u extra=%d dense=%d screen=(%d,%d) local=(%d,%d) panel=(%d,%d) scroll=%.4f revision=%u realWidgetHit=1",Role(a),s.level,own,kind,extra?1:0,dense,screenX,screenY,localX,localY,chooser->mX,chooser->mY,chooser->mScrollbar->mScrollValue,bank.revision);
+        if(Click(a,float(screenX),float(screenY)))s.waiting=own+1;return false;
     }
     if(bank.packets.size()!=bank.targetCount)return false;
     int rank=-1;for(int i=0;i<b->mSeedBank->mNumPackets;++i)
@@ -327,6 +416,283 @@ bool DyingCheckpoint(LawnApp* a)
     {s.dyingLogged=true;NetTrace("SMOKE_LESSON78_278_DYING role=%s level=%d id=%u token=%u localUID=%u allocated=1 hasHead=%d status=%d sourceStage=%u sourceActive=1 source7NeedsRetirement=%d",Role(a),s.level,s.enemy.id,s.enemy.token,s.enemy.localUID,z->mHasHead?1:0,GetNativeFusionZombieStatus(z),unsigned(c->adventure.run.tutorial.stage),s.level==7?1:0);}
     return Capture(a,"dying")&&Barrier(a,"DYING_"+Identity(s.enemy));
 }
+Coin* Fertilize288(Board* b,const Ref& ref)
+{
+    auto* coin=b->mCoins.DataArrayTryToGet(ref.localUID);const auto* d=GetNativeFertilize269Data(coin);
+    return coin&&!coin->mDead&&coin->mNetId==ref.id&&d&&d->instanceToken==ref.token?coin:nullptr;
+}
+bool BindFertilize288(LawnApp* a,Plant* source,int index)
+{
+    auto* b=a->mBoard;auto& ref=night.items[size_t(index)];if(ref.id)return Require(a,Fertilize288(b,ref),"Lesson1315 real Fertilize generation vanished before use");
+    float x=0,y=0;if(!GetNativeSourcePlantNodePoint(source,"",x,y))return false;
+    Coin* coin=nullptr;while(b->IterateCoins(coin))if(const auto* d=GetNativeFertilize269Data(coin);d&&!coin->mDead&&
+        d->phase==NativeFertilize269Phase::Falling&&std::abs(d->anchorX-x)<1&&std::abs(d->anchorY-y)<1)
+    {
+        if(index&&coin->mNetId==night.items[0].id)continue;
+        if(!Require(a,coin->mNetId&&d->instanceToken&&d->heldSlot==255&&coin->mNetGhost==a->NetIsClient(),"Lesson1315 genuine script item identity differs"))return false;
+        ref={coin->mNetId,d->instanceToken,b->mCoins.DataArrayGetID(coin)};
+        NetTrace("SMOKE_LESSON1315_288_FERTILIZE role=%s index=%d id=%u token=%u localUID=%u plant=%u anchorX=%.6f anchorY=%.6f sourceRootGrant=1 fixtureFactoryCalls=0",
+            Role(a),index,ref.id,ref.token,ref.localUID,source->mNetId,d->anchorX,d->anchorY);return true;
+    }
+    return false;
+}
+bool Uncovered288(LawnApp* a,float x,float y)
+{
+    const int sx=int(x+a->mBoard->mX+a->mDDInterface->mWideScreenOffsetX),sy=int(y+a->mBoard->mY+a->mDDInterface->mWideScreenOffsetY);
+    return a->mWidgetManager&&a->mWidgetManager->GetWidgetAt(sx,sy,nullptr,nullptr)==a->mBoard;
+}
+void ObserveFertilize288(LawnApp* a,int index,const Ref& target)
+{
+    if(auto* coin=Fertilize288(a->mBoard,night.items[size_t(index)]))if(const auto* d=GetNativeFertilize269Data(coin))
+    {
+        if(d->phase==NativeFertilize269Phase::Cursor&&d->heldSlot==1&&!night.held[size_t(index)])
+        {night.held[size_t(index)]=true;NetTrace("SMOKE_LESSON1315_288_HELD role=%s index=%d id=%u token=%u owner=1 nativeCursor=1",Role(a),index,coin->mNetId,d->instanceToken);}
+        if(d->phase==NativeFertilize269Phase::Using&&!night.used[size_t(index)])
+        {
+            if(!Require(a,d->heldSlot==255&&d->targetId==target.id&&d->targetToken==target.token,"Lesson1315 Fertilize use targeted a different generation"))return;
+            night.used[size_t(index)]=true;NetTrace("SMOKE_LESSON1315_288_USING role=%s index=%d id=%u token=%u target=%u targetToken=%u genuineInput=1",Role(a),index,coin->mNetId,d->instanceToken,target.id,target.token);
+        }
+    }
+}
+void UseFertilize288(LawnApp* a,int index,const Ref& target,int col)
+{
+    auto* b=a->mBoard;auto* coin=Fertilize288(b,night.items[size_t(index)]);const auto* d=GetNativeFertilize269Data(coin);
+    ObserveFertilize288(a,index,target);if(!coin||!d||night.used[size_t(index)])return;
+    if(a->NetIsClient()&&s.input==0)
+    {
+        if(d->phase!=NativeFertilize269Phase::World||b->mCursorObject->mCursorType!=CURSOR_TYPE_NORMAL||
+            b->mCursorObject->mCoinID!=COINID_NULL||!Uncovered288(a,coin->mPosX+20,coin->mPosY+20))return;
+        if(BoardClick(a,coin->mPosX+20,coin->mPosY+20))s.input=1;
+    }
+    if(!night.held[size_t(index)])return;
+    if(!Barrier(a,"FERT_HELD_"+Identity(night.items[size_t(index)])))return;
+    if(a->NetIsClient()&&s.input==1)
+    {
+        // FNS ownership can arrive before the normal client cursor reconcile.
+        // Only real local UI ownership dispatches the following native click.
+        if(GetNativeFertilize269ClaimedBy(b,1)!=coin||uint32_t(b->mCursorObject->mCoinID)!=night.items[size_t(index)].localUID)return;
+        if(Cell(a,col,2))s.input=2;
+    }
+}
+bool RecoverEffect288(LawnApp* a)
+{
+    auto* b=a->mBoard;auto* plant=PlantBy(b,night.chomper);if(!plant||!a->mEffectSystem||!a->mEffectSystem->mParticleHolder)return false;
+    float x=0,y=0;if(!plant->GetShadowCenter(x,y))return false;y-=float(.7*GetNativeFusionPixelsY(b));
+    auto* holder=a->mEffectSystem->mParticleHolder;TodParticleSystem* system=nullptr;
+    while(holder->mParticleSystems.IterateNext(system))if(!system->mDead&&system->mEffectType==PARTICLE_FUSION_SOURCE16&&system->mParticleDef)
+    for(auto* node=system->mEmitterList.mHead;node;node=node->mNext)
+    {
+        auto* emitter=holder->mEmitters.DataArrayTryToGet(uint32_t(node->mValue));
+        if(!emitter||emitter->mDead||!emitter->mEmitterDef||emitter->mParticleSystem!=system||std::abs(emitter->mSystemCenter.x-x)>.2f||std::abs(emitter->mSystemCenter.y-y)>.2f)continue;
+        for(auto* particleNode=emitter->mParticleList.mHead;particleNode;particleNode=particleNode->mNext)
+        {
+            auto* p=holder->mParticles.DataArrayTryToGet(uint32_t(particleNode->mValue));if(!p)continue;
+            ParticleRenderParams render{};if(!TodParticleEmitter::GetRenderParams(p,&render))continue;
+            auto* image=emitter->mImageOverride?emitter->mImageOverride:emitter->mEmitterDef->mImage;
+            if(!image||!std::isfinite(render.mAlpha)||render.mAlpha<=0||!std::isfinite(render.mPosX)||!std::isfinite(render.mPosY)||!std::isfinite(render.mSpinPosition)||
+                !std::isfinite(render.mParticleScale)||!std::isfinite(render.mParticleStretch))continue;
+            const float w=std::abs(render.mParticleScale)*image->GetCelWidth(),h=std::abs(render.mParticleScale*render.mParticleStretch)*image->GetCelHeight();
+            const float cr=std::abs(std::cos(render.mSpinPosition)),sr=std::abs(std::sin(render.mSpinPosition));
+            const float hw=(cr*w+sr*h)*.5f,hh=(sr*w+cr*h)*.5f;
+            const float sx=render.mPosX+b->mX+a->mDDInterface->mWideScreenOffsetX,sy=render.mPosY+b->mY+a->mDDInterface->mWideScreenOffsetY;
+            if(sx+hw<0||sx-hw>a->mWidth||sy+hh<0||sy-hh>a->mHeight)continue;
+            if(!night.fxSeen)
+            {
+                night.fxSeen=true;night.effectUID=holder->mParticleSystems.DataArrayGetID(system);
+                NetTrace("SMOKE_LESSON1315_288_RECOVER16 role=%s plant=%u token=%u source16=1 systemUID=%u emitterUID=%u particleUID=%u age=%d alpha=%.6f anchorX=%.6f anchorY=%.6f actualTodRender=1 callbackForced=0",
+                    Role(a),night.chomper.id,night.chomper.token,night.effectUID,uint32_t(node->mValue),uint32_t(particleNode->mValue),emitter->mSystemAge,render.mAlpha,x,y);
+            }
+            return true;
+        }
+    }
+    return false;
+}
+int LiveEnemies288(Board* b)
+{
+    int count=0;Zombie* z=nullptr;
+    while(b->IterateZombies(z))if(!z->mDead&&!z->IsDeadOrDying()&&!z->mMindControlled)++count;
+    return count;
+}
+bool NightComplete288(LawnApp* a)
+{
+    auto* b=a->mBoard;const auto* c=GetNativeContext(b);const auto& t=c->adventure.run.tutorial;
+    if(t.active||!b->mPaused)return false;
+    if(!Require(a,night.countdownSeen&&night.countdown>4.f&&night.countdown<=5.f&&s.messages==(s.level==13?511U:15U)&&
+        !FusionAdventureTutorialShowsZombieHealth284(c->adventure.run)&&!LiveEnemies288(b)&&
+        (a->NetIsClient()||!c->adventureEnemyCount)&&
+        t.stage==(s.level==13?8:3)&&t.timerTicks==0&&
+        t.message==(s.level==13?FusionAdventureMessage273::FertilizeReady:FusionAdventureMessage273::IceReady),
+        "Lesson1315 completion/Advice/countdown/temporary HP state differs"))return false;
+    if(!s.complete){s.complete=true;s.samples=Samples(a);}if(Samples(a)-s.samples<2)return false;
+    if(!Capture(a,"complete"))return false;
+    s.checkpoint=Tag("COMPLETE_"+std::to_string(s.level)+"_"+(s.level==13?Identity(night.chomper):Identity(night.enemies[0])));
+    if(!s.caseLogged)
+    {
+        s.caseLogged=true;
+        NetTrace("SMOKE_LESSON1315_288_CASE_COMPLETE role=%s level=%d epoch=%u sourceMessages=%u nativeChooser=1 nativeReady=1 fullIntro=1 initialSun=150 sourceMoney=3000 nativeInputOnly=1 fixtureFactoryCalls=0 profileSetup=FixtureProfileOnly progressionEarned=0 ClassicUnchanged=1 HPPrefUnchanged=1 sourceTutorOver=1 countdown=%.6f frames=6 actorWrites=0 HPWrites=0 clockWrites=0 RNGWrites=0 localProof=1 peerBarrierPending=1 FullLevelVictory=NotExecuted",
+            Role(a),s.level,s.epoch,s.level==13?9:4,night.countdown);
+        if(s.level==15)NetTrace("SMOKE_LESSON1315_288_COMPLETE role=%s cases=2 sourceLevels=13,15 frames=12 freshTallNut1027=1 sameGeneration1012Repair=1 genuineRecover16=1 source15SixIceThreeCone=1 naturalColdCombat=1 allSourceEnemiesZero=1 sourceSixCellsEmpty=1 temporaryHPNotINI=1 actualClientFertilizeInput=1 Sound66Receipt=RunnerLog profileSetup=FixtureProfileOnly progressionEarned=0 fixtureFactoryCalls=0 actorWrites=0 HPWrites=0 clockWrites=0 RNGWrites=0 localProof=1 peerBarrierPending=1 Full13Victory=NotExecuted Full15Victory=NotExecuted",Role(a));
+    }
+    Send(a,s.checkpoint);return Has(a,0,s.checkpoint)&&Has(a,1,s.checkpoint);
+}
+bool BindIceCohort288(LawnApp* a)
+{
+    auto* b=a->mBoard;const auto* c=GetNativeContext(b);
+    constexpr uint16_t kinds[]={1034,1037,1038,1034,1037,1038};constexpr int cols[]={3,5,3,4,6,4},rows[]={1,2,3,1,2,3};
+    for(size_t i=0;i<6;++i)
+    {
+        auto* p=At(b,cols[i],rows[i],kinds[i]);if(!p)return false;
+        if(!night.plants[i].id)
+        {
+            if(!FreshPlant(a,p,kinds[i],LawnNet::NET_SHARED_OWNER,0,true))return false;night.plants[i]=PlantRef(b,p);
+            NetTrace("SMOKE_LESSON1315_288_ICE_PLANT role=%s index=%zu id=%u token=%u localUID=%u kind=%u column=%d row=%d hp=%d sharedDefault=1",Role(a),i,p->mNetId,night.plants[i].token,night.plants[i].localUID,kinds[i],cols[i],rows[i],p->mPlantHealth);
+        }
+        if(!Require(a,PlantBy(b,night.plants[i])==p,"Lesson1315 source Ice actor generation changed before cohort"))return false;
+    }
+    for(size_t i=0;i<3;++i)
+    {
+        Zombie* found=nullptr;Zombie* z=nullptr;while(b->IterateZombies(z))if(const auto* d=GetNativeSourceZombieData(z);d&&d->kind==2&&z->mRow==int(i)+1&&z->mFromWave==0){found=z;break;}
+        if(!found)return false;const auto* d=GetNativeSourceZombieData(found);
+        if(!Require(a,found->mNetId&&d->instanceToken&&found->mNetGhost==a->NetIsClient()&&a->ReanimationTryToGet(found->mBodyReanimID),"Lesson1315 genuine Cone source/native identity differs"))return false;
+        if(!night.enemies[i].id)
+        {
+            float x=0,y=0;const float expected=float(b->GetCellCenterX(b->GetColumnCount()-1,int(i)+1))+1.7f*(float(b->GetCellPitchX())/1.35f);
+            if(!Require(a,GetNativeSourceZombie269NodePoint(found,"",x,y)&&std::abs(x-expected)<=8,"Lesson1315 source Cone ROOT9 birth position differs"))return false;
+            night.enemies[i]={found->mNetId,d->instanceToken,b->mZombies.DataArrayGetID(found)};
+            NetTrace("SMOKE_LESSON1315_288_CONE role=%s index=%zu id=%u token=%u localUID=%u kind=2 row=%d fromWave=0 rootX=%.6f expectedRootX=%.6f",Role(a),i,found->mNetId,d->instanceToken,night.enemies[i].localUID,found->mRow,x,expected);
+        }
+        if(!Require(a,night.enemies[i].id==found->mNetId&&night.enemies[i].token==d->instanceToken&&night.enemies[i].localUID==b->mZombies.DataArrayGetID(found),"Lesson1315 Cone generation changed"))return false;
+    }
+    // The scheduler counter is host-private. Ghosts prove the actual complete
+    // native actor set rather than expecting an unreplicated host counter.
+    if(!Require(a,LiveEnemies288(b)==3&&(a->NetIsClient()||c->adventureEnemyCount==3)&&FusionAdventureTutorialShowsZombieHealth284(c->adventure.run)&&!a->mShowHealthBar,"Lesson1315 whole enemy count or automatic HP override differs"))return false;
+    if(!night.cohort)
+    {
+        night.cohort=true;NetTrace("SMOKE_LESSON1315_288_ICE_COHORT role=%s sixPlants=1 threeCones=1 sourceRootX=9 rows=1,2,3 npc=%u,%u,%u tokens=%u,%u,%u fullNativeGenerations=1 sharedDefault=1 sourceHPOverride=1 persistedHPPref=0 fixtureFactoryCalls=0",
+            Role(a),night.enemies[0].id,night.enemies[1].id,night.enemies[2].id,night.enemies[0].token,night.enemies[1].token,night.enemies[2].token);
+    }
+    return true;
+}
+void ObserveIce288(LawnApp* a)
+{
+    auto* b=a->mBoard;
+    Projectile* p=nullptr;while(b->IterateProjectiles(p))if(IsNativeColdProjectile(p))if(const auto* d=GetNativeProjectileData(p);d&&p->mNetId&&!night.shotSeen)
+    {night.shotSeen=true;NetTrace("SMOKE_LESSON1315_288_COLD_SHOT role=%s id=%u kind=%u actualNatural=1",Role(a),p->mNetId,d->kind);}
+    for(const auto& ref:night.enemies)if(auto* z=b->mZombies.DataArrayTryToGet(ref.localUID))
+    if(const auto* d=GetNativeZombieColdData(static_cast<const Zombie*>(z));d&&(d->level>0||d->chilledTicks>0||d->frozenTicks>0)&&!night.coldSeen)
+    {night.coldSeen=true;NetTrace("SMOKE_LESSON1315_288_COLD_HIT role=%s id=%u token=%u level=%d threshold=%d chilled=%d frozen=%d nativeEffect=1",Role(a),ref.id,ref.token,d->level,d->threshold,d->chilledTicks,d->frozenTicks);}
+}
+bool HPActorVisible288(LawnApp* a)
+{
+    for(const auto& ref:night.enemies)if(auto* z=a->mBoard->mZombies.DataArrayTryToGet(ref.localUID);z&&!z->mDead&&!z->IsDeadOrDying())
+    {
+        float rx=0,ry=0,sx=0,sy=0;
+        if(!GetNativeSourceZombie269NodePoint(z,"",rx,ry)||!GetNativeSourceZombie269NodePoint(z,"Shadow",sx,sy))continue;
+        const float ox=float(a->mBoard->mX+a->mDDInterface->mWideScreenOffsetX),oy=float(a->mBoard->mY+a->mDDInterface->mWideScreenOffsetY);
+        if(rx+ox>=0&&rx+ox<a->mWidth&&ry+oy>=0&&ry+oy<a->mHeight&&sx+ox>=0&&sx+ox<a->mWidth&&sy+oy>=0&&sy+oy<a->mHeight)return true;
+    }
+    return false;
+}
+bool UpdateNight288(LawnApp* a)
+{
+    auto* b=a->mBoard;const auto* c=GetNativeContext(b);const auto& t=c->adventure.run.tutorial;const auto phase=c->selection.State().phase;
+    if(s.level==15)ObserveIce288(a);
+    if(s.level==13&&night.chomper.id)ObserveFertilize288(a,1,night.chomper);
+    if(!t.active&&t.stage==(s.level==13?8:3))
+    {
+        if(!night.countdownSeen){night.countdownSeen=true;night.countdown=c->adventure.countdown;}
+        // Pause at TutorOver, independently of subsequent BMP/chat barriers.
+        if(a->NetIsHost()&&!s.pause)s.pause=Escape(a);
+    }
+    if(s.stage==3)
+    {
+        if(phase==FusionBankPhase::Intro){if(!s.introStart)s.introStart=GetTickCount();s.introLast=GetTickCount();++s.introChecks;return true;}
+        if(phase!=FusionBankPhase::Playing||a->mSeedChooserScreen||a->mGameScene!=SCENE_PLAYING)return true;
+        NativeFieldView277 view;if(!QueryNativeFusionField277(b,view)||!view.artReady)return true;
+        if(!Require(a,s.introChecks>=10&&s.introLast-s.introStart>=1000&&view.sourceSelected&&view.background==BACKGROUND_2_NIGHT&&t.active,"Lesson1315 full native intro/source Night backdrop differs"))return true;
+        Advance(a,4);return true;
+    }
+    if(s.level==13)
+    {
+        if(s.stage==4)
+        {
+            if(t.stage<5)return true;auto* p=At(b,2,2,3);if(!p)return true;
+            if(!night.nut.id){if(!FreshPlant(a,p,3,LawnNet::NET_SHARED_OWNER,0,true))return true;night.nut=PlantRef(b,p);}
+            if(!BindFertilize288(a,p,0))return true;
+            if(a->NetIsHost())for(size_t i=1;i<5;++i)if(!Require(a,night.messageAt[i-1]>=0&&night.messageAt[i]-night.messageAt[i-1]>=399,"Lesson1315 source13 skipped a four-second introduction stage"))return true;
+            if(Capture(a,"nut")&&Barrier(a,"NUT_"+Identity(night.nut)+"_"+Identity(night.items[0])))Advance(a,5);
+        }
+        else if(s.stage==5)
+        {
+            UseFertilize288(a,0,night.nut,2);auto* p=At(b,2,2,1027);if(!p)return true;
+            if(!Require(a,night.used[0],"Lesson1315 TallNut appeared without the observed real item use"))return true;
+            if(!night.tall.id)
+            {
+                if(!FreshPlant(a,p,1027,LawnNet::NET_SHARED_OWNER,0,true)||!Require(a,p->mNetId!=night.nut.id&&GetNativePlantData(p)->instanceToken!=night.nut.token,"Lesson1315 Fertilize did not create a fresh default TallNut"))return true;
+                night.tall=PlantRef(b,p);NetTrace("SMOKE_LESSON1315_288_TALLNUT role=%s old=%u oldToken=%u fresh=%u token=%u kind=1027 sharedDefault=1 actualClientItem=1",Role(a),night.nut.id,night.nut.token,night.tall.id,night.tall.token);
+            }
+            if(b->mPlants.DataArrayTryToGet(night.nut.localUID)||b->mCoins.DataArrayTryToGet(night.items[0].localUID))return true;
+            if(Capture(a,"tallnut")&&Barrier(a,"TALL_"+Identity(night.tall)))Advance(a,6);
+        }
+        else if(s.stage==6)
+        {
+            if(t.stage<7)return true;auto* p=At(b,3,2,1012);const auto* d=GetNativePlantData(p);if(!p||!d)return true;
+            if(!Require(a,t.stage==7&&t.active&&p->mPlantHealth==1&&p->mPlantMaxHealth==4000&&d->owner==LawnNet::NET_SHARED_OWNER&&!d->packetId&&!d->randomOrigin&&
+                d->firstParent==kFusionNoPlant&&d->secondParent==kFusionNoPlant&&(!a->NetIsHost()||c->adventureMissionPlantUID==b->mPlants.DataArrayGetID(p)),"Lesson1315 source3999 damage/tracked1012 differs"))return true;
+            if(!night.chomper.id)night.chomper=PlantRef(b,p);
+            if(!BindFertilize288(a,p,1))return true;
+            if(a->NetIsHost()&&!Require(a,night.messageAt[6]-night.messageAt[5]>=399,"Lesson1315 source13 skipped the post-upgrade four-second timer"))return true;
+            if(Capture(a,"damaged")&&Barrier(a,"DAMAGED_"+Identity(night.chomper)+"_"+Identity(night.items[1])))Advance(a,7);
+        }
+        else if(s.stage==7)
+        {
+            UseFertilize288(a,1,night.chomper,3);auto* p=PlantBy(b,night.chomper);const auto* d=GetNativePlantData(p);
+            if(!p||!d){Require(a,false,"Lesson1315 tracked1012 was replaced or destroyed during repair");return true;}
+            if(p->mPlantHealth!=p->mPlantMaxHealth)return true;
+            if(!Require(a,night.used[1]&&d->kind==1012&&d->instanceToken==night.chomper.token&&p->mNetId==night.chomper.id&&p->mPlantMaxHealth==4000,"Lesson1315 repair did not preserve the exact1012 generation"))return true;
+            // Capture locally while the genuine .75s effect is alive. A peer
+            // receipt or an early global pause must not replace this evidence.
+            if(!s.frames.contains("fusion_lesson1315_288_13_recover_fx"))
+            {if(!RecoverEffect288(a)||!Capture(a,"recover_fx"))return true;}
+            if(b->mCoins.DataArrayTryToGet(night.items[1].localUID))return true;
+            if(Barrier(a,"REPAIRED_"+Identity(night.chomper)))Advance(a,8);
+        }
+        else if(s.stage==8)
+        {
+            if(t.active)return true;
+            if(!Require(a,night.fxSeen&&night.held[0]&&night.held[1]&&night.used[0]&&night.used[1]&&
+                (!a->NetIsHost()||night.messageAt[8]-night.messageAt[7]>=399),"Lesson1315 source13 exact input/FX/timer proof incomplete"))return true;
+            if(NightComplete288(a))Advance(a,90);
+        }
+    }
+    else if(s.stage==4)
+    {
+        if(t.stage<2)return true;if(!BindIceCohort288(a))return true;
+        if(a->NetIsHost()&&!Require(a,night.messageAt[1]-night.messageAt[0]>=399,"Lesson1315 source15 skipped its four-second preparation"))return true;
+        if(Capture(a,"prepared")&&Barrier(a,"ICE_COHORT_"+Identity(night.enemies[0])))Advance(a,5);
+    }
+    else if(s.stage==5)
+    {if(night.shotSeen&&Capture(a,"combat")&&Barrier(a,"NATURAL_ICE_SHOTS"))Advance(a,6);}
+    else if(s.stage==6)
+    {
+        if(!night.coldSeen||!HPActorVisible288(a))return true;
+        if(!Require(a,t.active&&t.stage==2&&FusionAdventureTutorialShowsZombieHealth284(c->adventure.run)&&!a->mShowHealthBar,"Lesson1315 HP override did not accompany the actual cold combat"))return true;
+        if(Capture(a,"hp")&&Barrier(a,"SOURCE_HP_OVERRIDE"))Advance(a,7);
+    }
+    else if(s.stage==7)
+    {
+        if(t.active||LiveEnemies288(b)||(a->NetIsHost()&&c->adventureEnemyCount))return true;
+        for(const auto& ref:night.enemies)if(b->mZombies.DataArrayTryToGet(ref.localUID))return true;
+        constexpr int cols[]={3,5,3,4,6,4},rows[]={1,2,3,1,2,3};
+        for(size_t i=0;i<6;++i)
+        {if(b->mPlants.DataArrayTryToGet(night.plants[i].localUID))return true;
+         Plant* p=nullptr;while(b->IteratePlants(p))if(p->mPlantCol==cols[i]&&p->mRow==rows[i]){Require(a,false,"Lesson1315 final source six-cell clear left a live actor");return true;}}
+        if(a->NetIsHost()&&!Require(a,night.messageAt[3]-night.messageAt[2]>=399,"Lesson1315 source15 skipped its final four-second timer"))return true;
+        if(Capture(a,"cleared")&&Barrier(a,"ALL_SOURCE_ENEMIES_ZERO_SIX_CELLS_EMPTY"))Advance(a,8);
+    }
+    else if(s.stage==8&&NightComplete288(a))a->CoopSmokeWriteResult(true,nullptr);
+    return true;
+}
 bool Complete(LawnApp* a)
 {
     auto* b=a->mBoard;const auto* c=GetNativeContext(b);const auto& v=c->adventure;
@@ -349,19 +715,22 @@ bool Complete(LawnApp* a)
 }
 bool Restart(LawnApp* a)
 {
+    const int nextLevel=Lesson1315()?15:8;
     const auto* c=GetNativeContext(a->mBoard);
     if(c&&c->epoch!=s.epoch)
     {
         if(!Require(a,s.complete&&!s.checkpoint.empty()&&Has(a,0,s.checkpoint)&&Has(a,1,s.checkpoint),"Lesson78 fresh source8 epoch arrived before common source7 proof"))return true;
-        s.previousEpoch=s.epoch;s.epoch=0;s.level=8;s.waiting=s.input=s.spent=0;s.lessonTick=-1;s.messages=s.introChecks=0;s.introStart=s.introLast=0;
+        s.previousEpoch=s.epoch;s.epoch=0;s.level=nextLevel;s.waiting=s.input=s.spent=0;s.lessonTick=-1;s.messages=s.introChecks=0;s.introStart=s.introLast=0;
         s.initial=s.pause=s.resume=s.dying=s.dyingLogged=s.complete=s.preparedLogged=s.bucketTransition=s.caseLogged=false;s.mission=s.enemy=s.giftResult=s.bucket=s.receiver=s.iron=s.fallback={};s.cards={};s.defenses={};s.cardCount=0;
+        if(Lesson1315()){const bool hp=night.hpPreference;night={};night.hpPreference=hp;}
         s.checkpoint.clear();s.caseStarted=GetTickCount();Advance(a,1);return true;
     }
     if(a->NetIsHost()&&!s.profileSetup)
     {
-        s.profileSetup=true;a->mNetManager->mConfig.mFusionSourceProfile=Profile(8);
-        NetTrace("SMOKE_LESSON78_278_PROFILE_SETUP hostOnly=1 level=8 completed=127 frontier=8 isolatedRuntimeConfig=1 profilePersist=0 progressionEarned=0");
-        Require(a,a->StartFusionSourceAdventure(8,false),"Lesson78 isolated source8 fresh production admission failed");
+        s.profileSetup=true;a->mNetManager->mConfig.mFusionSourceProfile=Profile(nextLevel);
+        if(Lesson1315())NetTrace("SMOKE_LESSON1315_288_PROFILE_SETUP hostOnly=1 level=15 completed=16383 frontier=15 setup=FixtureProfileOnly isolatedRuntimeConfig=1 profilePersist=0 progressionEarned=0");
+        else NetTrace("SMOKE_LESSON78_278_PROFILE_SETUP hostOnly=1 level=8 completed=127 frontier=8 isolatedRuntimeConfig=1 profilePersist=0 progressionEarned=0");
+        Require(a,a->StartFusionSourceAdventure(nextLevel,false),"Lesson78 isolated next source lesson fresh production admission failed");
     }
     return true;
 }
@@ -375,7 +744,7 @@ bool NetSmokeUpdateFusionLesson78_278(LawnApp* a)
     if(!a||!a->CoopSmokeActive()||!a->mNetManager||a->mCoopSmokeResultWritten)return true;
     if(!Require(a,Enabled("PVZ_COOP_SMOKE_FUSION_NATIVE")&&a->mCoopSmokeManifest.mScenario==NETSMOKE_SCENARIO_FUSION_VALIDATION,
         "Lesson78 requires owned native fusion_validation"))return true;
-    if(!s.started)s.started=s.caseStarted=s.since=GetTickCount();
+    if(!s.started){s.started=s.caseStarted=s.since=GetTickCount();if(Lesson1315()){s.level=13;night.hpPreference=a->mShowHealthBar;}}
     if(GetTickCount()-s.started>540000||GetTickCount()-s.caseStarted>240000)
     {NetTrace("SMOKE_LESSON78_278_DEADLINE role=%s level=%d stage=%d epoch=%u input=%d sourceMission=%u enemy=%u bucket=%u",Role(a),s.level,s.stage,s.epoch,s.input,s.mission.id,s.enemy.id,s.bucket.id);a->CoopSmokeFail("Lesson78 genuine native action deadline; inspect exact source mission/cursor/gift/item");return true;}
     if(!a->mNetManager->IsActive())return true;a->mCoopSmokePeerReady=true;
@@ -384,16 +753,19 @@ bool NetSmokeUpdateFusionLesson78_278(LawnApp* a)
         if(a->mNetManager->GetPlayerCount()!=2||(a->NetIsClient()&&!a->mNetManager->IsConnectedToHost()))return true;
         if(!Require(a,Slot(a)>=0&&Slot(a)<2&&a->mNetManager->GetDifficulty()==1&&a->mPlayerInfo,"Lesson78 requires two peers/difficulty1/profile"))return true;
         if(s.classicLevel<0){s.classicLevel=a->mPlayerInfo->mLevel;s.classicFinished=a->mPlayerInfo->mFinishedAdventure;s.localProfile=a->mNetManager->mConfig.mFusionSourceProfile;}
-        if(a->NetIsClient()){if(Send(a,"L78278_BEGIN"))Advance(a,1);return true;}
-        if(!Has(a,1,"L78278_BEGIN"))return true;
-        if(!Require(a,Same(s.localProfile,Profile(7))&&a->StartFusionSourceAdventure(7,false),"Lesson78 Root-private source6-complete profile/source7 admission failed"))return true;
-        NetTrace("SMOKE_LESSON78_278_BEGIN sourceLevel=7 completed=63 frontier=7 cycle=1 profileFixture=1 progressionEarned=0 timeoutPerCaseMs=240000");Advance(a,1);return true;
+        const char* begin=Lesson1315()?"L1315_288_BEGIN":"L78278_BEGIN";
+        if(a->NetIsClient()){if(Send(a,begin))Advance(a,1);return true;}
+        if(!Has(a,1,begin))return true;
+        if(!Require(a,Same(s.localProfile,Profile(s.level))&&a->StartFusionSourceAdventure(s.level,false),"Lesson78 Root-private source profile/first lesson admission failed"))return true;
+        if(Lesson1315())NetTrace("SMOKE_LESSON1315_288_BEGIN sourceLevel=13 completed=4095 frontier=13 cycle=1 setup=FixtureProfileOnly progressionEarned=0 timeoutPerCaseMs=240000");
+        else NetTrace("SMOKE_LESSON78_278_BEGIN sourceLevel=7 completed=63 frontier=7 cycle=1 profileFixture=1 progressionEarned=0 timeoutPerCaseMs=240000");Advance(a,1);return true;
     }
     if(!a->mBoard)return true;
     if(s.stage==90)return Restart(a);
-    if(const auto* next=GetNativeContext(a->mBoard);s.level==7&&s.complete&&next&&next->epoch!=s.epoch)
+    if(const auto* next=GetNativeContext(a->mBoard);s.level==(Lesson1315()?13:7)&&s.complete&&next&&next->epoch!=s.epoch)
         return Restart(a); // START_GAME may drain before this peer's final chat echo.
     if(!World(a)||!Message(a))return true;
+    if(Lesson1315()&&s.stage>=3)return UpdateNight288(a);
     auto* b=a->mBoard;const auto* c=GetNativeContext(b);const auto& t=c->adventure.run.tutorial;const auto phase=c->selection.State().phase;
     ObserveBucket(a);
     if(s.stage>=4&&(!s.diagnostic||GetTickCount()-s.diagnostic>=5000))

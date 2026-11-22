@@ -1001,7 +1001,7 @@ bool NetDay273AllocationCapacity(Board* board,const NetBuffer& body,const LawnFu
                 case SEED_JALAPENO:case SEED_SQUASH:case SEED_TORCHWOOD:case SEED_CHOMPER:case SEED_CABBAGEPULT:
                 case SEED_KERNELPULT:case SEED_MELONPULT:case SEED_WINTERMELON:case SEED_CATTAIL:case SEED_CACTUS:
                 case SEED_MARIGOLD:case SEED_SPIKEWEED:case SEED_SPIKEROCK:case SEED_FUMESHROOM:case SEED_PUFFSHROOM:
-                case SEED_SUNSHROOM:case SEED_HYPNOSHROOM:case SEED_IMITATER:break;
+                case SEED_SUNSHROOM:case SEED_HYPNOSHROOM:case SEED_SCAREDYSHROOM:case SEED_IMITATER:break;
                 default:return reject("plant-factory-not-budgeted",section,type);
                 }
                 const auto reanim=GetPlantDefinition(SeedType(type)).mReanimationType;
@@ -1012,7 +1012,7 @@ bool NetDay273AllocationCapacity(Board* board,const NetBuffer& body,const LawnFu
                 reanims+=1+heads;attachments+=heads; // Each Attach call can require at most one container.
                 // A raw daytime mushroom initializes before Fusion metadata
                 // is bound and can allocate its sleep reanimation (PlantInitialize).
-                if(!board->StageIsNight()&&(type==SEED_FUMESHROOM||type==SEED_PUFFSHROOM||type==SEED_SUNSHROOM||type==SEED_HYPNOSHROOM))
+                if(!board->StageIsNight()&&(type==SEED_FUMESHROOM||type==SEED_PUFFSHROOM||type==SEED_SUNSHROOM||type==SEED_HYPNOSHROOM||type==SEED_SCAREDYSHROOM))
                 {++reanims;if(!plainDefinition(REANIM_SLEEPING))return reject("mushroom-initial-sleep-definition",section,type);}
                 if(scan.mData[start+11]&1){++reanims;if(!plainDefinition(REANIM_SLEEPING))return reject("sleep-definition",section,type);}
                 if(type==SEED_POTATOMINE)

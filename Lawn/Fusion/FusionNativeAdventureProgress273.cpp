@@ -540,8 +540,13 @@ bool PrepareLesson13(Board* b,bool chomper,uint32_t& mission)
     auto* made=TrySpawnNativeFusionPlant(b,actor.column,actor.row,fresh);
     if(!FreshLessonPlant284(b,made,actor))return LessonMutationFailed284(b,"source13 default plant factory failed");
     if(chomper)ApplyNativeSourcePlantDamage(made,3999,0); // Exact virtual source action, never HP injection.
-    if(!FreshLessonPlant284(b,made,actor)||!EmitNativeFusionAdventureLesson284Fertilize(made,&error))
-        return LessonMutationFailed284(b,"source13 damage/Fertilize/Sound66 action failed");
+    if(!FreshLessonPlant284(b,made,actor))
+        return LessonMutationFailed284(b,"source13 damaged plant generation failed");
+    if(!EmitNativeFusionAdventureLesson284Fertilize(made,&error))
+    {
+        LawnNet::NetTrace("Fusion source Tutor13 Fertilize grant refused reason=%s",error.c_str());
+        return LessonMutationFailed284(b,"source13 Fertilize/Sound66 action failed");
+    }
     if(chomper)mission=b->mPlants.DataArrayGetID(made);
     RebuildNativeEquipmentGraph(b);
     LawnNet::NetTrace("Fusion source Tutor13 prepare kind=%u id=%u token=%u hp=%d/%d col=%d row=2 old=%zu sourceDamage=%d realFertilize=1 sharedDefault=1 tick=%d",
