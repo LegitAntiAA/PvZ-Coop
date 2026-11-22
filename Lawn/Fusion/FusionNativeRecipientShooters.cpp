@@ -1,3 +1,4 @@
+#include "FusionNativeProjectileBuff369.h"
 #include "FusionNativeRecipientShooters.h"
 #include "FusionNative.h"
 #include "FusionNativeMorePlants269Backend.h"
@@ -84,7 +85,7 @@ bool Emit(Plant* plant,const FusionRecipientEmissionSpec& spec,std::size_t index
     p->mShadowY=y;p->mRotationSpeed=spec.projectileKind==39?static_cast<float>(6*30*.01*3.14159265358979323846/180):0;
     p->mDamageRangeFlags=plant->GetDamageRangeFlags(WEAPON_PRIMARY);
     NativeProjectileData data;data.kind=spec.projectileKind;data.damage=20;data.specialType=static_cast<uint8_t>(spec.sourceMovingWay);
-    if(!AttachNativeProjectile(board,p,data)){p->Die();return false;}
+    if(!AttachNativeTravelProjectile369(plant,p,data)){p->Die();return false;}
     LawnNet::NetTrace("Fusion native Recipient projectile plant=%u kind=%u id=%u payload=%u way=%u shot=%zu vx=%.9g vy=%.9g damage=20",
         plant->mNetId,GetNativePlantData(plant)->kind,p->mNetId,data.kind,data.specialType,index,p->mVelX,p->mVelY);
     return true;
@@ -131,7 +132,7 @@ bool IsNativeRecipientProjectile(const Projectile* p)
     const auto* d=GetNativeProjectileData(p);
     if(d&&d->kind==37&&IsNativeMore269Projectile(p))return true;
     return d&&!d->fireState&&!d->lastTorchId&&!d->lastTorchToken&&!d->melonEnhanced&&!d->effectVariant&&
-        FusionRecipientProjectileMetadataValid(d->kind,d->damage,d->sunOnHit,d->specialType,p->mProjectileType,p->mMotionType);
+        FusionRecipientProjectileMetadataValid(d->kind,NativeProjectileValidationDamage369(*d),d->sunOnHit,d->specialType,p->mProjectileType,p->mMotionType);
 }
 bool GetNativeRecipientProjectileCenter(const Projectile* p,float& x,float& y)
 {if(!IsNativeRecipientProjectile(p))return false;x=p->mPosX+20;y=p->mPosY+p->mPosZ+20;return std::isfinite(x+y);}

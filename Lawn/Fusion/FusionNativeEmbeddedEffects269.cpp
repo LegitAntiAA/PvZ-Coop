@@ -1,3 +1,5 @@
+#include "FusionNativeExtendedZombie313Bridge.h"
+#include "FusionNativeNightZombie291Bridge.h"
 #include "FusionNativeEmbeddedEffects269.h"
 #include "FusionNativeCapturedSourcePlant314.h"
 #include "FusionNativeWorldParticle269.h"
@@ -64,10 +66,16 @@ void ValidateOwnerDestroyedParticle273(uint16_t kind,const Json& entry,const std
     // fallback or permit other dormant/unimplemented particle systems.
     const char* proofHash=kind==21?"4cb918fe380100c4a163eef3bc4ad3dcb24c4b7fa4f3537618bddff7ea7568b5":
         kind==22?"a797f4452feeff9ca28937ece6a5d3054a31a4630277377b646b3b8cbbb8416f":
-        kind==23?"a468ea2e0ec6ff7f78bf911b74d9cd460953e3a01801116550e2d82f5360b807":nullptr;
+        kind==23?"a468ea2e0ec6ff7f78bf911b74d9cd460953e3a01801116550e2d82f5360b807":
+        kind==105?"83231d793562388d370f438b8012fae04a9382e7b37374b70a01227778222886":
+        kind==110?"a9f8c104bf918f95d7ca999b5c6b13085485b78e456a4782a301e718406774a6":
+        kind==215?"6529435f392b27097a453bfe62a864055e6724b92e595a7ef2af241ee60ee166":nullptr;
     const char* modelHash=kind==21?"d83ea3808a7c29e19c1898bc64d8ec7ab4b50b1bd72ca1762ea39c01a8df381c":
         kind==22?"339a11cdf48a1be7899f9368ee00cabcbcb7442ea4ca8159796cd1cee9082703":
-        kind==23?"24acb26ca0edb834836f978ad8e84dd3a4cf4411665708b98bf852832b4fb0b4":nullptr;
+        kind==23?"24acb26ca0edb834836f978ad8e84dd3a4cf4411665708b98bf852832b4fb0b4":
+        kind==105?"9674a5743d9c3eb75667ce1732f53e1dfad037d5024c43af7d9a3e4f02ac09a5":
+        kind==110?"234a5f24d0e3cfe8d3ae473a3fe988837cf6ea28cf3b14f2b12a4a4c8cda3284":
+        kind==215?"8ca996acc46de5b018d73929b2cecb4b9c395058e18ebbff6d803a00620086cd":nullptr;
     const auto& proof=entry.at("lifecycleProof");
     if(!proofHash||entry.at("nativeLifecycle")!="ownerDestroyedBeforeRender"||
         entry.at("canonicalProofSha256")!=proofHash||Digest(proof.dump())!=proofHash||
@@ -515,10 +523,15 @@ void NativeEmbeddedEffects269::Update(Board* board)
             if(!definition||!GetNativeSourceZombie269NodeActivity(zombie,binding.path.c_str(),active)||
                !GetNativeSourceZombie269NodePoint(zombie,binding.path.c_str(),x,y))active=false;
             if(!active){mImpl->Kill(lease);lease.active=false;continue;}
+            if(board->mApp->NetIsClient()&&data->kind==207&&binding.path=="Trail_1/Trail_1")
+            {const auto* v=GetNativeJackson291(zombie);lease.emission=v&&!v->moonWalkFinished&&v->phase!=FusionNightZombie281Phase::Death?1:0;}
+            if(board->mApp->NetIsClient()&&data->kind==208&&binding.path=="Trail/Trail_1")
+            {const auto* v=GetNativeExtendedZombie313(zombie);lease.emission=v&&v->quickMove208?1:0;}
+            const bool emission=lease.emission<0?binding.emission:lease.emission!=0;
             if(!lease.active)
             {
                 auto* system=CreateNativeEmbeddedParticle269System(board,binding.resource,definition,x,y,
-                    zombie->mRenderOrder+binding.sortingOrder+1,binding.emission);
+                    zombie->mRenderOrder+binding.sortingOrder+1,emission);
                 if(!system)continue;
                 const bool detached=binding.path=="LoseHead"||binding.path.starts_with("LoseHead/")||
                     binding.path=="LoseArm"||binding.path.starts_with("LoseArm/");
@@ -531,7 +544,7 @@ void NativeEmbeddedEffects269::Update(Board* board)
                 lease.detached=detached;
             }
             if(auto* system=mImpl->System(lease.system))
-            {if(!lease.detached){definition->SetEmission(system,binding.emission);system->SystemMove(x,y);}}
+            {if(!lease.detached){definition->SetEmission(system,emission);system->SystemMove(x,y);}}
         }
     }
     for(auto it=mImpl->zombieLeases.begin();it!=mImpl->zombieLeases.end();)
@@ -568,5 +581,16 @@ void NativeEmbeddedEffects269::ReleaseCapturedPlant314(uint32_t ownerUID,uint32_
  for(auto at=mImpl->capturedLeases314.begin();at!=mImpl->capturedLeases314.end();)
   if(std::get<0>(at->first)==ownerUID&&std::get<1>(at->first)==token){mImpl->Kill(at->second);at=mImpl->capturedLeases314.erase(at);}else ++at;
  const auto at=mImpl->capturedOwners314.find(ownerUID);if(at!=mImpl->capturedOwners314.end()&&at->second.first==token)mImpl->capturedOwners314.erase(at);
+}
+}
+
+namespace LawnFusion {
+bool NativeEmbeddedEffects269::SetEmission(Zombie* z,const char* path,bool enabled)
+{
+ const auto* d=GetNativeSourceZombieData(z);if(!d||!path||!mImpl->Valid(z->mBoard))return false;
+ const auto found=mImpl->zombieBindings.find(d->kind);if(found==mImpl->zombieBindings.end())return false;
+ const auto uid=z->mBoard->mZombies.DataArrayGetID(z);if(!uid||z->mBoard->mZombies.DataArrayTryToGet(uid)!=z)return false;
+ for(const auto& b:found->second)if(b.path==path){mImpl->zombieLeases[{uid,d->kind,b.component}].emission=enabled?1:0;return true;}
+ return false;
 }
 }

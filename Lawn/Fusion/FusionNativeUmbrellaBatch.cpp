@@ -1,7 +1,11 @@
+#include "FusionNativeTravelConsumers369.h"
+#include "FusionNativeProjectileBuff369.h"
 #include "FusionNativeUmbrellaBatch.h"
 #include "FusionNativeUmbrella.h"
 #include "FusionNative.h"
 #include "FusionNativeZombie313Dispatch.h"
+#include "FusionSourceZombieTypes313.h"
+#include "FusionNativeSourceLifecycle313.h"
 #include "FusionNativeAction267.h"
 #include "FusionNativeBasePlants.h"
 #include "FusionNativeButter.h"
@@ -142,6 +146,20 @@ bool UpdateNativeUmbrellaBatch(Plant* p)
     if(d->kind==1185&&p->mTargetY>0&&!--p->mTargetY)
     {p->mTargetY=100;const int level=GetNativeFireLightLevel(p);if(level>0)d->batchBagCount=uint16_t((std::min)(2000,int(d->batchBagCount)+level*25));}
     if(!Awake(p,speed)||d->kind==30)return true;
+    // EmeraldUmbrella.FixedUpdate -> ConvertUpdate -> virtual SuperSkill.
+    // Keep the existing native skill cooldown, heal, clip and event dispatch.
+    if(d->kind==916&&HasNativeTravelAdvanced369(p->mBoard,23)&&CanActivateNativeUmbrellaBatchSkill(p))
+    {
+        Zombie* z=nullptr;
+        while(p->mBoard->IterateZombies(z))
+        {
+            const int kind=GetNativeFusionZombieKind(z),status=GetNativeFusionZombieStatus(z);
+            if(!Target(z)||kind<0||std::abs(z->mRow-p->mRow)>=2||!Circle(p,z,2)||FusionSourceZombieIsDriver313(uint16_t(kind)))continue;
+            const auto* source=GetNativeSourceZombieData(z);
+            if(status==20||FusionPlantSearchUniqueZombieAllowed(status,z->mMindControlled,source&&source->beforeDying))
+            {TryActivateNativeUmbrellaBatchSkill(p);break;}
+        }
+    }
     if(p->mLaunchCounter>0)--p->mLaunchCounter;
     if(d->kind!=1186&&p->mLaunchCounter<=0)
     {
@@ -269,8 +287,46 @@ bool TryHandleNativeUmbrella267Damage(Plant* p,int& damage,int)
 }
 bool TryEnhanceNativeUmbrellaProjectile(Projectile* p,Plant* actualTarget)
 {
-    if(!Host(p)||!IsNativeUmbrellaBatch(actualTarget)||!Live(actualTarget)||GetNativePlantData(actualTarget)->kind!=1128||actualTarget->mBoard!=p->mBoard||actualTarget->mRow!=p->mRow)return false;
-    auto* d=GetNativeProjectileData(p);if(!d||d->isZombieBullet||d->umbrellaed||!IsNativeLobberProjectile(p))return false;
+    if(!Host(p)||!IsNativeUmbrellaBatch(actualTarget)||!Live(actualTarget)||
+        (GetNativePlantData(actualTarget)->kind!=1128&&GetNativePlantData(actualTarget)->kind!=916)||actualTarget->mBoard!=p->mBoard||actualTarget->mRow!=p->mRow)return false;
+    const bool emerald=GetNativePlantData(actualTarget)->kind==916;
+    const bool relay=emerald&&HasNativeTravelAdvanced369(actualTarget->mBoard,24);
+    auto* d=GetNativeProjectileData(p);if(!d||d->isZombieBullet||(!relay&&d->umbrellaed)||!IsNativeLobberProjectile(p))return false;
+    const auto uid=p->mBoard->mProjectiles.DataArrayGetID(p);
+    const auto target=GetNativeContext(p->mBoard)->lobberPlantTargets.find(uid);
+    if(target==GetNativeContext(p->mBoard)->lobberPlantTargets.end()||target->second!=actualTarget->mBoard->mPlants.DataArrayGetID(actualTarget))return false;
+    const bool payCoin=emerald&&GetNativeContext(p->mBoard)->money<100000;
+    FusionSourceDeathBudget319 coinPeak;
+    coinPeak.coins=uint64_t(payCoin)+(d->kind==53?1:0);
+    // Coin.Init may allocate its real Coin reanimation+attachment; reserve the
+    // whole callback before changing velocities, damage or parent reservation.
+    coinPeak.reanimations=coinPeak.attachments=coinPeak.coins;
+    if(!CanAllocateNativeSourceBudget319(p->mBoard,coinPeak))return false;
+    Plant* next=nullptr;
+    if(relay)
+    {
+        // Source GetEmeraldUmbrella scans same-row cells from its own column,
+        // skips self, and returns the first actual kind916 in cell-list order.
+        for(int col=actualTarget->mPlantCol;col<p->mBoard->GetColumnCount()&&!next;++col)
+        {
+            Plant* v=nullptr;while(p->mBoard->IteratePlants(v))
+            {const auto* value=GetNativePlantData(v);if(v!=actualTarget&&Live(v)&&value&&value->kind==916&&v->mRow==actualTarget->mRow&&v->mPlantCol==col){next=v;break;}}
+        }
+    }
+    if(next)
+    {
+        float px=0,py=0,tx=0,ty=0,vx=0,vy=0,g=0;int damage=0,base=0;
+        if(!GetNativeLobberProjectileCenter(p,px,py)||!next->GetShadowCenter(tx,ty)||
+           !TryMakeFusionUmbrella267Retarget(px,py,tx,ty-float(.75*GetNativeFusionPixelsY(p->mBoard)),GetNativeFusionPixelsY(p->mBoard),vx,vy,g)||
+           !TryGetFusionUmbrella267Reinforcement(d->damage,true,damage)||
+           (d->sourceUnmodifiedDamage369&&!TryGetFusionUmbrella267Reinforcement(d->sourceUnmodifiedDamage369,true,base))||
+           !SetNativeLobberRetarget(p,next->mRow,vx,vy,g))return false;
+        d->damage=damage;d->sourceUnmodifiedDamage369=base;d->umbrellaed=true;
+        GetNativeContext(p->mBoard)->lobberPlantTargets[uid]=p->mBoard->mPlants.DataArrayGetID(next);
+        if(d->kind==53)p->mBoard->AddCoin(int(px-20),int(py-20),COIN_SMALLSUN,COIN_MOTION_FROM_PLANT,SEED_NONE,5);
+        if(payCoin)EmitNativeMoneyItem(p->mBoard,px,py,34);
+        return true;
+    }
     Zombie* z=nullptr;Zombie* candidate=nullptr;double best=(std::numeric_limits<double>::max)();float ux=0,uy=0;if(!actualTarget->GetShadowCenter(ux,uy))return false;
     const double vision=p->mBoard->GetCellCenterX(p->mBoard->GetColumnCount()-1,p->mRow)+1.85*kFusionBasePixelsX;
     while(p->mBoard->IterateZombies(candidate))
@@ -283,9 +339,12 @@ bool TryEnhanceNativeUmbrellaProjectile(Projectile* p,Plant* actualTarget)
     if(!z)return SetNativeLobberRetarget(p,p->mRow,0,float(-10*GetNativeFusionPixelsY(p->mBoard)*.01),float(14.715*GetNativeFusionPixelsY(p->mBoard)*.0001));
     float px=0,py=0;if(!GetNativeLobberProjectileCenter(p,px,py))return false;const auto r=z->GetZombieRect();
     float vx=0,vy=0,g=0;
-    if(!TryMakeFusionUmbrella267Retarget(px,py,r.mX+r.mWidth*.5,double(r.mY),GetNativeFusionPixelsY(p->mBoard),vx,vy,g))return false;int reinforced=0;if(!TryGetFusionUmbrella267Reinforcement(d->damage,false,reinforced))return false;
-    if(!SetNativeLobberRetarget(p,z->mRow,vx,vy,g))return false;d->damage=reinforced;d->umbrellaed=true;
+    if(!TryMakeFusionUmbrella267Retarget(px,py,r.mX+r.mWidth*.5,double(r.mY),GetNativeFusionPixelsY(p->mBoard),vx,vy,g))return false;int reinforced=0;if(!TryGetFusionUmbrella267Reinforcement(d->damage,relay,reinforced))return false;
+    int base369=0;
+    if(d->sourceUnmodifiedDamage369&&!TryGetFusionUmbrella267Reinforcement(d->sourceUnmodifiedDamage369,relay,base369))return false;
+    if(!SetNativeLobberRetarget(p,z->mRow,vx,vy,g))return false;d->damage=reinforced;d->sourceUnmodifiedDamage369=base369;d->umbrellaed=true;
     if(d->kind==53)p->mBoard->AddCoin(int(px-20),int(py-20),COIN_SMALLSUN,COIN_MOTION_FROM_PLANT,SEED_NONE,5);
+    if(payCoin)EmitNativeMoneyItem(p->mBoard,px,py,34);
     LawnNet::NetTrace("Fusion native Umbrella267 reinforce plant=%u projectile=%u damage=%d tick=%d",actualTarget->mNetId,p->mNetId,reinforced,p->mBoard->mMainCounter);return true;
 }
 int GetNativeUmbrella267LightContribution(const Plant* p)

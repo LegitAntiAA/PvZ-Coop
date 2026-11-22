@@ -6,6 +6,9 @@
 #include "FusionNativePlacement.h"
 #include "FusionNativeVisual.h"
 #include "FusionWire.h"
+#include "FusionNativeConveyor308.h"
+#include "FusionNativeSourceLifecycle313.h"
+#include "../SeedPacket.h"
 #include "../Board.h"
 #include "../Coin.h"
 #include "../Plant.h"
@@ -51,7 +54,7 @@ bool CanCreateNativeDroppedCard269(Board* b,uint16_t kind,int cost)
  !b->mCoins.mBlock||b->mCoins.mSize>=b->mCoins.mMaxSize)return false;
  size_t count=0;Coin* c=nullptr;while(b->IterateCoins(c))if(!c->mDead&&GetNativeDroppedCard269Data(c))++count;
  return count<128&&EnsureNativePortraitVisuals(b,kind);}
-Coin* CreateNativeDroppedCard269(Board* b,uint16_t kind,int cost,float x,float y)
+Coin* CreateNativeDroppedCard269(Board* b,uint16_t kind,int cost,float x,float y,bool toss)
 {
     if(!Point(x,y)||!CanCreateNativeDroppedCard269(b,kind,cost))return nullptr;
     auto* c=b->mCoins.DataArrayAlloc();c->mApp=b->mApp;c->mBoard=b;
@@ -61,7 +64,7 @@ Coin* CreateNativeDroppedCard269(Board* b,uint16_t kind,int cost,float x,float y
     *d={};d->kind=kind;d->cost=cost;d->instanceToken=b->mCoins.DataArrayGetID(c);
     c->mUsableSeedType=GetNativeSeedForPlant(kind);c->mX=c->mY=0;c->mWidth=50;c->mHeight=70;c->mScale=1;
     c->mPosX=x-25;c->mPosY=y-35;c->mCoinAge=c->mDisappearCounter=c->mFadeCount=c->mTimesDropped=0;c->mIsBeingCollected=false;c->mHitGround=false;
-    c->mVelX=RandRangeFloat(-2,2)*float(kFusionBasePixelsX*.01);c->mVelY=-RandRangeFloat(2,3)*float(GetNativeFusionPixelsY(b)*.01);
+    c->mVelX=toss?RandRangeFloat(-2,2)*float(kFusionBasePixelsX*.01):0;c->mVelY=toss?-RandRangeFloat(2,3)*float(GetNativeFusionPixelsY(b)*.01):0;
     c->mGroundY=int(b->GridToPixelY(0,GetNativeFusionRowCount(b)-1)+50+.1*GetNativeFusionPixelsY(b)-35);
     LawnNet::NetTrace("Fusion DroppedCard269 birth id=%u token=%u kind=%u cost=%d x=%.9g y=%.9g",c->mNetId,d->instanceToken,kind,cost,x,y);return c;
 }
@@ -81,6 +84,9 @@ bool UpdateNativeDroppedCard269(Coin* c,bool tutorial)
 {
     if(!IsNativeDroppedCard269(c))return false;if(c->mDead||c->mNetGhost||!Host(c->mBoard)||!CanApplyNativeFusionGameplay(c->mBoard))return true;
     auto* d=EditNativeDroppedCard269Data(c);const auto age=c->mCoinAge;
+    if(d->fallByBoss366)
+    {++c->mCoinAge;c->mVelY+=float(9.8*GetNativeFusionPixelsY(c->mBoard)*.0001);c->mPosX+=c->mVelX;c->mPosY+=c->mVelY;
+     if(c->mCoinAge>500)c->Die();return true;}
     if(!d->landed)
     {c->mVelY+=float(9.8*GetNativeFusionPixelsY(c->mBoard)*.0001);c->mPosX+=c->mVelX;c->mPosY+=c->mVelY;
      if(c->mPosY>c->mGroundY){c->mPosY=float(c->mGroundY);d->landed=true;}
@@ -99,7 +105,7 @@ Coin* GetNativeDroppedCard269Held(const Board* b,int slot)
 {if(!Current(b)||slot<0||slot>=4)return nullptr;Coin* c=nullptr;while(const_cast<Board*>(b)->IterateCoins(c))if(!c->mDead)if(const auto* d=GetNativeDroppedCard269Data(c))if(d->heldSlot==slot)return c;return nullptr;}
 Coin* FindNativeDroppedCard269At(Board* b,float x,float y)
 {if(!Current(b)||!Point(x,y))return nullptr;Coin* c=nullptr;Coin* result=nullptr;while(b->IterateCoins(c))if(!c->mDead)
- if(const auto* d=GetNativeDroppedCard269Data(c))if(d->heldSlot==255&&x>=c->mPosX&&x<=c->mPosX+50&&y>=c->mPosY&&y<=c->mPosY+70)result=c;return result;}
+ if(const auto* d=GetNativeDroppedCard269Data(c))if(!d->fallByBoss366&&d->heldSlot==255&&x>=c->mPosX&&x<=c->mPosX+50&&y>=c->mPosY&&y<=c->mPosY+70)result=c;return result;}
 bool DrawNativeDroppedCard269(Sexy::Graphics* g,const Coin* c)
 {if(!IsNativeDroppedCard269(c))return false;const auto* d=GetNativeDroppedCard269Data(c);if(c->mDead||d->heldSlot!=255)return true;
  DrawNativeFusionSeedPacket(g,c->mPosX,c->mPosY,d->kind,false,d->cost,0,Gray(c,*d),true);return true;}
@@ -110,7 +116,7 @@ bool HandleNativeDroppedCard269Command(Board* b,int slot,NativeDroppedCard269Act
 {
     const auto* ctx=GetNativeContext(b);if(!ctx||!Host(b)||!Active(b,slot)||command.epoch!=ctx->epoch)return false;
     auto* c=Resolve(b,command.sourceId,command.sourceToken);if(!c)return false;auto* d=EditNativeDroppedCard269Data(c);
-    if(command.kind!=d->kind||!NativeDroppedCard269DataValid(*d))return false;
+    if(command.kind!=d->kind||d->fallByBoss366||!NativeDroppedCard269DataValid(*d))return false;
     if(action==NativeDroppedCard269Action::PutDown)
     {if(d->heldSlot!=slot)return false;d->heldSlot=255;ClearCursor(b,slot,c);return true;}
     if(ctx->selection.State().phase!=FusionBankPhase::Playing||b->mPaused||b->mApp->mGameScene!=SCENE_PLAYING||b->mApp->GetDialogCount())return false;
@@ -132,4 +138,28 @@ void RefreshNativeDroppedCard269Cursors(Board* b)
 {if(!Current(b))return;for(int slot=0;slot<4;++slot)
  {auto* card=GetNativeDroppedCard269Held(b,slot);if(card&&Active(b,slot))HoldCursor(b,slot,card);else{if(Host(b)&&card)EditNativeDroppedCard269Data(card)->heldSlot=255;
   if(auto* c=Cursor(b,slot))if(c->mCursorType==CURSOR_TYPE_PLANT_FROM_USABLE_COIN){auto* actual=b->mCoins.DataArrayTryToGet(c->mCoinID);if(!actual||IsNativeDroppedCard269(actual))ClearCursor(b,slot,nullptr);}}}}
+bool FallNativeDroppedCardByBoss366(Coin* c)
+{if(!c||!Host(c->mBoard)||c->mDead)return false;auto* d=EditNativeDroppedCard269Data(c);if(!d)return false;
+ if(d->heldSlot<4)ClearCursor(c->mBoard,d->heldSlot,c);d->heldSlot=255;d->fallByBoss366=true;d->landed=d->flashing=false;
+ c->mCoinAge=c->mDisappearCounter=0;c->mVelY=0;c->mHitGround=false;return true;}
+bool CanFallNativeConveyorCards366(Board* b,std::string* error)
+{
+ if(!Host(b))return false;if(!IsNativeSourceConveyor308(b))return true;auto* ctx=GetNativeContext(b);
+ const auto& packets=ctx->selection.State().packets;unsigned dropped=0;Coin* c=nullptr;while(b->mCoins.IterateNext(c))if(!c->mDead&&IsNativeDroppedCard269(c))++dropped;
+ if(packets.size()+dropped>128)return false;
+ for(const auto& packet:packets)if(!CanCreateNativeDroppedCard269(b,packet.kind,packet.price))return false;
+ FusionSourceDeathBudget319 peak;peak.coins=packets.size();peak.droppedCards=packets.size();return CanAllocateNativeSourceBudget319(b,peak,error);
+}
+bool FallNativeConveyorCards366(Board* b)
+{
+ if(!CanFallNativeConveyorCards366(b))return false;if(!IsNativeSourceConveyor308(b))return true;auto* ctx=GetNativeContext(b);auto next=ctx->selection;
+ const auto packets=next.State().packets;auto empty=next.State();empty.packets.clear();++empty.revision;if(!next.ApplySnapshot(empty))return false;
+ struct Birth{FusionBankPacket packet;float x=0,y=0;uint16_t oldId=0;};std::vector<Birth> plan;plan.reserve(packets.size());
+ for(const auto& packet:packets){SeedPacket* raw=nullptr;for(int i=0;i<b->mSeedBank->mNumPackets;++i){auto* q=&b->mSeedBank->mSeedPackets[i];const auto found=ctx->packets.find(q->mNetId);if(found!=ctx->packets.end()&&found->second.selectionId==packet.id){raw=q;break;}}if(!raw)return false;
+  plan.push_back({packet,float(b->mSeedBank->mX+raw->mX+raw->mWidth/2),float(b->mSeedBank->mY+raw->mY+raw->mHeight/2),raw->mNetId});}
+ // Capture all source cards before changing the queue. The existing Coin is
+ // the native fall/Draw carrier; no player use, free purchase or extra RNG.
+ for(const auto& item:plan){auto* c=CreateNativeDroppedCard269(b,item.packet.kind,item.packet.price,item.x,item.y,false);if(!c)return false;c->mNetId=item.oldId;c->mTimesDropped=item.packet.conveyorUses;if(!FallNativeDroppedCardByBoss366(c))return false;}
+ ctx->selection=std::move(next);return SyncNativeConveyor308(b);
+}
 }

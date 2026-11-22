@@ -196,7 +196,7 @@ FusionSourceZombieWireTestResult RunFusionSourceZombieWireTests()
     // All byte truncations, including the appended record's final target token.
     for (size_t length=0;length<wire.Size();++length)
     { auto truncated=wire; truncated.mData.resize(length); RejectWireAtomically(truncated); }
-    for (uint16_t version : {uint16_t(13),uint16_t(14),uint16_t(15),uint16_t(16),uint16_t(17),uint16_t(18),uint16_t(19),uint16_t(20),uint16_t(21),uint16_t(22),uint16_t(23),uint16_t(24),uint16_t(25),uint16_t(26),uint16_t(27),uint16_t(28),uint16_t(30)})
+    for (uint16_t version : {uint16_t(13),uint16_t(14),uint16_t(15),uint16_t(16),uint16_t(17),uint16_t(18),uint16_t(19),uint16_t(20),uint16_t(21),uint16_t(22),uint16_t(23),uint16_t(24),uint16_t(25),uint16_t(26),uint16_t(27),uint16_t(28),uint16_t(29),uint16_t(kNativeFusionSnapshotVersion+1)})
     { auto wrongVersion=wire; PutU16(wrongVersion,4,version); RejectWireAtomically(wrongVersion); }
     // FNS18 action record id2+mask1+scale4+Doom/JalaedBool2+poisonI32*3+waterGrapI32*2 precedes the unchanged
     // coin/glove/money/light/Garlic/source tail. Noncanonical Bool must reject

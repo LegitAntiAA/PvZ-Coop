@@ -1,3 +1,4 @@
+#include "FusionNativeProjectileBuff369.h"
 #include "FusionNativeRemainingLeaves269.h"
 #include "FusionNativeRemainingPlants269.h"
 #include "FusionNative.h"
@@ -61,7 +62,7 @@ Projectile* Emit(Plant* p,uint16_t kind,uint8_t way,int damage,const char* path,
     auto* b=p->mBoard;float x=0,y=0;if(!GetNativeSourcePlantNodePoint(p,path,x,y)||!EnsureNativeProjectileVisuals(b,kind)||b->mProjectiles.mSize>=b->mProjectiles.mMaxSize)return nullptr;
     auto* q=b->AddProjectile(int(x-20),int(y-20),p->mRenderOrder-1,p->mRow,PROJECTILE_PEA);if(!q)return nullptr;
     NativeProjectileData d;d.kind=kind;d.damage=damage;d.specialType=way;d.effectVariant=kind==8?3:0;q->mMotionType=kind==8?MOTION_HOMING:MOTION_STAR;
-    if(!AttachNativeProjectile(b,q,d)){q->Die();return nullptr;}
+    if(!AttachNativeTravelProjectile369(p,q,d)){q->Die();return nullptr;}
     q->mPosX=x-20;q->mPosY=y-20;q->mPosZ=q->mVelZ=q->mAccZ=0;q->mShadowY=y;q->mRotation=float(angle);q->mRotationSpeed=0;
     q->mVelX=float(std::cos(angle)*(kind==8?5:6)*kFusionBasePixelsX*.01);q->mVelY=float(-std::sin(angle)*(kind==8?5:6)*GetNativeFusionPixelsY(b)*.01);
     q->mTargetZombieID=ZOMBIEID_NULL;q->mX=int(q->mPosX);q->mY=int(q->mPosY);return q;
@@ -236,7 +237,7 @@ bool DispatchNativeRemainingLeaves269Events(Plant* p)
 bool GetNativeRemainingLeaves269VisualPose(const Plant* p,const char*& state,float& seconds)
 {if(!IsNativeRemainingLeaves269Plant(p))return false;const auto* d=GetNativePlantData(p);state=d->shootSeconds>=0?"shoot":"idle";seconds=d->shootSeconds>=0?d->shootSeconds:d->idleSeconds;return true;}
 bool IsNativeRemainingLeaves269Projectile(const Projectile* p)
-{const auto* d=GetNativeProjectileData(p);return d&&FusionRemainingLeaves269ProjectileValid(d->kind,d->damage,d->specialType,d->effectVariant,p->mProjectileType,p->mMotionType);}
+{const auto* d=GetNativeProjectileData(p);return d&&FusionRemainingLeaves269ProjectileValid(d->kind,NativeProjectileValidationDamage369(*d),d->specialType,d->effectVariant,p->mProjectileType,p->mMotionType);}
 bool GetNativeRemainingLeaves269ProjectileRect(const Projectile* p,Sexy::Rect& out)
 {if(!IsNativeRemainingLeaves269Projectile(p))return false;const auto* d=GetNativeProjectileData(p);const double c=std::cos(p->mRotation),s=std::sin(p->mRotation),py=GetNativeFusionPixelsY(p->mBoard);
  const double offset=d->kind==51?2.5235982*.3:0,hw=d->kind==51?3.8728037*.3*.5:.2,hh=d->kind==51?.5446532*.4*.5:.2;

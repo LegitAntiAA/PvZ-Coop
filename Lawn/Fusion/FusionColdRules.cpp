@@ -6,7 +6,7 @@ namespace LawnFusion
 {
 namespace
 {
-constexpr FusionColdProjectileProfile profiles[] = {{15,10,1,false},{18,5,3,true},{21,10,1,false},{24,5,3,true},{97,20,1,false,2}};
+constexpr FusionColdProjectileProfile profiles[] = {{15,10,1,false},{18,5,3,true},{21,10,1,false},{24,5,3,true},{97,20,1,false,2},{101,10,1,false}};
 constexpr FusionColdContactProfile contactProfiles[]={{1036,-.0028865205,.227090355,.48337584,.557946645,400}};
 bool Valid(const FusionColdState& state)
 {

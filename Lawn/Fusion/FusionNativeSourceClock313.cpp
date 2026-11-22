@@ -28,7 +28,7 @@ bool IsNativeSourceWorld313(const Board* b)
 {
     const auto* c=GetNativeContext(b);
     if(!b||!b->mApp||b->mApp->mBoard!=b||!IsNativeFusionBoard(b)||!c||c->adventureTeardown||
-       !c->epoch||c->epoch!=b->mApp->mNativeFusionEpoch||int(b->mBackground)<0||int(b->mBackground)>4||
+       !c->epoch||c->epoch!=b->mApp->mNativeFusionEpoch||int(b->mBackground)<0||int(b->mBackground)>int(BACKGROUND_6_BOSS)||
        b->GetColumnCount()!=10||!b->mTDPath.empty())return false;
     const int rows=GetNativeFusionRowCount(b),expected=NativeFusionRowsForBackground(uint8_t(b->mBackground));
     if(rows!=expected)return false;
@@ -88,6 +88,7 @@ NativeSourceZombieInitialization313::~NativeSourceZombieInitialization313()
         {
             NativeJackbox309Removing(z);
             RemoveNativeWaterZombie313Actor(z);
+            RemoveNativeBoss361State(z);
             if(const auto graph=context->sourceGraphs313.find(uid);graph!=context->sourceGraphs313.end())
                 for(const uint32_t auxiliary:graph->second.auxiliaryUIDs)
                     if(auxiliary)

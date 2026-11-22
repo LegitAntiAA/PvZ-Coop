@@ -14,6 +14,7 @@ struct NativeWorld269PlantState
     FusionWorld269Reference receiver{},connectedPlant{};
     int energy=0,maximumEnergy=0,contributors=0;
     bool connected=false,main=false;
+    bool connectedAttackBonus369=false; // Source modifier1 sampled on Connected, not at buff award.
     int explosionDeadline=0; // Absolute real Board tick; no independent clock.
 };
 struct NativeWorld269BeamState

@@ -1,3 +1,4 @@
+#include "../Fusion/FusionQuickJackson367Rules.h"
 #include "../Fusion/FusionNativeConveyor308.h"
 #include "../Fusion/FusionConveyor348Rules.h"
 #include "../Board.h"
@@ -36,12 +37,15 @@
 #include "NetSourceCharred315.h"
 #include "../Fusion/FusionNativeSourceClock313.h"
 #include "../Fusion/FusionNative313SnapshotBridge.h"
+#include "../Fusion/FusionNativeBoss361Bridge.h"
+#include "../Fusion/FusionNativeBossRoom366.h"
 #include "../Fusion/FusionNativeZombie313Dispatch.h"
 #include "../Fusion/FusionNativeObstacle313.h"
 #include "../Fusion/FusionNativeSourceObstacleFactory313.h"
 #include "../Fusion/FusionNativeHeavyZombie313BBridge.h"
 #include "NetZombatar.h"
 #include "../Fusion/FusionNative.h"
+#include "../Fusion/FusionNativePlantDisable363.h"
 #include "../Fusion/FusionNativeWire.h"
 #include "../Fusion/FusionNativeEffects269.h"
 #include "../Fusion/FusionNativeAdventureProgress273.h"
@@ -209,7 +213,7 @@ bool NetFusionEquipmentCoinRawValid(const NetBuffer& bytes,size_t start,const La
     return true;
 }
 bool NetHas313(const LawnFusion::NativeSnapshotFrame& frame)
-{return !frame.sourceGraphs313.empty()||!frame.waterZombies313.empty()||!frame.heavyZombies313.empty()||!frame.extendedZombies313.empty()||!frame.sourceObstacles313.empty()||!frame.capturedPlants314.empty();}
+{return !frame.sourceGraphs313.empty()||!frame.waterZombies313.empty()||!frame.heavyZombies313.empty()||!frame.extendedZombies313.empty()||!frame.sourceObstacles313.empty()||!frame.capturedPlants314.empty()||!frame.bossZombies361.empty()||frame.bossRoom366.enabled;}
 void NetGather313(const LawnFusion::NativeSnapshotFrame& frame,uint16_t id,LawnFusion::Native313Snapshot& out)
 {
     out={};
@@ -217,6 +221,7 @@ void NetGather313(const LawnFusion::NativeSnapshotFrame& frame,uint16_t id,LawnF
     for(const auto& r:frame.waterZombies313)if(r.id==id)out.water=r.data;
     for(const auto& r:frame.heavyZombies313)if(r.id==id)out.heavy=r.data;
     for(const auto& r:frame.extendedZombies313)if(r.id==id)out.extended=r.data;
+    for(const auto& r:frame.bossZombies361)if(r.id==id)out.boss=r.data;
 }
 struct NetCaptured314Staging
 {
@@ -236,7 +241,7 @@ void NetPruneNativeFusionBridgeMetadata(Board* board,LawnFusion::NativeContext& 
     prune(context.worldPlants269,board->mPlants);prune(context.worldBeams269,board->mProjectiles);
     prune(context.worldRemainder269Aux,board->mProjectiles);prune(context.worldRemainder269Shots,board->mProjectiles);
     prune(context.sourceGraphs313,board->mZombies);prune(context.waterZombies313,board->mZombies);
-    prune(context.heavyZombies313B,board->mZombies);prune(context.extendedZombies313,board->mZombies);
+    prune(context.heavyZombies313B,board->mZombies);prune(context.extendedZombies313,board->mZombies);prune(context.bossZombies361,board->mZombies);
     prune(context.sourceObstacles313,board->mProjectiles);LawnFusion::PruneNativeSourceGraph313Clocks(board);
     if(auto* captures=LawnFusion::GetNativeCapturedPlants314(board))captures->Prune();
     prune(context.droppedCards269,board->mCoins);prune(context.fertilizeCoins269,board->mCoins);prune(context.rollingPlants269,board->mPlants);prune(context.wheatPlants269,board->mPlants);
@@ -248,6 +253,15 @@ bool NetCaptureNativeFusionFrame(Board* board, LawnFusion::NativeSnapshotFrame& 
     NetPruneNativeFusionBridgeMetadata(board,*context);
 	frame.epoch = context->epoch;
     frame.sourcePoints=context->sourcePoints;frame.extendedBoard313=context->extendedBoard313;
+    frame.bossRoom366=context->bossRoom366;frame.bossRoom366.lastTick=-1;
+    if(frame.bossRoom366.trophyId&&!(frame.bossRoom366.won&&frame.bossRoom366.trophyClaimed))
+    {
+        // Host capture proves the real generation. The transmitted token stays
+        // opaque on clients; their local Coin UID is never substituted for it.
+        if(board->mApp->NetIsClient())return false;
+        const auto* trophy=board->mCoins.DataArrayTryToGet(frame.bossRoom366.trophyToken);
+        if(!trophy||trophy->mDead||trophy->mType!=COIN_TROPHY||trophy->mNetId!=frame.bossRoom366.trophyId)return false;
+    }
     frame.worldRemainder269Board=context->worldRemainder269Board;frame.goldHypnoSummoned=context->goldHypnoSummoned;
 	frame.background = static_cast<uint8_t>(board->mBackground);
 	frame.selectionCommitted = context->selectionCommitted;
@@ -332,7 +346,7 @@ bool NetCaptureNativeFusionFrame(Board* board, LawnFusion::NativeSnapshotFrame& 
                     captured.paperShootEvent=uint8_t(zombie->mBossHeadCounter);
                 }
                 frame.sourceZombies.push_back({zombie->mNetId,captured});
-                if(LawnFusion::FusionWaterZombie313Kind(data->kind)||LawnFusion::NativeHeavyZombie313BKind(data->kind)||LawnFusion::FindFusionExtendedZombie313Profile(data->kind))
+                if(LawnFusion::FusionWaterZombie313Kind(data->kind)||LawnFusion::NativeHeavyZombie313BKind(data->kind)||LawnFusion::FindFusionExtendedZombie313Profile(data->kind)||LawnFusion::FusionBoss361Kind(data->kind))
                 {
                     LawnFusion::Native313Snapshot mirror;std::string error;
                     if(!LawnFusion::CaptureNative313(zombie,mirror,&error)){NetTrace("FNS28 source313 capture rejected id=%u kind=%u error=%s",zombie->mNetId,data->kind,error.c_str());return false;}
@@ -340,6 +354,7 @@ bool NetCaptureNativeFusionFrame(Board* board, LawnFusion::NativeSnapshotFrame& 
                     if(mirror.water)frame.waterZombies313.push_back({zombie->mNetId,*mirror.water});
                     if(mirror.heavy)frame.heavyZombies313.push_back({zombie->mNetId,*mirror.heavy});
                     if(mirror.extended)frame.extendedZombies313.push_back({zombie->mNetId,*mirror.extended});
+                    if(mirror.boss)frame.bossZombies361.push_back({zombie->mNetId,*mirror.boss});
                 }
                 if(data->kind==45)
                 {
@@ -354,7 +369,7 @@ bool NetCaptureNativeFusionFrame(Board* board, LawnFusion::NativeSnapshotFrame& 
                     if(found==context->jackboxZombies300.end()||!found->second.initialized||found->second.failed)return false;
                     frame.jackboxZombies300.push_back({zombie->mNetId,static_cast<const LawnFusion::FusionJackbox300View&>(found->second)});
                 }
-                if(data->kind==10)
+                if(LawnFusion::FusionJacksonFamily367Kind(data->kind))
                 {
                     const auto found=context->nightZombies281.find(token);
                     if(found==context->nightZombies281.end()||!found->second.initialized||found->second.failed)return false;
@@ -410,6 +425,7 @@ bool NetCaptureNativeFusionFrame(Board* board, LawnFusion::NativeSnapshotFrame& 
 			const int value = LawnFusion::GetNativeCoinValue(coin, -1);
 			if (value != -1) frame.coins.push_back({coin->mNetId, {value,LawnFusion::IsNativeMoneyCoin(coin)}});
 		}
+    frame.travelBuff369=board->mApp->mFusionTravelBuff369;frame.travelBuffCooldown369=context->travelBuffCooldown369;
 	frame.money = context->money;
 	frame.adventure = context->adventure;
 	frame.temporaryLightLevel = context->temporaryLightLevel;
@@ -460,6 +476,10 @@ bool NetPreflightNativeFusionBody(const NetBuffer& body, const LawnFusion::Nativ
 			const auto& data = metadata->data;
 			const uint8_t nativeType = static_cast<uint8_t>(LawnFusion::GetNativeSeedForPlant(data.kind));
 			if (type != nativeType || owner != data.owner || origin != data.randomOrigin) return false;
+            if(data.kind==245&&frame.selection.phase==LawnFusion::FusionBankPhase::Playing&&
+               LawnFusion::FusionAdventureBankPolicy308(frame.adventure)!=LawnFusion::FusionBankPolicy::SourceConveyor&&
+               LawnFusion::HasFusionTravelAdvanced360(frame.travelBuff369,32))
+            {NetBuffer refresh=scan;refresh.mReadPos=start+17;if(refresh.ReadU16Or()!=5000)return false;}
 		}
 		else if (type != 255 || origin) return false;
 		scan.mReadPos = start + NET_SEED_PACKET_WIRE_BYTES;
@@ -563,7 +583,8 @@ bool NetPreflightNativeFusionBody(const NetBuffer& body, const LawnFusion::Nativ
                         [=](const auto& value){return value.id==id;});
                     if(day!=frame.dayZombies273.end()&&!NetPaperHeadFitsNativeFrames(day->data.head))return false;
 					const int sourceRow=scan.mData[start+3];
-					if(sourceProfile&&sourceProfile->waterOnly&&(LawnFusion::NativeFusionRowsForBackground(frame.background)!=6||(sourceRow!=2&&sourceRow!=3)))return false;
+					const bool incomingDirect362=frame.adventure.enabled||LawnFusion::GetNativeContext(board)->validation;
+                    if(sourceProfile&&sourceProfile->waterOnly&&!incomingDirect362&&(LawnFusion::NativeFusionRowsForBackground(frame.background)!=6||(sourceRow!=2&&sourceRow!=3)))return false;
 					const auto sourcePhase = sourceBody.ReadU8Or(), sourceHeight = sourceBody.ReadU8Or();
 					const bool sourcePoolTransition=(sourceHeight==HEIGHT_IN_TO_POOL||sourceHeight==HEIGHT_OUT_OF_POOL)&&
 						LawnFusion::NativeFusionRowsForBackground(frame.background)==6&&(sourceRow==2||sourceRow==3);
@@ -640,6 +661,7 @@ bool NetPreflightNativeFusionBody(const NetBuffer& body, const LawnFusion::Nativ
 			}
 			else if (section == 3)
 			{
+                if(id==frame.bossRoom366.trophyId&&type!=COIN_TROPHY)return false;
 				coinIds.insert(id);
                 NetBuffer clock=scan;clock.mReadPos=start+30;const int age=clock.ReadI32Or(),lifetime=clock.ReadI32Or();
                 NetBuffer prefix=scan;prefix.mReadPos=start+23;
@@ -699,10 +721,12 @@ bool NetPreflightNativeFusionBody(const NetBuffer& body, const LawnFusion::Nativ
     for(const auto& record:frame.waterZombies313)if(!zombieIds.contains(record.id))return false;
     for(const auto& record:frame.heavyZombies313)if(!zombieIds.contains(record.id))return false;
     for(const auto& record:frame.extendedZombies313)if(!zombieIds.contains(record.id))return false;
+    for(const auto& record:frame.bossZombies361)if(!zombieIds.contains(record.id))return false;
+    if(frame.bossRoom366.trophyId&&!coinIds.contains(frame.bossRoom366.trophyId)&&!(frame.bossRoom366.won&&frame.bossRoom366.trophyClaimed))return false;
     for(const auto& record:frame.sourceObstacles313)if(!projectileIds.contains(record.id))return false;
     for(const auto& record:frame.capturedPlants314)if(!zombieIds.contains(record.id))return false;
     if((!frame.sourceGraphs313.empty()||!frame.waterZombies313.empty()||!frame.sourceObstacles313.empty()||!frame.capturedPlants314.empty())&&
-       (frame.background>BACKGROUND_5_ROOF||frame.sourceZombies.size()!=zombieIds.size()))return false;
+       (frame.background>BACKGROUND_6_BOSS||frame.sourceZombies.size()!=zombieIds.size()))return false;
     // Raw source row bounds also cover six-row dry births and genuine Bungee
     // target-row movement; canonical family state is validated above.
 	for (const auto& record : frame.coins) if (!coinIds.contains(record.id)) return false;
@@ -724,9 +748,11 @@ bool NetPreflight313Resources(Board* board,const NetBuffer& body,const LawnFusio
 {
     using namespace LawnFusion;
     if(!NetHas313(frame)){out={};return true;}
-    if(!board||!board->mApp||board->mApp->mBoard!=board||!board->mTDPath.empty()||board->GetColumnCount()!=10||frame.background>BACKGROUND_5_ROOF)return false;
+    if(!board||!board->mApp||board->mApp->mBoard!=board||!board->mTDPath.empty()||board->GetColumnCount()!=10||frame.background>BACKGROUND_6_BOSS)return false;
     std::vector<Native313Snapshot> mirrors;std::vector<Native313GhostRequest> requests;
     mirrors.reserve(frame.sourceZombies.size());requests.reserve(frame.sourceZombies.size());
+    // Resource-only cache admission before raw actors/background are changed.
+    if(frame.bossRoom366.enabled&&!EnsureNativeBossRoom366(board))return false;
     NetBuffer scan=body;scan.mReadPos=43+MAX_GRID_SIZE_Y*4+9+10+NET_CHALLENGE_RUNTIME_WIRE_BYTES+NET_ENDLESS_WEATHER_WIRE_BYTES+NET_ZEN_GARDEN_WIRE_BYTES+6;
     uint8_t packets=0;if(!scan.ReadU8(&packets)||scan.Remaining()<size_t(packets)*NET_SEED_PACKET_WIRE_BYTES)return false;
     scan.mReadPos+=size_t(packets)*NET_SEED_PACKET_WIRE_BYTES;uint16_t plants=0,zombies=0;
@@ -746,7 +772,7 @@ bool NetPreflight313Resources(Board* board,const NetBuffer& body,const LawnFusio
             const int rows=NativeFusionRowsForBackground(frame.background);uint8_t water[6]{};if(rows==6)water[2]=water[3]=1;
             if(!FusionWaterZombie313WorldValid(kind,rows,rows==6,std::span<const uint8_t>(water,rows),row,bool(scan.mData[start+50]&128)))return false;
         }
-        if(FusionWaterZombie313Kind(kind)||NativeHeavyZombie313BKind(kind)||FindFusionExtendedZombie313Profile(kind))
+        if(FusionWaterZombie313Kind(kind)||NativeHeavyZombie313BKind(kind)||FindFusionExtendedZombie313Profile(kind)||FusionBoss361Kind(kind))
         {
             NetBuffer clock=scan;clock.mReadPos=start+68;NetZombieAnimState bodyClock;
             if(!NetDecodeZombieAnimState(clock,bodyClock))return false;
@@ -915,11 +941,12 @@ bool NetBindNativeFusionFrame(Board* board, const LawnFusion::NativeSnapshotFram
     }
     for(const auto& source:frame.sourceZombies)
     {
-        if(!LawnFusion::FusionWaterZombie313Kind(source.data.kind)&&!LawnFusion::NativeHeavyZombie313BKind(source.data.kind)&&!LawnFusion::FindFusionExtendedZombie313Profile(source.data.kind))continue;
+        if(!LawnFusion::FusionWaterZombie313Kind(source.data.kind)&&!LawnFusion::NativeHeavyZombie313BKind(source.data.kind)&&!LawnFusion::FindFusionExtendedZombie313Profile(source.data.kind)&&!LawnFusion::FusionBoss361Kind(source.data.kind))continue;
         LawnFusion::Native313Snapshot mirror;NetGather313(frame,source.id,mirror);std::string error;
         if(!LawnFusion::AdoptNative313(board->NetGetGhostZombie(source.id),mirror,&error))
         {NetTrace("FNS28 prepared source313 adoption failed id=%u error=%s",source.id,error.c_str());return false;}
     }
+    context->bossRoom366=frame.bossRoom366;context->bossRoom366.lastTick=-1;
     for(const auto& record:frame.sourceObstacles313)
         if(!LawnFusion::AdoptNativeSourceObstacle313(board->NetGetGhostProjectile(record.id),record.data))return false;
     if(auto* captures=LawnFusion::GetNativeCapturedPlants314(board))
@@ -954,7 +981,7 @@ bool NetBindNativeFusionFrame(Board* board, const LawnFusion::NativeSnapshotFram
     {
         auto* zombie=board->NetGetGhostZombie(record.id);
         const auto* source=LawnFusion::GetNativeSourceZombieData(zombie);
-        if(!zombie||!source||source->kind!=10)return false;
+        if(!zombie||!source||!LawnFusion::FusionJacksonFamily367Kind(source->kind))return false;
         auto& state=context->nightZombies281[board->mZombies.DataArrayGetID(zombie)];
         static_cast<LawnFusion::FusionNightZombie281View&>(state)=record.data;
         state.initialized=true; // Ghosts adopt this view and never tick source callbacks.
@@ -1015,6 +1042,7 @@ bool NetBindNativeFusionFrame(Board* board, const LawnFusion::NativeSnapshotFram
 		if (!LawnFusion::AttachNativeZombieGarlicData(board,zombie,record.data) ||
 			!LawnFusion::RestoreNativeGarlicPresentation(zombie,record.data)) return false;
 	}
+    board->mApp->mFusionTravelBuff369=frame.travelBuff369;context->travelBuffCooldown369=frame.travelBuffCooldown369;
 	context->money = frame.money;
 	context->adventure = frame.adventure;
 	context->temporaryLightLevel = frame.temporaryLightLevel;
@@ -1022,6 +1050,7 @@ bool NetBindNativeFusionFrame(Board* board, const LawnFusion::NativeSnapshotFram
 	context->selectionCommitted = frame.selectionCommitted;
 	context->gloveHolds = frame.gloveHolds;
 	context->gloveCooldownTicks = frame.gloveCooldownTicks;
+    LawnFusion::ReconcileNativePlantDisables363(board);
 	LawnFusion::ReleaseUnusedNativeVisuals(board);
 	LawnFusion::ReleaseUnusedNativeSourceZombieVisuals(board);
 	// Client Board::Update skips host spawning/tutorial updates. Materialize the
@@ -1166,7 +1195,7 @@ bool NetDay273AllocationCapacity(Board* board,const NetBuffer& body,const LawnFu
     if(!board||!board->mApp||!LawnFusion::GetNativeContext(board))return reject("no-board-context");
     auto* app=board->mApp;auto* effects=app->mEffectSystem;
     if(app->mUpdateAppDepth>1||!board->mTDPath.empty()||board->GetColumnCount()!=10||
-       (cohort313?frame.background>BACKGROUND_5_ROOF:
+       (cohort313?frame.background>BACKGROUND_6_BOSS:
         (!LawnFusion::IsNativeSourceWorld313(board)||LawnFusion::GetNativeFusionRowCount(board)!=5||app->mGameMode!=GAMEMODE_ADVENTURE||frame.background!=board->mBackground)))
         return reject("only-nonreentrant-ordinary-source-world");
     if(!effects||effects!=gEffectSystem||!effects->mReanimationHolder||!effects->mAttachmentHolder||!effects->mParticleHolder)
@@ -1287,6 +1316,14 @@ bool NetDay273AllocationCapacity(Board* board,const NetBuffer& body,const LawnFu
                 case ZOMBIE_NORMAL:case ZOMBIE_TRAFFIC_CONE:case ZOMBIE_PAIL:case ZOMBIE_DOOR:case ZOMBIE_POLEVAULTER:
                 case ZOMBIE_NEWSPAPER:case ZOMBIE_FOOTBALL:break;
                 case ZOMBIE_ZAMBONI:if(!cohort313)return reject("zamboni-only-source313",section,type);break;
+                case ZOMBIE_BOSS:
+                    if(!cohort313||std::none_of(frame.sourceZombies.begin(),frame.sourceZombies.end(),[=](const auto& r){return r.id==id&&LawnFusion::FusionBoss361Kind(r.data.kind);}))
+                        return reject("boss-only-canonical-source361",section,type);
+                    // Raw ghost construction owns its body only. The shared
+                    // Boss bridge reserves RV+driver2R/2A: total3R/2A.
+                    if(!plainDefinition(REANIM_BOSS_DRIVER)||!plainDefinition(REANIM_BOSS,"Boss_head2")||!plainDefinition(REANIM_BOSS,"Boss_RV"))
+                        return reject("boss-aux-definitions",section,type);
+                    break;
                 default:return reject("zombie-carrier-not-budgeted",section,type);
                 }
                 const auto reanim=GetZombieDefinition(ZombieType(type)).mReanimationType;
@@ -2059,6 +2096,7 @@ int SourceSound284(uint16_t kind)
     case 8:return Sexy::SOUND_CHOMP;
     case 9:return Sexy::SOUND_CHOMP2;
     case 40:return Sexy::SOUND_CHERRYBOMB; // Source LoadSound[40]: Sound/Bomb/cherrybomb.
+    case 42:return Sexy::SOUND_JALAPENO; // Source LoadSound[42]: Sound/Bomb/jalapeno.
     case 43:return Sexy::SOUND_EXPLOSION;
     case 44:return Sexy::SOUND_NEWSPAPER_RIP;
     case 45:return Sexy::SOUND_NEWSPAPER_RARRGH;
@@ -2071,6 +2109,9 @@ int SourceSound284(uint16_t kind)
     case 63:return Sexy::SOUND_MINDCONTROLLED;
     case 64:return Sexy::SOUND_BONK;
     case 66:return Sexy::SOUND_PRIZE;
+    case 68:return Sexy::SOUND_SNOW_PEA_SPARKLES;
+    case 104:return Sexy::SOUND_MELONIMPACT;
+    case 105:return Sexy::SOUND_MELONIMPACT2;
     case 69:return Sexy::SOUND_DANCER;
     case 72:return Sexy::SOUND_SQUASH_HMM;
     case 73:return Sexy::SOUND_SQUASH_HMM2;
@@ -2081,6 +2122,8 @@ int SourceSound284(uint16_t kind)
     case 78:return Sexy::SOUND_DOLPHIN_APPEARS;
     case 79:return Sexy::SOUND_DOLPHIN_BEFORE_JUMPING;
     case 86:return Sexy::SOUND_BALLOONINFLATE;
+    case 84:return Sexy::SOUND_WINMUSIC;
+    case 93:return Sexy::SOUND_SWING;
     case 90:return Sexy::SOUND_JACK_SURPRISE;
     case 91:return Sexy::SOUND_JACK_SURPRISE2;
     case 94:return Sexy::SOUND_WAKEUP;
@@ -2089,6 +2132,10 @@ int SourceSound284(uint16_t kind)
     case 110:return Sexy::SOUND_IMP;
     case 111:return Sexy::SOUND_IMP2;
     case 112:return Sexy::SOUND_GARGANTUDEATH;
+    case 118:return Sexy::SOUND_HYDRAULIC;
+    case 119:return Sexy::SOUND_HYDRAULIC_SHORT;
+    case 120:return Sexy::SOUND_RVTHROW;
+    case 121:return Sexy::SOUND_BOSSBOULDERATTACK;
     case 122:return Sexy::SOUND_BUNGEE_SCREAM;
     case 123:return Sexy::SOUND_BUNGEE_SCREAM2;
     case 124:return Sexy::SOUND_BUNGEE_SCREAM3;
@@ -2100,18 +2147,18 @@ int ResolveSourceSound313(LawnApp* app,uint16_t kind)
     if(kind!=92)return SourceSound284(kind);
     return app&&app->mSoundManager?app->mSoundManager->LoadSound("fusion/sounds/source-92"):-1;
 }
-bool PlayVolumeSound284(LawnApp* app,int sound,float volume,bool broadcast)
+bool PlayVolumeSound284(LawnApp* app,int sound,float volume,bool broadcast,float pitchRatio=1.f)
 {
     if(!app||!app->mSoundManager||sound<0||sound>UINT16_MAX||!std::isfinite(volume)||volume<0||volume>1)return false;
     if(app->mMuteSoundsForCutscene)return true;
-    if(volume==1.f){app->PlaySample(sound);return true;}
+    if(volume==1.f&&pitchRatio==1.f){app->PlaySample(sound);return true;}
     if(auto* instance=app->mSoundManager->GetSoundInstance(sound))
-    {instance->SetVolume(volume);instance->Play(false,true);}
+    {instance->SetVolume(volume);instance->AdjustPitch(12.0*std::log2(pitchRatio));instance->Play(false,true);}
     // An exhausted local audio channel is cosmetic; peers still consume the
     // one reliable cue, and no source action is replayed to retry that sound.
     if(broadcast&&app->NetIsHost()&&app->mNetManager&&!LawnNet::gNetSuppressSounds)
     {
-        NetBuffer payload;payload.WriteU16(uint16_t(sound));payload.WriteF32(volume);
+        NetBuffer payload;payload.WriteU16(uint16_t(sound));payload.WriteF32(volume);if(pitchRatio!=1.f)payload.WriteF32(pitchRatio);
         app->mNetManager->SendBoardEvent(payload,BOARDEV_SOUND);
     }
     return true;
@@ -2119,9 +2166,9 @@ bool PlayVolumeSound284(LawnApp* app,int sound,float volume,bool broadcast)
 }
 bool LawnNet::NetSourceSound284Ready(LawnApp* app,uint16_t sourceSound)
 {const int id=ResolveSourceSound313(app,sourceSound);return app&&app->mSoundManager&&id>=0&&id<=UINT16_MAX;}
-bool LawnNet::NetPlaySourceSound284(LawnApp* app,uint16_t sourceSound,float volume)
+bool LawnNet::NetPlaySourceSound284(LawnApp* app,uint16_t sourceSound,float volume,float pitchRatio)
 {
-    if(!app||!app->mSoundManager||!std::isfinite(volume)||volume<0||volume>1)return false;
+    if(!app||!app->mSoundManager||!std::isfinite(volume)||volume<0||volume>1||!std::isfinite(pitchRatio)||pitchRatio<=0||pitchRatio>4)return false;
     const int id=ResolveSourceSound313(app,sourceSound);if(id<0||id>UINT16_MAX)return false;
     if(sourceSound==92)
     {
@@ -2129,14 +2176,14 @@ bool LawnNet::NetPlaySourceSound284(LawnApp* app,uint16_t sourceSound,float volu
         // stable source slot, then resolve its genuine local sample on receipt.
         if(!app->mMuteSoundsForCutscene)
             if(auto* instance=app->mSoundManager->GetSoundInstance(id))
-            {instance->SetVolume(volume);instance->Play(false,true);}
+            {instance->SetVolume(volume);instance->AdjustPitch(12.0*std::log2(pitchRatio));instance->Play(false,true);}
         if(app->NetIsHost()&&app->mNetManager&&!gNetSuppressSounds)
         {
-            NetBuffer payload;payload.WriteU16(uint16_t(0x8000u|sourceSound));payload.WriteF32(volume);
+            NetBuffer payload;payload.WriteU16(uint16_t(0x8000u|sourceSound));payload.WriteF32(volume);if(pitchRatio!=1.f)payload.WriteF32(pitchRatio);
             app->mNetManager->SendBoardEvent(payload,BOARDEV_SOUND);
         }
     }
-    else if(!PlayVolumeSound284(app,id,volume,true))return false;
+    else if(!PlayVolumeSound284(app,id,volume,true,pitchRatio))return false;
     NetTrace("Fusion source sound284 produced source=%u native=%d volume=%.9g role=%s",sourceSound,id,volume,app->NetIsClient()?"client":"host");
     return true;
 }
@@ -3384,19 +3431,19 @@ void Board::NetApplyEvent(NetBuffer& b)
 	}
 	case BOARDEV_SOUND:
 	{
-		uint16_t aSound=0;float aVolume=1.f;
-		if(!NetDecodeSoundEvent284(b,aSound,aVolume))break;
+		uint16_t aSound=0;float aVolume=1.f,aPitch=1.f;
+		if(!NetDecodeSoundEvent284(b,aSound,aVolume,aPitch))break;
         if(aSound&0x8000u)
         {
             if(aSound==uint16_t(0x8000u|92)&&mApp&&mApp->NetIsClient()&&LawnFusion::IsNativeFusionBoard(this)&&!gNetSuppressSounds)
             {
                 const int local=ResolveSourceSound313(mApp,92);
-                if(local>=0)PlayVolumeSound284(mApp,local,aVolume,false);
+                if(local>=0)PlayVolumeSound284(mApp,local,aVolume,false,aPitch);
             }
             break;
         }
 		if(aVolume!=1.f)NetTrace("Fusion source sound284 received native=%u volume=%.9g source66=%d role=%s",aSound,aVolume,aSound==Sexy::SOUND_PRIZE?1:0,mApp&&mApp->NetIsClient()?"client":"host");
-		if(!gNetSuppressSounds)PlayVolumeSound284(mApp,aSound,aVolume,false);
+		if(!gNetSuppressSounds)PlayVolumeSound284(mApp,aSound,aVolume,false,aPitch);
 		break;
 	}
 	case BOARDEV_FOLEY:

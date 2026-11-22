@@ -1,4 +1,5 @@
 #include "FusionNativeVisual.h"
+#include "FusionNativePlantDisable363.h"
 #include "FusionNativeCapturedSourcePlant314.h"
 #include "FusionNative.h"
 #include "FusionNativeEffects269.h"
@@ -501,6 +502,7 @@ ProjectilePackage{100,"projectile-batch-100","idle",0.0f},
 ProjectilePackage{7,"projectile-batch-7","idle",0.0f},
 ProjectilePackage{36,"projectile-batch-36","idle",0.0f},
 ProjectilePackage{47,"projectile-batch-47","idle",0.0f},
+ProjectilePackage{101,"projectile-snowball363","idle",0.0f},
 ProjectilePackage{58,"projectile-batch-58","idle",0.0f},
 ProjectilePackage{59,"projectile-batch-59","idle",0.0f},
 ProjectilePackage{87,"projectile-batch-87","FirePeaIdle",0.0f},
@@ -1483,6 +1485,14 @@ bool GetNativeWorldRemainder269AuxNodePoint(const Projectile* p,const char* node
 uint16_t GetNativeEmbedded269ProjectileModelKey(const Projectile* p)
 {if(const auto* s=GetNativeWorldRemainder269AuxState(p)){const int key=WorldAuxVisualKey(s->family,s->type);return key>0?uint16_t(4000+key):0;}
  const auto* d=GetNativeProjectileData(p);return d?EmbeddedProjectileModelKey(d->kind):0;}
+bool NativeVisuals::SnowBall363Box(const Projectile* p,FusionAnimationBoxCollider303& out) const
+{
+ const auto* d=GetNativeProjectileData(p);if(!mImpl||!p||p->mDead||!d||d->kind!=101)return false;
+ const auto found=mImpl->projectiles.find(101);if(found==mImpl->projectiles.end())return false;
+ const auto& v=*found->second;return v.animation.TryGetBoxCollider303(61703437598541787LL,out,v.state,0,nullptr,-1,1,&v.options);
+}
+bool GetNativeSnowBall363Box(const Projectile* p,FusionAnimationBoxCollider303& out)
+{const auto* c=GetNativeContext(p?p->mBoard:nullptr);return c&&c->visuals&&c->visuals->SnowBall363Box(p,out);}
 bool NativeVisuals::GetSourceProjectileNodePoint(const Projectile* p,const char* node,float& x,float& y) const
 {
  if(GetNativeWorldRemainder269AuxState(p))return GetWorldRemainderNodePoint(p,node,x,y);
@@ -2063,6 +2073,7 @@ bool NativeVisuals::Impl::BuildPlantPose(Plant* plant,const PlantVisual& visual,
     }
     else grabAnchors.erase(generation);
     out={baseState,actionState,baseSeconds,actionSeconds,*options};
+    if(NativePlantDisabled363(plant))for(int i=0;i<3;++i)out.options.colorMultiplierRGBA[i]=out.options.colorMultiplierRGBA[i]*128/255;
     return true;
 }
 
@@ -2272,8 +2283,10 @@ bool NativeVisuals::DrawPlant(Sexy::Graphics* graphics, Plant* plant) const
     // Plant::Draw is called between the real entity's BeginDraw/EndDraw. Keep
     // these coordinates local; do not add Board/camera/entity translation again.
     float groundX = 0.0f, groundY = 0.0f;
-    if (!plant->GetShadowCenter(groundX, groundY)) return false;
-    plant->DrawShadow(graphics);
+    Sexy::Graphics sourceCrushedGraphics(*graphics);
+    if(data->crushFlags366&2){groundX=data->crushShadowX366;groundY=data->crushShadowY366;
+        sourceCrushedGraphics.SetScale(1.f,.3f,groundX-plant->mX,groundY-plant->mY);graphics=&sourceCrushedGraphics;}
+    else {if (!plant->GetShadowCenter(groundX, groundY)) return false;plant->DrawShadow(graphics);}
     if (plant->IsOnBoard())
         if (auto* pumpkin = plant->mBoard->GetPumpkinAt(plant->mPlantCol,plant->mRow); pumpkin && PumpkinBackOwner(pumpkin) == plant)
         {
@@ -2297,6 +2310,7 @@ bool NativeVisuals::DrawPlant(Sexy::Graphics* graphics, Plant* plant) const
         if(frame->second.overlayQueued&&!frame->second.laser)pose.options.hiddenNodePaths.push_back("Grab");
     }
     else if(!mImpl->BuildPlantPose(plant,visual,pose))return true;
+    if(data->crushFlags366&2)pose.options.hiddenNodePaths.push_back("Shadow");
     if(data->kind==937&&(!inWorld||!frame->second.overlayQueued))DrawLaser269(graphics,plant);
     visual.animation.DrawPose(graphics,
         groundX-visual.shadowX*kNativePixelsPerWorldUnit,
@@ -2342,7 +2356,7 @@ bool NativeVisuals::DrawProjectile(Sexy::Graphics* graphics, Projectile* project
     const auto& visual = *found->second;
     float centerX = 0.0f, centerY = 0.0f;
     const auto* lobber = FindFusionLobberProjectileTraits(data->kind);
-    const bool planar=(data->kind==58||data->kind==59)&&data->specialType==13;
+    const bool planar=((data->kind==58||data->kind==59)&&data->specialType==13)||(data->kind==101&&data->specialType==17);
     const bool squashImage=data->kind==28||data->kind==32||data->kind==36;
     if(IsNativeStar269Projectile(projectile))GetNativeStar269ProjectileCenter(projectile,centerX,centerY);
     else if(data->kind==91||planar||squashImage||IsNativeWater268Projectile(projectile)||IsNativeChomper268Projectile(projectile)||IsNativeCannon268Kernel(projectile))

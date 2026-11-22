@@ -4,6 +4,7 @@ from source_particle_png import crop_png
 sys.dont_write_bytecode=True
 sys.path.insert(0,str(pathlib.Path(__file__).resolve().parent))
 import export_animation as e
+from source_trails360 import trail_profile, projected_edge
 
 def block(text,key):
  m=re.search(r'^( +)'+re.escape(key)+r':[^\n]*\n',text,re.M)
@@ -222,11 +223,22 @@ def export(assets,prefab,output,source_id,scope_ids=None,pose_model=None,guid_lo
    if len(found)!=1:raise ValueError('ambiguous source GUID '+g)
    used.add(found[0]);guids[g]=found[0].with_suffix('')
   return guids[g]
- docs=e.documents(read(assets/prefab));allowed={1,4,198,199}
+ docs=e.documents(read(assets/prefab));allowed={1,4,198,199,210} if factory_identity_root and scope_ids is None else {1,4,198,199}
  if scope_ids is None and any(k not in allowed for k,_,_ in docs):raise ValueError('unsupported source effect component')
  objects={i:t for k,i,t in docs if k==1};trans={i:t for k,i,t in docs if k==4}
  root=next(i for i,t in trans.items() if not e.reference(t,'m_Father'))
  if factory_identity_root and scope_ids is not None:raise ValueError('factory pose applies only to standalone CreateParticle.SetParticle births')
+ root_groups=[]
+ for typ,ident,body in docs:
+  if typ!=210:continue
+  if scope_ids is not None or not factory_identity_root:continue
+  if len(root_groups) or e.reference(body,'m_GameObject')!=e.reference(trans[root],'m_GameObject') or e.required(body,'m_Enabled')!='1' or e.required(body,'m_SortAtRoot')!='0':raise ValueError('standalone source SortingGroup must be one enabled static root group')
+  ps_owners=[e.reference(b,'m_GameObject')for k,i,b in docs if k==198];render_owners=[e.reference(b,'m_GameObject')for k,i,b in docs if k==199]
+  if len(ps_owners)!=len(set(ps_owners)) or sorted(ps_owners)!=sorted(render_owners) or set(ps_owners)!=set(objects):raise ValueError('standalone source SortingGroup requires complete particle-only owner coverage')
+  order=int(e.required(body,'m_SortingOrder'));layer=int(e.required(body,'m_SortingLayer'));layer_id=int(e.required(body,'m_SortingLayerID'))
+  if abs(order)>1000000 or not(-2147483648<=layer_id<=2147483647)or layer<0 or layer>32767:raise ValueError('invalid standalone source SortingGroup bounds')
+  root_groups.append({'sourceFileId':ident,'sourceGameObjectFileId':e.reference(body,'m_GameObject'),'sortingLayerID':layer_id,'sortingLayerIndex':layer,'sortingOrder':order,'serializedSortingGroup':body,'sha256':hashlib.sha256(body.encode()).hexdigest(),'nativeOrderContract':'caller must preserve this root sorting layer/order in the actual native system render order'})
+
  # CreateParticle.SetParticle444630 supplies Quaternion.identity to Instantiate.
  # Preserve the prefab bytes as evidence, but sample the real spawned root pose.
  original_root_rotation=e.vector(trans[root],'m_LocalRotation')
@@ -244,7 +256,8 @@ def export(assets,prefab,output,source_id,scope_ids=None,pose_model=None,guid_lo
   enabled=[]
   for module in re.findall(r'^  ([A-Z]\w+Module):',p,re.M):
    if e.field(block(p,module),'enabled')=='1':enabled.append(module)
-  supported={'InitialModule','EmissionModule','ShapeModule','SizeModule','UVModule','ColorModule','VelocityModule','ForceModule','RotationModule','CollisionModule'}
+  supported={'InitialModule','EmissionModule','ShapeModule','SizeModule','UVModule','ColorModule','VelocityModule','ForceModule','RotationModule','CollisionModule','TrailModule'}
+  trail=trail_profile(p,r,block,e.required,constant,scalar_curve,initial_color) if 'TrailModule'in enabled else None
   if set(enabled)-supported:raise ValueError('unsupported enabled modules '+str(set(enabled)-supported))
   if e.required(p,'simulationSpeed')!='1' or e.required(p,'useUnscaledTime')!='0':raise ValueError('source loop/time module needs adapter')
   init=block(p,'InitialModule');emission=block(p,'EmissionModule');shape=block(p,'ShapeModule');uv=block(p,'UVModule');size=block(p,'SizeModule')
@@ -259,13 +272,13 @@ def export(assets,prefab,output,source_id,scope_ids=None,pose_model=None,guid_lo
    if len(bursts)!=int(e.required(emission,'m_BurstCount')):raise ValueError('burst count differs')
   scale={k:v*root_scale['x'] for k,v in e.vector(t,'m_LocalScale').items()} if tid!=root else root_scale
   if min(scale.values())<=0:raise ValueError('invalid source particle local scale')
-  record={'nodeName':e.required(objects[oid],'m_Name'),'nodeIndex':ordinal-1,'sourceTransformFileId':tid,'sourcePosition':{k:v*root_scale['x'] for k,v in e.vector(t,'m_LocalPosition').items()} if scope_ids is None and tid!=root else {'x':0.,'y':0.,'z':0.},'sourceRotation':effective_rotation(tid),'sourceScale':scale,'sourceActive':True if scope_ids is not None else bool(int(e.required(objects[oid],'m_IsActive'))),'rendererEnabled':bool(int(e.required(r,'m_Enabled'))),'duration':float(e.required(p,'lengthInSec')),'delay':constant(p,'startDelay'),'lifetime':range_value(init,'startLifetime')[1],'speed':range_value(init,'startSpeed')[1],'size':range_value(init,'startSize')[1],'rotation':signed_range(init,'startRotation')[1],'rate':constant(emission,'rateOverTime'),'maxActive':int(e.required(init,'maxNumParticles')),'sourceStopAction':int(e.required(p,'stopAction')),'sourceSimulationSpace':int(e.required(p,'moveWithTransform')),'sourceScalingMode':int(e.required(p,'scalingMode')),'enabledModules':enabled,'sizeCurve':[[0,1],[1,1]],'shape':{'type':-1,'radius':0,'scale':{'x':1,'y':1,'z':1},'angle':0},'sprite':None,'material':e.required(r,'m_Materials')}
+  record={'nodeName':e.required(objects[oid],'m_Name'),'nodeIndex':ordinal-1,'sourceTransformFileId':tid,'sourcePosition':{k:v*root_scale['x'] for k,v in e.vector(t,'m_LocalPosition').items()} if scope_ids is None and tid!=root else {'x':0.,'y':0.,'z':0.},'sourceRotation':effective_rotation(tid),'sourceScale':scale,'sourceActive':True if scope_ids is not None else bool(int(e.required(objects[oid],'m_IsActive'))),'rendererEnabled':bool(int(e.required(r,'m_Enabled'))),'duration':float(e.required(p,'lengthInSec')),'delay':constant(p,'startDelay'),'lifetime':range_value(init,'startLifetime')[1],'speed':(signed_range(init,'startSpeed') if trail else range_value(init,'startSpeed'))[1],'size':range_value(init,'startSize')[1],'rotation':signed_range(init,'startRotation')[1],'rate':constant(emission,'rateOverTime'),'maxActive':int(e.required(init,'maxNumParticles')),'sourceStopAction':int(e.required(p,'stopAction')),'sourceSimulationSpace':int(e.required(p,'moveWithTransform')),'sourceScalingMode':int(e.required(p,'scalingMode')),'enabledModules':enabled,'sizeCurve':[[0,1],[1,1]],'shape':{'type':-1,'radius':0,'scale':{'x':1,'y':1,'z':1},'angle':0},'sprite':None,'material':e.required(r,'m_Materials')}
   col=block(init,'startColor')
   colors=initial_color(col);record['color']=colors[-1]
   if len(colors)==2:
    record['initialColorRange']=colors;record['serializedInitialColor']=col
    record['initialColorPolicy']='source two-color endpoints; native birth channel ranges, Unity coupled RGBA random factor not reproduced'
-  record['looping']=bool(int(e.required(p,'looping')));record['lifetimeRange']=range_value(init,'startLifetime');record['speedRange']=range_value(init,'startSpeed');record['rotationRange']=signed_range(init,'startRotation');record['emissionEnabled']='EmissionModule' in enabled;record['sourceEmissionRate']=record['rate'];record['rate']=record['rate'] if record['emissionEnabled'] else 0;record['forceCurves']=force_curves(block(p,'ForceModule')) if 'ForceModule' in enabled else None;record['spinCurves']=rotation_curve(block(p,'RotationModule')) if 'RotationModule' in enabled else None
+  record['looping']=bool(int(e.required(p,'looping')));record['lifetimeRange']=range_value(init,'startLifetime');record['speedRange']=signed_range(init,'startSpeed') if trail else range_value(init,'startSpeed');record['rotationRange']=signed_range(init,'startRotation');record['emissionEnabled']='EmissionModule' in enabled;record['sourceEmissionRate']=record['rate'];record['rate']=record['rate'] if record['emissionEnabled'] else 0;record['forceCurves']=force_curves(block(p,'ForceModule')) if 'ForceModule' in enabled else None;record['spinCurves']=rotation_curve(block(p,'RotationModule')) if 'RotationModule' in enabled else None
   record['sizeRange']=range_value(init,'startSize');record['burstCount']=sum(bursts);record['colorCurve']=color_curve(block(p,'ColorModule')) if 'ColorModule' in enabled else [[0,1,1,1,1],[1,1,1,1,1]]
   if 'ColorModule' in enabled and int(e.required(block(block(block(p,'ColorModule'),'gradient'),'maxGradient'),'m_Mode'))==1:record['colorInterpolation']='fixed'
   if 'ColorModule' in enabled and int(e.required(block(block(block(p,'ColorModule'),'gradient'),'maxGradient'),'m_Mode'))==2:
@@ -275,18 +288,22 @@ def export(assets,prefab,output,source_id,scope_ids=None,pose_model=None,guid_lo
   record['speedCurve']=velocity_curve(block(p,'VelocityModule')) if 'VelocityModule' in enabled else [[0,1,0,0],[1,1,0,0]]
   if 'VelocityModule' in enabled:
    velocity=block(p,'VelocityModule');record['velocityCurves']={'axes':[range_curve(block(velocity,k)) for k in ['x','y','z']],'orbitalZ':range_curve(block(velocity,'orbitalZ')),'world':bool(int(e.required(velocity,'inWorldSpace')))}
+  if trail:record['trail']=trail
   record['serializedSourceParticleSystem']=p
   if record['sourceScalingMode']!=1 or e.reference(p,'moveWithCustomTransform')!=0:raise ValueError('source scaling/custom space requires adapter')
   if 'ShapeModule' in enabled:
    ty=int(e.required(shape,'type'))
    random=float(e.required(shape,'randomDirectionAmount'));compat=ty==4 and random==1
-   if ty not in (0,4,5,10,18) or not compat and(e.vector(shape,'m_Position')!={'x':0.,'y':0.,'z':0.} or e.vector(shape,'m_Rotation')!={'x':0.,'y':0.,'z':0.}):raise ValueError('unsupported shape type/offset')
+   if ty not in (0,4,5,10,18,12) or not compat and(e.vector(shape,'m_Position')!={'x':0.,'y':0.,'z':0.} or e.vector(shape,'m_Rotation')!={'x':0.,'y':0.,'z':0.}):raise ValueError('unsupported shape type/offset')
    for k in ['randomDirectionAmount','sphericalDirectionAmount','randomPositionAmount']:
     if float(e.required(shape,k))!=0 and not(compat and k=='randomDirectionAmount'):raise ValueError('unsupported shape '+k)
    record['shape']={'type':ty,'radius':float(e.required(block(shape,'radius'),'value')),'scale':e.vector(shape,'m_Scale'),'angle':float(e.required(shape,'angle'))}
    if compat:
     record['shape'].update(position=e.vector(shape,'m_Position'),rotation=e.vector(shape,'m_Rotation'),randomDirectionAmount=1,
      nativeCompatibility='source Cone4 with fully randomized direction -> native2D CIRCLE radial/angular projection; source 3D cone/random coupling and projected ellipse differ, actual offset/rotation/scale retained')
+   if ty==12:
+    if not trail:raise ValueError('SingleSidedEdge currently requires strict trail subset')
+    record['shape']['projectedEdge']=projected_edge(assets,prefab,trans,objects,tid,shape,pathlib.Path(pose_model) if pose_model else None,e.reference,e.required,e.vector)
    if ty==18:record['shape']['projectedRectangle']=projected_rectangle(assets,prefab,trans,objects,tid,shape,pose_model,record['speedRange']==[0.,0.])
    if ty==10:
     arc=block(shape,'arc')
@@ -295,7 +312,9 @@ def export(assets,prefab,output,source_id,scope_ids=None,pose_model=None,guid_lo
   if 'SizeModule' in enabled:
    if e.required(size,'separateAxes')!='0':raise ValueError('separate size axes unsupported')
    record['sizeHermite']=scalar_curve(block(size,'curve'))
-  if record['rendererEnabled']:
+  if trail:
+   record['sourceRendererMode']=5;record['sourceBuiltinMaterial']={'fileId':10308,'guid':'0000000000000000f000000000000000','pipelineDecoded':False};record['nativeBlend']='alpha';record['materialAdapter']='Explicit native flat-alpha Trail20, original builtin texture unavailable; no invented PNG'
+  if record['rendererEnabled'] and not trail:
    if e.required(r,'m_RenderMode')!='0':raise ValueError('unsupported nonbillboard source particle renderer')
    if 'UVModule' not in enabled:
     mats=re.findall(r'fileID: (\d+), guid: ([0-9a-f]{32})',block(r,'m_Materials'))
@@ -378,6 +397,7 @@ def export(assets,prefab,output,source_id,scope_ids=None,pose_model=None,guid_lo
   emitters.append(record)
  for p in sorted(used):sources.append({'path':p.relative_to(assets).as_posix(),'sha256':hashlib.sha256(p.read_bytes()).hexdigest()})
  result={'schema':2,'sourceKind':source_id,'sourcePrefab':prefab,'sourcePrefabSha256':hashlib.sha256((assets/prefab).read_bytes()).hexdigest(),'bindingScope':'embeddedParticleComponents' if scope_ids is not None else 'sourceFactoryEffect','sourceComponentIds':scope_ids,'nativeAdapter':'TodParticleSystem source-compatible gradient/ranged-size/speed-curve subset','emitters':emitters,'birthPoints':[],'sources':sources,'ignoredBindings':[],'deferredComponents':[],'limits':['Native2D sphere/cone projection and random distribution differ from Unity3D','Native10ms quantization and stopAction child-tree shutdown not Unity runtime verified','Shader HDR/soft-particle material edge behavior bounded; native alpha blend','Every source sprite retained; random starting UV phase uses native frame0; native lifetime animation approximates Unity phase','Fractional UV crops conservatively quantized <1texel/edge; sequence canvases center-padded preserving original source pixels/PPU']}
+ if root_groups:result['sourceSortingGroups']=root_groups;result['sourceComponentCoverage']={'completeParticleOnly':True,'particleCount':len(ps_owners),'rendererCount':len(render_owners),'onlyAdditionalComponent':210}
  if factory_identity_root:result['sourceFactoryRootPose']={'method':'CreateParticle.SetParticle','address':'0x180444630','rotation':'Quaternion.identity','prefabRotation':original_root_rotation,'scale':'prefab preserved'}
  (output/'effect.json').write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8');return result
 

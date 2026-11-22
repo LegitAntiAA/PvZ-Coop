@@ -1,3 +1,4 @@
+#include "FusionNativeProjectileBuff369.h"
 #include "FusionNativeWater268.h"
 #include "FusionWater268Rules.h"
 #include "FusionNative.h"
@@ -158,7 +159,7 @@ Projectile* Emit(Plant* p,uint16_t kind,int row,uint8_t way,float x,float y,floa
     auto* q=b->AddProjectile(int(x-20),int(y-20),p->mRenderOrder-1,row,(kind==41||kind==42)?PROJECTILE_PEA:type);if(!q)return nullptr;
     q->mProjectileType=type;q->mMotionType=kind==41||kind==42||way==7?MOTION_STAR:way==4||way==5?MOTION_THREEPEATER:MOTION_STRAIGHT;
     NativeProjectileData data;data.kind=kind;data.damage=stats->damage;data.specialType=way;
-    if(!AttachNativeProjectile(b,q,data)){q->Die();return nullptr;}
+    if(!AttachNativeTravelProjectile369(p,q,data)){q->Die();return nullptr;}
     q->mPosX=x-20;q->mPosY=y-20;q->mPosZ=0;q->mVelZ=0;q->mAccZ=0;q->mShadowY=y;
     q->mVelX=float(std::cos(angle)*6*kFusionBasePixelsX*.01);q->mVelY=float(-std::sin(angle)*6*GetNativeFusionPixelsY(b)*.01);q->mRotation=angle;
     if(way==9)q->mVelX=float(-6*kFusionBasePixelsX*.01);
@@ -418,7 +419,7 @@ float GetNativeWater268GrapSpeedFactor(const Zombie* z)
 {const auto* d=GetNativeZombieActionData(z);return d&&d->waterGrapTicks>0?.5f:1.f;}
 bool IsNativeWater268Projectile(const Projectile* p)
 {
-    const auto* d=GetNativeProjectileData(p);if(!d||!FusionWater268ProjectileMetadataValid(d->kind,d->damage,d->specialType))return false;
+    const auto* d=GetNativeProjectileData(p);if(!d||!FusionWater268ProjectileMetadataValid(d->kind,NativeProjectileValidationDamage369(*d),d->specialType))return false;
     // Ordinary puff9 remains owned by its canonical native controller.
     if(d->kind==9)return false;
     if(d->specialType==6)return p->mMotionType==MOTION_HOMING;

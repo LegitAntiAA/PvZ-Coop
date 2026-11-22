@@ -1,4 +1,6 @@
 #include "FusionNative.h"
+#include "FusionNativeBossRoom366.h"
+#include "FusionNativeTravelBuff369.h"
 #include "FusionNativeConveyor308.h"
 #include "FusionNativeCapturedSourcePlant314.h"
 #include "FusionNativeSourceClock313.h"
@@ -753,6 +755,7 @@ bool HandleNativeFusionCommand(Board* board, int slot, const FusionCommand& comm
     NativeContext* context = GetNativeContext(board);
     if (!context || !Host(board) || command.epoch != context->epoch ||
         !Active(context->selection.State(), slot)) return false;
+    if(command.action==FusionCommandKind::BossHammer366||command.action==FusionCommandKind::BossTrophy366)return HandleNativeBossRoom366Command(board,slot,command);
     if(command.action==FusionCommandKind::AdventureRewardCollect)
         return HandleNativeSourceAdventureRewardCommand273(board,slot,command);
     if(command.action==FusionCommandKind::DroppedCardPickup||command.action==FusionCommandKind::DroppedCardPutDown||command.action==FusionCommandKind::DroppedCardPlant)
@@ -892,6 +895,7 @@ void PruneNativeMetadata(Board* board)
 {
     NativeContext* context = GetNativeContext(board);
     if (!context) return;
+    UpdateNativeTravelBuffCooldown369(board);
     UpdateNativeGloveState(board);
     if(context->capturedPlants314)context->capturedPlants314->Prune();
     if(auto* effects=GetNativeSourceEffects269(board,false))effects->UpdateEmbedded(board);

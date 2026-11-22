@@ -1577,6 +1577,44 @@ EXIT /B 0</Command>
     <ClCompile Include="..\Lawn\Fusion\FusionNativeSnowZombie363.cpp" />
     <ClInclude Include="..\Lawn\Fusion\FusionSnowZombie363Rules.h" />
     <ClInclude Include="..\Lawn\Fusion\FusionNativeSnowZombie363.h" />
+    <ClCompile Include="..\Lawn\Fusion\FusionPlantDisable363Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativePlantDisable363.cpp" />
+    <ClInclude Include="..\Lawn\Fusion\FusionPlantDisable363Rules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativePlantDisable363.h" />
+    <ClCompile Include="..\Lawn\Fusion\FusionSnowGun363Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionSourceGraphSnowGun363Generated.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionSourceRootSnowGun363.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeSnowGun363.cpp" />
+    <ClInclude Include="..\Lawn\Fusion\FusionSnowGun363Rules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeSnowGun363.h" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeSourceTrails360.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeQuickJackson367.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionQuickJackson367Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionQing208Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeQing208.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionSourceGraph208Generated.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeSourceDirect362.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionSourceRootQing369.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionTravelBuff360Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeTravelBuff360.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeTravelBuff369.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionLateZombie363Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeLateZombie363.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionSourceGraphLate363Generated.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionSourceRootLate363.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionDriver363Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeDriver363.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionSourceGraphDriver363Generated.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeFinish363.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionSourceGraphFinish363Generated.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionSourceRootFinish363.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeProjectileBuff369.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeRandom360.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeRandomTravel369.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeTravelConsumers369.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeTravelPlantActions369.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionRandomZombie360Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionTravelBuff369Rules.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Editor\ParticleScreen.h" />
@@ -1854,4 +1892,81 @@ EXIT /B 0</Command>
     <Copy SourceFiles="$(ProjectDir)..\lib\online\$(Platform)\datachannel.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" Condition="Exists('$(ProjectDir)..\lib\online\$(Platform)\datachannel.dll')" />
     <Copy SourceFiles="@(OnlineLicense)" DestinationFolder="$(OutDir)licenses" SkipUnchangedFiles="true" />
   </Target>
+  <ItemGroup>
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeTravelUltimate370.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeTravelUltimate370.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeTravelSteel370.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\Lawn\Fusion\FusionBoss361GraphGenerated.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionBoss361Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionBossBall366Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionBossBungee366Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeBoss361.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeBoss361Bridge.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeBossBall366.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeBossBungee366.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeBossRoom366.cpp" />
+    <ClInclude Include="..\Lawn\Fusion\FusionAnimation.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionExtendedZombie313Rules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionHeavyZombie313BRules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNative.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNative313SnapshotBridge.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeDroppedCards269.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeEffects269.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeEmbeddedEffects269.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeHeavyZombie313B.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeNextZombie343State.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeNightZombie281.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeNightZombie291Bridge.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeObstacle313.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeProjectileMetadata.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeSourceGraph313.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeVisual.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeWire.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeWorldActors269.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeZombies.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionSourceDamage315Rules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionSourceGraph313.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionSourceObstacle313.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionSourceZombieClosure280.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionWaterZombie313Rules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionWire.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionBoss361Rules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionBoss361Wire.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionBossBall366Rules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionBossBungee366Rules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionDriver363Rules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionLateZombie363Rules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeBoss361.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeBoss361Bridge.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeBossBall366.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeBossBungee366.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeBossRoom366.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeDriver363.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeFinish363.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeLateZombie363.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeProjectileBuff369.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeQing208.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeQuickJackson367.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeRandom360.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeRandomTravel369.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeSourceDirect362.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeSourceTrails360.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeTravelBuff360.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeTravelBuff369.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeTravelConsumers369.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeTravelPlantActions369.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionQing208Rules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionQuickJackson367Rules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionRandomZombie360Rules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionSourceRootQing369.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionSourceSpriteScript366.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionTravelBuff360Rules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionTravelBuff369Rules.h" />
+  </ItemGroup>
 </Project>

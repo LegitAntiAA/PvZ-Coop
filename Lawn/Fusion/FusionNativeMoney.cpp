@@ -1,3 +1,4 @@
+#include "FusionNativeTravelConsumers369.h"
 #include "FusionNativeMoney.h"
 #include "FusionMoneyRules.h"
 #include "FusionNative.h"
@@ -74,7 +75,14 @@ bool CreditNativeMoneyCoin(Coin* coin)
         LawnNet::NetTrace("Fusion native Money credit rejected coin=%u value=%d",coin->mNetId,value);
         return true;
     }
-    const int before = context->money; context->money = after;
+    const int before = context->money;
+    if(HasNativeTravelAdvanced369(coin->mBoard,22))
+    {
+        int sun=0;if(!TryFusionTravelMoney369(before,value,true,after,sun))return true;
+        // Source checks the OLD money >=100000, not overflow above99999.
+        if(sun&&!CreditNativeTravelSun369(coin->mBoard,sun))return true;
+    }
+    context->money = after;
     LawnNet::NetTrace("Fusion native Money credit coin=%u value=%d before=%d after=%d tick=%d host=1 profile=0 sun=0",
         coin->mNetId,value,before,after,coin->mBoard->mMainCounter);
     return true;

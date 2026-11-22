@@ -1,3 +1,5 @@
+#include "FusionNativeTravelBuff369.h"
+#include "FusionNativeProjectileBuff369.h"
 #include "FusionNative.h"
 #include "FusionNativeConveyor308.h"
 #include "FusionNativeCharred311.h"
@@ -323,7 +325,8 @@ bool AttachNativePlant(Board* board, Plant* plant, const NativePlantData& data)
 bool AttachNativeProjectile(Board* board, Projectile* projectile, const NativeProjectileData& data)
 {
     auto* context = GetNativeContext(board);
-    if (!context || !projectile || projectile->mBoard != board) return false;
+    if (!context || !projectile || projectile->mBoard != board ||
+        !NativeTravelProjectileLedgerValid369(data,GetNativeTravelBuff369(board))) return false;
     const uint32_t id = LiveId(board->mProjectiles, projectile);
     if (!id) return false;
     const auto state=context->star269Projectiles.find(id);

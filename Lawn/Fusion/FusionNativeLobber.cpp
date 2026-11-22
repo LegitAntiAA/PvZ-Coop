@@ -1,3 +1,4 @@
+#include "FusionNativeProjectileBuff369.h"
 #include "FusionNativeLobber.h"
 #include "FusionNative.h"
 #include "FusionNativeMorePlants269Backend.h"
@@ -65,7 +66,7 @@ Plant* RedirectUmbrella(Plant* source,float firstTargetX)
         const auto* d=GetNativePlantData(p);float x=0,y=0;
         // Thrower.AnimShoot scans the actual cell columns from its own column;
         // source+1B0 is the captured zombie B0.x, not the shooter's root X.
-        const bool relay=d&&(d->kind==1128||(IsNativeSolar269(source)&&FusionSolar269RelayKind(d->kind)));
+        const bool relay=d&&(d->kind==1128||d->kind==916||(IsNativeSolar269(source)&&FusionSolar269RelayKind(d->kind)));
         if(p->mDead||!p->mIsOnBoard||p->mPlantHealth<=0||!relay||p->mRow!=source->mRow||
             p->mPlantCol<source->mPlantCol||!p->GetShadowCenter(x,y)||x>=firstTargetX)continue;
         if(!first||p->mPlantCol<first->mPlantCol)first=p;
@@ -348,7 +349,7 @@ bool FireNativeLobberProjectile(Plant* plant)
     }
     bullet.melonEnhanced = traits->splash && GetNativeDefenderMelonEnhanced(plant); // Source trait captured on emission, not impact.
     projectile->mMotionType = MOTION_LOBBED;
-    if (!AttachNativeProjectile(plant->mBoard,projectile,bullet)) { projectile->Die(); return true; }
+    if (!AttachNativeTravelProjectile369(plant,projectile,bullet)) { projectile->Die(); return true; }
     if(aim.targetPlant)context->lobberPlantTargets[plant->mBoard->mProjectiles.DataArrayGetID(projectile)]=aim.targetGeneration;
     if (pierceLimit > 1) context->lobberPierceLimits[plant->mBoard->mProjectiles.DataArrayGetID(projectile)] = pierceLimit;
     projectile->mPosX = static_cast<float>(launch.spawn.x-20);
@@ -379,7 +380,7 @@ bool IsNativeLobberProjectile(const Projectile* projectile)
     if((data->kind==53||data->kind==75)&&data->specialType==13)
         return NativeProjectileMetadataValid(*data,projectile->mProjectileType,projectile->mMotionType);
     return data && !data->specialType && !data->fireState && !data->lastTorchId && !data->lastTorchToken &&
-        FusionLobberProjectileMetadataValid(data->kind,data->damage,data->sunOnHit,projectile->mProjectileType);
+        FusionLobberProjectileMetadataValid(data->kind,NativeProjectileValidationDamage369(*data),data->sunOnHit,projectile->mProjectileType);
 }
 bool SetNativeLobberRetarget(Projectile* p,int row,float vx,float vy,float gravity)
 {
@@ -441,7 +442,10 @@ bool UpdateNativeLobberMotion(Projectile* projectile)
             else if(NativeSourcePlantColliderEnabled(receiver)&&rect.Intersects(receiver->GetPlantRect())&&
                 TryEnhanceNativeUmbrellaProjectile(projectile,receiver))
             {
-                context->lobberPlantTargets.erase(generation);
+                // A source Emerald relay may have replaced the actual full-generation
+                // target during this callback. Preserve that new reservation.
+                const auto next=context->lobberPlantTargets.find(generation);
+                if(next!=context->lobberPlantTargets.end()&&next->second==projectile->mBoard->mPlants.DataArrayGetID(receiver))context->lobberPlantTargets.erase(next);
                 LawnNet::NetTrace("Fusion native Lobber plant contact projectile=%u target=%u generation=%u tick=%d",projectile->mNetId,receiver->mNetId,projectile->mBoard->mPlants.DataArrayGetID(receiver),projectile->mBoard->mMainCounter);
                 return true;
             }

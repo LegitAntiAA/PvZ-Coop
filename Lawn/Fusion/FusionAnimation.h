@@ -77,6 +77,11 @@ struct FusionAnimationDrawOptions
         float radiansZ;
         bool replace = false; // Source runtime localRotation assignment.
     };
+    struct NodeLocalRotation
+    {
+        std::string nodePath;
+        std::array<float,4> quaternion; // Replace source localRotation after all sampled layers.
+    };
     struct NodeWorldPosition
     {
         std::string nodePath;
@@ -106,6 +111,11 @@ struct FusionAnimationDrawOptions
         std::string nodePath;
         bool enabled;
     };
+    struct SpriteColor
+    {
+        std::string nodePath;
+        std::array<float,4> rgba; // Runtime SpriteRenderer.color, after source layers.
+    };
     struct SpriteSorting
     {
         std::string nodePath;
@@ -128,6 +138,7 @@ struct FusionAnimationDrawOptions
     std::span<const FusionMask269View> worldMasks;
     std::string spritePathPrefix; // Optional filtered source-node pass; empty draws all sprites.
     std::vector<SpriteEnabled> spriteEnabledOverrides;
+    std::vector<SpriteColor> spriteColorOverrides;
     std::vector<SpriteSorting> spriteSortingOverrides;
     std::vector<SortingGroup> sortingGroupOverrides;
     std::vector<MaskSorting> maskSortingOverrides;
@@ -137,6 +148,7 @@ struct FusionAnimationDrawOptions
     std::vector<NodeActivity> nodeActivityOverrides;
     // Runtime child rotation composes with its original source transform.
     std::vector<NodeRotation> nodeRotations;
+    std::vector<NodeLocalRotation> nodeLocalRotations;
     std::vector<NodeWorldPosition> nodeWorldPositions;
     // Explicit extra source layers; default empty preserves all existing poses.
     std::vector<ExtraState> extraStates;

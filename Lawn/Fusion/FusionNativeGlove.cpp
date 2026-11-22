@@ -1,4 +1,5 @@
 #include "FusionNativeGlove.h"
+#include "FusionNativeTravelConsumers369.h"
 #include "FusionGloveRules.h"
 #include "FusionNative.h"
 #include "FusionNativeBatchActions.h"
@@ -205,7 +206,7 @@ bool HandleNativeGloveCommand(Board* board, int slot, const FusionCommand& comma
     if (!TryPlaceNativeFusionPlant(board,command.column,command.row,incoming,destination.plantId,slot,
         destination.instanceToken,moving)) return false;
     if(!moving->mDead)NativeCompanions269PlantMoved(moving);
-    context->gloveCooldownTicks = FusionGloveSuccessCooldown(incoming.kind);
+    context->gloveCooldownTicks = HasNativeTravelAdvanced369(board,16) ? 0 : FusionGloveSuccessCooldown(incoming.kind);
     context->gloveTick = board->mMainCounter;
     CancelNativeGlove(board, slot);
     NativeLaserConnections269PlantMoved(moving,previousColumn);

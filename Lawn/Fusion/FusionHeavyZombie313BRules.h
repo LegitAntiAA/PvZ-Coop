@@ -80,6 +80,7 @@ struct FusionBungee313BView
     int targetColumn=0,targetRow=0;
     float targetX=0,targetY=0,cordScaleX=1.4705882f,cordScaleY=20.f,cordScaleZ=.5735294f,markerY=0;
     bool setZombie=false,targetLanded=false,markerVisible=true;
+    uint16_t bossId366=0;uint32_t bossToken366=0; // Source ZombieBoss reference, NOT a plant-parent identity.
     bool operator==(const FusionBungee313BView&) const=default;
 };
 bool FusionBungee313BViewValid(const FusionBungee313BView&,int columns,int rows);

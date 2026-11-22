@@ -5,7 +5,7 @@
 class Board;class Projectile;class Zombie;class Plant;
 namespace LawnFusion
 {
-enum class FusionSourceObstacle313Kind:uint8_t {DrownWeapon=1,KirovBomb=2,SuperBall=3,MachineBall=4,SpiderWeapon=5};
+enum class FusionSourceObstacle313Kind:uint8_t {DrownWeapon=1,KirovBomb=2,SuperBall=3,MachineBall=4,SpiderWeapon=5,BossBall=6,ZombieSquash=7};
 struct FusionSourceObstacle313View
 {
     FusionSourceObstacle313Kind kind=FusionSourceObstacle313Kind::DrownWeapon;
@@ -18,28 +18,32 @@ struct FusionSourceObstacle313View
     uint32_t lastHitAge=0; // Actual raw-age flash origin; no independent timer.
     int32_t ageTicks=0; // Snapshot mirror of actual Projectile.mProjectileAge.
     float velocityX=0,velocityY=0,velocityZ=0,accelerationZ=0;
+    uint8_t squashPhase=0,squashColumn=0;uint32_t squashPhaseAge=0;bool squashFire=false;
     LawnNet::NetZombieAnimState clock; // Genuine MachineBall Animator only.
 };
 inline bool FusionSourceObstacle313ControllerValid(const FusionSourceObstacle313View& d)
 {
+    if(d.kind!=FusionSourceObstacle313Kind::ZombieSquash&&(d.squashPhase||d.squashColumn||d.squashPhaseAge||d.squashFire))return false;
     if(!d.instanceToken||!d.ownerId||!d.ownerToken||bool(d.targetPlantId)!=bool(d.targetPlantToken)||
        (d.drownLongFlash&&(d.kind!=FusionSourceObstacle313Kind::DrownWeapon||!(d.variant&2))))return false;
+    if(d.kind==FusionSourceObstacle313Kind::ZombieSquash)return !d.targetPlantId&&!d.targetPlantToken&&!d.fromHypno&&!d.landed&&!d.hit&&!d.exploded&&!d.hitCount&&!d.lastHitAge&&!d.drownLongFlash&&d.variant<=1&&d.squashPhase<=4&&d.squashColumn<10&&(!d.squashFire||d.variant==1);
     if(d.kind==FusionSourceObstacle313Kind::DrownWeapon)return !d.fromHypno&&d.variant<=3&&d.hitCount<=301&&
         (!(d.variant&1)||!d.targetPlantId)&&((d.variant&2)?!d.hit:(!d.exploded&&!d.hitCount&&!d.lastHitAge&&!d.drownLongFlash));
     if(d.kind==FusionSourceObstacle313Kind::KirovBomb)return !d.targetPlantId&&!d.targetPlantToken&&!d.landed&&!d.hit&&d.variant<=1&&!d.hitCount&&!d.lastHitAge;
     if(d.kind==FusionSourceObstacle313Kind::SpiderWeapon)return !d.targetPlantId&&!d.targetPlantToken&&!d.landed&&!d.hit&&!d.variant&&!d.hitCount&&!d.lastHitAge;
     if(d.kind==FusionSourceObstacle313Kind::SuperBall)return !d.targetPlantId&&!d.targetPlantToken&&!d.landed&&!d.hit&&!d.fromHypno&&d.variant<=1&&!d.hitCount&&!d.lastHitAge;
+    if(d.kind==FusionSourceObstacle313Kind::BossBall)return !d.targetPlantId&&!d.targetPlantToken&&!d.landed&&!d.hit&&!d.fromHypno&&d.variant<=1&&!d.hitCount&&!d.lastHitAge;
     if(d.kind==FusionSourceObstacle313Kind::MachineBall)return !d.targetPlantId&&!d.targetPlantToken&&!d.landed&&!d.hit&&!d.fromHypno&&d.variant<=1&&d.hitCount<=31&&(!d.hitCount?d.lastHitAge==0:true);
     return false;
 }
 inline bool FusionSourceObstacle313ViewValid(const FusionSourceObstacle313View& d)
 {
-    if(!FusionSourceObstacle313ControllerValid(d)||d.ageTicks<0||d.lastHitAge>uint32_t(d.ageTicks)||
+    if(!FusionSourceObstacle313ControllerValid(d)||d.ageTicks<0||d.lastHitAge>uint32_t(d.ageTicks)||d.squashPhaseAge>uint32_t(d.ageTicks)||
        !std::isfinite(d.velocityX)||!std::isfinite(d.velocityY)||!std::isfinite(d.velocityZ)||!std::isfinite(d.accelerationZ)||
        std::abs(d.velocityX)>100000||std::abs(d.velocityY)>100000||std::abs(d.velocityZ)>100000||std::abs(d.accelerationZ)>100000)return false;const auto& c=d.clock;
     if(!std::isfinite(c.mAnimTime)||c.mAnimTime<0||c.mAnimTime>1||!std::isfinite(c.mAnimRate)||std::abs(c.mAnimRate)>10000||c.mLoopType>5||!LawnNet::NetZombieAnimStateFitsFrames(c,65535))return false;
     if(!c.mPresent&&(c.mDead||c.mFrameStart||c.mFrameCount||c.mAnimTime||c.mAnimRate||c.mLoopType||c.mLoopCount))return false;
-    return d.kind==FusionSourceObstacle313Kind::MachineBall?c.mPresent&&!c.mDead:!c.mPresent;
+    return (d.kind==FusionSourceObstacle313Kind::ZombieSquash||d.kind==FusionSourceObstacle313Kind::MachineBall||d.kind==FusionSourceObstacle313Kind::BossBall)?c.mPresent&&!c.mDead:!c.mPresent;
 }
 struct FusionSourceObstacle313Spawn
 {
@@ -51,7 +55,10 @@ struct FusionSourceObstacle313Spawn
     float groundY=0; // New2/3/4: copied into raw Projectile.mShadowY, no second position cache.
     int renderOrder=0; // Source factory sorting: Kirov row+1, Super owner+1, Machine owner exactly.
     bool fromHypno=false;
-    uint8_t variant=0; // SuperBall0=43/1=212; MachineBall0=fire/1=ice.
+    uint8_t variant=0; // SuperBall0=43/1=212; Machine/BossBall0=fire/1=ice.
+    uint8_t squashColumn=0;bool squashFire=false; // Genuine selected cell + prefab/cold birth input.
+    float sourceBirthVelocityX366=0; // BossBall only: Awake(-.5/-1)*Start1.5, source units/sec.
+    int growthRenderOrder366=0; // HOST birth input: source row-layer mapping after Bigger1s; raw order is canonical.
 };
 using CanSpawnSourceObstacle313=bool(*)(Board*,const FusionSourceObstacle313Spawn&);
 using SpawnSourceObstacle313=Projectile*(*)(Board*,const FusionSourceObstacle313Spawn&);

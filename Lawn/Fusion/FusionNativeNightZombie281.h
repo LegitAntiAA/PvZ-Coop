@@ -35,6 +35,10 @@ struct NativeNightZombie281Hooks
     // Exact source deadLeft/deadRight operands; Jackson.FixedUpdate calls Die(2).
     bool (*outsideSourceBounds)(const Zombie*)=nullptr;
     void (*dieWithoutAnimation)(Zombie*)=nullptr;
+    // Source virtual overrides; absent for original10. All source207 uses
+    // the SAME clocks/phase machine with its proven additional root movement.
+    bool (*finishMoonWalk)(Zombie*)=nullptr;
+    bool (*positionOverride)(Zombie*,bool& stopMoonWalk)=nullptr;
 };
 bool NativeNightZombie281StateValid(const NativeNightZombie281State&);
 bool InitializeNativeJackson281(Zombie*,NativeNightZombie281State&,const NativeNightZombie281Hooks&);

@@ -1,5 +1,6 @@
 #include "FusionNativeDryGround353.h"
 #include "FusionNativeNightZombie281.h"
+#include "FusionQuickJackson367Rules.h"
 #include "FusionNextZombie343Rules.h"
 #include "FusionNative.h"
 #include "FusionNativeAdventure273.h"
@@ -38,7 +39,7 @@ bool Factor(Zombie* z,float& value)
 bool Authority(const Zombie* z)
 {
  const auto* d=GetNativeSourceZombieData(z);
- return z&&d&&d->kind==10&&z->mBoard&&z->mApp&&z->mApp->mBoard==z->mBoard&&
+ return z&&d&&FusionJacksonFamily367Kind(d->kind)&&z->mBoard&&z->mApp&&z->mApp->mBoard==z->mBoard&&
   !z->mNetGhost&&!z->mApp->NetIsClient()&&NativeSourceDryRow353(z->mBoard,z->mRow);
 }
 bool Read(const Reanimation* r,const FusionNightZombie281Clip& clip,FusionZombieClipPosition& out)
@@ -70,6 +71,8 @@ void ClearTransition(NativeNightZombie281State& s)
 bool HookReady(const NativeNightZombie281Hooks& h)
 {return h.eveBalanced&&h.travelDebuff13&&h.prepareChildren&&h.childEffect&&h.facingKeepShadow&&
  h.contact&&h.bite&&h.sound&&h.fallSound&&h.destroy&&h.outsideSourceBounds&&h.dieWithoutAnimation;}
+bool FinishMoonWalk367(Zombie* z,NativeNightZombie281State& s,const NativeNightZombie281Hooks& h)
+{if(s.moonWalkFinished)return true;if(h.finishMoonWalk&&!h.finishMoonWalk(z)){s.failed=true;return false;}s.moonWalkFinished=true;return true;}
 bool Facing(Zombie* z,NativeNightZombie281State& s,bool back,const NativeNightZombie281Hooks& h)
 {if(!h.facingKeepShadow(z,back)){s.failed=true;return false;}s.lookBack=back;return true;}
 bool Enter(Zombie* z,NativeNightZombie281State& s,Phase phase)
@@ -339,8 +342,9 @@ bool UpdateNativeJackson281Animation(Zombie* z,const NativeNightZombie281State& 
 }
 bool BeginNativeJackson281Death(Zombie* z,NativeNightZombie281State& s,const NativeNightZombie281Hooks& h)
 {
- const auto* data=GetNativeSourceZombieData(z);if(!data||data->kind!=10)return false;
+ const auto* data=GetNativeSourceZombieData(z);if(!data||!FusionJacksonFamily367Kind(data->kind))return false;
  if(!Authority(z)||s.phase==Phase::Death)return true;
+ if(data->kind==207&&(!h.finishMoonWalk||!h.finishMoonWalk(z))){s.failed=true;return true;}
  if(!s.initialized||s.failed||!HookReady(h)){s.failed=true;return true;}
  FusionNightZombie281Clip c;FusionZombieClipPosition now;float factor=1;
  if(!TryGetFusionNightZombie281Clip(s.phase,c)||!BodyMatches(Body(z),c)||!Read(Body(z),c,now)||!Factor(z,factor))
@@ -351,8 +355,9 @@ bool BeginNativeJackson281Death(Zombie* z,NativeNightZombie281State& s,const Nat
 }
 bool UpdateNativeJackson281(Zombie* z,NativeNightZombie281State& s,const NativeNightZombie281Hooks& h)
 {
- const auto* d=GetNativeSourceZombieData(z);if(!d||d->kind!=10)return false;
- if(!Host(z,10)||z->mDead)return true;
+ const auto* d=GetNativeSourceZombieData(z);if(!d||!FusionJacksonFamily367Kind(d->kind))return false;
+ const bool quick207=d->kind==207;
+ if(!Host(z,d->kind)||z->mDead)return true;
  if(!s.initialized||s.failed||!HookReady(h))return true;
  // MainCounter is ONLY a private once-per-native-update guard, never a wire clock.
  if(s.tick==z->mBoard->mMainCounter)return true;s.tick=z->mBoard->mMainCounter;
@@ -364,27 +369,32 @@ bool UpdateNativeJackson281(Zombie* z,NativeNightZombie281State& s,const NativeN
  if(!Factor(z,factor)||!TryGetFusionNightZombie281Clip(s.phase,clip)||!BodyMatches(Body(z),clip)||!Read(Body(z),clip,now))
  {s.failed=true;return true;}
  // Derived source Update/FixedUpdate still maintain these flags during death.
- s.moonWalkElapsed+=.01f;
- if(s.moonWalkElapsed>3&&!s.moonWalkFinished)s.moonWalkFinished=true;
+ // Source207 PositionUpdate runs inside base Zombie.Update BEFORE the
+ // inherited Jackson.Update's three-second virtual StopMoonWalk check.
+ if(!quick207){s.moonWalkElapsed+=.01f;if(s.moonWalkElapsed>3&&!s.moonWalkFinished&&!FinishMoonWalk367(z,s,h))return true;}
  if(FusionJackson281MissingDancer(z->mRow,GetNativeFusionRowCount(z->mBoard),Present(z,s)))s.loseDancer=true;
  if(s.phase!=Phase::Death)
  {
   const bool contact=h.contact(z,s.canAttack);
-  if(contact&&!s.canAttack&&!s.moonWalkFinished&&!h.travelDebuff13(z->mBoard))s.moonWalkFinished=true;
+  if(contact&&!s.canAttack&&!s.moonWalkFinished&&!h.travelDebuff13(z->mBoard)&&!FinishMoonWalk367(z,s,h))return true;
  }
  if(!Step(z,s,now,d->originSpeed*factor,h))s.failed=true;
+ if(quick207&&!z->mDead&&!s.failed){bool stop=false;
+  if(s.phase!=Phase::Death&&!s.moonWalkFinished&&(!h.positionOverride||!h.positionOverride(z,stop))){s.failed=true;return true;}
+  if(stop&&!FinishMoonWalk367(z,s,h))return true;
+  s.moonWalkElapsed+=.01f;if(s.moonWalkElapsed>3&&!s.moonWalkFinished&&!FinishMoonWalk367(z,s,h))return true;}
  if(!z->mDead&&!s.failed)UpdateNativeJackson281Animation(z,s);return true;
 }
 bool MoveNativeJackson281(Zombie* z,NativeNightZombie281State&)
 {
  // Controller Update already applies each source root segment before callbacks.
  // Consume generic native movement on both host and presentation-only ghosts.
- const auto* d=GetNativeSourceZombieData(z);return d&&d->kind==10;
+ const auto* d=GetNativeSourceZombieData(z);return d&&FusionJacksonFamily367Kind(d->kind);
 }
 bool GetNativeJackson281Presentation(const Zombie* z,const NativeNightZombie281State& s,const char*& name,float& phase)
 {
  const auto* d=GetNativeSourceZombieData(z);auto* body=Body(z);FusionNightZombie281Clip c;FusionZombieClipPosition at;
- if(!d||d->kind!=10||!NativeNightZombie281StateValid(s)||!TryGetFusionNightZombie281Clip(s.phase,c)||
+ if(!d||!FusionJacksonFamily367Kind(d->kind)||!NativeNightZombie281StateValid(s)||!TryGetFusionNightZombie281Clip(s.phase,c)||
     !BodyMatches(body,c)||!Read(body,c,at))return false;
  const auto* state=FusionJackson281ControllerState(s.phase);if(!state)return false;
  name=state;phase=body->mAnimTime;return true;

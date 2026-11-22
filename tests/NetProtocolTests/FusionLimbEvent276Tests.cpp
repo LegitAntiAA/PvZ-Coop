@@ -36,7 +36,7 @@ int RunFusionLimbEvent276Tests(int& checks)
     using namespace LawnNet;int failures=0;
     const auto check=[&](bool okay,int line){++checks;if(!okay){++failures;std::printf("FusionLimbEvent276Tests:%d failed\n",line);}};
 #define CHECK(x) check(bool(x),__LINE__)
-    CHECK(NET_PROTOCOL_VERSION==70&&BOARDEV_PRESENTATION_FWOOSH==27&&BOARDEV_FUSION_LIMB276==28&&BOARDEV_FUSION_CHARRED315==29);
+    CHECK(NET_PROTOCOL_VERSION==71&&BOARDEV_PRESENTATION_FWOOSH==27&&BOARDEV_FUSION_LIMB276==28&&BOARDEV_FUSION_CHARRED315==29);
     CHECK(NET_FUSION_LIMB276_WIRE_BYTES==26);
     constexpr std::array<uint8_t,26> golden={
         0x04,0x03,0x02,0x01,0x05,0x06,0x07,0x08,0x09,0x0a,0x03,0x00,0x01,0x04,
@@ -157,5 +157,14 @@ int RunFusionLimbEvent276Tests(int& checks)
     auto invalidCursor=Raw(valid);invalidCursor.mReadPos=invalidCursor.Size()+1;auto out=valid;
     CHECK(!NetDecodeFusionLimbEvent276(invalidCursor,out));CHECK(invalidCursor.mReadPos==27&&Same(out,valid));
 #undef CHECK
+    // Source208's frequency ratio must round-trip independently of volume.
+    {NetBuffer pitched;pitched.WriteU16(42);pitched.WriteF32(.3f);pitched.WriteF32(1.6f);
+     uint16_t sound=0;float volume=0,pitch=0;CHECK(NetDecodeSoundEvent284(pitched,sound,volume,pitch));
+     CHECK(sound==42&&volume==.3f&&pitch==1.6f&&pitched.Remaining()==0);
+     for(float bad:{0.f,-1.f,4.01f,std::numeric_limits<float>::infinity(),std::numeric_limits<float>::quiet_NaN()})
+     {NetBuffer raw;raw.WriteU16(42);raw.WriteF32(.3f);raw.WriteF32(bad);sound=17;volume=.8f;pitch=1.2f;
+      CHECK(!NetDecodeSoundEvent284(raw,sound,volume,pitch));CHECK(raw.mReadPos==0&&sound==17&&volume==.8f&&pitch==1.2f);}
+     NetBuffer ordinary;ordinary.WriteU16(42);CHECK(NetDecodeSoundEvent284(ordinary,sound,volume,pitch));
+     CHECK(sound==42&&volume==1&&pitch==1);}
     return failures;
 }

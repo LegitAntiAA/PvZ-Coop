@@ -146,7 +146,7 @@ bool InitializeNativeSourceAdventure273(Board* b,const FusionAdventureSession273
     {if(error)*error="Source Adventure requires its exact imported scene/row/grid world without foreign initializers.";return false;}
     if(host&&level->roofPreplantColumns&&!PreflightNativeRoofPreplants350(b,*level,error))return false;
     FusionAdventureScheduler273State scheduler;
-    if(host&&(level->tutorialId==7||level->tutorialId==8||level->tutorialId==10||level->tutorialId==13||level->tutorialId==15||FusionAdventureLesson346Supported(boot.run.level))&&
+    if(host&&boot.run.cycle==1&&(level->tutorialId==7||level->tutorialId==8||level->tutorialId==10||level->tutorialId==13||level->tutorialId==15||FusionAdventureLesson346Supported(boot.run.level))&&
         !PreflightNativeFusionAdventureLesson278(b,boot.run.level,error))return false;
     if(host&&InitializeNativeAdventureScheduler273(b,scheduler,boot.run.level,int(boot.run.cycle),
         boot.sourceDifficulty,BoardRandom(b),error)!=Result::Okay)return false;

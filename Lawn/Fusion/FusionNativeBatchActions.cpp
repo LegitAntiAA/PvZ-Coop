@@ -1,3 +1,6 @@
+#include "FusionNativeTravelConsumers369.h"
+#include "FusionNativeSourceDamage315.h"
+#include "FusionNativeProjectileBuff369.h"
 #include "FusionNativeBatchActions.h"
 #include "FusionNativeExtras268.h"
 #include "FusionNativeSummonPlants269.h"
@@ -193,7 +196,7 @@ bool Emit(Plant* plant,uint16_t kind,int row,uint8_t phase=0)
     p->mShadowY=static_cast<float>(board->GridToPixelY(plant->mPlantCol,row)+50);
     NativeProjectileData data; data.kind=kind; data.damage=20; data.specialType=phase;
     if (kind==13) data.effectVariant=static_cast<uint8_t>(RandRangeInt(0,6));
-    if (!AttachNativeProjectile(board,p,data)) { p->Die(); return false; }
+    if (!AttachNativeTravelProjectile369(plant,p,data)) { p->Die(); return false; }
     LawnNet::NetTrace("Fusion native Batch projectile plant=%u kind=%u id=%u payload=%u row=%d phase=%u variant=%u damage=20",
         plant->mNetId,GetNativePlantData(plant)->kind,p->mNetId,kind,row,phase,data.effectVariant);
     return true;
@@ -605,7 +608,8 @@ void ApplyNativeBatchFireRow(Board* board,int row,int damage,bool fix)
 }
 void ApplyNativeBatchDoomAt(Board* board,float x,float y,int col,int row,int damage,bool setPit,bool iceDoom)
 {
-    if (!CanonicalBoard(board) || damage!=1800 || row<0 || row>=GetNativeFusionRowCount(board) ||
+    if(HasNativeTravelAdvanced369(board,38))setPit=false;
+    if (!CanonicalBoard(board) || (damage!=1800&&damage!=1000000) || row<0 || row>=GetNativeFusionRowCount(board) ||
         !std::isfinite(x) || !std::isfinite(y) || (setPit && !board->IsValidGridCell(col,row))) return;
     // Source default position is relative to the cell's logical Shadow anchor.
     x-=.3f*static_cast<float>(kFusionBasePixelsX); y-=.2f*static_cast<float>(kFusionBasePixelsY);
@@ -618,7 +622,7 @@ void ApplyNativeBatchDoomAt(Board* board,float x,float y,int col,int row,int dam
     for (auto id:targets) if ((zombie=board->ZombieTryToGet(id)) && Normal(zombie))
     {
         if (iceDoom) ApplyNativeColdFreeze(zombie,kFusionColdMaximumFreezeTicks);
-        ApplyNativeFusionCherryDamage(zombie);
+        if(damage==1800)ApplyNativeFusionCherryDamage(zombie);else ApplyNativeSourceCharred315(zombie,damage);
     }
     GridItem* item=nullptr;
     while (board->IterateGridItems(item))

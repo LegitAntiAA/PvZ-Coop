@@ -1,4 +1,5 @@
 #include "FusionNativeWorldParticle269.h"
+#include "FusionNativeSourceTrails360.h"
 #include "FusionWorldParticle269Rules.h"
 #include "FusionParticleCollision269Rules.h"
 #include "../../LawnApp.h"
@@ -127,6 +128,7 @@ struct NativeWorldParticle269Definition::Impl
     std::vector<std::vector<ParticleField>> fields;
     std::vector<Sexy::SharedImageRef> images;
     std::vector<Collision> collisions;
+    std::vector<std::unique_ptr<NativeSourceTrails360>> trails;
     void Track(FloatParameterTrack& target,std::span<const FusionWorldParticle269Sample> values)
     {
         tracks.emplace_back();auto& nodes=tracks.back();nodes.reserve(values.size());
@@ -185,13 +187,17 @@ bool NativeWorldParticle269Definition::Load(LawnApp* app,uint16_t kind,const std
         if(data.at("schema")!=2||data.at("sourceKind")!=kind||!data.at("ignoredBindings").empty()||!data.at("deferredComponents").empty()||data.at("emitters").empty()||data.at("emitters").size()>64)
             throw std::runtime_error("unsupported world particle package");
         auto definition=std::make_unique<Impl>();const auto folder=std::filesystem::path(path).parent_path();const size_t count=data.at("emitters").size();
-        definition->emitters.resize(count);definition->names.resize(count);definition->fields.resize(count);definition->collisions.resize(count);
+        definition->emitters.resize(count);definition->names.resize(count);definition->fields.resize(count);definition->collisions.resize(count);definition->trails.resize(count);
         definition->native.mEmitterDefs=definition->emitters.data();definition->native.mEmitterDefCount=int(count);
         const float pixels=std::sqrt(px*py);std::size_t i=0;
         for(const auto& source:data.at("emitters"))
         {
             for(const auto& module:source.at("enabledModules"))
-                if(module!="InitialModule"&&module!="EmissionModule"&&module!="ShapeModule"&&module!="SizeModule"&&module!="UVModule"&&module!="ColorModule"&&module!="VelocityModule"&&module!="ForceModule"&&module!="RotationModule"&&module!="CollisionModule")throw std::runtime_error("unsupported enabled source particle module");
+                if(module!="InitialModule"&&module!="EmissionModule"&&module!="ShapeModule"&&module!="SizeModule"&&module!="UVModule"&&module!="ColorModule"&&module!="VelocityModule"&&module!="ForceModule"&&module!="RotationModule"&&module!="CollisionModule"&&module!="TrailModule")throw std::runtime_error("unsupported enabled source particle module");
+            const bool trail=source.contains("trail");bool trailModule=false;for(const auto& module:source.at("enabledModules"))if(module=="TrailModule")trailModule=true;
+            if(trail!=trailModule)throw std::runtime_error("source TrailModule descriptor mismatch");
+            if(trail){if(source.at("sourceRendererMode")!=5||!source.at("sprite").is_null())throw std::runtime_error("source trail-only renderer mismatch");
+                auto resource=std::make_unique<NativeSourceTrails360>();std::string reason;if(!resource->Load(app,source.at("trail").dump(),pixels,reason))throw std::runtime_error(reason);definition->trails[i]=std::move(resource);}
             auto& out=definition->emitters[i];definition->names[i]=source.at("nodeName").get<std::string>()+"#"+std::to_string(i);out.mName=definition->names[i].c_str();out.mOnDuration="";
             out.mEmitterType=EmitterType::EMITTER_CIRCLE;out.mImageFrames=1;
             // Explicit native-compatible material policy, not an inferred Unity
@@ -233,7 +239,7 @@ bool NativeWorldParticle269Definition::Load(LawnApp* app,uint16_t kind,const std
             }
             else for(const auto& module:source.at("enabledModules"))if(module=="CollisionModule")throw std::runtime_error("missing source collision descriptor");
             definition->Constant(out.mParticleStretch,Number(source.at("sourceScale").at("y"),.00001f,20)/scale);
-            if(type!= -1&&type!=0&&type!=4&&type!=5&&type!=10&&type!=18)throw std::runtime_error("unsupported particle shape");
+            if(type!= -1&&type!=0&&type!=4&&type!=5&&type!=10&&type!=18&&type!=12)throw std::runtime_error("unsupported particle shape");
             if(type==10)
             {
                 const auto& rotation=source.at("sourceRotation");
@@ -269,7 +275,19 @@ bool NativeWorldParticle269Definition::Load(LawnApp* app,uint16_t kind,const std
                     for(const char* axis:{"x","y","z"})Number(shape.at("rotation").at(axis),-360,360);
                 }
             }
-            const float speedHigh=Number(source.at("speed"),0,100),speedScale=type==18?rectangle.launchSpeedScale:scale*pixels;const auto speedRange=source.value("speedRange",Json::array({speedHigh,speedHigh}));definition->Track(out.mLaunchSpeed,{{0,Number(speedRange[0],0,speedHigh)*speedScale,speedHigh*speedScale}});
+            float edgeSpeedScale=scale*pixels;
+            if(type==12){if(!trail)throw std::runtime_error("SingleSidedEdge requires source Trail360 subset");const auto& d=shape.at("projectedEdge");
+                if(d.at("edgeAxis")!=Json::array({1,0,0})||d.at("launchAxis")!=Json::array({0,1,0}))throw std::runtime_error("invalid source edge axes");
+                std::vector<FusionWorldParticle269Transform> chain;const char* axes[]={"x","y","z","w"};for(const auto& t:d.at("ancestorTrs")){FusionWorldParticle269Transform v;for(int a=0;a<3;++a){v.position[a]=Number(t.at("position").at(axes[a]),-10000,10000);v.scale[a]=Number(t.at("scale").at(axes[a]),.00001f,1000);v.rotation[a]=Number(t.at("rotation").at(axes[a]),-1.001f,1.001f);}v.rotation[3]=Number(t.at("rotation").at("w"),-1.001f,1.001f);chain.push_back(v);}
+                std::array<float,9> basis;if(chain.empty()||chain.size()>64||!ComposeFusionWorldParticle269LocalBasis(chain,basis))throw std::runtime_error("unsupported source edge frame");
+                for(int r=0;r<3;++r)for(int c=0;c<3;++c)if(std::abs(Number(d.at("basis").at(r).at(c),-1000,1000)-basis[r*3+c])>1e-5f)throw std::runtime_error("source edge basis mismatch");
+                const float ex=basis[0]*px,ey=-basis[3]*py,nx=basis[1]*px,ny=-basis[4]*py;
+                if(std::abs(ex)>1e-4f&&std::abs(ey)>1e-4f)throw std::runtime_error("native edge projection must be axis-aligned");edgeSpeedScale=std::hypot(nx,ny);if(edgeSpeedScale<1e-6f)throw std::runtime_error("edge has no planar launch direction");
+                const auto& sc=shape.at("scale");const float radius=Number(shape.at("radius"),0,20)*Number(sc.at("x"),0,20);out.mEmitterType=EmitterType::EMITTER_BOX;
+                definition->Track(out.mEmitterBoxX,{{0,-std::abs(ex)*radius,std::abs(ex)*radius}});definition->Track(out.mEmitterBoxY,{{0,-std::abs(ey)*radius,std::abs(ey)*radius}});
+                float angle=float(std::atan2(nx,ny)*180/3.141592653589793);if(std::abs(angle)<1e-6f)angle=360;definition->Constant(out.mLaunchAngle,angle);
+            }
+            const float speedHigh=Number(source.at("speed"),trail?-100:0,100),speedScale=type==18?rectangle.launchSpeedScale:edgeSpeedScale;const auto speedRange=source.value("speedRange",Json::array({speedHigh,speedHigh}));definition->Track(out.mLaunchSpeed,{{0,Number(speedRange[0],trail?-100:0,speedHigh)*speedScale,speedHigh*speedScale}});
             for(auto* track:{&out.mSystemRed,&out.mSystemGreen,&out.mSystemBlue,&out.mSystemAlpha,&out.mSystemBrightness,&out.mParticleBrightness})definition->Constant(*track,1);
             const auto& color=source.at("color");const auto& gradient=source.at("colorCurve");
             const auto interpolation=source.value("colorInterpolation",std::string("linear"));
@@ -353,7 +371,8 @@ bool NativeWorldParticle269Definition::Load(LawnApp* app,uint16_t kind,const std
                 const auto a=Curve(source.at("spinCurves")[0]),b=Curve(source.at("spinCurves")[1]);std::vector<FusionWorldParticle269Sample> spins;
                 for(int n=0;n<lifeTicks;++n){const float t=float(n)/(lifeTicks-1);float x=0,y=0;if(!SampleFusionWorldParticle269Curve(a,t,x)||!SampleFusionWorldParticle269Curve(b,t,y))throw std::runtime_error("invalid source rotation curve");spins.push_back({t,float(x*180/3.141592653589793),float(y*180/3.141592653589793)});}definition->Track(out.mParticleSpinSpeed,spins);
             }
-            if(source.at("rendererEnabled").get<bool>())
+            if(trail){const auto& range=source.at("sizeRange");const float low=Number(range[0],0,20),high=Number(range[1],low,20);definition->Track(out.mParticleScale,{{0,low*scale*pixels,high*scale*pixels}});}
+            if(source.at("rendererEnabled").get<bool>()&&!trail)
             {
                 const auto& sprite=source.at("sprite");const auto relative=std::filesystem::path(sprite.at("texture").get<std::string>());if(relative.is_absolute()||relative.lexically_normal().string().find("..")!=std::string::npos)throw std::runtime_error("invalid particle texture path");
                 const auto file=folder/relative;const auto hash=sprite.at("textureSha256").get<std::string>();if(Hash(file)!=hash)throw std::runtime_error("source particle image hash differs");
@@ -374,6 +393,7 @@ bool NativeWorldParticle269Definition::Load(LawnApp* app,uint16_t kind,const std
         definition->muted=definition->native;definition->mutedEmitters=definition->emitters;
         for(auto& emitter:definition->mutedEmitters){emitter.mSpawnRate={&definition->zeroEmission,1};emitter.mSpawnMinActive={&definition->zeroEmission,1};}
         definition->muted.mEmitterDefs=definition->mutedEmitters.data();
+        for(std::size_t n=0;n<count;++n)if(definition->trails[n]&&!definition->trails[n]->Register(&definition->emitters[n],&definition->mutedEmitters[n]))throw std::runtime_error("source trail registration failed");
         mImpl=std::move(definition);error.clear();return true;
     }
     catch(const std::exception& ex){error=ex.what();return false;}

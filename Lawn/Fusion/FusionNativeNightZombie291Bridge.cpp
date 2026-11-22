@@ -1,5 +1,7 @@
 #include "FusionNativeDryGround353.h"
 #include "FusionNativeNightZombie291Bridge.h"
+#include "FusionNativeQuickJackson367.h"
+#include "FusionNativeSourceLifecycle313.h"
 #include "FusionNative.h"
 #include "FusionNativeAdventure273.h"
 #include "FusionNativeDayZombie273Bridge.h"
@@ -24,7 +26,7 @@ namespace LawnFusion
 namespace
 {
 bool Typed(const Zombie* z)
-{const auto* data=GetNativeSourceZombieData(z);return data&&data->kind==10;}
+{const auto* data=GetNativeSourceZombieData(z);return data&&FusionJacksonFamily367Kind(data->kind);}
 bool Authority(const Zombie* z)
 {return Typed(z)&&z->mBoard&&z->mApp&&z->mApp->mBoard==z->mBoard&&!z->mNetGhost&&
     !z->mApp->NetIsClient()&&NativeSourceDryRow353(z->mBoard,z->mRow);}
@@ -39,9 +41,9 @@ void Failed(Zombie* z,const char* reason)
     const auto* data=GetNativeSourceZombieData(z);
     LawnNet::NetTrace("Fusion Jackson291 stopped id=%u token=%u reason=%s",z->mNetId,data?data->instanceToken:0,reason);
 }
-bool ClockReady(std::string* error)
+bool ClockReady(uint16_t kind,std::string* error)
 {
-    if(GetNativeSourceZombieCarrier(10)!=ZOMBIE_NORMAL)
+    if(!FusionJacksonFamily367Kind(kind)||GetNativeSourceZombieCarrier(kind)!=ZOMBIE_NORMAL)
     {if(error)*error="Jackson requires the covered NORMAL clock-only carrier.";return false;}
     const auto type=GetZombieDefinition(ZOMBIE_NORMAL).mReanimationType;
     ReanimatorEnsureDefinitionLoaded(type,false);
@@ -99,7 +101,7 @@ bool OutsideBounds(const Zombie* z)
 NativeNightZombie281State* EditNativeJackson291(Zombie* z,bool create)
 {
     auto* context=GetNativeContext(z?z->mBoard:nullptr);const auto* data=GetNativeSourceZombieData(z);
-    if(!context||!data||data->kind!=10)return nullptr;
+    if(!context||!data||!FusionJacksonFamily367Kind(data->kind))return nullptr;
     const uint32_t uid=z->mBoard->mZombies.DataArrayGetID(z);
     const bool ghost=z->mNetGhost||z->mApp->NetIsClient();
     // Ghost metadata keeps the opaque host token; this map uses the current
@@ -115,12 +117,14 @@ NativeNightZombie281State* EditNativeJackson291(Zombie* z,bool create)
 }
 const NativeNightZombie281State* GetNativeJackson291(const Zombie* z)
 {return EditNativeJackson291(const_cast<Zombie*>(z),false);}
-bool CanSpawnNativeJackson291(Board* b,std::string* error)
+bool CanSpawnNativeJackson291(Board* b,std::string* error){return CanSpawnNativeJackson291(b,10,error);}
+bool CanSpawnNativeJackson291(Board* b,uint16_t kind,std::string* error)
 {
-    if(error)error->clear();
-    if(kNativeFusionSnapshotVersion<27)
-    {if(error)*error="Jackson canonical controller view requires FNS27.";return false;}
-    return CanSpawnNativeGrassZombie284(b,10,error)&&ClockReady(error);
+ if(error)error->clear();if(kNativeFusionSnapshotVersion<27||!FusionJacksonFamily367Kind(kind))return false;
+ if(kind==10)return CanSpawnNativeGrassZombie284(b,10,error)&&ClockReady(kind,error);
+ if(!EnsureNativeQuickJackson367Resources(b,error)||!ClockReady(kind,error))return false;
+ const uint16_t parent[]={207};FusionSourceDeathBudget319 peak;
+ return GetNativeSourceZombieBirthBudget319(b,parent,peak,error)&&CanAllocateNativeSourceBudget319(b,peak,error);
 }
 const NativeNightZombie281Hooks& GetNativeJackson291Hooks()
 {
@@ -130,17 +134,18 @@ const NativeNightZombie281Hooks& GetNativeJackson291Hooks()
         value.prepareChildren=PrepareChildren;value.childEffect=PlayNativeNightChildEffect291;
         value.facingKeepShadow=FacingKeepShadow;value.contact=NativeJackson291Contact;value.bite=NativeJackson291Bite;
         value.sound=Sound;value.fallSound=FallSound;value.destroy=Destroy;
-        value.outsideSourceBounds=OutsideBounds;value.dieWithoutAnimation=Destroy;return value;
+        value.outsideSourceBounds=OutsideBounds;value.dieWithoutAnimation=Destroy;
+        value.finishMoonWalk=FinishNativeQuickJackson367MoonWalk;value.positionOverride=StepNativeQuickJackson367Position;return value;
     }();
     return hooks;
 }
 bool InitializeNativeJackson291(Zombie* z)
 {
-    if(kNativeFusionSnapshotVersion<27||!Authority(z)||!ClockReady(nullptr))return false;
+    if(kNativeFusionSnapshotVersion<27||!Authority(z)||!ClockReady(GetNativeSourceZombieData(z)->kind,nullptr))return false;
     auto* state=EditNativeJackson291(z,true);if(!state)return false;
     if(state->initialized)return !state->failed&&NativeNightZombie281StateValid(*state);
     // No repeated free-capacity demand AFTER this real actor/body was born.
-    const bool ready=InitializeNativeJackson281(z,*state,GetNativeJackson291Hooks());
+    const bool ready=InitializeNativeJackson281(z,*state,GetNativeJackson291Hooks())&&InitializeNativeQuickJackson367Presentation(z);
     if(!ready){state->failed=true;Failed(z,"source initialization/body clock");}return ready;
 }
 bool UpdateNativeJackson291(Zombie* z)

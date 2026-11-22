@@ -1,3 +1,4 @@
+#include "FusionQuickJackson367Rules.h"
 #include "FusionNativeLadder355.h"
 #include "FusionNativeDryGround353.h"
 #include "FusionNativeDayZombie273Bridge.h"
@@ -52,7 +53,7 @@ bool GroundController(uint16_t kind)
     if(FindFusionDayZombie273Profile(kind)||SpecialZombie269PaperKind(kind))return true;
     // Existing actual ordinary, Door, TallIceNut and Football mechanisms.
     // Jackson additionally requires the FNS27 source controller contract below.
-    return kind==0||kind==2||kind==4||kind==8||kind==111||kind==9||kind==109||kind==10||FusionJackbox300Kind(kind);
+    return kind==0||kind==2||kind==4||kind==8||kind==111||kind==9||kind==109||FusionJacksonFamily367Kind(kind)||FusionJackbox300Kind(kind);
 }
 bool Coexisting313Controller(uint16_t kind)
 {return (GetNativeSourceZombieCarrier(kind)>=0&&FindSpecialZombie269Profile(kind))||
@@ -145,7 +146,7 @@ bool DanceChildEffect(Zombie* parent,Zombie* child,bool dance)
 {
     const auto* source=GetNativeSourceZombieData(parent);const auto* born=GetNativeSourceZombieData(child);
     if(!Host(parent)||!child||child->mBoard!=parent->mBoard||!source||!born||
-        (dance?(!FusionDancePole343Kind(source->kind)||born->kind!=7):(source->kind!=10||born->kind!=6)))return false;
+        (dance?(!FusionDancePole343Kind(source->kind)||born->kind!=7):(!FusionJacksonFamily367Kind(source->kind)||born->kind!=6)))return false;
     float x=0,y=0;if(!GetNativeSourceZombie269NodePoint(child,dance?"":"Shadow",x,y))return false;
     // The resource was validated before any RNG/birth. Native cosmetic pool
     // exhaustion is an acknowledged one-shot drop, never another child batch.
@@ -279,7 +280,7 @@ bool CanSpawnNativeGrassZombie284(Board* b,uint16_t kind,std::string* error)
         if(FusionJackbox300Kind(dependency)&&(kNativeFusionSnapshotVersion<28||
             !LawnNet::NetSourceJackbox309Ready(b->mApp)||!FxReady(b,42,error)))
             return reject("Jackbox requires FNS28, genuine per-owner sound and source effect42.");
-        if(dependency==10&&(kNativeFusionSnapshotVersion<27||!LawnNet::NetSourceSound284Ready(b->mApp,69)||!FxReady(b,11,error)))
+        if(FusionJacksonFamily367Kind(dependency)&&(kNativeFusionSnapshotVersion<27||!LawnNet::NetSourceSound284Ready(b->mApp,69)||!FxReady(b,11,error)))
             return reject("Jackson requires FNS27, real Sound69 and source effect11.");
         if(!EnsureNativeSourceZombieVisuals(b,dependency,error))return false;
         if(!CanQueryNativeSourceZombieRoot273(b,dependency))

@@ -1,3 +1,4 @@
+#include "FusionNativeProjectileBuff369.h"
 #include "FusionNativeBasePlants.h"
 #include "FusionBasePlantRules.h"
 #include "FusionChomperRules.h"
@@ -452,7 +453,7 @@ bool FireNativePeaChomper(Plant* plant)
 bool IsNativePuffProjectile(const Projectile* projectile)
 {
     const auto* data = GetNativeProjectileData(projectile);
-    return data && data->kind == 9 && data->damage == 20 && data->sunOnHit == 0 &&
+    return data && data->kind == 9 && NativeProjectileValidationDamage369(*data) == 20 && data->sunOnHit == 0 &&
         projectile->mProjectileType == PROJECTILE_PUFF && projectile->mMotionType == MOTION_PUFF;
 }
 void CreateNativePuffProjectile(Plant* plant, Projectile* projectile)
@@ -460,7 +461,7 @@ void CreateNativePuffProjectile(Plant* plant, Projectile* projectile)
     const auto* source=GetNativePlantData(plant);
     if (!HostPlant(plant) || !source || (source->kind!=6&&source->kind!=19) || !projectile) return;
     NativeProjectileData data; data.kind = 9;
-    if (!AttachNativeProjectile(plant->mBoard, projectile, data)) { projectile->Die(); return; }
+    if (!AttachNativeTravelProjectile369(plant,projectile,data)) { projectile->Die(); return; }
     // Preserve real native Puff muzzle/FX/art. Only physics and source identity
     // change; the native40x40 logical centre is still (posX+20,posY+posZ+20).
     projectile->mMotionType = MOTION_PUFF;

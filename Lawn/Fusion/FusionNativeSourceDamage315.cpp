@@ -1,5 +1,9 @@
+#include "FusionNativeTravelConsumers369.h"
+#include "FusionDriver363Rules.h"
+#include "FusionNativeQuickJackson367.h"
 #include "FusionNativeExtendedZombie347.h"
 #include "FusionNativeSourceDamage315.h"
+#include "FusionNativeBoss361Bridge.h"
 #include "FusionSourceDamage315Rules.h"
 #include "FusionNative.h"
 #include "FusionNativeAdventure273.h"
@@ -65,15 +69,17 @@ bool Terminal(Zombie* z)
 bool ResolveNativeSourceBaseDamage315(Zombie* z,int raw,bool fix,int& resolved)
 {
     if(!z||!GetNativeSourceZombieData(z))return false;
+    if(GetNativeSourceZombieData(z)->kind==207&&!ResolveNativeQuickJackson367RawDamage(z,raw,fix,raw))return false;
     const auto* action=GetNativeZombieActionData(z);
     const auto* context=GetNativeContext(z->mBoard);
     return TrySourceBaseDamage315(raw,z->mMindControlled,action&&action->jalaedOnDeath,resolved,
-        context&&context->extendedBoard313.ultimateCount>0,fix);
+        context&&context->extendedBoard313.ultimateCount>0,fix,HasNativeTravelAdvanced369(z->mBoard,11),HasNativeTravelAdvanced369(z->mBoard,15),HasNativeTravelAdvanced369(z->mBoard,28));
 }
 bool CanApplyNativeSourceCharred315(Zombie* z,int damage,std::string* error)
 {
     if(!Authority(z)||damage<0){if(error)*error="Source Charred requires an authoritative ordinary source world.";return false;}
-    if(const auto* d=GetNativeSourceZombieData(z);d&&(d->kind==218||d->kind==219||d->kind==220||d->kind==221||d->kind==224))return true;
+    if(const auto* d=GetNativeSourceZombieData(z);d&&(d->kind==222||d->kind==218||d->kind==219||d->kind==220||d->kind==221||d->kind==224))return true;
+    if(FusionBoss361Kind(GetNativeSourceZombieData(z)->kind))return true;
     if(UsesNativeHeavyCharred313B(z))return CanApplyNativeHeavyCharred313B(z,damage,false,error);
     // Validate the exact current picture before any shield/armor callback. A
     // status/flag that excludes standalone art still permits genuine Die2.
@@ -87,7 +93,9 @@ bool CanApplyNativeSourceCharred315(Zombie* z,int damage,std::string* error)
 }
 bool ApplyNativeSourceCharred315(Zombie* z,int damage)
 {
+    if(GetNativeSourceZombieData(z)&&GetNativeSourceZombieData(z)->kind==222)return ApplyNativeSourceTypedDamage313(z,10,damage,false);
     if(!CanApplyNativeSourceCharred315(z,damage))return false;
+    if(FusionBoss361Kind(GetNativeSourceZombieData(z)->kind))return ApplyNativeSourceTypedDamage313(z,4,damage,false);
     if(ApplyNativeExtended347Charred(z,damage,false))return true;
     if(UsesNativeHeavyCharred313B(z))return ApplyNativeHeavyCharred313B(z,damage,false);
     const auto* d=GetNativeSourceZombieData(z);
@@ -99,6 +107,7 @@ bool ApplyNativeSourceTypedDamage313(Zombie* z,int sourceType,int raw,bool fix)
     if(!Authority(z)||raw<0||(sourceType!=0&&sourceType!=4&&sourceType!=10&&sourceType!=12))return false;
     if(sourceType==12&&!CanApplyNativeSourceCharred315(z,raw))return false;
     int filtered=raw;if(FilterNativeJackbox309Damage(z,raw,filtered)&&filtered==0)return true;
+    if(GetNativeSourceZombieData(z)->kind==222)filtered=(std::min)(5000,filtered);
     int remaining=0;
     if(const auto* d=GetNativeSourceZombieData(z);d&&FusionExtendedZombie347Kind(d->kind))
     {if(!ResolveNativeExtended347Damage(z,filtered,fix,remaining))return false;}

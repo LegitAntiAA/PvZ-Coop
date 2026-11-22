@@ -8,6 +8,7 @@
 #include "EffectSystem.h"
 #include "../Lawn/Fusion/FusionNativeCharred311.h"
 #include "../Lawn/Fusion/FusionNativeSourceClock313.h"
+#include "../Lawn/Fusion/FusionNativePlantDisable363.h"
 #include "../GameConstants.h"
 #include "../SexyAppFrameWork/Font.h"
 #include "../SexyAppFrameWork/PerfTimer.h"
@@ -432,7 +433,7 @@ void Reanimation::ReanimationInitialize(float theX, float theY, ReanimatorDefini
 // GOTY @Patoke: 0x4761C0
 void Reanimation::Update()
 {
-    if(LawnFusion::NativeSourceGraph313OwnsClock(this))return;
+    if(LawnFusion::NativePlantDisable363HoldsClock(this)||LawnFusion::NativeSourceGraph313OwnsClock(this))return;
 	if (mFrameCount == 0 || mDead)
 		return;
 

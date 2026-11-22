@@ -21,6 +21,7 @@ enum class FusionCompanion269Family:uint8_t;
 enum class NativeWorldRemainder269Family:uint8_t;
 struct FrozenSourcePose314;
 struct FusionAnimationMask;
+struct FusionAnimationBoxCollider303;
 using CapturedMatrix314=std::array<float,6>;
 struct NativeFieldView277
 {
@@ -83,6 +84,7 @@ public:
     bool GetPlantNodeTransform(const Plant* plant,const char* path,std::array<float,6>& out) const;
     bool DrawPumpkinBack(Sexy::Graphics* graphics, Plant* pumpkin) const;
     bool DrawProjectile(Sexy::Graphics* graphics, Projectile* projectile) const;
+    bool SnowBall363Box(const Projectile*,FusionAnimationBoxCollider303&) const;
     bool DrawPortrait(Sexy::Graphics* graphics, uint16_t kind, const Sexy::Rect& bounds, int grayness, bool preserveTint = false) const;
     bool DrawField(Sexy::Graphics* graphics, Board* board, bool useClassicArt);
     void ReconcileField(Board*);
@@ -102,6 +104,7 @@ bool EnsureNativePlantVisuals(Board* board, uint16_t kind, std::string* error = 
 // Bounded source resources reject states whose particle system is not yet native-supported.
 bool NativePlantVisualStateSupported(const Plant*,std::string* error=nullptr);
 bool EnsureNativeProjectileVisuals(Board* board, uint16_t kind, std::string* error = nullptr);
+bool GetNativeSnowBall363Box(const Projectile*,FusionAnimationBoxCollider303&);
 bool EnsureNativePortraitVisuals(Board* board, uint16_t kind, std::string* error = nullptr);
 // Main resource thread, once per rendered frame, outside Draw/snapshot mutation.
 // Intro/paused only: one complete resource per call, selected directed recipes only.

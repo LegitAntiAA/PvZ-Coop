@@ -1,5 +1,6 @@
 #include "FusionNativeDefender.h"
 #include "FusionNative.h"
+#include "FusionNativeTravelUltimate370.h"
 #include "FusionNativeZombie313Dispatch.h"
 #include "FusionNativeCold.h"
 #include "FusionNativeFire.h"
@@ -96,7 +97,7 @@ int GetNativeDefenderCornDenominator(Plant* plant, int original)
 bool GetNativeDefenderMelonEnhanced(Plant* plant)
 {
     const auto* data = GetNativePlantData(plant);
-    return data && FusionDefenderMelonEnhanced(data->kind,GetNativeDefenderPotKind(plant));
+    return data && (FusionDefenderMelonEnhanced(data->kind,GetNativeDefenderPotKind(plant))||NativeTravelUltimate370MelonEnhanced(plant));
 }
 void NativeDefenderBeforeBite(Zombie* biter, Plant* victim, int biteDamage)
 {
@@ -145,7 +146,7 @@ void NativeDefenderElementPulse(Board* board, FusionDefenderElement element, int
     {
         const auto* profile = Profile(plant);
         if (!profile || (element == FusionDefenderElement::Fire && plant->mRow != row)) continue;
-        const int amount = FusionDefenderElementRecovery(profile->kind,element);
+        const int amount = NativeTravelUltimate370ElementRecovery(plant,element==FusionDefenderElement::Fire,FusionDefenderElementRecovery(profile->kind,element));
         const int before = plant->mPlantHealth;
         if (amount && Recover(plant,amount))
             LawnNet::NetTrace("Fusion native Defender pulse plant=%u kind=%u element=%d before=%d after=%d amount=%d row=%d tick=%d",

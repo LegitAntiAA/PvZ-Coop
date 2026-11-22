@@ -759,8 +759,8 @@ bool NetFusionZombiePart284Supported(uint16_t kind,NetFusionZombiePart284 part)
 	if(part==Part::Glasses)return kind==5;
 	if(part!=Part::Arm&&part!=Part::Head)return false;
     if(kind==37||kind==38||kind==39||kind==213)return part==Part::Head;
-    if(kind==114||kind==118||kind==119||kind==25||kind==29||kind==202||kind==204||kind==220)return part==Part::Arm;
-	if(kind==47||kind==48||kind==3||kind==5||kind==6||kind==7||kind==9||kind==10||kind==24||kind==30||kind==217)return true;
+    if(kind==105||kind==110||kind==215||kind==114||kind==118||kind==119||kind==25||kind==29||kind==202||kind==204||kind==220)return part==Part::Arm;
+	if(kind==207||kind==208||kind==115||kind==116||kind==117||kind==209||kind==49||kind==47||kind==48||kind==3||kind==5||kind==6||kind==7||kind==9||kind==10||kind==24||kind==30||kind==217)return true;
 	if(part==Part::Head)return false;
 	switch(kind){case 21:case 22:case 23:case 100:case 101:case 102:case 103:case 106:case 107:case 108:return true;default:return false;}
 }
@@ -828,6 +828,16 @@ bool NetDecodeSoundEvent284(NetBuffer& wire,uint16_t& sound,float& volume)
 		!std::isfinite(parsedVolume)||parsedVolume<0||parsedVolume>1)
 	{wire.mReadPos=saved;return false;}
 	sound=parsedSound;volume=parsedVolume;return true;
+}
+bool NetDecodeSoundEvent284(NetBuffer& wire,uint16_t& sound,float& volume,float& pitchRatio)
+{
+    if(wire.Remaining()!=10)
+    {if(!NetDecodeSoundEvent284(wire,sound,volume))return false;pitchRatio=1;return true;}
+    auto copy=wire;uint16_t parsedSound=0;float parsedVolume=0,parsedPitch=0;
+    if(!copy.ReadU16(&parsedSound)||!copy.ReadF32(&parsedVolume)||!copy.ReadF32(&parsedPitch)||
+        !std::isfinite(parsedVolume)||parsedVolume<0||parsedVolume>1||
+        !std::isfinite(parsedPitch)||parsedPitch<=0||parsedPitch>4)return false;
+    wire.mReadPos=copy.mReadPos;sound=parsedSound;volume=parsedVolume;pitchRatio=parsedPitch;return true;
 }
 
 namespace

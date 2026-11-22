@@ -5,8 +5,8 @@ namespace LawnFusion
 {
 // Bounded source phase tables, not a Unity object/controller interpreter.
 // Indices are local to the genuine source kind; no source paths on the wire.
-enum class FusionSourceGraph313Param:uint8_t {Speed,Attacking,JumpSpeed,Shooting,Wait,Die,Throw,Fall,Landing,Crash,Walk2,Shake,Walk,Ladder,LoseLadder,LadderOver,Back,Jump,JumpOver,Steal,IdleToWalk,LosePaper,Shoot,Shoot2,Stop,Rise,Surprise,Pop,Fly};
-enum class FusionSourceGraph313Event:uint8_t {Throw,Crash,DieSound,FallSound,Destroy,Bite,StartLand,Land,FallComplete,Particle,Bomb,ReplaceBomb,Shoot,JumpFail,LandSound,SetLadder,BigJump,Catch,Angry,AngrySound,Shoot2,Status6,ChangeStatus=FallComplete,Pop=22,FootballThrowExit=23,SpiderRaised=24};
+enum class FusionSourceGraph313Param:uint8_t {Speed,Attacking,JumpSpeed,Shooting,Wait,Die,Throw,Fall,Landing,Crash,Walk2,Shake,Walk,Ladder,LoseLadder,LadderOver,Back,Jump,JumpOver,Steal,IdleToWalk,LosePaper,Shoot,Shoot2,Stop,Rise,Surprise,Pop,Fly,BossSpawn1,BossSpawn2,BossSpawn3,BossSpawn4,BossSpawn5,BossStomp1,BossStomp2,BossStomp3,BossStomp4,BossAttack1,BossAttack2,BossAttack3,BossAttack4,BossAttack5,BossHeadEnter,BossHeadLeave,BossRv,BossBungi,BossDrive,BossDriverDie,QuickMove,JacksonPoint363,Count};
+enum class FusionSourceGraph313Event:uint8_t {Throw,Crash,DieSound,FallSound,Destroy,Bite,StartLand,Land,FallComplete,Particle,Bomb,ReplaceBomb,Shoot,JumpFail,LandSound,SetLadder,BigJump,Catch,Angry,AngrySound,Shoot2,Status6,ChangeStatus=FallComplete,Pop=22,FootballThrowExit=23,SpiderRaised=24,BossSpawn=25,BossBungi,BossCrash,BossRv,BossPutBall,BossFootSound,BossDriverDie,BossDieOver,BossDieExplode,BossRemoveDebuff,BossMachineSound2,BossIdleEnter,BossHeadEnterExit,BossHeadAttackExit,BossHeadLeaveEnter,BossHeadLeaveExit,BossRvEnter,BossRvExit,StartQuickMove,QuickMoveOver,JacksonTurn363,JacksonSummon363};
 struct FusionSourceGraph313Condition {FusionSourceGraph313Param parameter;uint8_t mode;float threshold;};
 struct FusionSourceGraph313Edge
 {
@@ -20,7 +20,8 @@ struct FusionSourceGraph313State
     bool loop;uint8_t speedParameter;bool nullMotion; //0 none,1 Speed,2 jumpSpeed.
     const FusionSourceGraph313Edge* edges;uint8_t edgeCount;
     const FusionSourceGraph313Marker* markers;uint8_t markerCount;
-    int16_t exitEvent; // -1 none; source-proven Paper_beAngry.OnStateExit only.
+    int16_t exitEvent; // -1 none; source-proven OnStateExit at outgoing fade completion.
+    int16_t entryEvent=-1; // Tail default preserves every existing aggregate/table.
 };
 struct FusionSourceGraph313Layer {uint8_t defaultState;const uint8_t* states;uint8_t stateCount;const FusionSourceGraph313Edge* any;uint8_t anyCount;bool additive;};
 struct FusionSourceGraph313
@@ -30,9 +31,9 @@ struct FusionSourceGraph313
 };
 const FusionSourceGraph313* FindFusionSourceGraph313(uint16_t kind);
 bool FusionSourceGraph313OwnsState(const FusionSourceGraph313&,uint8_t layer,uint8_t state);
-struct FusionSourceGraph313Parameters {float speed=1,jumpSpeed=1;bool attacking=false,shooting=false,wait=false;uint32_t triggers=0;};
-constexpr uint32_t FusionSourceGraph313Trigger(FusionSourceGraph313Param p)
-{return p>=FusionSourceGraph313Param::Die?uint32_t(1U<<(uint8_t(p)-uint8_t(FusionSourceGraph313Param::Die))):0;}
+struct FusionSourceGraph313Parameters {float speed=1,jumpSpeed=1;bool attacking=false,shooting=false,wait=false;uint64_t triggers=0;};
+constexpr uint64_t FusionSourceGraph313Trigger(FusionSourceGraph313Param p)
+{return p>=FusionSourceGraph313Param::Die&&p<FusionSourceGraph313Param::Count?uint64_t(1ULL<<(uint8_t(p)-uint8_t(FusionSourceGraph313Param::Die))):0;}
 // Native body/aux Reanimation owns incoming time. Only outgoing/fade are
 // canonical presentation values; cursors/parameter triggers stay HOST ONLY.
 struct FusionSourceGraph313View
@@ -52,7 +53,11 @@ bool AdvanceFusionSourceGraph313(const FusionSourceGraph313State&,FusionSourceGr
 // false refuses its timed edge. It never invents a default null clip duration.
 bool SelectFusionSourceGraph313Edge(const FusionSourceGraph313&,uint8_t layer,const FusionSourceGraph313View&,
     FusionSourceGraph313Cursor previous,FusionSourceGraph313Cursor current,const FusionSourceGraph313Parameters&,
-    bool nativeDeathOverride,bool nullExitReady,const FusionSourceGraph313Edge*&,uint32_t& consumedTriggers);
+    bool nativeDeathOverride,bool nullExitReady,const FusionSourceGraph313Edge*&,uint64_t& consumedTriggers);
+// Compatibility for existing cohorts whose trigger IDs fit the original U32.
+bool SelectFusionSourceGraph313Edge(const FusionSourceGraph313&,uint8_t,const FusionSourceGraph313View&,
+    FusionSourceGraph313Cursor,FusionSourceGraph313Cursor,const FusionSourceGraph313Parameters&,
+    bool,bool,const FusionSourceGraph313Edge*&,uint32_t& consumedTriggers);
 // Earliest *future* source marker or eligible exit boundary, in real seconds.
 // Caller segments actual native clocks, consumes events before gameplay, then
 // re-resolves full UID and source parameters after every synchronous callback.

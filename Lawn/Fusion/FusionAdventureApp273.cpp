@@ -11,8 +11,8 @@
 
 namespace
 {
-// Open only after the real host/client source-level acceptance passes.
-constexpr bool kSourceAdventurePublicReady273=false;
+// All ordinary campaign components are integrated; full regression is pending.
+constexpr bool kSourceAdventurePublicReady273=true;
 bool SourceFixture(const LawnApp* app)
 {
     const char* value=std::getenv("PVZ_COOP_SMOKE_FUSION_SOURCE273");

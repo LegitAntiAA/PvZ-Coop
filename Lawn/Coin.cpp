@@ -1,4 +1,5 @@
 #include "Coin.h"
+#include "Fusion/FusionNativeBossRoom366.h"
 #include "CoinMotion.h"
 #include "Board.h"
 #include "Cutscene.h"
@@ -850,6 +851,7 @@ void Coin::UpdateCollected()
 //0x431500
 void Coin::Update()
 {
+    if(LawnFusion::UpdateNativeBossTrophy366(this))return;
     const auto* sourceContext=LawnFusion::GetNativeContext(mBoard);
     if(sourceContext&&sourceContext->adventure.enabled&&
         LawnFusion::UpdateNativeFusionAdventureTrophy273(this,sourceContext->adventure.run))return;
@@ -929,6 +931,7 @@ SeedType Coin::GetFinalSeedPacketType()
 //0x431810
 void Coin::Draw(Graphics* g)
 {
+    if(LawnFusion::DrawNativeBossTrophy366(this,g))return;
     if(LawnFusion::DrawNativeFertilize269(g,this)||LawnFusion::DrawNativeDroppedCard269(g,this))return;
     if (LawnFusion::DrawNativeFusionEquipment(g,this)) return;
     g->SetColor(GetColor());
@@ -1169,6 +1172,7 @@ void Coin::FanOutCoins(CoinType theCoinType, int theNumCoins)
 //0x432000
 void Coin::TryAutoCollectAfterLevelAward()
 {
+    if(LawnFusion::IsNativeBossTrophy366(this))return;
     if (LawnFusion::IsNativeEquipmentCoin(this)) return;
     bool aCanBeAutoCollected = false;
     if (IsMoney() && mCoinMotion != CoinMotion::COIN_MOTION_FROM_PRESENT)
@@ -1194,6 +1198,7 @@ void Coin::TryAutoCollectAfterLevelAward()
 //0x432060
 void Coin::Collect()
 {
+    if(LawnFusion::IsNativeBossTrophy366(this))return;
     if(const auto* context=LawnFusion::GetNativeContext(mBoard);context&&context->adventure.enabled&&
         LawnFusion::IsNativeFusionAdventureTrophy273(this,context->adventure.run))return;
     if (LawnFusion::IsNativeEquipmentCoin(this)) return;
@@ -1558,6 +1563,7 @@ void Coin::DroppedUsableSeed()
 //0x432C00
 void Coin::MouseDown(int x, int y, int theClickCount)
 {
+    if(LawnFusion::IsNativeBossTrophy366(this)){LawnFusion::HandleNativeBossRoom366Pointer(mBoard,theClickCount,x,y);return;}
     if (mBoard == nullptr || mBoard->mPaused || mApp->mGameScene != GameScenes::SCENE_PLAYING || mDead)
     {
         return;

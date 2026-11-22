@@ -9,6 +9,7 @@ NativeNightZombie281State* EditNativeJackson291(Zombie*,bool create=false);
 const NativeNightZombie281State* GetNativeJackson291(const Zombie*);
 // Resource/whole-current-batch admission before RNG; source Intro is permitted.
 bool CanSpawnNativeJackson291(Board*,std::string* error=nullptr);
+bool CanSpawnNativeJackson291(Board*,uint16_t sourceKind,std::string* error=nullptr);
 bool InitializeNativeJackson291(Zombie*);
 const NativeNightZombie281Hooks& GetNativeJackson291Hooks();
 // Consuming typed10 wrappers. Ghosts/paused actors never tick source gameplay.

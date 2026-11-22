@@ -1,3 +1,5 @@
+#include "FusionNativeBossBungee366.h"
+#include "FusionLateZombie363Rules.h"
 #include "FusionNativeHeavyZombie313B.h"
 #include "FusionNextZombie343Rules.h"
 #include "FusionNativeNextZombie343.h"
@@ -104,7 +106,7 @@ bool InitializeNativeHeavyZombie313B(Zombie* z,NativeHeavyZombie313BState& s,con
  if(!Authority(z)||!Hooks(h)||!NativeSourceGraph313ClockTracksReady(z,graph,nullptr))return false;
  auto* gs=h.graphStateFor(z);if(!gs)return false;s={};s.initialized=true;
  const auto kind=Kind(z);if(kind==28)s.status=12;if(FusionCatapult343Kind(kind))s.ammo=kind==216?2:25;
- if(kind==32||kind==34){s.status=14;s.jumpSpeed=RandRangeFloat(1.1f,1.4f);z->mPhaseCounter=0;}
+ if(kind==32||FusionSuperPogo363Kind(kind)){s.status=14;s.jumpSpeed=RandRangeFloat(1.1f,1.4f);z->mPhaseCounter=0;}
  if(kind==33){s.status=18;s.ladderVisible=true;}
  if(kind==45){s.status=22;s.bungee.status=22;z->mPhaseCounter=250;z->mSummonCounter=200;}
  if(Gold(kind)){s.gold={};z->mSummonCounter=kind==223?13:0;}
@@ -130,7 +132,8 @@ bool UpdateNativeHeavyZombie313B(Zombie* z,NativeHeavyZombie313BState& s,const N
  const bool first=s.worldTick<0;s.worldTick=z->mBoard->mMainCounter;
  if(!Hooks(h)){s.failed=true;return true;}
  const auto k=Kind(z);
- if(k==45&&first&&!s.bungee.setZombie&&!SelectTarget(z,s,h)){s.failed=true;return true;}
+ if(k==45&&first&&!s.bungee.setZombie)
+ {const auto start=StartNativeBossBungee366(z,s,h);if(start==NativeBossBungee366Start::Failed||(start==NativeBossBungee366Start::NotLinked&&!SelectTarget(z,s,h))){s.failed=true;return true;}}
  if(z->mDead)return true;
  float axisX=0,axisY=0,shadowX=0,shadowY=0,min=0,max=0,top=0;
  if(!h.sourcePoint(z,"axis",axisX,axisY)||!h.sourcePoint(z,"Shadow",shadowX,shadowY)||!h.bounds(z->mBoard,min,max,top)){s.failed=true;return true;}
@@ -151,11 +154,11 @@ bool UpdateNativeHeavyZombie313B(Zombie* z,NativeHeavyZombie313BState& s,const N
    if(!h.crash(z)){s.failed=true;return true;}
   }
  }
- if((k==32||k==34)&&!z->IsDeadOrDying())
+ if((k==32||FusionSuperPogo363Kind(k))&&!z->IsDeadOrDying())
  {
   if(s.status==14&&!z->mMindControlled&&!s.pogoWait&&!(z->mBoard->mMainCounter&1))
   {Plant* p=nullptr;while(z->mBoard->mPlants.IterateNext(p)){FusionHeavy313BPlant t;if(!h.plantTraits(p,t)){s.failed=true;return true;}if(FusionPogo313BCanPause(Pogo(s),false,z->mRow,shadowX,t)&&GroundBox(z,p,h,true)){s.pogoPaused=true;s.pogoWait=2;z->mVelX=0;break;}}}
-  if(k==34)
+  if(FusionSuperPogo363Kind(k))
   {
    FusionSuperPogo313BStep step;
    if(!StepFusionSuperPogo313B(Pogo(s),z->mPhaseCounter*.01f,.01f,axisX,max-2.5f,max,z->mMindControlled,step)){s.failed=true;return true;}
@@ -210,11 +213,11 @@ bool DispatchNativeHeavyZombie313BEvent(Zombie* z,NativeHeavyZombie313BState& s,
  case Event::Shoot:return k==216?ShootNativeDrownCatapult343(z,s,h):FusionCatapult343Kind(k)&&Shot(z,s,h);
  case Event::ReplaceBomb:if(k!=216)return false;s.catapultFlags343|=2;return true; // Exact AnimRelodeOver.
  case Event::SetLadder:return k==33&&SetLadder(z,s,h);
- case Event::LandSound:if(k==32||k==34){auto p=Pogo(s);if(!FusionPogo313BLandSound(p))return false;Pogo(s,p);h.sound(z,109);return true;}return false;
+ case Event::LandSound:if(k==32||FusionSuperPogo363Kind(k)){auto p=Pogo(s);if(!FusionPogo313BLandSound(p))return false;Pogo(s,p);h.sound(z,109);return true;}return false;
  case Event::JumpFail:
-  if(k==32||k==34)
+  if(k==32||FusionSuperPogo363Kind(k))
   {Plant* p=nullptr;while(z->mBoard->mPlants.IterateNext(p)){FusionHeavy313BPlant t;float x=0,y=0;if(!h.plantTraits(p,t)||!h.sourcePoint(z,"Shadow",x,y))return false;if(FusionPogo313BJumpBlocked(Pogo(s),z->IsDeadOrDying(),z->mRow,x,t)&&GroundBox(z,p,h,false)){if(!h.setAxis(z,t.shadowX+.5f,y))return false;h.sound(z,64);return h.sourceEffect(z,23,1.75f);}}return true;}return false;
- case Event::BigJump:if(k!=34)return false;if(!z->IsDeadOrDying())s.status=20;s.shadowEnabled=false;return true;
+ case Event::BigJump:if(!FusionSuperPogo363Kind(k))return false;if(!z->IsDeadOrDying())s.status=20;s.shadowEnabled=false;return true;
  case Event::ChangeStatus:if(k!=28)return false;s.status=0;return true;
  case Event::Catch:return k==45&&Catch(z,s,h);
  default:return false;
@@ -226,11 +229,12 @@ bool RootDeltaNativeHeavyZombie313B(Zombie* z,const NativeHeavyZombie313BState& 
  const char* name=graph->states[state].name;bool moving=false;
  const auto k=Kind(z);if(FusionCatapult343Kind(k))moving=(!std::strcmp(name,"walk")||!std::strcmp(name,"walk2")||(k==112&&!std::strcmp(name,"walk1")))&&!s.caltropDying;
  else if(k==33)moving=!std::strcmp(name,"walk")||!std::strcmp(name,"walk2");
- else if(k==32||k==34)moving=s.status==0&&!std::strcmp(name,"walk2");
+ else if(k==32||FusionSuperPogo363Kind(k))moving=s.status==0&&!std::strcmp(name,"walk2");
  else if(k==28)moving=!std::strcmp(name,"mine")||!std::strcmp(name,"walk1")||!std::strcmp(name,"landing");
  else if(Gold(k))moving=!std::strcmp(name,"walk")||!std::strcmp(name,"walk2");
  if(!moving||z->mIsEating||z->IsDeadOrDying()){out=0;return true;}
  if(k==112||k==216){double delta=0;if(!SourceRootDelta343(k,state,a,b,delta))return false;out=z->mMindControlled!=s.lookBack?-delta:delta;return true;}
+ if(k==209){double d=0;if(!SourceRootDeltaLate363(k,state,a,b,d))return false;out=z->mMindControlled!=s.lookBack?-d:d;return true;}
  return TryGetFusionHeavy313BRootDelta(k,name,{a.loop,a.seconds},{b.loop,b.seconds},z->mMindControlled!=s.lookBack,out);
 }
 bool NativeHeavyZombie313BContact(Zombie* z,NativeHeavyZombie313BState& s,Plant* p,const NativeHeavyZombie313BHooks& h)
@@ -249,8 +253,8 @@ bool NativeHeavyZombie313BLoseLadder(Zombie* z,NativeHeavyZombie313BState& s,con
 {if(Kind(z)!=33)return false;if(!Authority(z))return true;s.status=0;s.ladderVisible=false;z->mShieldType=SHIELDTYPE_NONE;Trigger(z,s,h,Param::LoseLadder);return true;}
 bool NativeHeavyZombie313BLoseJumper(Zombie* z,NativeHeavyZombie313BState& s,int reason,const NativeHeavyZombie313BHooks& h)
 {
- const auto k=Kind(z);if(k!=32&&k!=34)return false;if(!Authority(z))return true;
- if(k==34&&s.status==20){float x=0,y=0,land=0;if(!h.sourcePoint(z,"axis",x,y)||!h.landY(z->mBoard,x,z->mRow,land)||!h.setAxis(z,x,land)){s.failed=true;return true;}}
+ const auto k=Kind(z);if(k!=32&&!FusionSuperPogo363Kind(k))return false;if(!Authority(z))return true;
+ if(FusionSuperPogo363Kind(k)&&s.status==20){float x=0,y=0,land=0;if(!h.sourcePoint(z,"axis",x,y)||!h.landY(z->mBoard,x,z->mRow,land)||!h.setAxis(z,x,land)){s.failed=true;return true;}}
  auto p=Pogo(s);FusionPogo313BLoseJumper(p,k,z->IsDeadOrDying(),reason);Pogo(s,p);z->mVelX=z->mVelZ=0;z->mHasObject=false;Trigger(z,s,h,Param::Walk);return true;
 }
 bool NativeMiner313BAxeLost(Zombie* z,NativeHeavyZombie313BState& s,bool natural,const NativeHeavyZombie313BHooks& h)

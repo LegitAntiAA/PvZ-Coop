@@ -1,5 +1,6 @@
 #include "FusionNativeCannon268.h"
 #include "FusionNative.h"
+#include "FusionNativeTravelUltimate370.h"
 #include "FusionNativeVisual.h"
 #include "FusionNativeAction266.h"
 #include "FusionNativeCold.h"
@@ -109,7 +110,7 @@ void Impact(Projectile* p)
     }
     for(auto id:targets)if((z=b->ZombieTryToGet(id))&&!z->mDead&&!z->mMindControlled)
     {
-        z->TakeDamage(data.damage,data.kind==73||data.kind==83?1U:18U);
+        z->TakeDamage(NativeTravelUltimate370CannonDamage(b,data.kind,data.damage),data.kind==73||data.kind==83?1U:18U);
         if(data.kind==68)ApplyNativeAction266Jalaed(z);
         if(data.kind==69)ApplyNativeColdFreeze(z,500);
     }
@@ -157,7 +158,7 @@ bool CommitAimNativeCannon268(Plant* p,int x,int y)
     if(!Host(p)||!CanAimNativeCannon268(p)||!p->mBoard->IsValidGridCell(p->mBoard->PixelToGridX(x,y),p->mBoard->PixelToGridY(x,y)))return false;
     const auto* clock=FindFusionCannon268Timing(GetNativePlantData(p)->kind);
     int counter=0;if(!clock||!TryGetFusionCannon268ShotCounter(*clock,GetNativePlantData(p)->animationSpeed,counter))return false;
-    auto* d=GetNativePlantData(p);p->mTargetX=x;p->mTargetY=y;p->mStateCountdown=3601;d->productionTicks=p->mStateCountdown;
+    auto* d=GetNativePlantData(p);p->mTargetX=x;p->mTargetY=y;p->mStateCountdown=NativeTravelUltimate370CannonReload(p,3601);d->productionTicks=p->mStateCountdown;
     return StartClock(p,false);
 }
 bool InitializeNativeCannon268(Plant* p)
@@ -300,9 +301,11 @@ void NativeCannon268LobberEmitted(Plant* p,Projectile* projectile)
 {
     if(!Host(p)||!projectile)return;const auto* d=GetNativePlantData(p);auto* bullet=GetNativeProjectileData(projectile);
     if(!d||d->kind!=914||!bullet||bullet->kind!=72)return;
+    // Source339E40 latches WithMelonPot only after this whole callback.
+    struct Complete370{Plant* plant;~Complete370(){NativeTravelUltimate370MelonAfterShot(plant);}} complete370{p};
     bullet->effectVariant=GetNativeDefenderCornDenominator(p,4)==2?1:0;
     if(RandRangeInt(0,99)<42)p->mLaunchCounter=21;
-    if(RandRangeInt(0,99)>=42)return;
+    if(!NativeTravelUltimate370ExtraMelon(p,RandRangeInt(0,99)))return;
     float x=0,y=0,sx=0,sy=0;
     if(!p->GetShadowCenter(sx,sy)||!GetNativeSourcePlantNodePoint(p,"Shoot",x,y))return;
     Plant* receiver=nullptr;Plant* candidate=nullptr;
@@ -324,7 +327,7 @@ void NativeCannon268LobberEmitted(Plant* p,Projectile* projectile)
         if(receiver&&receiver->GetShadowCenter(ux,uy)&&ux<tx)point={ux,uy};
         FusionLobberLaunch launch;
         if(!TryMakeFusionLobberLaunch({x,y},point,point,1,nullptr,launch,GetNativeFusionPixelsY(p->mBoard)))continue;
-        if(auto* child=EmitNativeLobberChild(p->mBoard,p->mRow,sy,launch,72,120,false))
+        if(auto* child=EmitNativeLobberChild(p->mBoard,p->mRow,sy,launch,72,120,GetNativeDefenderMelonEnhanced(p)))
         {
             ++emitted;
             if(receiver)GetNativeContext(p->mBoard)->lobberPlantTargets[p->mBoard->mProjectiles.DataArrayGetID(child)]=p->mBoard->mPlants.DataArrayGetID(receiver);

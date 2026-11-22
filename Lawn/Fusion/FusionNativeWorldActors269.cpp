@@ -1,3 +1,4 @@
+#include "FusionNativeTravelConsumers369.h"
 #include "FusionNativeWorldActors269.h"
 #include "FusionNativeLaserConnections269.h"
 #include "FusionNative.h"
@@ -79,7 +80,7 @@ void AcquireLaser(Plant* p,NativeWorld269PlantState& s)
 }
 void PulseLaser(Plant* p,NativeWorld269PlantState& s)
 {
-    const int base=FusionFindPlant(937)->damage;
+    const int base=GetNativeTravelPlantAttack369(p,FusionFindPlant(937)->damage);
     for(auto& ref:s.zombies)
     {
         auto* z=ResolveZombie(p->mBoard,ref);if(!z){ref={};continue;}
@@ -146,6 +147,7 @@ bool UpdateNativeWorld269Plant(Plant* p)
     if(GetNativePlantData(p)->kind==34){if(--p->mLaunchCounter<=0){p->mLaunchCounter=150;if(GetNativePlantData(p)->shootSeconds<0&&CanCreateNativeWorld269Effects(p,false))AcquirePrism(p,*s);}return true;}
     if(s->connected&&!ResolvePlant(p->mBoard,s->connectedPlant))DisconnectNativeLaser269(p);
     if(p->mDoSpecialCountdown<=0){p->mDoSpecialCountdown=100;const int light=GetNativeFireLightLevel(p);if(light>0)Energy(p,*s,-light*(HasNativeWorld269Trait(p,NativeWorld269Trait::Advanced46)?500:25));}
+    if(p->mStateCountdown>0&&HasNativeWorld269Trait(p,NativeWorld269Trait::Advanced46))--p->mStateCountdown;
     if(p->mStateCountdown<=0){p->mStateCountdown=201;HealLaser(p,*s);}
     if(!s->connected||s->main)
     {
@@ -157,7 +159,7 @@ bool UpdateNativeWorld269Plant(Plant* p)
             if(held.size()==6&&CanCreateNativeWorld269Effects(p,true))
             {
                 auto* center=held[RandRangeInt(0,5)];float x=0,y=0;if(center->GetShadowCenter(x,y)&&CreateNativeWorld269Effect(p,100,x,y,center->mRow))
-                {std::vector<ZombieID> hit;Zombie* z=nullptr;while(p->mBoard->IterateZombies(z))if(Live(z)&&std::abs(z->mRow-center->mRow)<2&&Touches(p,x,y,2,z))hit.push_back(p->mBoard->ZombieGetID(z));for(auto id:hit)if((z=p->mBoard->ZombieTryToGet(id))&&Live(z))ApplyNativeSourceExplosionDamage(z,FusionFindPlant(937)->damage*(advanced?10:3));}
+                {std::vector<ZombieID> hit;Zombie* z=nullptr;while(p->mBoard->IterateZombies(z))if(Live(z)&&std::abs(z->mRow-center->mRow)<2&&Touches(p,x,y,2,z))hit.push_back(p->mBoard->ZombieGetID(z));for(auto id:hit)if((z=p->mBoard->ZombieTryToGet(id))&&Live(z))ApplyNativeSourceExplosionDamage(z,GetNativeTravelPlantAttack369(p,FusionFindPlant(937)->damage)*(advanced?10:3));}
             }
         }
     }
@@ -184,18 +186,19 @@ bool ConnectNativeLaser269(Plant* p,Plant* other)
     // paused. Its host-only refs do not apply damage or advance gameplay.
     if(!Host(p)||p->mDead||!p->mIsOnBoard||!IsNativeWorld269Plant(p)||!IsNativeWorld269Plant(other)||other->mDead||!other->mIsOnBoard||p==other||GetNativePlantData(p)->kind!=937||GetNativePlantData(other)->kind!=937||p->mBoard!=other->mBoard||!CanCreateNativeWorld269Effects(p,true))return false;
     auto* a=EditNativeWorld269PlantState(p);auto* b=EditNativeWorld269PlantState(other);if(!a||!b||a->connected||b->connected||!CreateNativeLaser269Connection(p,other))return false;
-    a->connected=b->connected=true;a->main=true;b->main=false;a->connectedPlant=Ref(other);b->connectedPlant=Ref(p);a->explosionDeadline=p->mBoard->mMainCounter;return true;
+    a->connected=b->connected=true;a->connectedAttackBonus369=b->connectedAttackBonus369=HasNativeTravelAdvanced369(p->mBoard,33);a->main=true;b->main=false;a->connectedPlant=Ref(other);b->connectedPlant=Ref(p);a->explosionDeadline=p->mBoard->mMainCounter;return true;
 }
 void DisconnectNativeLaser269(Plant* p)
 {
     auto* s=EditNativeWorld269PlantState(p);if(!s)return;auto* other=ResolvePlant(p->mBoard,s->connectedPlant);
-    RemoveNativeLaser269Connection(p);s->connected=s->main=false;s->connectedPlant={};s->explosionDeadline=0;s->zombies[4]=s->zombies[5]={};
-    if(other)if(auto* peer=EditNativeWorld269PlantState(other)){peer->connected=peer->main=false;peer->connectedPlant={};peer->explosionDeadline=0;peer->zombies[4]=peer->zombies[5]={};}
+    RemoveNativeLaser269Connection(p);s->connectedAttackBonus369=false;s->connected=s->main=false;s->connectedPlant={};s->explosionDeadline=0;s->zombies[4]=s->zombies[5]={};
+    if(other)if(auto* peer=EditNativeWorld269PlantState(other)){peer->connectedAttackBonus369=false;peer->connected=peer->main=false;peer->connectedPlant={};peer->explosionDeadline=0;peer->zombies[4]=peer->zombies[5]={};}
 }
 bool AdjustNativeLaser269Damage(Plant* p,int& damage)
 {
     if(!Host(p)||!IsNativeWorld269Plant(p)||GetNativePlantData(p)->kind!=937||damage<0)return false;auto* s=EditNativeWorld269PlantState(p);if(!s)return false;
-    const int before=s->energy;const int64_t spent=int64_t(damage)*5;Energy(p,*s,int(std::min<int64_t>(spent,(std::numeric_limits<int>::max)())));damage=(std::max)(0,damage-before/5);return true;
+    const int before=s->energy;const int64_t spent=int64_t(damage)*5;Energy(p,*s,int(std::min<int64_t>(spent,(std::numeric_limits<int>::max)())));damage=(std::max)(0,damage-before/5);
+    TryFusionTravelConnectedDamage369(damage,s->connected&&HasNativeTravelAdvanced369(p->mBoard,33),damage);return true;
 }
 bool GetNativeWorld269VisualPose(const Plant* p,const char*& state,float& seconds)
 {if(!IsNativeWorld269Plant(p))return false;const auto* d=GetNativePlantData(p);const auto* s=GetNativeWorld269PlantState(p);if(d->kind==34){state=d->shootSeconds>=0?"shoot":"idle";seconds=d->shootSeconds>=0?d->shootSeconds:d->idleSeconds;}else{state=s&&s->connected?"connect":s&&std::any_of(s->zombies.begin(),s->zombies.end(),[](auto r){return r.id!=0;})?"shoot":"idle";seconds=d->idleSeconds;}return true;}

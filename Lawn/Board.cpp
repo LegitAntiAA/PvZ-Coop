@@ -1,11 +1,15 @@
+#include "Fusion/FusionNativeTravelConsumers369.h"
+#include "Fusion/FusionNativeTravelBuff369.h"
 #include "Fusion/FusionFog357Rules.h"
 #include <time.h>
 #include <limits.h>
 #include <stdexcept>
 #include "ZenGarden.h"
 #include "BoardInclude.h"
+#include "Fusion/FusionNativeBossRoom366.h"
 #include "Fusion/FusionRuntime.h"
 #include "Fusion/FusionNative.h"
+#include "Fusion/FusionNativePlantDisable363.h"
 #include "Fusion/FusionNativeConveyor308.h"
 #include "Fusion/FusionNativeAdventure273.h"
 #include "Fusion/FusionNativeAdventureProgress273.h"
@@ -5892,6 +5896,7 @@ void Board::MouseDown(int x, int y, int theClickCount)
 		return;
 	const bool aRemoteInput = mApp->NetIsHost() && mApp->mNetManager &&
 		mApp->mNetManager->GetRawActingPlayerSlot() > 0;
+	if(!aRemoteInput&&LawnFusion::HandleNativeBossRoom366Pointer(this,theClickCount,x,y))return;
 	if (!aRemoteInput && (LawnFusion::HandleNativeMoneyPointer(this,theClickCount,x,y) ||
 		LawnFusion::HandleNativeGlovePointer(this, theClickCount, x, y))) return;
 	if(!aRemoteInput&&LawnFusion::HandleNativeSourceAdventurePointer273(this,theClickCount,x,y))return;
@@ -6603,6 +6608,8 @@ void Board::SpawnZombieWave()
 //0x4130D0
 void Board::UpdateGameObjects()
 {
+    LawnFusion::UpdateNativePlantDisables363(this);
+    LawnFusion::UpdateNativeTravelBuffCooldown369(this);
 	Plant* aPlant = nullptr;
 	while (IteratePlants(aPlant))
 	{
@@ -7853,7 +7860,7 @@ void Board::UpdateGame()
 void Board::Update()
 {
 	if (mApp->mFusionRuntime) { Widget::Update(); mApp->FusionTickNetwork(); MarkDirty(); return; }
-	if (LawnFusion::IsNativeFusionBoard(this)) mApp->NativeFusionTickNetwork();
+	if (LawnFusion::IsNativeFusionBoard(this)) {mApp->NativeFusionTickNetwork();LawnFusion::UpdateNativeBossRoom366(this);}
 	TodHesitationBracket aHesitation("Board::Update");
 
 	// ---- co-op: the host owns gameplay, while clients still run the normal
@@ -10296,7 +10303,7 @@ void Board::UpdateFog()
 			const float aY=y*85.f+20+(aSoftware?3:0)+aFogImage->GetCelHeight()*.5f;
 			const int aCol=LawnFusion::FusionFogSampleCell357(aX,aCellX,float(GetCellPitchX()));
 			const int aRow=LawnFusion::FusionFogSampleCell357(aY,aCellY,85.f);
-			Plant* aSourcePlant=nullptr;bool aLit=false;
+			Plant* aSourcePlant=nullptr;bool aLit=LawnFusion::GetNativeTravelLight369(this)>0;
 			while(IteratePlants(aSourcePlant))
 			{
 				const auto* aData=LawnFusion::GetNativePlantData(aSourcePlant);
@@ -10435,6 +10442,7 @@ bool Board::IsScaryPotterDaveTalking()
 //0x41AA40
 void Board::DrawUITop(Graphics* g)
 {
+    LawnFusion::DrawNativeBossTools366(this,g);
 	/*{
 		__m256i value = _mm256_set1_epi32(0xFF000000);
 		__m256i trans_value = _mm256_set1_epi32(0);
@@ -12160,6 +12168,7 @@ void Board::KeyChar(SexyChar theChar)
 //0x41B960
 void Board::AddSunMoney(int theAmount)
 {
+    if(LawnFusion::HasNativeTravelAdvanced369(this,25)&&LawnFusion::CreditNativeTravelSun369(this,theAmount))return;
 	mSunMoney += theAmount;
 	if (mSunMoney > 9990)
 	{
@@ -13568,7 +13577,8 @@ int Board::GetCurrentPlantCost(SeedType theSeedType, SeedType theImitaterType)
 bool Board::CanUseGameObject(GameObjectType theGameObject)
 {
 	if (const auto* context = LawnFusion::GetNativeContext(this))
-		return (theGameObject == OBJECT_TYPE_GLOVE || theGameObject == OBJECT_TYPE_MONEY_SIGN) && mApp->mGameScene == SCENE_PLAYING &&
+		return (theGameObject == OBJECT_TYPE_GLOVE || theGameObject == OBJECT_TYPE_MONEY_SIGN) &&
+            (theGameObject!=OBJECT_TYPE_GLOVE||LawnFusion::NativeBossRoomGloveAllowed366(this))&&mApp->mGameScene == SCENE_PLAYING &&
 			context->selection.State().phase == LawnFusion::FusionBankPhase::Playing;
 	if (mApp->mGameMode == GameMode::GAMEMODE_TREE_OF_WISDOM)
 	{

@@ -61,8 +61,8 @@ inline bool NativeSourceZombieDataValid(const NativeSourceZombieData& data,int m
         head.mAnimRate||head.mLoopType||head.mLoopCount))return false;
     if(data.kind!=104&&(data.paperShootTicks||data.paperShootEvent||head.mPresent))return false;
     if(data.kind!=18&&data.vehicleStopped)return false;
-    if((data.sourceStatusLevel<0&&!(data.kind==205&&data.sourceStatusLevel== -10))||data.sourceStatusLevel>1000000)return false;
-    if(((data.kind==9||data.kind==111||data.kind==109||data.kind==5||data.kind==15||data.kind==104||data.kind==30)?data.firstArmorStage>2:data.firstArmorStage!=0)||!FindFusionZombieProfile(data.kind)||!data.instanceToken||
+    if(data.kind!=222&&((data.sourceStatusLevel<0&&!(data.kind==205&&data.sourceStatusLevel== -10))||data.sourceStatusLevel>1000000))return false;
+    if(((data.kind==9||data.kind==111||data.kind==109||data.kind==5||data.kind==15||data.kind==104||data.kind==30||data.kind==105||data.kind==110||data.kind==215)?data.firstArmorStage>2:data.firstArmorStage!=0)||!FindFusionZombieProfile(data.kind)||!data.instanceToken||
         !std::isfinite(data.originSpeed)||data.originSpeed<kFusionZombieMinimumOriginSpeed||
         data.originSpeed>(data.kind==220?3.3f:data.kind==30?2*kFusionZombieMaximumOriginSpeed:kFusionZombieMaximumOriginSpeed)||!FusionZombieHealthFitsMaximum(data.health,maximumHealth)||
         bool(data.sourceParentId)!=bool(data.sourceParentToken)||(data.dieWithParent&&!data.sourceParentId))return false;

@@ -1,3 +1,4 @@
+#include "FusionLateZombie363Rules.h"
 #include "FusionNextZombie343Rules.h"
 #include "FusionHeavyZombie313BRules.h"
 #include <algorithm>
@@ -26,7 +27,7 @@ float Sample(std::span<const RootKey> keys,float t)
 }
 }
 const FusionZombieProfile* FindFusionHeavyZombie313BProfile(uint16_t kind)
-{if(kind==112||kind==216)return FindFusionNextZombie343Profile(kind);for(const auto& profile:profiles)if(profile.kind==kind)return &profile;return nullptr;}
+{if(kind==112||kind==216||kind==209)return FindFusionNextZombie343Profile(kind);for(const auto& profile:profiles)if(profile.kind==kind)return &profile;return nullptr;}
 bool FusionCatapult313BPlantAllowed(const FusionHeavy313BPlant& p,int row,float axisX)
 {return p.uid&&p.alive&&p.row==row&&!p.flying&&!p.caltrop&&p.kind!=1095&&Finite(p.shadowX)&&p.shadowX<=axisX;}
 bool SelectFusionCatapult313BTarget(std::span<const FusionHeavy313BPlant> plants,int row,float axisX,float shadowX,uint32_t& uid)
@@ -58,8 +59,8 @@ bool FusionMiner313BPlantSurprises(uint16_t kind,std::span<const uint16_t> conte
 }
 bool FusionPogo313BViewValid(uint16_t kind,const FusionPogo313BView& s)
 {
-    if((kind!=32&&kind!=34)||s.wait>2)return false;
-    if(s.status!=0&&s.status!=1&&s.status!=14&&(kind!=34||(s.status!=19&&s.status!=20)))return false;
+    if((kind!=32&&!FusionSuperPogo363Kind(kind))||s.wait>2)return false;
+    if(s.status!=0&&s.status!=1&&s.status!=14&&(!FusionSuperPogo363Kind(kind)||(s.status!=19&&s.status!=20)))return false;
     if(kind==32&&(s.jumped||s.lostJumper))return false;
     return s.status==1||s.shadowEnabled==(s.status!=20);
 }
@@ -79,10 +80,10 @@ float FusionPogo313BHorizontalSpeed(uint8_t wait,float speed,bool right)
 {return wait<=2&&Finite(speed)?(right?1.f:-1.f)*speed*(wait?1.7f:.8f):0.f;}
 void FusionPogo313BLoseJumper(FusionPogo313BView& s,uint16_t kind,bool dying,int reason)
 {
-    if(kind!=32&&kind!=34)return;
+    if(kind!=32&&!FusionSuperPogo363Kind(kind))return;
     if(!dying)s.status=0;
     s.shadowEnabled=true;
-    if(kind==34&&reason==0)s.lostJumper=true;
+    if(FusionSuperPogo363Kind(kind)&&reason==0)s.lostJumper=true;
 }
 bool StepFusionSuperPogo313B(const FusionPogo313BView& s,float wait,float dt,float x,float jumpX,float maximum,bool controlled,FusionSuperPogo313BStep& out)
 {
@@ -133,7 +134,8 @@ bool BuildFusionBungee313BCandidates(std::span<const FusionHeavy313BPlant> plant
 }
 bool FusionBungee313BViewValid(const FusionBungee313BView& s,int columns,int rows)
 {
-    return (s.status==0||s.status==1||s.status==22||s.status==23||s.status==24)&&columns>0&&rows>0&&
+    return bool(s.bossId366)==bool(s.bossToken366)&&(!s.bossId366||(s.targetColumn>=1&&s.targetColumn<=3))&&
+        (s.status==0||s.status==1||s.status==22||s.status==23||s.status==24)&&columns>0&&rows>0&&
         s.targetColumn>=0&&s.targetColumn<columns&&s.targetRow>=0&&s.targetRow<rows&&
         Finite(s.targetX)&&Finite(s.targetY)&&Finite(s.markerY)&&Finite(s.cordScaleX)&&Finite(s.cordScaleY)&&Finite(s.cordScaleZ)&&
         s.cordScaleX>=.1f&&s.cordScaleX<=1000&&std::abs(s.cordScaleY)<=1000&&std::abs(s.cordScaleZ)<=1000&&

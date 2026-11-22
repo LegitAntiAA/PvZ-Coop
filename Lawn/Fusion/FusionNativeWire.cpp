@@ -1,7 +1,10 @@
+#include "FusionQuickJackson367Rules.h"
+#include "FusionNativeProjectileBuff369.h"
 #include "FusionExtendedZombie347Rules.h"
 #include "FusionDrown343Rules.h"
 #include "FusionNativeConveyor308.h"
 #include "FusionNativeWire.h"
+#include "FusionPlantDisable363Rules.h"
 #include "FusionMorePlants269Rules.h"
 #include "FusionRollingActors269Rules.h"
 #include "FusionNativeWorldRemainder269.h"
@@ -45,6 +48,7 @@
 #include <cmath>
 #include <limits>
 #include <set>
+#include "type_traits"
 
 namespace LawnFusion
 {
@@ -80,13 +84,15 @@ struct Reader
 #include "FusionNative313Fields.inc"
 #include "FusionNativeCaptured314Fields.inc"
 
+template<class IO>void Fields(IO& io,FusionBoss361View& v){FieldsBoss361(io,v);}
+
 template<class IO>void Fields(IO& io,FusionSourceObstacle313View& v)
 {
     uint8_t kind=uint8_t(v.kind);io.U8(kind);v.kind=FusionSourceObstacle313Kind(kind);
     io.U32(v.instanceToken);io.U16(v.ownerId);io.U16(v.targetPlantId);io.U32(v.ownerToken);io.U32(v.targetPlantToken);
     io.Bool(v.landed);io.Bool(v.hit);io.Bool(v.fromHypno);io.Bool(v.exploded);
     io.U8(v.variant);io.U16(v.hitCount);io.Bool(v.drownLongFlash);io.U32(v.lastHitAge);Fields(io,v.clock);
-    io.I32(v.ageTicks);io.F32(v.velocityX);io.F32(v.velocityY);io.F32(v.velocityZ);io.F32(v.accelerationZ);
+    io.I32(v.ageTicks);io.F32(v.velocityX);io.F32(v.velocityY);io.F32(v.velocityZ);io.F32(v.accelerationZ);io.U8(v.squashPhase);io.U8(v.squashColumn);io.U32(v.squashPhaseAge);io.Bool(v.squashFire);
 }
 
 template <typename IO> void DayFields273(IO& io,NativeDayZombie273State& state)
@@ -125,12 +131,21 @@ template <typename IO> void Fields(IO& io, NativePlantData& v)
 {
     io.U16(v.kind); io.U16(v.firstParent); io.U16(v.secondParent); io.U16(v.packetId);
     io.U8(v.owner); io.U8(v.randomOrigin); io.I32(v.productionTicks); io.I32(v.pendingProductionTicks);
-    io.U8(v.producerRewardFlags); io.U8(v.deathEventFlags);
+    io.U8(v.producerRewardFlags); io.U8(v.deathEventFlags);io.U8(v.crushFlags366);io.F32(v.crushShadowX366);io.F32(v.crushShadowY366);
     io.U8(v.damageStage);
     io.F32(v.idleSeconds); io.F32(v.shootSeconds); io.F32(v.animationSpeed);
     io.U32(v.instanceToken);
     io.U32(v.batchShotCount); io.U16(v.batchRageTicks); io.U16(v.batchBagCount); io.U8(v.batchMode);
     io.U16(v.waterTargetId); io.U32(v.waterTargetToken);
+    if(v.disable363.size()>65535){io.valid=false;return;}
+    uint16_t disableCount363=uint16_t(v.disable363.size());io.U16(disableCount363);
+    if(!io.valid)return;
+    if constexpr(std::is_same_v<IO,Reader>)
+    {if(size_t(disableCount363)>io.b.Remaining()/2){io.valid=false;return;}v.disable363.resize(disableCount363);}
+    for(auto& tick:v.disable363)io.U16(tick);
+    if(!FusionPlantDisable363ViewValid(v.disable363))io.valid=false;
+    io.Bool(v.ultimateMelonPot370);
+    if(v.ultimateMelonPot370&&v.kind!=914)io.valid=false;
 }
 template <typename IO> void Fields(IO& io, NativeProjectileData& v)
 {
@@ -139,6 +154,8 @@ template <typename IO> void Fields(IO& io, NativeProjectileData& v)
     io.Bool(v.melonEnhanced); io.U8(v.effectVariant);
     io.Bool(v.isZombieBullet); io.Bool(v.hitLatched); io.Bool(v.umbrellaed);
     io.Bool(v.goldAttracted);
+    io.I32(v.sourceUnmodifiedDamage369);
+    io.I32(v.sourceSteelAttack370);io.F32(v.sourceSteelFactor370);io.U8(v.sourceSteelHits370);
 }
 
 template <typename IO> void Fields(IO& io, NativeZombieColdData& v)
@@ -231,7 +248,7 @@ template <typename IO> void Fields(IO& io,NativeCompanion269State& v)
 }
 template <typename IO> void Fields(IO& io,FusionWorld269Reference& v){io.U16(v.id);io.U32(v.token);}
 template <typename IO> void Fields(IO& io,NativeDroppedCard269Data& v)
-{io.U16(v.kind);io.I32(v.cost);io.U32(v.instanceToken);io.U8(v.heldSlot);io.Bool(v.landed);io.Bool(v.flashing);}
+{io.U16(v.kind);io.I32(v.cost);io.U32(v.instanceToken);io.U8(v.heldSlot);io.Bool(v.landed);io.Bool(v.flashing);io.Bool(v.fallByBoss366);}
 template <typename IO> void Fields(IO& io,NativeFertilize269Data& v)
 {
     io.U32(v.instanceToken);io.U16(v.targetId);io.U32(v.targetToken);
@@ -275,6 +292,7 @@ template <typename IO> void Fields(IO& io,NativeWorld269PlantState& v)
     for(auto& ref:v.zombies)Fields(io,ref);for(auto& ref:v.plants)Fields(io,ref);
     Fields(io,v.receiver);Fields(io,v.connectedPlant);
     io.I32(v.energy);io.I32(v.maximumEnergy);io.I32(v.contributors);io.Bool(v.connected);io.Bool(v.main);io.I32(v.explosionDeadline);
+    io.Bool(v.connectedAttackBonus369);
 }
 template <typename IO> void Fields(IO& io,NativeWorld269BeamState& v)
 {
@@ -420,6 +438,9 @@ bool Cannon268PlantValid(const NativePlantData& v)
 bool SupportedPlant(uint16_t kind) { return GetNativeSeedForPlant(kind) != SEED_NONE; }
 bool ValidNativeAncestry(const NativePlantData& data)
 {
+    if(data.crushFlags366>3||!std::isfinite(data.crushShadowX366)||!std::isfinite(data.crushShadowY366)||std::abs(data.crushShadowX366)>4096||std::abs(data.crushShadowY366)>4096||(!(data.crushFlags366&2)&&(data.crushShadowX366||data.crushShadowY366)))return false;
+    if(!FusionPlantDisable363ViewValid(data.disable363)||(!data.disable363.empty()&&FusionSourcePlantDisable363Immune(data.kind)))return false;
+    if(data.ultimateMelonPot370&&data.kind!=914)return false;
     // A recipe can produce a base kind (e.g. Puff + Scaredy produces Puff).
     // Only parentless plants use the direct acquisition rule.
     if (data.firstParent == kFusionNoPlant && data.secondParent == kFusionNoPlant &&
@@ -454,9 +475,10 @@ bool ValidateNativeSnapshotFrame(const NativeSnapshotFrame& frame, const std::ve
         !UniqueIds(frame.rollingPlants269,1024)||!UniqueIds(frame.fertilizeCoins269,1024)||
         !UniqueIds(frame.worldRemainder269Aux,1024)||!UniqueIds(frame.worldRemainder269Shots,1024)||!UniqueIds(frame.wheatPlants269,1024)||
         !UniqueIds(frame.dayZombies273,1024)||!UniqueIds(frame.nightZombies281,1024)||!UniqueIds(frame.jackboxZombies300,1024)||!NativeWorldRemainder269BoardStateValid(frame.worldRemainder269Board)||
+        !FusionTravelBuff360LedgerValid(frame.travelBuff369)||!std::isfinite(frame.travelBuffCooldown369)||frame.travelBuffCooldown369<0||frame.travelBuffCooldown369>60||
         !FusionAdventureSessionValid273(frame.adventure)||frame.money < 0 || frame.money > 99999||
         !UniqueIds(frame.sourceGraphs313,1024)||!UniqueIds(frame.waterZombies313,1024)||
-        !UniqueIds(frame.heavyZombies313,1024)||!UniqueIds(frame.extendedZombies313,1024)||
+        !UniqueIds(frame.heavyZombies313,1024)||!UniqueIds(frame.extendedZombies313,1024)||!UniqueIds(frame.bossZombies361,1024)||!NativeBossRoom366Valid(frame.bossRoom366)||
         !UniqueIds(frame.sourceObstacles313,1024)||!UniqueIds(frame.capturedPlants314,1024)||
         !std::isfinite(frame.sourcePoints)||frame.sourcePoints<0||frame.extendedBoard313.ultimateCount<0||frame.extendedBoard313.ultimateFootballDrownCount<0||
         !std::isfinite(frame.extendedBoard313.punishTime)||frame.extendedBoard313.punishTime<0) return false;
@@ -474,8 +496,14 @@ bool ValidateNativeSnapshotFrame(const NativeSnapshotFrame& frame, const std::ve
     if(!family313(frame.sourceGraphs313,[](uint16_t k){return !FusionWaterZombie313Kind(k)&&FindFusionSourceGraph313(k)!=nullptr;},Native313GraphViewValid)||
        !family313(frame.waterZombies313,FusionWaterZombie313Kind,Native313WaterViewValid)||
        !family313(frame.heavyZombies313,NativeHeavyZombie313BKind,Native313HeavyViewValid)||
-       !family313(frame.extendedZombies313,[](uint16_t k){return FindFusionExtendedZombie313Profile(k)!=nullptr;},Native313ExtendedViewValid))return false;
-    if((!frame.sourceGraphs313.empty()||!frame.waterZombies313.empty()||!frame.sourceObstacles313.empty())&&frame.background>BACKGROUND_5_ROOF)return false;
+       !family313(frame.extendedZombies313,[](uint16_t k){return FindFusionExtendedZombie313Profile(k)!=nullptr;},Native313ExtendedViewValid)||
+       !family313(frame.bossZombies361,FusionBoss361Kind,[](uint16_t k,const FusionBoss361View& v){return v.kind==k&&FusionBoss361ViewValid(v);}))return false;
+    const auto& room=frame.bossRoom366;
+    if(!frame.bossZombies361.empty()&&!room.enabled)return false;
+    if(room.enabled&&NativeFusionRowsForBackground(frame.background)!=5)return false;
+    if(!room.enabled&&(room.boss2||room.fastBoard||room.hammerGranted||room.gloveGranted||room.fakeTrophyNext||room.won||room.trophyFake||room.trophyClaimed||
+       room.hammerCooldownTicks!=6000||room.trophyId||room.trophyToken||room.trophyAnimationBaseAge||room.enemyCount||room.trophyStartX||room.trophyStartY))return false;
+    if((!frame.sourceGraphs313.empty()||!frame.waterZombies313.empty()||!frame.sourceObstacles313.empty())&&frame.background>BACKGROUND_6_BOSS)return false;
     std::set<uint32_t> obstacleTokens;
     for(const auto& record:frame.sourceObstacles313)
     {
@@ -491,7 +519,7 @@ bool ValidateNativeSnapshotFrame(const NativeSnapshotFrame& frame, const std::ve
         if(owner!=frame.sourceZombies.end()&&(v.kind==FusionSourceObstacle313Kind::DrownWeapon?
             !FusionDrown343OwnerVariant(owner->data.kind,v.variant):v.kind==FusionSourceObstacle313Kind::KirovBomb?
             owner->data.kind!=(v.variant?206:26):v.kind==FusionSourceObstacle313Kind::MachineBall?
-            !machineOwner:unsigned(v.kind)==5?owner->data.kind!=221:owner->data.kind!=expected))return false;
+            !machineOwner:v.kind==FusionSourceObstacle313Kind::BossBall? !FusionBoss361Kind(owner->data.kind):unsigned(v.kind)==7?owner->data.kind!=(v.variant?116:115):unsigned(v.kind)==5?owner->data.kind!=221:owner->data.kind!=expected))return false;
     }
     std::set<std::pair<uint16_t,uint32_t>> capturedOriginals;
     for(const auto& record:frame.capturedPlants314)
@@ -523,10 +551,10 @@ bool ValidateNativeSnapshotFrame(const NativeSnapshotFrame& frame, const std::ve
     {
         const auto source=std::find_if(frame.sourceZombies.begin(),frame.sourceZombies.end(),
             [&](const auto& value){return value.id==record.id;});
-        if(source==frame.sourceZombies.end()||source->data.kind!=10||!FusionNightZombie281ViewValid(record.data))return false;
+        if(source==frame.sourceZombies.end()||!FusionJacksonFamily367Kind(source->data.kind)||!FusionNightZombie281ViewValid(record.data))return false;
     }
     for(const auto& source:frame.sourceZombies)
-        if(source.data.kind==10&&std::none_of(frame.nightZombies281.begin(),frame.nightZombies281.end(),
+        if(FusionJacksonFamily367Kind(source.data.kind)&&std::none_of(frame.nightZombies281.begin(),frame.nightZombies281.end(),
             [&](const auto& value){return value.id==source.id;}))return false;
     for(const auto& record:frame.dayZombies273)
     {
@@ -762,7 +790,8 @@ bool ValidateNativeSnapshotFrame(const NativeSnapshotFrame& frame, const std::ve
         const auto* star=state==frame.star269Projectiles.end()?nullptr:&state->data;
         const auto motion=v.goldAttracted&&(v.specialType==4||v.specialType==5)?MOTION_THREEPEATER:
             star?(v.specialType==6?MOTION_HOMING:MOTION_STAR):NativeProjectileMetadataMotion(v);
-        if (!NativeProjectileMetadataValid(v,NativeProjectileMetadataType(v),motion,star)) return false;
+        if (!NativeTravelProjectileLedgerValid369(v,&frame.travelBuff369)||
+            !NativeProjectileMetadataValid(v,NativeProjectileMetadataType(v),motion,star)) return false;
         if((v.kind==43||v.kind==44||v.kind==45||v.kind==48||v.kind==49)&&!star)return false;
     }
     for (const auto& record : frame.coldZombies)
@@ -939,6 +968,19 @@ void ProjectNativeStar269LiveTargets(NativeSnapshotFrame& frame)
     }
 }
 
+namespace {
+template<class IO> void TravelFields369(IO& io,FusionTravelBuff360Ledger& ledger,float& cooldown)
+{
+ bool present=ledger.advanced||ledger.ultimate||cooldown!=0;io.Bool(present);if(!io.valid)return;
+ if(!present){if constexpr(std::is_same_v<IO,Reader>){ledger={};cooldown=0;}return;}
+ uint32_t low=uint32_t(ledger.advanced),high=uint32_t(ledger.advanced>>32);
+ io.U32(low);io.U32(high);io.U32(ledger.ultimate);io.F32(cooldown);
+ if constexpr(std::is_same_v<IO,Reader>)ledger.advanced=uint64_t(low)|(uint64_t(high)<<32);
+ for(auto& round:ledger.advancedUnlockRound)io.I32(round);
+ if(!FusionTravelBuff360LedgerValid(ledger)||!std::isfinite(cooldown)||cooldown<0||cooldown>60||
+    (!ledger.advanced&&!ledger.ultimate&&cooldown==0))io.valid=false;
+}
+}
 bool EncodeNativeSnapshot(const NativeSnapshotFrame& frame, const std::vector<FusionBankEligibleCard>& eligible, LawnNet::NetBuffer& nativeBody)
 {
     if (nativeBody.mReadPos || nativeBody.Size() > kMaximumBytes || !ValidateNativeSnapshotFrame(frame, eligible)) return false;
@@ -966,6 +1008,8 @@ bool EncodeNativeSnapshot(const NativeSnapshotFrame& frame, const std::vector<Fu
     Vector(writer,copy.sourceGraphs313);Vector(writer,copy.waterZombies313);Vector(writer,copy.heavyZombies313);Vector(writer,copy.extendedZombies313);
     Vector(writer,copy.sourceObstacles313);Vector(writer,copy.capturedPlants314);
     writer.F32(copy.sourcePoints);writer.I32(copy.extendedBoard313.ultimateCount);writer.I32(copy.extendedBoard313.ultimateFootballDrownCount);writer.F32(copy.extendedBoard313.punishTime);
+    Vector(writer,copy.bossZombies361);FieldsBossRoom366(writer,copy.bossRoom366);
+    TravelFields369(writer,copy.travelBuff369,copy.travelBuffCooldown369);
     if(!writer.valid)return false;
     constexpr size_t headerBytes = 14;
     if (metadata.Size() > 65535 || headerBytes + metadata.Size() > kMaximumBytes - nativeBody.Size()) return false;
@@ -1011,6 +1055,8 @@ bool DecodeNativeSnapshot(LawnNet::NetBuffer& wire, const std::vector<FusionBank
     Vector(reader,decoded.sourceGraphs313,1024);Vector(reader,decoded.waterZombies313,1024);Vector(reader,decoded.heavyZombies313,1024);Vector(reader,decoded.extendedZombies313,1024);
     Vector(reader,decoded.sourceObstacles313,1024);Vector(reader,decoded.capturedPlants314,1024);
     reader.F32(decoded.sourcePoints);reader.I32(decoded.extendedBoard313.ultimateCount);reader.I32(decoded.extendedBoard313.ultimateFootballDrownCount);reader.F32(decoded.extendedBoard313.punishTime);
+    Vector(reader,decoded.bossZombies361,1024);FieldsBossRoom366(reader,decoded.bossRoom366);
+    TravelFields369(reader,decoded.travelBuff369,decoded.travelBuffCooldown369);
     if (!reader.valid || metadata.Remaining() || decoded.epoch != expectedEpoch || !ValidateNativeSnapshotFrame(decoded, eligible)) return false;
     LawnNet::NetBuffer body;
     body.mData.resize(bodyBytes);

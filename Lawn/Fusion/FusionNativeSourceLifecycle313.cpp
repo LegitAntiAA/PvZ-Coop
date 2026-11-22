@@ -1,4 +1,9 @@
+#include "FusionNativeLateZombie363.h"
+#include "FusionNativeQuickJackson367.h"
+#include "FusionNativeQing208.h"
+#include "FusionQuickJackson367Rules.h"
 #include "FusionNativeSourceLifecycle313.h"
+#include "FusionNativeBoss361Bridge.h"
 #include "FusionNative.h"
 #include "FusionNativeZombies.h"
 #include "FusionNativeSourceClock313.h"
@@ -71,7 +76,10 @@ bool Leaves(Zombie* z,int reason,FusionSourceDeathBudget319& out,std::string* er
  if(c->sourceDeathPoints313.contains(r.uid)){out={};return true;} // Already in genuine BaseDie: no callback/resource replay.
  const double maximum=double(z->mBodyMaxHealth)+z->mHelmMaxHealth+z->mShieldMaxHealth;
  if(maximum<0||!std::isfinite(c->sourcePoints+float(maximum/12000.0)))return Reject(error,"Source death points invalid before any callback/status mutation.");
- if(FindFusionExtendedZombie313Profile(r.kind))
+ if(FusionBoss361Kind(r.kind))
+ {const auto* state=GetNativeBoss361State(z);if(!state||!state->initialized||state->failed)return false;
+  if(!state->deathStarted){NativeBoss361Action a;a.view=state->view;if(!GetNativeBoss361Hooks().preflight(z,NativeBoss361Operation::DeathBegin,a,error))return false;}}
+ else if(FindFusionExtendedZombie313Profile(r.kind))
  {
   const auto* s=GetNativeExtendedZombie313(z);if(!s)return Reject(error,"Source extended retirement state missing.");
   if(!s->initialized||s->failed)return Reject(error,"Source extended retirement controller invalid.");
@@ -110,6 +118,7 @@ bool Leaves(Zombie* z,int reason,FusionSourceDeathBudget319& out,std::string* er
   for(uint16_t sound=0;sound<3;++sound)if(!LawnNet::NetSourceSound284Ready(z->mApp,sound))return Reject(error,"Source Die1 sound0/1/2 mapping unavailable.");
  }
  if(!PlanFusionSourceDeathLeaves319(p,out))return Reject(error,"Source mandatory death leaf plan invalid.");
+ if(r.kind==201||r.kind==209||r.kind==222){FusionSourceDeathBudget319 extra;if(!PlanNativeLate363Death(z,p.reason,extra,error)||!AddFusionSourceDeathBudget319(out,extra,out))return false;}
  return true;
 }
 bool Points(const Ref& r)
@@ -142,12 +151,14 @@ bool ClearDeathStatus(const Ref& r)
 bool AfterDeathEvent(const Ref& r)
 {
  if(!Points(r))return false;
+ if(auto* z=r.Get();z&&r.kind==208&&!NativeQing208DieEvent369(z))return false;
  if(auto* z=r.Get())NativeBatchZombieDying(z); // Source points BEFORE JalaedExplode/drop callbacks.
  return true;
 }
 bool Finish(const Ref& r,int reason)
 {
  if(!AfterDeathEvent(r))return false;auto* z=r.Get();if(!z)return true;
+ if(r.kind==207&&!FinishNativeQuickJackson367MoonWalk(z))return false;
  if(reason==1)
  {
   float x=0,y=0;if(!GetNativeSourceZombie269NodePoint(z,"Shadow",x,y))return false;
@@ -169,6 +180,9 @@ bool GetNativeSourceZombieBirthBudget319(Board* b,std::span<const uint16_t> kind
  for(auto kind:kinds)
  {
   const int carrier=GetNativeSourceZombieCarrier(kind);
+  if(FusionBoss361Kind(kind))
+  {if(carrier!=ZOMBIE_BOSS||!Definition(REANIM_BOSS,error)||!Definition(REANIM_BOSS_DRIVER,error))return false;
+   FusionSourceDeathBudget319 one;one.zombies=1;one.reanimations=3;one.attachments=2;if(!AddFusionSourceDeathBudget319(sum,one,sum))return false;continue;}
   if(carrier!=ZOMBIE_NORMAL&&carrier!=ZOMBIE_TRAFFIC_CONE&&carrier!=ZOMBIE_PAIL&&carrier!=ZOMBIE_DOOR&&carrier!=ZOMBIE_POLEVAULTER&&carrier!=ZOMBIE_NEWSPAPER&&carrier!=ZOMBIE_FOOTBALL&&
      !(carrier==ZOMBIE_ZAMBONI&&(kind==14||kind==16||kind==18||kind==200||kind==211)))
    return Reject(error,"Source birth peak has an uncovered native initializer.");
@@ -229,7 +243,8 @@ bool RetireNativeSourceZombie313(Zombie* z,int reason)
  if(already&&reason==0)return true; // Do not restart an actual source death clock on each HP update.
  if(already){z->DieNoLoot();return !r.Get();} // BaseDie status1: changed reason destroys without replaying DieEvent/FX/points.
  if(!ClearDeathStatus(r))return false;if(!(z=r.Get()))return true;
- if(auto* s=EditNativeExtendedZombie313(z))
+ if(FusionBoss361Kind(r.kind)){if(!BeginNativeBoss361ActorDeath(z))return false;}
+ else if(auto* s=EditNativeExtendedZombie313(z))
  {
   const auto result=BeginNativeExtendedZombie313Death(z,*s,reason,GetNativeExtendedZombie313Hooks());
   if(result==NativeExtendedZombie313Death::Refused||result==NativeExtendedZombie313Death::NotHandled)return false;
@@ -250,11 +265,11 @@ bool RetireNativeSourceZombie313(Zombie* z,int reason)
   const auto result=BeginNativeJackbox309Death(z,reason);if(result==NativeJackbox300DeathResult::Refused||result==NativeJackbox300DeathResult::NotHandled)return false;
   if(result==NativeJackbox300DeathResult::OwnerRetired)return true;
  }
- else if(r.kind==10&&reason==0&&!BeginNativeJackson291Death(z))return false;
+ else if(FusionJacksonFamily367Kind(r.kind)&&reason==0&&!BeginNativeJackson291Death(z))return false;
  if(reason!=0)return Finish(r,reason);
  if(!AfterDeathEvent(r))return false;if(!(z=r.Get()))return true;
  RetireNativeSourceAdventureEnemy273(z);if(!(z=r.Get()))return true;
- if(FindFusionSourceGraph313(r.kind)||FusionWaterZombie313Kind(r.kind)||FusionJackbox300Kind(r.kind)||r.kind==10)
+ if(FindFusionSourceGraph313(r.kind)||FusionWaterZombie313Kind(r.kind)||FusionJackbox300Kind(r.kind)||FusionJacksonFamily367Kind(r.kind))
  {z->mVelX=0;z->mIsEating=false;z->mZombiePhase=PHASE_ZOMBIE_DYING;return true;}
  z->PlayDeathAnim(0);return true; // Existing admitted legacy native death path, under the reentry scope.
 }

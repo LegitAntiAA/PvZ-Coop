@@ -1,8 +1,11 @@
+#include "FusionNativeProjectileBuff369.h"
+#include "FusionNativeTravelConsumers369.h"
 #include "FusionNativeFireActionBatch.h"
 #include "FusionNativeCompanions269.h"
 #include "FusionNativeShooter267.h"
 #include "FusionShooter267Rules.h"
 #include "FusionNative.h"
+#include "FusionNativeTravelUltimate370.h"
 #include "FusionNativeZombie313Dispatch.h"
 #include "FusionNativeMorePlants269Backend.h"
 #include "FusionNativeUmbrellaBatch.h"
@@ -115,7 +118,7 @@ Projectile* Emit(Plant* p,uint16_t kind,int damage,int row,uint8_t special,
     shot->mVelX=3.2f;shot->mVelY=0;shot->mPosZ=0;shot->mShadowY=y;
     shot->mMotionType=motion;
     if(!shot->mNetId)shot->mNetId=b->NetAllocId();
-    if(!shot->mNetId||!AttachNativeProjectile(b,shot,data)){shot->Die();return nullptr;}
+    if(!shot->mNetId||!AttachNativeTravelProjectile369(p,shot,data)){shot->Die();return nullptr;}
     return shot;
 }
 bool EmitThree(Plant* p,uint16_t kind,int damage,bool hot)
@@ -231,7 +234,7 @@ bool AddNativeFireLight(Board* b,int ticks)
 int GetNativeFireLightLevel(const Plant* p)
 {
     if(!Current(p))return 0;const auto* c=GetNativeContext(p->mBoard);if(!c)return 0;
-    int level=c->temporaryLightLevel+GetNativeAction266LightContribution(p)+GetNativeUmbrella267LightContribution(p);
+    int level=GetNativeTravelLight369(p->mBoard)+c->temporaryLightLevel+GetNativeAction266LightContribution(p)+GetNativeUmbrella267LightContribution(p);
     Plant* other=nullptr;
     while(p->mBoard->IteratePlants(other))
     {
@@ -251,7 +254,11 @@ void NativeFireConversionCommitted(Plant* p)
     {
         if(p->mTargetX<(std::numeric_limits<int>::max)())++p->mTargetX;
         GetNativePlantData(p)->batchShotCount=static_cast<uint32_t>(p->mTargetX);
-        if(p->mTargetX>20&&SpawnRight(p,1054,p->mPlantCol+1))p->mTargetX=0;
+        if(p->mTargetX>NativeTravelUltimate370TorchLimit(p))
+        {
+            if(!SpawnRight(p,1054,p->mPlantCol+1))NativeTravelUltimate370TorchFailure(p);
+            p->mTargetX=0;GetNativePlantData(p)->batchShotCount=0;
+        }
         return;
     }
     const int before=p->mTargetX;int after=before;bool attempt=false;
@@ -489,7 +496,7 @@ bool IsNativeFireActionProjectile(const Projectile* p)
     if(extended&&(extended->kind==36||extended->kind==28&&(extended->specialType==4||extended->specialType==5||extended->specialType==255)))
         return NativeProjectileMetadataValid(*extended,p->mProjectileType,p->mMotionType);
     const auto* d=GetNativeProjectileData(p);
-    return Current(p)&&d&&FusionFireActionProjectileMetadataValid(d->kind,d->damage,d->sunOnHit,
+    return Current(p)&&d&&FusionFireActionProjectileMetadataValid(d->kind,NativeProjectileValidationDamage369(*d),d->sunOnHit,
         d->specialType,d->fireState,p->mProjectileType,p->mMotionType)&&!d->lastTorchId&&!d->lastTorchToken;
 }
 bool GetNativeFireActionProjectileCenter(const Projectile* p,float& x,float& y)

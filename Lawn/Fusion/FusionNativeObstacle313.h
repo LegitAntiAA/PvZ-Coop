@@ -13,6 +13,7 @@ struct NativeSourceObstacle313Data:FusionSourceObstacle313View
 {
     uint32_t clockUID=0; // LOCAL actual native R full generation, never hosttoken.
     std::vector<NativeSourceObstacle313Contact> entered; // HOST ONLY Unity enter-contact memory.
+    int growthRenderOrder366=0; // HOST ONLY future row-layer assignment; raw current order is canonical.
     int tick=-1;bool failed=false; // HOST ONLY, not simulation/wire clocks.
 };
 class NativeSourceObstacle313Visuals

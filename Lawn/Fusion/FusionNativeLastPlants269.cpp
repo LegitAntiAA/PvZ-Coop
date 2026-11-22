@@ -1,3 +1,5 @@
+#include "FusionNativeProjectileBuff369.h"
+#include "FusionNativeTravelConsumers369.h"
 #include "FusionNativeLastPlants269.h"
 #include "FusionBasePlantRules.h"
 #include "FusionNative.h"
@@ -156,7 +158,7 @@ bool CanPlaceNativeEmperor269(Board* b,int row)
     if(!b||!b->mApp||b->mApp->mBoard!=b||!IsNativeFusionBoard(b))return false;
     // Normal D2 has no per-plant Advanced trait. Any active board mode still
     // follows its complete source roster; unsupported choices fail as a group.
-    return EmperorRosterReady(b,row,NativeLastPlants269Shooting(b),false,NativeLastPlants269Balanced(b));
+    return EmperorRosterReady(b,row,NativeLastPlants269Shooting(b),HasNativeTravelAdvanced369(b,1),NativeLastPlants269Balanced(b));
 }
 bool IsNativeLastPlants269(const Plant* p)
 {const auto* d=GetNativePlantData(p);return d&&IsNativeFusionBoard(p->mBoard)&&IsFusionLastPlants269Kind(d->kind);}
@@ -302,7 +304,7 @@ Projectile* CreateNativeLastPlants269FireKelp(Plant* p,Projectile* original)
 bool IsNativeLastPlants269KelpProjectile(const Projectile* p)
 {
     const auto* d=GetNativeProjectileData(p);
-    return d&&FusionLastPlants269KelpProjectileValid(d->kind,d->damage,d->specialType)&&p->mProjectileType==PROJECTILE_PEA&&
+    return d&&FusionLastPlants269KelpProjectileValid(d->kind,NativeProjectileValidationDamage369(*d),d->specialType)&&p->mProjectileType==PROJECTILE_PEA&&
         p->mMotionType==(d->specialType==2?MOTION_STAR:MOTION_STRAIGHT)&&d->fireState==1&&d->lastTorchId&&d->lastTorchToken&&
         !d->sunOnHit&&!d->melonEnhanced&&!d->effectVariant&&!d->isZombieBullet&&!d->hitLatched&&!d->umbrellaed&&!d->goldAttracted;
 }

@@ -1,5 +1,8 @@
+#include "FusionNativeTravelConsumers369.h"
+#include "FusionNativeProjectileBuff369.h"
 #include "FusionNativeShooter267.h"
 #include "FusionNative.h"
+#include "FusionNativeTravelUltimate370.h"
 #include "FusionNativeShooterTiming.h"
 #include "FusionNativeShooterBatch.h"
 #include "FusionNativeBasePlants.h"
@@ -90,6 +93,7 @@ Projectile* Emit(Plant* p,uint16_t kind,int damage,int row,uint8_t way,float x,f
     if(!Current(p)||row<0||row>=Rows(b)||b->mProjectiles.mSize>=b->mProjectiles.mMaxSize||!EnsureNativeProjectileVisuals(b,kind))return nullptr;
     NativeProjectileData data;data.kind=kind;data.damage=damage;data.specialType=way;data.fireState=fire;data.effectVariant=variant;
     data.lastTorchId=stamp;data.lastTorchToken=token;
+    CaptureNativeTravelSteel370(p,data);
     const auto type=NativeProjectileMetadataType(data);const auto motion=NativeProjectileMetadataMotion(data);
     if(!NativeProjectileMetadataValid(data,type,motion))
     {LawnNet::NetTrace("Fusion native Shooter267 emitReject source=%u payload=%u damage=%d way=%u type=%d motion=%d fire=%u effect=%u",GetNativePlantData(p)->kind,kind,damage,way,int(type),int(motion),fire,variant);return nullptr;}
@@ -109,7 +113,7 @@ Projectile* Emit(Plant* p,uint16_t kind,int damage,int row,uint8_t way,float x,f
         q->mAccZ=float(9.8*py*.0001);
         q->mRotationSpeed=vx*float(PX*.01);
     }
-    if(!AttachNativeProjectile(b,q,data)){q->Die();return nullptr;}
+    if(data.sourceSteelAttack370 ? !AttachNativeProjectile(b,q,data) : !AttachNativeTravelProjectile369(p,q,data)){q->Die();return nullptr;}
     LawnNet::NetTrace("Fusion native Shooter267 emit plant=%u kind=%u projectile=%u payload=%u row=%d way=%u damage=%d tick=%d",p->mNetId,GetNativePlantData(p)->kind,q->mNetId,kind,row,way,damage,b->mMainCounter);
     return q;
 }
@@ -147,7 +151,7 @@ void AreaFume(Plant* p)
                 p->mApp->AddTodParticle(zx,zy,p->mRenderOrder+1,PARTICLE_DOOM);
                 LawnNet::NetBroadcastParticle(p->mApp,zx,zy,p->mRenderOrder+1,PARTICLE_DOOM);
             }
-            else {const FusionColdDamageContext cold{0,FusionColdDamageDelivery::IceAll};z->TakeDamage(150,2U,&cold);AddNativeColdLevel(z,10);}
+            else {const FusionColdDamageContext cold{0,FusionColdDamageDelivery::IceAll};z->TakeDamage(NativeTravelUltimate370FumeDamage(p,150),2U,&cold);AddNativeColdLevel(z,NativeTravelUltimate370FumeCold(p,10));}
         }
         else
         {
@@ -224,11 +228,16 @@ void Torch(Plant* p)
             const double py=GetNativeFusionPixelsY(p->mBoard);
             float x=0,y=0;Anchor(p,x,y);y-=float(.5*py);
             const float speed=q->mMotionType==MOTION_THREEPEATER?float(std::abs(q->mVelX/PX)*100):float(std::hypot(q->mVelX/PX,q->mVelY/py)*100);
+            float factor369=1.f;
+            if(HasNativeTravelAdvanced369(p->mBoard,41))factor369=(float(GetNativeContext(p->mBoard)->money)*.02f)/1000.f+1.f;
+            const float scaled369=float(data.damage)*factor369;
+            if(!std::isfinite(scaled369)||scaled369>float(100000000))continue;
+            const int goldDamage369=int(scaled369);
             const int wanted=3;if(p->mBoard->mProjectiles.mSize+wanted>p->mBoard->mProjectiles.mMaxSize)continue;
             if(!EnsureNativeProjectileVisuals(p->mBoard,98)||!EnsureNativeProjectileVisuals(p->mBoard,99))continue;
-            auto* a=Emit(p,98,data.damage,p->mRow?p->mRow-1:p->mRow,p->mRow?4:0,x+(p->mRow?0:float(.5*PX)),y,speed,0,p->mNetId,pd->instanceToken,0,1);
-            auto* b=Emit(p,98,data.damage,p->mRow+1<Rows(p->mBoard)?p->mRow+1:p->mRow,p->mRow+1<Rows(p->mBoard)?5:0,x+(p->mRow+1<Rows(p->mBoard)?0:float(.5*PX)),y,speed,0,p->mNetId,pd->instanceToken,0,1);
-            auto* c=Emit(p,99,data.damage,p->mRow,0,x,y,speed,0,p->mNetId,pd->instanceToken,0,1);
+            auto* a=Emit(p,98,goldDamage369,p->mRow?p->mRow-1:p->mRow,p->mRow?4:0,x+(p->mRow?0:float(.5*PX)),y,speed,0,p->mNetId,pd->instanceToken,0,1);
+            auto* b=Emit(p,98,goldDamage369,p->mRow+1<Rows(p->mBoard)?p->mRow+1:p->mRow,p->mRow+1<Rows(p->mBoard)?5:0,x+(p->mRow+1<Rows(p->mBoard)?0:float(.5*PX)),y,speed,0,p->mNetId,pd->instanceToken,0,1);
+            auto* c=Emit(p,99,goldDamage369,p->mRow,0,x,y,speed,0,p->mNetId,pd->instanceToken,0,1);
             if(a&&b&&c)q->Die();else{if(a)a->Die();if(b)b->Die();if(c)c->Die();}
         }
         else
@@ -242,12 +251,12 @@ void Torch(Plant* p)
             }
             else if(data.kind==87&&!data.fireState)
             {
-                auto hot=data;hot.damage*=2;hot.fireState=1;hot.lastTorchId=p->mNetId;hot.lastTorchToken=pd->instanceToken;
+                auto hot=data;hot.damage*=2;if(hot.sourceUnmodifiedDamage369)hot.sourceUnmodifiedDamage369*=2;hot.fireState=1;hot.lastTorchId=p->mNetId;hot.lastTorchToken=pd->instanceToken;
                 if(AttachNativeProjectile(p->mBoard,q,hot))LawnNet::NetTrace("Fusion native Shooter267 heat87 plant=%u projectile=%u damage=%d",p->mNetId,q->mNetId,hot.damage);
             }
             else if(data.kind==11&&!data.effectVariant)
             {
-                auto hot=data;hot.damage=320;hot.effectVariant=1;hot.lastTorchId=p->mNetId;hot.lastTorchToken=pd->instanceToken;
+                auto hot=data;hot.damage=320;hot.sourceUnmodifiedDamage369=0;hot.effectVariant=1;hot.lastTorchId=p->mNetId;hot.lastTorchToken=pd->instanceToken;
                 AttachNativeProjectile(p->mBoard,q,hot);
             }
         }
@@ -414,6 +423,7 @@ bool ApplyNativeShooter267ProjectileImpact(Projectile* p,Zombie* z)
     if(!NativeShooter267ProjectileCanHit(p,z))return true;auto* d=GetNativeProjectileData(p);const auto k=d->kind;
     auto* c=GetNativeContext(p->mBoard);const auto id=p->mBoard->mProjectiles.DataArrayGetID(p);
     if((k==87||k==93)&&(!c||!RememberFusionRollingHit(c->rollingHits,id,p->mBoard->ZombieGetID(z))))return true;
+    if((k==98||k==99)&&HasNativeTravelAdvanced369(p->mBoard,42))return ApplyNativeFireImpact(p,z);
     int damage=d->damage;
     if(k==47)TryGetFusionMagnetCactusDamage(damage,FirstArmor(z),SecondArmor(z),damage);
     if(k==11)TryGetFusionIronDamage(damage,z->mHelmHealth,damage);
@@ -422,12 +432,14 @@ bool ApplyNativeShooter267ProjectileImpact(Projectile* p,Zombie* z)
     {
         float x=0,y=0;if(z->GetShadowCenter(x,y))
         {const double right=p->mBoard->GetCellCenterX(p->mBoard->GetColumnCount()-1,z->mRow)+(4.0-2.2)*PX;
-        if(x<=right){z->mPosX+=float((std::min)(.05*PX,right-x));z->mX=int(z->mPosX);}}
+        if(x<=right){z->mPosX+=float((std::min)(double(NativeTravelUltimate370SteelKnockback(p->mBoard))*PX,right-x));z->mX=int(z->mPosX);}}
     }
-    if(k==93)d->damage=static_cast<int>(d->damage*.5f);
+    if(k==93){d->damage=static_cast<int>(d->damage*.5f);if(d->sourceSteelAttack370)NativeTravelSteel370AfterHit(*d);else if(d->sourceUnmodifiedDamage369)d->sourceUnmodifiedDamage369=static_cast<int>(d->sourceUnmodifiedDamage369*.5f);}
     p->PlayImpactSound(z);
     LawnNet::NetTrace("Fusion native Shooter267 impact projectile=%u payload=%u target=%u damage=%d body=%d helm=%d shield=%d tick=%d",p->mNetId,k,z->mNetId,damage,z->mBodyHealth,z->mHelmHealth,z->mShieldHealth,p->mBoard->mMainCounter);
-    if(k!=87&&k!=93||FusionProjectileHitCount(c->rollingHits,id)>=3)Retire(p);
+    int penetration=3;
+    if(k==87){const auto it=c->lobberPierceLimits.find(id);if(it!=c->lobberPierceLimits.end())penetration=it->second;}
+    if((k!=87&&k!=93)||FusionProjectileHitCount(c->rollingHits,id)>=penetration)Retire(p);
     return true;
 }
 bool HandleNativeShooter267ProjectileCollision(Projectile* p)

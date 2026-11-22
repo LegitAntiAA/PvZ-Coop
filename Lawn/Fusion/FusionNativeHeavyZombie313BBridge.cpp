@@ -1,3 +1,6 @@
+#include "FusionNativeLateZombie363.h"
+#include "FusionNativeZombiePreflight280.h"
+#include "FusionLateZombie363Rules.h"
 #include "FusionNativeDryGround353.h"
 #include "FusionNativeHeavy313BInternal.h"
 #include "FusionNextZombie343Rules.h"
@@ -248,14 +251,15 @@ namespace {bool Resources(Board* b,uint16_t kind,std::string* error)
  if(kind==28&&!sound(94))return false;
  if(FusionCatapult343Kind(kind)){for(uint16_t id:{43,72,73,77,101})if(!sound(id))return false;}
  if(kind==112&&!sound(40))return false;
- if(kind==32||kind==34){for(uint16_t id:{64,109})if(!sound(id))return false;}
+ if(kind==32||FusionSuperPogo363Kind(kind)){for(uint16_t id:{64,109})if(!sound(id))return false;}
  if(kind==45){for(uint16_t id:{50,62,122,123,124})if(!sound(id))return false;}
  if(kind==203||kind==223){for(uint16_t id:{3,4,44,66})if(!sound(id))return false;if(kind==203){if(!sound(45)||!sound(46))return false;}else for(uint16_t id:{0,1,2,43,72,73,77})if(!sound(id))return false;}
+ if(kind==209){const uint16_t roots[]={30};if(!EnsureNativeSourceZombieClosure280(b,roots,error)||!EnsureNativeSourceEffect269(b,42,error))return false;}
  if(FusionCatapult343Kind(kind)&&!EnsureNativeSourceEffect269(b,54,error))return false;
  if(FusionCatapult343Kind(kind)&&kind!=216&&!EnsureNativeProjectileVisuals(b,58))return false;
  if(kind==216&&!EnsureNativeDrownWeapon313Visuals(b,error,1))return false;
  if(kind==112&&!EnsureNativeProjectileVisuals(b,3))return false;
- if((kind==32||kind==34)&&!EnsureNativeSourceEffect269(b,23,error))return false;
+ if((kind==32||FusionSuperPogo363Kind(kind))&&!EnsureNativeSourceEffect269(b,23,error))return false;
  if((kind==203||kind==223)&&!GoldResources(b,kind,error))return false;
  if(kind==45)
  {if(!GetNativeCapturedPlants314(b)){if(error)*error="Source45 retained-plant presentation cache unavailable";return false;}
@@ -310,20 +314,20 @@ bool GetNativeHeavyZombie313BEquipment(const Zombie* z,int& first,int& second,in
  const auto* s=GetNativeHeavyZombie313B(z);if(!s)return false;int f=0,b=0,u=0;
  switch(Kind(z)){case 28:u=s->axePresent?3:0;break;case 32:u=s->lostJumper?0:2;break;
  case 33:b=s->ladderVisible&&z->mShieldType!=SHIELDTYPE_NONE?3:0;break;
- case 34:f=z->mHelmType!=HELMTYPE_NONE?1:0;break;case 203:b=z->mShieldType!=SHIELDTYPE_NONE?2:0;break;
+ case 209:case 34:f=z->mHelmType!=HELMTYPE_NONE?1:0;break;case 203:b=z->mShieldType!=SHIELDTYPE_NONE?2:0;break;
  case 223:f=z->mHelmType!=HELMTYPE_NONE?5:0;b=z->mShieldType!=SHIELDTYPE_NONE?2:0;break;}
  first=f;second=b;unique=u;return true;
 }
 bool NativeHeavyZombie313BActorCaltrop(Zombie* z)
 {auto* s=EditNativeHeavyZombie313B(z);return s&&KillNativeCatapult313BByCaltrop(z,*s,GetNativeHeavyZombie313BHooks());}
 bool NativeHeavyZombie313BActorHeadLost(Zombie* z)
-{const auto k=Kind(z);if(k!=32&&k!=34)return false;if(Playing(z)){float x=0,y=0,low=0,high=0,top=0;if(NativeSourcePoint313(z,"axis",x,y)&&NativeSourceBounds313(z->mBoard,low,high,top)){high-=2.2f;SetNativeSourceAxis313(z,x>high?x:(std::min)(x+1,high),y);}}return true;}
+{const auto k=Kind(z);if(k!=32&&!FusionSuperPogo363Kind(k))return false;if(Playing(z)){float x=0,y=0,low=0,high=0,top=0;if(NativeSourcePoint313(z,"axis",x,y)&&NativeSourceBounds313(z->mBoard,low,high,top)){high-=2.2f;SetNativeSourceAxis313(z,x>high?x:(std::min)(x+1,high),y);}}return true;}
 bool NativeHeavyZombie313BRejectStatus(const Zombie* z,bool mc,bool knock,bool freeze)
 {const auto* s=GetNativeHeavyZombie313B(z);const auto k=Kind(z);if(!s)return false;if(k==223)return FusionGoldBoss269RejectStatus(s->gold.status,mc,knock,freeze);if(k==203)return freeze&&s->gold.status==5;if(k==45)return knock;return false;}
 bool NativeHeavyZombie313BRejectCold(const Zombie* z)
 {const auto* s=GetNativeHeavyZombie313B(z);return s&&Kind(z)==28&&!FusionMiner313BCanCold(s->status);}
 bool ApplyNativeHeavyFreeze313B(Zombie* z,int ticks)
-{const auto k=Kind(z);const auto* s=GetNativeHeavyZombie313B(z);if(!s||!(k==28||k==32||k==34))return false;if(!Playing(z))return true;
+{const auto k=Kind(z);const auto* s=GetNativeHeavyZombie313B(z);if(!s||!(k==28||k==32||FusionSuperPogo363Kind(k)))return false;if(!Playing(z))return true;
  if(k==28)return s->status==12;
  if(FusionPogo313BFreezeBecomesCold(s->status,GetNativeSourceZombieData(z)->beforeDying)){z->mChilledCounter=(std::max)(z->mChilledCounter,1500);return true;}return false;}
 int ResolveNativeHeavyDamage313B(const Zombie* z,int damage){return Kind(z)==223?(std::min)(damage,5000):damage;}
@@ -337,12 +341,13 @@ bool ApplyNativeHeavyArmorDamage313B(Zombie* z,bool first,int damage,int& overfl
  if(k==203||k==223)return GoldArmorDamage(z,first,damage,overflow);
  auto* s=EditNativeHeavyZombie313B(z);if(!s){overflow=0;return true;}int& hp=first?z->mHelmHealth:z->mShieldHealth;
  if(k==216&&first){const int before=hp;overflow=(std::max)(0,damage-before);hp=(std::max)(0,before-damage);if(!hp){z->mHelmMaxHealth=0;z->mHelmType=HELMTYPE_NONE;}else s->armorStage=FusionDrownCatapult343ArmorStage(hp,z->mHelmMaxHealth,s->armorStage);return true;}
- if(first&&k!=34&&k!=223||!first&&k!=33&&k!=203&&k!=223)return false;
+ if(first&&!FusionSuperPogo363Kind(k)&&k!=223||!first&&k!=33&&k!=203&&k!=223)return false;
  const int maximum=first?z->mHelmMaxHealth:z->mShieldMaxHealth;overflow=(std::max)(0,damage-hp);
- if(damage>=hp&&hp>0&&!PlayNativeSourceZombieArmor284(z,first)){overflow=0;return true;}
+ if(damage>=hp&&hp>0&&!FusionSuperPogo363Kind(k)&&!PlayNativeSourceZombieArmor284(z,first)){overflow=0;return true;}
  hp=(std::max)(0,hp-damage);
- if(!hp){if(first){z->mHelmType=HELMTYPE_NONE;if(k==34)NativeHeavyZombie313BLoseJumper(z,*s,0,GetNativeHeavyZombie313BHooks());}
+ if(!hp){if(first){z->mHelmType=HELMTYPE_NONE;} //356B70 only clears armor reference/type; NO LoseJumper/ArmorFall/Destroy.
   else if(k==33)NativeHeavyZombie313BLoseLadder(z,*s,GetNativeHeavyZombie313BHooks());}
+ else if(FusionSuperPogo363Kind(k)){uint8_t stage=s->armorStage;if(FusionSuperPogo363Armor(hp,maximum,s->armorStage,stage))s->armorStage=stage;}
  else s->armorStage=uint8_t(FusionGoldBoss269ArmorStage(hp,maximum,s->armorStage));return true;
 }
 bool UsesNativeHeavyCharred313B(const Zombie* z)
@@ -351,10 +356,10 @@ bool CanApplyNativeHeavyCharred313B(Zombie* z,int raw,bool fix,std::string* erro
 {int resolved=0;return UsesNativeHeavyCharred313B(z)&&Playing(z)&&ResolveNativeSourceBaseDamage315(z,raw,fix,resolved)&&GoldDamage(z,resolved,10,true,error);}
 bool ApplyNativeHeavyCharred313B(Zombie* z,int raw,bool fix)
 {int resolved=0;return UsesNativeHeavyCharred313B(z)&&Playing(z)&&ResolveNativeSourceBaseDamage315(z,raw,fix,resolved)&&GoldDamage(z,resolved,10,false,nullptr);}
-bool CanRetireNativeHeavyZombie313B(Zombie* z,int,std::string* error)
-{if(!Host(z))return false;const auto k=Kind(z);if(k==203||k==223)return GoldCanRetire(z,error);if(FusionCatapult343Kind(k))return EnsureNativeSourceEffect269(z->mBoard,54,error);return true;}
+bool CanRetireNativeHeavyZombie313B(Zombie* z,int reason,std::string* error)
+{if(!Host(z))return false;const auto k=Kind(z);if(k==209)return CanRetireNativeLate363(z,reason,error);if(k==203||k==223)return GoldCanRetire(z,error);if(FusionCatapult343Kind(k))return EnsureNativeSourceEffect269(z->mBoard,54,error);return true;}
 bool BeforeRetireNativeHeavyZombie313B(Zombie* z,int reason)
-{if(!CanRetireNativeHeavyZombie313B(z,reason))return false;const auto k=Kind(z);if((k==203||k==223)&&!GoldBeforeRetire(z))return false;if(FusionCatapult343Kind(k)&&!Effect(z,54,.6f))return false;return true;}
+{if(!CanRetireNativeHeavyZombie313B(z,reason))return false;const auto k=Kind(z);if(k==209&&!BeforeRetireNativeLate363(z,reason))return false;if((k==203||k==223)&&!GoldBeforeRetire(z))return false;if(FusionCatapult343Kind(k)&&!Effect(z,54,.6f))return false;return true;}
 bool RetireNativeHeavyZombie313B(Zombie* z,int reason)
 {if(!BeforeRetireNativeHeavyZombie313B(z,reason))return false;z->mDroppedLoot=true;z->DieNoLoot();return true;}
 bool GetNativeHeavyZombie313BSemantics(const Zombie* z,int& status,bool& before,bool& collider,bool& flip)

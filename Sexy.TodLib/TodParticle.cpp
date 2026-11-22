@@ -1,3 +1,5 @@
+#include "../Lawn/Fusion/FusionNativeSourceTrails360.h"
+#include "../Lawn/Fusion/FusionNativeEffects269.h"
 #include "TodDebug.h"
 #include "Definition.h"
 #include "TodParticle.h"
@@ -669,6 +671,7 @@ bool TodParticleEmitter::UpdateParticle(TodParticle* theParticle)
 
 	theParticle->mParticleAge++;
 	theParticle->mParticleLastTimeValue = theParticle->mParticleTimeValue;
+	LawnFusion::ObserveNativeSourceParticleTrail360(theParticle);
 	return true;
 }
 
@@ -722,6 +725,7 @@ void TodParticleEmitter::DeleteAll()
 	{
 		ParticleID anId = mParticleList.RemoveHead();
 		DataArray<TodParticle>& aDataArray = mParticleSystem->mParticleHolder->mParticles;
+		LawnFusion::RemoveNativeSourceParticleTrail360(aDataArray.DataArrayGet(anId));
 		aDataArray.DataArrayFree(aDataArray.DataArrayGet(anId));
 	}
 }
@@ -788,6 +792,7 @@ void TodParticleEmitter::DeleteParticle(TodParticle* theParticle)
 	
 	ParticleID aParticleID = (ParticleID)mParticleSystem->mParticleHolder->mParticles.DataArrayGetID(theParticle);
 	mParticleList.RemoveAt(mParticleList.Find(aParticleID));
+	LawnFusion::RemoveNativeSourceParticleTrail360(theParticle);
 	mParticleSystem->mParticleHolder->mParticles.DataArrayFree(theParticle);
 }
 
@@ -1233,6 +1238,7 @@ void RenderParticleAdditive(Graphics* g, TodParticle* theParticle, const Color& 
 //0x518210
 void TodParticleEmitter::DrawParticle(Graphics* g, TodParticle* theParticle, TodTriangleGroup* theTriangleGroup)
 {
+	LawnFusion::DrawNativeSourceParticleTrail360(theParticle,g);
 	if (theParticle->mCrossFadeDuration > 0)  // 交叉混合的源粒子，不绘制
 		return;
 
@@ -1281,6 +1287,7 @@ void TodParticleSystem::Draw(Graphics* g)
 {
 	for (TodListNode<ParticleEmitterID>* aNode = mEmitterList.mHead; aNode != nullptr; aNode = aNode->mNext)
 		mParticleHolder->mEmitters.DataArrayGet((unsigned int)aNode->mValue)->Draw(g);
+    LawnFusion::DrawNativeSourceEffectOverlay366(this,g);
 }
 
 //0x5183A0

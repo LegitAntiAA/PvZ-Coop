@@ -5,7 +5,7 @@ namespace LawnFusion { namespace {
 constexpr FusionZombieProfile profiles[]={
 {47,1350,0,0,50},
 {48,8888,8888,0,50},
-{49,720,0,0,50},
+{49,720,0,0,50,false,false,true},
 {112,1350,0,0,50},
 {113,720,0,0,50},
 {114,1350,1100,1100,50},

@@ -17,7 +17,7 @@ void NetBroadcastSourceCharred315(LawnApp*,const LawnFusion::SourceCharred311Bir
 // Source66/69 reuse the original prize/dancer resources. Source volume stays
 // per playback; changing a shared sound's base volume would alter Classic.
 bool NetSourceSound284Ready(LawnApp*,uint16_t sourceSound);
-bool NetPlaySourceSound284(LawnApp*,uint16_t sourceSound,float volume=.5f);
+bool NetPlaySourceSound284(LawnApp*,uint16_t sourceSound,float volume=.5f,float pitchRatio=1.f);
 // Per-owner source89 loop; Pause keeps the real audio buffer cursor.
 bool NetSourceJackbox309Ready(LawnApp*);
 void NetSourceJackbox309Loop(Zombie*,LawnFusion::NativeJackbox300Audio);

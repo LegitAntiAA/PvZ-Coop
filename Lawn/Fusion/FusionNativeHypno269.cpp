@@ -1,3 +1,4 @@
+#include "FusionNativeProjectileBuff369.h"
 #include "FusionNativeHypno269.h"
 #include "FusionNative.h"
 #include "FusionBasePlantRules.h"
@@ -68,7 +69,7 @@ void Emit(Plant* plant)
     projectile->mVelX=float(6*kFusionBasePixelsX*.01);projectile->mVelY=projectile->mVelZ=projectile->mAccZ=0;
     projectile->mShadowY=y;projectile->mRotation=projectile->mRotationSpeed=0;
     projectile->mDamageRangeFlags=plant->GetDamageRangeFlags(WEAPON_PRIMARY);
-    if(!AttachNativeProjectile(b,projectile,data)){projectile->Die();return;}
+    if(!AttachNativeTravelProjectile369(plant,projectile,data)){projectile->Die();return;}
     if(d->batchShotCount<uint32_t((std::numeric_limits<int>::max)()))++d->batchShotCount;
     plant->mApp->PlayFoley(FOLEY_THROW);
     LawnNet::NetTrace("Fusion Hypno269 emit source=%u token=%u kind=%u projectile=%u payload=14 damage=%d status=%u shotStatus=%u x=%.9g y=%.9g tick=%d",
@@ -151,7 +152,7 @@ bool GetNativeHypno269VisualLayers(const Plant* p,std::array<NativeHypno269Layer
 }
 bool IsNativeHypno269Projectile(const Projectile* p)
 {
-    const auto* d=GetNativeProjectileData(p);return d&&FusionHypno269ProjectileMetadataValid(d->kind,d->damage,d->specialType)&&
+    const auto* d=GetNativeProjectileData(p);return d&&FusionHypno269ProjectileMetadataValid(d->kind,NativeProjectileValidationDamage369(*d),d->specialType)&&
         p->mProjectileType==PROJECTILE_PUFF&&p->mMotionType==MOTION_STRAIGHT;
 }
 bool MoveNativeHypno269Projectile(Projectile* p)

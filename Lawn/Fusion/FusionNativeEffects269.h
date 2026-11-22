@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 class Board;class LawnApp;class Zombie;class TodParticleSystem;class TodParticleDefinition;
+namespace Sexy {class Graphics;}
 namespace LawnNet { struct NetFusionLimbEvent276; }
 namespace LawnFusion
 {
@@ -31,8 +32,11 @@ public:
     void CapturePlant314(Board*,uint32_t oldPlantUID,uint32_t ownerUID,uint32_t captureToken,uint16_t kind);
     void ReleaseCapturedPlant314(uint32_t ownerUID,uint32_t captureToken);
     void UpdateEmbedded(Board*);
+    void DrawSpriteOverlay366(Board*,TodParticleSystem*,Sexy::Graphics*) const;
+    bool SetZombieEmission(Zombie*,const char*,bool);
     bool BirthPoints(Board*,uint16_t sourceKind,float x,float y,std::array<NativeDoom269Point,8>&) const;
 private:
+    bool EnsureSpriteOverlay75(Board*,std::string&);
     struct Impl;std::unique_ptr<Impl> mImpl;
 };
 // Root owns NativeContext unique_ptr and mode/receiver admission. Both validated
@@ -55,6 +59,7 @@ void ReconcileNativeField277Particle(Board*,uint16_t scene,bool enabled,float x,
 bool QueryNativeField277Particle(const Board*,uint16_t& resource,uint32_t& system,float& x,float& y);
 // Explicit reliable-event mapping; dynamic cache resource IDs never enter the
 // native stock array or the network presentation event.
+void DrawNativeSourceEffectOverlay366(TodParticleSystem*,Sexy::Graphics*);
 int NativeSourceEffectParticle269(uint16_t sourceKind);
 bool NativeSourceEffectKind269(int particleEffect,uint16_t& sourceKind);
 TodParticleSystem* SpawnNativeSourceEffect269(Board*,uint16_t sourceKind,float x,float y,int order,bool broadcast);

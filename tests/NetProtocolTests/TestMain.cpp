@@ -1,3 +1,5 @@
+int RunFusionSnowGun363Tests(int&);
+int RunFusionPlantDisable363Tests(int&);
 int RunFusionSnowZombie363Tests(int&);
 int RunFusionGroundShooter343Tests(int&);
 int RunFusionWaterShoot343Tests(int&);
@@ -1213,8 +1215,10 @@ int main(int argc, char** argv)
 	gChecks += aFusionCampaign272Result.mChecks;
 	gFailures += aFusionCampaign272Result.mFailures;
     gFailures+=RunFusionNextZombie343Tests(gChecks);
+    gFailures+=RunFusionSnowGun363Tests(gChecks);
     gFailures+=RunFusionSnowZombie363Tests(gChecks);
     gFailures+=RunFusionGroundShooter343Tests(gChecks);
+    gFailures+=RunFusionPlantDisable363Tests(gChecks);
     gFailures+=RunFusionWaterShoot343Tests(gChecks);
     gFailures+=RunFusionExtendedZombie347Tests(gChecks);
     {const auto v=RunFusionRoof350Tests();gChecks+=v.mChecks;gFailures+=v.mFailures;}

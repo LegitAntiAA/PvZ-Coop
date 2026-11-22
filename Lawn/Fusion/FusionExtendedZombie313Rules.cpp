@@ -1,17 +1,23 @@
+#include "FusionNativeFinish363.h"
+#include "FusionDriver363Rules.h"
 #include "FusionExtendedZombie313Rules.h"
 #include "FusionExtendedZombie347Rules.h"
 #include "FusionNextZombie343Rules.h"
 #include "FusionGroundShooter343Rules.h"
 #include "FusionSnowZombie363Rules.h"
+#include "FusionSnowGun363Rules.h"
 #include <algorithm>
 #include <cmath>
 namespace LawnFusion
 {
 bool FusionExtendedZombie313ViewValid(uint16_t kind,const FusionExtendedZombie313View& v)
 {
+    if(kind!=115&&kind!=116&&v.squashLaunched363)return false;
     if(v.secondArmorStage343>2||(kind!=114&&v.secondArmorStage343))return false;
+    if(kind!=208&&v.quickMove208)return false;
     if(FusionExtendedZombie347Kind(kind))return FusionExtended347ViewValid(kind,v);
-    if(v.attributeCountdown||v.throwTime||v.isThrow||v.attackDamage)return false;
+    if(kind==208){if(!std::isfinite(v.attributeCountdown)||v.attributeCountdown<0||v.attributeCountdown>15.45f||v.throwTime||v.isThrow||v.attackDamage)return false;}
+    else if(v.attributeCountdown||v.throwTime||v.isThrow||v.attackDamage)return false;
     if(!FindFusionExtendedZombie313Profile(kind)||v.bodyStage>2||v.weapon>2||v.machineType>2||v.firstArmorStage>2||
         !std::isfinite(v.impVerticalSpeed)||std::abs(v.impVerticalSpeed)>4096||!std::isfinite(v.impMaximumVx)||(v.impMaximumVx!= -3&&v.impMaximumVx!= -2)||
         !std::isfinite(v.uniqueSpeed)||v.uniqueSpeed<=0||v.uniqueSpeed>4096)return false;
@@ -26,7 +32,7 @@ bool FusionExtendedZombie313ViewValid(uint16_t kind,const FusionExtendedZombie31
     if(kind==38||kind==39){if(v.uniqueType!=0&&v.uniqueType!=(kind==38?4:5))return false;}else if(v.uniqueType)return false;
     if(!FusionBalloon343Kind(kind)&&v.fallen)return false;
     if(kind!=37&&(!v.visible||v.adjustingImp||v.impVerticalSpeed!=1||v.impMaximumVx!= -3))return false;
-    if(FusionExtendedZombie313OwnBodyDamage(kind)&&v.beforeDying)return false;
+    if(FusionExtendedZombie313OwnBodyDamage(kind)&&kind!=201&&v.beforeDying)return false;
     return true;
 }
 namespace
@@ -46,7 +52,7 @@ uint8_t GargBody(float hp,int maximum,uint8_t previous)
 }
 }
 const FusionZombieProfile* FindFusionExtendedZombie313Profile(uint16_t k)
-{for(const auto& p:profiles)if(p.kind==k)return &p;return FusionGroundShooter343Kind(k)||FusionSnowZombie363Kind(k)?FindFusionNextZombie343Profile(k):FindFusionExtendedZombie347Profile(k);}
+{static const FusionZombieProfile qing{208,3000,0,0,500};if(k==208)return &qing;for(const auto& p:profiles)if(p.kind==k)return &p;return FusionFinish363Kind(k)||FusionDriver363Kind(k)||k==49||FusionGroundShooter343Kind(k)||FusionSnowZombie363Kind(k)?FindFusionNextZombie343Profile(k):FindFusionExtendedZombie347Profile(k);}
 bool TryGetFusionExtendedZombie313Family(uint16_t k,FusionExtendedZombie313Family& output)
 {
     FusionExtendedZombie313Family family;
@@ -58,13 +64,15 @@ bool TryGetFusionExtendedZombie313Family(uint16_t k,FusionExtendedZombie313Famil
     else return false;
     output=family;return true;
 }
-bool FusionExtendedZombie313OwnBodyDamage(uint16_t k){return Garg(k)||Iron(k)||k==40||k==26||FusionExtended347OwnBody(k);}
-bool FusionExtendedZombie313BaseLimbCallbacks(uint16_t k){return k==37||k==213||FusionBalloon343Kind(k)||FusionGroundShooter343Kind(k)||FusionSnowZombie363Kind(k)||FusionExtended347BaseLimbs(k);}
+bool FusionExtendedZombie313OwnBodyDamage(uint16_t k){return FusionDriver363Kind(k)||Garg(k)||Iron(k)||k==40||k==26||FusionExtended347OwnBody(k);}
+bool FusionExtendedZombie313BaseLimbCallbacks(uint16_t k){return k==208||FusionFinish363Kind(k)||k==37||k==213||FusionBalloon343Kind(k)||FusionGroundShooter343Kind(k)||k==49||FusionSnowZombie363Kind(k)||FusionExtended347BaseLimbs(k);}
 bool TryPlanFusionExtendedEffect313(uint16_t k,int status,FusionExtendedEffect313 effect,float seconds,FusionExtendedEffectAction313& output,float& resulting)
 {
     if(FusionExtendedZombie347Kind(k))return TryPlanFusionExtended347Effect(k,status,effect,seconds,output,resulting);
     if(!FindFusionExtendedZombie313Profile(k)||status<0||uint8_t(effect)>uint8_t(FusionExtendedEffect313::MindControl)||!std::isfinite(seconds))return false;
     auto action=FusionExtendedEffectAction313::Normal;float duration=seconds;
+    if(FusionDriver363Kind(k))
+    {if(effect==FusionExtendedEffect313::Cold||effect==FusionExtendedEffect313::Freeze||(k==222&&(effect==FusionExtendedEffect313::MindControl||effect==FusionExtendedEffect313::Knockback)))action=FusionExtendedEffectAction313::Suppress;}
     if(Iron(k))
     {
         if(effect==FusionExtendedEffect313::MindControl)action=FusionExtendedEffectAction313::CustomMindControl;
@@ -153,7 +161,7 @@ bool TryNormalizeFusionExtendedDeath313(uint16_t k,int reason,int& output)
 {
     if(FusionExtendedZombie347Kind(k))return TryNormalizeFusionExtended347Death(k,reason,output);
     if(!FindFusionExtendedZombie313Profile(k)||reason<0)return false;
-    output=k==40?(reason==1?1:2):k==26&&reason==0?2:reason;return true;
+    output=(FusionDriver363Kind(k)||k==40)?(reason==1?1:2):k==26&&reason==0?2:reason;return true;
 }
 bool TryGetFusionGarg313SpawnPlan(uint16_t k,bool hammer,FusionGarg313SpawnPlan& output)
 {

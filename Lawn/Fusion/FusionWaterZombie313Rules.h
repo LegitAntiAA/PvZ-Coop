@@ -72,5 +72,5 @@ bool TryMakeFusionDrown313Velocity(double sourceDX,double sourceDY,bool hasTarge
 bool TryGetFusionDrown313Damage(int currentHealth,uint16_t targetKind,bool eveBalanced,bool travel10,bool strongerBoard,int& damage);
 // Ordinary source capability, not campaign/level admission. Actual geometry
 // and terrain are supplied by the caller; no fake scene/row transformation.
-bool FusionWaterZombie313WorldValid(uint16_t,int rows,bool poolOrFog,std::span<const uint8_t> waterRows,int row,bool controlled=false);
+bool FusionWaterZombie313WorldValid(uint16_t,int rows,bool poolOrFog,std::span<const uint8_t> waterRows,int row,bool controlled=false,bool ordinaryDirectNonIZ=false);
 }

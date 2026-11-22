@@ -227,10 +227,10 @@ namespace
 bool ValidCommand(const FusionCommand& command)
 {
     if (!command.epoch || !command.inputEpoch || !command.sequence) return false;
-    if(command.action!=FusionCommandKind::CannonAim&&(command.boardTargetX||command.boardTargetY))return false;
+    if(command.action!=FusionCommandKind::CannonAim&&command.action!=FusionCommandKind::BossHammer366&&(command.boardTargetX||command.boardTargetY))return false;
     const bool newTool=command.action==FusionCommandKind::EquipmentPickup||command.action==FusionCommandKind::EquipmentUse||
         command.action==FusionCommandKind::EquipmentCancel||command.action==FusionCommandKind::CannonAim||
-        command.action==FusionCommandKind::AdventureRewardCollect;
+        command.action==FusionCommandKind::AdventureRewardCollect||command.action==FusionCommandKind::BossHammer366||command.action==FusionCommandKind::BossTrophy366;
     if(newTool&&(command.kind!=kFusionNoPlant||command.isExtra||command.enabled||command.packetId||
         command.targetId||command.targetToken||(command.action!=FusionCommandKind::EquipmentUse&&(command.column||command.row))))return false;
     switch (command.action)
@@ -260,6 +260,8 @@ bool ValidCommand(const FusionCommand& command)
     case FusionCommandKind::EquipmentUse:
         return command.sourceId&&command.sourceToken&&command.column<32&&command.row<10;
     case FusionCommandKind::EquipmentCancel: return (command.sourceId!=0)==(command.sourceToken!=0);
+    case FusionCommandKind::BossTrophy366:return command.sourceId&&command.sourceToken;
+    case FusionCommandKind::BossHammer366:return !command.sourceId&&!command.sourceToken&&command.boardTargetX>=0&&command.boardTargetX<=4095&&command.boardTargetY>=0&&command.boardTargetY<=4095;
     case FusionCommandKind::CannonAim:
         return command.sourceId&&command.sourceToken&&command.boardTargetX>=0&&command.boardTargetX<=4095&&
             command.boardTargetY>=0&&command.boardTargetY<=4095;
@@ -289,6 +291,8 @@ template <typename IO> void CommandFields(IO& io, FusionCommand& command)
         io.U16(command.sourceId); io.U32(command.sourceToken); break;
     case FusionCommandKind::EquipmentUse:
         io.U16(command.sourceId); io.U32(command.sourceToken); io.U8(command.column); io.U8(command.row); break;
+    case FusionCommandKind::BossTrophy366:io.U16(command.sourceId);io.U32(command.sourceToken);break;
+    case FusionCommandKind::BossHammer366:io.I16(command.boardTargetX);io.I16(command.boardTargetY);break;
     case FusionCommandKind::CannonAim:
         io.U16(command.sourceId); io.U32(command.sourceToken); io.I16(command.boardTargetX); io.I16(command.boardTargetY); break;
     case FusionCommandKind::GlovePlace:

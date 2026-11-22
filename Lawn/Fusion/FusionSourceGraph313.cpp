@@ -7,10 +7,10 @@ namespace LawnFusion
 namespace
 {
 double Absolute(const FusionSourceGraph313State& s,FusionSourceGraph313Cursor p){return double(p.loop)*s.duration+p.seconds;}
-bool Parameters(const FusionSourceGraph313Parameters& p){return std::isfinite(p.speed)&&p.speed>=0&&std::isfinite(p.jumpSpeed)&&p.jumpSpeed>=0&&(p.triggers&~((1U<<24)-1))==0;}
-bool Conditions(const FusionSourceGraph313Edge& e,const FusionSourceGraph313Parameters& p,uint32_t& consumed)
+bool Parameters(const FusionSourceGraph313Parameters& p){return std::isfinite(p.speed)&&p.speed>=0&&std::isfinite(p.jumpSpeed)&&p.jumpSpeed>=0&&(p.triggers&~((1ULL<<(uint8_t(FusionSourceGraph313Param::Count)-uint8_t(FusionSourceGraph313Param::Die)))-1))==0;}
+bool Conditions(const FusionSourceGraph313Edge& e,const FusionSourceGraph313Parameters& p,uint64_t& consumed)
 {
-    uint32_t triggers=0;
+    uint64_t triggers=0;
     for(uint8_t i=0;i<e.conditionCount;++i)
     {
         const auto& c=e.conditions[i];bool yes=false;
@@ -19,7 +19,7 @@ bool Conditions(const FusionSourceGraph313Edge& e,const FusionSourceGraph313Para
         else if(c.parameter==FusionSourceGraph313Param::Attacking||c.parameter==FusionSourceGraph313Param::Shooting||c.parameter==FusionSourceGraph313Param::Wait)
         {const bool value=c.parameter==FusionSourceGraph313Param::Attacking?p.attacking:c.parameter==FusionSourceGraph313Param::Shooting?p.shooting:p.wait;if(c.mode==1)yes=value;else if(c.mode==2)yes=!value;else return false;}
         else
-        {if(c.mode!=1)return false;const uint32_t bit=FusionSourceGraph313Trigger(c.parameter);yes=(p.triggers&bit)!=0;triggers|=bit;}
+        {if(c.mode!=1)return false;const uint64_t bit=FusionSourceGraph313Trigger(c.parameter);yes=(p.triggers&bit)!=0;triggers|=bit;}
         if(!yes)return false;
     }
     consumed=triggers;return true;
@@ -59,16 +59,16 @@ bool AdvanceFusionSourceGraph313(const FusionSourceGraph313State& s,FusionSource
 }
 bool SelectFusionSourceGraph313Edge(const FusionSourceGraph313& g,uint8_t layer,const FusionSourceGraph313View& v,
     FusionSourceGraph313Cursor a,FusionSourceGraph313Cursor b,const FusionSourceGraph313Parameters& p,
-    bool deathOverride,bool nullReady,const FusionSourceGraph313Edge*& output,uint32_t& consumed)
+    bool deathOverride,bool nullReady,const FusionSourceGraph313Edge*& output,uint64_t& consumed)
 {
     if(!FusionSourceGraph313ViewValid(g,layer,v)||!Parameters(p))return false;const auto& s=g.states[v.state];
     if(!FusionSourceGraph313CursorValid(s,a)||!FusionSourceGraph313CursorValid(s,b)||Absolute(s,b)<Absolute(s,a))return false;
-    const FusionSourceGraph313Edge* selected=nullptr;uint32_t bits=0;
+    const FusionSourceGraph313Edge* selected=nullptr;uint64_t bits=0;
     const auto scan=[&](const FusionSourceGraph313Edge* edges,uint8_t n,bool any)
     {
         for(uint8_t i=0;i<n;++i)
         {
-            const auto& e=edges[i];uint32_t take=0;
+            const auto& e=edges[i];uint64_t take=0;
             if(!e.self&&e.target==v.state)continue;
             if(!Conditions(e,p,take))continue;
             if(v.fadeDuration>0&&!(any&&deathOverride&&(take&FusionSourceGraph313Trigger(FusionSourceGraph313Param::Die))))continue;
@@ -79,6 +79,14 @@ bool SelectFusionSourceGraph313Edge(const FusionSourceGraph313& g,uint8_t layer,
     };
     const auto& l=g.layers[layer];if(!scan(l.any,l.anyCount,true))scan(s.edges,s.edgeCount,false);
     output=selected;consumed=bits;return true;
+}
+bool SelectFusionSourceGraph313Edge(const FusionSourceGraph313& g,uint8_t layer,const FusionSourceGraph313View& v,
+    FusionSourceGraph313Cursor a,FusionSourceGraph313Cursor b,const FusionSourceGraph313Parameters& p,
+    bool deathOverride,bool nullReady,const FusionSourceGraph313Edge*& output,uint32_t& consumed)
+{
+    const FusionSourceGraph313Edge* selected=nullptr;uint64_t bits=0;
+    if(!SelectFusionSourceGraph313Edge(g,layer,v,a,b,p,deathOverride,nullReady,selected,bits)||bits>UINT32_MAX)return false;
+    output=selected;consumed=uint32_t(bits);return true;
 }
 bool NextFusionSourceGraph313Marker(const FusionSourceGraph313State& s,FusionSourceGraph313Cursor p,FusionSourceGraph313Cursor& out,FusionSourceGraph313Event& event)
 {
@@ -111,7 +119,7 @@ bool NextFusionSourceGraph313Exit(const FusionSourceGraph313& g,uint8_t layer,co
     if(!FusionSourceGraph313ViewValid(g,layer,v)||!Parameters(params)||v.fadeDuration>0)return false;const auto& s=g.states[v.state];
     if((s.nullMotion&&s.duration==0)||!FusionSourceGraph313CursorValid(s,p))return false;const double x=Absolute(s,p);double best=(std::numeric_limits<double>::infinity)();FusionSourceGraph313Cursor result;
     const auto test=[&](const FusionSourceGraph313Edge* edges,uint8_t count)
-    {for(uint8_t i=0;i<count;++i){const auto& e=edges[i];uint32_t bits;if(!e.hasExitTime||!Conditions(e,params,bits)||(!e.self&&e.target==v.state))continue;
+    {for(uint8_t i=0;i<count;++i){const auto& e=edges[i];uint64_t bits;if(!e.hasExitTime||!Conditions(e,params,bits)||(!e.self&&e.target==v.state))continue;
         const double whole=std::floor(e.exitTime);const float seconds=(e.exitTime-float(whole))*s.duration;
         const double loop=e.exitTime>=1||!s.loop?whole:std::floor((x-seconds)/s.duration)+1;
         const double next=loop*s.duration+seconds;if(next<=x||next>=best||loop>UINT32_MAX)continue;

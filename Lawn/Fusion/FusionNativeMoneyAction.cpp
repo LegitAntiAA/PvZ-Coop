@@ -1,3 +1,4 @@
+#include "FusionNativeTravelConsumers369.h"
 #include "FusionNativeMoneyAction.h"
 #include "FusionNative.h"
 #include "FusionWire.h"
@@ -46,7 +47,7 @@ Availability Preview(const Plant* p,int slot,FusionMoneyActionQuote& quote)
         while(p->mBoard->mPlants.IterateNext(other))
             if(const auto* identity=GetNativePlantData(other);identity&&Present(other)&&
                 (d->kind==1136?(identity->kind==1137||identity->kind==936):identity->kind==1188))++goldCount;
-    if(!TryGetFusionMoneyActionQuote(d->kind,goldCount,quote)||
+    if(!TryGetFusionMoneyActionQuote(d->kind,d->kind==1136&&HasNativeTravelAdvanced369(p->mBoard,21)?(std::min)(goldCount,2):goldCount,quote)||
         (quote.upgrade&&GetNativeSeedForPlant(quote.resultKind)==SEED_NONE))return Availability::Unsupported;
     if(!quote.upgrade&&p->mEatenFlashCountdown>0)return Availability::Cooldown;
     if(c->money<quote.fee)return Availability::Funds;

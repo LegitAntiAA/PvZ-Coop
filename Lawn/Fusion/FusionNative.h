@@ -1,3 +1,6 @@
+#include "FusionNativeQing208.h"
+#include "FusionNativeBoss361Bridge.h"
+#include "FusionNativeBossRoom366.h"
 #ifndef LAWN_FUSION_NATIVE_H
 #define LAWN_FUSION_NATIVE_H
 
@@ -29,6 +32,7 @@
 #include "FusionNativeHeavyZombie313B.h"
 #include "FusionSourceBoard313.h"
 #include "FusionNativeNextZombie343State.h"
+#include "FusionNativePlantDisable363.h"
 #include "FusionNativeObstacle313.h"
 #include "../../ConstEnums.h"
 #include <cstdint>
@@ -128,6 +132,8 @@ struct NativePlantData
     int pendingProductionTicks = 0;
     uint8_t producerRewardFlags = 0; // Source SunNut one-shot threshold rewards, bits0/1.
     uint8_t deathEventFlags = 0; // Source PotatoNut consumed HP bands, bits0/1.
+    uint8_t crushFlags366=0; // Source Crashed latch + consumed component-removal callback.
+    float crushShadowX366=0,crushShadowY366=0; // Retained native image anchor only.
     uint8_t damageStage = 0; // Source appearance retained at no-write HP boundaries.
     float idleSeconds = 0.0f;
     float shootSeconds = -1.0f;
@@ -139,6 +145,8 @@ struct NativePlantData
     uint8_t batchMode = 0;
     uint16_t waterTargetId = 0;
     uint32_t waterTargetToken = 0;
+    std::vector<uint16_t> disable363; // Source timed TryBeDisable/Active refcount stack, tail preserves aggregate order.
+    bool ultimateMelonPot370 = false; //914 source UniqueEffect latches WithMelonPot after ExtraShoot.
 };
 
 struct NativeProjectileData
@@ -156,6 +164,10 @@ struct NativeProjectileData
     bool hitLatched = false; // Source hostile contact/umbrella latch; never a local prediction.
     bool umbrellaed = false; // Source one-shot friendly Umbrella reinforcement flag.
     bool goldAttracted = false; // Source GoldMagnet one-shot capture; the native projectile remains the actor.
+    int sourceUnmodifiedDamage369 = 0; // Exact strict-tuple base before source buffs; zero keeps ordinary payload semantics.
+    int sourceSteelAttack370 = 0;
+    float sourceSteelFactor370 = 0;
+    uint8_t sourceSteelHits370 = 0;
 };
 
 struct NativePacketData
@@ -259,6 +271,7 @@ struct NativeContext
     std::vector<FusionBankEligibleCard> eligible;
     std::unordered_map<uint16_t, NativePacketData> packets;
     std::unordered_map<uint32_t, NativePlantData> plants;
+    std::unordered_map<uint32_t,NativePlantDisable363State> plantDisables363;
     std::unordered_map<uint32_t, NativeLobberAim> lobberAims;
     std::unordered_map<uint32_t, uint32_t> lobberPlantTargets; // Full projectile generation -> full target Plant generation.
     std::unordered_map<uint32_t, int> lobberPierceLimits; // Host-only emission snapshot.
@@ -290,8 +303,14 @@ struct NativeContext
     std::unordered_set<uint32_t> sourceZombieInitializations313; // HOST synchronous factory scope only.
     std::unordered_set<uint32_t> sourceDeathPoints313; // HOST once-only source Die points per LOCAL generation.
     std::unordered_map<uint32_t, NativeSourceGraph313State> sourceGraphs313;
+    std::unordered_map<uint32_t,NativeBoss361State> bossZombies361;
+    NativeBossRoom366 bossRoom366;
+    std::unique_ptr<NativeBossRoomVisuals366> bossRoomVisuals366;
     std::unordered_map<uint32_t, NativeWaterZombie313State> waterZombies313;
     std::unordered_map<uint32_t, NativeExtendedZombie313State> extendedZombies313;
+    std::unordered_map<uint32_t,NativeQing208State> qingZombies208;
+    float travelBuffCooldown369=0;
+    int travelBuffTick369=-1;
     std::unordered_map<uint32_t, NativeHeavyZombie313BState> heavyZombies313B;
     float sourcePoints=500.f; // Source Board.thePoints124, distinct from native sun and Fusion money.
     FusionExtendedBoard313State extendedBoard313;

@@ -1,3 +1,4 @@
+#include "FusionNativeTravelConsumers369.h"
 #include "FusionNativeWorldRemainder269.h"
 #include "FusionNative.h"
 #include "FusionNativeVisual.h"
@@ -193,6 +194,8 @@ void UpdateNativeWorldRemainder269Board(Board* b)
 {
     if(!b||!b->mApp||b->mApp->NetIsClient()||b->mPaused||!IsNativeFusionBoard(b)||!CanApplyNativeFusionGameplay(b))return;
     if(!InitializeNativeWorldRemainder269Board(b))return;auto* s=EditNativeWorldRemainder269BoardState(b);const int now=b->mMainCounter;
+    if(HasNativeWorldRemainder269Trait(b,NativeWorldRemainder269Trait::Advanced19))
+    {if(s->passiveDeadline>now)--s->passiveDeadline;if(s->activeDeadline>now)--s->activeDeadline;if(s->ultimateDeadline>now)--s->ultimateDeadline;}
     if(HasNativeWorldRemainder269Trait(b,NativeWorldRemainder269Trait::Debuff19))
     {if(s->passiveDeadline>now)--s->passiveDeadline;if(s->activeDeadline>now)--s->activeDeadline;if(s->ultimateDeadline>now)--s->ultimateDeadline;}
     if(now>=s->passiveDeadline)
@@ -223,7 +226,7 @@ bool SummonNativeWorldRemainder269LourFly(Plant* p)
     float x=0,y=0;if(!GetNativeSourcePlantNodePoint(p,"FlyPos",x,y))return false;
     auto* q=CreateNativeAuxiliary269Carrier(p->mBoard,p->mRow,x,BoardY(p->mBoard,4));if(!q)return false;
     auto* s=EditNativeWorldRemainder269AuxState(q,true);if(!s){q->Die();return false;}
-    *s={};s->family=NativeWorldRemainder269Family::LourFly;s->instanceToken=p->mBoard->mProjectiles.DataArrayGetID(q);s->parent=Ref(p);s->targetX=x;s->targetY=y;s->parentDamage=FusionFindPlant(926)->damage;return true;
+    *s={};s->family=NativeWorldRemainder269Family::LourFly;s->instanceToken=p->mBoard->mProjectiles.DataArrayGetID(q);s->parent=Ref(p);s->targetX=x;s->targetY=y;s->parentDamage=GetNativeTravelPlantAttack369(p,FusionFindPlant(926)->damage);return true;
 }
 bool IsNativeWorldRemainder269Aux(const Projectile* p)
 {return p&&IsNativeFusionBoard(p->mBoard)&&GetNativeWorldRemainder269AuxState(p);}

@@ -1,3 +1,4 @@
+#include "FusionNativeProjectileBuff369.h"
 #include "FusionNativeCherryShooter.h"
 #include "FusionCherryShooterRules.h"
 #include "FusionStraightProjectileRules.h"
@@ -40,7 +41,7 @@ bool IsNativeCherryShooter(const Plant* plant)
 bool IsNativeCherryProjectile(const Projectile* projectile)
 {
     const auto* data = GetNativeProjectileData(projectile);
-    return data && data->kind == 1 && data->damage == kFusionCherryShooterDamage &&
+    return data && data->kind == 1 && NativeProjectileValidationDamage369(*data) == kFusionCherryShooterDamage &&
         data->sunOnHit == 0 && projectile->mProjectileType == PROJECTILE_PEA;
 }
 
@@ -56,7 +57,7 @@ bool IsNativeTimedPeaProjectile(const Projectile* projectile)
 {
     const auto* data = GetNativeProjectileData(projectile);
     return data && FindFusionStraightProjectileProfile(data->kind) &&
-        (IsNativeMore269Projectile(projectile)||FusionFireProjectileMetadataValid(data->kind,data->damage,data->sunOnHit,data->fireState,
+        (IsNativeMore269Projectile(projectile)||FusionFireProjectileMetadataValid(data->kind,NativeProjectileValidationDamage369(*data),data->sunOnHit,data->fireState,
             data->lastTorchId,data->lastTorchToken,projectile->mProjectileType,data->kind == 0 && data->effectVariant == 1)) &&
         FusionSplitProjectilePhaseValid(data->kind,data->specialType,projectile->mMotionType);
 }
@@ -165,7 +166,7 @@ void CreateNativeTimedPeaProjectile(Plant* source, Projectile* projectile, const
     float groundX = 0.0f, groundY = 0.0f;
     projectile->mMotionType = data.specialType == 1 ? MOTION_BACKWARDS : MOTION_STRAIGHT;
     if (!GetNativeCherryShooterGroundAnchor(source, groundX, groundY) ||
-        !AttachNativeProjectile(source->mBoard, projectile, data))
+        !AttachNativeTravelProjectile369(source,projectile,data))
     {
         projectile->Die();
         return;

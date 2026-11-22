@@ -1,3 +1,4 @@
+#include "FusionNativeTravelConsumers369.h"
 #include "FusionNative269RemainderCallbacks.h"
 #include "FusionBasePlantRules.h"
 #include "FusionNative.h"
@@ -82,9 +83,18 @@ bool EmitNativeWorldRemainder269MeteoriteSun(Board* b,float x,float y,int count)
 }
 // Travel, shooting-level and balanced-event selections have no active source
 // mode in native normal-D2. They are not inferred from vanilla challenge IDs.
-bool HasNativeWorldRemainder269Trait(const Board*,NativeWorldRemainder269Trait){return false;}
+bool HasNativeWorldRemainder269Trait(const Board* b,NativeWorldRemainder269Trait trait)
+{
+ switch(trait){case NativeWorldRemainder269Trait::Ultimate8:return HasNativeTravelUltimate369(b,8);
+ case NativeWorldRemainder269Trait::Ultimate9:return HasNativeTravelUltimate369(b,9);
+ case NativeWorldRemainder269Trait::Advanced19:return HasNativeTravelAdvanced369(b,19);
+ case NativeWorldRemainder269Trait::Advanced34:return HasNativeTravelAdvanced369(b,34);
+ case NativeWorldRemainder269Trait::Advanced35:return HasNativeTravelAdvanced369(b,35);
+ case NativeWorldRemainder269Trait::Advanced45:return HasNativeTravelAdvanced369(b,45);
+ default:return false;} // Debuff19 cannot be granted by Random.UnlockTravelBuff.
+}
 bool NativeWorldRemainder269ShootingBoard(const Board*){return false;}
-bool NativeLastPlants269Advanced(const Plant*,unsigned){return false;}
+bool NativeLastPlants269Advanced(const Plant* p,unsigned index){return p&&GetNativePlantData(p)&&HasNativeTravelAdvanced369(p->mBoard,index);}
 bool NativeLastPlants269Shooting(const Board*){return false;}
 bool NativeLastPlants269Balanced(const Board*){return false;}
 bool NativeLastPlants269EmperorFastStart(const Board*){return false;}

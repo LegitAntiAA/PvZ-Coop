@@ -1,9 +1,13 @@
+#include "FusionLateZombie363Rules.h"
+#include "FusionDriver363Rules.h"
+#include "FusionNativeFinish363.h"
 #include "FusionExtendedZombie347Rules.h"
 #include "FusionNextZombie343Rules.h"
 // Generated from exact serialized source controllers; edit generator, not tables.
 #include "FusionSourceGraph313.h"
 #include "FusionGroundShooter343Rules.h"
 #include "FusionSnowZombie363Rules.h"
+#include "FusionSnowGun363Rules.h"
 namespace LawnFusion { namespace {
 static const FusionSourceGraph313Condition g25_conditions0[]={{FusionSourceGraph313Param::Fall,1,0.f}};
 static const FusionSourceGraph313Edge g25_edges1[]={{2,0.25f,0.f,0.75f,false,true,true,g25_conditions0,1}};
@@ -321,6 +325,7 @@ static const FusionSourceGraph313Edge g223_edges12[]={{9,0.048458993f,0.f,0.8152
 static const FusionSourceGraph313Layer g223_layers[]={{0,g223_layerStates0,6,nullptr,0,false},{6,g223_layerStates1,2,g223_edges10,1,true},{8,g223_layerStates2,2,g223_edges12,1,true}};
 static const FusionSourceGraph313 g223={223,g223_states,10,g223_layers,3};
 }
+const FusionSourceGraph313* FindFusionSourceGraph208(uint16_t);
 const FusionSourceGraph313* FindFusionSourceGraph313(uint16_t kind){switch(kind){
 case 25:return &g25;
 case 26:return &g26;
@@ -342,5 +347,5 @@ case 203:return &g203;
 case 212:return &g212;
 case 213:return &g213;
 case 223:return &g223;
-default:if(FusionSnowZombie363Kind(kind))return FindFusionSnow363Graph(kind);if(FusionGroundShooter343Kind(kind))return FindFusionGround343Graph(kind);if(kind==112||kind==216||kind==113||kind==214)return FindFusionSourceGraph343(kind);return FindFusionSourceGraph347(kind);}}
+default:if(FusionFinish363Kind(kind))return FindFusionFinish363Graph(kind);if(FusionDriver363Kind(kind))return FindFusionDriver363Graph(kind);if(kind==209)return FindFusionLate363Graph(kind);if(kind==208)return FindFusionSourceGraph208(kind);if(kind==49)return FindFusionSnowGun363Graph(kind);if(FusionSnowZombie363Kind(kind))return FindFusionSnow363Graph(kind);if(FusionGroundShooter343Kind(kind))return FindFusionGround343Graph(kind);if(kind==112||kind==216||kind==113||kind==214)return FindFusionSourceGraph343(kind);return FindFusionSourceGraph347(kind);}}
 }

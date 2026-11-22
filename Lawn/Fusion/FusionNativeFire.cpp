@@ -1,3 +1,6 @@
+#include "FusionNativeTravelConsumers369.h"
+#include <limits>
+#include "FusionNativeProjectileBuff369.h"
 #include "FusionNativeFire.h"
 #include "FusionNativePoison.h"
 #include "FusionFireRules.h"
@@ -54,7 +57,7 @@ bool GetIncoming(Projectile* projectile, NativeProjectileData& data, bool& legac
     if (const auto* existing = GetNativeProjectileData(projectile))
     {
         data = *existing;
-        return FusionFireProjectileMetadataValid(data.kind,data.damage,data.sunOnHit,data.fireState,
+        return FusionFireProjectileMetadataValid(data.kind,NativeProjectileValidationDamage369(data),data.sunOnHit,data.fireState,
             data.lastTorchId,data.lastTorchToken,projectile->mProjectileType,data.kind==0&&data.effectVariant==1);
     }
     // Current native-Fusion factory invariant: the only untyped friendly PEA
@@ -72,6 +75,8 @@ bool ReplaceProjectile(Plant* torch, Projectile* original, const NativeProjectil
     Board* board = torch->mBoard;
     NativeProjectileData melted;
     melted.kind=plan.kind;melted.damage=plan.damage;melted.specialType=incoming.specialType;
+    if(incoming.sourceUnmodifiedDamage369&&plan.damage==incoming.sourceUnmodifiedDamage369)
+    {melted.sourceUnmodifiedDamage369=plan.damage;melted.damage=incoming.damage;}
     melted.lastTorchId=torch->mNetId;melted.lastTorchToken=GetNativePlantData(torch)->instanceToken;
     if(!NativeProjectileMetadataValid(melted,PROJECTILE_PEA,original->mMotionType))return false;
     if (board->mProjectiles.mSize >= board->mProjectiles.mMaxSize ||
@@ -106,7 +111,7 @@ bool IsNativeHotProjectile(const Projectile* projectile)
 {
     const auto* data = GetNativeProjectileData(projectile);
     return data && data->fireState > 0 && data->kind != 8 &&
-        (IsNativeMore269Projectile(projectile)||FusionFireProjectileMetadataValid(data->kind,data->damage,data->sunOnHit,
+        (IsNativeMore269Projectile(projectile)||FusionFireProjectileMetadataValid(data->kind,NativeProjectileValidationDamage369(*data),data->sunOnHit,
         data->fireState,data->lastTorchId,data->lastTorchToken,projectile->mProjectileType,data->kind==0&&data->effectVariant==1));
 }
 bool TryConvertNativeTorchProjectile(Plant* torch,Projectile* projectile,uint16_t sourceTorchKind,bool& counted)
@@ -118,7 +123,7 @@ bool TryConvertNativeTorchProjectile(Plant* torch,Projectile* projectile,uint16_
     NativeProjectileData candidate;bool legacyPea=false;
     if(!GetIncoming(projectile,candidate,legacyPea))return false;
     FusionTorchConversion plan;
-    if(!TryResolveFusionTorchConversion(sourceTorchKind,candidate.kind,candidate.damage,candidate.sunOnHit,
+    if(!TryResolveFusionTorchConversion(sourceTorchKind,candidate.kind,NativeProjectileValidationDamage369(candidate),candidate.sunOnHit,
         candidate.fireState,candidate.specialType,projectile->mRow==torch->mRow,
         sourceTorchKind==1056&&candidate.isZombieBullet,projectile->mMotionType,
         candidate.lastTorchId,candidate.lastTorchToken,torch->mNetId,plant->instanceToken,plan,
@@ -133,11 +138,23 @@ bool TryConvertNativeTorchProjectile(Plant* torch,Projectile* projectile,uint16_
         if(!ReplaceProjectile(torch,projectile,candidate,plan))return false;
         NativeFireConversionCommitted(torch);counted=true;return true;
     }
-    candidate.kind=plan.kind;candidate.damage=plan.damage;candidate.fireState=plan.fireState;candidate.sunOnHit=plan.sunOnHit;
+    const auto before369=candidate;
+    candidate.kind=plan.kind;candidate.damage=plan.damage;candidate.sourceUnmodifiedDamage369=0;
+    if(before369.sourceUnmodifiedDamage369)
+    {
+        int64_t actual=plan.damage;
+        if((candidate.kind==0||candidate.kind==10)&&(before369.kind==0||before369.kind==10||before369.kind==15||before369.kind==97))
+            actual=int64_t(before369.damage)+plan.damage-before369.sourceUnmodifiedDamage369;
+        else if((candidate.kind==8||candidate.kind==1)&&plan.damage%before369.sourceUnmodifiedDamage369==0)
+            actual=int64_t(before369.damage)*(plan.damage/before369.sourceUnmodifiedDamage369);
+        if(actual<=0||actual>(std::numeric_limits<int>::max)())return false;
+        if(actual!=plan.damage){candidate.sourceUnmodifiedDamage369=plan.damage;candidate.damage=int(actual);}
+    }
+    candidate.fireState=plan.fireState;candidate.sunOnHit=plan.sunOnHit;
     if(candidate.kind==0)candidate.effectVariant=plan.smallProjectile?1:0;
     if(plan.stamp){candidate.lastTorchId=torch->mNetId;candidate.lastTorchToken=plant->instanceToken;}
     const auto type=plan.action==FusionTorchConversionAction::Sun?PROJECTILE_PEA:PROJECTILE_FIREBALL;
-    if (!FusionFireProjectileMetadataValid(candidate.kind,candidate.damage,candidate.sunOnHit,candidate.fireState,
+    if (!FusionFireProjectileMetadataValid(candidate.kind,NativeProjectileValidationDamage369(candidate),candidate.sunOnHit,candidate.fireState,
         candidate.lastTorchId,candidate.lastTorchToken,type,candidate.kind==0&&candidate.effectVariant==1)) return false;
     if(!NativeProjectileMetadataValid(candidate,type,projectile->mMotionType))return false;
     // Column is only a legacy cosmetic guard, not the source identity.
@@ -215,7 +232,9 @@ void HealNativeCherryNutFromCircle(Board* board,double x,double y,int row,int am
 }
 bool ApplyNativeFireImpact(Projectile* projectile, Zombie* primary)
 {
-    if (!IsNativeHotProjectile(projectile)) return false;
+    const auto* source369=GetNativeProjectileData(projectile);
+    const bool money369=source369&&(source369->kind==98||source369->kind==99)&&HasNativeTravelAdvanced369(projectile->mBoard,42);
+    if (!IsNativeHotProjectile(projectile)&&!money369) return false;
     if (!HostObject(projectile) || projectile->mDead) return true;
     if (primary && (!LiveNormal(primary) || primary->mBoard != projectile->mBoard || primary->mRow != projectile->mRow)) return true;
     const int damage = GetNativeProjectileData(projectile)->damage;

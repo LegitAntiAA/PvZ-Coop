@@ -1,4 +1,5 @@
 #include "NativeSpecialZombie269.h"
+#include "FusionNativeSourceDirect362.h"
 #include "FusionNextZombie343Rules.h"
 #include "FusionNativeZombieVisual.h"
 #include "FusionAnimation.h"
@@ -341,7 +342,10 @@ bool NativeSubmarine343SourceInWater(const Zombie* z)
 bool NativeSpecialZombie269VehicleTerrainValid(const Zombie* z)
 {
     if(!IsNativeSpecialZombie269Vehicle(z)||z->mRow<0||z->mRow>=GetNativeFusionRowCount(z->mBoard))return false;
-    return z->mBoard->mPlantRow[z->mRow]==((GetNativeSourceZombieData(z)->kind==14||GetNativeSourceZombieData(z)->kind==200)?PLANTROW_POOL:PLANTROW_NORMAL);
+    const auto kind=GetNativeSourceZombieData(z)->kind;const auto terrain=z->mBoard->mPlantRow[z->mRow];
+    if((kind==14||kind==200)&&UseNativeSourceDirect362(z->mBoard))
+        return terrain==PLANTROW_NORMAL||terrain==PLANTROW_POOL;
+    return terrain==((kind==14||kind==200)?PLANTROW_POOL:PLANTROW_NORMAL);
 }
 bool NativeSpecialZombie269VehicleColliderEnabled(const Zombie* z)
 {return IsNativeSpecialZombie269Vehicle(z)&&!z->mDead&&!(GetNativeSourceZombieData(z)->kind==18&&z->mFlatTires);}

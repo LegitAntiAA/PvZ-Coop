@@ -39,7 +39,7 @@ enum class FusionCommandKind : uint8_t
     Choose = 1, Unchoose, Mystery, Ready, Plant, Shovel, CollectSun,
     GlovePickup, GlovePlace, GloveCancel, ActivatePlant, MoneyPlant,
     EquipmentPickup, EquipmentUse, EquipmentCancel, CannonAim,
-    DroppedCardPickup,DroppedCardPutDown,DroppedCardPlant,AdventureRewardCollect
+    DroppedCardPickup,DroppedCardPutDown,DroppedCardPlant,AdventureRewardCollect,BossHammer366,BossTrophy366
 };
 
 // The connection supplies the sender. Prices, ownership and RNG results are

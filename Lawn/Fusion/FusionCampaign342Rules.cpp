@@ -65,7 +65,7 @@ bool NativeSourceAdventureLevelReady342(int level,uint32_t cycle,std::string* er
     if(error)error->clear();
     const auto reject=[&](const char* why){if(error)*error=why;return false;};
     if(!FindFusionSourceAdventure272(level))return reject("descriptor: source campaign level is unavailable.");
-    if(cycle!=1)return reject("cycle: native source world supports cycle1 only.");
+    if(!cycle||cycle>uint32_t((std::numeric_limits<int>::max)()))return reject("cycle: invalid source campaign cycle.");
     FusionCampaign342Plan p;if(!BuildFusionCampaign342Plan(level,cycle,p,error))return false;
     if(p.source->conveyor&&level!=27&&level!=36&&level!=45)return reject("controller: source conveyor is unavailable.");
     if(p.source->roofPreplantColumns&&(p.source->scene!=4||p.source->roofPreplantColumns!=(level==37?5:3)))return reject("preplants: source roof descriptor differs.");

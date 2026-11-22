@@ -88,6 +88,7 @@ bool Enter(Run& r,uint8_t layer,uint8_t phase,float offset,float fade,bool norma
     // Include entry callbacks in the preflight BEFORE resetting the real clock.
     for(uint8_t i=0;i<s.markerCount;++i)if(s.markers[i].seconds==p.seconds&&p.loop==0)
     {std::string error;if(!r.h.preflightEvent(r.z,s.markers[i].event,&error))return false;}
+    if(s.entryEvent>=0){std::string error;if(!r.h.preflightEvent(r.z,FusionSourceGraph313Event(s.entryEvent),&error))return false;}
     auto& v=r.s->layers[layer];const uint8_t previous=v.state;
     if(v.fadeDuration>0)
     {
@@ -102,11 +103,23 @@ bool Enter(Run& r,uint8_t layer,uint8_t phase,float offset,float fade,bool norma
     else clock->PlayReanim(s.nativeTrack,s.loop?REANIM_LOOP:REANIM_PLAY_ONCE_AND_HOLD,0,0);
     if(!Write(r.z,layer,phase,p,r.h))return false;
     if(fade==0&&previous!=phase){if(!Exit(r,previous))return false;if(!Refresh(r))return true;}
+    if(s.entryEvent>=0)
+    {
+        const uint32_t enteredRevision=r.s->revisions[layer];
+        if(!r.h.event(r.z,FusionSourceGraph313Event(s.entryEvent),0))return Fail(r,"Source361 state-entry callback failed after consumption.");
+        if(!Refresh(r)||r.s->revisions[layer]!=enteredRevision)return true;
+    }
     if(!Markers(r,layer,phase,p,p,offset==0))return false;
     return true;
 }
-bool Input(Run& r,FusionSourceGraph313Parameters& p)
-{if(!r.h.parameters(r.z,p)||!std::isfinite(p.speed)||p.speed<0)return false;p.triggers|=r.s->parameters.triggers;r.s->parameters=p;return true;}
+bool Input(Run& r,uint8_t layer,FusionSourceGraph313Parameters& p)
+{
+    if(r.h.parametersForLayer361)
+    {if(!r.h.parametersForLayer361(r.z,layer,p)||!std::isfinite(p.speed)||p.speed<0)return false;p.triggers|=r.s->layerParameters361[layer].triggers;r.s->layerParameters361[layer]=p;return true;}
+    if(!r.h.parameters(r.z,p)||!std::isfinite(p.speed)||p.speed<0)return false;p.triggers|=r.s->parameters.triggers;r.s->parameters=p;return true;
+}
+void Consume(Run& r,uint8_t layer,uint64_t bits)
+{if(r.h.parametersForLayer361)r.s->layerParameters361[layer].triggers&=~bits;else r.s->parameters.triggers&=~bits;}
 bool Step(Run& r,uint8_t layer)
 {
     const auto* g=FindFusionSourceGraph313(r.kind);auto& initial=r.s->layers[layer];const auto& first=g->states[initial.state];
@@ -119,14 +132,14 @@ bool Step(Run& r,uint8_t layer)
     r.s->cursors[layer]=observed;float remaining=.01f;
     for(int splits=0;remaining>0;++splits)
     {
-        if(splits>=64)return false;FusionSourceGraph313Parameters params;if(!Input(r,params))return false;
+        if(splits>=64)return false;FusionSourceGraph313Parameters params;if(!Input(r,layer,params))return false;
         auto& v=r.s->layers[layer];const uint8_t phase=v.state;const auto& s=g->states[phase];const uint32_t revision=r.s->revisions[layer];
         const auto a=r.s->cursors[layer];const auto oa=r.s->outgoingCursors[layer];
-        const FusionSourceGraph313Edge* edge=nullptr;uint32_t consumed=0;
+        const FusionSourceGraph313Edge* edge=nullptr;uint64_t consumed=0;
         if(!SelectFusionSourceGraph313Edge(*g,layer,v,a,a,params,true,r.h.nullExitReady(r.z,layer,phase),edge,consumed))return false;
         if(edge)
         {
-            r.s->parameters.triggers&=~consumed;const float fade=edge->fixedDuration?edge->duration:edge->duration*s.duration;
+            Consume(r,layer,consumed);const float fade=edge->fixedDuration?edge->duration:edge->duration*s.duration;
             if(!Enter(r,layer,edge->target,edge->offset,fade,!edge->fixedDuration))return false;if(!Refresh(r))return true;continue;
         }
         float wait;if(!NextFusionSourceGraph313Boundary(*g,layer,v,a,params,wait))return false;
@@ -164,8 +177,8 @@ bool Step(Run& r,uint8_t layer)
         if(r.s->revisions[layer]!=revision){continue;}
         auto& now=r.s->layers[layer];if(now.fadeDuration>0&&now.fadeElapsed>=now.fadeDuration)
         {const uint8_t finished=now.outgoing;ClearFade(*r.s,layer);if(!Exit(r,finished))return false;if(!Refresh(r))return true;}
-        if(!Input(r,params)||!SelectFusionSourceGraph313Edge(*g,layer,now,a,end,params,true,r.h.nullExitReady(r.z,layer,phase),edge,consumed))return false;
-        if(edge){r.s->parameters.triggers&=~consumed;const float fade=edge->fixedDuration?edge->duration:edge->duration*s.duration;if(!Enter(r,layer,edge->target,edge->offset,fade,!edge->fixedDuration))return false;if(!Refresh(r))return true;}
+        if(!Input(r,layer,params)||!SelectFusionSourceGraph313Edge(*g,layer,now,a,end,params,true,r.h.nullExitReady(r.z,layer,phase),edge,consumed))return false;
+        if(edge){Consume(r,layer,consumed);const float fade=edge->fixedDuration?edge->duration:edge->duration*s.duration;if(!Enter(r,layer,edge->target,edge->offset,fade,!edge->fixedDuration))return false;if(!Refresh(r))return true;}
         if(dt==0&&!edge)return false;
     }
     return true;
@@ -233,10 +246,10 @@ bool UpdateNativeSourceGraph313Rates(Zombie* z,const NativeSourceGraph313State& 
 {return UpdateNativeSourceGraph313RatesMasked(z,s,h,0x7);}
 bool UpdateNativeSourceGraph313RatesMasked(Zombie* z,const NativeSourceGraph313State& s,const NativeSourceGraph313Hooks& h,uint8_t layerMask)
 {
-    if(!Host(z)||!Ready(h))return false;const auto* g=Graph(z);FusionSourceGraph313Parameters p;if(!h.parameters(z,p)||!std::isfinite(p.speed)||p.speed<0)return false;
+    if(!Host(z)||!Ready(h))return false;const auto* g=Graph(z);FusionSourceGraph313Parameters shared;if(!h.parametersForLayer361&&(!h.parameters(z,shared)||!std::isfinite(shared.speed)||shared.speed<0))return false;
     layerMask&=uint8_t((1u<<g->layerCount)-1);if(!layerMask||(layerMask&~s.initializedLayerMask343))return false;
     for(uint8_t i=0;i<g->layerCount;++i)
-    {if(!(layerMask&(1u<<i)))continue;const auto& state=g->states[s.layers[i].state];auto* r=h.clock(z,i);if(!Match(r,state))return false;r->mAnimRate=state.nullMotion&&state.duration==0?0:r->mFrameCount*FusionSourceGraph313Rate(state,FusionSourceGraph313Multiplier(state,p))/state.duration;if(i==0)z->mOriginalAnimRate=r->mAnimRate;}
+    {if(!(layerMask&(1u<<i)))continue;FusionSourceGraph313Parameters p=shared;if(h.parametersForLayer361&&(!h.parametersForLayer361(z,i,p)||!std::isfinite(p.speed)||p.speed<0))return false;const auto& state=g->states[s.layers[i].state];auto* r=h.clock(z,i);if(!Match(r,state))return false;if(h.layerActive366&&!h.layerActive366(z,i)){r->mAnimRate=0;continue;}r->mAnimRate=state.nullMotion&&state.duration==0?0:r->mFrameCount*FusionSourceGraph313Rate(state,FusionSourceGraph313Multiplier(state,p))/state.duration;if(i==0)z->mOriginalAnimRate=r->mAnimRate;}
     return true;
 }
 bool UpdateNativeSourceGraph313(Zombie* z,NativeSourceGraph313State& s,const NativeSourceGraph313Hooks& h)
@@ -246,7 +259,7 @@ bool UpdateNativeSourceGraph313Masked(Zombie* z,NativeSourceGraph313State& s,con
     if(!Host(z)||!Ready(h)||!s.initialized||s.failed)return false;if(z->mDead||z->mBoard->mPaused||z->mApp->mGameScene!=SCENE_PLAYING)return true;
     const auto* g=Graph(z);layerMask&=uint8_t((1u<<g->layerCount)-1);if(!layerMask||(layerMask&~s.initializedLayerMask343))return false;
     if(s.tick==z->mBoard->mMainCounter)return true;s.tick=z->mBoard->mMainCounter;auto r=Capture(z,s,h);
-    for(uint8_t i=0;i<g->layerCount;++i){if(!(layerMask&(1u<<i)))continue;if(!Step(r,i))return Fail(r,"Source313 segmented native phase/event update failed; no replay.");if(!Refresh(r))return true;}
+    for(uint8_t i=0;i<g->layerCount;++i){if(!(layerMask&(1u<<i))||(h.layerActive366&&!h.layerActive366(r.z,i)))continue;if(!Step(r,i))return Fail(r,"Source313 segmented native phase/event update failed; no replay.");if(!Refresh(r))return true;}
     return UpdateNativeSourceGraph313RatesMasked(r.z,*r.s,h,layerMask)||Fail(r,"Source313 real body/aux rate unavailable.");
 }
 bool GetNativeSourceGraph313Presentation(Zombie* z,const NativeSourceGraph313State& s,uint8_t layer,const NativeSourceGraph313Hooks& h,

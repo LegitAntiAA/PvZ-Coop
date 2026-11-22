@@ -1,6 +1,7 @@
 #ifndef LAWN_FUSION_NATIVE_DROPPED_CARDS269_H
 #define LAWN_FUSION_NATIVE_DROPPED_CARDS269_H
 #include <cstdint>
+#include <string>
 #include "FusionCatalog.h"
 #include "FusionNativePlacement.h"
 class Board;class Plant;class Coin;
@@ -15,10 +16,11 @@ struct NativeDroppedCard269Data
     uint32_t instanceToken=0;
     uint8_t heldSlot=255;
     bool landed=false,flashing=false;
+    bool fallByBoss366=false;
 };
 inline bool NativeDroppedCard269DataValid(const NativeDroppedCard269Data& d)
 {return d.instanceToken&&FusionFindPlant(d.kind)&&d.cost>=0&&d.cost<=1000000000&&(d.heldSlot==255||d.heldSlot<4)&&
-    (d.heldSlot==255||d.landed);}
+    (d.heldSlot==255||d.landed)&&(!d.fallByBoss366||d.heldSlot==255);}
 inline bool NativeDroppedCard269CoinStateValid(const NativeDroppedCard269Data& d,int age,int uses,int flash)
 {return NativeDroppedCard269DataValid(d)&&age>=0&&uses>=0&&uses<(IsFusionSourcePuffKind(d.kind)?3:1)&&flash>=0&&flash<=age&&
     (d.flashing?(age>1000&&flash>0):flash==0);}
@@ -29,7 +31,10 @@ const NativeDroppedCard269Data* GetNativeDroppedCard269Data(const Coin*);
 enum class NativeDroppedCard269Action:uint8_t {Pickup,PutDown,Plant};
 bool IsNativeDroppedCard269(const Coin*);
 bool CanCreateNativeDroppedCard269(Board*,uint16_t kind,int cost=0);
-Coin* CreateNativeDroppedCard269(Board*,uint16_t kind,int cost,float centerX,float centerY);
+Coin* CreateNativeDroppedCard269(Board*,uint16_t kind,int cost,float centerX,float centerY,bool toss=true);
+bool FallNativeDroppedCardByBoss366(Coin*);
+bool CanFallNativeConveyorCards366(Board*,std::string* error=nullptr);
+bool FallNativeConveyorCards366(Board*);
 bool CanCreateNativeRemaining269DroppedCard(Board*,uint16_t kind);
 bool CreateNativeRemaining269DroppedCard(Plant*,uint16_t kind,float centerX,float centerY);
 // BEFORE Coin::Update's existing mCoinAge++/legacy motion; true owns the one

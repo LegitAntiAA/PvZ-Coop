@@ -1,4 +1,6 @@
+#include "FusionNativeTravelConsumers369.h"
 #include "FusionNativeCold.h"
+#include "FusionNativeSnowGun363.h"
 #include "FusionColdRules.h"
 #include "FusionNative.h"
 #include "FusionNativeZombie313Dispatch.h"
@@ -32,10 +34,10 @@ bool HostObject(const GameObject* object)
     return object && object->mApp && !object->mApp->NetIsClient() && !object->mNetGhost &&
         IsNativeFusionBoard(object->mBoard) && NativeFusionBackgroundValid(static_cast<uint8_t>(object->mBoard->mBackground));
 }
-bool HostTarget(Zombie* zombie)
+bool HostTarget(Zombie* zombie,bool allowControlled=false)
 {
     if(!HostObject(zombie)||zombie->IsDeadOrDying()||zombie->mBodyHealth<=0||
-        zombie->mMindControlled||(GetNativeSourceZombieData(zombie)&&zombie->mOnHighGround))return false;
+        (!allowControlled&&zombie->mMindControlled)||(GetNativeSourceZombieData(zombie)&&zombie->mOnHighGround))return false;
     if(IsNativeZombie313(zombie)){NativeZombie313Semantics v;return GetNativeZombie313Semantics(zombie,v)&&v.status!=1;}
     if(!NativeFusionGroundTerrainAllowed(static_cast<uint8_t>(zombie->mBoard->mBackground),zombie->mRow,zombie->mInPool))return false;
     const auto* source=GetNativeSourceZombieData(zombie);
@@ -170,13 +172,13 @@ bool ApplyNativeColdBoardFreeze(Board* board, float x, float y)
 bool IsNativeColdProjectile(const Projectile* projectile)
 {
     const auto* data = GetNativeProjectileData(projectile);
-    return data && FindFusionColdProjectileProfile(data->kind) && IsNativeTimedPeaProjectile(projectile);
+    return data && FindFusionColdProjectileProfile(data->kind) && (IsNativeSnowBall363(projectile)||IsNativeTimedPeaProjectile(projectile));
 }
 bool PrepareNativeColdHit(Projectile* projectile, Zombie* target, int& damage, FusionColdDamageContext& context)
 {
     if (!IsNativeColdProjectile(projectile) || !HostObject(projectile) || projectile->mDead ||
-        !HostTarget(target) || target->mBoard != projectile->mBoard ||
-        !NativeTimedPeaProjectileCanHit(projectile,target)) return false;
+        !HostTarget(target,IsNativeSnowBall363(projectile)) || target->mBoard != projectile->mBoard ||
+        (IsNativeSnowBall363(projectile)?target->mMindControlled!=GetNativeProjectileData(projectile)->isZombieBullet:!NativeTimedPeaProjectileCanHit(projectile,target))) return false;
     const auto* payload = GetNativeProjectileData(projectile);
     if(NativeSummon269RejectCold(target))
     {
@@ -192,6 +194,13 @@ bool PrepareNativeColdHit(Projectile* projectile, Zombie* target, int& damage, F
     FusionColdState next;
     int resolved = 0;
     if (!data || !TryPrepareFusionColdHit(payload->kind,ReadState(target,*data),damage,next,resolved)) return false;
+    if((payload->kind==18||payload->kind==24)&&next.frozenTicks>0&&HasNativeTravelAdvanced369(projectile->mBoard,18))
+    {
+        const auto* profile=FindFusionColdProjectileProfile(payload->kind);
+        const int64_t boosted=int64_t(damage)*profile->baseDamageMultiplier*10;
+        if(boosted>(std::numeric_limits<int>::max)())return false;
+        resolved=int(boosted);
+    }
     Commit(target,*data,next);
     damage = resolved;
     context.projectileKind = payload->kind;
@@ -208,7 +217,11 @@ void NativeColdDamageAfterShield(Zombie* target, const FusionColdDamageContext& 
         FusionColdAppliesAfterShield(context.projectileKind,shieldPassed) :
         FusionColdDeliveryAppliesAfterShield(context.delivery,shieldPassed);
     if (!applies) return;
-    ApplyNativeColdSlow(target);
+    if(context.projectileKind==101)
+    {
+        if(!HostTarget(target,true)||NativeSummon269RejectCold(target))return;auto* data=GetOrCreateNativeZombieColdData(target);FusionColdState next;
+        if(data&&TrySetFusionColdSlow(ReadState(target,*data),next))Commit(target,*data,next,1,kFusionColdSlowTicks);
+    }else ApplyNativeColdSlow(target);
 }
 void ApplyNativeColdSlow(Zombie* target)
 {
@@ -328,7 +341,9 @@ bool ApplyNativeColdPiercingImpact(Projectile* projectile, Zombie* target)
     const auto count = FusionProjectileHitCount(context->rollingHits,projectileId);
     LawnNet::NetTrace("Fusion native cold pierce id=%u target=%u generation=%u visited=%zu damage=%d",
         projectile->mNetId,target->mNetId,zombieId,count,damage);
-    if (count >= static_cast<std::size_t>(FindFusionColdProjectileProfile(cold.projectileKind)->maximumHits)) projectile->Die();
+    const auto limit=context->lobberPierceLimits.find(projectileId);
+    const auto maximum=limit==context->lobberPierceLimits.end()?FindFusionColdProjectileProfile(cold.projectileKind)->maximumHits:limit->second;
+    if (count >= static_cast<std::size_t>(maximum)) projectile->Die();
     return true;
 }
 bool ApplyNativeColdProjectileLand(Projectile* projectile)

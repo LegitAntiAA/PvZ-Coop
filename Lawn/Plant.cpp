@@ -1,6 +1,7 @@
 
 #include "Coin.h"
 #include "Plant.h"
+#include "Fusion/FusionNativeBossRoom366.h"
 #include "Board.h"
 #include "Zombie.h"
 #include "Cutscene.h"
@@ -29,6 +30,7 @@
 #include "Net/NetCommon.h"
 #include "Fusion/FusionPotatoRules.h"
 #include "Fusion/FusionNative.h"
+#include "Fusion/FusionNativePlantDisable363.h"
 #include "Fusion/FusionNativeVisual.h"
 #include "Fusion/FusionNativeLaserConnections269.h"
 #include "Fusion/FusionNativeCherryShooter.h"
@@ -1347,6 +1349,7 @@ void Plant::StarFruitFire()
 //0x45F8A0
 void Plant::UpdateShooter()
 {
+    if(LawnFusion::NativePlantDisabled363(this))return;
     mLaunchCounter--;
     if (mLaunchCounter <= 0)
     {
@@ -2970,6 +2973,7 @@ void Plant::Squish()
 {
     if(LawnFusion::NativeRollingActor269SuppressSourceDie(this))return;
     if (LawnFusion::NativeStar269Invulnerable(this)) return;
+    if(LawnFusion::GetNativePlantData(this)){LawnFusion::ApplyNativeSourcePlantCrashed366(this);return;}
     if (LawnFusion::HandleNativeAction267Crush(this) || LawnFusion::HandleNativeAction266Crush(this)) return;
     if (NotOnGround())
         return;
@@ -3227,6 +3231,7 @@ void Plant::UpdateAbilities()
         return;
 #endif
     
+    if(LawnFusion::HandleNativeDisabledPlantAbilities363(this))return;
     UpdateShooting();
 
     if (mStateCountdown > 0)
@@ -3457,6 +3462,7 @@ void Plant::UpdateReanimColor()
     }
 
     aBodyReanim->PropogateColorToAttachments();
+    if(LawnFusion::NativePlantDisabled363(this))LawnFusion::ApplyNativePlantDisable363Color(this);
 }
 
 bool Plant::IsOnBoard()
@@ -3477,6 +3483,7 @@ bool Plant::IsInPlay()
 //0x463920
 void Plant::UpdateReanim()
 {
+    if(LawnFusion::NativePlantDisabled363(this))return; // Main Animator/native role playback, not actor lifetime.
     Reanimation* aBodyReanim = mApp->ReanimationTryToGet(mBodyReanimID);
     if (aBodyReanim == nullptr)
         return;
@@ -3623,6 +3630,7 @@ void Plant::UpdateReanim()
 //0x463E40
 void Plant::Update()
 {
+    if(const auto* d=LawnFusion::GetNativePlantData(this);d&&(d->crushFlags366&2)){if(!mNetGhost&&!mApp->NetIsClient()&&!mBoard->mPaused&&--mDisappearCountdown<=0)Die(255);return;}
     if(LawnFusion::UpdateNativeRollingActor269(this)||LawnFusion::UpdateNativeWheat269(this))return;
     bool doUpdate = false;
     if (IsOnBoard() && mApp->mGameScene == GameScenes::SCENE_LEVEL_INTRO && mApp->IsWallnutBowlingLevel())
@@ -4028,6 +4036,7 @@ void Plant::AnimatePumpkin()
 //0x464820
 void Plant::UpdateShooting()
 {
+    if(LawnFusion::NativePlantDisabled363(this))return;
     if (NotOnGround() || mShootingCounter == 0)
         return;
 
@@ -5105,7 +5114,7 @@ void Plant::Draw(Graphics* g)
 
         g->PushState();
         g->SetLinearBlend(true);
-        g->SetScale(1.0f, 0.25f, 0.0f, 0.0f);
+        g->SetScale(1.0f, (LawnFusion::GetNativePlantData(this)&&LawnFusion::GetNativePlantData(this)->crushFlags366&2)?.3f:.25f, 0.0f, 0.0f);
 
         int anAlpha = 255;
         if (mDisappearCountdown >= 0)
@@ -6756,6 +6765,7 @@ int Plant::DistanceToClosestZombie()
 //0x4679B0
 void Plant::Die(int theFusionRemovalReason)
 {
+    if(const auto* d=LawnFusion::GetNativePlantData(this);d&&(d->crushFlags366&2)){mDead=true;RemoveEffects();return;}
     if(LawnFusion::NativeRollingActor269SuppressSourceDie(this,theFusionRemovalReason))return;
     const bool firstRemoval = !mDead;
     if (theFusionRemovalReason != 255) LawnFusion::NativeProducerDying(this);

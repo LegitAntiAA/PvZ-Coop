@@ -261,6 +261,19 @@
     <ClCompile Include="..\..\Lawn\Fusion\FusionSourceGraphSnow363Generated.cpp" />
     <ClCompile Include="..\..\Lawn\Fusion\FusionSourceRootSnow363.cpp" />
     <ClCompile Include="FusionSnowZombie363Tests.cpp" />
+    <ClCompile Include="..\..\Lawn\Fusion\FusionPlantDisable363Rules.cpp" />
+    <ClCompile Include="FusionPlantDisable363Tests.cpp" />
+    <ClCompile Include="..\..\Lawn\Fusion\FusionSnowGun363Rules.cpp" />
+    <ClCompile Include="..\..\Lawn\Fusion\FusionSourceGraphSnowGun363Generated.cpp" />
+    <ClCompile Include="..\..\Lawn\Fusion\FusionSourceRootSnowGun363.cpp" />
+    <ClCompile Include="FusionSnowGun363Tests.cpp" />
+    <ClCompile Include="..\..\Lawn\Fusion\FusionQuickJackson367Rules.cpp" />
+    <ClCompile Include="..\..\Lawn\Fusion\FusionQing208Rules.cpp" />
+    <ClCompile Include="..\..\Lawn\Fusion\FusionSourceGraph208Generated.cpp" />
+    <ClCompile Include="..\..\Lawn\Fusion\FusionSourceRootQing369.cpp" />
+    <ClCompile Include="..\..\Lawn\Fusion\FusionTravelBuff360Rules.cpp" />
+    <ClCompile Include="..\..\Lawn\Fusion\FusionRandomZombie360Rules.cpp" />
+    <ClCompile Include="..\..\Lawn\Fusion\FusionTravelBuff369Rules.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LocalizedTextTests.h" />
@@ -323,4 +336,23 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
+  <ItemGroup>
+    <ClCompile Include="..\..\Lawn\Fusion\FusionBoss361GraphGenerated.cpp" />
+    <ClCompile Include="..\..\Lawn\Fusion\FusionBoss361Rules.cpp" />
+    <ClCompile Include="..\..\Lawn\Fusion\FusionBossBall366Rules.cpp" />
+    <ClCompile Include="..\..\Lawn\Fusion\FusionBossBungee366Rules.cpp" />
+    <ClCompile Include="..\..\Lawn\Fusion\FusionDriver363Rules.cpp" />
+    <ClCompile Include="..\..\Lawn\Fusion\FusionLateZombie363Rules.cpp" />
+    <ClCompile Include="..\..\Lawn\Fusion\FusionSourceGraphDriver363Generated.cpp" />
+    <ClCompile Include="..\..\Lawn\Fusion\FusionSourceGraphFinish363Generated.cpp" />
+    <ClCompile Include="..\..\Lawn\Fusion\FusionSourceGraphLate363Generated.cpp" />
+    <ClCompile Include="..\..\Lawn\Fusion\FusionSourceRootFinish363.cpp" />
+    <ClCompile Include="..\..\Lawn\Fusion\FusionSourceRootLate363.cpp" />
+    <ClInclude Include="..\..\Lawn\Fusion\FusionBoss361Rules.h" />
+    <ClInclude Include="..\..\Lawn\Fusion\FusionBossBall366Rules.h" />
+    <ClInclude Include="..\..\Lawn\Fusion\FusionBossBungee366Rules.h" />
+    <ClInclude Include="..\..\Lawn\Fusion\FusionDriver363Rules.h" />
+    <ClInclude Include="..\..\Lawn\Fusion\FusionLateZombie363Rules.h" />
+    <ClInclude Include="..\..\Lawn\Fusion\FusionBoss361Wire.h" />
+  </ItemGroup>
 </Project>

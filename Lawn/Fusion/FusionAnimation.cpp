@@ -375,7 +375,7 @@ bool IsColorCurve(CurveKind kind)
 struct Key { float time = 0; Vector value{}, inSlope{}, outSlope{}; const Variant* sprite = nullptr; };
 struct Curve { int node; CurveKind kind; std::vector<Key> keys; };
 struct Clip { float duration = 0; bool loop = false; std::vector<Curve> curves; std::vector<FusionAnimationEvent> events; };
-struct State { std::string clip, speedParameterName; float speed = 1; bool speedParameter = false; int layer = -1; bool additive = false, supported = true; bool writeDefaultsKnown = false, writeDefaults = false; bool initialRest347 = false; };
+struct State { std::string clip, speedParameterName; float speed = 1; bool speedParameter = false; int layer = -1; bool additive = false, supported = true; bool writeDefaultsKnown = false, writeDefaults = false; bool initialRest347 = false; bool independent366 = false; };
 
 // Preserve legacy packages/calls without inventing default-write history.
 // A new stateless blend requires both exact source states to prove WD1.
@@ -1098,9 +1098,21 @@ bool FusionAnimation::Load(LawnApp* app, const std::string& path, std::string& e
             state.initialRest347=initialRest347&&id==1102061268324235159LL&&state.writeDefaultsKnown&&!state.writeDefaults;
             // A no-motion WD1 state samples the genuine rest/prior-layer pose.
             // WD0 would retain history that this stateless sampler does not own.
-            if(nullMotion)state.supported=state.supported&&state.writeDefaultsKnown&&state.writeDefaults;
             for (size_t layer = 0; layer < layers.size(); ++layer) for (const auto& stateId : layers[layer].at("states")) if (stateId.get<int64_t>() == id)
             { state.layer = static_cast<int>(layer); state.additive = layers[layer].at("blendingMode").get<int>() == 1; }
+            if(data.contains("sourceAnimators"))for(const auto& owner:data.at("sourceAnimators"))
+                if(!owner.at("primary").get<bool>()&&owner.at("enabled").get<bool>())
+                    for(const auto& layer:owner.at("layers"))if(layer.get<int>()==state.layer)
+                    {
+                        if(!item.contains("sourceAnimatorFileId")||item.at("sourceAnimatorFileId")!=owner.at("fileId"))
+                            throw std::runtime_error("independent state Animator identity differs");
+                        if(!item.contains("sourceStateId"))throw std::runtime_error("independent state source identity missing");
+                        const auto defaults=SourceWriteDefaults(owner.at("serializedController").get<std::string>());
+                        const auto found=defaults.find(item.at("sourceStateId").get<int64_t>());
+                        if(found==defaults.end())throw std::runtime_error("independent state write-defaults proof missing");
+                        state.writeDefaultsKnown=true;state.writeDefaults=found->second;state.independent366=true;
+                    }
+            if(nullMotion)state.supported=state.supported&&state.writeDefaultsKnown&&state.writeDefaults;
             if (state.additive&&!nullMotion)
                 for (const auto& curve : result->clips.at(state.clip).curves)
                     if (curve.kind == CurveKind::FlipX || curve.kind == CurveKind::FlipY)
@@ -1192,7 +1204,15 @@ bool FusionAnimation::Impl::SamplePose(const char* baseName,float baseElapsed,co
             ambiguous(options->nodeActivityOverrides)||ambiguous(options->nodeRotations)||
             ambiguous(options->nodeWorldPositions)||ambiguous(options->spriteReplacements)||
             ambiguous(options->spriteSortingOverrides)||ambiguous(options->sortingGroupOverrides)||
-            ambiguous(options->maskSortingOverrides)||ambiguous(options->spriteEnabledOverrides))return false;
+            ambiguous(options->maskSortingOverrides)||ambiguous(options->spriteEnabledOverrides)||
+            ambiguous(options->spriteColorOverrides)||ambiguous(options->nodeLocalRotations))return false;
+    }
+    if(options)for(const auto& color:options->spriteColorOverrides)
+        for(float value:color.rgba)if(!std::isfinite(value))return false;
+    if(options)for(const auto& rotation:options->nodeLocalRotations)
+    {
+        float norm=0;for(float value:rotation.quaternion){if(!std::isfinite(value))return false;norm+=value*value;}
+        if(std::abs(norm-1)>1e-4f)return false;
     }
     const auto parameterSpeed = [&](const State& state)
     {
@@ -1234,7 +1254,8 @@ bool FusionAnimation::Impl::SamplePose(const char* baseName,float baseElapsed,co
                 const auto& blend = *extra.baseBlend;
                 const State* incoming = FindState(extra.stateName.c_str(),extra.layer);
                 const State* outgoing = FindState(blend.outgoingState.c_str(),extra.layer);
-                if (!incoming || !outgoing || !incoming->additive || !outgoing->additive ||
+                if (!incoming || !outgoing || incoming->additive != outgoing->additive ||
+                    (!incoming->additive&&(!incoming->independent366||!outgoing->independent366||extra.weight!=1)) ||
                     incoming->layer < 0 || incoming->layer != outgoing->layer ||
                     !incoming->writeDefaultsKnown || !outgoing->writeDefaultsKnown ||
                     !incoming->writeDefaults || !outgoing->writeDefaults ||
@@ -1244,8 +1265,8 @@ bool FusionAnimation::Impl::SamplePose(const char* baseName,float baseElapsed,co
                 if (extra.weight == 0) continue;
                 const auto baseline = pose;
                 auto previous = baseline;
-                Apply(previous,*outgoing,blend.outgoingElapsedSeconds,parameterSpeed(*outgoing),true);
-                Apply(pose,*incoming,extra.elapsedSeconds,parameterSpeed(*incoming),true);
+                Apply(previous,*outgoing,blend.outgoingElapsedSeconds,parameterSpeed(*outgoing),outgoing->additive);
+                Apply(pose,*incoming,extra.elapsedSeconds,parameterSpeed(*incoming),incoming->additive);
                 if (!BlendBasePoses(previous,pose,sprites,blend.incomingWeight)) return false;
                 if (extra.weight < 1 && !BlendBasePoses(baseline,pose,sprites,extra.weight)) return false;
                 continue;
@@ -1282,6 +1303,9 @@ bool FusionAnimation::Impl::SamplePose(const char* baseName,float baseElapsed,co
             for (const auto& renderer : options->spriteEnabledOverrides)
                 if (FindNode(renderer.nodePath.c_str()) == int(i))
                 { pose[i].enabled=renderer.enabled;pose[i].enabledChanged=true; }
+            for(const auto& color:options->spriteColorOverrides)
+                if(FindNode(color.nodePath.c_str())==int(i))
+                {pose[i].colorRGB={color.rgba[0],color.rgba[1],color.rgba[2]};pose[i].colorRGBChanged={true,true,true};pose[i].alpha=color.rgba[3];pose[i].alphaChanged=true;}
             for (const auto& rotation : options->nodeRotations)
                 if (FindNode(rotation.nodePath.c_str()) == int(i) && std::isfinite(rotation.radiansZ))
                 {
@@ -1289,6 +1313,8 @@ bool FusionAnimation::Impl::SamplePose(const char* baseName,float baseElapsed,co
                     const Quaternion value{0, 0, std::sin(half), std::cos(half)};
                     pose[i].rotation = rotation.replace ? value : Multiply(pose[i].rotation, value);
                 }
+            for(const auto& rotation:options->nodeLocalRotations)
+                if(FindNode(rotation.nodePath.c_str())==int(i))pose[i].rotation=rotation.quaternion;
             for (const auto& replacement : options->spriteReplacements)
                 if (FindNode(replacement.nodePath.c_str()) == int(i))
                 {

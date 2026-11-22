@@ -1,4 +1,5 @@
 #include "FusionNativeWaterZombie313.h"
+#include "FusionNativeSourceDirect362.h"
 #include "FusionNative.h"
 #include "FusionNativeSourceLifecycle313.h"
 #include "FusionNativeZombies.h"
@@ -216,9 +217,10 @@ bool NativeWaterZombie313WorldValid(const Board* b,uint16_t kind,int row,std::st
  const int rows=GetNativeFusionRowCount(b);if(rows!=5&&rows!=6)return false;uint8_t water[6]{};
  for(int r=0;r<rows;++r){if(b->mPlantRow[r]!=PLANTROW_NORMAL&&b->mPlantRow[r]!=PLANTROW_POOL)return false;water[r]=b->mPlantRow[r]==PLANTROW_POOL;}
  const bool pool=b->mBackground==BACKGROUND_3_POOL||b->mBackground==BACKGROUND_4_FOG;
- if(!pool&&b->mBackground!=BACKGROUND_1_DAY&&b->mBackground!=BACKGROUND_2_NIGHT)
+ if(!pool&&b->mBackground!=BACKGROUND_1_DAY&&b->mBackground!=BACKGROUND_2_NIGHT&&
+    !(UseNativeSourceDirect362(b)&&b->mBackground==BACKGROUND_5_ROOF))
   return reject("Water313 does not admit Roof or unsupported source terrain.");
- return FusionWaterZombie313WorldValid(kind,rows,pool,std::span<const uint8_t>(water,rows),row,controlled)||reject("Water313 actual terrain/row capability does not admit this source kind.");
+ return FusionWaterZombie313WorldValid(kind,rows,pool,std::span<const uint8_t>(water,rows),row,controlled,UseNativeSourceDirect362(b))||reject("Water313 actual terrain/row capability does not admit this source kind.");
 }
 bool InitializeNativeWaterZombie313(Zombie* z,NativeWaterZombie313State& s,const NativeWaterZombie313Hooks& h)
 {

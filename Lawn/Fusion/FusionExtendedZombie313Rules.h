@@ -20,6 +20,8 @@ struct FusionExtendedZombie313View
     float attributeCountdown=0,throwTime=0;
     bool isThrow=false;
     int32_t attackDamage=0;
+    bool quickMove208=false;
+    bool squashLaunched363=false; //115/116 detached actual SquashPrefab only.
 };
 bool FusionExtendedZombie313ViewValid(uint16_t,const FusionExtendedZombie313View&);
 enum class FusionExtendedEffect313:uint8_t {Cold,Freeze,Butter,Poison,Garlic,Jalapeno,Knockback,MindControl};

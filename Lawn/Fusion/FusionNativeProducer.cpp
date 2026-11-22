@@ -1,4 +1,5 @@
 #include "FusionNativeProducer.h"
+#include "FusionNativePlantDisable363.h"
 #include "FusionNative.h"
 #include "FusionNativeMoney.h"
 #include "../Board.h"
@@ -118,7 +119,7 @@ bool UpdateNativeProducer(Plant* plant)
     // Native nut cosmetic mAnimRate0 is not source Animator.speed0. Ordinary
     // source property1 is the supported baseline; future freezes need an
     // explicit gameplay status, not a test of the reanimation's art rate.
-    if (!FusionProducerGateOpen(profile,true,plant->mApp->IsIZombieLevel(),1)) return true;
+    if (!FusionProducerGateOpen(profile,true,plant->mApp->IsIZombieLevel(),NativePlantDisabled363(plant)?0.f:1.f)) return true;
     int& counter = Counter(plant,*data);
     if (AdvanceFusionProducerCounter(counter))
     {

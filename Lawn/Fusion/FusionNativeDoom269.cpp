@@ -1,3 +1,5 @@
+#include "FusionNativeTravelConsumers369.h"
+#include "FusionNativeProjectileBuff369.h"
 #include "FusionNativeDoom269.h"
 #include "FusionNative.h"
 #include "FusionNativeVisual.h"
@@ -35,7 +37,7 @@ bool Circle(Plant* p,NativeDoom269Point center,double radius,Zombie* z)
 }
 void IceHit(Plant* p,NativeDoom269Point center,double radius,bool adjacentRows,bool reverse)
 {
-    const int damage=FusionFindPlant(910)->damage;std::vector<ZombieID> targets;Zombie* z=nullptr;
+    const int damage=GetNativeTravelPlantAttack369(p,FusionFindPlant(910)->damage);std::vector<ZombieID> targets;Zombie* z=nullptr;
     while(p->mBoard->IterateZombies(z))if(Land(z)&&(!adjacentRows||std::abs(z->mRow-p->mRow)<2)&&Circle(p,center,radius,z))targets.push_back(p->mBoard->ZombieGetID(z));
     if(reverse)std::reverse(targets.begin(),targets.end());
     const FusionColdDamageContext cold{0,FusionColdDamageDelivery::IceAll};
@@ -109,7 +111,7 @@ bool Shoot(Plant* p)
     q->mMotionType=MOTION_STRAIGHT;q->mPosX=x-20;q->mPosY=y-20;q->mPosZ=0;q->mShadowY=y;q->mX=int(q->mPosX);q->mY=int(q->mPosY);
     q->mVelX=float(6*kFusionBasePixelsX*.01);q->mVelY=q->mVelZ=q->mAccZ=0;q->mDamageRangeFlags=p->GetDamageRangeFlags(WEAPON_PRIMARY);
     NativeProjectileData data;data.kind=23;data.damage=plan.damage;data.effectVariant=plan.enhanced?1:0;
-    if(!AttachNativeProjectile(p->mBoard,q,data)){q->Die();return false;}
+    if(!AttachNativeTravelProjectile369(p,q,data)){q->Die();return false;}
     state=EditNativeDoom269PlantState(p);state->interval=plan.interval;state->ordinal=plan.ordinal;
     if(plan.overrideRecovery)p->mLaunchCounter=int(std::floor(double(plan.recoverySeconds)*100))+1;
     ++GetNativePlantData(p)->batchShotCount;(void)RandRangeInt(3,4);p->mApp->PlayFoley(FOLEY_THROW);

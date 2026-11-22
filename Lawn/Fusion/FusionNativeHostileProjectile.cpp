@@ -1,5 +1,7 @@
+#include "FusionNativeProjectileBuff369.h"
 #include "FusionNativeSummonPlants269.h"
 #include "FusionNativeHostileProjectile.h"
+#include "FusionNativeSnowGun363.h"
 #include "FusionHostileProjectileRules.h"
 #include "FusionBasePlantRules.h"
 #include "FusionNativeProjectileMetadata.h"
@@ -32,11 +34,11 @@ bool Touches(const FusionRecipientRect& a,const Sexy::Rect& b)
 bool IsNativeSourceSuperCherryProjectile(const Projectile* p)
 {
     const auto* d=GetNativeProjectileData(p);
-    if(d&&d->kind==3&&d->damage==300&&d->isZombieBullet&&d->goldAttracted&&(d->specialType==4||d->specialType==5))
+    if(d&&d->kind==3&&NativeProjectileValidationDamage369(*d)==300&&d->isZombieBullet&&d->goldAttracted&&(d->specialType==4||d->specialType==5))
         return NativeProjectileMetadataValid(*d,p->mProjectileType,p->mMotionType);
-    return d&&d->isZombieBullet&&(FusionSuperCherryProjectileMetadataValid(d->kind,d->damage,
+    return d&&d->isZombieBullet&&(FusionSuperCherryProjectileMetadataValid(d->kind,NativeProjectileValidationDamage369(*d),
         d->specialType,true,p->mProjectileType,p->mMotionType)||FusionCatapultCherry343MetadataValid(
-        d->kind,d->damage,d->specialType,true,p->mProjectileType,p->mMotionType))&&
+        d->kind,NativeProjectileValidationDamage369(*d),d->specialType,true,p->mProjectileType,p->mMotionType))&&
         NativeProjectileMetadataValid(*d,p->mProjectileType,p->mMotionType);
 }
 bool UpdateNativeSourceSuperCherryProjectile(Projectile* p,NativeSuperCherryContact contact)
@@ -126,7 +128,7 @@ bool UpdateNativeSuperCherryStart(Projectile* p)
 bool IsNativeSourcePlanarProjectile(const Projectile* p)
 {
     const auto* d=GetNativeProjectileData(p);
-    return d&&(d->kind==58||d->kind==59||FusionCatapultCherry343MetadataValid(d->kind,d->damage,d->specialType,d->isZombieBullet,p->mProjectileType,p->mMotionType))&&d->specialType==13;
+    return IsNativeSnowBall363(p)||(d&&(d->kind==58||d->kind==59||FusionCatapultCherry343MetadataValid(d->kind,NativeProjectileValidationDamage369(*d),d->specialType,d->isZombieBullet,p->mProjectileType,p->mMotionType))&&d->specialType==13);
 }
 Projectile* SpawnNativeSourcePlanarProjectile(Board* b,uint16_t kind,int row,int damage,
     float x,float y,float vx,float vy,float gravity,bool hostile)
@@ -168,6 +170,7 @@ Projectile* TryMakeNativeHostileBasketball(Board* b,Plant* target,int row,float 
 {return TryMakeNativeHostileCatapult343(b,target,row,x,y,58);}
 bool UpdateNativeSourcePlanarProjectile(Projectile* p)
 {
+    if(UpdateNativeSnowBall363(p))return true;
     if(!IsNativeSourcePlanarProjectile(p))return false;
     auto* b=p->mBoard;
     if(p->mDead||p->mNetGhost||!b||!b->mApp||b->mApp->NetIsClient()||!CanApplyNativeFusionGameplay(b))return true;

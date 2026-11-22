@@ -1,4 +1,6 @@
+#include "FusionNativeProjectileBuff369.h"
 #include "FusionNative.h"
+#include "FusionNativePlantDisable363.h"
 #include "FusionNativeSourceDamage315.h"
 #include "FusionNativeVisual.h"
 #include "FusionCherryRules.h"
@@ -200,6 +202,7 @@ void NativePlantHealthChanged(Plant* plant)
 
 void UpdateNativePlant(Plant* plant)
 {
+    if(NativePlantDisabled363(plant))return; // Main Animator/phase only; health hooks run separately.
     if (!HasNativeContext(plant) || plant->mDead || plant->mNetGhost) return;
     NativePlantData* data = GetNativePlantData(plant);
     if (!data) return;
@@ -301,7 +304,7 @@ void NativeProjectileCreated(Plant* source, Projectile* projectile, const Fusion
         // recipients can observe an ordinary pea. Keep PvZ's effective speed.
         projectile->mVelX=3.33f;
         if(!EnsureNativeProjectileVisuals(source->mBoard,0)||
-            !AttachNativeProjectile(source->mBoard,projectile,NativeProjectileData{}))projectile->Die();
+            !AttachNativeTravelProjectile369(source,projectile,NativeProjectileData{}))projectile->Die();
         return;
     }
     if (plant && (plant->kind == 6 || plant->kind == 19))
@@ -321,7 +324,7 @@ void NativeProjectileCreated(Plant* source, Projectile* projectile, const Fusion
     data.kind = 8;
     data.damage = 100;
     data.sunOnHit = 5;
-    if (!AttachNativeProjectile(source->mBoard, projectile, data)) projectile->Die();
+    if (!AttachNativeTravelProjectile369(source,projectile,data)) projectile->Die();
 }
 
 int GetNativeProjectileDamage(const Projectile* projectile, int fallback)

@@ -29,7 +29,7 @@ namespace LawnNet
 // (the host broadcasts the same sounds via events).
 extern bool gNetSuppressSounds;
 
-static const uint32_t NET_PROTOCOL_VERSION = 70; // FNS29 source conveyor and expanded source family state.
+static const uint32_t NET_PROTOCOL_VERSION = 71; // FNS30 source timed plant-disable stack.
 static const uint16_t NET_DEFAULT_PORT = 27713;			// PvZ co-op port
 static const int NET_MAX_PLAYERS = 4;					// 1 host + 3 clients
 static const int NET_MAX_NICK_CHARS = 16;
@@ -565,6 +565,8 @@ bool NetDecodeFusionLimbEvent276(NetBuffer&, NetFusionLimbEvent276&);
 // Existing two-byte native cues keep volume1. Source cues may append one F32
 // per-playback volume. Exact framing; failure preserves cursor and outputs.
 bool NetDecodeSoundEvent284(NetBuffer&,uint16_t& sound,float& volume);
+// Source pitch is a per-instance frequency ratio, not native semitones.
+bool NetDecodeSoundEvent284(NetBuffer&,uint16_t& sound,float& volume,float& pitchRatio);
 
 // Every current/max health pool is authoritative.  U32 prevents Endless health
 // scaling from silently pinning client ghosts at 65535 and keeps health-bar

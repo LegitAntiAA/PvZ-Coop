@@ -1,3 +1,4 @@
+#include "FusionNativeFinish363.h"
 #include "FusionNativeExtendedZombie347.h"
 #include "FusionDrown343Rules.h"
 #include "FusionNativeSourceObstacleFactory313.h"
@@ -11,6 +12,7 @@
 #include "../Projectile.h"
 #include "../Plant.h"
 #include "../Zombie.h"
+#include "../Net/NetPresentation.h"
 #include "../../LawnApp.h"
 #include "../../Sexy.TodLib/Attachment.h"
 #include "../../Sexy.TodLib/Reanimator.h"
@@ -44,17 +46,18 @@ bool KeptClock(Board* b,const Projectile* p,const FusionSourceObstacle313View& v
 }
 bool EnsureNativeSourceObstacle313Resources(Board* b,FusionSourceObstacle313Kind kind,uint8_t variant,std::string* error)
 {
-    if(!b||!b->mApp||b->mApp->mBoard!=b||!GetNativeContext(b)||unsigned(kind)<1||unsigned(kind)>5||
+    if(!b||!b->mApp||b->mApp->mBoard!=b||!GetNativeContext(b)||unsigned(kind)<1||unsigned(kind)>7||
        (kind==FusionSourceObstacle313Kind::DrownWeapon?variant>3:kind==FusionSourceObstacle313Kind::SpiderWeapon?variant!=0:variant>1))
         return Reject("Source obstacle resource identity invalid.",error);
     auto* v=Visuals(b);std::string why;if(!v||!v->Ensure(kind,variant,why)){if(error)*error=why;return false;}
-    if(kind==FusionSourceObstacle313Kind::MachineBall)
+    if((kind==FusionSourceObstacle313Kind::ZombieSquash||kind==FusionSourceObstacle313Kind::MachineBall||kind==FusionSourceObstacle313Kind::BossBall))
     {
         ReanimatorEnsureDefinitionLoaded(REANIM_ZOMBIE,false);
         if(!gReanimatorDefArray||unsigned(REANIM_ZOMBIE)>=gReanimatorDefCount)return false;
     }
+    if(kind==FusionSourceObstacle313Kind::ZombieSquash)return LawnNet::NetSourceSound284Ready(b->mApp,74)&&LawnNet::NetSourceSound284Ready(b->mApp,42);
     for(uint16_t fx:kind==FusionSourceObstacle313Kind::DrownWeapon?std::initializer_list<uint16_t>{}:
-        kind==FusionSourceObstacle313Kind::MachineBall?std::initializer_list<uint16_t>{63,64}:std::initializer_list<uint16_t>{41,42})
+        (kind==FusionSourceObstacle313Kind::MachineBall||kind==FusionSourceObstacle313Kind::BossBall)?std::initializer_list<uint16_t>{63,64}:std::initializer_list<uint16_t>{41,42})
         if(!EnsureNativeSourceEffect269(b,fx,error))return false;
     return true;
 }
@@ -62,7 +65,7 @@ bool PreflightNativeSourceObstacle313(Board* b,const FusionSourceObstacle313View
 {
     if(!FusionSourceObstacle313ViewValid(v)||!EnsureNativeSourceObstacle313Resources(b,v.kind,v.variant,error))return false;
     FusionSourceDeathBudget319 peak;
-    if(v.kind==FusionSourceObstacle313Kind::MachineBall)
+    if(v.kind==FusionSourceObstacle313Kind::ZombieSquash||v.kind==FusionSourceObstacle313Kind::MachineBall||v.kind==FusionSourceObstacle313Kind::BossBall)
     {
         if(!Native313ClockTrackMatches(uint16_t(REANIM_ZOMBIE),"anim_walk",v.clock))
             return Reject("MachineBall actual clock does not match anim_walk.",error);
@@ -75,7 +78,7 @@ bool AdoptNativeSourceObstacle313(Projectile* p,const FusionSourceObstacle313Vie
     if(!p||!p->mNetGhost||!p->mApp->NetIsClient()||!IsNativeSourceWorld313(p->mBoard)||
        !FusionSourceObstacle313ViewValid(v)||!EnsureNativeSourceObstacle313Resources(p->mBoard,v.kind,v.variant,error))return false;
     auto* d=EditNativeSourceObstacle313(p,true);if(!d)return false;
-    if(v.kind!=FusionSourceObstacle313Kind::MachineBall||!KeptClock(p->mBoard,p,v))
+    if((v.kind!=FusionSourceObstacle313Kind::ZombieSquash&&v.kind!=FusionSourceObstacle313Kind::MachineBall&&v.kind!=FusionSourceObstacle313Kind::BossBall)||!KeptClock(p->mBoard,p,v))
     {
         RemoveNativeObstacle313Clock(p,*d);AttachmentDie(p->mAttachmentID);p->mAttachmentID=ATTACHMENTID_NULL;
     }
@@ -92,12 +95,15 @@ bool CanSpawnNativeSourceObstacle313(Board* b,const FusionSourceObstacle313Spawn
        std::abs(s.centerX)>4096||std::abs(s.centerY)>4096||std::abs(s.groundY)>4096||
        !b->mProjectiles.mBlock||b->mProjectiles.mSize>=b->mProjectiles.mMaxSize)
         return Reject("Source obstacle factory requires the live host world and one actual projectile slot.",error);
+    if(s.kind!=FusionSourceObstacle313Kind::BossBall&&(s.sourceBirthVelocityX366||s.growthRenderOrder366))return Reject("BossBall birth-only fields on another source obstacle.",error);
     const auto* owner=b->mZombies.DataArrayTryToGet(s.ownerToken);
     const auto* data=GetNativeSourceZombieData(owner);
     if(!owner||owner->mDead||owner->mNetId!=s.ownerId||!data||data->instanceToken!=s.ownerToken)
         return Reject("Source obstacle factory owner generation changed.",error);
     if((s.kind==FusionSourceObstacle313Kind::KirovBomb&&data->kind!=(s.variant?206:26))||
-       (s.kind==FusionSourceObstacle313Kind::SpiderWeapon&&data->kind!=221))return Reject("Source obstacle owner/variant differs.",error);
+       (s.kind==FusionSourceObstacle313Kind::SpiderWeapon&&data->kind!=221)||
+       (s.kind==FusionSourceObstacle313Kind::BossBall&&(data->kind!=44&&data->kind!=46)))return Reject("Source obstacle owner/variant differs.",error);
+    if(s.kind==FusionSourceObstacle313Kind::ZombieSquash&&((data->kind!=115&&data->kind!=116)||s.variant!=(data->kind==116?1:0)||s.squashColumn>=10||s.fromHypno))return Reject("Source Squash owner/prefab/cell differs.",error);
     if(s.kind!=FusionSourceObstacle313Kind::DrownWeapon)return CanCreateNativeExtendedObstacle313(b,s,error);
     if(!FusionDrown343OwnerVariant(data->kind,s.variant)||s.fromHypno||((s.variant&1)&&s.targetPlantId)||bool(s.targetPlantId)!=bool(s.targetPlantToken))
         return Reject("Source DrownWeapon factory contract differs.",error);
@@ -140,6 +146,7 @@ bool UpdateNativeSourceObstacle313(Projectile* p)
     ++p->mProjectileAge;
     if(d->kind==FusionSourceObstacle313Kind::DrownWeapon)
     {d->tick=p->mBoard->mMainCounter;return UpdateNativeDrownWeapon313(p,*d,GetNativeDrownWeapon313Hooks());}
+    if(d->kind==FusionSourceObstacle313Kind::ZombieSquash){d->tick=p->mBoard->mMainCounter;if(!UpdateNativeSquashItem363(p))if(auto* current=EditNativeSourceObstacle313(p))current->failed=true;return true;}
     if(d->kind==FusionSourceObstacle313Kind::SpiderWeapon)return UpdateNativeSpiderWeapon347(p);
     return UpdateNativeExtendedObstacle313(p);
 }

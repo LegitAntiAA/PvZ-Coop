@@ -1,3 +1,4 @@
+#include "Lawn/Fusion/FusionTravelBuff360Rules.h"
 #ifndef __LAWNAPP_H__
 #define __LAWNAPP_H__
 
@@ -82,6 +83,8 @@ public:
 class LawnApp : public SexyApp
 {
 public:
+    LawnFusion::FusionTravelBuff360Ledger mFusionTravelBuff369;
+
 	static SDL_Window*				mSDLWindow;
 	static SDL_Renderer*			mSDLRenderer;
 	static SDL_Cursor*				mSDLPointerCursor;

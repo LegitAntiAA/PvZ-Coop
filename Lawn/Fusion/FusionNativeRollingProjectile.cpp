@@ -1,3 +1,4 @@
+#include "FusionNativeProjectileBuff369.h"
 #include "FusionNativeRollingProjectile.h"
 #include "FusionRollingProjectileRules.h"
 #include "FusionNative.h"
@@ -52,8 +53,8 @@ bool IsNativeRollingProjectile(const Projectile* projectile)
 {
     const auto* data = GetNativeProjectileData(projectile);
     return data && !data->sunOnHit && projectile->mProjectileType == PROJECTILE_PEA &&
-        ((data->kind==2&&data->damage==20&&!data->specialType)||
-        ((data->kind==4||data->kind==5||data->kind==6)&&data->damage==80&&data->specialType==1));
+        ((data->kind==2&&NativeProjectileValidationDamage369(*data)==20&&!data->specialType)||
+        ((data->kind==4||data->kind==5||data->kind==6)&&NativeProjectileValidationDamage369(*data)==80&&data->specialType==1));
 }
 
 bool NativeRollingProjectileCanHit(const Projectile* projectile, Zombie* zombie)
@@ -77,7 +78,7 @@ bool LaunchNativeChomperBlock(Plant* plant,uint16_t kind)
     if(!p)return false;
     NativeProjectileData d;d.kind=kind;d.damage=80;d.specialType=1;
     p->mMotionType=MOTION_STRAIGHT;
-    if(!AttachNativeProjectile(b,p,d)){p->Die();return false;}
+    if(!AttachNativeTravelProjectile369(plant,p,d)){p->Die();return false;}
     p->mPosX=x-20;p->mPosY=y-20;p->mPosZ=0;p->mVelX=float(-6*kFusionRollingPixelsX*.01);
     p->mVelY=p->mVelZ=p->mAccZ=0;p->mShadowY=y;p->mRotation=p->mRotationSpeed=0;
     LawnNet::NetTrace("Fusion native PeaChomper fire plant=%u projectile=%u payload=%u damage=80 way=1 tick=%d",plant->mNetId,p->mNetId,kind,b->mMainCounter);
@@ -92,7 +93,7 @@ void CreateNativeRollingProjectile(Plant* plant, Projectile* projectile)
         !projectile || projectile->mNetGhost || projectile->mBoard != plant->mBoard) return;
     float x = 0, ground = 0;
     NativeProjectileData bullet; bullet.kind = 2;
-    if (!plant->GetShadowCenter(x, ground) || !AttachNativeProjectile(plant->mBoard, projectile, bullet))
+    if (!plant->GetShadowCenter(x, ground) || !AttachNativeTravelProjectile369(plant,projectile,bullet))
     { projectile->Die(); return; }
     const float centerX = static_cast<float>(x + .785 * kFusionRollingPixelsX);
     const float landedY = static_cast<float>(ground - .1 * kFusionRollingPixelsY);

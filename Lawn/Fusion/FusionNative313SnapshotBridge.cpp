@@ -1,4 +1,5 @@
 #include "FusionNative313SnapshotBridge.h"
+#include "FusionNativeBoss361Bridge.h"
 #include "FusionNative.h"
 #include "FusionNativeSourceClock313.h"
 #include "FusionNativeHeavyZombie313BBridge.h"
@@ -76,13 +77,13 @@ const LawnNet::NetZombieAnimState& Aux(const Native313Snapshot& v,uint8_t n)
 bool Definitions(uint16_t kind,const Native313Snapshot& v,const LawnNet::NetZombieAnimState& body,std::string* error)
 {
     // Source16 is the real Zamboni clock; every other new family uses NORMAL.
-    const auto* d=Definition(GetZombieDefinition(kind==16?ZOMBIE_ZAMBONI:ZOMBIE_NORMAL).mReanimationType);
+    const auto* d=Definition(GetZombieDefinition(FusionBoss361Kind(kind)?ZOMBIE_BOSS:kind==16?ZOMBIE_ZAMBONI:ZOMBIE_NORMAL).mReanimationType);
     if(!d||!Native313AnimationViewValid(body)||!LawnNet::NetZombieAnimStateFitsFrames(body,Frames(d)))
         return Reject("313 ghost body native definition/frame span unavailable",error);
     if(v.graph)
     {
         const auto* g=FindFusionSourceGraph313(kind);
-        for(uint8_t n=0;n<g->stateCount;++n)if(!Span(d,g->states[n].nativeTrack))return Reject("313 graph native track unavailable",error);
+        for(uint8_t n=0;n<g->stateCount;++n)if((!FusionBoss361Kind(kind)||FusionSourceGraph313OwnsState(*g,0,n))&&!Span(d,g->states[n].nativeTrack))return Reject("313 graph native track unavailable",error);
         if(!Span(d,g->states[v.graph->layers[0].state].nativeTrack,&body))return Reject("313 body clock disagrees with canonical graph state",error);
     }
     else
@@ -95,6 +96,12 @@ bool Definitions(uint16_t kind,const Native313Snapshot& v,const LawnNet::NetZomb
             return Reject("313 body clock disagrees with canonical water phase",error);
     }
     const auto count=AuxCount(kind,v);if(!count)return true;
+    if(FusionBoss361Kind(kind))
+    {const auto* rv=Definition(REANIM_BOSS);const auto* driver=Definition(REANIM_BOSS_DRIVER);const auto* graph=FindFusionSourceGraph313(kind);
+     if(!rv||!driver||!Span(d,"Boss_head2")||!Span(d,"Boss_RV"))return false;
+     for(uint8_t layer=1;layer<3;++layer){const auto* a=layer==1?rv:driver;const auto& clock=Aux(v,layer-1);
+      if(!LawnNet::NetZombieAnimStateFitsFrames(clock,Frames(a))||!Span(a,graph->states[v.graph->layers[layer].state].nativeTrack,&clock))return false;}
+     return true;}
     const auto* ad=Definition(REANIM_ZOMBIE);if(!ad)return Reject("313 auxiliary definition/attacher unavailable",error);
     if(v.graph&&!Span(d,"anim_head1"))return Reject("313 native auxiliary attachment track unavailable",error);
     for(uint8_t n=0;n<count;++n)
@@ -115,6 +122,7 @@ bool ExistingAux(Board* b,Zombie* z,uint16_t kind,std::array<uint32_t,2>& ids,st
         if(it->second.localUID!=uid)return Reject("313 water map belongs to stale LOCAL generation",error);ids[0]=it->second.auxiliaryID;ids[1]=it->second.shootClockUID343;}}
     else if(const auto* g=GetNativeSourceGraph313(z))
     {if(g->localUID!=uid)return Reject("313 graph map belongs to stale LOCAL generation",error);std::copy_n(g->auxiliaryUIDs,2,ids.begin());}
+    if(FusionBoss361Kind(kind)&&!ids[1]&&z->mSpecialHeadReanimID)ids[1]=uint32_t(z->mSpecialHeadReanimID);
     for(const auto id:ids)if(id&&!LiveClock(b,id))return Reject("313 auxiliary generation is missing/dead",error);
     if(ids[0]&&ids[0]==ids[1])return Reject("313 auxiliary generation is aliased",error);return true;
 }
@@ -143,6 +151,7 @@ bool CaptureNative313(const Zombie* z,Native313Snapshot& out,std::string* error)
      v.heavy.emplace();v.heavy->actor=*s;if(!GetNativeHeavyGold313BView(z,v.heavy->gold))return Reject("313 Gold capture state unavailable",error);}
     else if(FindFusionExtendedZombie313Profile(d->kind))
     {const auto* s=GetNativeExtendedZombie313(z);if(!s||!s->initialized||s->failed)return Reject("313 extended capture state unavailable",error);v.extended=*s;}
+    else if(FusionBoss361Kind(d->kind)){const auto* state=GetNativeBoss361State(z);if(!state||!state->initialized||state->failed)return false;v.boss=state->view;}
     else return Reject("313 capture family unsupported",error);
     if(!v.water)
     {
@@ -173,7 +182,8 @@ bool PreflightNative313GhostBatch(Board* b,std::span<const Native313GhostRequest
         {if(n>=count&&ids[n])return Reject("313 unused auxiliary handle must be zero",error);
          if(n<count){if(!ids[n])++need;else if(!clocks.insert(ids[n]).second)return Reject("313 auxiliary shared between actors",error);}}
         FusionSourceDeathBudget319 add;add.reanimations=need;
-        if(r.snapshot->graph&&count)
+        if(r.snapshot->boss){add.attachments=need;}
+        else if(r.snapshot->graph&&count)
         {
             auto* body=r.existing?LiveClock(b,uint32_t(r.existing->mBodyReanimID)):nullptr;
             if(r.existing&&!body)return Reject("313 existing ghost native body is absent",error);
@@ -195,6 +205,11 @@ bool AdoptNative313(Zombie* z,const Native313Snapshot& v,std::string* error)
     auto* b=z->mBoard;auto* c=GetNativeContext(b);const auto kind=data->kind;
     auto* body=LiveClock(b,uint32_t(z->mBodyReanimID));LawnNet::NetZombieAnimState bodyView;
     if(!CaptureClock(body,bodyView)||!Definitions(kind,v,bodyView,error))return false;
+    if(v.boss)
+    {if(!AdoptNativeBoss361Actor(z,*v.boss))return Reject("Boss366 prepared native clock creation failed",error);
+     auto* graph=EditNativeSourceGraph313(z);if(!graph)return false;graph->localUID=uid;graph->initialized=true;graph->initializedLayerMask343=7;std::copy(v.graph->layers.begin(),v.graph->layers.end(),graph->layers);
+     for(uint8_t n=0;n<2;++n){auto* r=LiveClock(b,graph->auxiliaryUIDs[n]);if(!r)return false;ApplyClock(r,v.graph->auxiliary[n]);if(!RegisterNativeSourceGraphClock313(r,true))return false;}
+     return RegisterNativeSourceGraphClock313(body,true);}
     if(v.water)
     {
         // Reuse the family's real auxiliary allocation/adoption. HOST A keeps

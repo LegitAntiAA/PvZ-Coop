@@ -51,7 +51,9 @@ FusionCampaign342TestResults RunFusionCampaign342Tests()
             (std::find(supported.begin(),supported.end(),level)!=supported.end()));
         CHECK(reason.empty()==NativeSourceAdventureLevelReady280(level,1));
         CHECK(!NativeSourceAdventureLevelReady280(level,0,&reason)&&reason.starts_with("cycle:"));
-        CHECK(!NativeSourceAdventureLevelReady280(level,2,&reason)&&reason.starts_with("cycle:"));
+        CHECK(NativeSourceAdventureLevelReady280(level,2,&reason));
+        FusionCampaign342Plan repeated;CHECK(BuildFusionCampaign342Plan(level,2,repeated,&reason));
+        CHECK(repeated.maximumWaves==p.maximumWaves+10&&repeated.possibleKinds==p.possibleKinds);
         std::vector<uint8_t> ice(p.source->rows,0);
         for(auto kind:p.source->allowedZombieKinds)for(int row=0;row<p.source->rows;++row)
         {

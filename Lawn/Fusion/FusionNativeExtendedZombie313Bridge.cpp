@@ -1,8 +1,14 @@
+#include "FusionNativeQuickJackson367.h"
+#include "FusionSourceRootQing369.h"
+#include "FusionNativeQing208.h"
+#include "FusionNativeFinish363.h"
+#include "FusionNativeDriver363.h"
 #include "../Net/NetCommon.h"
 #include "FusionNativeExtendedZombie313Bridge.h"
 #include "FusionNativeExtendedZombie347.h"
 #include "FusionNativeGroundShooter343.h"
 #include "FusionNativeSnowZombie363.h"
+#include "FusionNativeSnowGun363.h"
 #include "FusionNative.h"
 #include "FusionNativeZombies.h"
 #include "FusionNativeZombieVisual.h"
@@ -87,12 +93,47 @@ bool ClockDefinition(uint16_t kind,std::string* e)
     return g->layerCount==1||ready("anim_head1");
 }
 bool FxReady(Board* b,uint16_t k,std::string* e){return NativeSourceEffectParticle269(k)>=0&&EnsureNativeSourceEffect269(b,k,e);}
+const NativeQing208Hooks& QHooks369()
+{
+ static const NativeQing208Hooks h{
+  [](Board* b,std::string* e){return EnsureNativeSourceZombieVisuals(b,208,e);},
+  [](Zombie* z,bool on){return SetNativeSourceZombieEmission360(z,"Trail/Trail_1",on);},
+  [](Zombie* z){auto* g=EditNativeSourceGraph313(z);if(!g)return false;g->parameters.triggers|=FusionSourceGraph313Trigger(FusionSourceGraph313Param::QuickMove);return true;},
+  [](Zombie* z){auto* g=EditNativeSourceGraph313(z);if(!g)return false;g->parameters.triggers|=FusionSourceGraph313Trigger(FusionSourceGraph313Param::Shake);return true;},
+  [](Zombie* z,uint16_t sound,float vol,float ratio){return LawnNet::NetPlaySourceSound284(z->mApp,sound,vol,ratio);},
+  [](Zombie* z){z->DieNoLoot();return true;}
+ };return h;
+}
+NativeQing208State* QState369(Zombie* z,bool create=false)
+{
+ auto* c=GetNativeContext(z?z->mBoard:nullptr);if(!c||Kind(z)!=208)return nullptr;
+ const auto uid=z->mBoard->mZombies.DataArrayGetID(z);auto i=c->qingZombies208.find(uid);
+ if(i==c->qingZombies208.end()){if(!create)return nullptr;i=c->qingZombies208.emplace(uid,NativeQing208State{}).first;}return &i->second;
+}
+void QView369(Zombie* z,const NativeQing208State& q)
+{if(auto* e=EditNativeExtendedZombie313(z)){e->attributeCountdown=q.attributeCountdown;e->quickMove208=q.quickMove;}}
+bool QEvent369(Zombie* z,FusionSourceGraph313Event event)
+{
+ auto* q=QState369(z);if(!q)return false;NativeQing208Event resolved;
+ switch(event){case FusionSourceGraph313Event::StartQuickMove:resolved=NativeQing208Event::StartQuickMove;break;
+ case FusionSourceGraph313Event::QuickMoveOver:resolved=NativeQing208Event::QuickMoveOver;break;
+ case FusionSourceGraph313Event::Bite:resolved=NativeQing208Event::Bite;break;
+ case FusionSourceGraph313Event::Destroy:resolved=NativeQing208Event::Destroy;break;default:return false;}
+ const auto uid=z->mBoard->mZombies.DataArrayGetID(z);auto* b=z->mBoard;auto* app=z->mApp;
+ if(!ApplyNativeQing208Event(z,*q,resolved,QHooks369()))return false;
+ if(app->mBoard==b)if(auto* live=b->mZombies.DataArrayTryToGet(uid);live&&!live->mDead)QView369(live,*q);
+ return true;
+}
 bool Resources(Board* b,uint16_t kind,std::string* e)
 {
     if(!World(b)||!FindFusionExtendedZombie313Profile(kind)||!ClockDefinition(kind,e))return false;
     if(FusionExtendedZombie347Kind(kind))return EnsureNativeExtended347Resources(b,kind,e);
     if(FusionGroundShooter343Kind(kind))return EnsureNativeGroundShooter343Resources(b,kind,e);
     if(FusionSnowZombie363Kind(kind))return EnsureNativeSnowZombie363Resources(b,kind,e);
+    if(kind==208)return EnsureNativeQing208Resources(b,QHooks369(),e);
+    if(FusionFinish363Kind(kind))return EnsureNativeFinish363Resources(b,kind,e);
+    if(kind==49)return EnsureNativeSnowGun363Resources(b,e);
+    if(FusionDriver363Kind(kind))return EnsureNativeDriver363Resources(b,kind,e);
     std::vector<uint16_t> models{kind};if(kind==35||kind==36||kind==43||kind==40)models.push_back(37);if(kind==212){models.push_back(213);models.push_back(40);models.push_back(37);}if(kind==43)models.push_back(40);
     for(auto k:models)if(!EnsureNativeSourceZombieVisuals(b,k,e)||!CanQueryNativeSourceZombieRoot273(b,k))return false;
     std::vector<uint16_t> effects;std::vector<uint16_t> sounds;
@@ -226,14 +267,14 @@ bool Preflight(Zombie* z,NativeExtendedZombie313Operation op,std::string* e)
     return true;
 }
 bool EventPreflight(Zombie* z,FusionSourceGraph313Event ev,std::string* e)
-{if(FusionGroundShooter343Kind(Kind(z))&&ev==FusionSourceGraph313Event::Shoot)return CanShootNativeGround343(z,e);auto op=NativeExtendedZombie313Operation::Particle;switch(ev){case FusionSourceGraph313Event::Throw:op=NativeExtendedZombie313Operation::Throw;break;case FusionSourceGraph313Event::Crash:op=Kind(z)==26?NativeExtendedZombie313Operation::KirovCrash:NativeExtendedZombie313Operation::Hammer;break;case FusionSourceGraph313Event::Bomb:op=NativeExtendedZombie313Operation::KirovBomb;break;default:break;}return Preflight(z,op,e);}
+{if(FusionDriver363Kind(Kind(z)))return CanDriver363GraphEvent(z,ev,e);if(Kind(z)==49&&ev==FusionSourceGraph313Event::Shoot)return CanShootNativeSnowGun363(z,e);if(FusionGroundShooter343Kind(Kind(z))&&ev==FusionSourceGraph313Event::Shoot)return CanShootNativeGround343(z,e);auto op=NativeExtendedZombie313Operation::Particle;switch(ev){case FusionSourceGraph313Event::Throw:op=NativeExtendedZombie313Operation::Throw;break;case FusionSourceGraph313Event::Crash:op=Kind(z)==26?NativeExtendedZombie313Operation::KirovCrash:NativeExtendedZombie313Operation::Hammer;break;case FusionSourceGraph313Event::Bomb:op=NativeExtendedZombie313Operation::KirovBomb;break;default:break;}return Preflight(z,op,e);}
 bool GraphParameters(Zombie* z,FusionSourceGraph313Parameters& p)
-{NativeExtendedZombie313Input i;auto* s=EditNativeExtendedZombie313(z);if(!s||!Input(z,i))return false;p.speed=i.sourceSpeed;p.attacking=z->mIsEating;if(Kind(z)==114)p.wait=z->mShieldType==SHIELDTYPE_NONE;return true;}
-bool GraphEvent(Zombie* z,FusionSourceGraph313Event ev,int32_t n){if(FusionGroundShooter343Kind(Kind(z))&&ev==FusionSourceGraph313Event::Shoot)return ShootNativeGround343(z);return DispatchNativeExtendedZombie313Event(z,ev,n,GetNativeExtendedZombie313Hooks());}
-bool RootDelta(Zombie* z,uint8_t state,FusionSourceGraph313Cursor a,FusionSourceGraph313Cursor b,double& out){return FusionSnowZombie363Kind(Kind(z))?SourceRootDeltaSnow363(Kind(z),state,a,b,out):FusionGroundShooter343Kind(Kind(z))?SourceRootDeltaGround343(Kind(z),state,a,b,out):FusionExtendedZombie347Kind(Kind(z))?SourceRootDelta347(Kind(z),state,a,b,out):SourceRootDelta313(Kind(z),state,a,b,out);}
+{NativeExtendedZombie313Input i;auto* s=EditNativeExtendedZombie313(z);if(!s||!Input(z,i))return false;p.speed=i.sourceSpeed;p.attacking=z->mIsEating;if(Kind(z)==49)p.wait=NativeSnowGun363Shooting(z);if(Kind(z)==114)p.wait=z->mShieldType==SHIELDTYPE_NONE;return true;}
+bool GraphEvent(Zombie* z,FusionSourceGraph313Event ev,int32_t n){if(FusionDriver363Kind(Kind(z)))return Driver363GraphEvent(z,ev);if(Kind(z)==208&&(ev==FusionSourceGraph313Event::StartQuickMove||ev==FusionSourceGraph313Event::QuickMoveOver||ev==FusionSourceGraph313Event::Bite||ev==FusionSourceGraph313Event::Destroy))return QEvent369(z,ev);if(Kind(z)==49&&ev==FusionSourceGraph313Event::Shoot)return ShootNativeSnowGun363(z);if(FusionGroundShooter343Kind(Kind(z))&&ev==FusionSourceGraph313Event::Shoot)return ShootNativeGround343(z);return DispatchNativeExtendedZombie313Event(z,ev,n,GetNativeExtendedZombie313Hooks());}
+bool RootDelta(Zombie* z,uint8_t state,FusionSourceGraph313Cursor a,FusionSourceGraph313Cursor b,double& out){if(FusionFinish363Kind(Kind(z)))return SourceRootDeltaFinish363(Kind(z),state,a,b,out);if(FusionDriver363Kind(Kind(z))){out=0;return true;}return Kind(z)==208?SourceRootDeltaQing369(208,state,a,b,out):Kind(z)==49?SourceRootDeltaSnowGun363(49,state,a,b,out):FusionSnowZombie363Kind(Kind(z))?SourceRootDeltaSnow363(Kind(z),state,a,b,out):FusionGroundShooter343Kind(Kind(z))?SourceRootDeltaGround343(Kind(z),state,a,b,out):FusionExtendedZombie347Kind(Kind(z))?SourceRootDelta347(Kind(z),state,a,b,out):SourceRootDelta313(Kind(z),state,a,b,out);}
 bool MoveRoot(Zombie* z,double source)
 {const auto* s=GetNativeExtendedZombie313(z);if(!s||!std::isfinite(source))return false;const double delta=source*kFusionBasePixelsX*z->mScaleZombie*(s->rootFlip?-1:1);if(!std::isfinite(z->mPosX+delta))return false;z->mPosX+=float(delta);z->mX=int(z->mPosX);return true;}
-bool NullExit(Zombie*,uint8_t,uint8_t){return false;} // Exact Kirov null-motion timed exit remains an explicit source engine seam.
+bool NullExit(Zombie*,uint8_t,uint8_t){return false;}
 bool MachineDeath(Zombie* z,uint8_t type)
 {
     if(FusionExtendedZombie347Kind(Kind(z)))return NativeExtended347MachineDeath(z);
@@ -296,9 +337,13 @@ bool InitializeNativeExtendedZombie313Bridge(Zombie* z)
     // Capture source callbacks against this exact full generation. No initial
     // sound, board212 mutation or entry0 particle is published before every
     // fallible graph/model initialization has succeeded.
-    if(!InitializeNativeExtendedZombie313(z,*s,GetNativeExtendedZombie313Hooks()))return false;
+    if(!InitializeNativeExtendedZombie313(z,*s,Kind(z)==222?GetNativeDriver363Hooks():GetNativeExtendedZombie313Hooks()))return false;
     if(FusionGroundShooter343Kind(Kind(z))&&!InitializeNativeGroundShooter343(z))return false;
     if(FusionSnowZombie363Kind(Kind(z))&&!InitializeNativeSnowZombie363(z))return false;
+    if(FusionFinish363Kind(Kind(z))&&!InitializeNativeFinish363(z))return false;
+    if(Kind(z)==49&&!InitializeNativeSnowGun363(z))return false;
+    if(Kind(z)==208){auto* q=QState369(z,true);if(!q||!InitializeNativeQing208(z,*q,QHooks369()))return false;QView369(z,*q);}
+    if(FusionDriver363Kind(Kind(z))&&!InitializeNativeDriver363(z))return false;
     if(journal.app->mBoard!=journal.board)return false;
     z=journal.board->mZombies.DataArrayTryToGet(journal.uid);s=EditNativeExtendedZombie313(z);
     const auto* data=GetNativeSourceZombieData(z);const auto* graph=Graph(z);
@@ -318,13 +363,27 @@ bool InitializeNativeExtendedZombie313Bridge(Zombie* z)
     return true;
 }
 bool UpdateNativeExtendedZombie313Bridge(Zombie* z)
-{auto* s=EditNativeExtendedZombie313(z);if(!s)return false;if(!Host(z))return true;if(FusionSnowZombie363Kind(Kind(z))&&!UpdateNativeSnowZombie363Attribute(z)){s->failed=true;return true;}if(FusionGroundShooter343Kind(Kind(z))&&!UpdateNativeGroundShooter343Attribute(z)){s->failed=true;return true;}return UpdateNativeExtendedZombie313(z,*s,GetNativeExtendedZombie313Hooks());}
+{auto* s=EditNativeExtendedZombie313(z);if(!s)return false;if(!Host(z))return true;if(Kind(z)==208){auto* app=z->mApp;auto* b=z->mBoard;const auto uid=b->mZombies.DataArrayGetID(z);
+ auto* q=QState369(z);const bool updated=q&&UpdateNativeQing208(z,*q,QHooks369());
+ if(app->mBoard!=b)return true;z=b->mZombies.DataArrayTryToGet(uid);if(!z||z->mDead)return true;
+ s=EditNativeExtendedZombie313(z);q=QState369(z);if(!s)return false;if(!updated||!q){s->failed=true;return true;}QView369(z,*q);}
+if(Kind(z)==49&&!UpdateNativeSnowGun363(z)){s->failed=true;return true;}if(FusionSnowZombie363Kind(Kind(z))&&!UpdateNativeSnowZombie363Attribute(z)){s->failed=true;return true;}if(FusionGroundShooter343Kind(Kind(z))&&!UpdateNativeGroundShooter343Attribute(z)){s->failed=true;return true;}return UpdateNativeExtendedZombie313(z,*s,Kind(z)==222?GetNativeDriver363Hooks():GetNativeExtendedZombie313Hooks());}
 bool MoveNativeExtendedZombie313Physics(Zombie* z)
-{auto* s=EditNativeExtendedZombie313(z);if(!s)return false;if(!Host(z)||z->mDead||z->mBoard->mPaused||z->mApp->mGameScene!=SCENE_PLAYING)return true;const auto k=Kind(z);if(k!=26&&k!=205&&k!=206&&!(k==37&&(s->sourceStatus==16||s->sourceStatus==17)))return true;const float dx=z->mVelX/float(kFusionBasePixelsX),dy=z->mVelZ/float(GetNativeFusionPixelsY(z->mBoard));if(!Translate(z,dx,dy))Failed(z->mBoard,"Extended313 native rigid-body projection failed.");return true;}
+{auto* s=EditNativeExtendedZombie313(z);if(!s)return false;if(!Host(z)||z->mDead||z->mBoard->mPaused||z->mApp->mGameScene!=SCENE_PLAYING)return true;const auto k=Kind(z);if(!FusionDriver363Kind(k)&&k!=26&&k!=205&&k!=206&&!(k==37&&(s->sourceStatus==16||s->sourceStatus==17)))return true;const float dx=z->mVelX/float(kFusionBasePixelsX),dy=z->mVelZ/float(GetNativeFusionPixelsY(z->mBoard));if(!Translate(z,dx,dy))Failed(z->mBoard,"Extended313 native rigid-body projection failed.");return true;}
 Zombie* SpawnNativeExtendedZombieAtAxis313(Board* b,uint16_t kind,int row,float x,float y,bool controlled)
 {if(!World(b)||b->mApp->NetIsClient()||!std::isfinite(x)||!std::isfinite(y)||row<0||row>=GetNativeFusionRowCount(b))return nullptr;NativeSourceZombieSpawnRequest r;r.kind=kind;r.row=row;r.fromWave=0;r.friendly=controlled;r.positioned=true;r.shadowX=float(b->GetCellCenterX(0,row)+(x+4.8f)*kFusionBasePixelsX);auto* z=SpawnNativeSourceZombie(b,r);if(!z)return nullptr;if(!SetNativeSourceAxis313(z,x,y)){Failed(b,"Prepared child313 actual axis placement failed after birth.");return nullptr;}return z;}
 bool AdoptNativeExtendedZombie313Clocks(Zombie* z,std::span<const LawnNet::NetZombieAnimState> clocks,std::string* e)
 {const auto* g=FindFusionSourceGraph313(Kind(z));if(!g||clocks.size()!=g->layerCount||!PrepareNativeExtendedZombie313Clocks(z,e))return false;for(uint8_t n=0;n<g->layerCount;++n){auto* r=Clock(z,n);if(!r||!LawnNet::NetZombieAnimStateFitsFrames(clocks[n],r->mDefinition->mTracks.tracks[0].mTransforms.count))return false;}for(uint8_t n=0;n<g->layerCount;++n){auto* r=Clock(z,n);const auto& c=clocks[n];r->mFrameStart=c.mFrameStart;r->mFrameCount=c.mFrameCount;r->mAnimTime=r->mLastFrameTime=c.mAnimTime;r->mAnimRate=c.mAnimRate;r->mLoopType=ReanimLoopType(c.mLoopType);r->mLoopCount=c.mLoopCount;if(!RegisterNativeSourceGraphClock313(r,true))return false;}return true;}
 void RemoveNativeExtendedZombie313Bridge(Zombie* z)
-{if(!z)return;ReleaseNativeSourceGraph313Clocks(z,GetNativeExtendedZombie313Hooks().graph);auto* c=GetNativeContext(z->mBoard);if(!c)return;const uint32_t uid=z->mBoard->mZombies.DataArrayGetID(z);c->extendedZombies313.erase(uid);c->sourceGraphs313.erase(uid);if(FusionGroundShooter343Kind(Kind(z))||FusionSnowZombie363Kind(Kind(z)))c->nextZombies343.erase(uid);}
+{if(!z)return;ReleaseNativeSourceGraph313Clocks(z,GetNativeExtendedZombie313Hooks().graph);auto* c=GetNativeContext(z->mBoard);if(!c)return;const uint32_t uid=z->mBoard->mZombies.DataArrayGetID(z);c->qingZombies208.erase(uid);c->extendedZombies313.erase(uid);c->sourceGraphs313.erase(uid);if(FusionFinish363Kind(Kind(z))||FusionDriver363Kind(Kind(z))||Kind(z)==49||FusionGroundShooter343Kind(Kind(z))||FusionSnowZombie363Kind(Kind(z)))c->nextZombies343.erase(uid);}
+}
+
+namespace LawnFusion {
+bool NativeQing208DieEvent369(Zombie* z)
+{
+ if(Kind(z)!=208)return true;auto* q=QState369(z);if(!q)return false;
+ if(q->dieEventHandled369)return true;
+ if(!ApplyNativeQing208Event(z,*q,NativeQing208Event::DieEvent,QHooks369()))return false;
+ q->dieEventHandled369=true;return true;
+}
 }

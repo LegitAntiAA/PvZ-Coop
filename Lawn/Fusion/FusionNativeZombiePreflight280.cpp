@@ -1,3 +1,4 @@
+#include "FusionQuickJackson367Rules.h"
 #include "FusionNextZombie343Rules.h"
 #include "FusionNativeZombiePreflight280.h"
 #include "FusionSourceZombieClosure280.h"
@@ -79,16 +80,16 @@ bool EnsureNativeSourceZombieClosure280(Board* board,std::span<const uint16_t> r
         if(FindFusionExtendedZombie313Profile(kind)&&!EnsureNativeExtendedZombie313Resources(board,kind,&detail))return Reject(kind,detail,error);
         const auto effect=[&](uint16_t fx)
         {return EnsureNativeSourceEffect269(board,fx,&detail);};
-        if((FusionDayZombie273Doll(kind)||FusionDancePole343Kind(kind)||kind==10)&&!effect(11))return Reject(kind,detail,error);
+        if((FusionDayZombie273Doll(kind)||FusionDancePole343Kind(kind)||FusionJacksonFamily367Kind(kind))&&!effect(11))return Reject(kind,detail,error);
         if(FusionJackbox300Kind(kind))
         {
             if(kNativeFusionSnapshotVersion<28||!LawnNet::NetSourceJackbox309Ready(board->mApp)||!effect(42))
                 return Reject(kind,"Jackbox FNS28/owner audio/explosion42 unavailable: "+detail,error);
             if(!board->mApp->NetIsClient()&&!CanSpawnNativeJackbox309(board,kind,&detail))return Reject(kind,detail,error);
         }
-        if(kind==10&&kNativeFusionSnapshotVersion<27)return Reject(kind,"Jackson view requires FNS27",error);
-        if(kind==10&&!LawnNet::NetSourceSound284Ready(board->mApp,69))return Reject(kind,"source Sound69 unavailable",error);
-        if(kind==10&&!board->mApp->NetIsClient()&&!CanSpawnNativeJackson291(board,&detail))return Reject(kind,detail,error);
+        if(FusionJacksonFamily367Kind(kind)&&kNativeFusionSnapshotVersion<27)return Reject(kind,"Jackson view requires FNS27",error);
+        if(FusionJacksonFamily367Kind(kind)&&!LawnNet::NetSourceSound284Ready(board->mApp,69))return Reject(kind,"source Sound69 unavailable",error);
+        if(FusionJacksonFamily367Kind(kind)&&!board->mApp->NetIsClient()&&!CanSpawnNativeJackson291(board,kind,&detail))return Reject(kind,detail,error);
         if(FusionDayZombie273Pole(kind)&&(Sexy::SOUND_GRASSSTEP<0||Sexy::SOUND_POLEVAULT<0||!effect(23)))return Reject(kind,"Pole sound/effect23 dependency unavailable: "+detail,error);
         if(kind==100&&!effect(0))return Reject(kind,detail,error);
         if(kind==101&&!effect(10))return Reject(kind,detail,error);

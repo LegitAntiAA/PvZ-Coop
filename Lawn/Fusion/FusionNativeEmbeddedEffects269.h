@@ -55,6 +55,7 @@ public:
     // Exact source emission-module callbacks may override a dormant module;
     // absence of this callback never silently enables source-disabled emission.
     bool SetEmission(Plant*,const char* node,bool enabled);
+    bool SetEmission(Zombie*,const char* node,bool enabled);
     bool Play(Plant*,const char* node);
     bool StopAndClear(Plant*,const char* node);
 private:

@@ -15,6 +15,7 @@ struct NativeSourceGraph313State
     int tick=-1;
     uint32_t revisions[3]{};
     bool initialized=false,failed=false;
+    FusionSourceGraph313Parameters layerParameters361[3]{}; // HOST ONLY, used only by the optional per-layer provider.
     uint8_t initializedLayerMask343=0; // HOSTONLY ownership; never wire/clock.
 };
 struct NativeSourceGraph313Hooks
@@ -30,6 +31,8 @@ struct NativeSourceGraph313Hooks
     bool (*moveRootDelta)(Zombie*,double)=nullptr;
     bool (*nullExitReady)(Zombie*,uint8_t layer,uint8_t state)=nullptr;
     void (*failed)(Board*,const char*)=nullptr;
+    bool (*parametersForLayer361)(Zombie*,uint8_t,FusionSourceGraph313Parameters&)=nullptr;
+    bool (*layerActive366)(Zombie*,uint8_t)=nullptr; // Optional actual Animator GameObject activity. // Optional; old shared-parameter path unchanged.
 };
 bool InitializeNativeSourceGraph313(Zombie*,NativeSourceGraph313State&,const NativeSourceGraph313Hooks&);
 bool NativeSourceGraph313ClockTracksReady(Zombie*,const NativeSourceGraph313Hooks&,std::string* error=nullptr);

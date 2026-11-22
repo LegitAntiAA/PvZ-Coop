@@ -1,7 +1,9 @@
+#include "FusionNativeProjectileBuff369.h"
 #include "FusionNativeChomper268.h"
 #include "FusionChomper268Rules.h"
 #include "FusionShulk268Rules.h"
 #include "FusionNative.h"
+#include "FusionNativeTravelUltimate370.h"
 #include "FusionNativeVisual.h"
 #include "FusionNativeWater268.h"
 #include "FusionWater268Rules.h"
@@ -59,6 +61,7 @@ void Bite(Plant* p)
     const bool heavy=armor||z->mBodyHealth>float(profile->attackDamage)*2.5f;
     FusionStrongChomperBite plan;
     if(!TryPlanFusionStrongChomperBite(d->kind,float(z->mBodyHealth),armor,(std::max)(0,z->mHelmHealth),!p->mLaunchCounter,d->kind==1013&&heavy?RandRangeInt(4,5):0,plan))return;
+    PlanNativeTravelUltimate370Bite(p,z,plan);
     z->TakeDamage(plan.sourceDamage,2U); // Source NormalAll1, not Real6.
     RecoverNativeChomper268(p,plan.recovery);if(plan.rechargeTicks)p->mLaunchCounter=plan.rechargeTicks;
     if(d->kind==1013)d->batchBagCount=plan.nextShotKind;
@@ -72,7 +75,7 @@ Projectile* Emit(Plant* p,uint16_t kind,uint8_t way,int damage,const char* path)
     auto* q=b->AddProjectile(int(x-20),int(y-20),p->mRenderOrder-1,p->mRow,PROJECTILE_PEA);if(!q)return nullptr;
     NativeProjectileData d;d.kind=kind;d.damage=damage;d.specialType=way;
     q->mMotionType=way==16?MOTION_HOMING:MOTION_STRAIGHT;
-    if(!AttachNativeProjectile(b,q,d)){q->Die();return nullptr;}
+    if(!AttachNativeTravelProjectile369(p,q,d)){q->Die();return nullptr;}
     q->mPosX=x-20;q->mPosY=y-20;q->mPosZ=0;q->mVelY=q->mVelZ=q->mAccZ=0;q->mShadowY=y;q->mRotation=q->mRotationSpeed=0;
     q->mVelX=float((way==1?-6:6)*kFusionBasePixelsX*.01);
     if(kind==94)
@@ -93,7 +96,7 @@ void SearchShulk(Plant* p)
 }
 bool IsNativeChomper268Kind(uint16_t k){return FindFusionStrongChomperProfile(k)||IsFusionShulk268Kind(k);}
 bool TryCapNativeChomper268IncomingDamage(const Plant* p,int incoming,int& damage)
-{return Current(p)&&TryCapFusionStrongChomperDamage(GetNativePlantData(p)->kind,incoming,damage);}
+{return Current(p)&&TryCapFusionStrongChomperDamage(GetNativePlantData(p)->kind,NativeTravelUltimate370ChomperCap(p,incoming),damage);}
 void NativeChomper268HealthChanged(Plant* p)
 {
     if(!Host(p))return;auto* d=GetNativePlantData(p);if(!FindFusionStrongChomperProfile(d->kind)||p->mPlantHealth<=0)return;
@@ -103,7 +106,7 @@ void NativeChomper268HealthChanged(Plant* p)
 bool RecoverNativeChomper268(Plant* p,int amount)
 {
     if(!Host(p)||amount<0||!FindFusionStrongChomperProfile(GetNativePlantData(p)->kind))return false;
-    p->mPlantHealth=int((std::min)(int64_t((std::numeric_limits<int>::max)()),int64_t(p->mPlantHealth)+amount));NativeChomper268HealthChanged(p);return true;
+    p->mPlantHealth=int((std::min)(int64_t((std::numeric_limits<int>::max)()),int64_t(p->mPlantHealth)+NativeTravelUltimate370Recovery(p,amount)));NativeChomper268HealthChanged(p);return true;
 }
 bool InitializeNativeChomper268Plant(Plant* p)
 {
@@ -184,7 +187,7 @@ bool GetNativeChomper268VisualPose(const Plant* p,const char*& state,float& seco
 bool GetNativeShulk268HeadVisualPose(const Plant* p,const char*& state,float& seconds)
 {if(!Current(p)||GetNativePlantData(p)->kind!=1177)return false;const auto* d=GetNativePlantData(p);state=d->shootSeconds>=0?"shoot2":"head1";seconds=d->shootSeconds>=0?d->shootSeconds:d->idleSeconds;return true;}
 bool IsNativeChomper268Projectile(const Projectile* p)
-{const auto* d=GetNativeProjectileData(p);return d&&FusionChomper268ProjectileMetadataValid(d->kind,d->damage,d->specialType)&&
+{const auto* d=GetNativeProjectileData(p);return d&&FusionChomper268ProjectileMetadataValid(d->kind,NativeProjectileValidationDamage369(*d),d->specialType)&&
     (d->kind==89?p->mMotionType==MOTION_STRAIGHT:d->specialType==16?p->mMotionType==MOTION_HOMING:p->mMotionType==MOTION_STAR);}
 bool GetNativeChomper268ProjectileRect(const Projectile* p,Sexy::Rect& rect)
 {

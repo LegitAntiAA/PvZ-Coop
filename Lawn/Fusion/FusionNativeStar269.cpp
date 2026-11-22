@@ -1,3 +1,4 @@
+#include "FusionNativeProjectileBuff369.h"
 #include "FusionNativeStar269.h"
 #include "FusionNative.h"
 #include "FusionNativeVisual.h"
@@ -115,7 +116,7 @@ bool Emit(Plant* plant,std::size_t index)
     p->mRotation=std::atan2(float(-p->mVelY/GetNativeFusionPixelsY(b)),float(p->mVelX/kFusionBasePixelsX));p->mRotationSpeed=0;
     p->mDamageRangeFlags=plant->GetDamageRangeFlags(WEAPON_PRIMARY);
     NativeProjectileData data;data.kind=spec.projectile;data.damage=spec.damage;data.specialType=d->kind==1082?8:uint8_t(ray.sourceMovingWay);data.effectVariant=spec.special;
-    if(!AttachNativeProjectile(b,p,data)){p->Die();return false;}
+    if(!AttachNativeTravelProjectile369(plant,p,data)){p->Die();return false;}
     if(StarPayload(data.kind)&&!NativeStar269ProjectileCreated(p)){p->Die();return false;}
     LawnNet::NetTrace("Fusion Star269 shot plant=%u kind=%u projectile=%u payload=%u way=%u damage=%d light=%d",plant->mNetId,d->kind,p->mNetId,data.kind,data.specialType,data.damage,GetNativeFireLightLevel(plant));return true;
 }

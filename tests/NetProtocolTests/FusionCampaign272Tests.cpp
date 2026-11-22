@@ -42,7 +42,7 @@ FusionCampaign272TestResult RunFusionCampaign272Tests()
         for(auto kind:source->allowedZombieKinds)
             CHECK(std::find(closure.begin(),closure.end(),kind)!=closure.end());
         CHECK(!NativeSourceAdventureLevelReady280(level,0,&readinessError)&&readinessError.starts_with("cycle:"));
-        CHECK(!NativeSourceAdventureLevelReady280(level,2,&readinessError)&&readinessError.starts_with("cycle:"));
+        CHECK(NativeSourceAdventureLevelReady280(level,2,&readinessError));
         CHECK(!source->allowedZombieKinds.empty());
         for(auto kind:source->allowedZombieKinds){allKinds.insert(kind);CHECK(FusionSourceAdventureAllowsZombie272(level,kind));}
         int waves=0,later=0;

@@ -1,5 +1,6 @@
 #include "FusionNativePlantDamage.h"
 #include "FusionNative.h"
+#include "FusionNativeTravelUltimate370.h"
 #include "FusionNativeCompanions269.h"
 #include "FusionNativeWorldActors269.h"
 #include "FusionNativeRemainingPlants269.h"
@@ -24,7 +25,7 @@ bool NativeSourcePlantColliderEnabled(const Plant* p)
 {
     if(IsNativeRollingActor269(p))return p&&!p->mDead&&p->mIsOnBoard;
     const auto* data=GetNativePlantData(p);
-    if(!data||p->mDead||!p->mIsOnBoard||p->mPlantHealth<=0)return false;
+    if(!data||p->mDead||p->mSquished||!p->mIsOnBoard||p->mPlantHealth<=0)return false;
     if(data->kind==12)return !NativeLily267Covered(p);
     const auto* profile=FindFusionDefenderProfile(data->kind);
     if(!profile||profile->layer!=FusionDefenderLayer::Under)return true;
@@ -56,9 +57,12 @@ bool AdjustNativeSourcePlantDamage(Plant* p,int& damage,int sourceType)
     if(TryCapNativeChomper268IncomingDamage(p,damage,capped))damage=capped;
     // Source MachineNut.Instead is false: it cannot recurse into protectors.
     if(CapNativeRemaining269Damage(p,damage)||CapNativeMachine268Damage(p,damage))return false;
+    if(RedirectNativeTravelUltimate370Damage(p,damage,sourceType))return true;
     if(TryHandleNativeDefender267Damage(p,damage,sourceType))return true;
     if(TryHandleNativeUmbrella267Damage(p,damage,sourceType))return true;
-    return TryRedirectNativeMachine268Damage(p,damage);
+    if(TryRedirectNativeMachine268Damage(p,damage))return true;
+    damage=NativeTravelUltimate370TurretIncoming(p,damage);
+    return false;
 }
 void ApplyNativeSourcePlantDamage(Plant* p,int damage,int sourceType)
 {

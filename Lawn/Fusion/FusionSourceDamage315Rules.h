@@ -18,11 +18,15 @@ inline bool SourceCharred315Direct(float body,int first,int damage,int difficult
 // Genuine ordinary D2 GetDamage3854C0: jalaed affects hostile NPCs, including
 // fixed damage. The source212 Board counter protects hostile actors only for
 // non-fixed damage. Travel/buff/enhanced difficulty worlds have their own gate.
-inline bool TrySourceBaseDamage315(int damage,bool controlled,bool jalaed,int& out,bool ultimateProtection=false,bool fix=false)
+inline bool TrySourceBaseDamage315(int damage,bool controlled,bool jalaed,int& out,bool ultimateProtection=false,bool fix=false,
+    bool advanced11=false,bool advanced15=false,bool advanced28=false)
 {
     if(damage<0)return false;
-    float value=float(damage)*(!controlled&&jalaed?1.5f:1.f);
+    float value=float(damage);
+    if(!controlled&&advanced11)value*=1.2f;
+    if(!controlled&&jalaed)value*=advanced15?2.5f:1.5f;
     if(!controlled&&!fix&&ultimateProtection)value*=.1f;
+    if(!controlled&&advanced28&&value>1800.f)value+=1800.f;
     if(!std::isfinite(value)||double(value)>double((std::numeric_limits<int>::max)()))return false;
     out=value<=0?0:int(value<1?1:value);return true;
 }

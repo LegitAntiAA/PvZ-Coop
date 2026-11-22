@@ -1,3 +1,4 @@
+#include "FusionNativeProjectileBuff369.h"
 #ifndef LAWN_FUSION_NATIVE_PROJECTILE_METADATA_H
 #define LAWN_FUSION_NATIVE_PROJECTILE_METADATA_H
 #include "FusionNative.h"
@@ -19,6 +20,7 @@
 #include "FusionMorePlants269BackendRules.h"
 #include "FusionLastPlants269Rules.h"
 #include "FusionHostileProjectileRules.h"
+#include "FusionSnowGun363Rules.h"
 #include "FusionDayZombie273Rules.h"
 #include <limits>
 
@@ -26,7 +28,7 @@ namespace LawnFusion
 {
 inline bool NativeMore269MetadataValid(const NativeProjectileData& d,ProjectileType type,ProjectileMotion motion)
 {return !d.sunOnHit&&!d.effectVariant&&!d.melonEnhanced&&!d.isZombieBullet&&!d.hitLatched&&!d.umbrellaed&&!d.goldAttracted&&
- FusionMore269ProjectileMetadataValid(d.kind,d.damage,d.fireState,d.specialType,type,motion,d.lastTorchId,d.lastTorchToken);}
+ FusionMore269ProjectileMetadataValid(d.kind,NativeProjectileValidationDamage369(d),d.fireState,d.specialType,type,motion,d.lastTorchId,d.lastTorchToken);}
 inline bool NativeWater268Metadata(const NativeProjectileData& d)
 {return d.kind==20||d.kind==29||d.kind==32||d.kind==34||d.kind==35||d.kind==41||d.kind==42||(d.kind==37&&(d.specialType==6||d.specialType==7));}
 inline bool NativeCannon268Metadata(const NativeProjectileData& d)
@@ -56,9 +58,11 @@ inline ProjectileType NativeProjectileMetadataType(const NativeProjectileData& d
 
 inline ProjectileMotion NativeProjectileMetadataMotion(const NativeProjectileData& data)
 {
+    if(data.sourceUnmodifiedDamage369){NativeProjectileData raw;if(!NormalizeNativeTravelProjectile369(data,raw))return MOTION_STRAIGHT;return NativeProjectileMetadataMotion(raw);}
     if((data.kind==0||data.kind==1||data.kind==11)&&data.specialType==9)return MOTION_BACKWARDS;
     if(data.kind==3&&data.specialType==9)return MOTION_BACKWARDS;
     if(data.kind==3&&data.specialType==13)return MOTION_LOBBED;
+    if(data.kind==101&&data.specialType==17)return MOTION_LOBBED;
     if(data.kind==91)return data.specialType==6?MOTION_HOMING:MOTION_STRAIGHT;
     if(data.kind==30)return data.specialType==2?MOTION_STAR:MOTION_STRAIGHT;
     if((data.kind==0||data.kind==10)&&data.specialType==2&&data.lastTorchId&&data.lastTorchToken)return MOTION_STAR;
@@ -181,6 +185,8 @@ inline bool NativeProjectileMetadataValidCore(const NativeProjectileData& data,
 inline bool NativeStar269MetadataValid(const NativeProjectileData& d,ProjectileType type,ProjectileMotion motion,
     const NativeStar269ProjectileState* state=nullptr)
 {
+    if(d.sourceUnmodifiedDamage369){NativeProjectileData raw;return NormalizeNativeTravelProjectile369(d,raw)&&NativeStar269MetadataValid(raw,type,motion,state);}
+
     const int maximum=d.kind==49?400:120;
     if(!FusionStar269ProjectileClass(d.kind)||type!=PROJECTILE_STAR||d.damage<0||d.damage>(state&&state->accelerated?maximum*3:maximum)||
         d.sunOnHit||d.fireState||d.lastTorchId||d.lastTorchToken||d.melonEnhanced||d.isZombieBullet||d.hitLatched||d.umbrellaed||
@@ -202,7 +208,9 @@ inline bool NativeDay273ProjectileMetadataValid(const NativeProjectileData& data
 inline bool NativeProjectileMetadataValid(const NativeProjectileData& data,
     ProjectileType type,ProjectileMotion motion,const NativeStar269ProjectileState* star=nullptr)
 {
+    if(data.sourceUnmodifiedDamage369){NativeProjectileData raw;return NormalizeNativeTravelProjectile369(data,raw)&&NativeProjectileMetadataValid(raw,type,motion,star);}
     if(!star&&NativeDay273ProjectileMetadataValid(data,type,motion))return true;
+    if(data.kind==101)return !star&&NativeNew268ProjectileExtrasClear(data)&&!data.hitLatched&&!data.umbrellaed&&!data.goldAttracted&&FusionSnowBall363Metadata(data.kind,data.damage,data.specialType,type,motion);
     if(data.kind==91)return type==PROJECTILE_SPIKE&&motion==(data.specialType==6?MOTION_HOMING:MOTION_STRAIGHT)&&
         (data.specialType==0||data.specialType==6||data.specialType==10)&&
         (data.damage==160||data.damage==480||data.damage==800)&&

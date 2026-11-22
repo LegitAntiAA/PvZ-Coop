@@ -605,7 +605,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
     constexpr size_t headerBytes = 14, bankStateBytes = 22, selectedPacketBytes = 21, nativePacketBytes = 17;
     const size_t firstPlant = headerBytes + 6 + bankStateBytes + 2 + source.selection.packets.size()*selectedPacketBytes +
         2 + source.packets.size()*nativePacketBytes + 2;
-    constexpr size_t plantBytes = 54, flagsAfterRecordId = 20, deathFlagsAfterRecordId = 21;
+    constexpr size_t plantBytes = 56, flagsAfterRecordId = 20, deathFlagsAfterRecordId = 21;
     // These live recipes preserve the Puff kind but replace its generation.
     // Refusing the resulting ancestry drops every snapshot until the plant dies.
     for (const uint16_t incoming : {7, 9})
@@ -842,7 +842,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
         CHECK(!DecodeNativeSnapshot(forgedProducer, eligible, 19, preservedFrame, preservedBody));
         CHECK(forgedProducer.mReadPos == 0 && preservedFrame.epoch == 777 && preservedBody.Size() == 1 && preservedBody.mData[0] == 0x99);
     }
-    for (uint16_t version : {uint16_t(2), uint16_t(3), uint16_t(4), uint16_t(5), uint16_t(6), uint16_t(7), uint16_t(8), uint16_t(9), uint16_t(10), uint16_t(11), uint16_t(12), uint16_t(13), uint16_t(14), uint16_t(15), uint16_t(16), uint16_t(17), uint16_t(18), uint16_t(19), uint16_t(20), uint16_t(21), uint16_t(22),uint16_t(23),uint16_t(24),uint16_t(25),uint16_t(26),uint16_t(27),uint16_t(28),uint16_t(30)})
+    for (uint16_t version : {uint16_t(2), uint16_t(3), uint16_t(4), uint16_t(5), uint16_t(6), uint16_t(7), uint16_t(8), uint16_t(9), uint16_t(10), uint16_t(11), uint16_t(12), uint16_t(13), uint16_t(14), uint16_t(15), uint16_t(16), uint16_t(17), uint16_t(18), uint16_t(19), uint16_t(20), uint16_t(21), uint16_t(22),uint16_t(23),uint16_t(24),uint16_t(25),uint16_t(26),uint16_t(27),uint16_t(28),uint16_t(29),uint16_t(kNativeFusionSnapshotVersion+1)})
     {
         NetBuffer wrongVersion = producerWire; wrongVersion.mReadPos = 0;
         wrongVersion.mData[4] = static_cast<uint8_t>(version); wrongVersion.mData[5] = 0;
@@ -2246,7 +2246,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
         // A duplicate wire entry still has a valid framing/body checksum.
         auto duplicate=encoded;duplicate.mData.insert(duplicate.mData.begin()+end-emptyNight291CountBytes-2,encoded.mData.begin()+record,encoded.mData.begin()+record+7);
         duplicate.mData[count]=2;const size_t metadata=end-14+7;duplicate.mData[6]=uint8_t(metadata);duplicate.mData[7]=uint8_t(metadata>>8);RejectAtomically(duplicate);
-        for(uint16_t badVersion:{uint16_t(23),uint16_t(24),uint16_t(25),uint16_t(26),uint16_t(27),uint16_t(28),uint16_t(30)})
+        for(uint16_t badVersion:{uint16_t(23),uint16_t(24),uint16_t(25),uint16_t(26),uint16_t(27),uint16_t(28),uint16_t(29),uint16_t(kNativeFusionSnapshotVersion+1)})
         {auto bad=encoded;bad.mData[4]=uint8_t(badVersion);bad.mData[5]=0;RejectAtomically(bad);}
         auto cleared=source;NetBuffer clearWire;clearWire.mData=original;
         CHECK(EncodeNativeSnapshot(cleared,eligible,clearWire)&&DecodeNativeSnapshot(clearWire,eligible,19,restored,opaque)&&restored.wheatPlants269.empty());
@@ -2620,5 +2620,17 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
         CHECK(EncodeNativeSnapshot(makeJackbox(24,static_cast<const FusionJackbox300View&>(privateState)),eligible,canonical)&&canonical.mData==encoded.mData);
     }
     std::printf(result.mFailures ? "[  FAILED  ] Fusion.NativeWire\n" : "[       OK ] Fusion.NativeWire\n");
+    // Actual FNS codec: stacked source Invoke deadlines, no separate phase.
+    {
+        auto disabled=source;disabled.plants[0].data.disable363={1,250,500};
+        NetBuffer encoded;encoded.WriteU32(0x12345678);CHECK(EncodeNativeSnapshot(disabled,eligible,encoded));
+        NativeSnapshotFrame restored;NetBuffer raw;CHECK(DecodeNativeSnapshot(encoded,eligible,19,restored,raw));
+        CHECK(restored.plants.size()==disabled.plants.size()&&restored.plants[0].data.disable363==disabled.plants[0].data.disable363);
+        for(auto bad:{std::vector<uint16_t>{0},std::vector<uint16_t>{501},std::vector<uint16_t>{500,1}})
+        {auto invalid=source;invalid.plants[0].data.disable363=bad;NetBuffer untouched;untouched.WriteU8(0x55);const auto original=untouched.mData;CHECK(!EncodeNativeSnapshot(invalid,eligible,untouched)&&untouched.mData==original);}
+        NetBuffer bad;bad.WriteU32(0x12345678);CHECK(EncodeNativeSnapshot(disabled,eligible,bad));
+        // Current fixed prefix ends54bytes after this sole metadata record ID.
+        const size_t ttl=firstPlant+54+2;bad.mData[ttl]=0;bad.mData[ttl+1]=0;RejectAtomically(bad);
+    }
     return result;
 }

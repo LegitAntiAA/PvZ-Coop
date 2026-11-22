@@ -4,7 +4,7 @@
 class Board;
 namespace LawnFusion
 {
-// Imported source descriptor admission, cycle1. All possible row variants and
+// Imported source descriptor admission, including source replay cycles. All possible row variants and
 // actual transitive factories/resources are prepared before any wave-plan RNG.
 // Caller supplies the existing Board RNG callbacks; these never run on client.
 FusionAdventureScheduler273Result InitializeNativeAdventureScheduler273(

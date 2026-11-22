@@ -1484,4 +1484,13 @@
     <ClInclude Include="..\Lawn\Fusion\FusionSnowZombie363Rules.h"><Filter>Lawn\Common\Common Include</Filter></ClInclude>
     <ClInclude Include="..\Lawn\Fusion\FusionNativeSnowZombie363.h"><Filter>Lawn\Common\Common Include</Filter></ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeTravelUltimate370.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeTravelUltimate370.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeTravelSteel370.h" />
+  </ItemGroup>
 </Project>

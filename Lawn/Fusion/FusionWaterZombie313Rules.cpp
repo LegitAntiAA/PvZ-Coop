@@ -212,15 +212,16 @@ bool TryGetFusionDrown313Damage(int hp,uint16_t kind,bool eve,bool travel,bool s
     if(travel)damage*=5;if(stronger)damage*=5;if(kind==916||kind==923)damage/=4;
     if(damage>(std::numeric_limits<int>::max)())return false;out=int(damage);return true;
 }
-bool FusionWaterZombie313WorldValid(uint16_t k,int rows,bool pool,std::span<const uint8_t> water,int row,bool controlled)
+bool FusionWaterZombie313WorldValid(uint16_t k,int rows,bool pool,std::span<const uint8_t> water,int row,bool controlled,bool ordinaryDirectNonIZ)
 {
     if(!FusionWaterZombie313Kind(k)||row<0||row>=rows||water.size()!=size_t(rows))return false;
-    if(rows==5){if(pool||(!controlled&&FusionWaterZombie313SourceInWater(k)))return false;for(auto v:water)if(v)return false;return true;}
+    if(rows==5){if(pool||(!ordinaryDirectNonIZ&&!controlled&&FusionWaterZombie313SourceInWater(k)))return false;for(auto v:water)if(v)return false;return true;}
     if(rows!=6||!pool)return false;
     for(int r=0;r<6;++r)if(water[r]!=(r==2||r==3?1:0))return false;
     // The genuine controlled factory450B00 has only a row bounds check;
-    // hostile451130 has the explicit terrain/kind switch, including20dry.
-    return controlled||((k==16||k==20)?!water[row]:water[row]!=0);
+    // hostile451130 filters WATER rows; its dry restriction is IZ-only.
+    // Wave NewZombieUpdate row repair remains a separate caller policy.
+    return controlled||(ordinaryDirectNonIZ&&!water[row])||((k==16||k==20)?!water[row]:water[row]!=0);
 }
 }
 

@@ -1,3 +1,4 @@
+#include "FusionNativeTravelPlantActions369.h"
 #include "FusionNativeSummonPlants269.h"
 #include "FusionBasePlantRules.h"
 #include "FusionFireActionBatchRules.h"
@@ -177,7 +178,10 @@ bool DispatchNativeSummonPlants269Events(Plant* p)
     {
         bool due=false;if(!TryGetFusionShooterEventAtCounter(*timing,d->animationSpeed,p->mShootingCounter,i,due)||!due)continue;
         if(d->kind==928)
-        {float x=0,y=0;p->GetShadowCenter(x,y);auto* b=p->mBoard;const int col=p->mPlantCol,row=p->mRow;p->Die();ApplyNativeBatchDoomAt(b,x,y,col,row,1800,true,false);return true;}
+        {std::vector<NativeSourceZombieSpawnRequest> children;
+         if(!PrepareNativeHypnoDoom369(p,children))return true;
+         float x=0,y=0;p->GetShadowCenter(x,y);auto* b=p->mBoard;const int col=p->mPlantCol,row=p->mRow;
+         p->Die();ApplyNativeBatchDoomAt(b,x,y,col,row,1800,true,false);CommitNativeHypnoDoom369(b,children);return true;}
         if(d->kind==917){FusionSummon269Choice c;TryChooseFusionHypno269(917,Wet(p),false,false,false,0,c);Summon(p,c);}
         if(d->kind==1157){FusionSummon269Choice c;if(TryChooseFusionMagnet269(uint8_t(d->batchBagCount),RandRangeInt(0,2),Wet(p),c))Summon(p,c);d->batchMode=0;}
         if(d->kind==1150)

@@ -1,3 +1,4 @@
+#include "FusionNativeProjectileBuff369.h"
 #include "FusionNativeMorePlants269Backend.h"
 #include "FusionNativeMorePlants269.h"
 #include "FusionNative.h"
@@ -71,13 +72,13 @@ bool EmitNativeMore269HamburgerShot(Plant* p,const FusionHamburger269Shot& shot,
   q->mVelZ=-RandRangeFloat(4.8f,5.2f)*.8f*float(GetNativeFusionPixelsY(b)*.01);
   q->mAccZ=float(9.8*GetNativeFusionPixelsY(b)*.0001);q->mShadowY=y+float(10*.061242823*GetNativeFusionPixelsY(b));}
  q->mX=int(q->mPosX);q->mY=int(q->mPosY);
- if(!AttachNativeProjectile(b,q,d)){q->Die();return false;}
+ if(!AttachNativeTravelProjectile369(p,q,d)){q->Die();return false;}
  if(shot.kind==39&&!NativeStar269ProjectileCreated(q)){q->Die();return false;}
  return true;
 }
 bool IsNativeMore269Projectile(const Projectile* q)
 {const auto* d=GetNativeProjectileData(q);return d&&!d->sunOnHit&&!d->effectVariant&&!d->melonEnhanced&&!d->isZombieBullet&&!d->hitLatched&&!d->umbrellaed&&
- FusionMore269ProjectileMetadataValid(d->kind,d->damage,d->fireState,d->specialType,q->mProjectileType,q->mMotionType,d->lastTorchId,d->lastTorchToken);}
+ FusionMore269ProjectileMetadataValid(d->kind,NativeProjectileValidationDamage369(*d),d->fireState,d->specialType,q->mProjectileType,q->mMotionType,d->lastTorchId,d->lastTorchToken);}
 bool MoveNativeMore269PlanarLobber(Projectile* q)
 {
  const auto* d=GetNativeProjectileData(q);if(!d||!FusionMore269PlanarLobber(d->kind)||q->mMotionType!=MOTION_STRAIGHT||d->specialType)return false;

@@ -1,7 +1,10 @@
+#include "FusionNativeProjectileBuff369.h"
+#include "FusionNativeTravelConsumers369.h"
 #include "FusionNativeShooterBatch.h"
 #include "FusionNativeRemainingPlants269.h"
 #include "FusionNativeShooter267.h"
 #include "FusionNative.h"
+#include "FusionNativeTravelUltimate370.h"
 #include "FusionNativeShooterTiming.h"
 #include "FusionNativeBatchActions.h"
 #include "FusionNativeCold.h"
@@ -168,7 +171,7 @@ Projectile* Emit(Plant* plant,uint16_t payload,int damage,uint8_t way,float mx,f
     p->mVelZ=p->mAccZ=0;p->mShadowY=y;
     if(payload==39||payload==46||payload==40)p->mRotationSpeed=float((payload==40?5:6)*30*.01*pi/180);
     p->mRotation=float(-angle);p->mDamageRangeFlags=plant->GetDamageRangeFlags(WEAPON_PRIMARY);
-    if(!AttachNativeProjectile(b,p,data)){p->Die();return nullptr;}
+    if(!AttachNativeTravelProjectile369(plant,p,data)){p->Die();return nullptr;}
     LawnNet::NetTrace("Fusion native ShooterBatch projectile plant=%u kind=%u id=%u payload=%u way=%u damage=%d vx=%.9g vy=%.9g",
         plant->mNetId,GetNativePlantData(plant)->kind,p->mNetId,payload,way,damage,p->mVelX,p->mVelY);
     return p;
@@ -245,9 +248,9 @@ void FireEvent(Plant* p,std::size_t event)
     if(k==1005||k==901){Emit(p,3,300,0,x,y);Sound(p);return;}
     if(k==907)
     {
-        const bool big=++d->batchShotCount==16;
+        const bool big=++d->batchShotCount>=uint32_t(HasNativeTravelAdvanced369(p->mBoard,3)?4:16);
         Emit(p,23,big?1800:300,0,x,y,6,0,big?1:0);
-        if(big){d->batchShotCount=0;p->mLaunchCounter=451;}Sound(p);return;
+        if(big){d->batchShotCount=0;if(!HasNativeTravelAdvanced369(p->mBoard,2))p->mLaunchCounter=451;}Sound(p);return;
     }
     if(k==933){Emit(p,100,300,0,x,y);Sound(p);return;}
     if(k==1107)
@@ -516,7 +519,7 @@ bool IsNativeShooterBatchProjectile(const Projectile* p)
 {
     if(IsNativeShooter267Projectile(p))return true;
     const auto* d=GetNativeProjectileData(p);if(!d)return false;
-    const bool family=(d->kind==39&&d->damage==40)||d->kind==3||d->kind==23||d->kind==38||d->kind==40||d->kind==100||d->kind==11||d->kind==90||d->kind==46||d->kind==92||d->kind==95||d->kind==102||
+    const bool family=(d->kind==39&&NativeProjectileValidationDamage369(*d)==40)||d->kind==3||d->kind==23||d->kind==38||d->kind==40||d->kind==100||d->kind==11||d->kind==90||d->kind==46||d->kind==92||d->kind==95||d->kind==102||
         ((d->kind==0||d->kind==15||d->kind==97)&&d->specialType>=15);
     // Admission is shared with allocation and FNS, including IceTorch stamps
     // on unheated cold payloads and heated Rage projectiles retaining way15.
@@ -582,7 +585,7 @@ bool ApplyNativeShooterBatchProjectileImpact(Projectile* p,Zombie* z)
     if(!z)
     {
         const auto data=*GetNativeProjectileData(p);
-        if(data.kind==3){SourceExplosion(p,p->mPosX+20,p->mPosY+p->mPosZ+20,p->mRow,data.damage,1.5,false);HealNativeCherryNutFromCircle(p->mBoard,p->mPosX+20,p->mPosY+p->mPosZ+20,p->mRow,100,1.5);}
+        if(data.kind==3){SourceExplosion(p,p->mPosX+20,p->mPosY+p->mPosZ+20,p->mRow,NativeTravelUltimate370CherryDamage(p->mBoard,data.damage),1.5,false);HealNativeCherryNutFromCircle(p->mBoard,p->mPosX+20,p->mPosY+p->mPosZ+20,p->mRow,100,1.5);}
         Particle(p,data.kind==23||data.kind==100?PARTICLE_DOOM:PARTICLE_PEA_SPLAT);Retire(p);return true;
     }
     if(!NativeShooterBatchProjectileCanHit(p,z))return true;
@@ -590,7 +593,7 @@ bool ApplyNativeShooterBatchProjectileImpact(Projectile* p,Zombie* z)
     if(data.fireState)return ApplyNativeFireImpact(p,z);
     if(data.kind==3)
     {
-        SourceExplosion(p,p->mPosX+20,p->mPosY+p->mPosZ+20,p->mRow,data.damage,1.5,false);
+        SourceExplosion(p,p->mPosX+20,p->mPosY+p->mPosZ+20,p->mRow,NativeTravelUltimate370CherryDamage(p->mBoard,data.damage),1.5,false);
         HealNativeCherryNutFromCircle(board,p->mPosX+20,p->mPosY+p->mPosZ+20,p->mRow,100,1.5);
         Particle(p,PARTICLE_POWIE);Retire(p);return true;
     }

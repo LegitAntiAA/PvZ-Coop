@@ -1,3 +1,4 @@
+#include "FusionNativeProjectileBuff369.h"
 #include "FusionNativeGoldBoss269Adapter.h"
 #include "FusionNative.h"
 #include "FusionNativeZombies.h"
@@ -228,7 +229,7 @@ Projectile* CreateNativeGoldBoss269Cherry(Zombie* z,const FusionGoldBoss269Shot&
  LawnNet::NetTrace("Fusion GoldPaper270 actualShot source=%u kind=%u projectile=%u payload=3 damage=%d way=%u aimed=%d vx=%.9g vy=%.9g g=%.9g",z->mNetId,GetNativeSourceZombieData(z)->kind,p->mNetId,shot.damage,shot.way,shot.aimed,vx,vy,g);return p;
 }
 bool IsNativeGoldPaper269AimedProjectile(const Projectile* p)
-{const auto* d=GetNativeProjectileData(p);return d&&d->kind==3&&d->damage==60&&d->specialType==13&&d->isZombieBullet&&p->mProjectileType==PROJECTILE_PEA&&p->mMotionType==MOTION_LOBBED&&NativeProjectileMetadataValid(*d,p->mProjectileType,p->mMotionType);}
+{const auto* d=GetNativeProjectileData(p);return d&&d->kind==3&&NativeProjectileValidationDamage369(*d)==60&&d->specialType==13&&d->isZombieBullet&&p->mProjectileType==PROJECTILE_PEA&&p->mMotionType==MOTION_LOBBED&&NativeProjectileMetadataValid(*d,p->mProjectileType,p->mMotionType);}
 bool UpdateNativeGoldPaper269AimedProjectile(Projectile* p)
 {
  if(!IsNativeGoldPaper269AimedProjectile(p))return false;if(p->mDead||p->mNetGhost||!Host(p->mBoard)||!CanApplyNativeFusionGameplay(p->mBoard))return true;if(UpdateNativeSuperCherryStart(p))return true;

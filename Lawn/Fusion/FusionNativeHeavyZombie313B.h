@@ -25,7 +25,7 @@ struct NativeHeavyZombie313BState: FusionHeavyZombie313BView
     // HOST ONLY. Local generations are distinct from opaque host wire tokens.
     uint32_t targetPlantUID=0,capturedPlantUID=0;
     int worldTick=-1;
-    bool initialized=false,failed=false;
+    bool initialized=false,failed=false,bossStarted366=false;
 };
 struct NativeHeavyZombie313BHooks
 {

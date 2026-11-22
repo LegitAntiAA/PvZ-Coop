@@ -1,3 +1,4 @@
+#include "FusionTravelBuff360Rules.h"
 #ifndef LAWN_FUSION_NATIVE_WIRE_H
 #define LAWN_FUSION_NATIVE_WIRE_H
 
@@ -5,6 +6,7 @@
 #include "FusionCannon268Rules.h"
 #include "FusionNativeProjectileMetadata.h"
 #include "FusionNative313Snapshot.h"
+#include "FusionBoss361Wire.h"
 #include "FusionNativeCapturedSourcePlant314.h"
 #include <cmath>
 
@@ -12,7 +14,7 @@ namespace LawnNet { class NetBuffer; }
 
 namespace LawnFusion
 {
-constexpr uint16_t kNativeFusionSnapshotVersion=29;
+constexpr uint16_t kNativeFusionSnapshotVersion=30;
 struct NativeWheat269Snapshot {bool isFromWheat=false;float wheatTime=0;};
 struct NativeRollingActor269Snapshot:NativeRollingActor269State {int health=4000;}; // Actual native HP mirror, including source negative HP.
 // Pure admission of actual native raw fields; no timer or actor is duplicated.
@@ -44,6 +46,8 @@ template <typename T> struct NativeSnapshotRecord
 
 struct NativeSnapshotFrame
 {
+    FusionTravelBuff360Ledger travelBuff369;
+    float travelBuffCooldown369=0;
     FusionAdventureSession273 adventure;
     uint32_t epoch = 0;
     uint8_t background = BACKGROUND_1_DAY;
@@ -80,6 +84,8 @@ struct NativeSnapshotFrame
     std::vector<NativeSnapshotRecord<FusionWaterZombie313View>> waterZombies313;
     std::vector<NativeSnapshotRecord<NativeHeavyZombie313Snapshot>> heavyZombies313;
     std::vector<NativeSnapshotRecord<FusionExtendedZombie313View>> extendedZombies313;
+    std::vector<NativeSnapshotRecord<FusionBoss361View>> bossZombies361;
+    NativeBossRoom366 bossRoom366;
     std::vector<NativeSnapshotRecord<FusionSourceObstacle313View>> sourceObstacles313;
     std::vector<NativeSnapshotRecord<CapturedSourcePlant314View>> capturedPlants314;
     float sourcePoints=500;

@@ -1,3 +1,4 @@
+#include "FusionNativeProjectileBuff369.h"
 #include "FusionNativeRemainingPlants269.h"
 #include "FusionNative.h"
 #include "FusionNativeZombie313Dispatch.h"
@@ -72,7 +73,7 @@ void Puff(Plant* p)
     auto* b=p->mBoard;float x=0,y=0;if(!GetNativeSourcePlantNodePoint(p,"month2back",x,y)||!EnsureNativeProjectileVisuals(b,9)||b->mProjectiles.mSize>=b->mProjectiles.mMaxSize)return;
     auto* q=b->AddProjectile(int(x-20),int(y-20),p->mRenderOrder-1,p->mRow,PROJECTILE_PUFF);if(!q)return;
     q->mMotionType=MOTION_STRAIGHT;NativeProjectileData d;d.kind=9;d.damage=20;d.specialType=0;
-    if(!AttachNativeProjectile(b,q,d)){q->Die();return;}q->mPosX=x-20;q->mPosY=y-20;q->mPosZ=q->mVelY=q->mVelZ=q->mAccZ=0;
+    if(!AttachNativeTravelProjectile369(p,q,d)){q->Die();return;}q->mPosX=x-20;q->mPosY=y-20;q->mPosZ=q->mVelY=q->mVelZ=q->mAccZ=0;
     q->mVelX=float(6*kFusionBasePixelsX*.01);q->mShadowY=y;q->mRotation=q->mRotationSpeed=0;q->mX=int(q->mPosX);q->mY=int(q->mPosY);
     ++GetNativePlantData(p)->batchShotCount;
 }

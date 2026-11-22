@@ -1,3 +1,4 @@
+#include "FusionNativeTravelConsumers369.h"
 #include "FusionNative.h"
 #include "FusionNativeCompanions269.h"
 #include "FusionNativeWorldActors269.h"
@@ -19,9 +20,17 @@ namespace
 bool HostLive(const Plant* p)
 {return p&&p->mApp&&p->mApp->mBoard==p->mBoard&&!p->mApp->NetIsClient()&&!p->mNetGhost&&!p->mDead&&p->mIsOnBoard&&p->mPlantHealth>0&&GetNativePlantData(p);}
 }
-bool HasNativeCompanions269Trait(const Plant*,NativeCompanions269Trait){return false;}
+bool HasNativeCompanions269Trait(const Plant* p,NativeCompanions269Trait trait)
+{
+ if(!p||!GetNativePlantData(p))return false;
+ switch(trait){case NativeCompanions269Trait::Common5:return HasNativeTravelAdvanced369(p->mBoard,5);
+ case NativeCompanions269Trait::Advanced4:return HasNativeTravelAdvanced369(p->mBoard,4);
+ case NativeCompanions269Trait::Ultimate24:return HasNativeTravelUltimate369(p->mBoard,24);
+ case NativeCompanions269Trait::Ultimate25:return HasNativeTravelUltimate369(p->mBoard,25);}return false;
+}
 bool NativeCompanions269ShootingBoard(const Board*){return false;}
-bool HasNativeWorld269Trait(const Plant*,NativeWorld269Trait){return false;}
+bool HasNativeWorld269Trait(const Plant* p,NativeWorld269Trait trait)
+{return p&&GetNativePlantData(p)&&HasNativeTravelAdvanced369(p->mBoard,trait==NativeWorld269Trait::Advanced46?46:47);}
 bool ApplyNativeCompanion269CherryExplosion(Projectile* p,int row,int variant)
 {return p&&p->mApp&&!p->mApp->NetIsClient()&&IsNativeFusionBoard(p->mBoard)&&
     ApplyNativeSourceCherry269ExplosionAt(p->mBoard,p->mPosX+20,p->mPosY+p->mPosZ+20,row,variant);}

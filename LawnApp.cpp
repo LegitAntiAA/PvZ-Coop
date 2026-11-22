@@ -1421,7 +1421,7 @@ void LawnApp::PreNewGame(GameMode theGameMode, bool theLookForSavedGame)
 		return;
 	}
 
-	if (GetContentMode() == LawnFusion::ContentMode::Fusion) mNativeFusionEpoch = mFusionNextEpoch++;
+	if (GetContentMode() == LawnFusion::ContentMode::Fusion) {mFusionTravelBuff369={};mNativeFusionEpoch = mFusionNextEpoch++;}
 	if (NetIsHost()) mNetManager->PromoteSpectatorsAtLevelBoundary("PRE_NEW_GAME");
 	if (theGameMode == GAMEMODE_COOP_PVP && NetIsHost() && !mNetPvpTeamsConfirmed)
 	{
@@ -1488,7 +1488,7 @@ void LawnApp::PreNewGame(GameMode theGameMode, bool theLookForSavedGame, int the
 		return;
 	}
 
-	if (GetContentMode() == LawnFusion::ContentMode::Fusion) mNativeFusionEpoch = mFusionNextEpoch++;
+	if (GetContentMode() == LawnFusion::ContentMode::Fusion) {mFusionTravelBuff369={};mNativeFusionEpoch = mFusionNextEpoch++;}
 	if (NetIsHost()) mNetManager->PromoteSpectatorsAtLevelBoundary("PRE_NEW_GAME_LEVEL");
 	if (theGameMode == GAMEMODE_COOP_PVP && NetIsHost() && !mNetPvpTeamsConfirmed)
 	{

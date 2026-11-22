@@ -1,3 +1,6 @@
+#include "FusionNativeFinish363.h"
+#include "FusionNativeDriver363.h"
+#include "FusionNativeLateZombie363.h"
 #include "FusionNativeExtendedZombie313.h"
 #include "FusionNativeGroundShooter343.h"
 #include "FusionNativeSnowZombie363.h"
@@ -192,7 +195,7 @@ bool InitializeNativeExtendedZombie313(Zombie* z,NativeExtendedZombie313State& s
     if(FusionBalloon343Kind(r.kind)&&input.playMachineSound)h.sound(z,86,.5f);
     if(r.kind==212&&!h.sourceBoard212(z,true))return Fail(r,"Source212 Board lifetime initialization failed after preflight.");
     if(!InitializeNativeSourceGraph313(z,*h.graph.stateFor(z),h.graph))return Fail(r,"Source313 native graph initialization failed.");if(!Refresh(r))return true;
-    return PlayNativeSourceGraph313(r.z,*h.graph.stateFor(r.z),0,"walk",0,h.graph);
+    return PlayNativeSourceGraph313(r.z,*h.graph.stateFor(r.z),0,FusionDriver363Kind(r.kind)?"idle":"walk",0,h.graph);
 }
 bool ThrowNativeExtendedImp313(Zombie* z,NativeExtendedZombie313State& s,const NativeExtendedZombie313Hooks& h)
 {
@@ -202,6 +205,7 @@ bool ThrowNativeExtendedImp313(Zombie* z,NativeExtendedZombie313State& s,const N
 }
 bool ApplyNativeExtendedZombie313BodyDamage(Zombie* z,NativeExtendedZombie313State& s,int damage,const NativeExtendedZombie313Hooks& h)
 {
+    if(FusionDriver363Kind(GetNativeSourceZombieData(z)?GetNativeSourceZombieData(z)->kind:0xffff))return ApplyNativeDriver363Body(z,damage);
     if(!Host(z)||!Ready(h)||!FusionExtendedZombie313OwnBodyDamage(GetNativeSourceZombieData(z)->kind))return false;
     auto r=Capture(z,s,h);NativeExtendedZombie313Input input;if(!Input(r,input)||s.failed||!s.initialized)return true;auto* data=GetNativeSourceZombieData(z);FusionExtendedBody313Plan plan;
     if(!TryPlanFusionExtendedBody313(data->kind,data->health,z->mBodyMaxHealth,damage,s.bodyStage,s.uniqueType,s.sourceStatus,z->mMindControlled,input.sourceShadowX,plan))return Fail(r,"Invalid source313 body subtraction plan.");
@@ -237,7 +241,7 @@ bool UpdateNativeExtendedZombie313(Zombie* z,NativeExtendedZombie313State& s,con
     if(!s.initialized||s.failed)return true;if(s.logicTick==z->mBoard->mMainCounter)return true;s.logicTick=z->mBoard->mMainCounter;
     auto r=Capture(z,s,h);NativeExtendedZombie313Input i;if(!Input(r,i))return Fail(r,"Source313 actual world input unavailable.");
     if(r.kind==37&&!s.visible&&i.frame>s.bornFrame)s.visible=true;
-    if(FusionExtendedZombie313BaseLimbCallbacks(r.kind)&&s.sourceStatus==0&&!i.beforeDying&&((r.kind!=202&&r.kind!=218)||s.isThrow))
+    if(!FusionFinish363Kind(r.kind)&&r.kind!=49&&FusionExtendedZombie313BaseLimbCallbacks(r.kind)&&s.sourceStatus==0&&!i.beforeDying&&((r.kind!=202&&r.kind!=218)||s.isThrow))
     {bool attacking=false;if(!h.baseContact(z,attacking))return Fail(r,"Source313 shared base contact unavailable.");if(!Refresh(r))return true;r.z->mIsEating=attacking;}
     if(r.kind==35||r.kind==36||r.kind==43||r.kind==212){if(!ProbeGarg(r,i))return Fail(r,"Source313 Garg contact failed.");}
     if(FusionExtendedZombie347Kind(r.kind))
@@ -327,6 +331,13 @@ NativeExtendedZombie313Death BeginNativeExtendedZombie313Death(Zombie* z,NativeE
     if(!Host(z)||!Ready(h))return NativeExtendedZombie313Death::NotHandled;auto r=Capture(z,s,h);if(!s.initialized||s.failed)return NativeExtendedZombie313Death::Refused;
     if(s.deathConsumed)return NativeExtendedZombie313Death::Proceed;
     int normalized;if(!TryNormalizeFusionExtendedDeath313(r.kind,reason,normalized))return NativeExtendedZombie313Death::Refused;
+    if(FusionDriver363Kind(r.kind))
+    {
+        if(!CanRetireNativeLate363(z,normalized))return NativeExtendedZombie313Death::Refused;
+        s.deathConsumed=true;reason=normalized;s.sourceStatus=1;
+        if(!BeforeRetireNativeLate363(z,normalized)){Fail(r,"Driver363 prepared death descendants failed after latch.");return NativeExtendedZombie313Death::Refused;}
+        return Refresh(r)?NativeExtendedZombie313Death::Proceed:NativeExtendedZombie313Death::OwnerRetired;
+    }
     NativeExtendedZombie313Input input;if(!Input(r,input))return NativeExtendedZombie313Death::Refused;
     const auto operation=r.kind==40?NativeExtendedZombie313Operation::MachineDeath:r.kind==26?NativeExtendedZombie313Operation::KirovDeath:NativeExtendedZombie313Operation::IronDeath;
     if(!Preflight(r,operation))return NativeExtendedZombie313Death::Refused;

@@ -1,5 +1,7 @@
 #include "FusionNativeEffects269.h"
 #include "FusionNativeWorldParticle269.h"
+#include "FusionAnimation.h"
+#include "FusionSourceSpriteScript366.h"
 #include "FusionNativeEmbeddedEffects269.h"
 #include <tuple>
 #include "FusionNative.h"
@@ -81,6 +83,9 @@ struct NativeSourceEffects269::Impl
     std::map<std::pair<float,float>,std::unique_ptr<Definition>> definitions;
     std::map<std::tuple<uint16_t,float,float>,std::unique_ptr<NativeWorldParticle269Definition>> worldDefinitions;
     std::unique_ptr<NativeEmbeddedEffects269> embedded;
+    std::unique_ptr<FusionAnimation> overlay75;
+    std::array<float,4> overlayColor75{};
+    std::string overlayNode75;
 };
 NativeSourceEffects269::NativeSourceEffects269(LawnApp* app):mImpl(std::make_unique<Impl>())
 {mImpl->app=app;mImpl->holder=app&&app->mEffectSystem?app->mEffectSystem->mParticleHolder:nullptr;}
@@ -100,11 +105,70 @@ NativeSourceEffects269::~NativeSourceEffects269()
         if(!system->mDead)for(const auto& entry:mImpl->worldDefinitions)
             if(system->mParticleDef==entry.second->Data(true)||system->mParticleDef==entry.second->Data(false)){system->ParticleSystemDie();break;}
 }
+
+bool NativeSourceEffects269::EnsureSpriteOverlay75(Board* board,std::string& error)
+{
+ try
+ {
+  if(!board||board->mApp!=mImpl->app||!IsNativeFusionBoard(board)||!mImpl->holder||!mImpl->app->mEffectSystem||mImpl->app->mEffectSystem->mParticleHolder!=mImpl->holder)
+   throw std::runtime_error("source75 native Board/particle holder unavailable");
+  if(mImpl->overlay75)return true;
+  const auto root=ResourceRoot()/"source-75";std::ifstream effect(root/"effect.json");if(!effect)throw std::runtime_error("source75 effect missing");
+  const Json definition=Json::parse(effect);const auto& overlay=definition.at("spriteOverlay366");
+  if(definition.at("sourceKind")!=75||definition.at("emitters").size()!=8||overlay.at("model")!="overlay/animation.json"||overlay.at("sourceRendererFileID")!=212371939378208658LL||overlay.at("fixedStepSeconds")!=.02||overlay.at("alphaDecrementPerStep")!=.04)
+   throw std::runtime_error("source75 original mixed Sprite/particle controller differs");
+  const auto path=root/"overlay"/"animation.json";const auto hash=overlay.at("modelSha256").get<std::string>();if(Sha256(path)!=hash)throw std::runtime_error("source75 overlay model hash differs");
+  std::ifstream modelFile(path);const Json model=Json::parse(modelFile);
+  if(model.at("sourcePrefab")!="Resources/particle/prefabs/BossExplosion.prefab"||!model.at("static").get<bool>()||model.at("sprites").size()!=1||model.at("nodes").size()!=9||!model.at("clips").empty()||!model.at("ignoredBindings").empty()||!model.at("omittedInactiveNodes").empty())
+   throw std::runtime_error("source75 complete static source hierarchy differs");
+  const auto& proof=model.at("sourceBuiltinSpriteProof366");if(proof.at("builtinFileID")!=10905||proof.at("name")!="UISprite"||proof.at("spritePathID")!=7170)
+   throw std::runtime_error("source75 genuine builtin Sprite identity missing");
+  std::vector<int64_t> particles;bool controller=false;
+  for(const auto& c:model.at("nonRenderingComponents"))
+  {
+   const int kind=c.at("typeId").get<int>();if(kind==198||kind==199)particles.push_back(c.at("fileId").get<int64_t>());
+   if(kind==114)controller=c.at("serializedComponent").get<std::string>().find("guid: 4048e352ff94155e9450a15465186b68")!=std::string::npos;
+  }
+  if(particles.size()!=16||!controller)throw std::runtime_error("source75 full eight particle pairs/IceExplodeControl missing");
+  const auto& sprite=model.at("sprites").front();const auto node=model.at("nodes").at(sprite.at("node").get<size_t>()).at("path").get<std::string>();
+  if(node!="sprit1"||sprite.at("sortingOrder")!=0||sprite.at("sortingLayerId")!=-1823021693||sprite.at("maskInteraction")!=0)
+   throw std::runtime_error("source75 original overlay layer/transform differs");
+  const auto& color=sprite.at("color");const std::array<float,4> rgba{color.at("r").get<float>(),color.at("g").get<float>(),color.at("b").get<float>(),color.at("a").get<float>()};
+  std::array<float,4> checked;if(!SourceIceExplosionColor366(0,rgba,checked))throw std::runtime_error("source75 initial Sprite color invalid");
+  auto pending=std::make_unique<FusionAnimation>();if(!pending->Load(mImpl->app,path.string(),error,particles))return false;
+  if(Sha256(path)!=hash)throw std::runtime_error("source75 overlay changed during load");
+  mImpl->overlayColor75=rgba;mImpl->overlayNode75=node;mImpl->overlay75=std::move(pending);error.clear();return true;
+ }
+ catch(const std::exception& exception){error=exception.what();return false;}
+}
+void NativeSourceEffects269::DrawSpriteOverlay366(Board* board,TodParticleSystem* system,Sexy::Graphics* graphics) const
+{
+ if(!graphics||!system||system->mDead||!board||board->mApp!=mImpl->app||mImpl->app->mBoard!=board||!mImpl->overlay75||
+  !mImpl->holder||system->mParticleHolder!=mImpl->holder||!mImpl->app->mEffectSystem||mImpl->app->mEffectSystem->mParticleHolder!=mImpl->holder)return;
+ const auto found=mImpl->worldDefinitions.find({75,float(kFusionBasePixelsX),float(GetNativeFusionPixelsY(board))});
+ if(found==mImpl->worldDefinitions.end()||(system->mParticleDef!=found->second->Data(true)&&system->mParticleDef!=found->second->Data(false)))return;
+ const auto uid=mImpl->holder->mParticleSystems.DataArrayGetID(system);
+ if(!uid||mImpl->holder->mParticleSystems.DataArrayTryToGet(uid)!=system||!system->mEmitterList.mHead)return;
+ const auto* emitter=mImpl->holder->mEmitters.DataArrayTryToGet(unsigned(system->mEmitterList.mHead->mValue));
+ if(!emitter||emitter->mParticleSystem!=system)return;
+ std::array<float,4> rgba;if(!SourceIceExplosionColor366(emitter->mSystemAge,mImpl->overlayColor75,rgba)||rgba[3]<=0)return;
+ FusionAnimationDrawOptions options;options.useBoardBasis=true;options.boardBasis={float(kFusionBasePixelsX),0,0,-float(GetNativeFusionPixelsY(board))};
+ options.nodeLocalRotations.push_back({"",{0,0,0,1}}); // CreateParticle.SetParticle overwrites prefab -90X.
+ options.spriteColorOverrides.push_back({mImpl->overlayNode75,rgba});
+ mImpl->overlay75->DrawPose(graphics,emitter->mSystemCenter.x,emitter->mSystemCenter.y,1,nullptr,0,nullptr,-1,1,&options);
+}
+void DrawNativeSourceEffectOverlay366(TodParticleSystem* system,Sexy::Graphics* graphics)
+{
+ if(!gLawnApp||!gLawnApp->mBoard||!IsNativeFusionBoard(gLawnApp->mBoard))return;
+ if(auto* cache=GetNativeSourceEffects269(gLawnApp->mBoard,false))cache->DrawSpriteOverlay366(gLawnApp->mBoard,system,graphics);
+}
+
 bool NativeSourceEffects269::Ensure(Board* board,uint16_t kind,std::string& error)
 {
+    if(kind==75&&!EnsureSpriteOverlay75(board,error))return false;
     if(kind==23)
         return WorldDefinition(board,5066,(ResourceRoot()/"zombies270"/"5066"/"effect.json").string(),error)!=nullptr;
-    if(kind==0||kind==10||kind==11||kind==16||kind==18||kind==32||kind==34||kind==35||kind==36||kind==41||kind==42||kind==49||kind==51||kind==54||kind==62||kind==63||kind==64||kind==99||kind==100||(kind>=2000&&kind<2100))
+    if(kind==75||kind==76||kind==77||kind==24||kind==97||kind==0||kind==10||kind==11||kind==16||kind==18||kind==32||kind==34||kind==35||kind==36||kind==41||kind==42||kind==49||kind==51||kind==54||kind==62||kind==63||kind==64||kind==99||kind==100||(kind>=2000&&kind<2100))
     {const auto path=kind<2000?ResourceRoot()/ ("source-"+std::to_string(kind))/"effect.json":ResourceRoot()/"embedded269"/std::to_string(kind)/"effect.json";
      return WorldDefinition(board,kind,path.string(),error)!=nullptr;}
 
@@ -354,6 +418,11 @@ int NativeSourceEffectParticle269(uint16_t kind)
     case 16:return PARTICLE_FUSION_SOURCE16;
     case 18:return PARTICLE_FUSION_SOURCE18;
     case 23:return PARTICLE_FUSION_SOURCE23;
+    case 75:return PARTICLE_FUSION_SOURCE75;
+    case 76:return PARTICLE_FUSION_SOURCE76;
+    case 77:return PARTICLE_FUSION_SOURCE77;
+    case 24:return PARTICLE_FUSION_SOURCE24;
+    case 97:return PARTICLE_FUSION_SOURCE97;
     case 32:return PARTICLE_FUSION_SOURCE32;
     case 34:return PARTICLE_FUSION_SOURCE34;
     case 35:return PARTICLE_FUSION_SOURCE35;
@@ -374,7 +443,7 @@ int NativeSourceEffectParticle269(uint16_t kind)
 }
 bool NativeSourceEffectKind269(int effect,uint16_t& kind)
 {
-    for(uint16_t candidate:{0,10,11,16,18,23,32,34,35,36,41,42,49,51,52,54,62,63,64,99,100})
+    for(uint16_t candidate:{0,10,11,16,18,23,24,75,76,77,97,32,34,35,36,41,42,49,51,52,54,62,63,64,99,100})
         if(NativeSourceEffectParticle269(candidate)==effect){kind=candidate;return true;}
     return false;
 }
@@ -407,4 +476,11 @@ void NativeSourceEffects269::CapturePlant314(Board* board,uint32_t oldUID,uint32
 {if(mImpl->embedded)mImpl->embedded->CapturePlant314(board,oldUID,ownerUID,token,kind);}
 void NativeSourceEffects269::ReleaseCapturedPlant314(uint32_t ownerUID,uint32_t token)
 {if(mImpl->embedded)mImpl->embedded->ReleaseCapturedPlant314(ownerUID,token);}
+}
+
+namespace LawnFusion {
+bool NativeSourceEffects269::SetZombieEmission(Zombie* z,const char* path,bool enabled)
+{return mImpl&&mImpl->embedded&&mImpl->embedded->SetEmission(z,path,enabled);}
+bool SetNativeSourceZombieEmission360(Zombie* z,const char* path,bool enabled)
+{auto* cache=GetNativeSourceEffects269(z?z->mBoard:nullptr,false);return cache&&cache->SetZombieEmission(z,path,enabled);}
 }

@@ -1,3 +1,4 @@
+#include "FusionNativeTravelConsumers369.h"
 #include "FusionNativeAction267.h"
 #include "FusionNative.h"
 #include "FusionNativeDefender.h"
@@ -90,7 +91,7 @@ bool RockHit(Plant* p,bool apply=true)
         const auto r=z->GetZombieRect();if(FusionBatchAreaTouchesRect(area,r.mX,r.mY,r.mWidth,r.mHeight))targets.push_back(p->mBoard->ZombieGetID(z));
     }
     if(!apply)return !targets.empty();
-    for(auto id:targets)if((z=p->mBoard->ZombieTryToGet(id))&&!z->mDead)z->TakeDamage(100,1U);
+    for(auto id:targets)if((z=p->mBoard->ZombieTryToGet(id))&&!z->mDead)z->TakeDamage(GetNativeTravelPlantAttack369(p,100)*(HasNativeTravelAdvanced369(p->mBoard,6)?5:1),1U);
     LawnNet::NetTrace("Fusion native Action267 rock plant=%u hits=%zu tick=%d",p->mNetId,targets.size(),p->mBoard->mMainCounter);
     return !targets.empty();
 }
@@ -180,6 +181,7 @@ bool TryHandleNativeDefender267Damage(Plant* p,int& damage,int type)
 {
     if(!Live(p)||damage<0)return false;auto* d=GetNativePlantData(p);const auto kind=d->kind;
     if(!IsFusionObsidian267Kind(kind))return false;
+    if(kind==906&&HasNativeTravelAdvanced369(p->mBoard,7))damage=(std::max)(1,int(float(damage)*.05f));
     if(kind==925&&damage>0)Store(p,damage);
     const auto victims=kind==913||kind==925?Group(p->mBoard):std::vector<uint32_t>();
     int applied=damage;bool shared=false;if(!TryGetFusionObsidian267Damage(kind,damage,type,static_cast<int>(victims.size()),applied,shared))return false;

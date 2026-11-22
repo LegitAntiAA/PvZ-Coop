@@ -1,4 +1,5 @@
 #include "FusionNativeShooterTiming.h"
+#include "FusionNativePlantDisable363.h"
 #include "FusionNative.h"
 #include "FusionNativeAction267.h"
 #include "FusionSplitShooterRules.h"
@@ -89,6 +90,7 @@ void UpdateNativeShooterPhase(Plant* plant, const FusionShooterTimingProfile& pr
 
 bool DispatchNativeShooterEvents(Plant* plant)
 {
+    if(NativePlantDisabled363(plant))return true;
     // Event callbacks sample animated source nodes before the one ordinary
     // phase update at the native tick tail. Mirror the real counter here;
     // do not advance idleSeconds or introduce another animation clock.

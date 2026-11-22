@@ -1,3 +1,4 @@
+#include "FusionNativeTravelConsumers369.h"
 #include "FusionNativeCompanions269.h"
 #include "FusionNative.h"
 #include "FusionNativePlacement.h"
@@ -246,7 +247,7 @@ bool DispatchNativeCompanions269Events(Plant* p)
     if(!TryGetFusionShooterEventsAtCounter(*timing,GetNativePlantData(p)->animationSpeed,p->mShootingCounter,count))return true;
     for(int event=0;event<count;++event)
     {
-        const int base=FusionFindPlant(912)->damage,damage=HasNativeCompanions269Trait(p,NativeCompanions269Trait::Ultimate25)?base*3:base;
+        const int base=GetNativeTravelPlantAttack369(p,FusionFindPlant(912)->damage),damage=HasNativeCompanions269Trait(p,NativeCompanions269Trait::Ultimate25)?base*3:base;
         Zombie* z=nullptr;while(p->mBoard->IterateZombies(z))if(Live(z)&&z->mRow==p->mRow&&GetNativeFusionZombieStatus(z)==10&&!z->mMindControlled)z->TakeDamage(damage,1U);
         ++GetNativePlantData(p)->batchShotCount;p->mApp->PlayFoley(FOLEY_FUME);
     }

@@ -1,3 +1,4 @@
+#include "Fusion/FusionNativeTravelConsumers369.h"
 #include "Board.h"
 #include "Cutscene.h"
 #include "Challenge.h"
@@ -158,9 +159,12 @@ void SeedPacket::Update()
 		FlashIfReady();
 	}
 
+	if(const auto* source=LawnFusion::GetNativePacketData(this);source&&
+        !LawnFusion::IsNativeSourceConveyor308(mBoard)&&LawnFusion::HasNativeTravelAdvanced369(mBoard,32))
+        mRefreshTime=FloatRoundToInt(LawnFusion::GetNativeTravelCardSeconds369(mBoard,source->kind,source->rechargeSeconds)*100.f);
 	if (!mActive && mRefreshing)
 	{
-		mRefreshCounter++;
+		mRefreshCounter+=LawnFusion::GetNativeTravelCardStep369(mBoard);
 		if (mRefreshCounter > mRefreshTime)
 		{
 			mRefreshCounter = 0;
