@@ -154,7 +154,11 @@ bool Input(Zombie* z,NativeExtendedZombie313Input& out)
 {
     auto* s=EditNativeExtendedZombie313(z);auto* d=GetNativeSourceZombieData(z);if(!s||!d||!World(z->mBoard))return false;
     NativeExtendedZombie313Input i;i.frame=z->mBoard->mMainCounter;i.beforeDying=s->beforeDying;
-    if(!NativeSourcePoint313(z,"",i.sourceRootX,i.sourceRootY)||!NativeSourcePoint313(z,"axis",i.sourceAxisX,i.sourceAxisY)||!NativeSourcePoint313(z,"Shadow",i.sourceShadowX,i.sourceShadowY)||!NativeSourceRowLandY313(z->mBoard,i.sourceShadowX,z->mRow,i.landY))return false;
+    const auto poseRefused=[&](const char* field){const auto* g=GetNativeSourceGraph313(z);LawnNet::NetTrace("Extended313 input refused kind=%u uid=%u field=%s graph=%d failed=%d bodyR=%u auxR=%u,%u tick=%d",d->kind,uint32_t(z->mBoard->mZombies.DataArrayGetID(z)),field,g&&g->initialized?1:0,g&&g->failed?1:0,uint32_t(z->mBodyReanimID),g?g->auxiliaryUIDs[0]:0,g?g->auxiliaryUIDs[1]:0,z->mBoard->mMainCounter);return false;};
+    if(!NativeSourcePoint313(z,"",i.sourceRootX,i.sourceRootY))return poseRefused("ROOT");
+    if(!NativeSourcePoint313(z,"axis",i.sourceAxisX,i.sourceAxisY))return poseRefused("axis");
+    if(!NativeSourcePoint313(z,"Shadow",i.sourceShadowX,i.sourceShadowY))return poseRefused("Shadow");
+    if(!NativeSourceRowLandY313(z->mBoard,i.sourceShadowX,z->mRow,i.landY))return poseRefused("landY");
     float low=0,top=0;if(!NativeSourceBounds313(z->mBoard,low,i.sourceRightBoundary,top))return false;
     const auto* row=GetNativeZombieGarlicData(z);i.changingRow=row&&row->phase==GarlicActionPhase::Moving;
     float factor=0;if(!TryGetFusionZombieStatusSpeedFactor(d->kind,z->mChilledCounter>0,z->mIceTrapCounter>0,z->mButteredCounter>0,row&&FusionGarlicStopsWalking(*row)&&!NativeSourceDeathIgnoresGarlic313(z),factor))return false;
@@ -319,36 +323,39 @@ bool CanSpawnNativeExtendedZombie313(Board* b,uint16_t kind,std::string* e)
 {FusionSourceDeathBudget319 peak;return Resources(b,kind,e)&&GetNativeSourceZombieBirthBudget319(b,std::span(&kind,1),peak,e)&&CanAllocateNativeSourceBudget319(b,peak,e);}
 bool PrepareNativeExtendedZombie313Clocks(Zombie* z,std::string* e)
 {
-    if(!z||!World(z->mBoard)||!FindFusionExtendedZombie313Profile(Kind(z))||!ClockDefinition(Kind(z),e))return false;auto* c=GetNativeContext(z->mBoard);const uint32_t uid=z->mBoard->mZombies.DataArrayGetID(z);auto [i,_]=c->sourceGraphs313.try_emplace(uid);auto& state=i->second;const auto* graph=FindFusionSourceGraph313(Kind(z));
-    auto* body=Clock(z,0);if(!body)return false;auto* fx=z->mApp->mEffectSystem;if(!fx||fx!=gEffectSystem||!fx->mReanimationHolder||!fx->mAttachmentHolder)return false;
+    if(!z||!World(z->mBoard)||!FindFusionExtendedZombie313Profile(Kind(z)))return Reject("Source clock actor/world/profile unavailable.",e);if(!ClockDefinition(Kind(z),e))return false;auto* c=GetNativeContext(z->mBoard);const uint32_t uid=z->mBoard->mZombies.DataArrayGetID(z);auto [i,_]=c->sourceGraphs313.try_emplace(uid);auto& state=i->second;const auto* graph=FindFusionSourceGraph313(Kind(z));
+    auto* body=Clock(z,0);if(!body)return Reject("Source clock native body lease missing.",e);auto* fx=z->mApp->mEffectSystem;if(!fx||fx!=gEffectSystem||!fx->mReanimationHolder||!fx->mAttachmentHolder)return Reject("Source clock native R/A holders unavailable.",e);
     auto& rs=fx->mReanimationHolder->mReanimations;auto& as=fx->mAttachmentHolder->mAttachments;unsigned need=0;for(uint8_t n=1;n<graph->layerCount;++n)if(!Clock(z,n))++need;
     if(!need)return NativeSourceGraph313ClockTracksReady(z,GetNativeExtendedZombie313Hooks().graph,e);
-    if(!rs.mBlock||need>unsigned(rs.mMaxSize-rs.mSize)||!as.mBlock||!body->TrackExists("anim_head1"))return false;auto* track=body->GetTrackInstanceByName("anim_head1");auto* a=as.DataArrayTryToGet(unsigned(track->mAttachmentID));
-    if(a&&!a->mDead){if(a->mNumEffects<0||need>unsigned(MAX_EFFECTS_PER_ATTACHMENT-a->mNumEffects))return false;}else if(as.mSize>=as.mMaxSize)return false;
-    for(uint8_t n=1;n<graph->layerCount;++n)if(!Clock(z,n)){auto* r=z->mApp->AddReanimation(0,0,0,REANIM_ZOMBIE);if(!r)return false;r->PlayReanim("anim_head1",REANIM_LOOP,0,0);for(int t=0;t<r->mDefinition->mTracks.count;++t)r->mTrackInstances[t].mForceDontRender=true;if(!AttachReanim(track->mAttachmentID,r,0,0)){r->ReanimationDie();return false;}state.auxiliaryUIDs[n-1]=uint32_t(z->mApp->ReanimationGetID(r));}
+    if(!rs.mBlock||need>unsigned(rs.mMaxSize-rs.mSize)||!as.mBlock||!body->TrackExists("anim_head1"))return Reject("Source auxiliary native pool/attachment-track unavailable.",e);auto* track=body->GetTrackInstanceByName("anim_head1");auto* a=as.DataArrayTryToGet(unsigned(track->mAttachmentID));
+    if(a&&!a->mDead){if(a->mNumEffects<0||need>unsigned(MAX_EFFECTS_PER_ATTACHMENT-a->mNumEffects))return Reject("Source auxiliary parent attachment capacity unavailable.",e);}else if(as.mSize>=as.mMaxSize)return Reject("Source auxiliary attachment pool exhausted.",e);
+    for(uint8_t n=1;n<graph->layerCount;++n)if(!Clock(z,n)){auto* r=z->mApp->AddReanimation(0,0,0,REANIM_ZOMBIE);if(!r)return Reject("Source auxiliary native Reanimation allocation refused.",e);r->PlayReanim("anim_head1",REANIM_LOOP,0,0);for(int t=0;t<r->mDefinition->mTracks.count;++t)r->mTrackInstances[t].mForceDontRender=true;if(!AttachReanim(track->mAttachmentID,r,0,0)){r->ReanimationDie();return Reject("Source auxiliary AttachReanim refused.",e);}state.auxiliaryUIDs[n-1]=uint32_t(z->mApp->ReanimationGetID(r));}
     return NativeSourceGraph313ClockTracksReady(z,GetNativeExtendedZombie313Hooks().graph,e);
 }
 bool InitializeNativeExtendedZombie313Bridge(Zombie* z)
 {
-    if(!Host(z)||!PrepareNativeExtendedZombie313Clocks(z))return false;
-    auto* s=EditNativeExtendedZombie313(z,true);if(!s)return false;
+    const auto refuse=[&](const char* stage,const std::string& why=std::string()){const auto* g=GetNativeSourceGraph313(z);LawnNet::NetTrace("Extended313 init refused kind=%u uid=%u stage=%s reason=%s bodyR=%u auxR=%u,%u graph=%d failed=%d tick=%d",Kind(z),z&&z->mBoard?uint32_t(z->mBoard->mZombies.DataArrayGetID(z)):0,stage,why.c_str(),z?uint32_t(z->mBodyReanimID):0,g?g->auxiliaryUIDs[0]:0,g?g->auxiliaryUIDs[1]:0,g&&g->initialized?1:0,g&&g->failed?1:0,z&&z->mBoard?z->mBoard->mMainCounter:-1);return false;};
+    if(!Host(z))return refuse("authority/world");
+    std::string clockError;
+    if(!PrepareNativeExtendedZombie313Clocks(z,&clockError))return refuse("native-clock-prepare",clockError);
+    auto* s=EditNativeExtendedZombie313(z,true);if(!s)return refuse("family-state");
     if(s->initialized)return !s->failed;
     InitJournal313 journal(z);
     // Capture source callbacks against this exact full generation. No initial
     // sound, board212 mutation or entry0 particle is published before every
     // fallible graph/model initialization has succeeded.
-    if(!InitializeNativeExtendedZombie313(z,*s,Kind(z)==222?GetNativeDriver363Hooks():GetNativeExtendedZombie313Hooks()))return false;
+    if(!InitializeNativeExtendedZombie313(z,*s,Kind(z)==222?GetNativeDriver363Hooks():GetNativeExtendedZombie313Hooks()))return refuse("family-core");
     if(FusionGroundShooter343Kind(Kind(z))&&!InitializeNativeGroundShooter343(z))return false;
     if(FusionSnowZombie363Kind(Kind(z))&&!InitializeNativeSnowZombie363(z))return false;
     if(FusionFinish363Kind(Kind(z))&&!InitializeNativeFinish363(z))return false;
     if(Kind(z)==49&&!InitializeNativeSnowGun363(z))return false;
     if(Kind(z)==208){auto* q=QState369(z,true);if(!q||!InitializeNativeQing208(z,*q,QHooks369()))return false;QView369(z,*q);}
-    if(FusionDriver363Kind(Kind(z))&&!InitializeNativeDriver363(z))return false;
+    if(FusionDriver363Kind(Kind(z))&&!InitializeNativeDriver363(z))return refuse("driver-family");
     if(journal.app->mBoard!=journal.board)return false;
     z=journal.board->mZombies.DataArrayTryToGet(journal.uid);s=EditNativeExtendedZombie313(z);
     const auto* data=GetNativeSourceZombieData(z);const auto* graph=Graph(z);
     if(!z||z->mDead||!s||s->failed||!s->initialized||!data||data->instanceToken!=journal.uid||
-        !graph||!graph->initialized||graph->failed||graph->localUID!=journal.uid)return false;
+        !graph||!graph->initialized||graph->failed||graph->localUID!=journal.uid)return refuse("canonical-commit");
     auto* context=GetNativeContext(journal.board);if(!context)return false;
     if(Kind(z)==212)
     {

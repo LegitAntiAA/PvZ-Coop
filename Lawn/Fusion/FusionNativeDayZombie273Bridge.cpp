@@ -1,4 +1,5 @@
 #include "FusionQuickJackson367Rules.h"
+#include "../../Sexy.TodLib/Reanimator.h"
 #include "FusionNativeLadder355.h"
 #include "FusionNativeDryGround353.h"
 #include "FusionNativeDayZombie273Bridge.h"
@@ -64,6 +65,16 @@ bool Coexisting313Actor(Zombie* z)
     // record. Validate that real controller when a Day actor joins its world.
     if(IsNativeSpecialZombie269Vehicle(z))
         return NativeSpecialZombie269VehicleTerrainValid(z)&&z->mApp->ReanimationTryToGet(z->mBodyReanimID);
+    // Child-resource preflight can revisit this very factory before its
+    // controller commits. Only the host's full-generation initialization
+    // lease admits that transient actor; unrelated live actors stay strict.
+    if(IsNativeSourceZombieInitializing313(z))
+    {
+        const auto* source=GetNativeSourceZombieData(z);
+        auto* body=z->mApp->ReanimationTryToGet(z->mBodyReanimID);
+        return source&&IsNativeSourceZombie(z)&&IsNativeSourceWorld313(z->mBoard)&&
+            Coexisting313Controller(source->kind)&&body&&!body->mDead;
+    }
     NativeZombie313Semantics semantics;
     if(!GetNativeZombie313Semantics(z,semantics))return false;
     if(FusionWaterZombie313Kind(semantics.kind))
