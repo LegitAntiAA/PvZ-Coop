@@ -39,6 +39,9 @@ NativeSourceEffects269* GetNativeSourceEffects269(Board*,bool create=false);
 // Presentation only: invoked by actual native loss callbacks, never hydration.
 // Host/offline builds an authoritative birth DTO; clients only use the receiver.
 bool PlayNativeSourceZombieLimb276(Zombie*,bool head);
+// Source First/SecondArmorFall, synchronous before destructive retirement.
+// False refuses resource admission; acknowledged cosmetic capacity drops do not retry.
+bool PlayNativeSourceZombieArmor284(Zombie*,bool firstArmor);
 // True acknowledges a valid event, including duplicate/cosmetic capacity drop.
 // Full canonical seen-set survives owner deletion and resets with Board/epoch.
 bool PlayNativeSourceZombieLimbEvent276(Board*,const LawnNet::NetFusionLimbEvent276&);

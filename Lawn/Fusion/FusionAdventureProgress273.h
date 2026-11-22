@@ -11,10 +11,14 @@ enum class FusionAdventureMessage273:uint8_t
     GloveUnlocked,GloveMove,MoveTwinFlower,GloveReady,
     PresentIntro,UsePresent,PresentReady,CherryPaperWarning,PresentDefenseReady,
     EquipmentIntro,BucketNutWarning,UseBucket,IronPlants,EquipmentReady,
-    PuffIntro,PuffStack,PuffMix,PuffReady
+    PuffIntro,PuffStack,PuffMix,PuffReady,
+    FertilizeIntro,FertilizeGrow,FertilizeUpgrade,FertilizeLesson,UseFertilizeNut,
+    FertilizeNutReady,RepairNutChomper,FertilizeRepairReady,FertilizeReady,
+    IceIntro,IceDefense,IceLessonReady,IceReady
 };
 enum class FusionAdventureMissionAction274:uint8_t
-{None,Prepare4,Prepare7,Spawn7EnemyAndCard,Prepare8,Prepare10,Mix10};
+{None,Prepare4,Prepare7,Spawn7EnemyAndCard,Prepare8,Prepare10,Mix10,
+ Prepare13Nut,Prepare13Chomper,Prepare15,Clear15};
 
 // Host observations of the exact bound mission actors, not any matching type.
 // beforeDying/status1 differ from actual destruction in the source lessons.
@@ -25,6 +29,8 @@ struct FusionAdventureLessonInput274
     bool hasMissionZombie=false;
     bool missionZombieBeforeDying=false,missionZombieDying=false;
     bool hasBucketPlant1020or1029=false;
+    bool hasTallNut1027=false,missionPlantFullyRepaired=false;
+    int sourceEnemyCount=0;
 };
 
 // Persistent source profile. Bit(level-1) is advLevelCompleted[level].
@@ -77,13 +83,16 @@ bool BeginFusionAdventureRun273(const FusionAdventureProfile273&,int level,bool 
 // actual living native plants, independent of owner/cell/carrier SeedType.
 bool StepFusionAdventureTutorial273(FusionAdventureRun273&,uint32_t dtTicks,
     bool hasSunflower1,bool hasPeaSunflower1000,bool hasGatling1032,FusionAdventureTutorialEffects273&);
-// Source4/7/8/10. Execute missionAction against the real board before committing a
+// Source4/7/8/10/13/15. Execute missionAction against the real board before committing a
 // candidate run; failed allocation must not advance the stage. The older bool
 // overload rejects active lessons, so an unchanged source1 adapter fails closed.
 bool StepFusionAdventureTutorial273(FusionAdventureRun273&,uint32_t dtTicks,
     const FusionAdventureLessonInput274&,FusionAdventureTutorialEffects273&);
 bool FusionAdventureCardsIgnoreExpiry273(const FusionAdventureRun273&);
 uint16_t FusionAdventureMessageDuration273(FusionAdventureMessage273);
+// Source15 temporarily enables enemy HP during stage2. Presentation derives
+// this from the replicated run; it must not modify the persisted preference.
+bool FusionAdventureTutorialShowsZombieHealth284(const FusionAdventureRun273&);
 // Call AFTER a non-mindcontrolled enemy death decrements the source enemy count.
 // Sets over before allocation; no progress or WIN is committed by this event.
 bool TryArmFusionAdventureReward273(FusionAdventureRun273&,int wave,int maximumWave,int enemyCount,bool isIZ);

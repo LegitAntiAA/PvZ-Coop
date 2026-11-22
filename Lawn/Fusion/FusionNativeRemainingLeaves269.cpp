@@ -9,6 +9,8 @@
 #include "FusionNativePlantDamage.h"
 #include "FusionNativeMoney.h"
 #include "FusionNativePlacement.h"
+#include "FusionNativeEffects269.h"
+#include "FusionNativeGlove.h"
 #include "FusionBasePlantRules.h"
 #include "FusionSummon269Rules.h"
 #include "FusionFireActionBatchRules.h"
@@ -22,9 +24,14 @@
 #include "../../LawnApp.h"
 #include "../../Sexy.TodLib/TodCommon.h"
 #include "../../Sexy.TodLib/TodFoley.h"
+#include "../../Sexy.TodLib/EffectSystem.h"
+#include "../../Sexy.TodLib/Reanimator.h"
+#include "../../Sexy.TodLib/Attachment.h"
+#include "../../Sexy.TodLib/TodParticle.h"
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <cstring>
 #include <vector>
 namespace LawnFusion
 {
@@ -91,18 +98,123 @@ void SwordShoot(Plant* p)
 Plant* FertilizeTarget(Coin* c)
 {const auto* d=GetNativeFertilize269Data(c);if(!d||!d->targetId||!d->targetToken)return nullptr;Plant* p=nullptr;
  while(c->mBoard->IteratePlants(p))if(!p->mDead&&p->mNetId==d->targetId)if(const auto* pd=GetNativePlantData(p))if(pd->instanceToken==d->targetToken)return p;return nullptr;}
+struct FertilizeRecipient269
+{uint32_t uid;uint16_t id,kind,next;};
+bool FertilizePlan269(Coin* coin,Plant* target,std::vector<FertilizeRecipient269>& plan,std::string* error)
+{
+    const auto reject=[&](const char* why){if(error)*error=why;return false;};
+    if(error)error->clear();auto* b=coin?coin->mBoard:nullptr;
+    if(!Host(coin)||!target||target->mBoard!=b||target->mDead||!target->mIsOnBoard||
+        target->mPlantHealth<=0||!GetNativePlantData(target)||!EnsureNativeSourceEffect269(b,16,error))
+        return reject("Fertilize target or genuine source Recover16 resource unavailable.");
+    int bodies=0,reanimations=0,attachments=0;Plant* p=nullptr;
+    while(b->IteratePlants(p))if(p->mPlantCol==target->mPlantCol&&p->mRow==target->mRow)
+    {
+        const auto* d=GetNativePlantData(p);const auto uid=b->mPlants.DataArrayGetID(p);
+        if(!d||d->instanceToken!=uid||!p->mNetId||p->mNetGhost||!p->mIsOnBoard||p->mPlantHealth<=0||
+            p->mSeedType!=GetNativeSeedForPlant(d->kind)||IsNativeGlovePlantReserved(b,p,-1))
+            return reject("Fertilize group has a foreign generation or active glove lease.");
+        bool covered=false;
+        if(d->kind==12)
+        {
+            Plant* q=nullptr;while(b->IteratePlants(q))if(q!=p&&q->mPlantCol==p->mPlantCol&&q->mRow==p->mRow)
+            {bool air=false,pumpkin=false,pot=false,lily=false;
+             if(GetNativeRemaining269PlantTags(q,air,pumpkin,pot,lily)&&!pumpkin&&!air)covered=true;}
+        }
+        uint16_t next=0;TryGetFusionFertilize269Upgrade(d->kind,covered,next);
+        plan.push_back({uid,p->mNetId,d->kind,next});if(!next)continue;
+        const auto seed=GetNativeSeedForPlant(next);const auto* stats=FusionFindPlant(next);
+        // Exact ordinary native initializers used by the source upgrade table.
+        // New table additions cannot silently borrow this resource budget.
+        if((seed!=SEED_TALLNUT&&seed!=SEED_GLOOMSHROOM&&seed!=SEED_CATTAIL&&seed!=SEED_SPIKEROCK&&
+            seed!=SEED_COBCANNON&&seed!=SEED_THREEPEATER)||!stats||!stats->hasStats||
+            !EnsureNativePlantVisuals(b,next,error))return reject("Unbudgeted Fertilize replacement initializer.");
+        const auto type=GetPlantDefinition(seed).mReanimationType;
+        if(type==REANIM_NONE)return reject("Fertilize replacement native definition missing.");
+        ReanimatorEnsureDefinitionLoaded(type,false);
+        if(!gReanimatorDefArray||unsigned(type)>=gReanimatorDefCount)return reject("Fertilize native definition unavailable.");
+        const auto& tracks=gReanimatorDefArray[int(type)].mTracks;
+        if(!tracks.tracks||tracks.count<=0)return reject("Fertilize native definition has no tracks.");
+        bool ground=false;
+        for(int i=0;i<tracks.count;++i)if(const char* name=tracks.tracks[i].mName)
+        {if(strnicmp(name,"attacher__",10)==0)return reject("Fertilize native definition has an unbudgeted dynamic attacher.");
+         if(!std::strcmp(name,"_ground"))ground=true;}
+        ++bodies;++reanimations;
+        if(seed==SEED_THREEPEATER){reanimations+=3;attachments+=3;}
+        if(Plant::IsNocturnal(seed)&&!b->StageIsNight())
+        {
+            ReanimatorEnsureDefinitionLoaded(REANIM_SLEEPING,false);
+            if(unsigned(REANIM_SLEEPING)>=gReanimatorDefCount)return reject("Fertilize sleeping definition unavailable.");
+            const auto& sleep=gReanimatorDefArray[int(REANIM_SLEEPING)].mTracks;
+            if(!sleep.tracks||sleep.count<=0)return reject("Fertilize sleeping definition has no tracks.");
+            for(int i=0;i<sleep.count;++i)if(sleep.tracks[i].mName&&strnicmp(sleep.tracks[i].mName,"attacher__",10)==0)
+                return reject("Fertilize sleeping definition has an unbudgeted dynamic attacher.");
+            ++reanimations; // SetSleeping allocates one R, no Attachment.
+        }
+        if(!b->mApp->GetDialog(DIALOG_ALMANAC)&&b->mApp->IsWallnutBowlingLevel()&&ground)
+        {++reanimations;++attachments;}
+    }
+    if(plan.empty())return reject("Fertilize has no actual cell recipients.");
+    auto* fx=b->mApp->mEffectSystem;
+    if(!fx||fx!=gEffectSystem||!fx->mReanimationHolder||!fx->mAttachmentHolder||!fx->mParticleHolder)
+        return reject("Fertilize native pools unavailable.");
+    const auto& plants=b->mPlants;const auto& r=fx->mReanimationHolder->mReanimations;const auto& a=fx->mAttachmentHolder->mAttachments;
+    if(!plants.mBlock||!r.mBlock||!a.mBlock||plants.mSize>plants.mMaxSize||r.mSize>r.mMaxSize||a.mSize>a.mMaxSize||
+        bodies>plants.mMaxSize-plants.mSize||reanimations>r.mMaxSize-r.mSize||attachments>a.mMaxSize-a.mSize)
+        return reject("Fertilize whole replacement peak unavailable; no dead credit.");
+    if(bodies)
+    {
+        const auto effect=b->IsPoolSquare(target->mPlantCol,target->mRow)?PARTICLE_PLANTING_POOL:PARTICLE_PLANTING;
+        if(!gParticleDefArray||int(effect)>=gParticleDefCount)return reject("Fertilize planting definition unavailable.");
+        const auto& def=gParticleDefArray[int(effect)];const auto& ps=fx->mParticleHolder->mParticleSystems;const auto& em=fx->mParticleHolder->mEmitters;
+        // Genuine Health16 has one PS/emitter per Recover. Reserve it together
+        // with planting so healing cannot steal the later factory's PS peak.
+        // Heal-only groups retain cosmetic-drop semantics under pool pressure.
+        if(!def.mEmitterDefs||def.mEmitterDefCount<=0||!ps.mBlock||!em.mBlock||ps.mSize>ps.mMaxSize||em.mSize>em.mMaxSize||
+            plan.size()+size_t(bodies)>size_t(ps.mMaxSize-ps.mSize)||
+            plan.size()+size_t(bodies)*size_t(def.mEmitterDefCount)>size_t(em.mMaxSize-em.mSize))
+            return reject("Fertilize whole planting particle peak unavailable.");
+    }
+    return true;
+}
 void Upgrade(Coin* c)
 {
     auto* target=FertilizeTarget(c);if(!target){c->Die();return;}auto* b=c->mBoard;const int col=target->mPlantCol,row=target->mRow;
-    std::vector<uint32_t> ids;Plant* p=nullptr;while(b->IteratePlants(p))if(!p->mDead&&p->mPlantCol==col&&p->mRow==row&&GetNativePlantData(p))ids.push_back(b->mPlants.DataArrayGetID(p));
-    for(auto id:ids)if((p=b->mPlants.DataArrayTryToGet(id))&&!p->mDead)
-    {const auto kind=GetNativePlantData(p)->kind;RecoverNativeCompanions269Plant(p,p->mPlantMaxHealth);ReduceNativeFertilize269Attribute(p,50);
-     bool covered=false;if(kind==12){Plant* q=nullptr;while(b->IteratePlants(q))if(q!=p&&!q->mDead&&q->mPlantCol==col&&q->mRow==row)
-       {bool air=false,pumpkin=false,pot=false,lily=false;if(GetNativeRemaining269PlantTags(q,air,pumpkin,pot,lily)&&!pumpkin&&!air)covered=true;}}
-     if(kind==1039&&p->mLaunchCounter>50)p->mLaunchCounter=50;uint16_t next=0;
-     if(!TryGetFusionFertilize269Upgrade(kind,covered,next)||GetNativeSeedForPlant(next)==SEED_NONE||!EnsureNativePlantVisuals(b,next))continue;
-     NativePlantData fresh;fresh.kind=next;fresh.owner=LawnNet::NET_SHARED_OWNER;
-     auto* made=b->AddPlant(col,row,GetNativeSeedForPlant(next),SEED_NONE,&fresh);if(made&&!made->mDead&&GetNativePlantData(made))p->Die(2);else if(made)made->Die(255);
+    std::vector<FertilizeRecipient269> plan;std::string error;
+    if(!FertilizePlan269(c,target,plan,&error))
+    {if(c->mCoinAge%100==0)LawnNet::NetTrace("Fusion Fertilize Upgrade deferred id=%u reason=%s",c->mNetId,error.c_str());return;}
+    for(const auto& actor:plan)
+    {
+        auto* p=b->mPlants.DataArrayTryToGet(actor.uid);const auto* old=GetNativePlantData(p);
+        if(!p||p->mDead||!old||p->mNetId!=actor.id||old->instanceToken!=actor.uid||old->kind!=actor.kind)
+        {
+            if(auto* ctx=GetNativeContext(b);ctx&&ctx->adventure.enabled)
+            {ctx->adventure.schedulerFailed=true;ctx->adventureScheduler.failed=true;}
+            LawnNet::NetTrace("Fusion Fertilize invariant FAILED after preflight coin=%u old=%u",c->mNetId,actor.id);
+            c->Die();return;
+        }
+        RecoverNativeCompanions269Plant(p,p->mPlantMaxHealth);ReduceNativeFertilize269Attribute(p,50);
+        if(actor.kind==1039&&p->mLaunchCounter>50)p->mLaunchCounter=50;
+        if(!actor.next)continue;
+        NativePlantData fresh;fresh.kind=actor.next;fresh.owner=LawnNet::NET_SHARED_OWNER;
+        // Source freeSet upgrade group removes the old generation FIRST.
+        // Corn28's non-free SetPlant1120 path is still the legacy native
+        // Add-before-Die conversion; its shared CheckBox/CheckMix parity is
+        // not claimed here. Both orders are covered by the same whole peak.
+        if(actor.kind!=28)p->Die(2);
+        auto* made=b->AddPlant(col,row,GetNativeSeedForPlant(actor.next),SEED_NONE,&fresh);const auto* d=GetNativePlantData(made);
+        if(!made||made->mDead||!d||d->kind!=actor.next||!made->mNetId||!d->instanceToken||
+            b->mPlants.DataArrayTryToGet(d->instanceToken)!=made||d->owner!=LawnNet::NET_SHARED_OWNER||
+            d->packetId||d->randomOrigin||d->firstParent!=kFusionNoPlant||d->secondParent!=kFusionNoPlant)
+        {
+            if(made&&!made->mDead)made->Die(255);
+            if(auto* ctx=GetNativeContext(b);ctx&&ctx->adventure.enabled)
+            {ctx->adventure.schedulerFailed=true;ctx->adventureScheduler.failed=true;}
+            LawnNet::NetTrace("Fusion Fertilize invariant FAILED after mutation old=%u result=%u coin=%u",actor.id,actor.next,c->mNetId);
+            c->Die();return;
+        }
+        if(actor.kind==28)p->Die(2);
+        LawnNet::NetTrace("Fusion Fertilize upgrade old=%u oldToken=%u kind=%u child=%u token=%u result=%u sourceFreeSetOrder=%d",actor.id,actor.uid,actor.kind,made->mNetId,d->instanceToken,actor.next,actor.kind!=28);
     }
     c->Die();
 }
@@ -162,9 +274,21 @@ bool HandleNativeRemainingLeaves269Collision(Projectile* p)
 void NativeRemainingLeaves269ProjectileRemoving(Projectile* p)
 {if(Host(p))if(auto* ctx=GetNativeContext(p->mBoard))ctx->rollingHits.erase(p->mBoard->mProjectiles.DataArrayGetID(p));}
 bool IsNativeFertilize269(const Coin* c){return c&&GetNativeFertilize269Data(c);}
+bool CanCreateNativeRemaining269Fertilize(Board* b,unsigned count,std::string* error)
+{
+    if(error)error->clear();const auto reject=[&](const char* why){if(error)*error=why;return false;};
+    if(!b||!b->mApp||b->mApp->mBoard!=b||b->mApp->NetIsClient()||!IsNativeFusionBoard(b)||
+        !b->mCoins.mBlock||b->mCoins.mSize>b->mCoins.mMaxSize||count>unsigned(b->mCoins.mMaxSize-b->mCoins.mSize))
+        return reject("Fertilize whole native Coin peak unavailable.");
+    if(!EnsureNativeFertilize269Visuals(b))return reject("Genuine source Fertilize package unavailable.");
+    return true;
+}
+bool PreflightNativeFertilize269Upgrade(Coin* coin,std::string* error)
+{std::vector<FertilizeRecipient269> plan;return FertilizePlan269(coin,FertilizeTarget(coin),plan,error);}
 bool CreateNativeRemaining269Fertilize(Plant* p,float x,float y)
 {
-    if(!Host(p)||!std::isfinite(x+y)||!EnsureNativeFertilize269Visuals(p->mBoard)||p->mBoard->mCoins.mSize>=p->mBoard->mCoins.mMaxSize)return false;auto* b=p->mBoard;auto* c=b->mCoins.DataArrayAlloc();c->mApp=b->mApp;c->mBoard=b;
+    if(!Host(p)||!std::isfinite(x)||!std::isfinite(y)||std::abs(x)>4096||std::abs(y)>4096||
+       !CanCreateNativeRemaining269Fertilize(p->mBoard))return false;auto* b=p->mBoard;auto* c=b->mCoins.DataArrayAlloc();c->mApp=b->mApp;c->mBoard=b;
     c->CoinInitializeNetGhost(int(x-20),int(y-20),COIN_NONE,COIN_MOTION_COIN,nullptr);c->mNetGhost=false;c->mNetId=b->NetAllocId();if(!c->mNetId){b->mCoins.DataArrayFree(c);return false;}
     auto* d=EditNativeFertilize269Data(c,true);if(!d){b->mCoins.DataArrayFree(c);return false;}*d={};d->instanceToken=b->mCoins.DataArrayGetID(c);d->anchorX=x;d->anchorY=y;
     c->mPosX=x-20;c->mPosY=y-20;c->mX=c->mY=0;c->mCoinAge=c->mDisappearCounter=0;c->mVelX=RandRangeFloat(-1.5f,1.5f)*float(kFusionBasePixelsX*.01);c->mVelY=-4.f*float(GetNativeFusionPixelsY(b)*.01);return true;
@@ -176,7 +300,9 @@ bool PickNativeFertilize269(Coin* c,int slot)
 bool UseNativeFertilize269(Coin* c,int slot,int col,int row)
 {auto* d=EditNativeFertilize269Data(c);if(!d||!Playing(c)||!Active(c->mBoard,slot)||d->heldSlot!=slot||d->phase!=NativeFertilize269Phase::Cursor||!c->mBoard->IsValidGridCell(col,row))return false;
  Plant* p=nullptr;while(c->mBoard->IteratePlants(p))if(!p->mDead&&GetNativePlantData(p)&&p->mPlantCol==col&&p->mRow==row)
- {float x=0,y=0;if(!p->GetShadowCenter(x,y))continue;d->targetId=p->mNetId;d->targetToken=GetNativePlantData(p)->instanceToken;d->phase=NativeFertilize269Phase::Using;d->phaseStartAge=c->mCoinAge;d->heldSlot=255;
+ {float x=0,y=0;std::vector<FertilizeRecipient269> plan;std::string error;
+  if(!p->GetShadowCenter(x,y)||!FertilizePlan269(c,p,plan,&error))return false;
+  d->targetId=p->mNetId;d->targetToken=GetNativePlantData(p)->instanceToken;d->phase=NativeFertilize269Phase::Using;d->phaseStartAge=c->mCoinAge;d->heldSlot=255;
   c->mPosX=x-20;c->mPosY=y-float(1.5*GetNativeFusionPixelsY(c->mBoard))-20;return true;}return false;}
 bool PutDownNativeFertilize269(Coin* c,int slot)
 {auto* d=EditNativeFertilize269Data(c);if(!d||!Host(c)||c->mDead||d->phase!=NativeFertilize269Phase::Cursor||d->heldSlot!=slot)return false;

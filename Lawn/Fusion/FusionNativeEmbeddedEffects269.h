@@ -8,6 +8,9 @@ class Board;class Plant;class Projectile;class Zombie;class LawnApp;class TodPar
 namespace LawnNet { struct NetFusionLimbEvent276; }
 namespace LawnFusion
 {
+// Exact source callback nodes; the reliable payload carries a bounded part,
+// never a resource ID or arbitrary asset path.
+const char* NativeSourceZombiePartNode284(uint8_t part);
 class NativeWorldParticle269Definition;
 // Root callbacks into the existing NativeSourceEffects269 resource cache.
 NativeWorldParticle269Definition* EnsureNativeEmbeddedParticle269Resource(Board*,uint16_t resourceKind,const std::string& effectJson,std::string& error);

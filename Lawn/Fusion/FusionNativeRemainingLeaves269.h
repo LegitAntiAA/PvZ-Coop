@@ -2,6 +2,7 @@
 #define LAWN_FUSION_NATIVE_REMAINING_LEAVES269_H
 #include "FusionRemainingLeaves269Rules.h"
 #include <cmath>
+#include <string>
 #include "../../SexyAppFramework/Rect.h"
 class Plant;class Zombie;class Projectile;class Board;class Coin;
 namespace LawnFusion
@@ -34,6 +35,11 @@ NativeFertilize269Data* EditNativeFertilize269Data(Coin*,bool create=false);
 const NativeFertilize269Data* GetNativeFertilize269Data(const Coin*);
 // Exact Ferilize.prefab package preflight, never a vanilla Zen fertiliser icon.
 bool EnsureNativeFertilize269Visuals(Board*);
+// Real Coin/package capacity only, valid during chooser/intro preflight too.
+// No world creation, RNG, collection or healing occurs here.
+bool CanCreateNativeRemaining269Fertilize(Board*,unsigned count=1,std::string* error=nullptr);
+// Exact current target/cell group, checked again at the source Upgrade event.
+bool PreflightNativeFertilize269Upgrade(Coin*,std::string* error=nullptr);
 void ReduceNativeFertilize269Attribute(Plant*,int maximumTicks);
 bool CreateNativeRemaining269Fertilize(Plant*,float x,float y);
 bool IsNativeFertilize269(const Coin*);

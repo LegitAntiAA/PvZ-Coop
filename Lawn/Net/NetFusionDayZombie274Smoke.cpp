@@ -14,8 +14,10 @@
 #include "../Fusion/FusionNativeAdventure273.h"
 #include "../Fusion/FusionNativeZombies.h"
 #include "../Fusion/FusionNativeDayZombie273.h"
+#include "../Fusion/NativeSpecialZombie269.h"
 #include "../Fusion/FusionNativeZombieVisual.h"
 #include "../Fusion/FusionNativeProjectileMetadata.h"
+#include "../Fusion/FusionBasePlantRules.h"
 #include "../Fusion/FusionNativeEquipment.h"
 #include "../Fusion/FusionNativeVisual.h"
 #include "../../Sexy.TodLib/Reanimator.h"
@@ -30,6 +32,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <vector>
 
 namespace
 {
@@ -44,6 +47,27 @@ struct State
 }s;
 bool Enabled(const char* name){const auto* value=std::getenv(name);return value&&std::strcmp(value,"1")==0;}
 bool Combat(){return Enabled("PVZ_COOP_SMOKE_FUSION_DAY274_COMBAT");}
+bool Grass(){return Enabled("PVZ_COOP_SMOKE_FUSION_GRASS284");}
+struct GrassState
+{
+    std::array<Ref,3> actors{},walls{};
+    std::array<uint32_t,3> actorUID{};
+    std::array<Ref,4> children{};
+    std::array<int,3> wallHP{},bodyFrame{},bodyLoops{};
+    std::array<float,3> bodyTime{};
+    std::array<bool,3> moved{},animated{};
+    std::array<bool,4> childMoved{},childAnimated{};
+    std::array<float,4> childTime{};
+    std::array<int,4> childLoops{};
+    std::array<bool,2> contact{},armor{},arm{},head{},retired{},shot{};
+    std::map<std::string,std::string> proofs;
+    bool resources=false,setup=false,initial=false,run=false,jump=false,land=false,anchorKnown=false,
+        childrenBound=false,firstWeapons=false,footWeapons=false,fall=false,rage=false,
+        pauseRequested=false,resumeRequested=false,logged=false;
+    float birthAnchor=0;
+    int anchorRow=-1;
+    uint32_t childSamples=0,diagnostic=0;
+}grass;
 struct CombatState
 {
     int cohort=0,chainIndex=-1,previousNutHP=0;uint32_t oldEpoch=0,diagnostic=0;
@@ -94,7 +118,7 @@ bool Escape(LawnApp* a)
 }
 bool Capture(LawnApp* a,const char* suffix)
 {
-    const std::string name="fusion_day274_"+(Combat()?"combat"+std::to_string(combat.cohort)+"_":"")+std::string(suffix);if(s.frames.contains(name))return true;
+    const std::string name=(Grass()?"fusion_grass284_":"fusion_day274_")+(Combat()?"combat"+std::to_string(combat.cohort)+"_":"")+std::string(suffix);if(s.frames.contains(name))return true;
     if(!s.draws.contains(name))s.draws[name]=a->mDrawCount;
     const int requested=s.draws[name]+2;if(!a->CoopSmokeEnsureFreshFrameAfterDraw(requested))return false;
     if(!Require(a,a->CoopSmokeCaptureFrame(name.c_str()),"Day274 fresh owned capture failed"))return false;
@@ -560,6 +584,385 @@ bool CombatRestart(LawnApp* a)
     {combat.restarted=true;Require(a,a->StartFusionSourceAdventure(1,false),"Day275 genuine source1 fresh-cohort restart failed");}
     return true;
 }
+
+// One source world, two factory setup phases and genuine native gameplay.
+// No acquisition/full-level claim: source1 tutorial naturally holds wave0.
+constexpr std::array<uint16_t,3> grassKinds={5,6,9};
+constexpr std::array<int,3> grassRows={0,2,4};
+bool GrassPreflight(LawnApp* a)
+{
+    if(grass.resources)return true;
+    auto* b=a->mBoard;std::string error;
+    for(uint16_t kind:{uint16_t(0),uint16_t(3),uint16_t(1027),uint16_t(1032)})
+    {
+        if(!EnsureNativePlantVisuals(b,kind,&error))
+        {NetTrace("SMOKE_GRASS284_RESOURCE role=%s kind=%u error=%s",Role(a),kind,error.c_str());return Require(a,false,"Grass284 plant resource unavailable");}
+        const auto seed=GetNativeSeedForPlant(kind);
+        if(!Require(a,seed!=SEED_NONE,"Grass284 plant carrier unavailable"))return false;
+        ReanimationPreload(GetPlantDefinition(seed).mReanimationType);
+    }
+    for(uint16_t kind:{uint16_t(5),uint16_t(6),uint16_t(7),uint16_t(9)})
+    {
+        if(!EnsureNativeSourceZombieVisuals(b,kind,&error))
+        {NetTrace("SMOKE_GRASS284_RESOURCE role=%s kind=%u error=%s",Role(a),kind,error.c_str());return Require(a,false,"Grass284 source model unavailable");}
+        ReanimationPreload(GetZombieDefinition(ZombieType(GetNativeSourceZombieCarrier(kind))).mReanimationType);
+    }
+    constexpr std::array<uint16_t,7> peak={5,6,9,7,7,7,7};
+    if(a->NetIsHost()&&!CanAllocateNativeSourceDayBatch274(b,peak,&error))
+    {NetTrace("SMOKE_GRASS284_CAPACITY role=%s error=%s",Role(a),error.c_str());return Require(a,false,"Grass284 genuine seven-body peak rejected");}
+    grass.resources=true;return true;
+}
+void GrassAdvance(LawnApp* a,int stage)
+{
+    grass.pauseRequested=grass.resumeRequested=false;s.pauseSamples=0;Advance(a,stage);
+}
+bool GrassPaused(LawnApp* a)
+{
+    if(a->NetIsHost()&&!grass.pauseRequested)grass.pauseRequested=Escape(a);
+    if(!a->mBoard->mPaused)return false;
+    if(!s.pauseSamples){s.pauseSamples=Samples(a);return false;}
+    return Samples(a)-s.pauseSamples>=2;
+}
+bool GrassResumed(LawnApp* a)
+{
+    if(a->NetIsHost()&&!grass.resumeRequested)grass.resumeRequested=Escape(a);
+    return !a->NetIsHost()||grass.resumeRequested;
+}
+bool GrassSetup(LawnApp* a)
+{
+    if(!a->NetIsHost()||grass.setup)return true;
+    auto* b=a->mBoard;
+    if(!Require(a,!b->mPlants.mSize&&!b->mZombies.mSize&&!b->mPaused&&b->mSunMoney==500,
+        "Grass284 setup requires empty genuine source opening"))return false;
+    for(size_t i=0;i<3;++i)
+    {
+        // Paper's slow calm walk must contact before unarmed backup runners
+        // reach the left edge. Dance has a later blocker and room for ±1.5 ROOTs.
+        const float birthX=i==0?500.f:i==1?650.f:600.f;
+        if(!CombatPlantBirth(a,i==1?3:1027,i==1?5:4,grassRows[i])||
+            !CombatZombieBirth(a,grassKinds[i],grassRows[i],birthX))return false;
+    }
+    grass.setup=true;return true;
+}
+bool GrassNodes(LawnApp* a,Zombie* z,bool trace)
+{
+    float rx=0,ry=0,sx=0,sy=0;
+    const bool root=GetNativeSourceZombie269NodePoint(z,"",rx,ry),shadow=GetNativeSourceZombie269NodePoint(z,"Shadow",sx,sy);
+    const float ox=float(a->mBoard->mX+a->mDDInterface->mWideScreenOffsetX),oy=float(a->mBoard->mY+a->mDDInterface->mWideScreenOffsetY);
+    const bool visible=root&&shadow&&(std::min)(rx+ox,sx+ox)>=24&&(std::max)(rx+ox,sx+ox)<=a->mWidth-48&&
+        (std::min)(ry+oy,sy+oy)>=0&&(std::max)(ry+oy,sy+oy)<=a->mHeight-6;
+    if(trace||!visible)
+    {
+        const auto* d=GetNativeSourceZombieData(z);
+        NetTrace("SMOKE_GRASS284_ANCHORS role=%s kind=%u id=%u token=%u row=%d rootOkay=%d shadowOkay=%d carrier=(%.3f,%.3f) root=(%.3f,%.3f) shadow=(%.3f,%.3f) screenRoot=(%.3f,%.3f) screenShadow=(%.3f,%.3f) viewport=%dx%d visible=%d",
+            Role(a),d?d->kind:0xffff,z->mNetId,d?d->instanceToken:0,z->mRow,root,shadow,z->mPosX,z->mPosY,
+            rx,ry,sx,sy,rx+ox,ry+oy,sx+ox,sy+oy,a->mWidth,a->mHeight,visible);
+    }
+    return Require(a,visible,"Grass284 actual model ROOT/Shadow is unavailable or outside capture");
+}
+bool GrassInitial(LawnApp* a)
+{
+    auto* b=a->mBoard;
+    for(size_t i=0;i<3;++i)
+    {
+        auto* z=CombatZombie(b,grassKinds[i]);auto* p=CombatPlantAt(b,i==1?3:1027,i==1?5:4,grassRows[i]);
+        if(!z||!p)return false;
+        const auto* d=GetNativeSourceZombieData(z);const auto* pd=GetNativePlantData(p);const auto* profile=FindFusionZombieProfile(grassKinds[i]);
+        auto* body=a->ReanimationTryToGet(z->mBodyReanimID);
+        if(!Require(a,d&&pd&&profile&&body&&z->mNetId&&d->instanceToken&&p->mNetId&&pd->instanceToken&&
+            z->mRow==grassRows[i]&&!z->mMindControlled&&z->mFromWave==0&&z->mZombieType==GetNativeSourceZombieCarrier(grassKinds[i])&&
+            z->mBodyHealth==profile->maxHealth&&z->mBodyMaxHealth==profile->maxHealth&&
+            z->mHelmHealth==profile->firstArmor&&z->mShieldHealth==profile->secondArmor&&
+            z->mHasHead&&z->mHasArm&&p->mPlantHealth==p->mPlantMaxHealth&&pd->owner==LawnNet::NET_SHARED_OWNER,
+            "Grass284 actual initial identity/HP/armor differs"))return false;
+        grass.actors[i]={z->mNetId,d->instanceToken,z->mPosX};grass.walls[i]={p->mNetId,pd->instanceToken,0};
+        grass.actorUID[i]=b->mZombies.DataArrayGetID(z);grass.wallHP[i]=p->mPlantHealth;
+        grass.bodyFrame[i]=body->mFrameStart;grass.bodyLoops[i]=body->mLoopCount;grass.bodyTime[i]=body->mAnimTime;
+        if(!GrassNodes(a,z,true))return false;
+        NetTrace("SMOKE_GRASS284_BIND role=%s kind=%u id=%u token=%u localUID=%u row=%d body=%d helm=%d shield=%d wallId=%u wallToken=%u wallHP=%d",
+            Role(a),grassKinds[i],z->mNetId,d->instanceToken,grass.actorUID[i],z->mRow,z->mBodyHealth,z->mHelmHealth,z->mShieldHealth,
+            p->mNetId,pd->instanceToken,p->mPlantHealth);
+    }
+    const auto* pole=GetNativeDayZombie273(CombatZombieRef(b,grass.actors[1]));
+    if(!Require(a,pole&&pole->status==2&&pole->shadowEnabled,"Grass284 Dance initial status is not2"))return false;
+    grass.run=grass.initial=true;return true;
+}
+bool GrassProof(LawnApp* a,const char* name,bool canonical)
+{
+    // The peer can resume only after our declared local proof. Preserve that
+    // proof while its chat echo arrives; never recompute moving live clocks.
+    if(const auto found=grass.proofs.find(name);found!=grass.proofs.end())return Barrier(a,found->second);
+    LawnNet::NetBuffer out;
+    for(size_t i=0;i<3;++i)
+    {
+        out.WriteU16(grassKinds[i]);out.WriteU16(grass.actors[i].id);out.WriteU32(grass.actors[i].token);
+        out.WriteU16(grass.walls[i].id);out.WriteU32(grass.walls[i].token);
+        if(canonical)
+        {
+            auto* z=CombatZombieRef(a->mBoard,grass.actors[i]);out.WriteU8(z?1:0);
+            if(z)
+            {
+                out.WriteI32(z->mBodyHealth);out.WriteI32(z->mHelmHealth);out.WriteI32(z->mShieldHealth);
+                out.WriteU8(z->mHasHead);out.WriteU8(z->mHasArm);
+                LawnNet::NetZombieAnimState state;LawnNet::NetBuffer body;
+                if(!Require(a,CaptureHead(a->ReanimationTryToGet(z->mBodyReanimID),state,body),"Grass284 actual paused native body invalid"))return false;
+                out.mData.insert(out.mData.end(),body.mData.begin(),body.mData.end());
+            }
+        }
+    }
+    for(const auto& r:grass.children){out.WriteU16(r.id);out.WriteU32(r.token);}
+    char hash[16];sprintf_s(hash,"%08x",LawnNet::NetFnv1a32(out.Data(),out.Size()));
+    const auto value=std::string("GRASS_")+name+"_"+hash;grass.proofs.emplace(name,value);
+    NetTrace("SMOKE_GRASS284_PROOF role=%s phase=%s hash=%s canonicalPausedBody=%d localProofBeforeReceipt=1",Role(a),name,hash,canonical);
+    return Barrier(a,value);
+}
+bool GrassAnchor(LawnApp* a,const NativeDayZombie273State* pole)
+{
+    const auto prefix=Tag("GRASS_ANCHOR_");
+    if(a->NetIsHost()&&!grass.anchorKnown)
+    {
+        if(!pole||pole->status!=0||!grass.jump)return false;
+        if(!Require(a,!pole->danceSpawnFailed&&pole->danceSpawnRow==2&&std::isfinite(pole->danceSpawnShadowX),
+            "Grass284 source JumpOver birth batch failed or anchor differs"))return false;
+        grass.anchorRow=pole->danceSpawnRow;grass.birthAnchor=pole->danceSpawnShadowX;grass.anchorKnown=true;
+    }
+    if(a->NetIsHost())
+    {
+        char number[32];sprintf_s(number,"%.3f",grass.birthAnchor);return Send(a,prefix+number);
+    }
+    for(const auto& line:a->mNetManager->mChatLines)if(line.mSlot==0&&line.mText.starts_with(prefix))
+    {
+        const auto number=line.mText.substr(prefix.size());char* end=nullptr;
+        const float value=std::strtof(number.c_str(),&end);
+        if(!Require(a,end&&end!=number.c_str()&&!*end&&std::isfinite(value),"Grass284 host event-anchor proof malformed"))return false;
+        grass.birthAnchor=value;grass.anchorRow=2;grass.anchorKnown=true;return true;
+    }
+    return false;
+}
+bool GrassChildren(LawnApp* a)
+{
+    auto* b=a->mBoard;std::vector<Zombie*> found;Zombie* z=nullptr;
+    while(b->IterateZombies(z))if(const auto* d=GetNativeSourceZombieData(z);d&&d->kind==7)found.push_back(z);
+    if(!Require(a,found.size()<=4,"Grass284 Dance emitted duplicate backup7"))return false;
+    if(found.size()!=4)return false;
+    std::sort(found.begin(),found.end(),[](const Zombie* x,const Zombie* y){return x->mNetId<y->mNetId;});
+    std::array<int,5> rows{};std::array<float,2> same{};size_t sameCount=0;
+    for(size_t i=0;i<4;++i)
+    {
+        z=found[i];const auto* d=GetNativeSourceZombieData(z);const auto* day=GetNativeDayZombie273(z);
+        auto* body=a->ReanimationTryToGet(z->mBodyReanimID);float rx=0,ry=0;
+        if(!Require(a,d&&day&&body&&z->mNetId&&d->instanceToken&&z->mRow>=1&&z->mRow<=3&&!z->mMindControlled&&
+            z->mFromWave==0&&!d->sourceParentId&&!d->sourceParentToken&&!d->dieWithParent&&z->mBodyHealth==270&&
+            z->mBodyMaxHealth==270&&!z->mHelmHealth&&!z->mShieldHealth&&z->mZombieType==GetNativeSourceZombieCarrier(7)&&
+            NativeDayZombie273ControllerValid(7,*day)&&GetNativeSourceZombie269NodePoint(z,"",rx,ry),
+            "Grass284 backup7 source birth identity/hostility/controller differs"))return false;
+        ++rows[size_t(z->mRow)];
+        if(!grass.childrenBound)
+        {
+            if(z->mRow==2)
+            {if(!Require(a,sameCount<2,"Grass284 too many same-row backups"))return false;same[sameCount++]=rx;}
+            else if(!Require(a,std::abs(rx-grass.birthAnchor)<=32,"Grass284 adjacent backup ROOT is not source eventShadowX"))return false;
+            grass.children[i]={z->mNetId,d->instanceToken,z->mPosX};grass.childTime[i]=body->mAnimTime;grass.childLoops[i]=body->mLoopCount;
+            for(size_t j=0;j<3;++j)if(!Require(a,z->mNetId!=grass.actors[j].id&&d->instanceToken!=grass.actors[j].token,
+                "Grass284 backup reused a parent generation"))return false;
+            for(size_t j=0;j<i;++j)if(!Require(a,d->instanceToken!=grass.children[j].token,"Grass284 backup tokens duplicated"))return false;
+            NetTrace("SMOKE_GRASS284_CHILD role=%s index=%zu id=%u token=%u localUID=%u row=%d root=(%.3f,%.3f) acceptedEventShadow=%.3f sameRowOffset=%.3f hostile=1 parentLink=0 birthProjectionTolerance=32 postBirthWrites=0",
+                Role(a),i,z->mNetId,d->instanceToken,b->mZombies.DataArrayGetID(z),z->mRow,rx,ry,grass.birthAnchor,rx-grass.birthAnchor);
+            if(!GrassNodes(a,z,true))return false;
+        }
+        else
+        {
+            if(!Require(a,z->mNetId==grass.children[i].id&&d->instanceToken==grass.children[i].token,
+                "Grass284 backup set changed or duplicated"))return false;
+            grass.childMoved[i]=grass.childMoved[i]||std::abs(z->mPosX-grass.children[i].x)>=2;
+            grass.childAnimated[i]=grass.childAnimated[i]||body->mAnimTime!=grass.childTime[i]||body->mLoopCount!=grass.childLoops[i];
+        }
+    }
+    if(!Require(a,rows[1]==1&&rows[2]==2&&rows[3]==1,"Grass284 source interior Dance backup rows differ"))return false;
+    if(!grass.childrenBound)
+    {
+        std::sort(same.begin(),same.end());const float offset=float(1.5*kFusionBasePixelsX);
+        if(!Require(a,sameCount==2&&std::abs(same[0]-(grass.birthAnchor-offset))<=32&&
+            std::abs(same[1]-(grass.birthAnchor+offset))<=32,"Grass284 same-row backup ROOT is not eventShadowX plus/minus1.5"))return false;
+        grass.childrenBound=true;grass.childSamples=Samples(a);return false;
+    }
+    return Samples(a)-grass.childSamples>=20&&std::all_of(grass.childMoved.begin(),grass.childMoved.end(),[](bool v){return v;})&&
+        std::all_of(grass.childAnimated.begin(),grass.childAnimated.end(),[](bool v){return v;});
+}
+bool GrassApproach(LawnApp* a)
+{
+    auto* b=a->mBoard;
+    for(size_t i=0;i<3;++i)
+    {
+        auto* z=CombatZombieRef(b,grass.actors[i]);auto* p=CombatPlant(b,grass.walls[i]);
+        if(!Require(a,z&&p&&!z->IsDeadOrDying(),"Grass284 passive precombat actor retired"))return false;
+        auto* body=a->ReanimationTryToGet(z->mBodyReanimID);
+        if(!Require(a,body!=nullptr,"Grass284 native body missing"))return false;
+        grass.moved[i]=grass.moved[i]||std::abs(z->mPosX-grass.actors[i].x)>=2;
+        grass.animated[i]=grass.animated[i]||body->mFrameStart!=grass.bodyFrame[i]||body->mLoopCount!=grass.bodyLoops[i]||body->mAnimTime!=grass.bodyTime[i];
+        if(i!=1&&p->mPlantHealth<grass.wallHP[i])
+        {
+            const int damage=grass.wallHP[i]-p->mPlantHealth;const size_t index=i==0?0:1;const auto* d=GetNativeSourceZombieData(z);
+            if(!Require(a,damage>0&&damage%50==0&&z->mIsEating&&d->targetEntity==NativeZombieTargetEntity::Plant&&d->targetId==p->mNetId,
+                "Grass284 passive blocker damage is not genuine exclusive50 bite"))return false;
+            if(!grass.contact[index])NetTrace("SMOKE_GRASS284_CONTACT role=%s kind=%u id=%u token=%u targetId=%u targetToken=%u before=%d after=%d damage=%d sourceBite50=1 weaponsPresent=0",
+                Role(a),grassKinds[i],z->mNetId,grass.actors[i].token,p->mNetId,grass.walls[i].token,grass.wallHP[i],p->mPlantHealth,damage);
+            grass.contact[index]=true;
+        }
+        grass.wallHP[i]=p->mPlantHealth;
+    }
+    auto* parent=CombatZombieRef(b,grass.actors[1]);const auto* pole=GetNativeDayZombie273(parent);bool shadow=false;
+    if(!Require(a,pole&&NativeDayZombie273ControllerValid(6,*pole)&&
+        GetNativeSourceZombie269NodeActivity(parent,"Shadow",shadow)&&shadow==pole->shadowEnabled,
+        "Grass284 Dance actual Shadow/controller differs"))return false;
+    if(pole->status==3)
+    {
+        if(!Require(a,grass.run&&!grass.land&&!shadow,"Grass284 Dance2->3 transition skipped"))return false;
+        grass.jump=true;if(!GrassNodes(a,parent,false)||!Capture(a,"jump"))return false;
+    }
+    if(pole->status==0)
+    {
+        if(!Require(a,grass.jump&&shadow,"Grass284 Dance natural jump/landing was not observed"))return false;
+        grass.land=true;
+    }
+    if(!grass.land||!GrassAnchor(a,pole)||!GrassChildren(a))return false;
+    return grass.contact[0]&&grass.contact[1]&&std::all_of(grass.moved.begin(),grass.moved.end(),[](bool v){return v;})&&
+        std::all_of(grass.animated.begin(),grass.animated.end(),[](bool v){return v;})&&s.frames.contains("fusion_grass284_jump");
+}
+bool GrassWeapons(LawnApp* a,bool foot)
+{
+    auto& ready=foot?grass.footWeapons:grass.firstWeapons;
+    if(!a->NetIsHost()||ready)return true;
+    if(!Require(a,a->mBoard->mPaused,"Grass284 second factory setup requires actual pause"))return false;
+    if(foot)
+    {for(int col=0;col<2;++col)if(!CombatPlantBirth(a,1032,col,4))return false;}
+    else
+    {
+        if(!CombatPlantBirth(a,0,0,0))return false;
+        for(int row=1;row<=3;++row)if(!CombatPlantBirth(a,1032,0,row))return false;
+    }
+    ready=true;NetTrace("SMOKE_GRASS284_WEAPONS phase=%s actualFactoriesOnly=1 acquisition=NotExecuted HPWrites=0 clockWrites=0",foot?"football":"paper-and-backups");return true;
+}
+bool GrassBattle(LawnApp* a)
+{
+    auto* b=a->mBoard;Zombie* actor=nullptr;
+    while(b->IterateZombies(actor))
+    {
+        const auto* d=GetNativeSourceZombieData(actor);if(!Require(a,d!=nullptr,"Grass284 untyped actor appeared"))return false;
+        bool known=false;for(const auto& r:grass.actors)known=known||(actor->mNetId==r.id&&d->instanceToken==r.token);
+        for(const auto& r:grass.children)known=known||(actor->mNetId==r.id&&d->instanceToken==r.token);
+        if(!Require(a,known,"Grass284 extra actor or duplicate Dance generation appeared after combat"))return false;
+    }
+    for(size_t i=0;i<2;++i)
+    {
+        const size_t index=i==0?0:2;auto* z=CombatZombieRef(b,grass.actors[index]);
+        if(z)
+        {
+            if(i==0)
+            {
+                int status=-1;if(!Require(a,GetNativeSpecialZombie269Status(z,status),"Grass284 Paper controller missing"))return false;
+                if(status==5)grass.fall=true;
+                if(status==6)
+                {
+                    if(!Require(a,grass.fall,"Grass284 source Paper LosePaper phase was skipped"))return false;
+                    if(!grass.rage)NetTrace("SMOKE_GRASS284_RAGE role=%s kind=5 id=%u token=%u status=6 body=%d shield=%d naturalProjectiles=1",Role(a),z->mNetId,grass.actors[0].token,z->mBodyHealth,z->mShieldHealth);
+                    grass.rage=true;
+                }
+            }
+            const bool lost=i==0?z->mShieldType==SHIELDTYPE_NONE:z->mHelmType==HELMTYPE_NONE;
+            if(lost&&!grass.armor[i])NetTrace("SMOKE_GRASS284_ARMOR role=%s kind=%u id=%u token=%u body=%d helm=%d shield=%d stage=%u naturalProjectiles=1",Role(a),i==0?5:9,z->mNetId,grass.actors[index].token,z->mBodyHealth,z->mHelmHealth,z->mShieldHealth,unsigned(GetNativeSourceZombieData(z)->firstArmorStage));
+            grass.armor[i]=grass.armor[i]||lost;grass.arm[i]=grass.arm[i]||!z->mHasArm;grass.head[i]=grass.head[i]||!z->mHasHead;
+        }
+        if(!b->mZombies.DataArrayTryToGet(grass.actorUID[index])&&!grass.retired[i])
+        {
+            grass.retired[i]=true;
+            NetTrace("SMOKE_GRASS284_RETIRED role=%s kind=%u id=%u token=%u localUID=%u actualDataArrayAbsent=1 armorObserved=%d armObserved=%d headObserved=%d",Role(a),i==0?5:9,grass.actors[index].id,grass.actors[index].token,grass.actorUID[index],grass.armor[i],grass.arm[i],grass.head[i]);
+        }
+    }
+    Projectile* shot=nullptr;while(b->IterateProjectiles(shot))if(const auto* d=GetNativeProjectileData(shot);
+        d&&!shot->mDead&&d->kind==0&&d->damage==20&&!d->isZombieBullet&&(shot->mRow==0||shot->mRow==4))
+    {
+        const size_t i=shot->mRow==0?0:1;if(!grass.shot[i])NetTrace("SMOKE_GRASS284_SHOT role=%s row=%d id=%u kind=0 damage=20 hostile=0 genuineNativeWeapon=1",Role(a),shot->mRow,shot->mNetId);
+        grass.shot[i]=true;
+    }
+    return true;
+}
+bool GrassUpdate(LawnApp* a)
+{
+    auto* b=a->mBoard;
+    if(!grass.diagnostic||GetTickCount()-grass.diagnostic>=3000)
+    {
+        grass.diagnostic=GetTickCount();auto* p=CombatZombieRef(b,grass.actors[0]);auto* d=CombatZombieRef(b,grass.actors[1]);auto* f=CombatZombieRef(b,grass.actors[2]);
+        const auto* day=GetNativeDayZombie273(d);
+        NetTrace("SMOKE_GRASS284_WAIT role=%s stage=%d paused=%d tick=%d snapshots=%u danceStatus=%d jump=%d land=%d children=%d contact=%d/%d paper=(%d,%d) fall=%d rage=%d football=(%d,%d) armor=%d/%d retire=%d/%d",
+            Role(a),s.stage,b->mPaused,b->mMainCounter,Samples(a),day?int(day->status):-1,grass.jump,grass.land,grass.childrenBound,
+            grass.contact[0],grass.contact[1],p?p->mBodyHealth:-1,p?p->mShieldHealth:-1,grass.fall,grass.rage,f?f->mBodyHealth:-1,f?f->mHelmHealth:-1,
+            grass.armor[0],grass.armor[1],grass.retired[0],grass.retired[1]);
+    }
+    if(s.stage==30)
+    {
+        if(!GrassPaused(a))return true;
+        if(!grass.initial&&!GrassInitial(a))return true;
+        if(!Capture(a,"cohort")||!GrassProof(a,"INITIAL",true)||!GrassResumed(a))return true;
+        GrassAdvance(a,31);
+    }
+    else if(s.stage==31)
+    {
+        if(!GrassApproach(a)||!GrassProof(a,"PASSIVE",false))return true;
+        GrassAdvance(a,32);
+    }
+    else if(s.stage==32)
+    {
+        if(!GrassPaused(a)||!Capture(a,"backups")||!GrassProof(a,"BACKUPS",true)||!GrassWeapons(a,false)||!GrassResumed(a))return true;
+        NetTrace("SMOKE_GRASS284_BACKUPS role=%s source6=1 observedStatus=2,3,0 count=4 kind=7 rows=1,2,2,3 fullGenerations=4 hostile=1 sourceParentLink=0 ROOTProjection=1 movement=4 animations=4 minimumSnapshots=20 duplicateChildren=0",Role(a));
+        GrassAdvance(a,33);
+    }
+    else if(s.stage==33)
+    {
+        if(!GrassBattle(a)||!grass.rage||!grass.shot[0]||!GrassProof(a,"RAGE",false))return true;
+        GrassAdvance(a,34);
+    }
+    else if(s.stage==34)
+    {
+        if(!GrassPaused(a)||!GrassProof(a,"FOOT_SETUP",true)||!GrassWeapons(a,true)||!GrassResumed(a))return true;
+        GrassAdvance(a,35);
+    }
+    else if(s.stage==35)
+    {
+        if(!GrassBattle(a)||!grass.armor[1]||!grass.shot[1])return true;
+        // Freeze the genuine armor edge before a fast Gatling can retire Foot9.
+        // The client proves the authoritative paused edge after raw adoption.
+        if(a->NetIsHost()&&!grass.pauseRequested)grass.pauseRequested=Escape(a);
+        if(!b->mPaused)return true;
+        GrassAdvance(a,36);grass.pauseRequested=a->NetIsHost();
+    }
+    else if(s.stage==36)
+    {
+        if(!GrassPaused(a)||!GrassBattle(a)||!Capture(a,"armor")||!GrassProof(a,"ARMOR",true)||!GrassResumed(a))return true;
+        GrassAdvance(a,37);
+    }
+    else if(s.stage==37)
+    {
+        if(!GrassBattle(a)||!grass.retired[0]||!grass.retired[1])return true;
+        if(!Require(a,grass.armor[0]&&grass.armor[1]&&grass.rage&&grass.arm[0]&&grass.head[0],
+            "Grass284 Paper retired before its genuine armor/rage/arm/head proof"))return true;
+        if(!GrassProof(a,"RETIRED",false))return true;
+        GrassAdvance(a,38);
+    }
+    else if(s.stage==38)
+    {
+        if(!GrassPaused(a)||!Capture(a,"paused"))return true;
+        if(!grass.logged)
+        {
+            grass.logged=true;
+            NetTrace("SMOKE_GRASS284_COMPLETE role=%s source1=1 tutorialActive=1 wave=0 primaries=5,6,9 backup7=4 motionAnimations=7 contact50=5,9 jump=2,3,0 sourceROOTBirths=1 paperLossRage=1 footballHelmetLoss=1 actualRetired=5,9 reliableParts=RunnerChecks fullCampaign=0 Jackson10=NotExecuted ownerAbsentReliableReplay=NotExecuted setupFactoriesOnly=1 HPWrites=0 clockWrites=0 RNGWrites=0",
+                Role(a));
+        }
+        if(GrassProof(a,"COMPLETE",true))a->CoopSmokeWriteResult(true,nullptr);
+    }
+    return true;
+}
+
 }
 
 namespace LawnNet
@@ -570,8 +973,10 @@ bool NetSmokeUpdateFusionDayZombie274(LawnApp* a)
     if(!a||!a->CoopSmokeActive()||!a->mNetManager||a->mCoopSmokeResultWritten)return true;
     if(!Require(a,Enabled("PVZ_COOP_SMOKE_FUSION_NATIVE")&&a->mCoopSmokeManifest.mScenario==NETSMOKE_SCENARIO_FUSION_VALIDATION,
         "Day274 requires owned native fusion_validation fixture"))return true;
+    if(Grass()&&!Require(a,!Combat()&&Enabled("PVZ_COOP_SMOKE_FUSION_SOURCE273"),
+        "Grass284 requires Source273 and a separate non-Combat cohort"))return true;
     if(!s.started)s.started=s.since=GetTickCount();
-    if(GetTickCount()-s.started>(Combat()?600000u:180000u)||GetTickCount()-s.since>(Combat()?180000u:60000u))
+    if(GetTickCount()-s.started>(Grass()?450000u:Combat()?600000u:180000u)||GetTickCount()-s.since>((Grass()||Combat())?180000u:60000u))
     {a->CoopSmokeFail("Day274 actual cohort/input deadline; inspect stage and model-node traces");return true;}
     if(!s.stage)
     {
@@ -589,6 +994,7 @@ bool NetSmokeUpdateFusionDayZombie274(LawnApp* a)
     }
     if(!a->mBoard||!World(a))return true;
     if(Combat()&&s.stage==10)return CombatUpdate(a);
+    if(Grass()&&s.stage>=30)return GrassUpdate(a);
     auto* b=a->mBoard;const auto* c=GetNativeContext(b);const auto& bank=c->selection.State();
     if(s.stage==1){if(Choose(a))Advance(a,2);}
     else if(s.stage==2)
@@ -606,6 +1012,11 @@ bool NetSmokeUpdateFusionDayZombie274(LawnApp* a)
         if(bank.phase!=FusionBankPhase::Playing||a->mSeedChooserScreen||a->mGameScene!=SCENE_PLAYING)return true;
         if(s.playingFrame<0){s.playingFrame=a->mAppCounter;s.startSamples=Samples(a);return true;}
         if(a->mAppCounter<=s.playingFrame||Samples(a)-s.startSamples<2)return true;
+        if(Grass())
+        {
+            if(!GrassPreflight(a)||!Barrier(a,"EMPTY_SOURCE_OPENING")||!GrassSetup(a))return true;
+            GrassAdvance(a,30);return true;
+        }
         if(Combat())
         {
             if(!CombatPreflight(a)||!Barrier(a,"EMPTY_SOURCE_OPENING")||!CombatSetup(a))return true;

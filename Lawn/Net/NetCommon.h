@@ -29,7 +29,7 @@ namespace LawnNet
 // (the host broadcasts the same sounds via events).
 extern bool gNetSuppressSounds;
 
-static const uint32_t NET_PROTOCOL_VERSION = 66; // Shared Night world and multi-Puff source placement; FNS26 unchanged.
+static const uint32_t NET_PROTOCOL_VERSION = 67; // Reliable source armor/head-accessory callbacks; FNS26 unchanged.
 static const uint16_t NET_DEFAULT_PORT = 27713;			// PvZ co-op port
 static const int NET_MAX_PLAYERS = 4;					// 1 host + 3 clients
 static const int NET_MAX_NICK_CHARS = 16;
@@ -543,13 +543,15 @@ bool NetDecodeEndlessRepickEvent(NetBuffer& theBuffer, uint32_t& theStage);
 // Reliable host source loss survives removal before the next Board snapshot.
 // SendBoardEvent prepends the event byte; this payload contains no event type.
 static const size_t NET_FUSION_LIMB276_WIRE_BYTES = 26;
+enum class NetFusionZombiePart284 : uint8_t {Arm=0,Head=1,FirstArmor=2,SecondArmor=3,Glasses=4};
+bool NetFusionZombiePart284Supported(uint16_t sourceKind,NetFusionZombiePart284 part);
 struct NetFusionLimbEvent276
 {
 	uint32_t mEpoch = 0;
 	uint16_t mZombieId = 0;
 	uint32_t mZombieToken = 0;
 	uint16_t mSourceKind = 0;
-	bool mHead = false;
+	NetFusionZombiePart284 mPart = NetFusionZombiePart284::Arm;
 	uint8_t mRow = 0;
 	float mX = 0.0f;
 	float mY = 0.0f;
@@ -559,6 +561,9 @@ bool NetFusionLimbEvent276Valid(const NetFusionLimbEvent276&);
 bool NetEncodeFusionLimbEvent276(const NetFusionLimbEvent276&, NetBuffer&);
 // Exact remaining payload required. Invalid input preserves cursor and output.
 bool NetDecodeFusionLimbEvent276(NetBuffer&, NetFusionLimbEvent276&);
+// Existing two-byte native cues keep volume1. Source cues may append one F32
+// per-playback volume. Exact framing; failure preserves cursor and outputs.
+bool NetDecodeSoundEvent284(NetBuffer&,uint16_t& sound,float& volume);
 
 // Every current/max health pool is authoritative.  U32 prevents Endless health
 // scaling from silently pinning client ghosts at 65535 and keeps health-bar

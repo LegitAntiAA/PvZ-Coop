@@ -11,6 +11,7 @@
 #include "FusionSummon269Rules.h"
 #include "FusionNativeWater268.h"
 #include "FusionSourceZombieDeps269.h"
+#include "FusionNightZombie281Rules.h"
 #include "NativeSpecialZombie269.h"
 #include "FusionNativeEffects269.h"
 #include "../Board.h"
@@ -84,9 +85,9 @@ bool SpeedFactor(Zombie* zombie,const NativeSourceZombieData& data,float& factor
         garlic && FusionGarlicStopsWalking(*garlic),factor);
 }
 bool WalkCurve2(const NativeSourceZombieData& data)
-{return data.kind==111||(data.kind!=109&&data.originSpeed>kFusionZombieWalk2Threshold);}
-float WalkDuration(uint16_t kind){return kind==109?2.f:kFusionZombieWalkClipSeconds;}
-float AttackDuration(uint16_t kind){return kind==3?2.25f:kind==109?2.9166667f:kFusionZombieAttackClipSeconds;}
+{return data.kind==111||(data.kind!=109&&data.kind!=9&&data.originSpeed>kFusionZombieWalk2Threshold);}
+float WalkDuration(uint16_t kind){return kind==9||kind==109?2.f:kFusionZombieWalkClipSeconds;}
+float AttackDuration(uint16_t kind){return FusionDayZombie273Pole(kind)?2.25f:kind==9||kind==109?2.9166667f:kFusionZombieAttackClipSeconds;}
 uint16_t MotionKind(const NativeSourceZombieData& data)
 {return data.kind==4||data.kind==111?0:FusionDayZombie273Doll(data.kind)?2:data.kind;}
 bool EatingBlocked(Zombie* zombie)
@@ -166,7 +167,7 @@ bool CanAllocateNativeSourceDayBatch274(Board* board,std::span<const uint16_t> k
     {
         const int carrier=GetNativeSourceZombieCarrier(kind);
         if(carrier!=ZOMBIE_NORMAL&&carrier!=ZOMBIE_TRAFFIC_CONE&&carrier!=ZOMBIE_PAIL&&
-            carrier!=ZOMBIE_DOOR&&carrier!=ZOMBIE_POLEVAULTER&&carrier!=ZOMBIE_NEWSPAPER)
+            carrier!=ZOMBIE_DOOR&&carrier!=ZOMBIE_POLEVAULTER&&carrier!=ZOMBIE_NEWSPAPER&&carrier!=ZOMBIE_FOOTBALL)
             return reject("Source Day batch contains an uncovered native carrier initializer.");
         const bool head=kind==100||kind==108||kind==104;
         const ReanimationType types[]={GetZombieDefinition(static_cast<ZombieType>(carrier)).mReanimationType,
@@ -209,7 +210,20 @@ bool IsNativeSourceZombie(const Zombie* zombie)
 
 bool ApplyNativeSourceZombie111Armor(Zombie* zombie,int damage,int& overkill)
 {
-    auto* data=GetNativeSourceZombieData(zombie);if(!data||(data->kind!=111&&data->kind!=109))return false;
+    auto* data=GetNativeSourceZombieData(zombie);if(!data)return false;
+    if(data->kind==9)
+    {
+        overkill=0;if(!HostPlaying(zombie)||zombie->IsDeadOrDying())return true;
+        int after=0,excess=0;
+        if(!TryStepFusionSourceZombie111Armor(zombie->mHelmHealth,damage,after,excess))return true;
+        if(zombie->mHelmType!=HELMTYPE_NONE&&!after&&!PlayNativeSourceZombieArmor284(zombie,true))return true;
+        uint8_t stage=data->firstArmorStage;int sprite=-1;
+        if(after)TryGetFusionNightZombie281ArmorStage(9,after,zombie->mHelmMaxHealth,stage,stage,sprite);
+        data->firstArmorStage=stage;zombie->mHelmHealth=after;
+        if(!after)zombie->mHelmType=HELMTYPE_NONE;
+        overkill=excess;return true; // Source FirstArmorFall, never stock DropHelm.
+    }
+    if(data->kind!=111&&data->kind!=109)return false;
     if(!TryApplyNativeSourceZombie111Armor(zombie,damage,overkill))return false;
     // Source lethal branch clears the armor reference without Broken(). Its
     // last head sprite therefore survives, even on a direct2200->0 hit.
@@ -235,9 +249,15 @@ bool GetNativeSpecialZombie269PlantTraits(const Plant* plant,bool& caltrop,bool&
 void RefreshNativeSpecialZombie269PaperArmor(Zombie* zombie)
 {
     auto* data=GetNativeSourceZombieData(zombie);
-    if(!data||(data->kind!=15&&data->kind!=104)||!HostPlaying(zombie)||
+    if(!data||!SpecialZombie269PaperKind(data->kind)||!HostPlaying(zombie)||
         zombie->mShieldHealth<=0||zombie->mShieldMaxHealth<=0)return;
     const int hp=zombie->mShieldHealth,maximum=zombie->mShieldMaxHealth;
+    if(data->kind==5)
+    {
+        int sprite=-1;uint8_t stage=data->firstArmorStage;
+        if(TryGetFusionNightZombie281ArmorStage(5,hp,maximum,stage,stage,sprite))data->firstArmorStage=stage;
+        return;
+    }
     if(hp<int(int64_t(maximum)*2/3)&&data->firstArmorStage<1)data->firstArmorStage=1;
     if(hp<maximum/3&&data->firstArmorStage<2)data->firstArmorStage=2;
 }
@@ -298,7 +318,14 @@ Zombie* SpawnNativeSourceZombie(Board* board,const NativeSourceZombieSpawnReques
         LawnNet::NetTrace("Fusion source111 spawn bounded refusal row=%d effect=%d reason=onlyGroundWithEffectFalseAdmitted",row,request.withEffect?1:0);
         return nullptr;
     }
-    if((kind==109||kind==18)&&board->mPlantRow[row]==PLANTROW_POOL)return nullptr;
+    if(kind==10)return nullptr; // Jackson controller/wire/blend is deliberately not admitted.
+    if((kind==9||kind==109||kind==18)&&board->mPlantRow[row]==PLANTROW_POOL)return nullptr;
+    if(kind==5||kind==9)
+    {
+        std::string error;
+        if(!CanSpawnNativeGrassZombie284(board,kind,&error))
+        {LawnNet::NetTrace("Fusion source284 spawn gated kind=%u row=%d reason=%s",kind,row,error.c_str());return nullptr;}
+    }
     if(FindFusionDayZombie273Profile(kind))
     {
         // These are the bounded ground families. A copied profile does not
@@ -318,7 +345,7 @@ Zombie* SpawnNativeSourceZombie(Board* board,const NativeSourceZombieSpawnReques
     if((board->mBackground==BACKGROUND_1_DAY||
         (board->mBackground==BACKGROUND_2_NIGHT&&IsNativeSourceAdventureGrassWorld281(board)))&&GetNativeFusionRowCount(board)==5&&
         (nativeCarrier==ZOMBIE_NORMAL||nativeCarrier==ZOMBIE_TRAFFIC_CONE||nativeCarrier==ZOMBIE_PAIL||
-         nativeCarrier==ZOMBIE_DOOR||nativeCarrier==ZOMBIE_POLEVAULTER||nativeCarrier==ZOMBIE_NEWSPAPER))
+         nativeCarrier==ZOMBIE_DOOR||nativeCarrier==ZOMBIE_POLEVAULTER||nativeCarrier==ZOMBIE_NEWSPAPER||nativeCarrier==ZOMBIE_FOOTBALL))
     {
         // Includes transitive births such as SilverDoll23 -> ordinary Cone2.
         // Source metadata is attached after the native initializer, so every
@@ -441,6 +468,38 @@ int GetNativeSourceZombieBiteDamage(const Zombie* zombie,int nativeDamage)
     return profile ? profile->biteDamage : nativeDamage;
 }
 
+bool ApplyNativeSourceZombieDeathClock284(Zombie* zombie)
+{
+    if(!IsNativeSourceZombie(zombie)||!HostPlaying(zombie)||zombie->mZombiePhase!=PHASE_ZOMBIE_DYING)return false;
+    const auto* data=GetNativeSourceZombieData(zombie);auto* body=Body(zombie);
+    if(!body||body->mFrameCount<=0)return false;
+    float seconds=0,multiplier=0;
+    if(data->kind==5){seconds=.8333333f;multiplier=.5f;}
+    else if(data->kind==9){seconds=1.4166666f;multiplier=1.2f;}
+    else if(data->kind==6||data->kind==7)
+    {FusionDayZombie273Clip clip;if(!TryGetFusionDayZombie273Clip(data->kind,1,false,clip))return false;
+     seconds=clip.seconds;multiplier=clip.multiplier;}
+    else return false;
+    const float rate=body->mFrameCount*multiplier*data->originSpeed/seconds;
+    if(!std::isfinite(rate)||rate<=0)return false;
+    zombie->mOriginalAnimRate=rate;body->mAnimRate=rate;return true;
+}
+
+bool UpdateNativeSourceZombieDeath284(Zombie* zombie)
+{
+    if(!IsNativeSourceZombie(zombie))return false;
+    const auto* data=GetNativeSourceZombieData(zombie);
+    if(data->kind!=5&&data->kind!=6&&data->kind!=7&&data->kind!=9)return false;
+    if(zombie->mZombiePhase!=PHASE_ZOMBIE_DYING)return false;
+    if(!HostPlaying(zombie))return true;
+    auto* body=Body(zombie);if(!body){zombie->DieNoLoot();return true;}
+    const float fall=data->kind==5?.43333334f/.8333333f:data->kind==9?
+        1.0833334f/1.4166666f:1.5f/2.1666667f;
+    if(body->ShouldTriggerTimedEvent(fall))zombie->mApp->PlayFoley(FOLEY_ZOMBIE_FALLING);
+    if(body->mLoopCount>0)zombie->DieNoLoot(); // Source DestoryZombie at actual clip end.
+    return true;
+}
+
 bool TryShrinkNativeSourceZombie(Zombie* zombie)
 {
     if (!IsNativeSourceZombie(zombie) || !FlatLive(zombie)) return false;
@@ -500,7 +559,7 @@ bool UpdateNativeSourceZombieAnimation(Zombie* zombie)
         body->mAnimRate=zombie->mOriginalAnimRate;return true;
     }
     const float duration=zombie->mIsEating ? AttackDuration(data->kind) : WalkDuration(data->kind);
-    if(data->kind==109)rate=(zombie->mIsEating?2.f:1.7f)*data->originSpeed*factor;
+    if(data->kind==9||data->kind==109)rate=(zombie->mIsEating?2.f:1.7f)*data->originSpeed*factor;
     else if (zombie->mIsEating) rate=data->originSpeed*factor;
     else if (!TryGetFusionZombieWalkRate(MotionKind(*data),WalkCurve2(*data),data->originSpeed,factor,rate)) return true;
     // ApplyAnimRate would halve chill a second time. This rate already includes
@@ -553,7 +612,7 @@ bool UpdateNativeSourceZombieWalking(Zombie* zombie)
         std::isfinite(zombie->mScaleZombie) && zombie->mScaleZombie>0)
     {
         double delta=0;
-        if(data->kind==109)
+        if(data->kind==9||data->kind==109)
         {
             // Actual TallNutFootball walk root:6.73->6.2499995 over2s,
             // linear Hermite slope-.24000025, source root scale1.2.
@@ -627,8 +686,8 @@ bool GetNativeSourceZombiePresentation(const Zombie* zombie,const char*& stateNa
     const auto* data=GetNativeSourceZombieData(zombie); const auto* body=Body(zombie);
     if (!body || !std::isfinite(body->mAnimTime) || body->mAnimTime<0 || body->mAnimTime>1) return false;
     const char* state=const_cast<Zombie*>(zombie)->IsDeadOrDying() ? "die" : zombie->mIsEating ?
-        (FindFusionZombieProfile(data->kind)->waterOnly?"attackinwater":"attack") : zombie->mInPool ? "swim" :
-        data->kind==111||data->kind==109?"walk":data->originSpeed>kFusionZombieWalk2Threshold ? "walk2" : "walk";
+        (data->kind==9?"eat":FindFusionZombieProfile(data->kind)->waterOnly?"attackinwater":"attack") : zombie->mInPool ? "swim" :
+        data->kind==111||data->kind==109||data->kind==9?"walk":data->originSpeed>kFusionZombieWalk2Threshold ? "walk2" : "walk";
     if(IsFusionSummon269Money(data->kind))state="walk";
     stateName=state; normalizedPhase=body->mAnimTime;
     return true;

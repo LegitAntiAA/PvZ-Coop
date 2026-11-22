@@ -751,21 +751,25 @@ bool NetDecodeEndlessRepickEvent(NetBuffer& theBuffer, uint32_t& theStage)
 	return true;
 }
 
+bool NetFusionZombiePart284Supported(uint16_t kind,NetFusionZombiePart284 part)
+{
+	using Part=NetFusionZombiePart284;
+	if(part==Part::FirstArmor)return kind==9;
+	if(part==Part::SecondArmor||part==Part::Glasses)return kind==5;
+	if(part!=Part::Arm&&part!=Part::Head)return false;
+	if(kind==3||kind==5||kind==6||kind==7||kind==9)return true;
+	if(part==Part::Head)return false;
+	switch(kind){case 21:case 22:case 23:case 100:case 106:case 107:case 108:return true;default:return false;}
+}
 bool NetFusionLimbEvent276Valid(const NetFusionLimbEvent276& theEvent)
 {
 	if (!theEvent.mEpoch || !theEvent.mZombieId || !theEvent.mZombieToken ||
-		theEvent.mRow >= 5 || (theEvent.mHead && theEvent.mSourceKind != 3) ||
+		theEvent.mRow >= 5 || !NetFusionZombiePart284Supported(theEvent.mSourceKind,theEvent.mPart) ||
 		!std::isfinite(theEvent.mX) || !std::isfinite(theEvent.mY) ||
 		std::fabs(theEvent.mX) > 4096.0f || std::fabs(theEvent.mY) > 4096.0f ||
 		theEvent.mRenderOrder < 0 || theEvent.mRenderOrder > 1000000)
 		return false;
-	switch (theEvent.mSourceKind)
-	{
-	case 3: case 21: case 22: case 23: case 100: case 106: case 107: case 108:
-		return true;
-	default:
-		return false;
-	}
+	return true;
 }
 
 bool NetEncodeFusionLimbEvent276(const NetFusionLimbEvent276& theEvent, NetBuffer& theBuffer)
@@ -777,7 +781,7 @@ bool NetEncodeFusionLimbEvent276(const NetFusionLimbEvent276& theEvent, NetBuffe
 	aWire.WriteU16(theEvent.mZombieId);
 	aWire.WriteU32(theEvent.mZombieToken);
 	aWire.WriteU16(theEvent.mSourceKind);
-	aWire.WriteU8(theEvent.mHead ? 1 : 0);
+	aWire.WriteU8(uint8_t(theEvent.mPart));
 	aWire.WriteU8(theEvent.mRow);
 	aWire.WriteF32(theEvent.mX);
 	aWire.WriteF32(theEvent.mY);
@@ -794,17 +798,17 @@ bool NetDecodeFusionLimbEvent276(NetBuffer& theBuffer, NetFusionLimbEvent276& th
 		return false;
 	const size_t aStartReadPos = theBuffer.mReadPos;
 	NetFusionLimbEvent276 aDecoded;
-	uint8_t aHead = 0;
+	uint8_t aPart = 0;
 	if (!theBuffer.ReadU32(&aDecoded.mEpoch) || !theBuffer.ReadU16(&aDecoded.mZombieId) ||
 		!theBuffer.ReadU32(&aDecoded.mZombieToken) || !theBuffer.ReadU16(&aDecoded.mSourceKind) ||
-		!theBuffer.ReadU8(&aHead) || !theBuffer.ReadU8(&aDecoded.mRow) ||
+		!theBuffer.ReadU8(&aPart) || !theBuffer.ReadU8(&aDecoded.mRow) ||
 		!theBuffer.ReadF32(&aDecoded.mX) || !theBuffer.ReadF32(&aDecoded.mY) ||
-		!theBuffer.ReadI32(&aDecoded.mRenderOrder) || aHead > 1 || theBuffer.Remaining())
+		!theBuffer.ReadI32(&aDecoded.mRenderOrder) || aPart > uint8_t(NetFusionZombiePart284::Glasses) || theBuffer.Remaining())
 	{
 		theBuffer.mReadPos = aStartReadPos;
 		return false;
 	}
-	aDecoded.mHead = aHead != 0;
+	aDecoded.mPart = NetFusionZombiePart284(aPart);
 	if (!NetFusionLimbEvent276Valid(aDecoded))
 	{
 		theBuffer.mReadPos = aStartReadPos;
@@ -812,6 +816,15 @@ bool NetDecodeFusionLimbEvent276(NetBuffer& theBuffer, NetFusionLimbEvent276& th
 	}
 	theEvent = aDecoded;
 	return true;
+}
+bool NetDecodeSoundEvent284(NetBuffer& wire,uint16_t& sound,float& volume)
+{
+	if(wire.mReadPos>wire.Size()||(wire.Remaining()!=2&&wire.Remaining()!=6))return false;
+	const auto saved=wire.mReadPos;uint16_t parsedSound=0;float parsedVolume=1.f;
+	if(!wire.ReadU16(&parsedSound)||(wire.Remaining()&&!wire.ReadF32(&parsedVolume))||
+		!std::isfinite(parsedVolume)||parsedVolume<0||parsedVolume>1)
+	{wire.mReadPos=saved;return false;}
+	sound=parsedSound;volume=parsedVolume;return true;
 }
 
 namespace

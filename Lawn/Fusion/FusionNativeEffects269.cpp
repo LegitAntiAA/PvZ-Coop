@@ -5,6 +5,7 @@
 #include "FusionNative.h"
 #include "FusionNativeZombieVisual.h"
 #include "FusionNativeDayZombie273.h"
+#include "FusionNativeAdventure273.h"
 #include "FusionBasePlantRules.h"
 #include "../Board.h"
 #include "../Plant.h"
@@ -103,7 +104,7 @@ bool NativeSourceEffects269::Ensure(Board* board,uint16_t kind,std::string& erro
 {
     if(kind==23)
         return WorldDefinition(board,5066,(ResourceRoot()/"zombies270"/"5066"/"effect.json").string(),error)!=nullptr;
-    if(kind==0||kind==11||kind==18||kind==35||kind==36||kind==49||kind==51||kind==99||kind==100||(kind>=2000&&kind<2100))
+    if(kind==0||kind==11||kind==16||kind==18||kind==35||kind==36||kind==49||kind==51||kind==99||kind==100||(kind>=2000&&kind<2100))
     {const auto path=kind<2000?ResourceRoot()/ ("source-"+std::to_string(kind))/"effect.json":ResourceRoot()/"embedded269"/std::to_string(kind)/"effect.json";
      return WorldDefinition(board,kind,path.string(),error)!=nullptr;}
 
@@ -223,41 +224,63 @@ bool PlayNativeSourceZombieLimbEvent276(Board* board,const LawnNet::NetFusionLim
 {
     const auto* context=GetNativeContext(board);
     if(!board||!board->mApp||board->mApp->mBoard!=board||!context||context->epoch!=event.mEpoch||
-        board->mBackground!=BACKGROUND_1_DAY||GetNativeFusionRowCount(board)!=5||
+        !IsNativeSourceAdventureGrassWorld281(board)||
         !LawnNet::NetFusionLimbEvent276Valid(event))return false;
     auto* cache=GetNativeSourceEffects269(board,true);bool newEvent=false;
     return cache&&cache->PlayZombieLimbEvent(board,event,newEvent);
 }
-bool PlayNativeSourceZombieLimb276(Zombie* zombie,bool head)
+namespace
 {
-    // Snapshot hydration and ghost loss routines never create Day particles.
-    // The reliable host callback is the sole producer, even for lethal damage
-    // that removes an owner before its first headless/armless snapshot.
-    if(!IsNativeDayZombie273(zombie)||zombie->mNetGhost||zombie->mApp->NetIsClient())return false;
+bool CaptureSourcePart284(Zombie* zombie,LawnNet::NetFusionZombiePart284 part,LawnNet::NetFusionLimbEvent276& event)
+{
+    if(!zombie||zombie->mNetGhost||!zombie->mApp||zombie->mApp->NetIsClient()||
+        !IsNativeSourceAdventureGrassWorld281(zombie->mBoard))return false;
     auto* board=zombie->mBoard;const auto* context=GetNativeContext(board);
     const auto* data=GetNativeSourceZombieData(zombie);
-    if(!context||!data||(head&&data->kind!=3))return false;
-    LawnNet::NetFusionLimbEvent276 event;
+    if(!context||!data||!LawnNet::NetFusionZombiePart284Supported(data->kind,part)||
+        !EnsureNativeSourceZombieVisuals(board,data->kind))return false;
     event.mEpoch=context->epoch;event.mZombieId=zombie->mNetId;event.mZombieToken=data->instanceToken;
-    event.mSourceKind=data->kind;event.mHead=head;event.mRow=uint8_t(zombie->mRow);event.mRenderOrder=zombie->mRenderOrder;
-    if(!GetNativeSourceZombieLimbBirthPoint276(zombie,head?"LoseHead":"LoseArm",event.mX,event.mY))
+    event.mSourceKind=data->kind;event.mPart=part;event.mRow=uint8_t(zombie->mRow);event.mRenderOrder=zombie->mRenderOrder;
+    if(!GetNativeSourceZombieLimbBirthPoint276(zombie,NativeSourceZombiePartNode284(uint8_t(part)),event.mX,event.mY))
     {
-        LawnNet::NetTrace("Fusion Day limb276 producer rejected epoch=%u kind=%u id=%u token=%u head=%d reason=body-pose",
-            event.mEpoch,event.mSourceKind,event.mZombieId,event.mZombieToken,head?1:0);return false;
+        LawnNet::NetTrace("Fusion Day limb276 producer rejected epoch=%u kind=%u id=%u token=%u part=%u reason=body-pose",
+            event.mEpoch,event.mSourceKind,event.mZombieId,event.mZombieToken,uint8_t(part));return false;
     }
-    if(!LawnNet::NetFusionLimbEvent276Valid(event))
-    {
-        LawnNet::NetTrace("Fusion Day limb276 producer rejected epoch=%u kind=%u id=%u token=%u head=%d reason=canonical-event",
-            event.mEpoch,event.mSourceKind,event.mZombieId,event.mZombieToken,head?1:0);return false;
-    }
+    return LawnNet::NetFusionLimbEvent276Valid(event);
+}
+bool CommitSourcePart284(Zombie* zombie,const LawnNet::NetFusionLimbEvent276& event)
+{
+    auto* board=zombie->mBoard;
     auto* cache=GetNativeSourceEffects269(board,true);bool newEvent=false;
     const bool accepted=cache&&cache->PlayZombieLimbEvent(board,event,newEvent);
+    const char* names[]={"arm","head","first-armor","second-armor","glasses"};
     if(accepted&&newEvent)
         LawnNet::NetTrace("Fusion Day limb276 produced epoch=%u kind=%u id=%u token=%u part=%s row=%u birth=(%.3f,%.3f) ownerOrder=%d broadcastRequested=%d",
-            event.mEpoch,event.mSourceKind,event.mZombieId,event.mZombieToken,head?"head":"arm",event.mRow,
+            event.mEpoch,event.mSourceKind,event.mZombieId,event.mZombieToken,names[uint8_t(event.mPart)],event.mRow,
             event.mX,event.mY,event.mRenderOrder,zombie->mApp->NetIsHost()?1:0);
     if(accepted&&newEvent&&zombie->mApp->NetIsHost())LawnNet::NetBroadcastFusionLimb276(zombie->mApp,event);
     return accepted;
+}
+}
+bool PlayNativeSourceZombieLimb276(Zombie* zombie,bool head)
+{
+    using Part=LawnNet::NetFusionZombiePart284;
+    const auto* data=GetNativeSourceZombieData(zombie);
+    std::array<LawnNet::NetFusionLimbEvent276,2> events;
+    const size_t count=head&&data&&data->kind==5?2:1;
+    if(!CaptureSourcePart284(zombie,head?Part::Head:Part::Arm,events[0])||
+        (count==2&&!CaptureSourcePart284(zombie,Part::Glasses,events[1])))return false;
+    // Capture both original transforms before any head mutation/owner removal.
+    // Each source PS has its own reliable identity and exact birth position.
+    bool accepted=true;
+    for(size_t i=0;i<count;++i)accepted=CommitSourcePart284(zombie,events[i])&&accepted;
+    return accepted;
+}
+bool PlayNativeSourceZombieArmor284(Zombie* zombie,bool firstArmor)
+{
+    LawnNet::NetFusionLimbEvent276 event;
+    return CaptureSourcePart284(zombie,firstArmor?LawnNet::NetFusionZombiePart284::FirstArmor:
+        LawnNet::NetFusionZombiePart284::SecondArmor,event)&&CommitSourcePart284(zombie,event);
 }
 bool NativeSourceEffects269::EnsureEmbeddedProjectile(Board* board,uint16_t kind,const std::string& model,std::string& error)
 {
@@ -318,6 +341,7 @@ int NativeSourceEffectParticle269(uint16_t kind)
     {
     case 0:return PARTICLE_FUSION_SOURCE0;
     case 11:return PARTICLE_FUSION_SOURCE11;
+    case 16:return PARTICLE_FUSION_SOURCE16;
     case 18:return PARTICLE_FUSION_SOURCE18;
     case 23:return PARTICLE_FUSION_SOURCE23;
     case 35:return PARTICLE_FUSION_SOURCE35;
@@ -332,7 +356,7 @@ int NativeSourceEffectParticle269(uint16_t kind)
 }
 bool NativeSourceEffectKind269(int effect,uint16_t& kind)
 {
-    for(uint16_t candidate:{0,11,18,23,35,36,49,51,52,99,100})
+    for(uint16_t candidate:{0,11,16,18,23,35,36,49,51,52,99,100})
         if(NativeSourceEffectParticle269(candidate)==effect){kind=candidate;return true;}
     return false;
 }

@@ -1,5 +1,6 @@
 #include "Plant.h"
 #include "Fusion/FusionNativeAdventure273.h"
+#include "Fusion/FusionNativeAdventureProgress273.h"
 #include "Fusion/FusionNativeDayZombie273Bridge.h"
 #include <cmath>
 #include "Board.h"
@@ -4068,7 +4069,8 @@ void Zombie::DropHead(unsigned int theDamageFlags)
 
     mHasHead = false;
     SetupReanimForLostHead();
-    if(LawnFusion::IsNativeDayZombie273(this))
+    if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);
+        LawnFusion::IsNativeDayZombie273(this)||(source&&(source->kind==5||source->kind==9)))
     {
         // Flags/stump and source106/108 Bucket gameplay above are independent
         // of the genuine cosmetic callback. Other Day heads have no fall PS.
@@ -4459,7 +4461,8 @@ void Zombie::SetupReanimForLostArm(unsigned int theDamageFlags)
         }
     }
 
-    if(LawnFusion::IsNativeDayZombie273(this))
+    if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);
+        LawnFusion::IsNativeDayZombie273(this)||(source&&(source->kind==5||source->kind==9)))
         return; // Hydration-safe native stump only; actual DropArm owns the event.
 
     if (!mInPool && !TestBit(theDamageFlags, DamageFlags::DAMAGE_DOESNT_LEAVE_BODY))
@@ -4584,7 +4587,8 @@ void Zombie::DropArm(unsigned int theDamageFlags)
 
     mHasArm = false;
     SetupReanimForLostArm(theDamageFlags);
-    if(LawnFusion::IsNativeDayZombie273(this))
+    if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);
+        LawnFusion::IsNativeDayZombie273(this)||(source&&(source->kind==5||source->kind==9)))
         LawnFusion::PlayNativeSourceZombieLimb276(this,false);
     mApp->PlayFoley(FoleyType::FOLEY_LIMBS_POP);
 }
@@ -4600,7 +4604,8 @@ void Zombie::UpdateDamageStates(unsigned int theDamageFlags)
     const bool sourceThresholds = source &&
         LawnFusion::TryGetFusionZombieLimbThresholds(source->kind,mBodyMaxHealth,sourceArm,sourceHead);
     if (mHasArm && (sourceThresholds ? source->health < sourceArm : mBodyHealth < 2 * mBodyMaxHealth / 3) &&
-        (mBodyHealth > 0 || LawnFusion::IsNativeDayZombie273(this)))
+        (mBodyHealth > 0 || LawnFusion::IsNativeDayZombie273(this)||
+            (source&&LawnNet::NetFusionZombiePart284Supported(source->kind,LawnNet::NetFusionZombiePart284::Arm))))
     {
         DropArm(theDamageFlags);
     }
@@ -7633,7 +7638,9 @@ void Zombie::Draw(Graphics* g)
     g->ClearClipRect();
 
     const auto* sourceHealth = LawnFusion::GetNativeSourceZombieData(this);
-    if (mZombieType != ZombieType::ZOMBIE_BOSS && IsOnBoard() && mApp->mShowHealthBar && (mHasHead || sourceHealth) && !IsDeadOrDying() && !mApp->IsWhackAZombieLevel() &&
+    const auto* sourceContext=LawnFusion::GetNativeContext(mBoard);
+    const bool sourceLessonHealth=sourceContext&&LawnFusion::FusionAdventureTutorialShowsZombieHealth284(sourceContext->adventure.run);
+    if (mZombieType != ZombieType::ZOMBIE_BOSS && IsOnBoard() && (mApp->mShowHealthBar||sourceLessonHealth) && (mHasHead || sourceHealth) && !IsDeadOrDying() && !mApp->IsWhackAZombieLevel() &&
         (!sourceHealth || mBodyMaxHealth > 0 || mHelmMaxHealth > 0) &&
         (sourceHealth || EffectedByDamage(1U) || EffectedByDamage(2U) || EffectedByDamage(4U) || EffectedByDamage(8U) || EffectedByDamage(129U) && mMindControlled)
         ) {
@@ -9506,6 +9513,9 @@ void Zombie::DropShield(unsigned int theDamageFlags)
 //0x530BC0
 int Zombie::TakeShieldDamage(int theDamage, unsigned int theDamageFlags)
 {
+    if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);
+        source&&source->kind==5&&!mNetGhost&&!mApp->NetIsClient()&&mShieldHealth>0&&theDamage>=mShieldHealth&&
+        !LawnFusion::PlayNativeSourceZombieArmor284(this,false))return 0;
     if (!TestBit(theDamageFlags, (int)DamageFlags::DAMAGE_DOESNT_CAUSE_FLASH))
     {
         mShieldJustGotShotCounter = 25;
@@ -9589,6 +9599,12 @@ void Zombie::DropHelm(unsigned int theDamageFlags)
 {
     if (mHelmType == HelmType::HELMTYPE_NONE)
         return;
+    if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);source&&source->kind==9)
+    {
+        if(!mNetGhost&&!mApp->NetIsClient()&&!LawnFusion::PlayNativeSourceZombieArmor284(this,true))return;
+        ReanimShowPrefix("zombie_football_helmet",RENDER_GROUP_HIDDEN);
+        mHelmType=HELMTYPE_NONE;mHelmHealth=0;return;
+    }
 
     ZombieDrawPosition aDrawPos;
     GetDrawPos(aDrawPos);
@@ -9720,6 +9736,9 @@ void Zombie::DropHelm(unsigned int theDamageFlags)
 //0x530FE0
 int Zombie::TakeHelmDamage(int theDamage, unsigned int theDamageFlags)
 {
+    if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);
+        source&&source->kind==9&&!mNetGhost&&!mApp->NetIsClient()&&mHelmHealth>0&&theDamage>=mHelmHealth&&
+        !LawnFusion::PlayNativeSourceZombieArmor284(this,true))return 0;
     int dayRemaining=0;
     if(LawnFusion::ApplyNativeDayZombie273Armor(this,theDamage,dayRemaining,LawnFusion::GetNativeDayZombie273Hooks()))return dayRemaining;
     int sourceRemaining=theDamage;if(LawnFusion::ApplyNativeSourceZombie111Armor(this,theDamage,sourceRemaining))return sourceRemaining;
@@ -11320,6 +11339,7 @@ void Zombie::PlayDeathAnim(unsigned int theDamageFlags)
     }
    
     PlayZombieReanim(aDeathTrackName, ReanimLoopType::REANIM_PLAY_ONCE_AND_HOLD, theBlendTime, aDeathAnimRate);
+    LawnFusion::ApplyNativeSourceZombieDeathClock284(this);
 
     ReanimShowPrefix("anim_tongue", RENDER_GROUP_HIDDEN);
 
@@ -11376,6 +11396,7 @@ void Zombie::DoDaisies()
 //0x5336B0
 void Zombie::UpdateDeath()
 {
+    if(LawnFusion::UpdateNativeSourceZombieDeath284(this))return;
     Reanimation* aBodyReanim = mApp->ReanimationTryToGet(mBodyReanimID);
     if (aBodyReanim == nullptr)
     {

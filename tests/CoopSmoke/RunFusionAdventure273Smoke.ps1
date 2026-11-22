@@ -1,6 +1,7 @@
 #requires -Version 5.1
 [CmdletBinding()]
-param([string]$GameExe='', [string]$ArtifactsRoot='', [int]$TimeoutSeconds=240,[switch]$Victory,[switch]$DayResources,[switch]$SolarShots,[switch]$DayActors,[switch]$DayCombat,[switch]$PoleActors,[switch]$Lesson4,[switch]$Lesson4Victory,[switch]$Lesson78,[switch]$Puff280,[switch]$Night10,[switch]$DayLimbs,[switch]$Adventure56,[switch]$FieldBiomes,[ValidateSet(800,1066)][int]$ClientWindowWidth=800)
+param([string]$GameExe='', [string]$ArtifactsRoot='', [int]$TimeoutSeconds=240,[switch]$Victory,[switch]$DayResources,[switch]$SolarShots,[switch]$DayActors,[switch]$DayCombat,[switch]$GrassFamilies284,[switch]$PoleActors,[switch]$Lesson4,[switch]$Lesson4Victory,[switch]$Lesson78,[switch]$Puff280,[switch]$Night10,[switch]$DayLimbs,[switch]$Adventure56,[switch]$FieldBiomes,[ValidateSet(800,1066)][int]$ClientWindowWidth=800)
+if($GrassFamilies284){if($DayCombat){throw 'GrassFamilies284 and DayCombat are separate native cohorts.'};$DayActors=$true;if($TimeoutSeconds -lt 540){$TimeoutSeconds=540}}
 if($Night10){$Puff280=$true}
 if($Puff280 -and ($Lesson78 -or $Lesson4Victory -or $Lesson4 -or $FieldBiomes -or $Adventure56 -or $DayLimbs -or $PoleActors -or $DayCombat -or $DayActors -or $Victory -or $SolarShots -or $DayResources)){throw 'Puff280/Night10 is a separate native mechanism scenario.'}
 if($DayCombat){$DayActors=$true}
@@ -17,7 +18,7 @@ if($PoleActors -and ($DayActors -or $Victory -or $SolarShots -or $DayResources))
 if($DayActors -and ($Victory -or $SolarShots -or $DayResources)){throw 'DayActors is a separate native NPC scenario.'}
 if(($Victory -or $DayCombat) -and $TimeoutSeconds -lt 660){$TimeoutSeconds=660}
 $sourceClientWidth273=$ClientWindowWidth
-$sourceScenario273=if($Night10){'SourceNight10_282'}elseif($Puff280){'SourcePuff280'}elseif($Lesson78){'SourceLesson78_278'}elseif($Lesson4Victory){'SourceLesson4Victory278'}elseif($FieldBiomes){'NativeField277'}elseif($Adventure56){'SourceAdventure56_277'}elseif($DayLimbs){'SourceDayLimbs276'}elseif($Lesson4){'SourceLesson4_275'}elseif($PoleActors){'SourcePole275'}elseif($DayCombat){'SourceDay275-Combat'}elseif($DayActors){'SourceDay274-NPC'}elseif($Victory){'SourceAdventure273-Victory'}elseif($SolarShots){'SourceAdventure273-Solar'}else{'SourceAdventure273-Opening'}
+$sourceScenario273=if($Night10){'SourceNight10_282'}elseif($Puff280){'SourcePuff280'}elseif($Lesson78){'SourceLesson78_278'}elseif($Lesson4Victory){'SourceLesson4Victory278'}elseif($FieldBiomes){'NativeField277'}elseif($Adventure56){'SourceAdventure56_277'}elseif($DayLimbs){'SourceDayLimbs276'}elseif($Lesson4){'SourceLesson4_275'}elseif($PoleActors){'SourcePole275'}elseif($GrassFamilies284){'SourceGrassFamilies284'}elseif($DayCombat){'SourceDay275-Combat'}elseif($DayActors){'SourceDay274-NPC'}elseif($Victory){'SourceAdventure273-Victory'}elseif($SolarShots){'SourceAdventure273-Solar'}else{'SourceAdventure273-Opening'}
 $ErrorActionPreference='Stop'
 $repoPath=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..'))
 if(!$GameExe){$GameExe=Join-Path $repoPath 'build\ReleaseGOTY_Win32\bin\PlantsVsZombies.exe'}
@@ -32,7 +33,7 @@ $hostDir=Join-Path $runDir 'host';$clientDir=Join-Path $runDir 'client'
 $hostLogs=Join-Path $hostDir 'logs';$clientLogs=Join-Path $clientDir 'logs'
 $hostProcess=$null;$clientProcess=$null;$failure='';$frames=@();$common=@();$environment=@{}
 foreach($entry in @(Get-ChildItem Env: | Where-Object Name -like 'PVZ_COOP_SMOKE_FUSION_*')){$environment[$entry.Name]=$entry.Value}
-foreach($name in @('PVZ_COOP_SMOKE_FUSION_NATIVE','PVZ_COOP_SMOKE_FUSION_SOURCE273','PVZ_COOP_SMOKE_FUSION_SOURCE273_VICTORY','PVZ_COOP_SMOKE_FUSION_SOURCE273_SOLAR','PVZ_COOP_SMOKE_FUSION_DAY273_RESOURCES','PVZ_COOP_SMOKE_FUSION_DAY274','PVZ_COOP_SMOKE_FUSION_DAY274_COMBAT','PVZ_COOP_SMOKE_FUSION_POLE275','PVZ_COOP_SMOKE_FUSION_LESSON4_275','PVZ_COOP_SMOKE_FUSION_LESSON4_VICTORY278','PVZ_COOP_SMOKE_FUSION_LESSON78_278','PVZ_COOP_SMOKE_FUSION_LIMBS276','PVZ_COOP_SMOKE_FUSION_ADVENTURE56_277','PVZ_COOP_SMOKE_FUSION_FIELD277','PVZ_COOP_SMOKE_HIDE_CONTROL_CHAT')){
+foreach($name in @('PVZ_COOP_SMOKE_FUSION_NATIVE','PVZ_COOP_SMOKE_FUSION_SOURCE273','PVZ_COOP_SMOKE_FUSION_SOURCE273_VICTORY','PVZ_COOP_SMOKE_FUSION_SOURCE273_SOLAR','PVZ_COOP_SMOKE_FUSION_DAY273_RESOURCES','PVZ_COOP_SMOKE_FUSION_DAY274','PVZ_COOP_SMOKE_FUSION_DAY274_COMBAT','PVZ_COOP_SMOKE_FUSION_GRASS284','PVZ_COOP_SMOKE_FUSION_POLE275','PVZ_COOP_SMOKE_FUSION_LESSON4_275','PVZ_COOP_SMOKE_FUSION_LESSON4_VICTORY278','PVZ_COOP_SMOKE_FUSION_LESSON78_278','PVZ_COOP_SMOKE_FUSION_LIMBS276','PVZ_COOP_SMOKE_FUSION_ADVENTURE56_277','PVZ_COOP_SMOKE_FUSION_FIELD277','PVZ_COOP_SMOKE_HIDE_CONTROL_CHAT')){
     $environment[$name]=[Environment]::GetEnvironmentVariable($name,'Process')
 }
 $environment['PVZ_COOP_SMOKE_FUSION_PUFF280']=[Environment]::GetEnvironmentVariable('PVZ_COOP_SMOKE_FUSION_PUFF280','Process')
@@ -62,6 +63,7 @@ try{
     if(!$FieldBiomes){$env:PVZ_COOP_SMOKE_FUSION_SOURCE273='1'}
     if($DayActors){$env:PVZ_COOP_SMOKE_FUSION_DAY274='1'}
     if($DayCombat){$env:PVZ_COOP_SMOKE_FUSION_DAY274_COMBAT='1'}
+    if($GrassFamilies284){$env:PVZ_COOP_SMOKE_FUSION_GRASS284='1'}
     if($PoleActors){$env:PVZ_COOP_SMOKE_FUSION_POLE275='1'}
     if($Lesson4){$env:PVZ_COOP_SMOKE_FUSION_LESSON4_275='1'}
     if($Lesson4Victory){$env:PVZ_COOP_SMOKE_FUSION_LESSON4_VICTORY278='1'}
@@ -81,7 +83,7 @@ try{
     $clientProcess=Start-SmokeProcess -Executable $GameExe -WorkingDirectory $gameDir -ManifestPath (Join-Path $clientDir 'smoke.ini') -Role client -RunId $runId -EnableUnicodeChat $false
     Save-PidLedger -Path (Join-Path $runDir 'pids.json') -Executable $GameExe -HostProcess $hostProcess -ClientProcess $clientProcess
     $results=@(Wait-ForResults -HostResultPath (Join-Path $hostDir 'result.json') -ClientResultPath (Join-Path $clientDir 'result.json') -HostProcess $hostProcess -ClientProcess $clientProcess -HostLogDirectory $hostLogs -ClientLogDirectory $clientLogs -TimeoutSeconds $TimeoutSeconds)
-    if($results.Count -ne 2 -or @($results | Where-Object {$_.status -ne 'pass' -or $_.protocol -ne 66}).Count){throw 'Both source peers must pass using protocol66.'}
+    if($results.Count -ne 2 -or @($results | Where-Object {$_.status -ne 'pass' -or $_.protocol -ne 67}).Count){throw 'Both source peers must pass using protocol67.'}
 }catch{$failure=$_.Exception.Message}
 finally{
     foreach($name in $environment.Keys){[Environment]::SetEnvironmentVariable($name,$environment[$name],'Process')}
@@ -95,7 +97,7 @@ if(!$failure){
         foreach($role in @('host','client')){
             $log=if($role -eq 'host'){$hostText}else{$clientText};$root=if($role -eq 'host'){$hostDir}else{$clientDir}
             if($log -match 'SMOKE_FAIL|native Fusion snapshot (encode|preflight) rejected|seq-gap|Adventure273 stopped'){throw ('Source rejection or failed input on '+$role)}
-            $proof=if($Lesson78){'SMOKE_LESSON78_278_COMPLETE role='+$role+'\b'}elseif($Lesson4Victory){'SMOKE_LESSON4_VICTORY278_COMPLETE role='+$role+'\b'}elseif($FieldBiomes){'SMOKE_FIELD277_COMPLETE role='+$role+'\b'}elseif($Adventure56){'SMOKE_ADVENTURE56_277_COMPLETE role='+$role+'\b'}elseif($DayLimbs){'SMOKE_LIMBS276_COMPLETE role='+$role+'\b'}elseif($Lesson4){'SMOKE_LESSON4_275_COMPLETE role='+$role+'\b'}elseif($PoleActors){'SMOKE_POLE275_COMPLETE role='+$role+'\b'}elseif($DayCombat){'SMOKE_DAY275_COMPLETE role='+$role+'\b'}elseif($DayActors){'SMOKE_DAY274_COMPLETE role='+$role+'\b'}elseif($Victory){'SMOKE_SOURCE273_VICTORY_COMPLETE role='+$role}elseif($SolarShots){'SMOKE_SOURCE273_SOLAR_COMPLETE role='+$role+'\b[^\r\n]*kind=8 damage=100 sunOnHit=5 naturallyFired=1'}else{'SMOKE_SOURCE273_COMPLETE role='+$role+'\b[^\r\n]*sourceLevel=1 wave=1/10[^\r\n]*sourceFullCampaign=0'}
+            $proof=if($Lesson78){'SMOKE_LESSON78_278_COMPLETE role='+$role+'\b'}elseif($Lesson4Victory){'SMOKE_LESSON4_VICTORY278_COMPLETE role='+$role+'\b'}elseif($FieldBiomes){'SMOKE_FIELD277_COMPLETE role='+$role+'\b'}elseif($Adventure56){'SMOKE_ADVENTURE56_277_COMPLETE role='+$role+'\b'}elseif($DayLimbs){'SMOKE_LIMBS276_COMPLETE role='+$role+'\b'}elseif($Lesson4){'SMOKE_LESSON4_275_COMPLETE role='+$role+'\b'}elseif($PoleActors){'SMOKE_POLE275_COMPLETE role='+$role+'\b'}elseif($GrassFamilies284){'SMOKE_GRASS284_COMPLETE role='+$role+'\b'}elseif($DayCombat){'SMOKE_DAY275_COMPLETE role='+$role+'\b'}elseif($DayActors){'SMOKE_DAY274_COMPLETE role='+$role+'\b'}elseif($Victory){'SMOKE_SOURCE273_VICTORY_COMPLETE role='+$role}elseif($SolarShots){'SMOKE_SOURCE273_SOLAR_COMPLETE role='+$role+'\b[^\r\n]*kind=8 damage=100 sunOnHit=5 naturallyFired=1'}else{'SMOKE_SOURCE273_COMPLETE role='+$role+'\b[^\r\n]*sourceLevel=1 wave=1/10[^\r\n]*sourceFullCampaign=0'}
             if($Night10){$proof='SMOKE_PUFF280_NIGHT_COMPLETE role='+$role+'\b'}elseif($Puff280){$proof='SMOKE_PUFF280_COMPLETE role='+$role+'\b'}
             if($log -notmatch $proof){throw ('Missing source scenario proof: '+$role)}
             if($Night10){
@@ -130,15 +132,45 @@ if(!$failure){
                     if([regex]::Matches($log,('SMOKE_DAY275_COHORT_COMPLETE role='+$role+' cohort='+$cohort+'\b')).Count -ne 1){throw ('Missing or duplicate combat cohort '+$cohort+' on '+$role)}
                 }
             }
+            if($GrassFamilies284){
+                if([regex]::Matches($log,('SMOKE_GRASS284_BACKUPS role='+$role+'\b[^\r\n]*count=4 kind=7 rows=1,2,2,3[^\r\n]*movement=4 animations=4 minimumSnapshots=20 duplicateChildren=0')).Count -ne 1){throw ('Missing genuine four-child Dance proof on '+$role)}
+                if([regex]::Matches($log,('SMOKE_GRASS284_CHILD role='+$role+'\b')).Count -ne 4){throw ('Missing or duplicate backup identities on '+$role)}
+                foreach($kind in @(5,9)){
+                    $binds=[regex]::Matches($log,('SMOKE_GRASS284_BIND role='+$role+' kind='+$kind+' id=(\d+) token=(\d+)\b'))
+                    if($binds.Count -ne 1){throw ('Missing canonical '+$kind+' binding on '+$role)}
+                    $id=$binds[0].Groups[1].Value;$token=$binds[0].Groups[2].Value
+                    foreach($marker in @('CONTACT','ARMOR','RETIRED')){
+                        if([regex]::Matches($log,('SMOKE_GRASS284_'+$marker+' role='+$role+' kind='+$kind+' id='+$id+' token='+$token+'\b')).Count -ne 1){throw ('Missing genuine '+$kind+' '+$marker+' proof on '+$role)}
+                    }
+                    $parts=if($kind -eq 5){@('arm','head','second-armor','glasses')}else{@('head','first-armor')}
+                    foreach($part in $parts){
+                        $identity='epoch=\d+ kind='+$kind+' id='+$id+' token='+$token+' part='+$part+'\b'
+                        if([regex]::Matches($log,('Fusion Day limb276 started '+$identity+'[^\r\n]*resource=\d+ system=[1-9]\d*\b[^\r\n]*role='+$role+'\b')).Count -ne 1){throw ('Missing or duplicate genuine reliable '+$kind+'/'+$part+' PS on '+$role)}
+                        if($role -eq 'host' -and [regex]::Matches($log,('Fusion Day limb276 produced '+$identity+'[^\r\n]*broadcastRequested=1')).Count -ne 1){throw ('Missing or duplicate reliable producer '+$kind+'/'+$part)}
+                    }
+                }
+                if([regex]::Matches($log,('SMOKE_GRASS284_RAGE role='+$role+'\b[^\r\n]*status=6')).Count -ne 1){throw ('Missing natural source Paper rage on '+$role)}
+                if($log -match 'Fusion Day limb276 (dropped|producer rejected) [^\r\n]*kind=(5|6|7|9)\b'){throw ('Source part effect refusal in Grass cohort on '+$role)}
+                foreach($phase in @('INITIAL','PASSIVE','BACKUPS','RAGE','FOOT_SETUP','ARMOR','RETIRED','COMPLETE')){
+                    if([regex]::Matches($log,('SMOKE_GRASS284_PROOF role='+$role+' phase='+$phase+' hash=[0-9a-f]{8}\b')).Count -ne 1){throw ('Missing local canonical/set proof '+$phase+' on '+$role)}
+                }
+            }
             if($DayResources -and $log -notmatch ('SMOKE_SOURCE273_DAY_RESOURCES_COMPLETE role='+$role+' bodies=8 factoryFX=4 actorAdmission=0')){throw ('Missing native Day resource proof: '+$role)}
-            $frameNames=if($Lesson78){@('7_chooser','7_prepared','7_gift_held','7_gift_used','7_enemy','7_defense','7_complete','8_chooser','8_prepared','8_cards','8_dying','8_bucket_held','8_iron','8_complete')}elseif($Lesson4Victory){@('chooser','opening','prepared','defenses','held','moved','complete','battle','finalwave','trophy','trophy_clicked','next5_chooser')}elseif($FieldBiomes){@('night_chooser','night_source','pool_chooser','pool_water','pool_paused','pool_resumed','day_chooser','day_initial','day_client_fusion','day_host_native','day_complete')}elseif($Adventure56){@('level5_chooser','level5_initial','level5_purchases','level5_sun','level5_clienttool','level5_firstwaves','level5_paused','level6_chooser','level6_initial','level6_purchases','level6_sun','level6_clienttool','level6_firstwaves','level6_paused')}elseif($DayLimbs){@('case0_chooser','case0_cohort','case0_resource5033','case0_resource5035','case0_resource5037','case0_paused','case1_chooser','case1_cohort','case1_resource5063','case1_resource5064','case1_resource5065','case1_paused','case2_chooser','case2_cohort','case2_resource5059','case2_resource5011','case2_resource5010','case2_paused','case3_chooser','case3_cohort','case3_resource5059','case3_lethal','case3_paused')}elseif($Lesson4){@('chooser','opening','prepared','held','moved','complete')}elseif($PoleActors){@('chooser','cohort','jump','star','landed','paused')}elseif($DayCombat){@('combat0_chooser','combat0_start','combat0_chain21','combat0_chain22','combat0_chain23','combat0_chain2','combat1_chooser','combat1_start','combat1_bucket','combat2_chooser','combat2_start','combat2_armor107','combat2_hit11','combat2_bucket')}elseif($DayActors){@('chooser','cohort','moved','shots','paused')}elseif($Victory){@('chooser','initial','missions','defenses','gatling','battle','trophy','trophy_clicked','next2_chooser')}elseif($SolarShots){@('chooser','initial','missions','gatling','solar')}else{@('chooser','initial','missions','gatling','firstwave','paused')}
+            $frameNames=if($Lesson78){@('7_chooser','7_prepared','7_gift_held','7_gift_used','7_enemy','7_defense','7_complete','8_chooser','8_prepared','8_cards','8_dying','8_bucket_held','8_iron','8_complete')}elseif($Lesson4Victory){@('chooser','opening','prepared','defenses','held','moved','complete','battle','finalwave','trophy','trophy_clicked','next5_chooser')}elseif($FieldBiomes){@('night_chooser','night_source','pool_chooser','pool_water','pool_paused','pool_resumed','day_chooser','day_initial','day_client_fusion','day_host_native','day_complete')}elseif($Adventure56){@('level5_chooser','level5_initial','level5_purchases','level5_sun','level5_clienttool','level5_firstwaves','level5_paused','level6_chooser','level6_initial','level6_purchases','level6_sun','level6_clienttool','level6_firstwaves','level6_paused')}elseif($DayLimbs){@('case0_chooser','case0_cohort','case0_resource5033','case0_resource5035','case0_resource5037','case0_paused','case1_chooser','case1_cohort','case1_resource5063','case1_resource5064','case1_resource5065','case1_paused','case2_chooser','case2_cohort','case2_resource5059','case2_resource5011','case2_resource5010','case2_paused','case3_chooser','case3_cohort','case3_resource5059','case3_lethal','case3_paused')}elseif($Lesson4){@('chooser','opening','prepared','held','moved','complete')}elseif($PoleActors){@('chooser','cohort','jump','star','landed','paused')}elseif($GrassFamilies284){@('chooser','cohort','jump','backups','armor','paused')}elseif($DayCombat){@('combat0_chooser','combat0_start','combat0_chain21','combat0_chain22','combat0_chain23','combat0_chain2','combat1_chooser','combat1_start','combat1_bucket','combat2_chooser','combat2_start','combat2_armor107','combat2_hit11','combat2_bucket')}elseif($DayActors){@('chooser','cohort','moved','shots','paused')}elseif($Victory){@('chooser','initial','missions','defenses','gatling','battle','trophy','trophy_clicked','next2_chooser')}elseif($SolarShots){@('chooser','initial','missions','gatling','solar')}else{@('chooser','initial','missions','gatling','firstwave','paused')}
             if($Night10){$frameNames=@('chooser','stack','mixed','paused')}elseif($Puff280){$frameNames=@('chooser','day_actor','puffs','paused')}
             foreach($suffix in $frameNames){
-                $prefix=if($Lesson78){'fusion_lesson78_278_'}elseif($FieldBiomes){'fusion_field277_'}elseif($Adventure56){'fusion_adventure56_277_'}elseif($DayLimbs){'fusion_limbs276_'}elseif($Lesson4){'fusion_lesson4_275_'}elseif($PoleActors){'fusion_pole275_'}elseif($DayActors){'fusion_day274_'}else{'fusion_source273_'}
+                $prefix=if($Lesson78){'fusion_lesson78_278_'}elseif($FieldBiomes){'fusion_field277_'}elseif($Adventure56){'fusion_adventure56_277_'}elseif($DayLimbs){'fusion_limbs276_'}elseif($Lesson4){'fusion_lesson4_275_'}elseif($PoleActors){'fusion_pole275_'}elseif($GrassFamilies284){'fusion_grass284_'}elseif($DayActors){'fusion_day274_'}else{'fusion_source273_'}
                 if($Night10){$prefix='fusion_puff280_night_'}elseif($Puff280){$prefix='fusion_puff280_'}
                 $frame=Join-Path $root ($prefix+$suffix+'.bmp')
                 if(!(Test-Path -LiteralPath $frame -PathType Leaf)){throw ('Missing native frame '+$frame)}
                 $frames+=$frame
+            }
+        }
+        if($GrassFamilies284){
+            foreach($phase in @('INITIAL','PASSIVE','BACKUPS','RAGE','FOOT_SETUP','ARMOR','RETIRED','COMPLETE')){
+                $pattern='SMOKE_GRASS284_PROOF role=\w+ phase='+$phase+' hash=([0-9a-f]{8})\b'
+                $hostHash=[regex]::Match($hostText,$pattern).Groups[1].Value;$clientHash=[regex]::Match($clientText,$pattern).Groups[1].Value
+                if(!$hostHash -or $hostHash -ne $clientHash){throw ('Grass canonical/set proof differs for '+$phase)}
             }
         }
         $tx=@(Get-SnapshotHashes -Text $hostText -Marker SMOKE_SNAPSHOT_TX)

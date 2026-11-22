@@ -27,7 +27,7 @@ bool NativeSourceAdventureLevelReady280(int level,uint32_t cycle,std::string* er
     if(source->roofPreplantColumns)return reject("preplants: source Roof Pot27 initialization is not implemented.");
     switch(source->tutorialId)
     {
-    case 0:case 1:case 4:case 7:case 8:case 10:break;
+    case 0:case 1:case 4:case 7:case 8:case 10:case 13:case 15:break;
     default:return reject("tutorial: source lesson has no native implementation.");
     }
     if((source->scene!=0&&source->scene!=1)||source->rows!=5)

@@ -16,6 +16,12 @@ bool BeginNativeSpecialZombie269PaperFall(Zombie*);
 bool GetNativeSpecialZombie269Presentation(const Zombie*,const char*& clip,float& normalizedPhase);
 bool GetNativeSpecialZombie269BodyStage(const Zombie*,uint8_t& stage);
 bool GetNativeSpecialZombie269Status(const Zombie*,int& sourceStatus);
+// Root calls at the end of actual Zombie.PlayDeathAnim, after selecting its
+// real native frame span; source5/6/7/9 clocks replace only their carrier rate.
+bool ApplyNativeSourceZombieDeathClock284(Zombie*);
+// Root calls first in Zombie.UpdateDeath. Actual source fall/end callbacks,
+// without stock corpse fade, a second award or an independently ticked clock.
+bool UpdateNativeSourceZombieDeath284(Zombie*);
 bool StartNativeSpecialZombie269Walk(Zombie*,int blendTicks);
 bool MoveNativeSpecialZombie269Paper(Zombie*);
 bool UpdateNativeSpecialZombie269PaperAttack(Zombie*);

@@ -20,6 +20,9 @@ struct NativeDayZombie273State
     bool poleEventValid=false;
     bool headDropPending=false; // Host-only bounded Coin allocation retry.
     uint32_t headDropDamageFlags=0; // Do not encode/hash either retry field.
+    bool danceSpawnPending=false,danceSpawnFailed=false; // HOST ONLY: no wire/hash.
+    int danceSpawnRow=-1;
+    float danceSpawnShadowX=0; // Actual accepted JumpOver anchor; retries never resample it.
 };
 // Root supplies one sparse map in NativeContext keyed by actual DataArray UID,
 // with prune/reset/adopt/hash/validation beside sourceZombies. No local actor list.
@@ -31,7 +34,7 @@ inline bool NativeDayZombie273ControllerValid(uint16_t kind,const NativeDayZombi
 {
     if(!FindFusionDayZombie273Profile(kind)||s.armorStage>2||s.shootEvent>2||!std::isfinite(s.shootCountdown)||
         s.shootCountdown<-.01f||s.shootCountdown>1.6f)return false;
-    if(kind==3){if(s.status!=0&&s.status!=2&&s.status!=3)return false;if(s.shadowEnabled!=(s.status!=3))return false;}
+    if(FusionDayZombie273Pole(kind)){if(s.status!=0&&s.status!=2&&s.status!=3)return false;if(s.shadowEnabled!=(s.status!=3))return false;}
     else if(s.status||!s.shadowEnabled)return false;
     if(!FusionDayZombie273Doll(kind)&&kind!=106&&kind!=107&&s.armorStage)return false;
     return FusionDayZombie273Shooter(kind)||(!s.shootEvent&&s.shootCountdown==1.5f);

@@ -37,7 +37,7 @@ int GetNativeSourceZombieCarrier(uint16_t kind)
     case 4:case 13:case 111:return ZOMBIE_PAIL;case 9:case 109:return ZOMBIE_FOOTBALL;case 8:return ZOMBIE_DOOR;
     case 5:case 15:case 104:return ZOMBIE_NEWSPAPER;case 14:case 18:return ZOMBIE_ZAMBONI;
     case 3:case 6:case 7:return ZOMBIE_POLEVAULTER;case 21:case 22:case 23:return ZOMBIE_TRAFFIC_CONE;
-    case 10:case 100:case 106:case 107:case 108:return ZOMBIE_NORMAL;default:return -1;}
+    case 100:case 106:case 107:case 108:return ZOMBIE_NORMAL;default:return -1;}
 }
 
 bool TryPrepareFusionZombieSpawn(uint16_t kind, int sourcePreset, float draw, FusionZombieSpawn& output)

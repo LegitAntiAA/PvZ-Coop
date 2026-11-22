@@ -11,10 +11,10 @@ constexpr uint64_t mask=(uint64_t{1}<<kFusionAdventureLevels273)-1;
 bool Level(int level){return level>=1&&level<=kFusionAdventureLevels273;}
 bool Cycle(uint32_t cycle){return cycle>0&&cycle<=uint32_t((std::numeric_limits<int32_t>::max)());}
 uint16_t Minus(uint16_t value,uint32_t ticks){return ticks>=value?0:uint16_t(value-ticks);}
-bool TutorialLevel(int level){return level==1||level==4||level==7||level==8||level==10;}
+bool TutorialLevel(int level){return level==1||level==4||level==7||level==8||level==10||level==13||level==15;}
 bool TutorialValid(const FusionAdventureTutorial273& t,int level)
 {
-    if(uint8_t(t.message)>uint8_t(FusionAdventureMessage273::PuffReady)||
+    if(uint8_t(t.message)>uint8_t(FusionAdventureMessage273::IceReady)||
         t.messageTicks>FusionAdventureMessageDuration273(t.message))return false;
     if(t.stage==0)return t.timerTicks==0&&t.message==FusionAdventureMessage273::None&&t.messageTicks==0;
     if(level==1)
@@ -28,7 +28,9 @@ bool TutorialValid(const FusionAdventureTutorial273& t,int level)
         ((level==4&&t.stage==3&&t.message==M::GloveReady)||
          (level==7&&t.stage==4&&t.message==M::PresentDefenseReady)||
          (level==8&&t.stage==4&&t.message==M::EquipmentReady)||
-         (level==10&&t.stage==3&&t.message==M::PuffReady));
+         (level==10&&t.stage==3&&t.message==M::PuffReady)||
+         (level==13&&t.stage==8&&t.message==M::FertilizeReady)||
+         (level==15&&t.stage==3&&t.message==M::IceReady));
     M expected=M::None;uint16_t maximumTimer=0;
     switch(level)
     {
@@ -47,6 +49,17 @@ bool TutorialValid(const FusionAdventureTutorial273& t,int level)
     case 10:
         switch(t.stage){case 1:expected=M::PuffIntro;maximumTimer=400;break;
         case 2:expected=M::PuffStack;maximumTimer=400;break;case 3:expected=M::PuffMix;maximumTimer=400;break;}
+        break;
+    case 13:
+        switch(t.stage){case 1:expected=M::FertilizeIntro;maximumTimer=400;break;
+        case 2:expected=M::FertilizeGrow;maximumTimer=400;break;case 3:expected=M::FertilizeUpgrade;maximumTimer=400;break;
+        case 4:expected=M::FertilizeLesson;maximumTimer=400;break;case 5:expected=M::UseFertilizeNut;break;
+        case 6:expected=M::FertilizeNutReady;maximumTimer=400;break;case 7:expected=M::RepairNutChomper;break;
+        case 8:expected=M::FertilizeRepairReady;maximumTimer=400;break;}
+        break;
+    case 15:
+        switch(t.stage){case 1:expected=M::IceIntro;maximumTimer=400;break;case 2:expected=M::IceDefense;break;
+        case 3:expected=M::IceLessonReady;maximumTimer=400;break;}
         break;
     }
     return expected!=M::None&&t.message==expected&&t.timerTicks<=maximumTimer;
@@ -99,13 +112,20 @@ uint16_t FusionAdventureMessageDuration273(FusionAdventureMessage273 message)
     case FusionAdventureMessage273::Ready:return 500;
     case FusionAdventureMessage273::GloveUnlocked:case FusionAdventureMessage273::EquipmentIntro:return 400;
     case FusionAdventureMessage273::PuffIntro:case FusionAdventureMessage273::PuffStack:case FusionAdventureMessage273::PuffMix:return 400;
+    case FusionAdventureMessage273::FertilizeIntro:case FusionAdventureMessage273::FertilizeGrow:
+    case FusionAdventureMessage273::FertilizeUpgrade:case FusionAdventureMessage273::FertilizeLesson:
+    case FusionAdventureMessage273::FertilizeNutReady:case FusionAdventureMessage273::FertilizeRepairReady:
+    case FusionAdventureMessage273::IceIntro:case FusionAdventureMessage273::IceLessonReady:return 400;
     case FusionAdventureMessage273::PresentIntro:return 600;
     case FusionAdventureMessage273::PresentReady:case FusionAdventureMessage273::IronPlants:return 300;
     case FusionAdventureMessage273::MoveTwinFlower:case FusionAdventureMessage273::UsePresent:
-    case FusionAdventureMessage273::BucketNutWarning:case FusionAdventureMessage273::UseBucket:return 6000;
+    case FusionAdventureMessage273::BucketNutWarning:case FusionAdventureMessage273::UseBucket:
+    case FusionAdventureMessage273::UseFertilizeNut:case FusionAdventureMessage273::RepairNutChomper:
+    case FusionAdventureMessage273::IceDefense:return 6000;
     case FusionAdventureMessage273::GloveMove:case FusionAdventureMessage273::GloveReady:
     case FusionAdventureMessage273::CherryPaperWarning:case FusionAdventureMessage273::PresentDefenseReady:
-    case FusionAdventureMessage273::EquipmentReady:case FusionAdventureMessage273::PuffReady:return 500;
+    case FusionAdventureMessage273::EquipmentReady:case FusionAdventureMessage273::PuffReady:
+    case FusionAdventureMessage273::FertilizeReady:case FusionAdventureMessage273::IceReady:return 500;
     }
     return 0;
 }
@@ -193,6 +213,30 @@ bool StepFusionAdventureTutorial273(FusionAdventureRun273& r,uint32_t ticks,
                 case 3:message=M::PuffReady;t.active=false;e.completed=true;break;
                 }
                 break;
+            case 13:
+                switch(t.stage)
+                {
+                case 0:message=M::FertilizeIntro;t.timerTicks=400;++t.stage;break;
+                case 1:message=M::FertilizeGrow;t.timerTicks=400;++t.stage;break;
+                case 2:message=M::FertilizeUpgrade;t.timerTicks=400;++t.stage;break;
+                case 3:message=M::FertilizeLesson;t.timerTicks=400;++t.stage;break;
+                case 4:message=M::UseFertilizeNut;e.missionAction=A::Prepare13Nut;++t.stage;break;
+                case 5:if(input.hasTallNut1027){message=M::FertilizeNutReady;t.timerTicks=400;++t.stage;}break;
+                case 6:message=M::RepairNutChomper;e.missionAction=A::Prepare13Chomper;++t.stage;break;
+                case 7:if(input.hasMissionPlant&&input.missionPlantFullyRepaired)
+                    {message=M::FertilizeRepairReady;t.timerTicks=400;++t.stage;}break;
+                case 8:message=M::FertilizeReady;t.active=false;e.completed=true;break;
+                }
+                break;
+            case 15:
+                switch(t.stage)
+                {
+                case 0:message=M::IceIntro;t.timerTicks=400;++t.stage;break;
+                case 1:message=M::IceDefense;e.missionAction=A::Prepare15;++t.stage;break;
+                case 2:if(input.sourceEnemyCount==0){message=M::IceLessonReady;t.timerTicks=400;++t.stage;}break;
+                case 3:message=M::IceReady;e.missionAction=A::Clear15;t.active=false;e.completed=true;break;
+                }
+                break;
             }
             if(message!=M::None)
             {t.message=message;t.messageTicks=FusionAdventureMessageDuration273(message);e.messageChanged=true;}
@@ -204,6 +248,8 @@ bool StepFusionAdventureTutorial273(FusionAdventureRun273& r,uint32_t ticks,
 }
 bool FusionAdventureCardsIgnoreExpiry273(const FusionAdventureRun273& r)
 {return FusionAdventureRunValid273(r)&&r.level&&r.tutorial.active;}
+bool FusionAdventureTutorialShowsZombieHealth284(const FusionAdventureRun273& r)
+{return FusionAdventureRunValid273(r)&&r.level==15&&r.tutorial.active&&r.tutorial.stage==2;}
 bool TryArmFusionAdventureReward273(FusionAdventureRun273& r,int wave,int maximum,int enemies,bool iz)
 {
     if(!FusionAdventureRunValid273(r)||!r.level||r.over||r.tutorial.active||iz||maximum<=0||wave<maximum||enemies>0)return false;

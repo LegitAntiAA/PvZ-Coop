@@ -1,5 +1,9 @@
 #include "FusionNativeDayZombie273Bridge.h"
 #include "FusionNativeAdventure273.h"
+#include "FusionNativeNightZombie281.h"
+#include "FusionNativeZombiePreflight280.h"
+#include "FusionSourceZombieClosure280.h"
+#include "FusionCampaign272Rules.h"
 #include "FusionNative.h"
 #include "FusionNativeBasePlants.h"
 #include "FusionBasePlantRules.h"
@@ -30,23 +34,29 @@ namespace
 {
 bool Current(const Board* b)
 {return b&&b->mApp&&b->mApp->mBoard==b&&IsNativeFusionBoard(b)&&!GetNativeContext(b)->adventureTeardown;}
-bool OrdinarySourceDay(Board* b)
+bool GroundController(uint16_t kind)
 {
-    if(!IsNativeSourceAdventureGrassWorld281(b))return false;
-    Zombie* actor=nullptr;
+    const auto* profile=FindFusionZombieProfile(kind);
+    if(!profile||profile->waterOnly||profile->noAttack)return false;
+    if(FindFusionDayZombie273Profile(kind)||SpecialZombie269PaperKind(kind))return true;
+    // Existing actual ordinary, Door, TallIceNut and Football mechanisms.
+    // A catalog/carrier alone cannot admit Jackson, vehicles or Money.
+    return kind==0||kind==2||kind==4||kind==8||kind==111||kind==9||kind==109;
+}
+bool OrdinarySourceGrass(Board* b,uint16_t candidate,std::vector<uint16_t>& closure)
+{
+    if(!IsNativeSourceAdventureGrassWorld281(b)||!GroundController(candidate))return false;
+    std::vector<uint16_t> roots{candidate};Zombie* actor=nullptr;
     while(b->IterateZombies(actor))
     {
         const auto* source=GetNativeSourceZombieData(actor);
-        // This source-only closure contains no ladder producer or Tower Corner
-        // operation. Garlic changes row but never the source targetRow field.
-        if(!source)return false;
-        switch(source->kind)
-        {
-        case 0:case 2:case 3:case 4:case 8:case 21:case 22:case 23:
-        case 100:case 104:case 106:case 107:case 108:break;
-        default:return false;
-        }
+        if(!source||!GroundController(source->kind))return false;
+        roots.push_back(source->kind);
     }
+    // The wave roster is not the actor roster: genuine plant/child callbacks
+    // may create a different supported source family. Check its real closure.
+    if(!BuildFusionSourceZombieClosure280(roots,closure))return false;
+    for(auto kind:closure)if(!GroundController(kind))return false;
     return true;
 }
 bool Host(const Zombie* z)
@@ -77,6 +87,31 @@ bool FxReady(Board* b,uint16_t kind,std::string* error=nullptr)
     {if(error)*error="Source cosmetic kind has no reliable native dispatcher.";return false;}
     return EnsureNativeSourceEffect269(b,kind,error);
 }
+bool OrdinaryEveBalanced(const Board*)
+{return false;} // Only the proved ordinary grass world can reach these hooks.
+bool PrepareDanceChildren(Zombie* parent,std::span<const uint16_t> kinds,std::string* error)
+{
+    return Host(parent)&&IsNativeSourceAdventureGrassWorld281(parent->mBoard)&&
+        FxReady(parent->mBoard,11,error)&&CanAllocateNativeSourceZombieBatch280(parent->mBoard,kinds,error);
+}
+bool DanceChildEffect(Zombie* parent,Zombie* child,bool dance)
+{
+    if(!dance||!Host(parent)||!child||child->mBoard!=parent->mBoard)return false;
+    float x=0,y=0;if(!GetNativeSourceZombie269NodePoint(child,"",x,y))return false;
+    // The resource was validated before any RNG/birth. Native cosmetic pool
+    // exhaustion is an acknowledged one-shot drop, never another child batch.
+    const bool played=SpawnNativeSourceEffect269(parent->mBoard,11,x,
+        y-float(.5*GetNativeFusionPixelsY(parent->mBoard)),child->mRenderOrder+1,true)!=nullptr;
+    if(!played)LawnNet::NetTrace("Fusion Dance284 cosmetic capacity drop parent=%u child=%u kind=11",parent->mNetId,child->mNetId);
+    return true;
+}
+const NativeNightZombie281Hooks& DanceHooks()
+{
+    static const NativeNightZombie281Hooks hooks=[]
+    {NativeNightZombie281Hooks value;value.eveBalanced=OrdinaryEveBalanced;
+     value.prepareChildren=PrepareDanceChildren;value.childEffect=DanceChildEffect;return value;}();
+    return hooks;
+}
 void PoleEvent(Zombie* z,uint8_t event)
 {
     if(!Host(z))return;
@@ -84,6 +119,21 @@ void PoleEvent(Zombie* z,uint8_t event)
     // publishes these native samples through reliable BOARDEV_SOUND once.
     if(event==Day273JumpSound1)z->mApp->PlaySample(Sexy::SOUND_GRASSSTEP);
     else if(event==Day273JumpSound2)z->mApp->PlaySample(Sexy::SOUND_POLEVAULT);
+    else if(event==Day273JumpOver)
+    {
+        const auto* source=GetNativeSourceZombieData(z);auto* state=EditNativeDayZombie273(z);
+        if(!source||source->kind!=6||!state||state->danceSpawnPending||state->danceSpawnFailed)return;
+        float x=0,y=0;if(!GetNativeSourceZombie269NodePoint(z,"Shadow",x,y))
+        {
+            state->danceSpawnFailed=true;
+            if(auto* context=GetNativeContext(z->mBoard);context&&context->adventure.enabled)
+            {context->adventure.schedulerFailed=true;context->adventureScheduler.failed=true;}
+            LawnNet::NetTrace("Fusion Dance284 event anchor unavailable parent=%u token=%u",z->mNetId,source->instanceToken);
+            return;
+        }
+        state->danceSpawnRow=z->mRow;state->danceSpawnShadowX=x;state->danceSpawnPending=true;
+        RetryNativeDancePole284(z);
+    }
     else if(event==Day273JumpFail)
     {
         float x=0,y=0;
@@ -165,29 +215,55 @@ const NativeDayZombie273Hooks& GetNativeDayZombie273Hooks()
     static const NativeDayZombie273Hooks hooks{PlantTraits,PoleContact,PoleEvent,PrepareDoll,FinishDoll,ProjectileContact};
     return hooks;
 }
-bool CanSpawnNativeDayZombie273(Board* b,uint16_t kind,std::string* error)
+bool CanSpawnNativeGrassZombie284(Board* b,uint16_t kind,std::string* error)
 {
     if(error)error->clear();
     const auto reject=[&](const char* reason){if(error)*error=reason;return false;};
-    if(!Current(b)||!FindFusionDayZombie273Profile(kind)||b->mApp->mGameMode!=GAMEMODE_ADVENTURE)
-        return reject("Day family requires its bounded native Adventure world.");
-    // Typed snapshots own these births. The receiving Board checks the whole
-    // incoming native resource peak before it mutates any presentation actor.
-    if(!OrdinarySourceDay(b))return reject("Day family requires the fresh ordinary source Day closure without Tower, ladders or imported actors.");
-    if(kNativeFusionSnapshotVersion<26)return reject("Day source state is absent from the native wire contract.");
-    if(!EnsureNativeSourceZombieVisuals(b,kind,error))return false;
-    if(kind==3&&(Sexy::SOUND_GRASSSTEP<0||Sexy::SOUND_POLEVAULT<0||!FxReady(b,23,error)))return false;
-    if(kind==100&&!FxReady(b,0,error))return false;
-    if(kind==108&&!FxReady(b,18,error))return false;
-    if((kind==106||kind==108)&&!CanCreateNativeEquipmentVisual(b,FusionEquipmentType::Bucket))return reject("Actual source Bucket item resource is unavailable.");
-    if(kind==100||kind==108)
+    std::vector<uint16_t> closure;
+    if(!Current(b)||b->mApp->mGameMode!=GAMEMODE_ADVENTURE||!OrdinarySourceGrass(b,kind,closure))
+        return reject("Source family requires the genuine ordinary grass controller/dependency world.");
+    if(kNativeFusionSnapshotVersion<26)return reject("Source controller state is absent from the native wire contract.");
+    for(auto dependency:closure)
     {
-        NativeProjectileData shot;shot.kind=kind==100?0:11;shot.damage=kind==100?20:80;shot.specialType=9;shot.isZombieBullet=true;
-        if(!NativeProjectileMetadataValid(shot,PROJECTILE_PEA,MOTION_BACKWARDS)||!EnsureNativeProjectileVisuals(b,shot.kind))
-            return reject("Day hostile source projectile family is not ready.");
+        if(!EnsureNativeSourceZombieVisuals(b,dependency,error))return false;
+        if(!CanQueryNativeSourceZombieRoot273(b,dependency))
+            return reject("Source family actual model/root/state dependency is unavailable.");
+        if(FusionDayZombie273Pole(dependency)&&
+            (Sexy::SOUND_GRASSSTEP<0||Sexy::SOUND_POLEVAULT<0||!FxReady(b,23,error)))return false;
+        if((FusionDayZombie273Doll(dependency)||dependency==6)&&!FxReady(b,11,error))return false;
+        if(dependency==100&&!FxReady(b,0,error))return false;
+        if(dependency==108&&!FxReady(b,18,error))return false;
+        if((dependency==106||dependency==108)&&!CanCreateNativeEquipmentVisual(b,FusionEquipmentType::Bucket))
+            return reject("Actual source Bucket item resource is unavailable.");
+        if(FusionDayZombie273Shooter(dependency))
+        {
+            NativeProjectileData shot;shot.kind=dependency==100?0:11;shot.damage=dependency==100?20:80;shot.specialType=9;shot.isZombieBullet=true;
+            if(!NativeProjectileMetadataValid(shot,PROJECTILE_PEA,MOTION_BACKWARDS)||!EnsureNativeProjectileVisuals(b,shot.kind))
+                return reject("Source hostile projectile family is not ready.");
+        }
     }
-    const uint16_t batch[]={kind};
-    return CanAllocateNativeSourceDayBatch274(b,batch,error);
+    const uint16_t batch[]={kind};return CanAllocateNativeSourceDayBatch274(b,batch,error);
+}
+bool CanSpawnNativeDayZombie273(Board* b,uint16_t kind,std::string* error)
+{
+    if(!FindFusionDayZombie273Profile(kind)){if(error)*error="Source kind does not use the shared Day-family controller.";return false;}
+    return CanSpawnNativeGrassZombie284(b,kind,error);
+}
+void RetryNativeDancePole284(Zombie* z)
+{
+    const auto* source=GetNativeSourceZombieData(z);auto* state=EditNativeDayZombie273(z);
+    if(!source||source->kind!=6||!state||!state->danceSpawnPending||state->danceSpawnFailed||!Host(z))return;
+    if(z->IsDeadOrDying()||!z->mHasHead){state->danceSpawnPending=false;return;}
+    std::string error;bool failed=false;
+    const bool born=SpawnNativeDancePole284Children(z,state->danceSpawnRow,state->danceSpawnShadowX,DanceHooks(),failed,&error);
+    if(born)state->danceSpawnPending=false;
+    if(failed)
+    {
+        state->danceSpawnPending=false;state->danceSpawnFailed=true;
+        if(auto* context=GetNativeContext(z->mBoard);context&&context->adventure.enabled)
+        {context->adventure.schedulerFailed=true;context->adventureScheduler.failed=true;}
+        LawnNet::NetTrace("Fusion Dance284 partial birth failed parent=%u token=%u reason=%s",z->mNetId,source->instanceToken,error.c_str());
+    }
 }
 bool PrepareNativeDayZombie273ChomperArmor(Zombie* z,Coin*& born,int& oldType,int& oldHealth)
 {

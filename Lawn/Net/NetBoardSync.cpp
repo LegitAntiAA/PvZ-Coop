@@ -19,6 +19,8 @@
 #include "../../Sexy.TodLib/Attachment.h"
 #include "../../Sexy.TodLib/EffectSystem.h"
 #include "../../Sexy.TodLib/TodParticle.h"
+#include "../../SexyAppFramework/SoundManager.h"
+#include "../../SexyAppFramework/SoundInstance.h"
 #include "../System/PlayerInfo.h"
 #include "../../GameConstants.h"
 #include "../../SexyAppFramework/Graphics.h"
@@ -1026,7 +1028,8 @@ bool NetDay273AllocationCapacity(Board* board,const NetBuffer& body,const LawnFu
             {
                 switch(type)
                 {
-                case ZOMBIE_NORMAL:case ZOMBIE_TRAFFIC_CONE:case ZOMBIE_PAIL:case ZOMBIE_DOOR:case ZOMBIE_POLEVAULTER:case ZOMBIE_NEWSPAPER:break;
+                case ZOMBIE_NORMAL:case ZOMBIE_TRAFFIC_CONE:case ZOMBIE_PAIL:case ZOMBIE_DOOR:case ZOMBIE_POLEVAULTER:
+                case ZOMBIE_NEWSPAPER:case ZOMBIE_FOOTBALL:break;
                 default:return reject("zombie-carrier-not-budgeted",section,type);
                 }
                 const auto reanim=GetZombieDefinition(ZombieType(type)).mReanimationType;
@@ -1770,6 +1773,35 @@ void LawnNet::NetBroadcastFusionLimb276(LawnApp* app,const NetFusionLimbEvent276
     NetBuffer payload;
     if(NetEncodeFusionLimbEvent276(event,payload))
         app->mNetManager->SendBoardEvent(payload,BOARDEV_FUSION_LIMB276);
+}
+namespace
+{
+int SourceSound284(uint16_t kind)
+{return kind==66?Sexy::SOUND_PRIZE:kind==69?Sexy::SOUND_DANCER:-1;}
+bool PlayVolumeSound284(LawnApp* app,int sound,float volume,bool broadcast)
+{
+    if(!app||!app->mSoundManager||sound<0||sound>UINT16_MAX||!std::isfinite(volume)||volume<0||volume>1)return false;
+    if(app->mMuteSoundsForCutscene)return true;
+    if(volume==1.f){app->PlaySample(sound);return true;}
+    if(auto* instance=app->mSoundManager->GetSoundInstance(sound))
+    {instance->SetVolume(volume);instance->Play(false,true);}
+    // An exhausted local audio channel is cosmetic; peers still consume the
+    // one reliable cue, and no source action is replayed to retry that sound.
+    if(broadcast&&app->NetIsHost()&&app->mNetManager&&!LawnNet::gNetSuppressSounds)
+    {
+        NetBuffer payload;payload.WriteU16(uint16_t(sound));payload.WriteF32(volume);
+        app->mNetManager->SendBoardEvent(payload,BOARDEV_SOUND);
+    }
+    return true;
+}
+}
+bool LawnNet::NetSourceSound284Ready(LawnApp* app,uint16_t sourceSound)
+{return app&&app->mSoundManager&&SourceSound284(sourceSound)>=0&&SourceSound284(sourceSound)<=UINT16_MAX;}
+bool LawnNet::NetPlaySourceSound284(LawnApp* app,uint16_t sourceSound,float volume)
+{
+    if(!NetSourceSound284Ready(app,sourceSound)||!PlayVolumeSound284(app,SourceSound284(sourceSound),volume,true))return false;
+    NetTrace("Fusion source sound284 produced source=%u native=%d volume=%.9g role=%s",sourceSound,SourceSound284(sourceSound),volume,app->NetIsClient()?"client":"host");
+    return true;
 }
 
 void LawnNet::NetBroadcastParticle(LawnApp* theApp, float theX, float theY,
@@ -2668,7 +2700,7 @@ void Board::NetApplyEvent(NetBuffer& b)
         NetFusionLimbEvent276 event;
         const auto* context=LawnFusion::GetNativeContext(this);
         if(!mApp||!mApp->NetIsClient()||mApp->mBoard!=this||!context||
-            mBackground!=BACKGROUND_1_DAY||!NetDecodeFusionLimbEvent276(b,event)||
+            !LawnFusion::IsNativeSourceAdventureGrassWorld281(this)||!NetDecodeFusionLimbEvent276(b,event)||
             context->epoch!=event.mEpoch)break;
         // The real loss can retire the owner before its next snapshot.
         // Event identity and the epoch, rather than a live ghost, own this FX.
@@ -3006,9 +3038,10 @@ void Board::NetApplyEvent(NetBuffer& b)
 	}
 	case BOARDEV_SOUND:
 	{
-		uint16_t aSound = b.ReadU16Or();
-		if (!gNetSuppressSounds)
-			mApp->PlaySample(aSound);
+		uint16_t aSound=0;float aVolume=1.f;
+		if(!NetDecodeSoundEvent284(b,aSound,aVolume))break;
+		if(aVolume!=1.f)NetTrace("Fusion source sound284 received native=%u volume=%.9g source66=%d role=%s",aSound,aVolume,aSound==Sexy::SOUND_PRIZE?1:0,mApp&&mApp->NetIsClient()?"client":"host");
+		if(!gNetSuppressSounds)PlayVolumeSound284(mApp,aSound,aVolume,false);
 		break;
 	}
 	case BOARDEV_FOLEY:

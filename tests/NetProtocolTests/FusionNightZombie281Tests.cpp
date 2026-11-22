@@ -39,7 +39,7 @@ int RunFusionNightZombie281Tests(int& checks)
     // Five distinct source identities/stats, rather than carrier aliases.
     struct Profile {uint16_t kind;int body,first,second,carrier;};
     constexpr Profile profiles[]={{5,270,0,200,ZOMBIE_NEWSPAPER},{6,720,0,0,ZOMBIE_POLEVAULTER},
-        {7,270,0,0,ZOMBIE_POLEVAULTER},{9,270,1400,0,ZOMBIE_FOOTBALL},{10,720,0,0,ZOMBIE_NORMAL}};
+        {7,270,0,0,ZOMBIE_POLEVAULTER},{9,270,1400,0,ZOMBIE_FOOTBALL},{10,720,0,0,-1}};
     for(const auto& oracle:profiles)
     {
         const auto* p=FindFusionZombieProfile(oracle.kind);
@@ -237,15 +237,18 @@ int RunFusionNightZombie281Tests(int& checks)
     // atomic failure. Missing actors are never replaced with original PvZ types.
     std::vector<uint16_t> closure{999};std::string error;
     const uint16_t jackson[]={10};
-    CHECK(BuildFusionSourceZombieClosure280(jackson,closure,&error)&&closure==std::vector<uint16_t>({10,6,7}));
-    const uint16_t overlap[]={6,10,7,10,5,9};
-    CHECK(BuildFusionSourceZombieClosure280(overlap,closure,&error)&&closure==std::vector<uint16_t>({6,7,10,5,9}));
-    CHECK(BuildFusionSourceZombieClosure280(closure,closure,&error)&&closure==std::vector<uint16_t>({6,7,10,5,9}));
-    const auto savedClosure=closure;const uint16_t unsupported[]={10,203};
+    // Jackson data/dependencies are recovered, but its canonical controller
+    // and transition view are not wired. Never admit a BasicZombie substitute.
+    CHECK(!BuildFusionSourceZombieClosure280(jackson,closure,&error)&&closure==std::vector<uint16_t>({999}));
+    CHECK(std::vector<uint16_t>(FusionDayZombie273NpcDependencies(10).begin(),FusionDayZombie273NpcDependencies(10).end())==std::vector<uint16_t>({6,7}));
+    const uint16_t overlap[]={6,7,6,5,9};
+    CHECK(BuildFusionSourceZombieClosure280(overlap,closure,&error)&&closure==std::vector<uint16_t>({6,7,5,9}));
+    CHECK(BuildFusionSourceZombieClosure280(closure,closure,&error)&&closure==std::vector<uint16_t>({6,7,5,9}));
+    const auto savedClosure=closure;const uint16_t unsupported[]={6,203};
     CHECK(!BuildFusionSourceZombieClosure280(unsupported,closure,&error)&&closure==savedClosure);
     CHECK(error.find("rootKind=203")!=std::string::npos&&error.find("dependencyKind=203")!=std::string::npos);
-    const uint16_t all[]={0,2,4,8,11,12,13,14,15,18,41,42,104,109,111,3,21,22,23,100,106,107,108,5,6,7,9,10};
-    CHECK(BuildFusionSourceZombieClosure280(all,closure,&error)&&closure.size()==28&&error.empty());
+    const uint16_t all[]={0,2,4,8,11,12,13,14,15,18,41,42,104,109,111,3,21,22,23,100,106,107,108,5,6,7,9};
+    CHECK(BuildFusionSourceZombieClosure280(all,closure,&error)&&closure.size()==27&&error.empty());
 #undef CHECK
     return failures;
 }

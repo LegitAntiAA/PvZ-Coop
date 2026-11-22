@@ -9,6 +9,7 @@
 #include "FusionNativeWater268.h"
 #include "FusionNativeVisual.h"
 #include "FusionNativeProjectileMetadata.h"
+#include "FusionNativeEffects269.h"
 #include "../Zombie.h"
 #include "../Plant.h"
 #include "../Projectile.h"
@@ -89,7 +90,9 @@ bool BeginNativeSpecialZombie269PaperFall(Zombie* z)
     if(!IsNativeSpecialZombie269(z)||!Paper(z))return false;
     if(!Host(z)||z->IsDeadOrDying())return true;
     auto* body=Body(z);if(!body||!body->TrackExists("anim_gasp"))return true;
+    if(GetNativeSourceZombieData(z)->kind==5&&!PlayNativeSourceZombieArmor284(z,false))return true;
     z->StopEating();z->mShieldType=SHIELDTYPE_NONE;z->mShieldHealth=0;z->mHasObject=false;
+    z->mApp->PlayFoley(FOLEY_NEWSPAPER_RIP);
     z->mZombiePhase=PHASE_NEWSPAPER_MADDENING;
     z->PlayZombieReanim("anim_gasp",REANIM_PLAY_ONCE_AND_HOLD,0,0);
     UpdateNativeSpecialZombie269Animation(z);

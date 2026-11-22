@@ -31,7 +31,7 @@ struct NativeSourceZombieData
     uint16_t sourceParentId=0;
     uint32_t sourceParentToken=0;
     bool dieWithParent=false;
-    uint8_t firstArmorStage=0; // Persistent appearance: first111/109, second15/104.
+    uint8_t firstArmorStage=0; // Persistent appearance: first9/111/109, second5/15/104.
     // Day273 status/armor/head variants live in their separately validated
     // full-UID state; they must not overload these legacy Paper/vehicle fields.
     uint8_t paperShootTicks=0,paperShootEvent=0;
@@ -59,7 +59,7 @@ inline bool NativeSourceZombieDataValid(const NativeSourceZombieData& data,int m
         head.mAnimRate||head.mLoopType||head.mLoopCount))return false;
     if(data.kind!=104&&(data.paperShootTicks||data.paperShootEvent||head.mPresent))return false;
     if(data.kind!=18&&data.vehicleStopped)return false;
-    if(((data.kind==111||data.kind==109||data.kind==15||data.kind==104)?data.firstArmorStage>2:data.firstArmorStage!=0)||!FindFusionZombieProfile(data.kind)||!data.instanceToken||
+    if(((data.kind==9||data.kind==111||data.kind==109||data.kind==5||data.kind==15||data.kind==104)?data.firstArmorStage>2:data.firstArmorStage!=0)||!FindFusionZombieProfile(data.kind)||!data.instanceToken||
         !std::isfinite(data.originSpeed)||data.originSpeed<kFusionZombieMinimumOriginSpeed||
         data.originSpeed>kFusionZombieMaximumOriginSpeed||!FusionZombieHealthFitsMaximum(data.health,maximumHealth)||
         bool(data.sourceParentId)!=bool(data.sourceParentToken)||(data.dieWithParent&&!data.sourceParentId))return false;

@@ -1,4 +1,5 @@
 #include "FusionNativeDayZombie273.h"
+#include "FusionNativeDayZombie273Bridge.h"
 #include "FusionBasePlantRules.h"
 #include "FusionNative.h"
 #include "FusionNativeZombieVisual.h"
@@ -207,8 +208,10 @@ bool MoveNativeDayZombie273(Zombie* z)
 }
 bool UpdateNativeDayZombie273(Zombie* z,const NativeDayZombie273Hooks& hooks)
 {
-    if(!IsNativeDayZombie273(z))return false;if(!Host(z)||z->mDead||z->IsDeadOrDying())return true;
+    if(!IsNativeDayZombie273(z))return false;if(!Host(z)||z->mDead)return true;
     auto* s=EditNativeDayZombie273(z);if(!s)return true;
+    if(z->IsDeadOrDying()){s->danceSpawnPending=false;return true;}
+    if(Kind(z)==6&&s->danceSpawnPending)RetryNativeDancePole284(z);
     if(FusionDayZombie273Pole(Kind(z))){Pole(z,*s,hooks);return true;}
     if(!FusionDayZombie273Shooter(Kind(z)))return true;
     auto* head=z->mApp->ReanimationTryToGet(z->mSpecialHeadReanimID);float factor=0;

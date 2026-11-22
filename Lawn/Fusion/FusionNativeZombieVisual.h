@@ -43,7 +43,7 @@ void ReleaseUnusedNativeSourceZombieVisuals(Board* board);
 bool DrawNativeSourceZombie(Sexy::Graphics* graphics, Zombie* zombie);
 bool GetNativeSourceZombie269NodePoint(const Zombie*,const char*,float&,float&);
 bool GetNativeSourceZombie269NodeActivity(const Zombie*,const char*,bool&);
-// Synchronous Day loss callback: sample the actual native body track, including
+// Synchronous source loss callback: sample the actual native body track, including
 // a lethal hit before PlayDeathAnim changes it. Never select a pose from HP.
 bool GetNativeSourceZombieLimbBirthPoint276(const Zombie*,const char*,float&,float&);
 bool CanQueryNativeSourceZombieRoot273(Board*,uint16_t kind);

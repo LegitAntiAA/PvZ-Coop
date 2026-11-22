@@ -131,7 +131,7 @@ bool InitializeNativeSourceAdventure273(Board* b,const FusionAdventureSession273
     if(!IsNativeSourceAdventureGrassWorld281(b))
     {if(error)*error="Source Adventure requires its current Day/Night five-grass world without foreign grid/Tower initializers.";return false;}
     FusionAdventureScheduler273State scheduler;
-    if(host&&(level->tutorialId==7||level->tutorialId==8||level->tutorialId==10)&&
+    if(host&&(level->tutorialId==7||level->tutorialId==8||level->tutorialId==10||level->tutorialId==13||level->tutorialId==15)&&
         !PreflightNativeFusionAdventureLesson278(b,boot.run.level,error))return false;
     if(host&&InitializeNativeAdventureScheduler273(b,scheduler,boot.run.level,int(boot.run.cycle),
         boot.sourceDifficulty,BoardRandom(b),error)!=Result::Okay)return false;

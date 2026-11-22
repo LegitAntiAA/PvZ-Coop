@@ -33,12 +33,13 @@ FusionAdventureLessons274TestResult RunFusionAdventureLessons274Tests()
     static_assert(std::is_trivially_copyable_v<FusionAdventureRun273>);
     static_assert(uint8_t(M::Ready)==7); // Existing source1 message wire values stay unchanged.
     static_assert(uint8_t(M::EquipmentReady)==21&&uint8_t(M::PuffIntro)==22&&uint8_t(M::PuffReady)==25);
+    static_assert(uint8_t(M::FertilizeIntro)==26&&uint8_t(M::IceReady)==38&&uint8_t(A::Prepare13Nut)==7&&uint8_t(A::Clear15)==10);
     static_assert(sizeof(M)==1&&sizeof(A)==1);
     FusionAdventureLessonInput274 input;FusionAdventureTutorialEffects273 e;
     // The full source activation subset, independently from public campaign admission.
     for(int level=1;level<=45;++level)
     {
-        const bool lesson=level==1||level==4||level==7||level==8||level==10;
+        const bool lesson=level==1||level==4||level==7||level==8||level==10||level==13||level==15;
         auto run=Begin(level);CHECK(run.tutorial.active==lesson);
         run=Begin(level,true);CHECK(!run.tutorial.active&&run.tutorial.stage==0);
         run=Begin(level,false,2);CHECK(!run.tutorial.active&&run.tutorial.message==M::None);
@@ -149,8 +150,65 @@ FusionAdventureLessons274TestResult RunFusionAdventureLessons274Tests()
     Step(run,100000,input,e);CHECK(!run.tutorial.active&&run.tutorial.messageTicks==500&&e.completed&&e.nextWaveTicks==500);
     for(const auto message:{M::PuffIntro,M::PuffStack,M::PuffMix})CHECK(FusionAdventureMessageDuration273(message)==400);
     CHECK(FusionAdventureMessageDuration273(M::PuffReady)==500);
+    // Source13: four timed messages, real Nut/Fertilize action, any1027,
+    // then damage/repair of the EXACT tracked1012, not another healthy actor.
+    input={};run=Begin(13);Step(run,0,input,e);
+    const M timed13[]={M::FertilizeIntro,M::FertilizeGrow,M::FertilizeUpgrade,M::FertilizeLesson};
+    for(unsigned i=0;i<4;++i)
+    {
+        CHECK(run.tutorial.stage==i+1&&run.tutorial.message==timed13[i]&&run.tutorial.timerTicks==400&&NoAction(e));
+        Step(run,399,input,e);CHECK(run.tutorial.timerTicks==1&&NoAction(e));
+        Step(run,1,input,e);
+    }
+    CHECK(run.tutorial.stage==5&&run.tutorial.message==M::UseFertilizeNut&&run.tutorial.timerTicks==0&&run.tutorial.messageTicks==6000);
+    CHECK(e.missionAction==A::Prepare13Nut&&!e.completed&&!e.grantMissionCards);
+    input.hasMissionPlant=true;input.missionPlantFullyRepaired=true;Step(run,60000,input,e);
+    CHECK(run.tutorial.stage==5&&run.tutorial.active&&NoAction(e)); // A healthy actor is not the1027 condition.
+    input.hasTallNut1027=true;Step(run,0,input,e);
+    CHECK(run.tutorial.stage==6&&run.tutorial.message==M::FertilizeNutReady&&run.tutorial.timerTicks==400&&NoAction(e));
+    Step(run,399,input,e);CHECK(run.tutorial.timerTicks==1&&NoAction(e));
+    beforeNativeCommit=run;candidate=run;Step(candidate,1,input,e);
+    CHECK(e.missionAction==A::Prepare13Chomper&&candidate.tutorial.stage==7&&candidate.tutorial.message==M::RepairNutChomper);
+    CHECK(run.tutorial.stage==beforeNativeCommit.tutorial.stage&&run.tutorial.timerTicks==1);run=candidate;
+    input.hasMissionPlant=false;input.missionPlantFullyRepaired=true;Step(run,60000,input,e);
+    CHECK(run.tutorial.stage==7&&run.tutorial.active&&NoAction(e)); // Replacement/another healthy1012 must not pass.
+    input.hasMissionPlant=true;input.missionPlantFullyRepaired=false;Step(run,1,input,e);
+    CHECK(run.tutorial.stage==7&&NoAction(e));
+    input.missionPlantFullyRepaired=true;Step(run,0,input,e);
+    CHECK(run.tutorial.stage==8&&run.tutorial.message==M::FertilizeRepairReady&&run.tutorial.timerTicks==400&&NoAction(e));
+    Step(run,399,input,e);CHECK(run.tutorial.active&&run.tutorial.timerTicks==1);
+    Step(run,1,input,e);CHECK(!run.tutorial.active&&run.tutorial.message==M::FertilizeReady&&e.completed&&e.nextWaveTicks==500&&e.missionAction==A::None);
+    CHECK(!FusionAdventureTutorialShowsZombieHealth284(run));
+    Step(run,500,input,e);CHECK(run.tutorial.messageTicks==0&&NoAction(e));
+    input={};run=Begin(13);
+    for(int stage=1;stage<=5;++stage){Step(run,100000,input,e);CHECK(run.tutorial.stage==stage);}
+    CHECK(e.missionAction==A::Prepare13Nut); // Large dt still cannot prepare both source groups at once.
+    // Source15 waits on the whole source enemy count, not just its three Cone
+    // identities. HP visibility is derived and clears at the actual count gate.
+    input={};input.sourceEnemyCount=7;run=Begin(15);
+    CHECK(!FusionAdventureTutorialShowsZombieHealth284(run));Step(run,0,input,e);
+    CHECK(run.tutorial.stage==1&&run.tutorial.message==M::IceIntro&&run.tutorial.timerTicks==400&&NoAction(e));
+    Step(run,399,input,e);CHECK(run.tutorial.timerTicks==1&&!FusionAdventureTutorialShowsZombieHealth284(run));
+    Step(run,1,input,e);CHECK(run.tutorial.stage==2&&run.tutorial.message==M::IceDefense&&run.tutorial.timerTicks==0&&run.tutorial.messageTicks==6000);
+    CHECK(e.missionAction==A::Prepare15&&FusionAdventureTutorialShowsZombieHealth284(run));
+    for(int enemies:{7,3,1,-1})
+    {input.sourceEnemyCount=enemies;Step(run,100000,input,e);CHECK(run.tutorial.stage==2&&NoAction(e)&&FusionAdventureTutorialShowsZombieHealth284(run));}
+    input.sourceEnemyCount=0;Step(run,0,input,e);
+    CHECK(run.tutorial.stage==3&&run.tutorial.message==M::IceLessonReady&&run.tutorial.timerTicks==400&&NoAction(e));
+    CHECK(!FusionAdventureTutorialShowsZombieHealth284(run));Step(run,399,input,e);CHECK(run.tutorial.timerTicks==1);
+    beforeNativeCommit=run;candidate=run;Step(candidate,1,input,e);
+    CHECK(e.missionAction==A::Clear15&&e.completed&&e.nextWaveTicks==500&&!candidate.tutorial.active&&candidate.tutorial.message==M::IceReady);
+    CHECK(run.tutorial.active&&run.tutorial.stage==beforeNativeCommit.tutorial.stage&&run.tutorial.timerTicks==1);
+    run=candidate;CHECK(!FusionAdventureTutorialShowsZombieHealth284(run));Step(run,500,input,e);CHECK(!run.tutorial.messageTicks&&NoAction(e));
+    input={};run=Begin(15);Step(run,100000,input,e);CHECK(run.tutorial.stage==1&&NoAction(e));
+    Step(run,100000,input,e);CHECK(run.tutorial.stage==2&&e.missionAction==A::Prepare15); // No immediate zero-count shortcut in the same case.
+    Step(run,100000,input,e);CHECK(run.tutorial.stage==3&&NoAction(e));Step(run,100000,input,e);CHECK(e.completed&&e.missionAction==A::Clear15);
+    for(const auto message:{M::FertilizeIntro,M::FertilizeGrow,M::FertilizeUpgrade,M::FertilizeLesson,
+        M::FertilizeNutReady,M::FertilizeRepairReady,M::IceIntro,M::IceLessonReady})CHECK(FusionAdventureMessageDuration273(message)==400);
+    for(const auto message:{M::UseFertilizeNut,M::RepairNutChomper,M::IceDefense})CHECK(FusionAdventureMessageDuration273(message)==6000);
+    CHECK(FusionAdventureMessageDuration273(M::FertilizeReady)==500&&FusionAdventureMessageDuration273(M::IceReady)==500);
     // Level-aware validation rejects wrong stage/message/timer combinations.
-    for(int level:{4,7,8,10})
+    for(int level:{4,7,8,10,13,15})
     {
         input={};auto valid=Begin(level);Step(valid,0,input,e);
         auto bad=valid;bad.tutorial.message=M::Welcome;CHECK(!FusionAdventureRunValid273(bad));

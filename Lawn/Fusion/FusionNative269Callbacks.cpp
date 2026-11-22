@@ -34,9 +34,19 @@ bool TrySpendNativeSuperSun269Sun(Plant* p,int cost)
 bool RecoverNativeCompanions269Plant(Plant* p,int amount)
 {
     if(!HostLive(p)||amount<0)return false;
-    if(RecoverNativeMachine268(p,amount)||RecoverNativeChomper268(p,amount))return true;
-    p->mPlantHealth=int((std::min)(int64_t(p->mPlantMaxHealth),int64_t(p->mPlantHealth)+amount));
-    p->mEatenFlashCountdown=25;NativePlantHealthChanged(p);return true;
+    // Plant.Recover180466F90: resolve its real source resource before the
+    // health operation. Cosmetic pool exhaustion must never cancel healing.
+    const bool effectReady=EnsureNativeSourceEffect269(p->mBoard,16);
+    if(!RecoverNativeMachine268(p,amount)&&!RecoverNativeChomper268(p,amount))
+    {
+        p->mPlantHealth=int((std::min)(int64_t(p->mPlantMaxHealth),int64_t(p->mPlantHealth)+amount));
+        p->mEatenFlashCountdown=25;NativePlantHealthChanged(p);
+    }
+    float x=0,y=0;
+    if(effectReady&&p->GetShadowCenter(x,y))
+        SpawnNativeSourceEffect269(p->mBoard,16,x,y-float(.7*GetNativeFusionPixelsY(p->mBoard)),
+            Board::MakeRenderOrder(RENDER_LAYER_PARTICLE,p->mRow,0),true);
+    return true;
 }
 bool NativeCompanions269HasLayerNeighbour(const Plant* p)
 {

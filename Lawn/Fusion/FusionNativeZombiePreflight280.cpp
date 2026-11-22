@@ -67,7 +67,7 @@ bool EnsureNativeSourceZombieClosure280(Board* board,std::span<const uint16_t> r
         const auto effect=[&](uint16_t fx)
         {return EnsureNativeSourceEffect269(board,fx,&detail);};
         if(FusionDayZombie273Doll(kind)&&!effect(11))return Reject(kind,detail,error);
-        if(kind==3&&(Sexy::SOUND_GRASSSTEP<0||Sexy::SOUND_POLEVAULT<0||!effect(23)))return Reject(kind,"Pole sound/effect23 dependency unavailable: "+detail,error);
+        if(FusionDayZombie273Pole(kind)&&(Sexy::SOUND_GRASSSTEP<0||Sexy::SOUND_POLEVAULT<0||!effect(23)))return Reject(kind,"Pole sound/effect23 dependency unavailable: "+detail,error);
         if(kind==100&&!effect(0))return Reject(kind,detail,error);
         if(kind==108&&!effect(18))return Reject(kind,detail,error);
         if((kind==14||kind==18)&&!effect(kind==14?35:36))return Reject(kind,detail,error);
@@ -90,7 +90,7 @@ bool EnsureNativeSourceZombieClosure280(Board* board,std::span<const uint16_t> r
         // Preserve the existing host controller/world/minimum allocation gate
         // before initial wave-plan RNG. Client resource probes do not simulate
         // the controller or claim host pool capacity.
-        if(FindFusionDayZombie273Profile(kind)&&!board->mApp->NetIsClient()&&!CanSpawnNativeDayZombie273(board,kind,&detail))
+        if((FindFusionDayZombie273Profile(kind)||kind==5||kind==9)&&!board->mApp->NetIsClient()&&!CanSpawnNativeGrassZombie284(board,kind,&detail))
             return Reject(kind,detail,error);
         if(IsFusionSummon269Money(kind))
         {
