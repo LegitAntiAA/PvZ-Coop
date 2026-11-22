@@ -1,4 +1,5 @@
 #include "FusionNativeWaterZombie313Bridge.h"
+#include "FusionNativeWaterShoot343.h"
 #include "FusionNativeDrown313Bridge.h"
 #include "FusionNative.h"
 #include "FusionNativeZombies.h"
@@ -78,10 +79,11 @@ bool Resources(Board* b,uint16_t kind,std::string* error)
     if(kind==16)
     {for(uint16_t id:std::array<uint16_t,7>{8,9,43,72,73,76,77})if(!sound(id))return false;
         return EnsureNativeSourceEffect269(b,34,error);}
+    if(FusionWaterShooter343Kind(kind)&&!EnsureNativeWaterShoot343Resources(b,kind,error))return false;
     if(kind==20)
     {return sound(3)&&sound(4)&&EnsureNativeDrownWeapon313Visuals(b,error);}
     if(!EnsureNativeSourceAnimated317(b,3,0,error)||!EnsureNativeSourceEffect269(b,32,error)||!sound(75))return false;
-    if(kind==19||kind==27)
+    if(FusionDolphin343Kind(kind))
         return EnsureNativeSourceEffect269(b,23,error)&&sound(64)&&sound(78)&&sound(79);
     return true;
 }
@@ -89,7 +91,7 @@ bool Prepare(Zombie* z,NativeWaterZombie313Operation operation,std::string* erro
 {
     if(!Host(z)||!Resources(z->mBoard,Kind(z),error))return false;
     if(operation==NativeWaterZombie313Operation::Initialize)
-        return Pool(z->mBoard,0,Kind(z)==20?0:1,error);
+        return Pool(z->mBoard,0,Kind(z)==20?0:FusionWaterShooter343Kind(Kind(z))?2:1,error);
     if(operation==NativeWaterZombie313Operation::Splash)return EnsureNativeSourceAnimated317(z->mBoard,3,1,error);
     // Death has no OWN gameplay descendants in any of these five families.
     // Existing source particle capacity drops are cosmetic, not callback replay.
@@ -211,14 +213,14 @@ const NativeWaterZombie313Hooks& GetNativeWaterZombie313Hooks()
 bool EnsureNativeWaterZombie313Resources(Board* b,uint16_t kind,std::string* error)
 {return Resources(b,kind,error);}
 bool CanSpawnNativeWaterZombie313(Board* b,uint16_t kind,int row,bool controlled,std::string* error)
-{return NativeWaterZombie313WorldValid(b,kind,row,error,controlled)&&Resources(b,kind,error)&&Pool(b,1,kind==20?1:2,error);}
+{return NativeWaterZombie313WorldValid(b,kind,row,error,controlled)&&Resources(b,kind,error)&&Pool(b,1,kind==20?1:FusionWaterShooter343Kind(kind)?3:2,error);}
 bool CanAllocateNativeWaterZombie313Batch(Board* b,std::span<const uint16_t> kinds,std::string* error)
-{size_t clocks=0;for(uint16_t k:kinds){if(!Resources(b,k,error))return false;clocks+=k==20?1:2;}return Pool(b,kinds.size(),clocks,error);}
+{size_t clocks=0;for(uint16_t k:kinds){if(!Resources(b,k,error))return false;clocks+=k==20?1:FusionWaterShooter343Kind(k)?3:2;}return Pool(b,kinds.size(),clocks,error);}
 bool InitializeNativeWaterZombie313Actor(Zombie* z)
 {
     if(!z||!FusionWaterZombie313Kind(Kind(z))||!Resources(z->mBoard,Kind(z),nullptr))return false;
     if(z->mNetGhost||z->mApp->NetIsClient())return true;auto* state=EditNativeWaterZombie313(z,true);
-    return state&&InitializeNativeWaterZombie313(z,*state,GetNativeWaterZombie313Hooks());
+    return state&&InitializeNativeWaterZombie313(z,*state,GetNativeWaterZombie313Hooks())&&InitializeNativeWaterShoot343(z,*state);
 }
 bool UpdateNativeWaterZombie313Actor(Zombie* z)
 {
@@ -227,19 +229,19 @@ bool UpdateNativeWaterZombie313Actor(Zombie* z)
     const auto uid=z->mBoard->mZombies.DataArrayGetID(z);auto* b=z->mBoard;auto* app=z->mApp;
     const bool handled=UpdateNativeWaterZombie313(z,*state,GetNativeWaterZombie313Hooks());
     if(app->mBoard==b)if(auto* live=b->mZombies.DataArrayTryToGet(uid);live&&!live->mDead)
-        if(const auto* current=GetNativeWaterZombie313State(live);current&&current->failed)Failed(live,"Water313 real source callback/preflight failed");return handled;
+        if(auto* current=EditNativeWaterZombie313(live);current&&(current->failed||!UpdateNativeWaterShoot343(live,*current)))Failed(live,"Water313 real source callback/preflight failed");return handled;
 }
 bool AdoptNativeWaterZombie313Actor(Zombie* z,const FusionWaterZombie313View& view)
 {
     if(!z||(!z->mNetGhost&&!z->mApp->NetIsClient())||!FusionWaterZombie313WireViewValid(Kind(z),view)||
         !NativeWaterZombie313WorldValid(z->mBoard,Kind(z),z->mRow,nullptr,z->mMindControlled))return false;
     auto* c=GetNativeContext(z->mBoard);if(!c)return false;const uint32_t uid=z->mBoard->mZombies.DataArrayGetID(z);if(!uid)return false;
-    NativeWaterZombie313State next;auto old=c->waterZombies313.find(uid);if(old!=c->waterZombies313.end())next.auxiliaryID=old->second.auxiliaryID;
+    NativeWaterZombie313State next;auto old=c->waterZombies313.find(uid);if(old!=c->waterZombies313.end()){next.auxiliaryID=old->second.auxiliaryID;next.shootClockUID343=old->second.shootClockUID343;}
     static_cast<FusionWaterZombie313View&>(next)=view;next.localUID=uid;next.initialized=true;
-    if(!AdoptNativeWaterZombie313Auxiliary(z,next,view.auxiliary))return false;c->waterZombies313[uid]=std::move(next);return true;
+    if(!AdoptNativeWaterZombie313Auxiliary(z,next,view.auxiliary)||!AdoptNativeWaterShoot343(z,next,view))return false;c->waterZombies313[uid]=std::move(next);return true;
 }
 void RemoveNativeWaterZombie313Actor(Zombie* z)
-{auto* c=GetNativeContext(z?z->mBoard:nullptr);if(!c||!z)return;auto it=c->waterZombies313.find(z->mBoard->mZombies.DataArrayGetID(z));if(it==c->waterZombies313.end())return;RemoveNativeWaterZombie313Auxiliary(z,it->second);c->waterZombies313.erase(it);}
+{auto* c=GetNativeContext(z?z->mBoard:nullptr);if(!c||!z)return;auto it=c->waterZombies313.find(z->mBoard->mZombies.DataArrayGetID(z));if(it==c->waterZombies313.end())return;RemoveNativeWaterShoot343(z,it->second);RemoveNativeWaterZombie313Auxiliary(z,it->second);c->waterZombies313.erase(it);}
 bool BeginNativeWaterZombie313ActorDeath(Zombie* z,int reason)
 {auto* s=EditNativeWaterZombie313(z);return s&&BeginNativeWaterZombie313Death(z,*s,reason,GetNativeWaterZombie313Hooks());}
 bool NativeWaterZombie313ActorHeadLost(Zombie* z)

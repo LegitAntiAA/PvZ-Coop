@@ -4,6 +4,7 @@
 #include "FusionNativeHeavyZombie313BBridge.h"
 #include "FusionNativeExtendedZombie313Bridge.h"
 #include "FusionNativeWaterZombie313Bridge.h"
+#include "FusionNativeWaterShoot343.h"
 #include "FusionNativeZombieVisual.h"
 #include "../Board.h"
 #include "../Zombie.h"
@@ -69,9 +70,9 @@ const ReanimatorDefinition* Definition(ReanimationType type)
     return d;
 }
 uint8_t AuxCount(uint16_t kind,const Native313Snapshot& v)
-{return v.graph?uint8_t(v.graph->layerCount-1):uint8_t(kind==20?0:1);}
+{return v.graph?uint8_t(v.graph->layerCount-1):uint8_t(kind==20?0:FusionWaterShooter343Kind(kind)?2:1);}
 const LawnNet::NetZombieAnimState& Aux(const Native313Snapshot& v,uint8_t n)
-{return v.graph?v.graph->auxiliary[n]:v.water->auxiliary;}
+{return v.graph?v.graph->auxiliary[n]:n?v.water->shootClock343:v.water->auxiliary;}
 bool Definitions(uint16_t kind,const Native313Snapshot& v,const LawnNet::NetZombieAnimState& body,std::string* error)
 {
     // Source16 is the real Zamboni clock; every other new family uses NORMAL.
@@ -98,7 +99,7 @@ bool Definitions(uint16_t kind,const Native313Snapshot& v,const LawnNet::NetZomb
     if(v.graph&&!Span(d,"anim_head1"))return Reject("313 native auxiliary attachment track unavailable",error);
     for(uint8_t n=0;n<count;++n)
     {
-        const char* name=v.graph?FindFusionSourceGraph313(kind)->states[v.graph->layers[n+1].state].nativeTrack:"anim_walk";
+        const char* name=v.graph?FindFusionSourceGraph313(kind)->states[v.graph->layers[n+1].state].nativeTrack:n?FindFusionSourceGraph313(kind)->states[v.water->shoot343.state].nativeTrack:"anim_walk";
         if(!LawnNet::NetZombieAnimStateFitsFrames(Aux(v,n),Frames(ad))||!Span(ad,name,&Aux(v,n)))
             return Reject("313 auxiliary native frame span disagrees with canonical state",error);
     }
@@ -111,7 +112,7 @@ bool ExistingAux(Board* b,Zombie* z,uint16_t kind,std::array<uint32_t,2>& ids,st
     const auto* c=GetNativeContext(b);
     if(FusionWaterZombie313Kind(kind))
     {const auto it=c->waterZombies313.find(uid);if(it!=c->waterZombies313.end()){
-        if(it->second.localUID!=uid)return Reject("313 water map belongs to stale LOCAL generation",error);ids[0]=it->second.auxiliaryID;}}
+        if(it->second.localUID!=uid)return Reject("313 water map belongs to stale LOCAL generation",error);ids[0]=it->second.auxiliaryID;ids[1]=it->second.shootClockUID343;}}
     else if(const auto* g=GetNativeSourceGraph313(z))
     {if(g->localUID!=uid)return Reject("313 graph map belongs to stale LOCAL generation",error);std::copy_n(g->auxiliaryUIDs,2,ids.begin());}
     for(const auto id:ids)if(id&&!LiveClock(b,id))return Reject("313 auxiliary generation is missing/dead",error);
@@ -136,7 +137,7 @@ bool CaptureNative313(const Zombie* z,Native313Snapshot& out,std::string* error)
     if(FusionWaterZombie313Kind(d->kind))
     {const auto* state=GetNativeWaterZombie313State(z);if(!state||!state->initialized||state->failed||state->localUID!=uid)return Reject("313 water capture state unavailable",error);
      v.water=static_cast<const FusionWaterZombie313View&>(*state);
-     if(!CaptureNativeWaterZombie313Auxiliary(z,*state,v.water->auxiliary))return Reject("313 water capture auxiliary unavailable",error);}
+     if(!CaptureNativeWaterZombie313Auxiliary(z,*state,v.water->auxiliary)||!CaptureNativeWaterShoot343(z,*state,*v.water))return Reject("313 water capture auxiliary unavailable",error);}
     else if(NativeHeavyZombie313BKind(d->kind))
     {const auto* s=GetNativeHeavyZombie313B(z);if(!s||!s->initialized||s->failed)return Reject("313 heavy capture state unavailable",error);
      v.heavy.emplace();v.heavy->actor=*s;if(!GetNativeHeavyGold313BView(z,v.heavy->gold))return Reject("313 Gold capture state unavailable",error);}
@@ -201,7 +202,8 @@ bool AdoptNative313(Zombie* z,const Native313Snapshot& v,std::string* error)
         if(!AdoptNativeWaterZombie313Actor(z,*v.water))return Reject("313 prepared water adoption failed",error);
         const auto* state=GetNativeWaterZombie313State(z);
         if(!state||!RegisterNativeSourceGraphClock313(body,true)||
-            (kind!=20&&!RegisterNativeSourceGraphClock313(LiveClock(b,state->auxiliaryID),true)))
+            (kind!=20&&!RegisterNativeSourceGraphClock313(LiveClock(b,state->auxiliaryID),true))||
+            (FusionWaterShooter343Kind(kind)&&!RegisterNativeSourceGraphClock313(LiveClock(b,state->shootClockUID343),true)))
             return Reject("313 prepared water ghost clock lease unavailable",error);
         if(error)error->clear();return true;
     }

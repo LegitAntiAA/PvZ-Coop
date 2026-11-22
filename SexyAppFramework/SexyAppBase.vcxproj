@@ -681,6 +681,25 @@ EXIT /B 0</Command>
     <ClCompile Include="..\Lawn\Fusion\NativeSpecialZombie269.cpp" />
     <ClCompile Include="..\Lawn\Fusion\FusionZombieBatch270Rules.cpp" />
     <ClCompile Include="..\Lawn\Fusion\FusionCampaign272Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionCampaign342Rules.cpp" />
+    <ClCompile Include="..\Lawn\Net\NetFusionCampaign356Smoke.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeWaterShoot343.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeLadder355.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionRoof350Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeRoof350.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNextZombie343Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeNextZombie343.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionSourceGraph343Generated.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionSourceRoot343.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionDrown343Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionExtendedZombie347Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeExtendedZombie347.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionSourceGraph347Generated.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionSourceRoot347Generated.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionAdventureLesson346Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeAdventureLesson346.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionConveyor305Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeConveyor308.cpp" />
     <ClCompile Include="..\Lawn\Fusion\FusionAdventureScheduler273.cpp" />
     <ClCompile Include="..\Lawn\Fusion\FusionAdventureProgress273.cpp" />
     <ClCompile Include="..\Lawn\Fusion\FusionAdventureSession273.cpp" />
@@ -1546,6 +1565,18 @@ EXIT /B 0</Command>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseGOTY|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseGOTY|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\Lawn\Fusion\FusionGroundShooter343Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionSourceGraphGround343Generated.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionSourceRootGround343.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeGroundShooter343.cpp" />
+    <ClInclude Include="..\Lawn\Fusion\FusionGroundShooter343Rules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeGroundShooter343.h" />
+    <ClCompile Include="..\Lawn\Fusion\FusionSnowZombie363Rules.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionSourceGraphSnow363Generated.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionSourceRootSnow363.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeSnowZombie363.cpp" />
+    <ClInclude Include="..\Lawn\Fusion\FusionSnowZombie363Rules.h" />
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeSnowZombie363.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Editor\ParticleScreen.h" />

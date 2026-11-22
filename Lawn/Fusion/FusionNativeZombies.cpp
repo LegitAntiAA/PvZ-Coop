@@ -1,3 +1,7 @@
+#include "FusionNativeDryGround353.h"
+#include "FusionNextZombie343Rules.h"
+#include "FusionNativeRoof350.h"
+#include "FusionNativeExtendedZombie347.h"
 #include "FusionNativeZombies.h"
 #include "FusionNative.h"
 #include "FusionNativeAdventure273.h"
@@ -295,11 +299,9 @@ bool CanAllocateNativeSourceDayBatch274(Board* board,std::span<const uint16_t> k
 {
     if(error)error->clear();
     const auto reject=[&](const char* why){if(error)*error=why;return false;};
-    if(!CurrentBoard(board)||board->mApp->NetIsClient()||GetNativeFusionRowCount(board)!=5||
-        (board->mBackground!=BACKGROUND_1_DAY&&
-            !(board->mBackground==BACKGROUND_2_NIGHT&&IsNativeSourceWorld313(board))))
+    if(!CurrentBoard(board)||board->mApp->NetIsClient()||!IsNativeSourceWorld313(board))
         return reject("Source grass allocation requires the host Day Board or actual source Night world.");
-    for(int row=0;row<5;++row)if(board->mPlantRow[row]!=PLANTROW_NORMAL)
+    for(int row=0;row<GetNativeFusionRowCount(board);++row)if(board->mPlantRow[row]!=PLANTROW_NORMAL&&board->mPlantRow[row]!=PLANTROW_POOL)
         return reject("Source grass allocation does not cover a pool or dirt initializer.");
     size_t reanimations=0,attachments=0;
     for(auto kind:kinds)
@@ -493,7 +495,7 @@ Zombie* SpawnNativeSourceZombie(Board* board,const NativeSourceZombieSpawnReques
         if(!CanSpawnNativeJackson291(board,&error))
         {LawnNet::NetTrace("Fusion Jackson291 spawn gated row=%d reason=%s",row,error.c_str());return nullptr;}
     }
-    if((kind==9||kind==109||kind==18)&&board->mPlantRow[row]==PLANTROW_POOL)return nullptr;
+    if((kind==5||kind==9||kind==10||kind==109||kind==18||kind==211||FusionJackbox300Kind(kind))&&!NativeSourceDryRow353(board,row))return nullptr;
     if(kind==5||kind==9)
     {
         std::string error;
@@ -508,7 +510,7 @@ Zombie* SpawnNativeSourceZombie(Board* board,const NativeSourceZombieSpawnReques
         if(board->mPlantRow[row]==PLANTROW_POOL||!CanSpawnNativeDayZombie273(board,kind,&error))
         {LawnNet::NetTrace("Fusion Day273 spawn gated kind=%u row=%d reason=%s",kind,row,error.c_str());return nullptr;}
     }
-    if((kind==14||kind==18)&&!EnsureNativeSourceEffect269(board,kind==14?35:36))return nullptr;
+    if((FusionSubmarine343Kind(kind)||kind==18)&&!EnsureNativeSourceEffect269(board,FusionSubmarine343Kind(kind)?35:36))return nullptr;
     std::string resourceError;
     if (!EnsureNativeSourceZombieVisuals(board,kind,&resourceError))
     {
@@ -516,11 +518,11 @@ Zombie* SpawnNativeSourceZombie(Board* board,const NativeSourceZombieSpawnReques
         return nullptr;
     }
     const int nativeCarrier=GetNativeSourceZombieCarrier(kind);
-    if(typed313)
+    if(typed313||kind==200||kind==211)
     {
         FusionSourceDeathBudget319 peak;const uint16_t batch[]={kind};
         if(!GetNativeSourceZombieBirthBudget319(board,batch,peak,&resourceError))return nullptr;
-        if(request.friendly&&request.withEffect)
+        if(typed313&&request.friendly&&request.withEffect)
         {
             FusionSourceDeathBudget319 mc,combined;
             if(!NativeZombie313MindControlAllowed(kind,0,0)||!PrepareNativeSourceMindControl313(board,mc,&resourceError)||
@@ -530,8 +532,7 @@ Zombie* SpawnNativeSourceZombie(Board* board,const NativeSourceZombieSpawnReques
         if(!CanAllocateNativeSourceBudget319(board,peak,&resourceError))
         {LawnNet::NetTrace("Fusion Source313 allocation deferred kind=%u reason=%s",kind,resourceError.c_str());return nullptr;}
     }
-    else if((board->mBackground==BACKGROUND_1_DAY||
-        (board->mBackground==BACKGROUND_2_NIGHT&&IsNativeSourceWorld313(board)))&&GetNativeFusionRowCount(board)==5&&
+    else if(IsNativeSourceWorld313(board)&&
         (nativeCarrier==ZOMBIE_NORMAL||nativeCarrier==ZOMBIE_TRAFFIC_CONE||nativeCarrier==ZOMBIE_PAIL||
          nativeCarrier==ZOMBIE_DOOR||nativeCarrier==ZOMBIE_POLEVAULTER||nativeCarrier==ZOMBIE_NEWSPAPER||nativeCarrier==ZOMBIE_FOOTBALL))
     {
@@ -588,6 +589,15 @@ Zombie* SpawnNativeSourceZombie(Board* board,const NativeSourceZombieSpawnReques
     if (!AttachNativeSourceZombieData(board,zombie,data))
     { zombie->DieNoLoot(); return nullptr; }
     NativeSourceZombieInitialization313 sourceInitialization(zombie);
+    if(board->StageHasRoof())
+    {
+        if(request.positioned)
+        {
+            float x=0,y=0;if(!zombie->GetShadowCenter(x,y))return nullptr;
+            zombie->mPosX+=request.shadowX-x;zombie->mX=int(zombie->mPosX);
+        }
+        if(!ReconcileNativeRoofZombie350(zombie))return nullptr;
+    }
     if(FindSpecialZombie269Profile(kind))
     {
         if(!InitializeNativeSpecialZombie269(zombie)||
@@ -600,7 +610,7 @@ Zombie* SpawnNativeSourceZombie(Board* board,const NativeSourceZombieSpawnReques
     {
         float x=0,y=0;if(!zombie->GetShadowCenter(x,y)){zombie->DieNoLoot();return nullptr;}
         zombie->mPosX+=request.shadowX-x;zombie->mX=int(zombie->mPosX);
-        if(kind==14){zombie->mInPool=true;zombie->mZombieHeight=HEIGHT_ZOMBIE_NORMAL;}
+        if(FusionSubmarine343Kind(kind)){zombie->mInPool=board->mPlantRow[row]==PLANTROW_POOL;zombie->mZombieHeight=HEIGHT_ZOMBIE_NORMAL;}
         else {zombie->CheckForPool();zombie->CompletePoolEntry();}
         if(profile->waterOnly&&!zombie->mInPool){zombie->DieNoLoot();return nullptr;}
     }
@@ -611,6 +621,7 @@ Zombie* SpawnNativeSourceZombie(Board* board,const NativeSourceZombieSpawnReques
         float x=0,y=0;if(!GetNativeSourceZombie269NodePoint(zombie,"Shadow",x,y))return nullptr;
         zombie->mPosX+=request.shadowX-x;zombie->mX=int(zombie->mPosX);
     }
+    if(!ReconcileNativeRoofZombie350(zombie))return nullptr;
     if(waterFamily&&!InitializeNativeWaterZombie313Actor(zombie))return nullptr;
     if(heavyFamily&&!InitializeNativeHeavyZombie313BActor(zombie))return nullptr;
     if(extendedFamily&&!InitializeNativeExtendedZombie313Bridge(zombie))return nullptr;
@@ -625,6 +636,7 @@ Zombie* SpawnNativeSourceZombie(Board* board,const NativeSourceZombieSpawnReques
     if(kind==10&&!InitializeNativeJackson291(zombie))
     {zombie->DieNoLoot();return nullptr;}
     if(!typed313){if(profile->nativeLocomotion)zombie->StartWalkAnim(0);else StartNativeSourceZombieWalk(zombie,0);}
+    if(extendedFamily&&!CommitNativeExtended347Factory(zombie))return nullptr;
     sourceInitialization.Commit();
     RegisterNativeSourceAdventureEnemy273(zombie);
     LawnNet::NetTrace("Fusion source Zombie spawn id=%u token=%u kind=%u preset=%d speed=%.9g body=%d max=%d helm=%d walk2=%d tick=%d",
@@ -685,7 +697,7 @@ int GetNativeSourceZombieBiteDamage(const Zombie* zombie,int nativeDamage)
 {
     const auto* data=GetNativeSourceZombieData(zombie);
     const auto* profile=IsNativeSourceZombie(zombie) ? FindFusionZombieProfile(data->kind) : nullptr;
-    return profile ? profile->biteDamage : nativeDamage;
+    return profile ? NativeExtended347AttackDamage(zombie,profile->biteDamage) : nativeDamage;
 }
 
 bool ApplyNativeSourceZombieDeathClock284(Zombie* zombie)

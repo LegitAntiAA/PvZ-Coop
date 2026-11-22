@@ -4,8 +4,8 @@
 class Board;
 namespace LawnFusion
 {
-// Bounded native world admission: real Day source1..6, cycle1. Source5 needs
-// genuine100; source6 preflights the complete21->22->23->2 factory closure.
+// Imported source descriptor admission, cycle1. All possible row variants and
+// actual transitive factories/resources are prepared before any wave-plan RNG.
 // Caller supplies the existing Board RNG callbacks; these never run on client.
 FusionAdventureScheduler273Result InitializeNativeAdventureScheduler273(
     Board*,FusionAdventureScheduler273State&,int sourceLevel,int cycle,int sourceDifficulty,

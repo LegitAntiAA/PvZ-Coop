@@ -1,4 +1,9 @@
+#include "FusionNativeDryGround353.h"
 #include "FusionNativeHeavy313BInternal.h"
+#include "FusionNextZombie343Rules.h"
+#include "FusionNativeNextZombie343.h"
+#include "FusionNativeDrown313Bridge.h"
+#include "FusionNativeDrownWeapon313.h"
 #include "FusionNative.h"
 #include "FusionNativeAdventure273.h"
 #include "FusionNativeSourceClock313.h"
@@ -45,9 +50,23 @@ namespace Heavy313B
 {
 uint16_t Kind(const Zombie* z){const auto* d=GetNativeSourceZombieData(z);return d?d->kind:0xffff;}
 bool World(const Board* b)
-{return b&&b->mApp&&b->mApp->mBoard==b&&IsNativeSourceWorld313(b)&&GetNativeFusionRowCount(b)==5;}
+{return b&&b->mApp&&b->mApp->mBoard==b&&IsNativeSourceWorld313(b);}
+// Source45 chooses the selected plant's actual row after its dry birth.
+// Keep that existing full-generation actor accessible over water; this does
+// not authorize a new Heavy constructor on a water row.
+bool RowAllowed358(const Zombie* z,bool creating=false)
+{
+ if(!z||!World(z->mBoard)||z->mRow<0||z->mRow>=GetNativeFusionRowCount(z->mBoard))return false;
+ if(NativeSourceDryRow353(z->mBoard,z->mRow))return true;
+ if(creating||Kind(z)!=45)return false;
+ const auto* c=GetNativeContext(z->mBoard);const auto uid=z->mBoard->mZombies.DataArrayGetID(const_cast<Zombie*>(z));
+ if(!c||!uid||z->mBoard->mZombies.DataArrayTryToGet(uid)!=z)return false;
+ const auto found=c->heavyZombies313B.find(uid);
+ return found!=c->heavyZombies313B.end()&&found->second.initialized&&
+  found->second.bungee.targetRow==z->mRow&&ValidateFusionHeavyZombie313BView(45,found->second);
+}
 bool Host(const Zombie* z)
-{return z&&World(z->mBoard)&&z->mApp==z->mBoard->mApp&&!z->mNetGhost&&!z->mApp->NetIsClient()&&NativeHeavyZombie313BKind(Kind(z));}
+{return z&&World(z->mBoard)&&RowAllowed358(z)&&z->mApp==z->mBoard->mApp&&!z->mNetGhost&&!z->mApp->NetIsClient()&&NativeHeavyZombie313BKind(Kind(z));}
 bool Playing(const Zombie* z)
 {return Host(z)&&!z->mDead&&!z->mBoard->mPaused&&CanApplyNativeFusionGameplay(z->mBoard);}
 void Failed(Board* b,const char* why)
@@ -82,7 +101,7 @@ bool PlantTraits(const Plant* p,FusionHeavy313BPlant& out)
  t.goldPot=t.kind==1137;t.doubleBox=FusionSourcePlantIsDoubleBox313(t.kind);
  t.ladder=p->mBoard->GetLadderAt(t.column,t.row)!=nullptr;out=t;return true;
 }
-bool Contact(Zombie* z,bool attack){if(Kind(z)==31||Kind(z)==223||Kind(z)==45)return false;return NativeClockOnlyZombieContact309(z,attack);}
+bool Contact(Zombie* z,bool attack){if(FusionCatapult343Kind(Kind(z))||Kind(z)==223||Kind(z)==45)return false;return NativeClockOnlyZombieContact309(z,attack);}
 void Bite(Zombie* z){NativeClockOnlyZombieBite313(z);}
 void Sound(Zombie* z,uint16_t k){if(Playing(z))LawnNet::NetPlaySourceSound284(z->mApp,k,.5f);}
 void FallSound(Zombie* z){if(Playing(z))z->mApp->PlayFoley(FOLEY_ZOMBIE_FALLING);}
@@ -91,7 +110,8 @@ void SourceDie(Zombie* z,int reason)
 bool Effect(Zombie* z,uint16_t kind,float offset)
 {float x=0,y=0;if(!Node(z,"Shadow",x,y)||!EnsureNativeSourceEffect269(z->mBoard,kind))return false;SpawnNativeSourceEffect269(z->mBoard,kind,x,y-offset*float(GetNativeFusionPixelsY(z->mBoard)),z->mRenderOrder+1,true);return true;}
 bool ShotReady(Zombie* z,Plant* p,std::string* error)
-{return Host(z)&&p&&!p->mDead&&EnsureNativeProjectileVisuals(z->mBoard,58)&&Pool(z->mBoard,0,0,0,1,0);}
+{const uint16_t shot=Kind(z)==112&&GetNativeHeavyZombie313B(z)&&GetNativeHeavyZombie313B(z)->ammo<=20?3:58;
+ return Host(z)&&p&&!p->mDead&&EnsureNativeProjectileVisuals(z->mBoard,shot)&&Pool(z->mBoard,0,0,0,1,0);}
 bool CaptureMatrix(Zombie* z,CapturedMatrix314& matrix)
 {return GetNativeSourceZombieMatrix313(z,"",matrix)&&CapturedMatrix314Valid(matrix);}
 bool PrepareCapture(Zombie* z,std::span<const uint32_t> candidates,std::string* error)
@@ -160,7 +180,7 @@ bool PrepareEvent(Zombie* z,Event e,std::string* error)
 {
  const auto k=Kind(z);if(k==203||k==223)return GoldPrepareEvent(z,e,error);
  if(e==Event::Destroy)return CanRetireNativeSourceZombie313(z,2,error);
- if(e==Event::Shoot)return EnsureNativeProjectileVisuals(z->mBoard,58)&&Pool(z->mBoard,0,0,0,1,0);
+ if(e==Event::Shoot){if(k==216){float x=0,y=0;return GetNativeSourceZombie269NodePoint(z,"Shoot",x,y)&&CanSpawnNativeDrownVolley343(z,x,y,GetNativeDrownWeapon313Hooks(),error);}return EnsureNativeProjectileVisuals(z->mBoard,58)&&Pool(z->mBoard,0,0,0,1,0);}
  if(e==Event::JumpFail)return EnsureNativeSourceEffect269(z->mBoard,23,error);
  if(e==Event::SetLadder)return z->mBoard->mGridItems.mBlock&&z->mBoard->mGridItems.mSize<z->mBoard->mGridItems.mMaxSize;
  if(e==Event::Catch){auto* s=EditNativeHeavyZombie313B(z);if(!s)return false;std::vector<FusionHeavy313BPlant> cell;Plant* p=nullptr;while(z->mBoard->mPlants.IterateNext(p))if(!p->mDead&&p->mRow==s->bungee.targetRow&&p->mPlantCol==s->bungee.targetColumn){FusionHeavy313BPlant t;if(!PlantTraits(p,t))return false;cell.push_back(t);}std::vector<uint32_t> candidates;for(const auto& t:cell)if(FusionBungee313BStealable(t,cell))candidates.push_back(t.uid);return PrepareCapture(z,candidates,error);}
@@ -206,7 +226,7 @@ bool AddAux(Zombie* z)
 NativeHeavyZombie313BState* EditNativeHeavyZombie313B(Zombie* z,bool create)
 {
  auto* c=z?GetNativeContext(z->mBoard):nullptr;const auto* d=GetNativeSourceZombieData(z);
- if(!c||!d||!NativeHeavyZombie313BKind(d->kind)||!z->mApp||!World(z->mBoard)||!d->instanceToken)return nullptr;
+ if(!c||!d||!NativeHeavyZombie313BKind(d->kind)||!z->mApp||!World(z->mBoard)||!RowAllowed358(z,create)||!d->instanceToken)return nullptr;
  const uint32_t uid=z->mBoard->mZombies.DataArrayGetID(z);const bool ghost=z->mNetGhost||z->mApp->NetIsClient();
  if(!uid||(create&&ghost)||(!ghost&&d->instanceToken!=uid))return nullptr;
  auto it=c->heavyZombies313B.find(uid);if(it==c->heavyZombies313B.end()){if(!create)return nullptr;it=c->heavyZombies313B.emplace(uid,NativeHeavyZombie313BState{}).first;}return &it->second;
@@ -226,11 +246,15 @@ namespace {bool Resources(Board* b,uint16_t kind,std::string* error)
  if(!EnsureNativeSourceZombieVisuals(b,kind,error)||!CanQueryNativeSourceZombieRoot273(b,kind)||!ClockDefinition(kind,error))return false;
  const auto sound=[&](uint16_t id){if(LawnNet::NetSourceSound284Ready(b->mApp,id))return true;if(error)*error="Heavy313B genuine source sound unavailable: "+std::to_string(id);return false;};
  if(kind==28&&!sound(94))return false;
- if(kind==31){for(uint16_t id:{43,72,73,77,101})if(!sound(id))return false;}
+ if(FusionCatapult343Kind(kind)){for(uint16_t id:{43,72,73,77,101})if(!sound(id))return false;}
+ if(kind==112&&!sound(40))return false;
  if(kind==32||kind==34){for(uint16_t id:{64,109})if(!sound(id))return false;}
  if(kind==45){for(uint16_t id:{50,62,122,123,124})if(!sound(id))return false;}
  if(kind==203||kind==223){for(uint16_t id:{3,4,44,66})if(!sound(id))return false;if(kind==203){if(!sound(45)||!sound(46))return false;}else for(uint16_t id:{0,1,2,43,72,73,77})if(!sound(id))return false;}
- if(kind==31&&(!EnsureNativeProjectileVisuals(b,58)||!EnsureNativeSourceEffect269(b,54,error)))return false;
+ if(FusionCatapult343Kind(kind)&&!EnsureNativeSourceEffect269(b,54,error))return false;
+ if(FusionCatapult343Kind(kind)&&kind!=216&&!EnsureNativeProjectileVisuals(b,58))return false;
+ if(kind==216&&!EnsureNativeDrownWeapon313Visuals(b,error,1))return false;
+ if(kind==112&&!EnsureNativeProjectileVisuals(b,3))return false;
  if((kind==32||kind==34)&&!EnsureNativeSourceEffect269(b,23,error))return false;
  if((kind==203||kind==223)&&!GoldResources(b,kind,error))return false;
  if(kind==45)
@@ -306,12 +330,13 @@ int ResolveNativeHeavyDamage313B(const Zombie* z,int damage){return Kind(z)==223
 bool ApplyNativeHeavyTakeDamage313B(Zombie* z,int damage,int type)
 {const auto k=Kind(z);if(k!=203&&k!=223)return false;if(Playing(z)&&!GoldDamage(z,damage,type,false,nullptr))Failed(z->mBoard,"Gold313B source damage callback refused");return true;}
 bool ApplyNativeHeavyBodyDamage313B(Zombie* z,int damage,unsigned)
-{const auto k=Kind(z);if(k==31)return ApplyNativeCatapult313BBodyDamage(z,damage,GetNativeHeavyZombie313BHooks());if(k!=203&&k!=223)return false;const auto* s=GetNativeHeavyZombie313B(z);return !s||!Playing(z)||s->gold.status!=6;}
+{const auto k=Kind(z);if(k==216){auto* s=EditNativeHeavyZombie313B(z);return !Playing(z)||!s||ApplyNativeDrownCatapult343Body(z,*s,damage,GetNativeHeavyZombie313BHooks());}if(FusionCatapult343Kind(k))return ApplyNativeCatapult313BBodyDamage(z,damage,GetNativeHeavyZombie313BHooks());if(k!=203&&k!=223)return false;const auto* s=GetNativeHeavyZombie313B(z);return !s||!Playing(z)||s->gold.status!=6;}
 bool ApplyNativeHeavyArmorDamage313B(Zombie* z,bool first,int damage,int& overflow)
 {
  const auto k=Kind(z);if(!NativeHeavyZombie313BKind(k))return false;if(!Playing(z)||damage<0){overflow=0;return true;}
  if(k==203||k==223)return GoldArmorDamage(z,first,damage,overflow);
  auto* s=EditNativeHeavyZombie313B(z);if(!s){overflow=0;return true;}int& hp=first?z->mHelmHealth:z->mShieldHealth;
+ if(k==216&&first){const int before=hp;overflow=(std::max)(0,damage-before);hp=(std::max)(0,before-damage);if(!hp){z->mHelmMaxHealth=0;z->mHelmType=HELMTYPE_NONE;}else s->armorStage=FusionDrownCatapult343ArmorStage(hp,z->mHelmMaxHealth,s->armorStage);return true;}
  if(first&&k!=34&&k!=223||!first&&k!=33&&k!=203&&k!=223)return false;
  const int maximum=first?z->mHelmMaxHealth:z->mShieldMaxHealth;overflow=(std::max)(0,damage-hp);
  if(damage>=hp&&hp>0&&!PlayNativeSourceZombieArmor284(z,first)){overflow=0;return true;}
@@ -327,9 +352,9 @@ bool CanApplyNativeHeavyCharred313B(Zombie* z,int raw,bool fix,std::string* erro
 bool ApplyNativeHeavyCharred313B(Zombie* z,int raw,bool fix)
 {int resolved=0;return UsesNativeHeavyCharred313B(z)&&Playing(z)&&ResolveNativeSourceBaseDamage315(z,raw,fix,resolved)&&GoldDamage(z,resolved,10,false,nullptr);}
 bool CanRetireNativeHeavyZombie313B(Zombie* z,int,std::string* error)
-{if(!Host(z))return false;const auto k=Kind(z);if(k==203||k==223)return GoldCanRetire(z,error);if(k==31)return EnsureNativeSourceEffect269(z->mBoard,54,error);return true;}
+{if(!Host(z))return false;const auto k=Kind(z);if(k==203||k==223)return GoldCanRetire(z,error);if(FusionCatapult343Kind(k))return EnsureNativeSourceEffect269(z->mBoard,54,error);return true;}
 bool BeforeRetireNativeHeavyZombie313B(Zombie* z,int reason)
-{if(!CanRetireNativeHeavyZombie313B(z,reason))return false;const auto k=Kind(z);if((k==203||k==223)&&!GoldBeforeRetire(z))return false;if(k==31&&!Effect(z,54,.6f))return false;return true;}
+{if(!CanRetireNativeHeavyZombie313B(z,reason))return false;const auto k=Kind(z);if((k==203||k==223)&&!GoldBeforeRetire(z))return false;if(FusionCatapult343Kind(k)&&!Effect(z,54,.6f))return false;return true;}
 bool RetireNativeHeavyZombie313B(Zombie* z,int reason)
 {if(!BeforeRetireNativeHeavyZombie313B(z,reason))return false;z->mDroppedLoot=true;z->DieNoLoot();return true;}
 bool GetNativeHeavyZombie313BSemantics(const Zombie* z,int& status,bool& before,bool& collider,bool& flip)

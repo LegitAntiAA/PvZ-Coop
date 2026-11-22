@@ -1,4 +1,6 @@
+#include "FusionNativeDryGround353.h"
 #include "FusionNativeNightZombie281.h"
+#include "FusionNextZombie343Rules.h"
 #include "FusionNative.h"
 #include "FusionNativeAdventure273.h"
 #include "FusionNativeZombies.h"
@@ -37,7 +39,7 @@ bool Authority(const Zombie* z)
 {
  const auto* d=GetNativeSourceZombieData(z);
  return z&&d&&d->kind==10&&z->mBoard&&z->mApp&&z->mApp->mBoard==z->mBoard&&
-  !z->mNetGhost&&!z->mApp->NetIsClient()&&IsNativeSourceAdventureGrassWorld281(z->mBoard);
+  !z->mNetGhost&&!z->mApp->NetIsClient()&&NativeSourceDryRow353(z->mBoard,z->mRow);
 }
 bool Read(const Reanimation* r,const FusionNightZombie281Clip& clip,FusionZombieClipPosition& out)
 {
@@ -403,7 +405,7 @@ bool GetNativeJackson281BlendPresentation(const Zombie* z,const NativeNightZombi
 }
 bool SpawnNativeDancePole284Children(Zombie* z,int row,float shadowX,const NativeNightZombie281Hooks& h,bool& failed,std::string* error)
 {
- if(!Host(z,6)||!IsNativeSourceAdventureGrassWorld281(z->mBoard)||z->IsDeadOrDying()||!z->mHasHead||
+ if((!GetNativeSourceZombieData(z)||!FusionDancePole343Kind(GetNativeSourceZombieData(z)->kind))||!Host(z,GetNativeSourceZombieData(z)->kind)||!NativeSourceDryRow353(z->mBoard,z->mRow)||z->IsDeadOrDying()||!z->mHasHead||
    failed||!h.eveBalanced||!h.prepareChildren||!h.childEffect||!std::isfinite(shadowX))return false;
  const int count=GetNativeFusionRowCount(z->mBoard);if(count<1||count>6||row<0||row>=count)return false;
  std::array<uint8_t,6> rows{};

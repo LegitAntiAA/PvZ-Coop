@@ -1,9 +1,13 @@
+#include "FusionAdventureLesson346Rules.h"
 #include "FusionNativeAdventure273.h"
 #include "FusionNative.h"
+#include "FusionNativeRoof350.h"
 #include "FusionNativeAdventureScheduler273.h"
 #include "FusionNativeAdventureProgress273.h"
 #include "FusionNativeZombieVisual.h"
 #include "FusionCampaign272Rules.h"
+#include "FusionCampaign342Rules.h"
+#include "FusionNativeSourceClock313.h"
 #include "FusionWire.h"
 #include "../Board.h"
 #include "../Zombie.h"
@@ -96,13 +100,22 @@ bool IsNativeSourceAdventureGrassWorld281(const Board* b)
     }
     return true;
 }
+bool IsNativeSourceAdventureWorld342(const Board* b)
+{
+    const auto* c=GetNativeContext(b);
+    const auto* source=c?FindFusionSourceAdventure272(c->adventure.run.level):nullptr;
+    return IsNativeSourceAdventure273(b)&&b->mApp->IsFusionSourceAdventure()&&source&&
+        IsNativeSourceWorld313(b)&&int(b->mBackground)==source->scene&&
+        GetNativeFusionRowCount(b)==source->rows&&b->GetColumnCount()==source->columns;
+}
 bool InitializeNativeSourceAdventure273(Board* b,const FusionAdventureSession273& boot,std::string* error)
 {
     if(error)error->clear();
+    FusionCampaign342Plan plan;
     const auto* level=FindFusionSourceAdventure272(boot.run.level);auto* c=GetNativeContext(b);
     if(!Current(b)||!c||!boot.enabled||!FusionAdventureSessionValid273(boot)||!level||
         !NativeSourceAdventureLevelReady273(boot.run.level,boot.run.cycle)||
-        (level->scene!=0&&level->scene!=1)||level->rows!=5||level->columns!=10)
+        !BuildFusionCampaign342Plan(boot.run.level,boot.run.cycle,plan,error))
     {if(error)*error="Source Adventure boot is invalid or outside supported scene/controller capabilities.";return false;}
     const bool host=!b->mApp->NetIsClient();
     if(host&&(boot.wave||boot.run.over||boot.run.rewardCollected||boot.schedulerFailed||
@@ -124,17 +137,20 @@ bool InitializeNativeSourceAdventure273(Board* b,const FusionAdventureSession273
     // stock Adventure1 may still have a one-row lawn, so always set full rows.
     for(int row=0;row<MAX_GRID_SIZE_Y;++row)
     {
-        b->mPlantRow[row]=row<level->rows?PLANTROW_NORMAL:PLANTROW_DIRT;
+        const bool water=(plan.waterRows&(1<<row))!=0;
+        b->mPlantRow[row]=row<level->rows?(water?PLANTROW_POOL:PLANTROW_NORMAL):PLANTROW_DIRT;
         for(int col=0;col<b->GetColumnCount();++col)
-            b->GetGridSquareTypeAt(col,row)=row<level->rows?GRIDSQUARE_GRASS:GRIDSQUARE_NONE;
+            b->GetGridSquareTypeAt(col,row)=row<level->rows?(water?GRIDSQUARE_POOL:GRIDSQUARE_GRASS):GRIDSQUARE_NONE;
     }
-    if(!IsNativeSourceAdventureGrassWorld281(b))
-    {if(error)*error="Source Adventure requires its current Day/Night five-grass world without foreign grid/Tower initializers.";return false;}
+    if(!IsNativeSourceAdventureWorld342(b))
+    {if(error)*error="Source Adventure requires its exact imported scene/row/grid world without foreign initializers.";return false;}
+    if(host&&level->roofPreplantColumns&&!PreflightNativeRoofPreplants350(b,*level,error))return false;
     FusionAdventureScheduler273State scheduler;
-    if(host&&(level->tutorialId==7||level->tutorialId==8||level->tutorialId==10||level->tutorialId==13||level->tutorialId==15)&&
+    if(host&&(level->tutorialId==7||level->tutorialId==8||level->tutorialId==10||level->tutorialId==13||level->tutorialId==15||FusionAdventureLesson346Supported(boot.run.level))&&
         !PreflightNativeFusionAdventureLesson278(b,boot.run.level,error))return false;
     if(host&&InitializeNativeAdventureScheduler273(b,scheduler,boot.run.level,int(boot.run.cycle),
         boot.sourceDifficulty,BoardRandom(b),error)!=Result::Okay)return false;
+    if(host&&level->roofPreplantColumns&&!InitializeNativeRoofPreplants350(b,*level,error))return false;
     c->adventure=boot;c->adventureScheduler=std::move(scheduler);c->adventureTick=-1;
     c->adventureEnemies.clear();c->adventureEnemyCount=0;c->adventureSkySunTicks=750;
     c->validation=false;c->money=level->initialMoney;c->level=boot.run.level;
@@ -144,8 +160,8 @@ bool InitializeNativeSourceAdventure273(Board* b,const FusionAdventureSession273
     b->mZombieCountDownStart=1500;b->mZombieCountDown=1500;b->mHugeWaveCountDown=0;
     b->mSunCountDown=750;b->mNumSunsFallen=0;
     if(host)View(b);
-    LawnNet::NetTrace("Fusion source Adventure273 initialized role=%s level=%u cycle=%u sourceDifficulty=%u rows=5 columns=10 sun=%d money=%d waves=%u classicProgressUsed=0",
-        host?"host":"client",boot.run.level,boot.run.cycle,boot.sourceDifficulty,b->mSunMoney,c->money,c->adventure.maximumWaves);
+    LawnNet::NetTrace("Fusion source Adventure273 initialized role=%s level=%u cycle=%u sourceDifficulty=%u rows=%u columns=10 sun=%d money=%d waves=%u classicProgressUsed=0",
+        host?"host":"client",boot.run.level,boot.run.cycle,boot.sourceDifficulty,level->rows,b->mSunMoney,c->money,c->adventure.maximumWaves);
     return true;
 }
 bool UpdateNativeSourceAdventure273(Board* b)
@@ -186,7 +202,7 @@ bool UpdateNativeSourceAdventureSun273(Board* b)
     // Source LevelUpdate1803189F0 requires !isNight/!isConvey and fallSun.
     // This ordinary world excludes Tower/Indestructible/SeedRain controllers;
     // they must provide their own source policy before native admission.
-    if(!source||!IsNativeSourceAdventureGrassWorld281(b)||source->scene==1||source->conveyor)return true;
+    if(!source||!IsNativeSourceAdventureWorld342(b)||source->scene==1||source->scene==3||source->conveyor)return true;
     if(c->adventureSkySunTicks>0)--c->adventureSkySunTicks;
     b->mSunCountDown=c->adventureSkySunTicks;
     if(c->adventureSkySunTicks>0)return true;

@@ -1,4 +1,6 @@
 #include "FusionDayZombie273Rules.h"
+#include "FusionNextZombie343Rules.h"
+#include <cstring>
 #include "FusionZombieMotion.h"
 #include <cmath>
 #include <limits>
@@ -74,15 +76,15 @@ int WrappedTwoThirds(int maximum)
 }
 }
 const FusionZombieProfile* FindFusionDayZombie273Profile(uint16_t kind)
-{for(const auto& p:profiles)if(p.kind==kind)return &p;return nullptr;}
-bool FusionDayZombie273Pole(uint16_t kind){return kind==3||kind==6||kind==7;}
+{if(kind==217)return FindFusionNextZombie343Profile(kind);for(const auto& p:profiles)if(p.kind==kind)return &p;return nullptr;}
+bool FusionDayZombie273Pole(uint16_t kind){return kind==3||FusionDancePole343Kind(kind)||kind==7;}
 bool FusionDayZombie273Doll(uint16_t kind){return kind==21||kind==22||kind==23;}
 bool FusionDayZombie273Shooter(uint16_t kind){return kind==100||kind==101||kind==102||kind==108;}
 bool FusionDayZombie273NutArmor(uint16_t kind){return kind==103||kind==106||kind==107;}
 float FusionDayZombie273ShootInterval(uint16_t kind){return FusionDayZombie273Shooter(kind)?(kind==102?3.f:1.5f):0.f;}
 std::span<const uint16_t> FusionDayZombie273NpcDependencies(uint16_t kind)
 {
-    if(kind==10)return jacksonDeps;if(kind==6)return danceDeps;if(kind==21)return diamondDeps;if(kind==22)return goldDeps;if(kind==23)return silverDeps;
+    if(kind==10)return jacksonDeps;if(FusionDancePole343Kind(kind))return danceDeps;if(kind==21)return diamondDeps;if(kind==22)return goldDeps;if(kind==23)return silverDeps;
     return {};
 }
 uint32_t FusionDayZombie273RequiredCapabilities(uint16_t kind)
@@ -116,11 +118,11 @@ bool TryGetFusionDayZombie273Clip(uint16_t kind,int status,bool eating,FusionDay
         else if(status==3)c={"jump","anim_jump",3.5f,2,false};
         else if(status==0)c=eating?FusionDayZombie273Clip{"attack","anim_eat",2.25f,1,true}:
             FusionDayZombie273Clip{"walk2","anim_walk",3.3333333f,.5f,true};
-        else if(status==1)c={"die","anim_death",2.1666667f,kind==6?2.f:1.8f,false};
+        else if(status==1)c={"die","anim_death",2.1666667f,FusionDancePole343Kind(kind)?2.f:1.8f,false};
         else return false;
         // The staged Pole6/7 Animator serializes original clip names.
         if(kind!=3)c.sourceName=status==2?"Zombie_polevaulter_run":status==3?
-            (kind==6?"Zombie_polevaulter_jump 1":"Zombie_polevaulter_jump"):status==1?
+            (FusionDancePole343Kind(kind)?"Zombie_polevaulter_jump 1":"Zombie_polevaulter_jump"):status==1?
             "Zombie_polevaulter_die":eating?"Zombie_polevaulter_eat":"Zombie_polevaulter_walk";
     }
     else if(FusionDayZombie273Shooter(kind)||FusionDayZombie273NutArmor(kind))
@@ -140,9 +142,12 @@ bool TryGetFusionDayZombie273RootDelta(uint16_t kind,int status,FusionZombieClip
     if(FusionDayZombie273Shooter(kind)||FusionDayZombie273NutArmor(kind))
         return status==0&&TryGetFusionZombieRootDelta(0,true,before,after,right,out,projection);
     if(!FusionDayZombie273Pole(kind))return false;
+
+    if(kind==217){const auto* graph=FindFusionSourceGraph343(kind);if(!graph)return false;const char* state=status==2?"walk":status==3?"jump":status==0?"walk2":nullptr;if(!state)return false;
+      for(uint8_t i=0;i<graph->stateCount;++i)if(!std::strcmp(graph->states[i].name,state)){if(status==3&&after.loop==1&&after.seconds==3.5f)after.loop=0;double scaled=0;if(!SourceRootDelta343(kind,i,{before.loop,before.seconds},{after.loop,after.seconds},scaled))return false;out=scaled*(projection/1.25)*(right?-1:1);return std::isfinite(out);}return false;}
     std::span<const RootKey> keys;float duration=0;
     if(status==2){keys=run;duration=3;}else if(status==3){keys=jump;duration=3.5f;}
-    else if(status==0){keys=kind==6?std::span<const RootKey>(danceWalk):std::span<const RootKey>(walk);duration=3.3333333f;}else return false;
+    else if(status==0){keys=FusionDancePole343Kind(kind)?std::span<const RootKey>(danceWalk):std::span<const RootKey>(walk);duration=3.3333333f;}else return false;
     // A native PLAY_ONCE carrier may report loopCount1 at its final held frame.
     if(status==3&&after.loop==1&&after.seconds==duration)after.loop=0;
     if(!SpanValid(before,after,duration,status!=3))return false;

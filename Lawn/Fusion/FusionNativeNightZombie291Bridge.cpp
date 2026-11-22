@@ -1,3 +1,4 @@
+#include "FusionNativeDryGround353.h"
 #include "FusionNativeNightZombie291Bridge.h"
 #include "FusionNative.h"
 #include "FusionNativeAdventure273.h"
@@ -26,7 +27,7 @@ bool Typed(const Zombie* z)
 {const auto* data=GetNativeSourceZombieData(z);return data&&data->kind==10;}
 bool Authority(const Zombie* z)
 {return Typed(z)&&z->mBoard&&z->mApp&&z->mApp->mBoard==z->mBoard&&!z->mNetGhost&&
-    !z->mApp->NetIsClient()&&IsNativeSourceAdventureGrassWorld281(z->mBoard);}
+    !z->mApp->NetIsClient()&&NativeSourceDryRow353(z->mBoard,z->mRow);}
 bool Playing(const Zombie* z)
 {return Authority(z)&&!z->mDead&&!z->mBoard->mPaused&&z->mApp->mGameScene==SCENE_PLAYING&&
     CanApplyNativeFusionGameplay(z->mBoard);}

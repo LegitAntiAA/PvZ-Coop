@@ -12,7 +12,7 @@ namespace LawnNet { class NetBuffer; }
 
 namespace LawnFusion
 {
-constexpr uint16_t kNativeFusionSnapshotVersion=28;
+constexpr uint16_t kNativeFusionSnapshotVersion=29;
 struct NativeWheat269Snapshot {bool isFromWheat=false;float wheatTime=0;};
 struct NativeRollingActor269Snapshot:NativeRollingActor269State {int health=4000;}; // Actual native HP mirror, including source negative HP.
 // Pure admission of actual native raw fields; no timer or actor is duplicated.

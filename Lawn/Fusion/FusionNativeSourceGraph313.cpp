@@ -180,27 +180,35 @@ bool ReadNativeSourceGraph313Clock(Zombie* z,uint8_t layer,uint8_t phase,const N
     if(!FusionSourceGraph313CursorValid(s,p))return false;out=p;return true;
 }
 bool InitializeNativeSourceGraph313(Zombie* z,NativeSourceGraph313State& s,const NativeSourceGraph313Hooks& h)
+{return InitializeNativeSourceGraph313Masked(z,s,h,0x7);}
+bool InitializeNativeSourceGraph313Masked(Zombie* z,NativeSourceGraph313State& s,const NativeSourceGraph313Hooks& h,uint8_t layerMask)
 {
     if(!Host(z)||!Ready(h))return false;const auto* g=Graph(z);auto r=Capture(z,s,h);
-    if(s.initialized)return s.localUID==r.uid&&!s.failed;
-    if(!NativeSourceGraph313ClockTracksReady(z,h))return false;
-    for(uint8_t i=0;i<g->layerCount;++i)if(!h.clock(z,i))return false;
+    layerMask&=uint8_t((1u<<g->layerCount)-1);
+    if(s.initialized)return s.localUID==r.uid&&!s.failed&&s.initializedLayerMask343==layerMask;
+    if(!(layerMask&uint8_t((1u<<g->layerCount)-1))||!NativeSourceGraph313ClockTracksReadyMasked(z,h,layerMask))return false;
+    for(uint8_t i=0;i<g->layerCount;++i)if((layerMask&(1u<<i))&&!h.clock(z,i))return false;
     const uint32_t firstAux=s.auxiliaryUIDs[0],secondAux=s.auxiliaryUIDs[1];
-    s={};s.auxiliaryUIDs[0]=firstAux;s.auxiliaryUIDs[1]=secondAux;s.localUID=r.uid;s.initialized=true;
+    s={};s.auxiliaryUIDs[0]=firstAux;s.auxiliaryUIDs[1]=secondAux;s.localUID=r.uid;s.initialized=true;s.initializedLayerMask343=layerMask;
     for(uint8_t i=0;i<g->layerCount;++i)
-    {s.layers[i].state=s.layers[i].outgoing=g->layers[i].defaultState;if(!Enter(r,i,g->layers[i].defaultState,0,0))return Fail(r,"Source313 default source clock failed.");if(!Refresh(r))return true;}
-    if(!UpdateNativeSourceGraph313Rates(z,s,h))return false;
-    for(uint8_t i=0;i<g->layerCount;++i)if(!RegisterNativeSourceGraphClock313(h.clock(z,i),true))
-    {for(uint8_t j=0;j<i;++j)RegisterNativeSourceGraphClock313(h.clock(z,j),false);return false;}
+    {if(!(layerMask&(1u<<i)))continue;s.layers[i].state=s.layers[i].outgoing=g->layers[i].defaultState;if(!Enter(r,i,g->layers[i].defaultState,0,0))return Fail(r,"Source313 default source clock failed.");if(!Refresh(r))return true;}
+    if(!UpdateNativeSourceGraph313RatesMasked(z,s,h,layerMask))return false;
+    for(uint8_t i=0;i<g->layerCount;++i)if((layerMask&(1u<<i))&&!RegisterNativeSourceGraphClock313(h.clock(z,i),true))
+    {for(uint8_t j=0;j<i;++j)if(layerMask&(1u<<j))RegisterNativeSourceGraphClock313(h.clock(z,j),false);return false;}
     return true;
 }
 void ReleaseNativeSourceGraph313Clocks(Zombie* z,const NativeSourceGraph313Hooks& h)
-{const auto* g=Graph(z);if(!g||!h.clock)return;for(uint8_t i=0;i<g->layerCount;++i)if(auto* r=h.clock(z,i))RegisterNativeSourceGraphClock313(r,false);}
+{ReleaseNativeSourceGraph313ClocksMasked(z,h,0x7);}
+void ReleaseNativeSourceGraph313ClocksMasked(Zombie* z,const NativeSourceGraph313Hooks& h,uint8_t layerMask)
+{const auto* g=Graph(z);if(!g||!h.clock)return;for(uint8_t i=0;i<g->layerCount;++i)if(layerMask&(1u<<i))if(auto* r=h.clock(z,i))RegisterNativeSourceGraphClock313(r,false);}
 bool NativeSourceGraph313ClockTracksReady(Zombie* z,const NativeSourceGraph313Hooks& h,std::string* error)
+{return NativeSourceGraph313ClockTracksReadyMasked(z,h,0x7,error);}
+bool NativeSourceGraph313ClockTracksReadyMasked(Zombie* z,const NativeSourceGraph313Hooks& h,uint8_t layerMask,std::string* error)
 {
     const auto* g=Graph(z);if(!g||!h.clock)return false;
     for(uint8_t layer=0;layer<g->layerCount;++layer)
     {
+        if(!(layerMask&(1u<<layer)))continue;
         auto* clock=h.clock(z,layer);if(!clock||clock->mDead){if(error)*error="Missing actual body/aux Reanimation.";return false;}
         for(uint8_t state=0;state<g->stateCount;++state)if(FusionSourceGraph313OwnsState(*g,layer,state))
         {
@@ -212,24 +220,34 @@ bool NativeSourceGraph313ClockTracksReady(Zombie* z,const NativeSourceGraph313Ho
 }
 bool PlayNativeSourceGraph313(Zombie* z,NativeSourceGraph313State& s,uint8_t layer,const char* name,float offset,const NativeSourceGraph313Hooks& h)
 {
-    if(!Host(z)||!Ready(h)||!s.initialized||s.failed||!name)return false;const auto* g=Graph(z);auto r=Capture(z,s,h);
+    if(!Host(z)||!Ready(h)||!s.initialized||s.failed||!name||layer>=3||!(s.initializedLayerMask343&(1u<<layer)))return false;const auto* g=Graph(z);auto r=Capture(z,s,h);
+    // Source218 WD0 walk has a proved fresh-rest entry, not replay semantics.
+    // All later locomotion returns through the genuine WD1 walk2 graph state.
+    if(g->kind==218&&layer==0&&std::strcmp(name,"walk")==0&&
+       (s.tick!=-1||s.layers[0].state!=g->layers[0].defaultState||offset!=0))return false;
     for(uint8_t i=0;i<g->stateCount;++i)if(FusionSourceGraph313OwnsState(*g,layer,i)&&std::strcmp(g->states[i].name,name)==0)
-        return Enter(r,layer,i,offset,0)&&(!Refresh(r)||UpdateNativeSourceGraph313Rates(r.z,*r.s,h));
+        return Enter(r,layer,i,offset,0)&&(!Refresh(r)||UpdateNativeSourceGraph313RatesMasked(r.z,*r.s,h,r.s->initializedLayerMask343));
     return false;
 }
 bool UpdateNativeSourceGraph313Rates(Zombie* z,const NativeSourceGraph313State& s,const NativeSourceGraph313Hooks& h)
+{return UpdateNativeSourceGraph313RatesMasked(z,s,h,0x7);}
+bool UpdateNativeSourceGraph313RatesMasked(Zombie* z,const NativeSourceGraph313State& s,const NativeSourceGraph313Hooks& h,uint8_t layerMask)
 {
     if(!Host(z)||!Ready(h))return false;const auto* g=Graph(z);FusionSourceGraph313Parameters p;if(!h.parameters(z,p)||!std::isfinite(p.speed)||p.speed<0)return false;
+    layerMask&=uint8_t((1u<<g->layerCount)-1);if(!layerMask||(layerMask&~s.initializedLayerMask343))return false;
     for(uint8_t i=0;i<g->layerCount;++i)
-    {const auto& state=g->states[s.layers[i].state];auto* r=h.clock(z,i);if(!Match(r,state))return false;r->mAnimRate=state.nullMotion&&state.duration==0?0:r->mFrameCount*FusionSourceGraph313Rate(state,FusionSourceGraph313Multiplier(state,p))/state.duration;if(i==0)z->mOriginalAnimRate=r->mAnimRate;}
+    {if(!(layerMask&(1u<<i)))continue;const auto& state=g->states[s.layers[i].state];auto* r=h.clock(z,i);if(!Match(r,state))return false;r->mAnimRate=state.nullMotion&&state.duration==0?0:r->mFrameCount*FusionSourceGraph313Rate(state,FusionSourceGraph313Multiplier(state,p))/state.duration;if(i==0)z->mOriginalAnimRate=r->mAnimRate;}
     return true;
 }
 bool UpdateNativeSourceGraph313(Zombie* z,NativeSourceGraph313State& s,const NativeSourceGraph313Hooks& h)
+{return UpdateNativeSourceGraph313Masked(z,s,h,0x7);}
+bool UpdateNativeSourceGraph313Masked(Zombie* z,NativeSourceGraph313State& s,const NativeSourceGraph313Hooks& h,uint8_t layerMask)
 {
     if(!Host(z)||!Ready(h)||!s.initialized||s.failed)return false;if(z->mDead||z->mBoard->mPaused||z->mApp->mGameScene!=SCENE_PLAYING)return true;
-    if(s.tick==z->mBoard->mMainCounter)return true;s.tick=z->mBoard->mMainCounter;auto r=Capture(z,s,h);const auto* g=Graph(z);
-    for(uint8_t i=0;i<g->layerCount;++i){if(!Step(r,i))return Fail(r,"Source313 segmented native phase/event update failed; no replay.");if(!Refresh(r))return true;}
-    return UpdateNativeSourceGraph313Rates(r.z,*r.s,h)||Fail(r,"Source313 real body/aux rate unavailable.");
+    const auto* g=Graph(z);layerMask&=uint8_t((1u<<g->layerCount)-1);if(!layerMask||(layerMask&~s.initializedLayerMask343))return false;
+    if(s.tick==z->mBoard->mMainCounter)return true;s.tick=z->mBoard->mMainCounter;auto r=Capture(z,s,h);
+    for(uint8_t i=0;i<g->layerCount;++i){if(!(layerMask&(1u<<i)))continue;if(!Step(r,i))return Fail(r,"Source313 segmented native phase/event update failed; no replay.");if(!Refresh(r))return true;}
+    return UpdateNativeSourceGraph313RatesMasked(r.z,*r.s,h,layerMask)||Fail(r,"Source313 real body/aux rate unavailable.");
 }
 bool GetNativeSourceGraph313Presentation(Zombie* z,const NativeSourceGraph313State& s,uint8_t layer,const NativeSourceGraph313Hooks& h,
     const char*& incoming,float& time,const char*& outgoing,float& oldTime,float& weight)

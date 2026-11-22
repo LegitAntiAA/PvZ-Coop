@@ -1,3 +1,5 @@
+#include "FusionNativeExtendedZombie347.h"
+#include "FusionDrown343Rules.h"
 #include "FusionNativeSourceObstacleFactory313.h"
 #include "FusionNativeObstacle313.h"
 #include "FusionNativeDrown313Bridge.h"
@@ -42,8 +44,8 @@ bool KeptClock(Board* b,const Projectile* p,const FusionSourceObstacle313View& v
 }
 bool EnsureNativeSourceObstacle313Resources(Board* b,FusionSourceObstacle313Kind kind,uint8_t variant,std::string* error)
 {
-    if(!b||!b->mApp||b->mApp->mBoard!=b||!GetNativeContext(b)||unsigned(kind)<1||unsigned(kind)>4||
-       variant>1||((kind==FusionSourceObstacle313Kind::DrownWeapon||kind==FusionSourceObstacle313Kind::KirovBomb)&&variant))
+    if(!b||!b->mApp||b->mApp->mBoard!=b||!GetNativeContext(b)||unsigned(kind)<1||unsigned(kind)>5||
+       (kind==FusionSourceObstacle313Kind::DrownWeapon?variant>3:kind==FusionSourceObstacle313Kind::SpiderWeapon?variant!=0:variant>1))
         return Reject("Source obstacle resource identity invalid.",error);
     auto* v=Visuals(b);std::string why;if(!v||!v->Ensure(kind,variant,why)){if(error)*error=why;return false;}
     if(kind==FusionSourceObstacle313Kind::MachineBall)
@@ -94,8 +96,10 @@ bool CanSpawnNativeSourceObstacle313(Board* b,const FusionSourceObstacle313Spawn
     const auto* data=GetNativeSourceZombieData(owner);
     if(!owner||owner->mDead||owner->mNetId!=s.ownerId||!data||data->instanceToken!=s.ownerToken)
         return Reject("Source obstacle factory owner generation changed.",error);
+    if((s.kind==FusionSourceObstacle313Kind::KirovBomb&&data->kind!=(s.variant?206:26))||
+       (s.kind==FusionSourceObstacle313Kind::SpiderWeapon&&data->kind!=221))return Reject("Source obstacle owner/variant differs.",error);
     if(s.kind!=FusionSourceObstacle313Kind::DrownWeapon)return CanCreateNativeExtendedObstacle313(b,s,error);
-    if(data->kind!=20||s.fromHypno||s.variant||bool(s.targetPlantId)!=bool(s.targetPlantToken))
+    if(!FusionDrown343OwnerVariant(data->kind,s.variant)||s.fromHypno||((s.variant&1)&&s.targetPlantId)||bool(s.targetPlantId)!=bool(s.targetPlantToken))
         return Reject("Source DrownWeapon factory contract differs.",error);
     if(s.targetPlantId)
     {
@@ -103,7 +107,7 @@ bool CanSpawnNativeSourceObstacle313(Board* b,const FusionSourceObstacle313Spawn
         if(!target||!plant||plant->instanceToken!=s.targetPlantToken||target->mNetId!=s.targetPlantId)
             return Reject("Source DrownWeapon target generation changed.",error);
     }
-    auto* v=Visuals(b);std::string failure;const bool ready=v&&v->Ensure(s.kind,0,failure);
+    auto* v=Visuals(b);std::string failure;const bool ready=v&&v->Ensure(s.kind,s.variant,failure);
     if(error)*error=failure;return ready;
 }
 Projectile* SpawnNativeSourceObstacle313(Board* b,const FusionSourceObstacle313Spawn& s)
@@ -117,7 +121,7 @@ Projectile* SpawnNativeSourceObstacle313(Board* b,const FusionSourceObstacle313S
     auto* d=EditNativeSourceObstacle313(p,true);bool ready=d!=nullptr;
     if(ready&&s.kind==FusionSourceObstacle313Kind::DrownWeapon)
     {
-        *d={};d->kind=s.kind;d->instanceToken=b->mProjectiles.DataArrayGetID(p);
+        *d={};d->kind=s.kind;d->variant=s.variant;d->instanceToken=b->mProjectiles.DataArrayGetID(p);
         d->ownerId=s.ownerId;d->ownerToken=s.ownerToken;d->targetPlantId=s.targetPlantId;d->targetPlantToken=s.targetPlantToken;
         p->mPosX=s.centerX-20;p->mPosY=s.centerY-20;p->mShadowY=s.groundY;
         p->mRenderOrder=s.renderOrder;p->mX=int(p->mPosX);p->mY=int(p->mPosY);
@@ -136,6 +140,7 @@ bool UpdateNativeSourceObstacle313(Projectile* p)
     ++p->mProjectileAge;
     if(d->kind==FusionSourceObstacle313Kind::DrownWeapon)
     {d->tick=p->mBoard->mMainCounter;return UpdateNativeDrownWeapon313(p,*d,GetNativeDrownWeapon313Hooks());}
+    if(d->kind==FusionSourceObstacle313Kind::SpiderWeapon)return UpdateNativeSpiderWeapon347(p);
     return UpdateNativeExtendedObstacle313(p);
 }
 bool DrawNativeSourceObstacle313(Sexy::Graphics* g,Projectile* p)

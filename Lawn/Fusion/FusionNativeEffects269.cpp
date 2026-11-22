@@ -179,8 +179,8 @@ bool NativeSourceEffects269::Ensure(Board* board,uint16_t kind,std::string& erro
 TodParticleSystem* NativeSourceEffects269::Create(Board* board,uint16_t kind,float x,float y,int order,bool emission)
 {
     if(!std::isfinite(x)||!std::isfinite(y)||std::abs(x)>4096||std::abs(y)>4096)return nullptr;
-    const bool field=kind==6000&&mImpl->embedded&&mImpl->embedded->FieldResourceAdmitted277(kind);
-    if(kind==6000&&!field)return nullptr; // Only the exact field manifest can admit this family.
+    const bool field=(kind==6000||kind==6001)&&mImpl->embedded&&mImpl->embedded->FieldResourceAdmitted277(kind);
+    if((kind==6000||kind==6001)&&!field)return nullptr; // Only the exact field manifest can admit this family.
     if((kind>=2000&&kind<3000)||(kind>=5000&&kind<6000)||field)
     {
         // Binding preflight loaded this exact hashed resource already. AUX
@@ -267,6 +267,8 @@ bool PlayNativeSourceZombieLimb276(Zombie* zombie,bool head)
 {
     using Part=LawnNet::NetFusionZombiePart284;
     const auto* data=GetNativeSourceZombieData(zombie);
+    if(data&&(data->kind==202||data->kind==204||data->kind==218||data->kind==220)&&
+       (head||data->kind==218))return true;
     std::array<LawnNet::NetFusionLimbEvent276,2> events;
     const size_t count=head&&data&&data->kind==5?2:1;
     if(!CaptureSourcePart284(zombie,head?Part::Head:Part::Arm,events[0])||

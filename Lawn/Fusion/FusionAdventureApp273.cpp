@@ -1,3 +1,4 @@
+#include "FusionAdventureLesson346Rules.h"
 #include "../../LawnApp.h"
 #include "FusionNative.h"
 #include "FusionNativeAdventure273.h"
@@ -52,6 +53,7 @@ bool LawnApp::StartFusionSourceAdventure(int level,bool disableTutorial)
     if(!BeginFusionAdventureRun273(profile,level,disableTutorial,session.run)||
         !TryProjectFusionSourceAdventure272(level,projection)||
         !TryGetFusionSourceAdventureWaves272(level,int(session.run.cycle),waves))return false;
+    if(IsFusionSourceAdventure())session.sourceDifficulty=FusionAdventureRuntimeDifficulty346(mSourceAdventure);
     session.maximumWaves=uint16_t(waves);session.countdown=15;
     if(!FusionAdventureSessionValid273(session))return false;
     KillGameSelector();

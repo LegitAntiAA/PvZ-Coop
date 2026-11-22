@@ -17,6 +17,7 @@ struct NativeSuperCherryStart
 };
 Projectile* SpawnNativeSourcePlanarProjectile(Board* board,uint16_t kind,int row,int damage,
     float centerX,float centerY,float velocityX,float velocityY,float gravityY,bool isZombieBullet);
+Projectile* TryMakeNativeHostileCatapult343(Board*,Plant*,int row,float shootX,float shootY,uint16_t bulletKind);
 Projectile* TryMakeNativeHostileBasketball(Board* board,Plant* target,int row,
     float rawShootCenterX,float rawShootY);
 // Contact captures the selected target full generation and commits a real

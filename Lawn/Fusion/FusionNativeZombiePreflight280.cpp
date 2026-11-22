@@ -1,3 +1,4 @@
+#include "FusionNextZombie343Rules.h"
 #include "FusionNativeZombiePreflight280.h"
 #include "FusionSourceZombieClosure280.h"
 #include "FusionNative.h"
@@ -78,7 +79,7 @@ bool EnsureNativeSourceZombieClosure280(Board* board,std::span<const uint16_t> r
         if(FindFusionExtendedZombie313Profile(kind)&&!EnsureNativeExtendedZombie313Resources(board,kind,&detail))return Reject(kind,detail,error);
         const auto effect=[&](uint16_t fx)
         {return EnsureNativeSourceEffect269(board,fx,&detail);};
-        if((FusionDayZombie273Doll(kind)||kind==6||kind==10)&&!effect(11))return Reject(kind,detail,error);
+        if((FusionDayZombie273Doll(kind)||FusionDancePole343Kind(kind)||kind==10)&&!effect(11))return Reject(kind,detail,error);
         if(FusionJackbox300Kind(kind))
         {
             if(kNativeFusionSnapshotVersion<28||!LawnNet::NetSourceJackbox309Ready(board->mApp)||!effect(42))
@@ -93,7 +94,7 @@ bool EnsureNativeSourceZombieClosure280(Board* board,std::span<const uint16_t> r
         if(kind==101&&!effect(10))return Reject(kind,detail,error);
         if(kind==102&&!effect(16))return Reject(kind,detail,error);
         if(kind==108&&!effect(18))return Reject(kind,detail,error);
-        if((kind==14||kind==18)&&!effect(kind==14?35:36))return Reject(kind,detail,error);
+        if((FusionSubmarine343Kind(kind)||kind==18)&&!effect(FusionSubmarine343Kind(kind)?35:36))return Reject(kind,detail,error);
         if((kind==106||kind==108)&&!CanCreateNativeEquipmentVisual(board,FusionEquipmentType::Bucket))
             return Reject(kind,"actual source Bucket item visual is unavailable",error);
         if(FusionDayZombie273Shooter(kind)||kind==104)

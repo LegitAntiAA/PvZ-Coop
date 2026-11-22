@@ -1,4 +1,7 @@
+#include "FusionNativeLadder355.h"
+#include "FusionNativeDryGround353.h"
 #include "FusionNativeDayZombie273Bridge.h"
+#include "FusionNextZombie343Rules.h"
 #include "FusionNativeAdventure273.h"
 #include "FusionNativeSourceClock313.h"
 #include "FusionNativeSourceGraph313.h"
@@ -52,9 +55,14 @@ bool GroundController(uint16_t kind)
     return kind==0||kind==2||kind==4||kind==8||kind==111||kind==9||kind==109||kind==10||FusionJackbox300Kind(kind);
 }
 bool Coexisting313Controller(uint16_t kind)
-{return FusionWaterZombie313Kind(kind)||FindFusionSourceGraph313(kind);}
+{return (GetNativeSourceZombieCarrier(kind)>=0&&FindSpecialZombie269Profile(kind))||
+    FusionWaterZombie313Kind(kind)||FindFusionSourceGraph313(kind);}
 bool Coexisting313Actor(Zombie* z)
 {
+    // Vehicle269 owns its native body clock rather than a313 graph/state
+    // record. Validate that real controller when a Day actor joins its world.
+    if(IsNativeSpecialZombie269Vehicle(z))
+        return NativeSpecialZombie269VehicleTerrainValid(z)&&z->mApp->ReanimationTryToGet(z->mBodyReanimID);
     NativeZombie313Semantics semantics;
     if(!GetNativeZombie313Semantics(z,semantics))return false;
     if(FusionWaterZombie313Kind(semantics.kind))
@@ -72,9 +80,8 @@ bool Coexisting313Actor(Zombie* z)
 }
 bool OrdinarySourceGrass(Board* b,uint16_t candidate,std::vector<uint16_t>& closure)
 {
-    // Birth closure remains dry/no-grid: Pole GetLadder has not been ported.
-    // This is a world/controller requirement, independent of the scheduler.
-    if(!IsNativeSourceWorld313(b)||GetNativeFusionRowCount(b)!=5||b->mGridItems.mSize||
+    // Common source world admits only real native ladders as grid items.
+    if(!IsNativeSourceWorld313(b)||
         !GroundController(candidate))return false;
     std::vector<uint16_t> roots{candidate};Zombie* actor=nullptr;
     while(b->IterateZombies(actor))
@@ -83,19 +90,29 @@ bool OrdinarySourceGrass(Board* b,uint16_t candidate,std::vector<uint16_t>& clos
         const auto* source=GetNativeSourceZombieData(actor);
         const auto uid=b->mZombies.DataArrayGetID(actor);
         if(!IsNativeSourceZombie(actor)||!source||!uid||source->instanceToken!=uid||
-            actor->mRow<0||actor->mRow>=5)return false;
-        if(!GroundController(source->kind)&&!Coexisting313Actor(actor))return false;
+            actor->mRow<0||actor->mRow>=GetNativeFusionRowCount(b))return false;
+        const auto* profile=FindFusionZombieProfile(source->kind);
+        const int carrier=GetNativeSourceZombieCarrier(source->kind);
+        const bool baseWater=profile&&profile->waterOnly&&b->mPlantRow[actor->mRow]==PLANTROW_POOL&&
+            (carrier==ZOMBIE_NORMAL||carrier==ZOMBIE_TRAFFIC_CONE||carrier==ZOMBIE_PAIL);
+        if(GroundController(source->kind)?!NativeSourceDryRow353(b,actor->mRow):(!baseWater&&!Coexisting313Actor(actor)))return false;
         roots.push_back(source->kind);
     }
     // Keep the complete source child closure, including known independent
     // A/B/C controllers; these are never substituted with a Day controller.
     if(!BuildFusionSourceZombieClosure280(roots,closure))return false;
-    for(auto kind:closure)if(!GroundController(kind)&&!Coexisting313Controller(kind))return false;
+    for(auto kind:closure)
+    {
+        const auto* profile=FindFusionZombieProfile(kind);const int carrier=GetNativeSourceZombieCarrier(kind);
+        const bool baseWater=profile&&profile->waterOnly&&
+            (carrier==ZOMBIE_NORMAL||carrier==ZOMBIE_TRAFFIC_CONE||carrier==ZOMBIE_PAIL);
+        if(!GroundController(kind)&&!Coexisting313Controller(kind)&&!baseWater)return false;
+    }
     return true;
 }
 bool Host(const Zombie* z)
 {return z&&Current(z->mBoard)&&!z->mNetGhost&&!z->mApp->NetIsClient()&&!z->mDead&&
-    z->mApp->mGameScene==SCENE_PLAYING&&!z->mBoard->mPaused;}
+    z->mApp->mGameScene==SCENE_PLAYING&&!z->mBoard->mPaused&&NativeSourceDryRow353(z->mBoard,z->mRow);}
 bool PlantTraits(const Plant* p,FusionDayZombie273PlantTraits& result)
 {
     const auto* d=GetNativePlantData(p);if(!d||!Current(p->mBoard))return false;
@@ -109,12 +126,8 @@ bool PlantTraits(const Plant* p,FusionDayZombie273PlantTraits& result)
     if(!GetNativeBasePlantGroundAnchor(const_cast<Plant*>(p),out.shadowX,out.shadowY))return false;
     result=out;return true;
 }
-void PoleContact(Zombie*,Plant*)
-{
-    // OnTriggerStay2D36F390 dispatches +0x2a8 = slot23 GetLadder385A40,
-    // NOT slot48 AttackEffect37F310. Contact deals no damage. OrdinarySourceDay
-    // admits only worlds without a ladder, where that source call is a no-op.
-}
+void PoleContact(Zombie* z,Plant* p)
+{ContactNativeDayLadder355(z,p);}
 bool FxReady(Board* b,uint16_t kind,std::string* error=nullptr)
 {
     if(NativeSourceEffectParticle269(kind)<0)
@@ -125,14 +138,14 @@ bool OrdinaryEveBalanced(const Board*)
 {return false;} // Only the proved ordinary grass world can reach these hooks.
 bool PrepareDanceChildren(Zombie* parent,std::span<const uint16_t> kinds,std::string* error)
 {
-    return Host(parent)&&IsNativeSourceAdventureGrassWorld281(parent->mBoard)&&
+    return Host(parent)&&NativeSourceDryRow353(parent->mBoard,parent->mRow)&&
         FxReady(parent->mBoard,11,error)&&CanAllocateNativeSourceZombieBatch280(parent->mBoard,kinds,error);
 }
 bool DanceChildEffect(Zombie* parent,Zombie* child,bool dance)
 {
     const auto* source=GetNativeSourceZombieData(parent);const auto* born=GetNativeSourceZombieData(child);
     if(!Host(parent)||!child||child->mBoard!=parent->mBoard||!source||!born||
-        (dance?(source->kind!=6||born->kind!=7):(source->kind!=10||born->kind!=6)))return false;
+        (dance?(!FusionDancePole343Kind(source->kind)||born->kind!=7):(source->kind!=10||born->kind!=6)))return false;
     float x=0,y=0;if(!GetNativeSourceZombie269NodePoint(child,dance?"":"Shadow",x,y))return false;
     // The resource was validated before any RNG/birth. Native cosmetic pool
     // exhaustion is an acknowledged one-shot drop, never another child batch.
@@ -158,7 +171,7 @@ void PoleEvent(Zombie* z,uint8_t event)
     else if(event==Day273JumpOver)
     {
         const auto* source=GetNativeSourceZombieData(z);auto* state=EditNativeDayZombie273(z);
-        if(!source||source->kind!=6||!state||state->danceSpawnPending||state->danceSpawnFailed)return;
+        if(!source||!FusionDancePole343Kind(source->kind)||!state||state->danceSpawnPending||state->danceSpawnFailed)return;
         float x=0,y=0;if(!GetNativeSourceZombie269NodePoint(z,"Shadow",x,y))
         {
             state->danceSpawnFailed=true;
@@ -298,7 +311,7 @@ bool CanSpawnNativeDayZombie273(Board* b,uint16_t kind,std::string* error)
 void RetryNativeDancePole284(Zombie* z)
 {
     const auto* source=GetNativeSourceZombieData(z);auto* state=EditNativeDayZombie273(z);
-    if(!source||source->kind!=6||!state||!state->danceSpawnPending||state->danceSpawnFailed||!Host(z))return;
+    if(!source||!FusionDancePole343Kind(source->kind)||!state||!state->danceSpawnPending||state->danceSpawnFailed||!Host(z))return;
     if(z->IsDeadOrDying()||!z->mHasHead){state->danceSpawnPending=false;return;}
     std::string error;bool failed=false;
     const bool born=SpawnNativeDancePole284Children(z,state->danceSpawnRow,state->danceSpawnShadowX,DanceHooks(),failed,&error);

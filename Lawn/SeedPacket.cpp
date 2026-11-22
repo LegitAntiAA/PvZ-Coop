@@ -12,6 +12,7 @@
 #include "../LawnApp.h"
 #include "Net/NetManager.h"
 #include "Fusion/FusionNative.h"
+#include "Fusion/FusionNativeConveyor308.h"
 #include "Fusion/FusionNativeVisual.h"
 #include "Fusion/FusionPortraitCache.h"
 #include <algorithm>
@@ -782,7 +783,11 @@ void SeedPacket::Draw(Graphics* g)
 		g->PushState();
 
 		if (aFusionPacket)
+        {
+            if(LawnFusion::IsNativeSourceConveyor308(mBoard))
+            {g->mScaleX*=LawnFusion::kNativeConveyor308Geometry.scale;g->mScaleY*=LawnFusion::kNativeConveyor308Geometry.scale;}
 			DrawNativeFusionSeedPacket(g, mOffsetX, 0.0f, aFusionPacket->kind, aFusionPacket->isExtra, aFusionPacket->price, aPercentDark, aGrayness, false);
+        }
 		else
 			DrawSeedPacket(g, mOffsetX, 0.0f, mPacketType, mImitaterType, aPercentDark, aGrayness, false, true);
 
@@ -842,6 +847,12 @@ bool SeedPacket::CanPickUp()
 	{
 		if (mBoard->mPaused || mApp->mGameScene != SCENE_PLAYING || !mActive || mRefreshing)
 			return false;
+        if(LawnFusion::IsNativeSourceConveyor308(mBoard))
+        {
+            const int slot=mApp->mNetManager?mApp->mNetManager->GetActingPlayerSlot():0;
+            return (!mApp->NetActive()||(mApp->mNetManager&&!mApp->mNetManager->IsSpectator()))&&
+                LawnFusion::CanUseNativeConveyorPacket308(mBoard,mNetId,slot);
+        }
 		if (mApp->NetActive() && (!mApp->mNetManager || mApp->mNetManager->IsSpectator() ||
 			aPacket->owner != mApp->mNetManager->GetActingPlayerSlot()))
 			return false;
@@ -1082,6 +1093,8 @@ void SeedPacket::MouseDown(int x, int y, int theClickCount)
 //0x488EC0
 void SeedPacket::WasPlanted()
 {
+    // Canonical source consumption belongs to the prepared world transaction.
+    if(LawnFusion::IsNativeSourceConveyor308(mBoard))return;
 	if (const LawnFusion::NativePacketData* aPacket = LawnFusion::GetNativePacketData(this))
 	{
 		mTimesUsed++;
@@ -1242,7 +1255,10 @@ void SeedBank::Draw(Graphics* g)
 	{
 		g->DrawImage(IMAGE_CONVEYORBELT_BACKDROP, 83, 0);
 		g->DrawImageCel(IMAGE_CONVEYORBELT, 90, 63, mConveyorBeltCounter / 4 % 6);
-		g->SetClipRect(90, 0, 501, BOARD_HEIGHT);
+
+        if(LawnFusion::IsNativeSourceConveyor308(mBoard))
+        {const auto& geometry=LawnFusion::kNativeConveyor308Geometry;g->SetClipRect(geometry.clipLeft,0,geometry.clipWidth,BOARD_HEIGHT);}
+        else g->SetClipRect(90,0,501,BOARD_HEIGHT);
 	}
 	else
 	{
@@ -1301,6 +1317,12 @@ void SeedBank::Draw(Graphics* g)
 //0x489970
 bool SeedBank::MouseHitTest(int x, int y, HitResult* theHitResult)
 {
+    if(LawnFusion::IsNativeSourceConveyor308(mBoard))
+    {
+        const auto& geometry=LawnFusion::kNativeConveyor308Geometry;
+        if(x<mX+geometry.clipLeft||x>=mX+geometry.clipLeft+geometry.clipWidth)
+        {theHitResult->mObject=nullptr;theHitResult->mObjectType=OBJECT_TYPE_NONE;return false;}
+    }
 	if (x >= mX && x - mX <= mWidth - 5 && y >= mY && y < mY + mHeight && mNumPackets > 0)
 	{
 		const int anActingSlot = mApp->mNetManager ? mApp->mNetManager->GetActingPlayerSlot() : 0;
@@ -1362,6 +1384,14 @@ void SeedBank::AddSeed(SeedType theSeedType, bool thePlaceOnLeft)
 			aSeedPacket->mOffsetX = aPrevPacket->mOffsetX + 40;
 		}
 	}
+    if(LawnFusion::IsNativeSourceConveyor308(mBoard))
+    {
+        const auto& geometry=LawnFusion::kNativeConveyor308Geometry;
+        aSeedPacket->mOffsetX=thePlaceOnLeft?0:geometry.EntryOffset(aNumSeeds);
+        if(aNumSeeds>0)aSeedPacket->mOffsetX=max(aSeedPacket->mOffsetX,mSeedPackets[aNumSeeds-1].mOffsetX);
+        aSeedPacket->mNetOwnerSlot=LawnNet::NET_SHARED_OWNER;
+    }
+
 }
 
 //0x489AC0
@@ -1411,7 +1441,7 @@ void SeedBank::RemoveSeed(int theIndex)
 			aSeedPacket->mNetOwnerSlot = aNextPacket->mNetOwnerSlot;
 			aSeedPacket->mNetId = aNextPacket->mNetId;
 			aSeedPacket->mRandomDiscountLevel = aNextPacket->mRandomDiscountLevel;
-			aSeedPacket->mOffsetX = aNextPacket->mOffsetX + SEED_PACKET_WIDTH + 1;
+			aSeedPacket->mOffsetX = aNextPacket->mOffsetX + (LawnFusion::IsNativeSourceConveyor308(mBoard)?LawnFusion::kNativeConveyor308Geometry.step:SEED_PACKET_WIDTH+1);
 		}
 
 		aSeedPacket->mRefreshCounter = 0;

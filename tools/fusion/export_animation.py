@@ -16,6 +16,16 @@ import subprocess
 import zlib
 
 
+def yaml_string(value):
+    # Unity YAML quotes are serialization syntax, not Transform-name bytes.
+    # Keep spaces inside quotes; a doubled apostrophe denotes one apostrophe.
+    if value.startswith("'"):
+        if len(value)<2 or not value.endswith("'") or re.fullmatch(r"(?:[^']|'')*",value[1:-1]) is None:
+            raise ValueError("invalid quoted Unity YAML string")
+        return value[1:-1].replace("''", "'")
+    return json.loads(value) if value.startswith('"') else value
+
+
 def scalar(text):
     text = text.strip()
     if text.startswith("{"):
@@ -87,7 +97,7 @@ def read_clip(path, source_skin=False):
                 keys.append(key)
             if not keys or any(a["time"] >= b["time"] for a, b in zip(keys, keys[1:])):
                 raise ValueError(str(path) + ": empty or unordered curve")
-            curve = {"kind": kind, "path": required(block, "path"), "keys": keys,
+            curve = {"kind": kind, "path": yaml_string(required(block, "path")), "keys": keys,
                      "preInfinity": int(required(block, "m_PreInfinity")), "postInfinity": int(required(block, "m_PostInfinity"))}
             if kind == "float":
                 curve["attribute"] = required(block, "attribute")
@@ -136,7 +146,7 @@ def read_clip(path, source_skin=False):
             keys.append({"time": float(time), "spriteGuid": guid[1] if guid else None})
         if not keys:
             raise ValueError(str(path) + ": empty object curve")
-        curves.append({"kind": "sprite", "path": required(block, "path"), "keys": keys})
+        curves.append({"kind": "sprite", "path": yaml_string(required(block, "path")), "keys": keys})
     events = []
     for event in re.split(r"\n  - time:", section(text, "m_Events"))[1:]:
         time, body = event.split("\n", 1)
@@ -145,7 +155,7 @@ def read_clip(path, source_skin=False):
                        "stringParameter": field(body, "data", "")})
     if float(required(text, "m_StartTime")) != 0:
         raise ValueError(str(path) + ": nonzero clip start requires a separate evaluator")
-    return {"name": required(text, "m_Name"), "duration": float(required(text, "m_StopTime")),
+    return {"name": yaml_string(required(text, "m_Name")), "duration": float(required(text, "m_StopTime")),
             "additiveReferencePoseTime": float(required(text, "m_AdditiveReferencePoseTime")),
             "hasAdditiveReferencePose": bool(int(required(text, "m_HasAdditiveReferencePose"))),
             "loop": bool(int(required(text, "m_LoopTime"))), "sourceSampleRate": float(required(text, "m_SampleRate")),
@@ -326,7 +336,7 @@ def source_unbound_bindings(assets, prefab, docs, clips, clip_sources, node_path
         clip_text = read(source)
         bindings = []
         for block in re.split(r"\n    - serializedVersion: 2\n", section(clip_text, "m_ClipBindingConstant"))[1:]:
-            bindings.append((int(required(block, "path")), int(required(block, "attribute")),
+            bindings.append((int(yaml_string(required(block, "path"))), int(required(block, "attribute")),
                              int(required(block, "typeID")), reference(block, "script"),
                              int(required(block, "isPPtrCurve")), int(required(block, "isIntCurve")),
                              int(required(block, "isSerializeReferenceCurve")), int(required(block, "customType"))))
@@ -511,7 +521,7 @@ def export(assets, prefab_path, output, active_only=False, sprite_prefix=None, a
     source_rect_transforms=[]
     for kind, ident, text in docs:
         if kind == 1:
-            objects[ident] = {"name": required(text, "m_Name"), "active": bool(int(required(text, "m_IsActive"))), "tag": required(text, "m_TagString")}
+            objects[ident] = {"name": yaml_string(required(text, "m_Name")), "active": bool(int(required(text, "m_IsActive"))), "tag": required(text, "m_TagString")}
         elif kind == 4 or kind ==224:
             if kind==224:
                 # Outside a Canvas/RectTransform parent, the original local

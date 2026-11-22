@@ -2,6 +2,7 @@
 #define LAWN_FUSION_NATIVE_H
 
 #include "FusionSeedBank.h"
+#include "FusionRoof350Rules.h"
 #include "FusionRollingProjectileRules.h"
 #include "FusionGarlicRules.h"
 #include "FusionNativeZombies.h"
@@ -27,6 +28,7 @@
 #include "FusionNativeExtendedZombie313.h"
 #include "FusionNativeHeavyZombie313B.h"
 #include "FusionSourceBoard313.h"
+#include "FusionNativeNextZombie343State.h"
 #include "FusionNativeObstacle313.h"
 #include "../../ConstEnums.h"
 #include <cstdint>
@@ -64,6 +66,8 @@ inline bool NativeFusionGroundTerrainAllowed(uint8_t background,int row,bool inP
 inline int NativeFusionPixelToRow(uint8_t background,int pixelY,bool keepOnBoard=false)
 {
     if(!NativeFusionBackgroundValid(background))return -1;
+    if(background==BACKGROUND_5_ROOF||background==BACKGROUND_6_BOSS)
+        return FusionRoof350PixelToRow(0,6.3*kFusionBasePixelsX,pixelY,keepOnBoard);
     const int rows=NativeFusionRowsForBackground(background),pitch=rows==6?85:100;
     if(pixelY<LAWN_YMIN)return keepOnBoard?0:-1;
     if(pixelY>=LAWN_YMIN+rows*pitch)return keepOnBoard?rows-1:-1;
@@ -77,6 +81,9 @@ inline bool NativeGarlicRawFlagsValid(uint8_t background,int row,uint8_t flags)
 }
 int GetNativeFusionRowCount(const Board* board);
 double GetNativeFusionPixelsY(const Board* board);
+float GetNativeFusionRoofRowY350(const Board*,float nativeFloorX,int row);
+int GetNativeFusionPixelToRow350(const Board*,int pixelX,int pixelY,bool keepOnBoard=false);
+bool GetNativeFusionRoofZombieRowY350(const Zombie*,float nextNativePosX,int row,float& bodyY);
 bool ConfigureNativeFusionBackground(Board* board,uint8_t background);
 // DAY grass: Board::GridToPixelY(row) minus Zombie::GetPosYBasedOnRow's30.
 inline float NativeGarlicRowY(int row,int rows=5) { return static_cast<float>(LAWN_YMIN-30+(rows==6?85:100)*row); }
@@ -104,6 +111,7 @@ class NativeZombieVisuals;
 class NativeSourceCharred311;
 class NativeCapturedPlants314;
 class NativeGloveUIState;
+struct NativeConveyor308State;
 struct FusionCommand;
 struct FusionSplitEmissionSpec;
 // Metadata extends the real Board entities. This context owns no second world,
@@ -244,9 +252,10 @@ struct NativeContext
     bool fieldButtonPressed = false;
     bool fieldButtonReleasePending = false;
 
-    // Selection-only controller supplies the existing SeedChooserScreen.
-    // Once committed, real SeedPacket instances own the live cooldowns.
+    // Canonical identities supply the native chooser or source conveyor.
+    // Real SeedPacket instances own the live cooldowns and belt geometry.
     FusionSeedBank selection;
+    std::unique_ptr<NativeConveyor308State> conveyor308; // Host feed/RNG only; bank packets remain the only queue.
     std::vector<FusionBankEligibleCard> eligible;
     std::unordered_map<uint16_t, NativePacketData> packets;
     std::unordered_map<uint32_t, NativePlantData> plants;
@@ -286,6 +295,7 @@ struct NativeContext
     std::unordered_map<uint32_t, NativeHeavyZombie313BState> heavyZombies313B;
     float sourcePoints=500.f; // Source Board.thePoints124, distinct from native sun and Fusion money.
     FusionExtendedBoard313State extendedBoard313;
+    std::unordered_map<uint32_t,NativeNextZombie343State> nextZombies343;
     uint32_t sourceAnimatedSerial317=0; // HOST cosmetic birth identity; never a simulation clock.
     std::unordered_map<uint32_t, NativeSourceObstacle313Data> sourceObstacles313;
     std::unique_ptr<NativeSourceObstacle313Visuals> sourceObstacleVisuals313;

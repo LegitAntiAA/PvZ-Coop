@@ -67,7 +67,7 @@ FusionHostilePhysicsTestResult RunFusionHostilePhysicsTests()
         CHECK(FusionSuperCherryProjectileMetadataValid(3,damage,0,false,PROJECTILE_PEA,MOTION_STRAIGHT));
     CHECK(FusionSuperCherryProjectileMetadataValid(3,300,9,true,PROJECTILE_PEA,MOTION_BACKWARDS));
     CHECK(!FusionSuperCherryProjectileMetadataValid(3,1000,9,true,PROJECTILE_PEA,MOTION_BACKWARDS));
-    CHECK(!FusionSuperCherryProjectileMetadataValid(3,300,0,true,PROJECTILE_PEA,MOTION_STRAIGHT));
+    CHECK(FusionSuperCherryProjectileMetadataValid(3,300,0,true,PROJECTILE_PEA,MOTION_STRAIGHT));
     CHECK(!FusionSuperCherryProjectileMetadataValid(3,300,9,false,PROJECTILE_PEA,MOTION_BACKWARDS));
     CHECK(!FusionSuperCherryProjectileMetadataValid(3,300,9,true,PROJECTILE_PEA,MOTION_STRAIGHT));
     CHECK(!FusionSuperCherryProjectileMetadataValid(58,300,9,true,PROJECTILE_PEA,MOTION_BACKWARDS));
@@ -79,7 +79,8 @@ FusionHostilePhysicsTestResult RunFusionHostilePhysicsTests()
     CHECK(!NativeProjectileMetadataValid(pending,PROJECTILE_PEA,MOTION_STRAIGHT));
     auto attracted=cherry;attracted.specialType=4;attracted.isZombieBullet=false;attracted.goldAttracted=true;
     CHECK(NativeProjectileMetadataValid(attracted,PROJECTILE_PEA,MOTION_THREEPEATER)); // Existing friendly GoldMagnet wrapper remains admitted.
-    attracted.isZombieBullet=true;CHECK(!NativeProjectileMetadataValid(attracted,PROJECTILE_PEA,MOTION_THREEPEATER));
+    attracted.isZombieBullet=true;CHECK(NativeProjectileMetadataValid(attracted,PROJECTILE_PEA,MOTION_THREEPEATER));
+    attracted.damage=299;CHECK(!NativeProjectileMetadataValid(attracted,PROJECTILE_PEA,MOTION_THREEPEATER));
     for(int extra=0;extra<10;++extra)
     {
         auto altered=cherry;

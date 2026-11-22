@@ -1,3 +1,4 @@
+#include "Fusion/FusionFog357Rules.h"
 #include <time.h>
 #include <limits.h>
 #include <stdexcept>
@@ -5,6 +6,7 @@
 #include "BoardInclude.h"
 #include "Fusion/FusionRuntime.h"
 #include "Fusion/FusionNative.h"
+#include "Fusion/FusionNativeConveyor308.h"
 #include "Fusion/FusionNativeAdventure273.h"
 #include "Fusion/FusionNativeAdventureProgress273.h"
 #include "Fusion/FusionNativeLastPlants269.h"
@@ -2506,6 +2508,7 @@ void Board::InitLawnMowers()
 //0x40BD30
 bool Board::ChooseSeedsOnCurrentLevel()
 {
+    if(LawnFusion::GetNativeBankPolicy308(this)==LawnFusion::FusionBankPolicy::SourceConveyor)return false;
 	if (LawnFusion::IsNativeFusionBoard(this)) return true;
 	if (mApp->IsChallengeWithoutSeedBank() || HasConveyorBeltSeedBank())
 		return false;
@@ -6860,6 +6863,7 @@ bool Board::HasLevelAwardDropped()
 //0x413A70
 void Board::UpdateSunSpawning()
 {
+    if(LawnFusion::IsNativeSourceConveyor308(this))return;
 	if(LawnFusion::UpdateNativeSourceAdventureSun273(this))return;
 	if (StageIsNight() ||
 		HasLevelAwardDropped() || 
@@ -8344,7 +8348,7 @@ void Board::DrawBackdrop(Graphics* g)
 		DrawHouseDoorBottom(g);
 	}
 
-	if (StageHasPool() && !(aNativeFusionField && mBackground == BACKGROUND_3_POOL))
+	if (StageHasPool() && !(aNativeFusionField && (mBackground == BACKGROUND_3_POOL||mBackground == BACKGROUND_4_FOG)))
 	{
 		mApp->mPoolEffect->PoolEffectDraw(g, StageIsNight());
 	}
@@ -9183,7 +9187,8 @@ void Board::DrawLevel(Graphics* g)
 
 	if (mApp->IsAdventureMode())
 	{
-		aLevelStr = TodStringTranslate(_S("[LEVEL]")) + _S("") + mApp->GetStageString(mLevel);
+		aLevelStr = TodStringTranslate(_S("[LEVEL]")) + (LawnFusion::IsNativeSourceAdventure273(this)?
+            StrFormat(_S(" %d-%d"),(mLevel-1)/9+1,(mLevel-1)%9+1):mApp->GetStageString(mLevel));
 	}
 	else
 	{
@@ -10276,6 +10281,39 @@ void Board::UpdateFog()
 		}
 	}
 
+	if (LawnFusion::IsNativeFusionBoard(this))
+	{
+		// One native91-alpha owner; source light family/ranges are sampled at
+		// the native fog tiles' real centers. No second FogBlock actor list.
+		const bool aSoftware=!mApp->Is3DAccelerated();
+		Image* aFogImage=aSoftware?Sexy::IMAGE_FOG_SOFTWARE:Sexy::IMAGE_FOG;
+		if(!aFogImage)return;
+		const float aCellX=float(GridToPixelX(0,0)+GetCellPitchX()*.5f);
+		const float aCellY=float(GridToPixelY(0,0)+50); // Same source row anchor as Projection313/field art.
+		for(int x=aLeft;x<MAX_GRID_SIZE_X+4;++x)for(int y=0;y<MAX_GRID_SIZE_Y+1;++y)
+		{
+			const float aX=x*80.f+mFogOffset-15+(aSoftware?10:0)+aFogImage->GetCelWidth()*.5f;
+			const float aY=y*85.f+20+(aSoftware?3:0)+aFogImage->GetCelHeight()*.5f;
+			const int aCol=LawnFusion::FusionFogSampleCell357(aX,aCellX,float(GetCellPitchX()));
+			const int aRow=LawnFusion::FusionFogSampleCell357(aY,aCellY,85.f);
+			Plant* aSourcePlant=nullptr;bool aLit=false;
+			while(IteratePlants(aSourcePlant))
+			{
+				const auto* aData=LawnFusion::GetNativePlantData(aSourcePlant);
+				if(!aData||aSourcePlant->mDead||!aSourcePlant->mIsOnBoard||aSourcePlant->mSquished)continue;
+				const auto* aBody=mApp->ReanimationTryToGet(aSourcePlant->mBodyReanimID);
+				if(!aBody||aBody->mDead||aBody->mAnimRate==0)continue;
+				if(LawnFusion::FusionFogLightRange357(LawnFusion::FusionFogLightKind357(aData->kind),
+					aSourcePlant->mPlantCol,aSourcePlant->mRow,aCol,aRow)){aLit=true;break;}
+			}
+			if(aLit)
+			{
+				const int aFade=mFogBlownCountDown>=2000?40:mFogBlownCountDown>0?2:6;
+				mGridCelFog[x][y]=max(mGridCelFog[x][y]-aFade,0);
+			}
+		}
+		return;
+	}
 	Plant* aPlant = nullptr;
 	while (IteratePlants(aPlant))
 	{
@@ -11184,7 +11222,11 @@ bool Board::HandleHotbarKey(KeyCode theKey, bool theRepeat)
 		const Rect aBankHitRect(mSeedBank->mX, mSeedBank->mY, max(0, mSeedBank->mWidth - 4), mSeedBank->mHeight);
 		// Match SeedBank::Draw's native conveyor clip. Entering cards can lie
 		// beyond it, over the shovel/menu HUD, before they become visible.
-		const Rect aConveyorClip(mSeedBank->mX + 90, mSeedBank->mY, 501, mSeedBank->mHeight);
+
+        const bool sourceConveyor=LawnFusion::IsNativeSourceConveyor308(this);
+        const auto& conveyorGeometry=LawnFusion::kNativeConveyor308Geometry;
+        const Rect aConveyorClip(mSeedBank->mX+(sourceConveyor?conveyorGeometry.clipLeft:90),mSeedBank->mY,
+            sourceConveyor?conveyorGeometry.clipWidth:501,mSeedBank->mHeight);
 		const auto aPacketHitRect = [&](const SeedPacket& aPacket)
 		{
 			const bool aZombie = IsPvPMode() && mChallenge->IsZombieSeedType(aPacket.mPacketType);
@@ -12246,6 +12288,7 @@ void Board::ProcessDeleteQueue()
 //0x41BE50
 bool Board::HasConveyorBeltSeedBank()
 {
+    if(LawnFusion::GetNativeBankPolicy308(this)==LawnFusion::FusionBankPolicy::SourceConveyor)return true;
 	if(mApp->IsFusionAdventure())return false;
 	return
 		mApp->IsFinalBossLevel() || 
@@ -12267,6 +12310,7 @@ bool Board::HasConveyorBeltSeedBank()
 //0x41BEE0
 int Board::GetNumSeedsInBank()
 {
+    if(LawnFusion::GetNativeBankPolicy308(this)==LawnFusion::FusionBankPolicy::SourceConveyor)return int(LawnFusion::GetNativeBankCapacity308(this));
 	if (const auto* aFusion = LawnFusion::GetNativeContext(this)) return aFusion->selection.State().targetCount;
 	if (mApp->mGameMode == GameMode::GAMEMODE_COOP_PVP)
 		return PVP_PACKET_COUNT;
@@ -12432,6 +12476,7 @@ bool Board::StageIsDayWithPool() {
 //0x41C1C0
 int Board::LeftFogColumn()
 {
+    if(LawnFusion::IsNativeFusionBoard(this)&&mBackground==BACKGROUND_4_FOG)return 5;
 	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_AIR_RAID)		return 6;
 	if (!mApp->IsAdventureMode())										return 5;
 	if (mLevel == 31)													return 6;
@@ -12445,6 +12490,7 @@ int Board::LeftFogColumn()
 //0x41C210
 int Board::GetSeedPacketPositionX(int theIndex)
 {
+    if(LawnFusion::GetNativeBankPolicy308(this)==LawnFusion::FusionBankPolicy::SourceConveyor)return LawnFusion::kNativeConveyor308Geometry.PacketX(theIndex);
 	if (mApp->IsSlotMachineLevel())			return theIndex * 59 + 247;
 	if (HasConveyorBeltSeedBank())			return theIndex * 50 + 91;
 	if (IsPvPMode())
@@ -12624,7 +12670,7 @@ int Board::PixelToGridY(int theX, int theY)
 	if (LawnFusion::IsNativeFusionBoard(this))
 	{
 		if (PixelToGridX(theX, theY) < 0) return -1;
-		return LawnFusion::NativeFusionPixelToRow(static_cast<uint8_t>(mBackground),theY);
+		return LawnFusion::GetNativeFusionPixelToRow350(this,theX,theY);
 	}
 	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN)
 	{
@@ -12662,7 +12708,7 @@ int Board::PixelToGridY(int theX, int theY)
 int Board::PixelToGridYKeepOnBoard(int theX, int theY)
 {
 	if (LawnFusion::IsNativeFusionBoard(this))
-		return LawnFusion::NativeFusionPixelToRow(static_cast<uint8_t>(mBackground),theY,true);
+		return LawnFusion::GetNativeFusionPixelToRow350(this,theX,theY,true);
 	int aGridY = PixelToGridY(max(theX, 80), theY);
 	return max(aGridY, 0);
 }
@@ -12688,6 +12734,8 @@ int Board::GridToPixelX(int theGridX, int theGridY)
 //0x41C6C0
 float Board::GetPosYBasedOnRow(float thePosX, int theRow)
 {
+    if(LawnFusion::IsNativeFusionBoard(this)&&StageHasRoof())
+        return LawnFusion::GetNativeFusionRoofRowY350(this,thePosX,theRow);
 	if (StageHasRoof())
 	{
 		float aSlopeOffset = 0.0f;
@@ -12705,6 +12753,8 @@ float Board::GetPosYBasedOnRow(float thePosX, int theRow)
 //0x41C740
 int Board::GridToPixelY(int theGridX, int theGridY)
 {
+    if(LawnFusion::IsNativeFusionBoard(this)&&StageHasRoof())
+        return int(LawnFusion::GetNativeFusionRoofRowY350(this,float(GetCellCenterX(theGridX,theGridY)),theGridY));
 	TOD_ASSERT(theGridX >= 0 && theGridX < GetColumnCount());
 	TOD_ASSERT(theGridY >= 0 && theGridY < MAX_GRID_SIZE_Y);
 	if (mApp->mGameMode == GameMode::GAMEMODE_CHALLENGE_ZEN_GARDEN)
@@ -13863,5 +13913,6 @@ void Board::ButtonDepress(int theId)
 
 int Board::GetSeedPacketPositionY(int theIndex)
 {
+    if(LawnFusion::GetNativeBankPolicy308(this)==LawnFusion::FusionBankPolicy::SourceConveyor)return LawnFusion::kNativeConveyor308Geometry.top;
 	return 8;
 }

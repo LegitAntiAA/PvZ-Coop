@@ -32,6 +32,9 @@ bool FusionSuperCherryCollateralCell(int columnDelta,int rowDelta);
 FusionSuperCherryPlantPlan PlanFusionSuperCherryPlantHit(uint16_t kind,bool cherryCover,bool cherryMagnetGraph);
 bool TryPlanFusionSuperCherryRebound(uint16_t defenderKind,bool animationRunning,bool umbrellaPot,int& reflectedDamage);
 
+// CherryCatapult352390: five58 then twenty3. CreateBullet441CC0 binds3 to
+// SuperCherryBullet; way13 changes trajectory, not its BombCherry impact.
+bool FusionCatapultCherry343MetadataValid(uint16_t,int,uint8_t,bool,ProjectileType,ProjectileMotion);
 bool FusionHostilePlanarShotValid(const FusionHostilePlanarShot& shot);
 bool AdvanceFusionHostilePlanarShot(FusionHostilePlanarShot& shot);
 bool TryMakeFusionHostileProjectileRect(uint16_t kind,double centerX,double centerY,double pixelsY,FusionRecipientRect& rect);

@@ -20,11 +20,11 @@ NativeSnapshotFrame Actor(uint16_t kind)
 {
     auto f=Empty();NativeSourceZombieData d;d.kind=kind;d.instanceToken=0x10029;d.originSpeed=1;d.health=float(FindFusionZombieProfile(kind)->maxHealth);
     f.sourceZombies.push_back({41,d});f.zombieIdentities.push_back({41,d.instanceToken});
-    if(FindFusionSourceGraph313(kind)){NativeSourceGraph313Snapshot graph;MakeNative313GraphFixture(kind,graph);f.sourceGraphs313.push_back({41,graph});}
+    if(!FusionWaterZombie313Kind(kind)&&FindFusionSourceGraph313(kind)){NativeSourceGraph313Snapshot graph;MakeNative313GraphFixture(kind,graph);f.sourceGraphs313.push_back({41,graph});}
     if(FusionWaterZombie313Kind(kind))
-    {FusionWaterZombie313View water;InitializeFusionWaterZombie313View(kind,water);if(kind!=20){water.auxiliary.mPresent=true;water.auxiliary.mFrameCount=1;}f.waterZombies313.push_back({41,water});f.background=BACKGROUND_3_POOL;}
+    {FusionWaterZombie313View water;InitializeFusionWaterZombie313View(kind,water);if(kind!=20){water.auxiliary.mPresent=true;water.auxiliary.mFrameCount=1;}if(FusionWaterShooter343Kind(kind)){water.shootClock343.mPresent=true;water.shootClock343.mFrameCount=1;}f.waterZombies313.push_back({41,water});f.background=BACKGROUND_3_POOL;}
     if(NativeHeavyZombie313BKind(kind)){NativeHeavyZombie313Snapshot heavy;if(kind==32||kind==34){heavy.actor.status=14;heavy.actor.jumpSpeed=1.2f;}if(kind==45)heavy.actor.status=heavy.actor.bungee.status;f.heavyZombies313.push_back({41,heavy});}
-    if(FindFusionExtendedZombie313Profile(kind))f.extendedZombies313.push_back({41,{}});
+    if(FindFusionExtendedZombie313Profile(kind)){FusionExtendedZombie313View v;if(kind==220)v.attackDamage=200;f.extendedZombies313.push_back({41,v});}
     return f;
 }
 NetBuffer Encode(const NativeSnapshotFrame& f,bool& okay)
@@ -68,6 +68,17 @@ int RunFusionZombieBatch313WireTests(int& checks)
         NativeSnapshotFrame restored;NetBuffer body;C313(DecodeNativeSnapshot(bytes,eligible,epoch,restored,body)&&restored.sourceObstacles313[0].data.ageTicks==20&&restored.sourceObstacles313[0].data.velocityY==.5f);
         auto bad=f;bad.sourceObstacles313[0].data.velocityX=std::numeric_limits<float>::quiet_NaN();C313(!ValidateNativeSnapshotFrame(bad,eligible));
         bad=f;bad.sourceObstacles313[0].data.lastHitAge=21;C313(!ValidateNativeSnapshotFrame(bad,eligible));
+    }
+    // Each genuine Machine family retains its live source owner while its
+    // shared MachineBall is in flight. Never validate it only after owner death.
+    for(uint16_t ownerKind:{40,210,219,205})
+    {
+        auto f=Actor(ownerKind);FusionSourceObstacle313View ball;
+        ball.kind=FusionSourceObstacle313Kind::MachineBall;ball.instanceToken=0x10040;
+        ball.ownerId=41;ball.ownerToken=0x10029;ball.clock.mPresent=true;ball.clock.mFrameCount=1;
+        f.sourceObstacles313.push_back({64,ball});
+        C313(ValidateNativeSnapshotFrame(f,eligible)==(ownerKind!=205));
+        if(ownerKind!=205){bool okay=false;auto bytes=Encode(f,okay);C313(okay);}
     }
     auto money=Empty();money.sourcePoints=1234.5f;money.extendedBoard313={7,100000};bool moneyOkay=false;auto moneyBytes=Encode(money,moneyOkay);C313(moneyOkay);
     NativeSnapshotFrame moneyOut;NetBuffer moneyBody;C313(DecodeNativeSnapshot(moneyBytes,eligible,epoch,moneyOut,moneyBody)&&moneyOut.sourcePoints==1234.5f&&moneyOut.extendedBoard313.ultimateCount==7&&moneyOut.extendedBoard313.punishTime==100000);

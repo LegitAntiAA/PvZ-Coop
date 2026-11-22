@@ -7,7 +7,7 @@ namespace LawnFusion
 {
 struct NativeWaterZombie313State: FusionWaterZombie313View
 {
-    uint32_t localUID=0,auxiliaryID=0;
+    uint32_t localUID=0,auxiliaryID=0,shootClockUID343=0; // LOCALthirdR, neverhosttoken.
     int tick=-1,driverStopAge=-1;
     FusionZombieClipPosition incoming{},previous{};
     bool initialized=false,failed=false,throwRequested=false,jumpRequested=false,jumpFailed=false,deathCallbackHandled=false,driverDeathEventDone=false;

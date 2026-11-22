@@ -15,6 +15,7 @@ struct NativeSourceGraph313State
     int tick=-1;
     uint32_t revisions[3]{};
     bool initialized=false,failed=false;
+    uint8_t initializedLayerMask343=0; // HOSTONLY ownership; never wire/clock.
 };
 struct NativeSourceGraph313Hooks
 {
@@ -50,4 +51,13 @@ bool UpdateNativeSourceGraph313Rates(Zombie*,const NativeSourceGraph313State&,co
 bool ReadNativeSourceGraph313Clock(Zombie*,uint8_t layer,uint8_t sourceState,const NativeSourceGraph313Hooks&,FusionSourceGraph313Cursor&);
 bool GetNativeSourceGraph313Presentation(Zombie*,const NativeSourceGraph313State&,uint8_t layer,const NativeSourceGraph313Hooks&,
     const char*& incoming,float& incomingSamplerSeconds,const char*& outgoing,float& outgoingSamplerSeconds,float& incomingWeight);
+// Partial source layers share the SAME segmented evaluator. A caller may own
+// layer2 alone while the existing Water controller owns body/water clocks.
+// Masks never imply another clock or permit an uninitialized layer to tick.
+bool InitializeNativeSourceGraph313Masked(Zombie*,NativeSourceGraph313State&,const NativeSourceGraph313Hooks&,uint8_t layerMask);
+bool NativeSourceGraph313ClockTracksReadyMasked(Zombie*,const NativeSourceGraph313Hooks&,uint8_t layerMask,std::string* error=nullptr);
+bool UpdateNativeSourceGraph313Masked(Zombie*,NativeSourceGraph313State&,const NativeSourceGraph313Hooks&,uint8_t layerMask);
+bool UpdateNativeSourceGraph313RatesMasked(Zombie*,const NativeSourceGraph313State&,const NativeSourceGraph313Hooks&,uint8_t layerMask);
+void ReleaseNativeSourceGraph313ClocksMasked(Zombie*,const NativeSourceGraph313Hooks&,uint8_t layerMask);
+
 }

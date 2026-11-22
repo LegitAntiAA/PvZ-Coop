@@ -36,7 +36,8 @@ const char* NativeSourceZombiePartNode284(uint8_t part)
 }
 const char* NativeSourceZombiePartNode313(uint16_t kind,uint8_t part)
 {
-    if((kind==43||kind==212)&&part==uint8_t(LawnNet::NetFusionZombiePart284::FirstArmor))return "LoseBucket";
+    if(kind==114&&part==uint8_t(LawnNet::NetFusionZombiePart284::SecondArmor))return "LoseDoor";
+    if((kind==114||kind==43||kind==212)&&part==uint8_t(LawnNet::NetFusionZombiePart284::FirstArmor))return "LoseBucket";
     return NativeSourceZombiePartNode284(part);
 }
 namespace
@@ -86,8 +87,9 @@ std::vector<Binding> LoadBindings(uint16_t kind,const std::string& modelPath,con
     if(plant==families.end()||plant->at("status")!="Passed")throw std::runtime_error("source embedded particle family remains blocked");
     if(field)
     {
-        const char* prefab=kind==1?"Resources/background/background2.prefab":kind==2?"Resources/background/background3.prefab":nullptr;
-        const char* background=kind==1?"BACKGROUND_2_NIGHT":"BACKGROUND_3_POOL";
+        const char* prefab=kind==1?"Resources/background/background2.prefab":kind==2?"Resources/background/background3.prefab":
+            kind==3?"Resources/background/background4.prefab":kind==4?"Resources/background/background5/BackgroundPrefab2.prefab":nullptr;
+        const char* background=kind==1?"BACKGROUND_2_NIGHT":kind==2?"BACKGROUND_3_POOL":kind==3?"BACKGROUND_4_FOG":"BACKGROUND_5_ROOF";
         std::ifstream file(modelPath,std::ios::binary);const std::string bytes((std::istreambuf_iterator<char>(file)),{});
         if(!prefab||manifest.at("ownerScope")!="nativeBoardField277"||plant->at("nativeBackground").get<std::string>()!=background||
             model.at("sourcePrefab").get<std::string>()!=prefab||plant->at("sourcePrefab").get<std::string>()!=prefab||!file||Digest(bytes)!=plant->at("sourceModelSha256").get<std::string>())
@@ -119,7 +121,7 @@ std::vector<Binding> LoadBindings(uint16_t kind,const std::string& modelPath,con
             ValidateOwnerDestroyedParticle273(kind,entry,modelPath);continue;
         }
         Binding binding;binding.component=ps;binding.renderer=renderer;const int id=entry.at("resourceKind").get<int>();if(id<1||id>65535)throw std::runtime_error("invalid native particle resource key");binding.resource=uint16_t(id);
-        if(field&&(kind!=2||id!=6000))throw std::runtime_error("unregistered native field particle resource");
+        if(field&&!((kind==2&&id==6000)||(kind==3&&id==6001)))throw std::runtime_error("unregistered native field particle resource");
         binding.path=entry.at("nodePath").get<std::string>();binding.emission=entry.at("defaultEmissionEnabled").get<bool>();
         if(std::none_of(model.at("nodes").begin(),model.at("nodes").end(),[&](const Json& n){return n.at("path")==binding.path;}))throw std::runtime_error("missing actual source particle node");
         const auto resource=std::find_if(manifest.at("resources").begin(),manifest.at("resources").end(),[&](const Json& r){return r.at("resourceKind")==id;});
@@ -237,7 +239,8 @@ bool NativeEmbeddedEffects269::EnsureField277(Board* board,uint16_t scene,const 
     try
     {
         if(!mImpl->Valid(board))throw std::runtime_error("native field particle Board unavailable");
-        if(!((scene==1&&board->mBackground==BACKGROUND_2_NIGHT)||(scene==2&&board->mBackground==BACKGROUND_3_POOL)))
+        if(!((scene==1&&board->mBackground==BACKGROUND_2_NIGHT)||(scene==2&&board->mBackground==BACKGROUND_3_POOL)||
+             (scene==3&&board->mBackground==BACKGROUND_4_FOG)||(scene==4&&board->mBackground==BACKGROUND_5_ROOF)))
             throw std::runtime_error("native field scene/background differs");
         auto found=mImpl->fieldBindings.find(scene);
         if(found==mImpl->fieldBindings.end())
@@ -253,13 +256,14 @@ bool NativeEmbeddedEffects269::EnsureField277(Board* board,uint16_t scene,const 
 }
 bool NativeEmbeddedEffects269::FieldResourceAdmitted277(uint16_t resource) const
 {
-    const auto found=mImpl->fieldBindings.find(2);
-    return resource==6000&&found!=mImpl->fieldBindings.end()&&found->second.size()==1&&
+    const auto found=mImpl->fieldBindings.find(resource==6000?2:resource==6001?3:0);
+    return (resource==6000||resource==6001)&&found!=mImpl->fieldBindings.end()&&found->second.size()==1&&
         found->second.front().resource==resource&&found->second.front().definition;
 }
 void NativeEmbeddedEffects269::ReconcileField277(Board* board,uint16_t scene,bool enabled,float x,float y,int order)
 {
-    if(!enabled||scene!=2||!mImpl->Valid(board)||board->mBackground!=BACKGROUND_3_POOL||!std::isfinite(x)||!std::isfinite(y))
+    if(!enabled||!mImpl->Valid(board)||
+        !((scene==2&&board->mBackground==BACKGROUND_3_POOL)||(scene==3&&board->mBackground==BACKGROUND_4_FOG))||!std::isfinite(x)||!std::isfinite(y))
     {mImpl->StopField();return;}
     const auto found=mImpl->fieldBindings.find(scene);
     if(found==mImpl->fieldBindings.end()||found->second.size()!=1){mImpl->StopField();return;}
@@ -278,10 +282,10 @@ void NativeEmbeddedEffects269::ReconcileField277(Board* board,uint16_t scene,boo
 bool NativeEmbeddedEffects269::QueryField277(const Board* board,uint16_t& resource,uint32_t& id,float& x,float& y) const
 {
     resource=0;id=0;x=y=0;
-    if(!mImpl->Valid(const_cast<Board*>(board))||mImpl->fieldScene!=2)return false;
+    if(!mImpl->Valid(const_cast<Board*>(board))||(mImpl->fieldScene!=2&&mImpl->fieldScene!=3))return false;
     resource=mImpl->fieldResource;x=mImpl->fieldX;y=mImpl->fieldY;
     const auto* system=mImpl->System(mImpl->fieldSystem);
-    const auto found=mImpl->fieldBindings.find(2);
+    const auto found=mImpl->fieldBindings.find(mImpl->fieldScene);
     if(system&&!system->mDead&&system->mEffectType==PARTICLE_FUSION_EMBEDDED269&&found!=mImpl->fieldBindings.end()&&
         found->second.size()==1&&system->mParticleDef==found->second.front().definition->Data(found->second.front().emission))id=mImpl->fieldSystem;
     return true;

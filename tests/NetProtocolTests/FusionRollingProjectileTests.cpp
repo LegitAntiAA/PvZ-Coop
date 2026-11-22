@@ -120,7 +120,7 @@ FusionRollingProjectileTestResult RunFusionRollingProjectileTests()
     bad=frame;bad.projectiles[0].data.kind=3;CHECK(!ValidateNativeSnapshotFrame(bad,eligible));
     bad=frame;bad.plants[0].data.shootSeconds=1;CHECK(!ValidateNativeSnapshotFrame(bad,eligible));
     LawnNet::NetBuffer wire;wire.WriteU32(66);CHECK(EncodeNativeSnapshot(frame,eligible,wire));
-    CHECK(wire.mData[4]==28 && wire.mData[5]==0); // Exact source status; impact history stays host-only.
+    CHECK(wire.mData[4]==kNativeFusionSnapshotVersion && wire.mData[5]==0); // Exact source status; impact history stays host-only.
     NativeSnapshotFrame decoded;LawnNet::NetBuffer native,input=wire;
     CHECK(DecodeNativeSnapshot(input,eligible,66,decoded,native));
     CHECK(decoded.plants[0].data.kind==1004 && decoded.projectiles[0].data.kind==2 && decoded.projectiles[0].data.damage==20);

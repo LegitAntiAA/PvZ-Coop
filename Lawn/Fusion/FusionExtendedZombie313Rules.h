@@ -12,9 +12,14 @@ struct FusionExtendedZombie313View
 {
     int8_t sourceStatus=0;
     uint8_t bodyStage=0,weapon=0,machineType=0,uniqueType=0,firstArmorStage=0;
+    uint8_t secondArmorStage343=0; // Source114 Door.SecondArmorBroken; other kinds zero.
     bool carriedImpRemoved=false,ballRemoved=false,bombPresent=false,fallen=false,visible=true,adjustingImp=false;
     bool beforeDying=false,rootFlip=false;
     float impVerticalSpeed=1,impMaximumVx=-3,uniqueSpeed=1;
+    // Genuine347 source countdowns; inactive kinds keep all four fields zero.
+    float attributeCountdown=0,throwTime=0;
+    bool isThrow=false;
+    int32_t attackDamage=0;
 };
 bool FusionExtendedZombie313ViewValid(uint16_t,const FusionExtendedZombie313View&);
 enum class FusionExtendedEffect313:uint8_t {Cold,Freeze,Butter,Poison,Garlic,Jalapeno,Knockback,MindControl};

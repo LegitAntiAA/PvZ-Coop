@@ -58,6 +58,7 @@ inline ProjectileMotion NativeProjectileMetadataMotion(const NativeProjectileDat
 {
     if((data.kind==0||data.kind==1||data.kind==11)&&data.specialType==9)return MOTION_BACKWARDS;
     if(data.kind==3&&data.specialType==9)return MOTION_BACKWARDS;
+    if(data.kind==3&&data.specialType==13)return MOTION_LOBBED;
     if(data.kind==91)return data.specialType==6?MOTION_HOMING:MOTION_STRAIGHT;
     if(data.kind==30)return data.specialType==2?MOTION_STAR:MOTION_STRAIGHT;
     if((data.kind==0||data.kind==10)&&data.specialType==2&&data.lastTorchId&&data.lastTorchToken)return MOTION_STAR;
@@ -232,7 +233,8 @@ inline bool NativeProjectileMetadataValid(const NativeProjectileData& data,
     }
     if(star)return NativeStar269MetadataValid(data,type,motion,star);
     if(data.kind==3)return NativeNew268ProjectileExtrasClear(data)&&(!data.hitLatched||data.isZombieBullet)&&!data.umbrellaed&&!data.goldAttracted&&
-        FusionSuperCherryProjectileMetadataValid(data.kind,data.damage,data.specialType,data.isZombieBullet,type,motion);
+        (FusionSuperCherryProjectileMetadataValid(data.kind,data.damage,data.specialType,data.isZombieBullet,type,motion)||
+         FusionCatapultCherry343MetadataValid(data.kind,data.damage,data.specialType,data.isZombieBullet,type,motion));
     if(data.kind==37&&(data.specialType==8||data.specialType==12))return type==PROJECTILE_SPIKE&&motion==(data.specialType==12?MOTION_STAR:MOTION_STRAIGHT)&&data.damage==20&&
         NativeNew268ProjectileExtrasClear(data)&&!data.isZombieBullet&&!data.hitLatched&&!data.umbrellaed;
     if(data.kind==58)

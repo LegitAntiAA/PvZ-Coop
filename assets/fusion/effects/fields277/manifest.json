@@ -26,6 +26,31 @@
       ],
       "artSpritePathPrefix": "bg/",
       "status": "Passed"
+    },
+    {
+      "sourceSceneType": 3,
+      "nativeBackground": "BACKGROUND_4_FOG",
+      "sourcePrefab": "Resources/background/background4.prefab",
+      "package": "../../pilot/background4/animation.json",
+      "sourceModelSha256": "634906450bcc7f96bd63eb042f2f0cce35d80b6f8d55c93f28f9f9e7638f93b0",
+      "count": 1,
+      "validatedParticleComponents": [
+        198484755779879834,
+        199697715728111791
+      ],
+      "artSpritePathPrefix": "bg/",
+      "status": "Passed"
+    },
+    {
+      "sourceSceneType": 4,
+      "nativeBackground": "BACKGROUND_5_ROOF",
+      "sourcePrefab": "Resources/background/background5/BackgroundPrefab2.prefab",
+      "package": "../../pilot/background5/animation.json",
+      "sourceModelSha256": "5d369adb9acd6097c0e1915fa5201530d20e834a9ae5219d2989308d3c179e5a",
+      "count": 0,
+      "validatedParticleComponents": [],
+      "artSpritePathPrefix": "bg/",
+      "status": "Passed"
     }
   ],
   "bindings": [
@@ -180,6 +205,158 @@
       },
       "sourceParticleScalingMode": "Local1: ancestor rotation and own PS scale; ancestor scale contributes to anchor translation only",
       "lifecycle": "one local Board native Tod loop while the matching Fusion skin is active; kill on skin/biome/Board switch"
+    },
+    {
+      "sourceSceneType": 3,
+      "nativeBackground": "BACKGROUND_4_FOG",
+      "sourcePrefab": "Resources/background/background4.prefab",
+      "sourcePrefabSha256": "bc6184134fa1625b5343065681c7d303e1da78781e134481f1325de8625fabde",
+      "sourceModelSha256": "634906450bcc7f96bd63eb042f2f0cce35d80b6f8d55c93f28f9f9e7638f93b0",
+      "sourceParticleFileId": 198484755779879834,
+      "sourceRendererFileId": 199697715728111791,
+      "serializedParticleSha256": "6800eecbb378388130dfd830ce736492cba273ebec66e5062b7797f1545b713c",
+      "serializedRendererSha256": "80b5dbde9178c2c8f0955956307671e445f5956b93ab00602e2237290fb10eec",
+      "resourceKind": 6001,
+      "nodePath": "bg/bg/water/Particle System",
+      "defaultNodeActive": true,
+      "defaultEmissionEnabled": true,
+      "status": "Passed",
+      "sourceSortingLayerId": 0,
+      "sourceSortingOrder": -107,
+      "sourceHierarchy": [
+        {
+          "path": "",
+          "transformFileId": 4012617856089587,
+          "gameObjectFileId": 1709254077376921,
+          "serializedTransformSha256": "dbcc26eec0c61e70f9ac4d2691999d5fdceb5fe968a32a701537a24a4fae4399",
+          "serializedGameObjectSha256": "368d4ee77243392b9115b640d18ca96ad140faaaf1d492e54b18d76176435fb0",
+          "position": {
+            "x": -10.0,
+            "y": 5.0,
+            "z": 0.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "active": true
+        },
+        {
+          "path": "bg",
+          "transformFileId": 4258471659221418,
+          "gameObjectFileId": 1730242686860875,
+          "serializedTransformSha256": "4f96bb33c58839ca7e025b333ec995b5c3f0fde2a0af5af41752c320d4f68ccc",
+          "serializedGameObjectSha256": "0c0da8ae2e581d5bc6c416f304d05c27ca9d86d6ab5915800b8ca94494c5935e",
+          "position": {
+            "x": 12.0,
+            "y": -10.0,
+            "z": 0.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.7,
+            "y": 1.7,
+            "z": 1.7
+          },
+          "active": true
+        },
+        {
+          "path": "bg/bg",
+          "transformFileId": 4904079258986964,
+          "gameObjectFileId": 1044625135789424,
+          "serializedTransformSha256": "fa34f0e21c5073602cb102c8bc1bba189a967b448e8ff86e94946cec10ce322e",
+          "serializedGameObjectSha256": "8e8c7d8135421a04b4836187e1f1310c1e723a4359eec8259e82dd3e8ebda67f",
+          "position": {
+            "x": 0.0,
+            "y": 3.0,
+            "z": 0.0
+          },
+          "rotation": {
+            "x": -0.0,
+            "y": -0.0,
+            "z": -0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "active": true
+        },
+        {
+          "path": "bg/bg/water",
+          "transformFileId": 4845025230388998,
+          "gameObjectFileId": 1589667821646929,
+          "serializedTransformSha256": "7cb8ca4eeb28a2d510db0f49dbf6f6d67b733502604b1311882c27c11a7c5bfd",
+          "serializedGameObjectSha256": "2e7cb5178ea826b54b628588baa2ceb88f94c6209a7bae26284150beeb7d674b",
+          "position": {
+            "x": 0.61,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "active": true
+        },
+        {
+          "path": "bg/bg/water/Particle System",
+          "transformFileId": 4657558218238974,
+          "gameObjectFileId": 1372920208702427,
+          "serializedTransformSha256": "890d43f1f7e3817cd4070663279c7f63bee56d732cae36225f470bbcd6ce265e",
+          "serializedGameObjectSha256": "9bc756c460f5fef6886cb81738cef834d94562e834613b6bc1bd4ca6659fa38f",
+          "position": {
+            "x": 0.81,
+            "y": -0.599,
+            "z": 0.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "active": true
+        }
+      ],
+      "serializedWorldPositionAtPhase0": {
+        "x": 4.414,
+        "y": -0.9183000000000003,
+        "z": 0.0
+      },
+      "serializedWorldScale": {
+        "x": 1.7,
+        "y": 1.7,
+        "z": 1.7
+      },
+      "sourceParticleScalingMode": "Local1: ancestor rotation and own PS scale; ancestor scale contributes to anchor translation only",
+      "lifecycle": "one local Board native Tod loop while the matching Fusion skin is active; kill on skin/biome/Board switch"
     }
   ],
   "resources": [
@@ -192,10 +369,20 @@
         "effect.json": "95a4828a7c4b392ed646b57e5b1bc607c62b95d5f026ec37c1f09742421d03c0",
         "textures/fe8daf7585b720848874652bd438e782.png": "dfcda7d327218caf0074bf4b2e6a0ed565c3ddb4e05955914d179254c8757ed8"
       }
+    },
+    {
+      "resourceKind": 6001,
+      "package": "6001/effect.json",
+      "effectSha256": "a4ae9bb6b1422efeefb1af8b21d879bc668c9ee4f8685f31856031c7cc227659",
+      "status": "Passed",
+      "files": {
+        "effect.json": "a4ae9bb6b1422efeefb1af8b21d879bc668c9ee4f8685f31856031c7cc227659",
+        "textures/fe8daf7585b720848874652bd438e782.png": "dfcda7d327218caf0074bf4b2e6a0ed565c3ddb4e05955914d179254c8757ed8"
+      }
     }
   ],
   "status": "Passed_source_resource_checks",
-  "nativeAdmission": "Not implemented / Not executed",
+  "nativeAdmission": "Staged_source_checks; native build/game Not executed",
   "requiresConverterReview": "converter-zero-launch.patch (work-only candidate)",
   "coverageContract": "Source198/199 sets in the unchanged complete models must equal all bound particle+renderer IDs before supplying validatedParticleComponents to FusionAnimation.Load; no stripping/ignore/allow-unused",
   "runtimeContract": {
@@ -203,7 +390,7 @@
     "owner": "existing NativeContext visuals/effects native Board, no Plant/Zombie proxy",
     "sceneClock": "native TodParticleSystem only",
     "network": "local field presentation; no extra FNS/packet state",
-    "scope": "Night art + Pool art/genuine water; Fog/Roof deferred"
+    "scope": "Night/Pool/Fog/Roof genuine art; Pool/Fog genuine water; native91alpha fog adaptation"
   },
   "knownProjectionLimits": [
     "Native2D sphere/cone projection and random distribution differ from Unity3D",

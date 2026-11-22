@@ -1,3 +1,4 @@
+#include "FusionNativeDryGround353.h"
 #include "FusionGoldConversion313B.h"
 #include "FusionNative.h"
 #include "FusionNativeGoldBoss269Adapter.h"
@@ -45,7 +46,7 @@ bool PrepareNativeGoldConversion313B(Zombie* parent,const NativeGoldConversion31
     NativeGoldConversion313BPlan next;
     if(!BuildFusionGoldConversion313B(actors,next.actors))return fail("Gold313B malformed source actor order");
     std::vector<uint16_t> children(next.actors.size(),203);std::vector<uint32_t> retire;retire.reserve(next.actors.size());
-    for(const auto& a:next.actors)retire.push_back(a.localUID);
+    for(const auto& a:next.actors){if(!NativeSourceDryRow353(b,a.row))return fail("Gold313B replacement row is not a prepared dry source row");retire.push_back(a.localUID);}
     if(!Capacity(b,next.actors.size())||!h.prepareChildren(b,children,error)||!h.prepareRetire(parent,retire,error))return false;
     next.parentLocalUID=b->mZombies.DataArrayGetID(parent);next.preparedTick=b->mMainCounter;
     output=std::move(next);return true;

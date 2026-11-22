@@ -754,12 +754,13 @@ bool NetDecodeEndlessRepickEvent(NetBuffer& theBuffer, uint32_t& theStage)
 bool NetFusionZombiePart284Supported(uint16_t kind,NetFusionZombiePart284 part)
 {
 	using Part=NetFusionZombiePart284;
-	if(part==Part::FirstArmor)return kind==9||kind==30||kind==43||kind==212;
-	if(part==Part::SecondArmor||part==Part::Glasses)return kind==5;
+	if(part==Part::FirstArmor)return kind==48||kind==114||kind==9||kind==30||kind==43||kind==212;
+	if(part==Part::SecondArmor)return kind==5||kind==114;
+	if(part==Part::Glasses)return kind==5;
 	if(part!=Part::Arm&&part!=Part::Head)return false;
     if(kind==37||kind==38||kind==39||kind==213)return part==Part::Head;
-    if(kind==25||kind==29)return part==Part::Arm;
-	if(kind==3||kind==5||kind==6||kind==7||kind==9||kind==10||kind==24||kind==30)return true;
+    if(kind==114||kind==118||kind==119||kind==25||kind==29||kind==202||kind==204||kind==220)return part==Part::Arm;
+	if(kind==47||kind==48||kind==3||kind==5||kind==6||kind==7||kind==9||kind==10||kind==24||kind==30||kind==217)return true;
 	if(part==Part::Head)return false;
 	switch(kind){case 21:case 22:case 23:case 100:case 101:case 102:case 103:case 106:case 107:case 108:return true;default:return false;}
 }

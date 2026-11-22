@@ -1,6 +1,7 @@
 #ifndef LAWN_FUSION_NATIVE_DAY_ZOMBIE273_H
 #define LAWN_FUSION_NATIVE_DAY_ZOMBIE273_H
 #include "FusionDayZombie273Rules.h"
+#include "FusionLadder355Rules.h"
 #include "../Net/NetCommon.h"
 #include <cmath>
 class Board; class Zombie; class Plant; class Projectile; class Coin;
@@ -23,6 +24,7 @@ struct NativeDayZombie273State
     bool danceSpawnPending=false,danceSpawnFailed=false; // HOST ONLY: no wire/hash.
     int danceSpawnRow=-1;
     float danceSpawnShadowX=0; // Actual accepted JumpOver anchor; retries never resample it.
+    FusionLadder355State ladder; // HOST-only source physics; not encoded/hashed.
 };
 // Root supplies one sparse map in NativeContext keyed by actual DataArray UID,
 // with prune/reset/adopt/hash/validation beside sourceZombies. No local actor list.

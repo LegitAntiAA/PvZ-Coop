@@ -1,3 +1,4 @@
+#include "Lawn/Net/NetFusionCampaign356Smoke.h"
 #include <time.h>
 #include "LawnApp.h"
 #include "Lawn/Board.h"
@@ -6038,6 +6039,7 @@ void LawnApp::CoopSmokeUpdate()
 		return;
 	if (LawnNet::NetSmokeUpdateFusionLesson4_275(this))
 		return;
+    if(LawnNet::NetSmokeUpdateFusionCampaign356(this))return;
 	if (LawnNet::NetSmokeUpdateFusionAdventure273(this))
 		return;
 	if (LawnNet::NetSmokeUpdateFusionWallnut(this))

@@ -1,4 +1,5 @@
 #include "FusionNative.h"
+#include "FusionNativeConveyor308.h"
 #include "FusionNativeCapturedSourcePlant314.h"
 #include "FusionNativeSourceClock313.h"
 #include "FusionNativeZombieVisual.h"
@@ -20,6 +21,7 @@
 #include "FusionRecipe.h"
 #include "FusionWire.h"
 #include "../Board.h"
+#include "../CursorObject.h"
 #include "../Coin.h"
 #include "FusionNativeAdventure273.h"
 #include "FusionCampaign272Rules.h"
@@ -314,6 +316,7 @@ bool MakePlacementPlan(Board* board, int column, int row, uint16_t incoming, Pla
 bool SyncPackets(Board* board, NativeContext& context)
 {
     if (!Host(board) || !board->mSeedBank) return false;
+    if(IsNativeSourceConveyor308(board))return SyncNativeConveyor308(board);
     SeedBank* bank = board->mSeedBank;
     const auto& state = context.selection.State();
     if (state.packets.size() > SEEDBANK_CAPACITY) return false;
@@ -419,19 +422,30 @@ bool PlantPacket(Board* board, NativeContext& context, int slot, const FusionCom
         if (board->mSeedBank->mSeedPackets[i].mNetId == command.packetId)
         { packet = &board->mSeedBank->mSeedPackets[i]; break; }
     const NativePacketData* data = GetNativePacketData(packet);
-    if (!packet || !data || data->owner != slot || !packet->mNetId ||
-        !packet->mActive || packet->mRefreshing ||
+    const bool conveyor=IsNativeSourceConveyor308(board);
+    if (!packet || !data || data->owner != (conveyor?LawnNet::NET_SHARED_OWNER:slot) || !packet->mNetId ||
+        (!conveyor&&(!packet->mActive||packet->mRefreshing)) ||
         !std::isfinite(data->rechargeSeconds) || data->rechargeSeconds < 0.0f ||
         GetNativeSeedForPlant(data->kind) == SEED_NONE || packet->mPacketType != GetNativeSeedForPlant(data->kind) ||
-        !board->CanTakeSunMoney(board->GetSeedPacketCost(*packet))) return false;
+        (!conveyor&&!board->CanTakeSunMoney(board->GetSeedPacketCost(*packet)))) return false;
+
+    NativeConveyor308Use conveyorUse;
+    if(conveyor&&!PrepareNativeConveyorUse308(board,slot,packet->mNetId,conveyorUse))return false;
 
     NativePlantData incoming;
     incoming.kind = data->kind;
     incoming.packetId = packet->mNetId;
-    incoming.owner = data->owner;
+    incoming.owner = conveyor?static_cast<uint8_t>(slot):data->owner;
     incoming.randomOrigin = data->randomOrigin;
     if (!TryPlaceNativeFusionPlant(board, command.column, command.row, incoming,
         static_cast<uint16_t>(command.targetId), slot, command.targetToken)) return false;
+    if(conveyor)
+    {
+        const auto plantedType=packet->mPacketType;
+        CommitNativeConveyorUse308(board,conveyorUse);
+        board->OnSeedPacketPlanted(plantedType);
+        return true;
+    }
     board->TakeSunMoney(board->GetSeedPacketCost(*packet));
     packet->WasPlanted();
     board->OnSeedPacketPlanted(packet->mPacketType);
@@ -450,6 +464,15 @@ template <typename T, typename Value> void Prune(DataArray<T>& array, std::unord
 
 bool ResolveNativeFusionPlacementTarget(Board* board, int column, int row, uint16_t incoming, Plant*& target, bool worldSpawn)
 {
+    if(!worldSpawn&&IsNativeSourceConveyor308(board)&&board->mCursorObject&&board->mSeedBank&&
+        board->mCursorObject->mCursorType==CURSOR_TYPE_PLANT_FROM_BANK)
+    {
+        const int i=board->mCursorObject->mSeedBankIndex;
+        const int slot=board->mApp->mNetManager?board->mApp->mNetManager->GetActingPlayerSlot():0;
+        if(i>=0&&i<board->mSeedBank->mNumPackets)
+        {const auto& p=board->mSeedBank->mSeedPackets[i];const auto* d=GetNativePacketData(&p);
+         worldSpawn=d&&d->kind==incoming&&CanUseNativeConveyorPacket308(board,p.mNetId,slot);}
+    }
     PlacementPlan plan;
     if (!MakePlacementPlan(board,column,row,incoming,plan,nullptr,worldSpawn)) return false;
     target = plan.parent; return true;
@@ -496,7 +519,11 @@ Plant* TryPlaceNativeFusionPlant(Board* board, int column, int row,
     PlacementPlan plan;
     const auto* heldCard=requestingSlot>=0?GetNativeDroppedCard269Data(GetNativeDroppedCard269Held(board,requestingSlot)):nullptr;
     const bool sourceCard=heldCard&&heldCard->kind==incoming.kind&&!incoming.packetId&&!incoming.randomOrigin;
-    if (!MakePlacementPlan(board,column,row,incoming.kind,plan,movingSource,requestingSlot == -1||sourceCard)) return nullptr;
+    const auto sourcePacket=context->packets.find(incoming.packetId);
+    const bool conveyorCard=requestingSlot>=0&&incoming.owner==requestingSlot&&!incoming.randomOrigin&&
+        sourcePacket!=context->packets.end()&&sourcePacket->second.kind==incoming.kind&&
+        CanUseNativeConveyorPacket308(board,incoming.packetId,requestingSlot);
+    if (!MakePlacementPlan(board,column,row,incoming.kind,plan,movingSource,requestingSlot == -1||sourceCard||conveyorCard)) return nullptr;
     if ((!movingSource || plan.parent) && board->mPlants.mSize >= board->mPlants.mMaxSize)
     {
         LawnNet::NetTrace("Fusion native placement rejected reason=capacity kind=%u column=%d row=%d slot=%d",
@@ -654,7 +681,8 @@ bool InitializeNativeBoardContext(Board* board, uint32_t epoch, uint32_t seed,
     context->validation = !context->adventure.enabled&&board->mApp->IsFusionValidationFixture();
     const auto* sourceLevel=context->adventure.enabled?FindFusionSourceAdventure272(context->adventure.run.level):nullptr;
     if(context->adventure.enabled&&!sourceLevel)return false;
-    for (size_t index = 0; index < FusionPlantCount(); ++index)
+    const bool conveyor=GetNativeBankPolicy308(board)==FusionBankPolicy::SourceConveyor;
+    for (size_t index = 0; !conveyor&&index < FusionPlantCount(); ++index)
     {
         const auto* plant = FusionPlantAt(index);
         if (!plant || !IsNativeBasePlantKind(plant->id)) continue;
@@ -689,7 +717,17 @@ bool InitializeNativeBoardContext(Board* board, uint32_t epoch, uint32_t seed,
             context->eligible.push_back(card);
         }
     }
-    if (!context->selection.Open(epoch, difficulty, context->eligible, activeMask, kNativeFusionBankCapacity)) return false;
+    if(conveyor)
+    {
+        const auto* profile=sourceLevel?FindFusionConveyor305Profile(sourceLevel->level):nullptr;
+        if(!profile)return false;
+        for(const auto kind:profile->orderedPool)
+            if(std::none_of(context->eligible.begin(),context->eligible.end(),[&](const auto& card){return card.kind==kind;}))
+                context->eligible.push_back({kind,false,0,0});
+        if(!context->selection.OpenConveyor(epoch,difficulty,context->eligible,activeMask))return false;
+        context->selectionCommitted=true;
+    }
+    else if (!context->selection.Open(epoch, difficulty, context->eligible, activeMask, kNativeFusionBankCapacity)) return false;
     board->mFusionNative = std::move(context);
     std::string visualError;
     if (!InitializeNativeVisuals(board, &visualError))
@@ -698,6 +736,8 @@ bool InitializeNativeBoardContext(Board* board, uint32_t epoch, uint32_t seed,
         board->mFusionNative.reset();
         return false;
     }
+    if(conveyor&&!InitializeNativeConveyor308(board,&visualError))
+    {LawnNet::NetTrace("Fusion source conveyor308 initialization refused reason=%s",visualError.c_str());board->mFusionNative.reset();return false;}
     if(!board->mApp->NetIsClient())InitializeNativeWorldRemainder269Board(board);
     return true;
 }
@@ -761,6 +801,15 @@ bool ReconcileNativePlayers(Board* board, uint8_t activeMask)
 {
     auto* context = GetNativeContext(board);
     if (!context || !Host(board) || !activeMask) return false;
+    if(IsNativeSourceConveyor308(board))
+    {
+        auto previous=context->selection;
+        if(!context->selection.ReconcilePlayers(context->epoch,activeMask))return false;
+        if(!SyncNativeConveyor308(board)){context->selection=std::move(previous);return false;}
+        context->pendingRosterMask=0;
+        for(size_t slot=0;slot<kFusionBankPlayers;++slot)if(!(activeMask&(1U<<slot)))context->gloveHolds[slot]={};
+        return true;
+    }
     const uint8_t previousMask = context->selection.State().activeMask;
     const bool added = (activeMask & ~previousMask) != 0;
     if (added && context->selection.State().phase != FusionBankPhase::Playing) return false;
@@ -869,6 +918,7 @@ void PruneNativeMetadata(Board* board)
     Prune(board->mZombies, context->waterZombies313);
     Prune(board->mZombies, context->extendedZombies313);
     Prune(board->mZombies, context->heavyZombies313B);
+    Prune(board->mZombies, context->nextZombies343);
     Prune(board->mProjectiles, context->sourceObstacles313);
     PruneNativeSourceGraph313Clocks(board);
     Prune(board->mZombies, context->sourceZombieCursors);

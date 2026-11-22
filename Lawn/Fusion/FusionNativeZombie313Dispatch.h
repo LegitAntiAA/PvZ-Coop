@@ -21,7 +21,7 @@ bool NativeZombie313MindControlAllowed(uint16_t kind,int sourceStatus,int source
 // True consumes A/B/C, including a source override's deliberate no-op.
 bool NativeZombie313ApplyCold(Zombie*,bool freeze,int sourceTicks);
 inline bool FusionSourceMachineRowMoving323(uint16_t kind,const GarlicActionState& state)
-{return kind==40&&state.phase==GarlicActionPhase::Moving;}
+{return (kind==40||kind==210||kind==219)&&state.phase==GarlicActionPhase::Moving;}
 bool NativeZombie313Caltrop(Zombie*);
 bool NativeZombie313LoseEquipment(Zombie*,int sourceReason=0);
 }

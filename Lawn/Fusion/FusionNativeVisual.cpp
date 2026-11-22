@@ -100,10 +100,17 @@ float FieldX(float sourceX) { return 76.0f+(sourceX+4.8f)*kFieldPixelsX; }
 float FieldY(float sourceY) { return 130.0f-(sourceY-2.3f)*kFieldPixelsY; }
 float FieldY277(const Board* board,float sourceY)
 {return 130.0f-(sourceY-2.3f)*float(GetNativeFusionPixelsY(board));}
-struct FieldSpec277 {BackgroundType background;uint16_t scene;const char* package;};
+struct FieldSpec277 {BackgroundType background;uint16_t scene;const char* package;const char* plane;};
+Sexy::Image* NativeFieldImage277(uint16_t scene)
+{
+    switch(scene){case 1:return Sexy::IMAGE_BACKGROUND2;case 2:return Sexy::IMAGE_BACKGROUND3;
+        case 3:return Sexy::IMAGE_BACKGROUND4;case 4:return Sexy::IMAGE_BACKGROUND5;default:return nullptr;}
+}
 const FieldSpec277* SourceFieldSpec277(const Board* board)
 {
-    static constexpr FieldSpec277 specs[]={{BACKGROUND_2_NIGHT,1,"background2"},{BACKGROUND_3_POOL,2,"background3"}};
+    static constexpr FieldSpec277 specs[]={{BACKGROUND_2_NIGHT,1,"background2","bg/bg"},
+        {BACKGROUND_3_POOL,2,"background3","bg/bg"},{BACKGROUND_4_FOG,3,"background4","bg/bg"},
+        {BACKGROUND_5_ROOF,4,"background5","bg/back/tree1"}};
     if(board)for(const auto& spec:specs)if(board->mBackground==spec.background)return &spec;
     return nullptr;
 }
@@ -2472,7 +2479,7 @@ void NativeVisuals::ReconcileField(Board* board)
     auto found=mImpl->fieldBiomes.find(key);
     // Native resources finish loading after NativeContext construction. This
     // is a pending state, not a permanent source-resource failure.
-    if(found==mImpl->fieldBiomes.end()&&!(spec->scene==1?Sexy::IMAGE_BACKGROUND2:Sexy::IMAGE_BACKGROUND3))
+    if(found==mImpl->fieldBiomes.end()&&!NativeFieldImage277(spec->scene))
     {ReconcileNativeField277Particle(board,0,false,0,0,0);return;}
     if(found==mImpl->fieldBiomes.end())
     {
@@ -2498,7 +2505,7 @@ void NativeVisuals::ReconcileField(Board* board)
                 ++sprites;
                 if(sprite.value("maskInteraction",0)!=0)throw std::runtime_error("source backdrop requires a live gameplay mask");
             }
-            if(nodePath=="bg/bg")
+            if(nodePath==spec->plane)
             {plane=&package.at("spriteVariants").at(sprite.at("guid").get<std::string>());planeNode=index;++planeCount;}
         }
         if(planeCount!=1||!plane)throw std::runtime_error("missing exact source biome plane");
@@ -2516,7 +2523,7 @@ void NativeVisuals::ReconcileField(Board* board)
         const float width=plane->at("logicalSize").at("width").get<float>()*scaleX/ppu,height=plane->at("logicalSize").at("height").get<float>()*scaleY/ppu;
         const float planeLeft=planeX-plane->at("pivot").at("x").get<float>()*width;
         const float planeBottom=planeY-plane->at("pivot").at("y").get<float>()*height;
-        const int rows=GetNativeFusionRowCount(board),pitch=rows==6?85:100;
+        const int rows=GetNativeFusionRowCount(board),pitch=rows==6||spec->scene==4?85:100;
         const float lawnBottom=float(board->GridToPixelY(0,rows-1)+pitch);
         const float gap=lawnBottom-FieldY277(board,planeBottom);
         if(ppu<=0||width<=0||height<=0||!std::isfinite(gap)||std::abs(gap)>100||
@@ -2529,12 +2536,12 @@ void NativeVisuals::ReconcileField(Board* board)
         background.DrawPose(&canvas,-left,top,1,"motion1",0,nullptr,-1,1,&options);
         visual->matrix.LoadIdentity();visual->matrix.m00=kFieldPixelsX/100;visual->matrix.m11=float(GetNativeFusionPixelsY(board))/100;
         visual->matrix.m02=FieldX(rootX+(left+right)*.005f);visual->matrix.m12=FieldY277(board,rootY+(top+bottom)*.005f)+gap;
-        if(spec->scene==2)
+        if(spec->scene==2||spec->scene==3)
         {
             float x=0,y=0;bool active=false;const char* node="bg/bg/water/Particle System";
             if(!background.TryGetNodeOffset(node,x,y,"motion1",0,nullptr,-1,1,&options)||
                 !background.TryGetNodeActivity(node,active,"motion1",0,nullptr,-1,1,&options)||!active)
-                throw std::runtime_error("source Pool water node is unavailable");
+                throw std::runtime_error("source biome water node is unavailable");
             visual->waterX=FieldX(rootX+x);visual->waterY=FieldY277(board,rootY+y)+gap;
         }
         found=mImpl->fieldBiomes.emplace(key,std::move(visual)).first;
@@ -2549,7 +2556,7 @@ void NativeVisuals::ReconcileField(Board* board)
     if(found!=mImpl->fieldBiomes.end())
     {
         const auto& v=*found->second;
-        ReconcileNativeField277Particle(board,v.scene,v.scene==2,v.waterX,v.waterY,Board::MakeRenderOrder(RENDER_LAYER_UI_BOTTOM,0,1));
+        ReconcileNativeField277Particle(board,v.scene,v.scene==2||v.scene==3,v.waterX,v.waterY,Board::MakeRenderOrder(RENDER_LAYER_UI_BOTTOM,0,1));
     }
 }
 bool NativeVisuals::QueryField(const Board* board,NativeFieldView277& out) const
@@ -2575,7 +2582,7 @@ bool NativeVisuals::DrawField(Sexy::Graphics* graphics, Board* board, bool useCl
         // As with Day, the unchanged native image fills only the viewport
         // outside the genuine art extent; the admitted source plane covers
         // every one of the ten lawn columns. No native strips are stretched.
-        auto* base=board->mBackground==BACKGROUND_2_NIGHT?Sexy::IMAGE_BACKGROUND2:Sexy::IMAGE_BACKGROUND3;
+        auto* base=NativeFieldImage277(SourceFieldSpec277(board)->scene);
         if(base)graphics->DrawImageF(base,-BOARD_OFFSET+WIDESCREEN_OFFSETX,WIDESCREEN_OFFSETY);
         graphics->DrawImageMatrix(found->second->image.get(),found->second->matrix);return true;
     }

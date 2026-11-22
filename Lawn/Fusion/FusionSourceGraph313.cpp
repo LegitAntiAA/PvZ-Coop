@@ -7,7 +7,7 @@ namespace LawnFusion
 namespace
 {
 double Absolute(const FusionSourceGraph313State& s,FusionSourceGraph313Cursor p){return double(p.loop)*s.duration+p.seconds;}
-bool Parameters(const FusionSourceGraph313Parameters& p){return std::isfinite(p.speed)&&p.speed>=0&&std::isfinite(p.jumpSpeed)&&p.jumpSpeed>=0&&(p.triggers&~((1U<<22)-1))==0;}
+bool Parameters(const FusionSourceGraph313Parameters& p){return std::isfinite(p.speed)&&p.speed>=0&&std::isfinite(p.jumpSpeed)&&p.jumpSpeed>=0&&(p.triggers&~((1U<<24)-1))==0;}
 bool Conditions(const FusionSourceGraph313Edge& e,const FusionSourceGraph313Parameters& p,uint32_t& consumed)
 {
     uint32_t triggers=0;

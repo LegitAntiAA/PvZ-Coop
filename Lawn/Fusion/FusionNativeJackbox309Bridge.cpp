@@ -1,3 +1,5 @@
+#include "FusionNativeRoof350.h"
+#include "FusionNativeDryGround353.h"
 #include "FusionNativeJackbox309Bridge.h"
 #include "FusionNative.h"
 #include "FusionNativeSourceClock313.h"
@@ -32,9 +34,13 @@ namespace
 bool Typed(const Zombie* z)
 {const auto* d=GetNativeSourceZombieData(z);return d&&FusionJackbox300Kind(d->kind);}
 bool World(const Board* b)
-{return IsNativeSourceWorld313(b)&&GetNativeFusionRowCount(b)==5;}
+{return IsNativeSourceWorld313(b);}
 bool Authority(const Zombie* z)
-{return Typed(z)&&World(z->mBoard)&&!z->mNetGhost&&!z->mApp->NetIsClient();}
+{
+    const auto* s=GetNativeJackbox309(z);
+    return Typed(z)&&World(z->mBoard)&&!z->mNetGhost&&!z->mApp->NetIsClient()&&
+        (NativeSourceDryRow353(z->mBoard,z->mRow)||(s&&s->rowMoving&&z->mRow>=0&&z->mRow<GetNativeFusionRowCount(z->mBoard)));
+}
 bool Playing(const Zombie* z)
 {return Authority(z)&&!z->mDead&&!z->mBoard->mPaused&&z->mApp->mGameScene==SCENE_PLAYING&&CanApplyNativeFusionGameplay(z->mBoard);}
 bool Reject(const char* why,std::string* error)
@@ -82,6 +88,7 @@ bool Resources(Board* b,uint16_t kind,std::string* error)
 }
 bool Circle(Board* b,const NativeJackbox300Explosion& e,const Sexy::Rect& r)
 {
+    if(r.mWidth<=0||r.mHeight<=0)return false; // No genuine collider, e.g source26.
     // Shared native source collision projection: preserve a source circle,
     // including the actual Board's Y spacing, rather than a pixel circle.
     const double ratio=kFusionBasePixelsY/GetNativeFusionPixelsY(b);
@@ -98,11 +105,11 @@ bool ZombieRecipient(Zombie* z,const NativeJackbox300Explosion& e)
 {return z&&!z->mDead&&!z->mNetGhost&&GetNativeSourceZombieData(z)&&
     z->mMindControlled!=e.controlled&&std::abs(z->mRow-e.row)<=1&&Circle(z->mBoard,e,z->GetZombieRect());}
 struct Recipient
-{uint32_t generation=0;uint16_t id=0;bool plant=false;};
-bool Recipients(Board* b,const NativeJackbox300Explosion& e,std::vector<Recipient>& out,std::string* error)
+{uint32_t generation=0;uint16_t id=0;bool plant=false,heal224=false;};
+bool Recipients(Board* b,const NativeJackbox300Explosion& e,std::vector<Recipient>& out,std::string* error,bool common=false)
 {
-    if(!World(b)||!std::isfinite(e.centerX+e.centerY+e.shadowX+e.shadowY)||e.row<0||e.row>=5||
-        !e.ownerId||!e.ownerToken||!FusionJackbox300Kind(e.sourceKind))return Reject("Invalid Jackbox source explosion/world.",error);
+    if(!(common?IsNativeSourceWorld313(b):World(b))||!std::isfinite(e.centerX+e.centerY+e.shadowX+e.shadowY)||e.row<0||e.row>=GetNativeFusionRowCount(b)||
+        !e.ownerId||!e.ownerToken||(common?!FindFusionZombieProfile(e.sourceKind):!FusionJackbox300Kind(e.sourceKind)))return Reject("Invalid Jackbox source explosion/world.",error);
     std::vector<Recipient> planned;
     if(!e.controlled)
     {
@@ -126,6 +133,10 @@ bool Recipients(Board* b,const NativeJackbox300Explosion& e,std::vector<Recipien
             if(!CanApplyNativeJackbox309Charred(z,1800,error))return false;
             planned.push_back({b->mZombies.DataArrayGetID(z),z->mNetId,false});
         }
+        // This source branch exists only for an uncontrolled explosion.
+        // Its same-side224 heal is NOT limited to Charred recipients.
+        if(!e.controlled&&data->kind==224&&std::abs(z->mRow-e.row)<=1&&Circle(b,e,z->GetZombieRect()))
+            planned.push_back({b->mZombies.DataArrayGetID(z),z->mNetId,false,true});
     }
     for(const auto& r:planned)if(!r.generation||!r.id)return Reject("Jackbox recipient has no full-generation identity.",error);
     out.swap(planned);return true;
@@ -166,11 +177,11 @@ bool Prepare(Zombie* z,NativeJackbox300Operation operation,const NativeJackbox30
     if(!children.empty()&&!CanAllocateNativeSourceDayBatch274(z->mBoard,children,error))return false;
     return true;
 }
-bool Explode(Board* b,const NativeJackbox300Explosion& e)
+bool Explode(Board* b,const NativeJackbox300Explosion& e,bool common=false,int sourcePlantDamageType=0)
 {
-    if(!World(b)||b->mApp->NetIsClient())return false;
+    if(!(common?IsNativeSourceWorld313(b):World(b))||b->mApp->NetIsClient())return false;
     std::vector<Recipient> targets;std::string error;
-    if(!Recipients(b,e,targets,&error)){Failed(b,error.c_str());return false;}
+    if(!Recipients(b,e,targets,&error,common)){Failed(b,error.c_str());return false;}
     // Payload is standalone: normal24 has already retired. No owner lookup.
     LawnNet::NetPlaySourceSound284(b->mApp,43,.5f);
     SpawnNativeSourceEffect269(b,42,e.centerX,e.centerY,e.renderOrder+1,true);
@@ -183,11 +194,18 @@ bool Explode(Board* b,const NativeJackbox300Explosion& e)
         if(target.plant)
         {
             auto* p=b->mPlants.DataArrayTryToGet(target.generation);
-            if(p&&p->mNetId==target.id&&PlantRecipient(p,e))ApplyNativeSourcePlantDamage(p,1000000,2);
+            if(p&&p->mNetId==target.id&&PlantRecipient(p,e))ApplyNativeSourcePlantDamage(p,1000000,sourcePlantDamageType);
         }
         else
         {
             auto* z=b->mZombies.DataArrayTryToGet(target.generation);
+            if(target.heal224)
+            {
+                auto* d=GetNativeSourceZombieData(z);
+                if(z&&!z->mDead&&z->mNetId==target.id&&d&&d->kind==224&&std::isfinite(d->health))
+                {d->health=(std::min)(d->health+3200.f,float(z->mBodyMaxHealth));z->mBodyHealth=NativeSourceZombieLivenessHealth(d->health);}
+                continue; // Source changes NO phase/part/beforeDying/death flags.
+            }
             if(z&&z->mNetId==target.id&&ZombieRecipient(z,e)&&!ApplyNativeJackbox309Charred(z,1800))
                 return false;
         }
@@ -220,7 +238,7 @@ bool StartNextRow(Zombie* z,NativeJackbox300State& s)
     float rootX=0,rootY=0,x=0,y=0;
     if(!GetNativeSourceZombie269NodePoint(z,"",rootX,rootY)||!GetNativeSourceZombie269NodePoint(z,"Shadow",x,y))return false;
     s.rowNext=z->mRow+(s.rowTarget>z->mRow?1:-1);s.rowStartShadowY=y;
-    s.rowTargetShadowY=y+float((s.rowNext-z->mRow)*1.67*GetNativeFusionPixelsY(z->mBoard));
+    s.rowTargetShadowY=y+float((s.rowNext-z->mRow)*NativeSourceRowPitch353(z->mBoard));
     s.rowRootX=rootX;s.rowMoving=true;
     const float keepY=z->mPosY;
     z->SetRow(s.rowNext);z->mPosY=keepY;z->mY=int(keepY);
@@ -230,7 +248,7 @@ bool StartNextRow(Zombie* z,NativeJackbox300State& s)
 bool MoveChild(Zombie* z,int target)
 {
     auto* s=EditNativeJackbox309(z);
-    if(!Authority(z)||!s||target<0||target>=5)return false;
+    if(!Authority(z)||!s||!NativeSourceDryRow353(z->mBoard,target))return false;
     if(s->rowMoving)return true; // Source MoveSpawned returns when isMoving.
     s->rowTarget=target;return StartNextRow(z,*s);
 }
@@ -261,7 +279,7 @@ bool Motion(Zombie* z,double delta)
     // Source delta, native scale and allegiance reflection are applied once.
     const double dx=delta*1.2*kFusionBasePixelsX*z->mScaleZombie*(z->mMindControlled?-1:1);
     if(!std::isfinite(z->mPosX+dx))return false;
-    z->mPosX+=float(dx);z->mX=int(z->mPosX);return true;
+    z->mPosX+=float(dx);z->mX=int(z->mPosX);return ReconcileNativeRoofZombie350(z);
 }
 bool Input(Zombie* z,NativeJackbox300Input& out)
 {
@@ -307,6 +325,13 @@ bool CanSpawnNativeJackbox309(Board* b,uint16_t kind,std::string* error)
     if(error)error->clear();
     return FusionJackbox300Kind(kind)&&Resources(b,kind,error)&&CanSpawnNativeGrassZombie284(b,kind,error);
 }
+bool CanEmitNativeSourceZombieExplosion343(Board* b,const NativeJackbox300Explosion& e,std::string* error,int sourcePlantDamageType)
+{
+ std::vector<Recipient> targets;return (sourcePlantDamageType==0||sourcePlantDamageType==2)&&IsNativeSourceWorld313(b)&&!b->mApp->NetIsClient()&&
+  LawnNet::NetSourceSound284Ready(b->mApp,43)&&EnsureNativeSourceEffect269(b,42,error)&&Recipients(b,e,targets,error,true);
+}
+bool EmitNativeSourceZombieExplosion343(Board* b,const NativeJackbox300Explosion& e,int sourcePlantDamageType)
+{return CanEmitNativeSourceZombieExplosion343(b,e,nullptr,sourcePlantDamageType)&&Explode(b,e,true,sourcePlantDamageType);}
 const NativeJackbox300Hooks& GetNativeJackbox309Hooks()
 {
     static const NativeJackbox300Hooks hooks=[]
@@ -314,7 +339,7 @@ const NativeJackbox300Hooks& GetNativeJackbox309Hooks()
         NativeJackbox300Hooks h;h.stateFor=[](Zombie* z){return EditNativeJackbox309(z);};h.input=Input;
         h.randomInt=RandomInt;h.randomFloat=RandomFloat;h.preflight=Prepare;h.canPlayLoop=LoopAllowed;
         h.audio=Audio;h.sound=Sound;h.bite=NativeClockOnlyZombieBite309;h.moveRootDelta=Motion;
-        h.explode=Explode;h.retire=Retire;h.moveChildToTargetRow=MoveChild;h.armorFall=Armor;h.failed=Failed;return h;
+        h.explode=[](Board* b,const NativeJackbox300Explosion& e){return Explode(b,e);};h.retire=Retire;h.moveChildToTargetRow=MoveChild;h.armorFall=Armor;h.failed=Failed;return h;
     }();return hooks;
 }
 bool InitializeNativeJackbox309(Zombie* z)

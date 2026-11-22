@@ -1,3 +1,4 @@
+#include "FusionNativeLadder355.h"
 #include "FusionNativeDayZombie273.h"
 #include "FusionNativeDayZombie273Bridge.h"
 #include "FusionBasePlantRules.h"
@@ -199,12 +200,17 @@ bool MoveNativeDayZombie273(Zombie* z)
     if(!Host(z)||z->IsDeadOrDying())return true;
     const auto* s=GetNativeDayZombie273(z);auto* body=Body(z);auto* cursor=Cursor(z);FusionDayZombie273Clip clip;FusionZombieClipPosition now;
     if(!s||!body||!cursor||!TryGetFusionDayZombie273Clip(Kind(z),s->status,false,clip)||!Read(body,clip.seconds,now))return true;
+    if(MoveNativeDayLadder355(z))
+    {
+        cursor->motion=now;cursor->motionFrameStart=body->mFrameStart;cursor->motionValid=false;return true;
+    }
     const bool moving=!z->mIsEating&&z->mZombieHeight==HEIGHT_ZOMBIE_NORMAL&&!z->mOnHighGround&&!NativeWater268ZombieCaptured(z);
     double delta=0;
     if(moving&&cursor->motionValid&&cursor->motionFrameStart==body->mFrameStart&&std::isfinite(z->mScaleZombie)&&z->mScaleZombie>0&&
         TryGetFusionDayZombie273RootDelta(Kind(z),s->status,cursor->motion,now,z->mMindControlled,
             (FusionDayZombie273Pole(Kind(z))?1.25:.31)*kFusionBasePixelsX*z->mScaleZombie,delta)&&std::isfinite(z->mPosX+delta))z->mPosX+=float(delta);
-    cursor->motion=now;cursor->motionFrameStart=body->mFrameStart;cursor->motionValid=moving;return true;
+    cursor->motion=now;cursor->motionFrameStart=body->mFrameStart;cursor->motionValid=moving;
+    RecoverNativeDayLadder355(z);return true;
 }
 bool UpdateNativeDayZombie273(Zombie* z,const NativeDayZombie273Hooks& hooks)
 {

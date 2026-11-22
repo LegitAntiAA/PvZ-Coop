@@ -4,6 +4,10 @@
 class Board;class Zombie;
 namespace LawnFusion
 {
+// Shared Lawnf.ZombieExplode4017D0. A standalone validated source object may
+// outlive its owner; retain the actual birth sourceKind/identity, never alias24.
+bool CanEmitNativeSourceZombieExplosion343(Board*,const NativeJackbox300Explosion&,std::string* error=nullptr,int sourcePlantDamageType=0);
+bool EmitNativeSourceZombieExplosion343(Board*,const NativeJackbox300Explosion&,int sourcePlantDamageType=0);
 NativeJackbox300State* EditNativeJackbox309(Zombie*,bool create=false);
 const NativeJackbox300State* GetNativeJackbox309(const Zombie*);
 bool CanSpawnNativeJackbox309(Board*,uint16_t kind,std::string* error=nullptr);

@@ -28,9 +28,9 @@ bool IsNativeSourceWorld313(const Board* b)
 {
     const auto* c=GetNativeContext(b);
     if(!b||!b->mApp||b->mApp->mBoard!=b||!IsNativeFusionBoard(b)||!c||c->adventureTeardown||
-       !c->epoch||c->epoch!=b->mApp->mNativeFusionEpoch||int(b->mBackground)<0||int(b->mBackground)>3||
+       !c->epoch||c->epoch!=b->mApp->mNativeFusionEpoch||int(b->mBackground)<0||int(b->mBackground)>4||
        b->GetColumnCount()!=10||!b->mTDPath.empty())return false;
-    const int rows=GetNativeFusionRowCount(b),expected=int(b->mBackground)>=2?6:5;
+    const int rows=GetNativeFusionRowCount(b),expected=NativeFusionRowsForBackground(uint8_t(b->mBackground));
     if(rows!=expected)return false;
     for(int row=0;row<rows;++row)
     {
@@ -100,7 +100,7 @@ NativeSourceZombieInitialization313::~NativeSourceZombieInitialization313()
             context->sourceGraphs313.erase(uid);context->dayZombies273.erase(uid);
             context->nightZombies281.erase(uid);context->jackboxZombies300.erase(uid);
             context->waterZombies313.erase(uid);context->extendedZombies313.erase(uid);
-            context->heavyZombies313B.erase(uid);context->sourceZombieBirthOrdinals.erase(uid);
+            context->nextZombies343.erase(uid);context->heavyZombies313B.erase(uid);context->sourceZombieBirthOrdinals.erase(uid);
             z->mDroppedLoot=true;z->DieNoLoot();
         }
     }
@@ -118,7 +118,7 @@ bool IsNativeSourceZombieInitializing313(const Zombie* z)
 bool ReadNativeSourceStatusLevel313(const Zombie* z,int& out)
 {
     const auto* data=GetNativeSourceZombieData(z);
-    if(!z||!data||!IsNativeSourceZombie(z)||data->sourceStatusLevel<0||data->sourceStatusLevel>1000000)return false;
+    if(!z||!data||!IsNativeSourceZombie(z)||(data->sourceStatusLevel<0&&!(data->kind==205&&data->sourceStatusLevel== -10))||data->sourceStatusLevel>1000000)return false;
     out=data->sourceStatusLevel;return true;
 }
 bool NativeSourceGraph313OwnsClock(const Reanimation* r)

@@ -1,4 +1,6 @@
 #include "FusionSeedBank.h"
+#include "FusionConveyor305Rules.h"
+#include "FusionNativePlacement.h"
 #include "../Net/NetCommon.h"
 #include "../Net/NetGameplayPolicy.h"
 #include <algorithm>
@@ -48,6 +50,35 @@ bool EligibleValid(const std::vector<FusionBankEligibleCard>& eligible)
     return true;
 }
 
+bool ConveyorEligibleValid(const std::vector<FusionBankEligibleCard>& eligible)
+{
+    if (!EligibleValid(eligible)) return false;
+    for (const auto& card : eligible)
+        if (card.isExtra || card.baseCost || card.rechargeSeconds != 0.0f || !FusionFindPlant(card.kind)) return false;
+    return true;
+}
+
+bool ConveyorSnapshotValid(const FusionBankState& state, const std::vector<FusionBankEligibleCard>& eligible, size_t capacity)
+{
+    if (capacity != kFusionSourceConveyor305Capacity || !ConveyorEligibleValid(eligible) ||
+        !state.epoch || !state.revision || state.difficulty < 1 || state.difficulty > 10 ||
+        !state.activeMask || (state.activeMask & ~kPlayerMask) || state.readyMask || state.mysteryMask ||
+        (state.phase != FusionBankPhase::Intro && state.phase != FusionBankPhase::Playing) ||
+        state.targetCount != kFusionSourceConveyor305Capacity || state.packets.size() > kFusionSourceConveyor305Capacity ||
+        state.quotas != std::array<uint8_t,kFusionBankPlayers>{} || !state.nextPacketId ||
+        state.nextPacketId > static_cast<uint32_t>((std::numeric_limits<uint16_t>::max)()) + 1) return false;
+    uint16_t previousId = 0;
+    for (const auto& packet : state.packets)
+    {
+        if (!packet.id || packet.id <= previousId || packet.id >= state.nextPacketId ||
+            !Find(eligible, packet.kind, false) || packet.isExtra || packet.owner != 0xff ||
+            packet.randomOrigin || packet.mysteryPending || packet.price || packet.rechargeSeconds != 0.0f ||
+            packet.remainingRechargeSeconds != 0.0f || packet.conveyorUses >= (IsFusionSourcePuffKind(packet.kind) ? 3 : 1)) return false;
+        previousId = packet.id;
+    }
+    return true;
+}
+
 bool Quotas(size_t target, uint8_t mask, std::array<uint8_t, kFusionBankPlayers>& result)
 {
     if (!mask || (mask & ~kPlayerMask) != 0 || target > kFusionBankCapacity) return false;
@@ -87,7 +118,7 @@ bool Same(const FusionBankState& first, const FusionBankState& second)
         const auto& a = first.packets[i]; const auto& b = second.packets[i];
         if (a.id != b.id || !Identity(a, b) || a.owner != b.owner || a.randomOrigin != b.randomOrigin ||
             a.mysteryPending != b.mysteryPending || a.price != b.price || a.rechargeSeconds != b.rechargeSeconds ||
-            a.remainingRechargeSeconds != b.remainingRechargeSeconds) return false;
+            a.remainingRechargeSeconds != b.remainingRechargeSeconds || a.conveyorUses != b.conveyorUses) return false;
     }
     return true;
 }
@@ -138,7 +169,7 @@ bool FusionSeedBank::HasContext(uint32_t epoch, FusionBankPhase phase) const
 
 bool FusionSeedBank::CanChoose(uint32_t epoch, int slot) const
 {
-    return HasContext(epoch, FusionBankPhase::Choosing) && Active(mState, slot);
+    return mPolicy == FusionBankPolicy::Selected && HasContext(epoch, FusionBankPhase::Choosing) && Active(mState, slot);
 }
 
 void FusionSeedBank::Commit(FusionBankState& state)
@@ -162,6 +193,51 @@ bool FusionSeedBank::Open(uint32_t epoch, int difficulty, const std::vector<Fusi
     mEligible = eligible;
     mCapacity = capacity;
     mState = state;
+    mPolicy = FusionBankPolicy::Selected;
+    return true;
+}
+
+bool FusionSeedBank::OpenConveyor(uint32_t epoch, int difficulty, const std::vector<FusionBankEligibleCard>& eligible, uint8_t activeMask)
+{
+    if (!epoch || epoch <= mState.epoch || difficulty < 1 || difficulty > 10 || !ConveyorEligibleValid(eligible) ||
+        !activeMask || (activeMask & ~kPlayerMask)) return false;
+    FusionBankState state;
+    state.epoch = epoch;
+    state.revision = 1;
+    state.phase = FusionBankPhase::Intro;
+    state.difficulty = static_cast<uint8_t>(difficulty);
+    state.activeMask = activeMask;
+    state.targetCount = static_cast<uint8_t>(kFusionSourceConveyor305Capacity);
+    mEligible = eligible;
+    mCapacity = kFusionSourceConveyor305Capacity;
+    mState = std::move(state);
+    mPolicy = FusionBankPolicy::SourceConveyor;
+    return true;
+}
+
+bool FusionSeedBank::AppendConveyor(uint32_t epoch, FusionPlantId kind, uint16_t* packetId)
+{
+    if (mPolicy != FusionBankPolicy::SourceConveyor || !HasContext(epoch, FusionBankPhase::Playing) ||
+        mState.packets.size() >= kFusionSourceConveyor305Capacity || !Find(mEligible,kind,false) ||
+        mState.nextPacketId > (std::numeric_limits<uint16_t>::max)()) return false;
+    FusionBankState state = mState;
+    FusionBankPacket packet;
+    packet.id = static_cast<uint16_t>(state.nextPacketId++);
+    packet.kind = kind;
+    state.packets.push_back(packet);
+    Commit(state);
+    if (packetId) *packetId = packet.id;
+    return true;
+}
+
+bool FusionSeedBank::ConsumeConveyor(uint32_t epoch, int slot, uint16_t packetId)
+{
+    if (mPolicy != FusionBankPolicy::SourceConveyor || !PeekReadyPacket(epoch,slot,packetId)) return false;
+    FusionBankState state = mState;
+    const auto packet = std::find_if(state.packets.begin(),state.packets.end(),
+        [=](const auto& value) { return value.id == packetId; });
+    if (++packet->conveyorUses >= (IsFusionSourcePuffKind(packet->kind) ? 3 : 1)) state.packets.erase(packet);
+    Commit(state);
     return true;
 }
 
@@ -252,7 +328,7 @@ bool FusionSeedBank::BeginPlaying(uint32_t epoch)
 
 bool FusionSeedBank::Reveal(uint32_t epoch, const RandomIndex& randomIndex)
 {
-    if (!HasContext(epoch, FusionBankPhase::Playing)) return false;
+    if (mPolicy != FusionBankPolicy::Selected || !HasContext(epoch, FusionBankPhase::Playing)) return false;
     bool pending = false;
     for (const auto& packet : mState.packets) pending |= packet.mysteryPending;
     if (!pending) return true;
@@ -284,13 +360,15 @@ const FusionBankPacket* FusionSeedBank::PeekReadyPacket(uint32_t epoch, int slot
     if (!HasContext(epoch, FusionBankPhase::Playing) || !Active(mState, slot)) return nullptr;
     for (const auto& packet : mState.packets) if (packet.mysteryPending) return nullptr;
     for (const auto& packet : mState.packets)
-        if (packet.id == packetId && packet.owner == slot && !packet.mysteryPending && packet.remainingRechargeSeconds == 0.0f) return &packet;
+        if (packet.id == packetId && (packet.owner == slot ||
+            (mPolicy == FusionBankPolicy::SourceConveyor && packet.owner == 0xff)) &&
+            !packet.mysteryPending && packet.remainingRechargeSeconds == 0.0f) return &packet;
     return nullptr;
 }
 
 bool FusionSeedBank::CommitPacketUse(uint32_t epoch, int slot, uint16_t packetId)
 {
-    if (!PeekReadyPacket(epoch, slot, packetId)) return false;
+    if (mPolicy != FusionBankPolicy::Selected || !PeekReadyPacket(epoch, slot, packetId)) return false;
     FusionBankState state = mState;
     for (auto& packet : state.packets) if (packet.id == packetId) packet.remainingRechargeSeconds = packet.rechargeSeconds;
     Commit(state);
@@ -314,6 +392,7 @@ bool FusionSeedBank::AdvanceRecharge(uint32_t epoch, float deltaSeconds)
 
 bool FusionSeedBank::ReassignOwners(uint32_t epoch, uint8_t activeMask)
 {
+    if (mPolicy == FusionBankPolicy::SourceConveyor) return ReconcilePlayers(epoch,activeMask);
     if (!HasContext(epoch, FusionBankPhase::Playing)) return false;
     FusionBankState state = mState;
     if (!Quotas(state.targetCount, activeMask, state.quotas)) return false;
@@ -343,6 +422,16 @@ bool FusionSeedBank::ReassignOwners(uint32_t epoch, uint8_t activeMask)
 
 bool FusionSeedBank::ReconcilePlayers(uint32_t epoch, uint8_t activeMask)
 {
+    if (mPolicy == FusionBankPolicy::SourceConveyor)
+    {
+        if ((!HasContext(epoch,FusionBankPhase::Intro) && !HasContext(epoch,FusionBankPhase::Playing)) ||
+            !activeMask || (activeMask & ~mState.activeMask)) return false;
+        if (activeMask == mState.activeMask) return true;
+        FusionBankState state = mState;
+        state.activeMask = activeMask;
+        Commit(state);
+        return true;
+    }
     if ((!HasContext(epoch, FusionBankPhase::Choosing) && !HasContext(epoch, FusionBankPhase::Playing)) ||
         !activeMask || (activeMask & ~mState.activeMask) != 0) return false;
     if (activeMask == mState.activeMask) return true;
@@ -389,8 +478,10 @@ bool FusionSeedBank::ReconcilePlayers(uint32_t epoch, uint8_t activeMask)
     return true;
 }
 
-bool FusionSeedBank::ValidateSnapshot(const FusionBankState& state, const std::vector<FusionBankEligibleCard>& eligible, size_t capacity)
+bool FusionSeedBank::ValidateSnapshot(const FusionBankState& state, const std::vector<FusionBankEligibleCard>& eligible, size_t capacity, FusionBankPolicy policy)
 {
+    if (policy == FusionBankPolicy::SourceConveyor) return ConveyorSnapshotValid(state,eligible,capacity);
+    if (policy != FusionBankPolicy::Selected) return false;
     if (!capacity || capacity > kFusionBankCapacity || !EligibleValid(eligible) || !state.epoch || !state.revision || state.difficulty < 1 || state.difficulty > 10 ||
         state.phase < FusionBankPhase::Choosing || state.phase > FusionBankPhase::Playing ||
         state.targetCount != (std::min)(capacity, eligible.size()) || state.packets.size() > state.targetCount ||
@@ -411,7 +502,7 @@ bool FusionSeedBank::ValidateSnapshot(const FusionBankState& state, const std::v
     for (size_t i = 0; i < state.packets.size(); ++i)
     {
         const auto& packet = state.packets[i];
-        if (!packet.id || packet.id >= state.nextPacketId || !Active(state, packet.owner) ||
+        if (packet.conveyorUses || !packet.id || packet.id >= state.nextPacketId || !Active(state, packet.owner) ||
             (packet.randomOrigin != 0 && packet.randomOrigin != state.difficulty) ||
             !std::isfinite(packet.rechargeSeconds) || !std::isfinite(packet.remainingRechargeSeconds) ||
             packet.remainingRechargeSeconds < 0.0f || packet.remainingRechargeSeconds > packet.rechargeSeconds) return false;
@@ -441,9 +532,21 @@ bool FusionSeedBank::ValidateSnapshot(const FusionBankState& state, const std::v
 bool FusionSeedBank::ApplySnapshot(const FusionBankState& state)
 {
     if (state.epoch != mState.epoch || state.revision < mState.revision || state.phase < mState.phase ||
-        state.difficulty != mState.difficulty || state.nextPacketId < mState.nextPacketId || !ValidateSnapshot(state, mEligible, mCapacity) ||
+        state.difficulty != mState.difficulty || state.nextPacketId < mState.nextPacketId || !ValidateSnapshot(state, mEligible, mCapacity, mPolicy) ||
         (state.revision == mState.revision && !Same(state, mState))) return false;
-    if (mState.phase >= FusionBankPhase::Intro)
+    if (mPolicy == FusionBankPolicy::SourceConveyor)
+    {
+        if (state.activeMask & ~mState.activeMask) return false;
+        for (const auto& packet : state.packets)
+        {
+            const auto old = std::find_if(mState.packets.begin(),mState.packets.end(),
+                [&](const auto& value) { return value.id == packet.id; });
+            if (old == mState.packets.end())
+            { if (packet.id < mState.nextPacketId) return false; }
+            else if (!Identity(packet,*old) || packet.conveyorUses < old->conveyorUses) return false;
+        }
+    }
+    else if (mState.phase >= FusionBankPhase::Intro)
     {
         if (mState.packets.size() != state.packets.size()) return false;
         for (const auto& old : mState.packets)

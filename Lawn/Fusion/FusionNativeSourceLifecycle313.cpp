@@ -170,11 +170,12 @@ bool GetNativeSourceZombieBirthBudget319(Board* b,std::span<const uint16_t> kind
  {
   const int carrier=GetNativeSourceZombieCarrier(kind);
   if(carrier!=ZOMBIE_NORMAL&&carrier!=ZOMBIE_TRAFFIC_CONE&&carrier!=ZOMBIE_PAIL&&carrier!=ZOMBIE_DOOR&&carrier!=ZOMBIE_POLEVAULTER&&carrier!=ZOMBIE_NEWSPAPER&&carrier!=ZOMBIE_FOOTBALL&&
-     !(carrier==ZOMBIE_ZAMBONI&&(kind==14||kind==16||kind==18)))
+     !(carrier==ZOMBIE_ZAMBONI&&(kind==14||kind==16||kind==18||kind==200||kind==211)))
    return Reject(error,"Source birth peak has an uncovered native initializer.");
   if(!Definition(GetZombieDefinition(ZombieType(carrier)).mReanimationType,error))return false;
   FusionSourceDeathBudget319 one;one.zombies=one.reanimations=1;
-  if(const auto* graph=FindFusionSourceGraph313(kind))
+  if(FusionWaterZombie313Kind(kind))one.reanimations=kind==20?1:FusionWaterShooter343Kind(kind)?3:2;
+  else if(const auto* graph=FindFusionSourceGraph313(kind))
   {
    if(graph->layerCount<1||graph->layerCount>3||carrier!=ZOMBIE_NORMAL)return false;
    const auto& tracks=gReanimatorDefArray[int(REANIM_ZOMBIE)].mTracks;
@@ -183,7 +184,6 @@ bool GetNativeSourceZombieBirthBudget319(Board* b,std::span<const uint16_t> kind
    if(graph->layerCount>1&&!span("anim_head1"))return Reject(error,"Source auxiliary actual native head track span unavailable.");
    one.reanimations=graph->layerCount;one.attachments=graph->layerCount>1?1:0;
   }
-  else if(FusionWaterZombie313Kind(kind))one.reanimations=kind==20?1:2;
   else if(FusionDayZombie273Shooter(kind)||kind==104){if(!Definition(REANIM_PEASHOOTER,error))return false;one.reanimations++;one.attachments++;}
   if(!AddFusionSourceDeathBudget319(sum,one,sum))return Reject(error,"Source birth peak overflow.");
  }

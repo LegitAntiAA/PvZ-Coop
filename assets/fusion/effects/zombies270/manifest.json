@@ -235,6 +235,106 @@
       "kind": 223,
       "count": 2,
       "status": "Passed"
+    },
+    {
+      "kind": 202,
+      "status": "Passed",
+      "count": 1
+    },
+    {
+      "kind": 204,
+      "status": "Passed",
+      "count": 1
+    },
+    {
+      "kind": 205,
+      "status": "Passed",
+      "count": 0
+    },
+    {
+      "kind": 206,
+      "status": "Passed",
+      "count": 0
+    },
+    {
+      "kind": 210,
+      "status": "Passed",
+      "count": 0
+    },
+    {
+      "kind": 218,
+      "status": "Passed",
+      "count": 0
+    },
+    {
+      "kind": 219,
+      "status": "Passed",
+      "count": 0
+    },
+    {
+      "kind": 220,
+      "status": "Passed",
+      "count": 1
+    },
+    {
+      "kind": 221,
+      "status": "Passed",
+      "count": 0
+    },
+    {
+      "kind": 224,
+      "status": "Passed",
+      "count": 0
+    },
+    {
+      "kind": 112,
+      "status": "Passed",
+      "count": 0
+    },
+    {
+      "kind": 216,
+      "status": "Passed",
+      "count": 0
+    },
+    {
+      "kind": 200,
+      "status": "Passed",
+      "count": 0
+    },
+    {
+      "kind": 211,
+      "status": "Passed",
+      "count": 0
+    },
+    {
+      "kind": 217,
+      "status": "Passed",
+      "count": 2
+    },
+    {
+      "kind": 114,
+      "status": "Passed",
+      "count": 3
+    },
+    {
+      "kind": 118,
+      "status": "Passed",
+      "count": 1
+    },
+    {
+      "kind": 119,
+      "status": "Passed",
+      "count": 1
+    },
+    {
+      "kind": 47,
+      "status": "Passed",
+      "count": 5
+    },
+    {
+      "kind": 48,
+      "status": "Passed",
+      "count": 3
     }
   ],
   "bindings": [
@@ -1623,6 +1723,240 @@
       "status": "Passed",
       "package": "particles/5702/effect.json",
       "effectSha256": "5f628ac66af8b364580b0405408910081ed7d02e65682c6955312f00368a2606"
+    },
+    {
+      "sourceZombieKind": 202,
+      "resourceKind": 5750,
+      "sourcePrefab": "Resources/zombies/_prefab/FootballDrownZombie.prefab",
+      "sourceParticleFileId": 198294885792020211,
+      "sourceRendererFileId": 199271925019662038,
+      "nodePath": "LoseArm",
+      "serializedParticleSha256": "0e45c3bbf199fc54749b1ec83a18b2493480261f6361ef95f0d8ccbac0678a32",
+      "serializedRendererSha256": "bcc4958eb8f6fdae91ae27598730afd600ceb4e8ea46f3453d9b8845e81e1aed",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "sourceZombieKind": 204,
+      "resourceKind": 5751,
+      "sourcePrefab": "Resources/zombies/_prefab/BlackFootballZombie.prefab",
+      "sourceParticleFileId": 198215879266689626,
+      "sourceRendererFileId": 199689364072382846,
+      "nodePath": "LoseArm",
+      "serializedParticleSha256": "c1a5dac8af614ce257e9004d1a0fe7bdc50a1b23cf4193c40c3d085d902183d8",
+      "serializedRendererSha256": "be442ce23e5a9174a0c6ff5dce1c82c45498b9eeb319c0a7a07d93f8dca36c68",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "sourceZombieKind": 220,
+      "resourceKind": 5752,
+      "sourcePrefab": "Resources/zombies/_prefab/UltimateFootballZombie.prefab",
+      "sourceParticleFileId": 198450391854282655,
+      "sourceRendererFileId": 199386943702330414,
+      "nodePath": "LoseArm",
+      "serializedParticleSha256": "aeddca0ae7fbbba73a2412c766197056b5c062c07c92f71f54236f8860c6ae84",
+      "serializedRendererSha256": "2124b81de076e3076e1de2b638fdd5da84d11a8753731be55363b59d259391ed",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "sourceZombieKind": 217,
+      "resourceKind": 5787,
+      "sourcePrefab": "Resources/zombies/_prefab/SuperDancePolZombie.prefab",
+      "sourceParticleFileId": 198574304967836189,
+      "sourceRendererFileId": 199009931292380359,
+      "nodePath": "LoseHead",
+      "serializedParticleSha256": "f56e2196e4ea3744604f7f03e314cd94bef0dec06e1bd2d7e7eefda04da6b1d8",
+      "serializedRendererSha256": "51a48e2cea501353143465fa0b6ba6729a393990b216c91d6ff96ba4ae6acbff",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "sourceZombieKind": 217,
+      "resourceKind": 5788,
+      "sourcePrefab": "Resources/zombies/_prefab/SuperDancePolZombie.prefab",
+      "sourceParticleFileId": 198799762105739359,
+      "sourceRendererFileId": 199829625606037309,
+      "nodePath": "LoseArm",
+      "serializedParticleSha256": "02b147674335e8ba45dae3b9803a6242ef2543e826299dd6a042995096a226f7",
+      "serializedRendererSha256": "461a94847de0bbc7eb91088d381869a7baa3c33ffc04a2c80a942343b60d0bac",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "sourceZombieKind": 114,
+      "resourceKind": 5770,
+      "sourcePrefab": "Resources/zombies/_prefab/IronPeaDoorZombie.prefab",
+      "sourceParticleFileId": 198356319167443197,
+      "sourceRendererFileId": 199976365255789935,
+      "nodePath": "LoseArm",
+      "serializedParticleSha256": "b4827e4da94d690a0ff0e6a1e8452e6a455cd5059239ec4733d5f9426a313ee9",
+      "serializedRendererSha256": "ca0934ccd4edcd74adcb733c0ce16b701c8318612ac908f6e7ca249670ccabb1",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "sourceZombieKind": 114,
+      "resourceKind": 5771,
+      "sourcePrefab": "Resources/zombies/_prefab/IronPeaDoorZombie.prefab",
+      "sourceParticleFileId": 198264357844037074,
+      "sourceRendererFileId": 199499726237547504,
+      "nodePath": "LoseDoor",
+      "serializedParticleSha256": "55d737fca559ceedf192b37478fb9ace62ddf1282d452b5dae814551553828ec",
+      "serializedRendererSha256": "7ebc04cea95934b4f56a18928ebdb49cbb763d6e679abfa3e0df9be2008b8fbf",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "sourceZombieKind": 114,
+      "resourceKind": 5772,
+      "sourcePrefab": "Resources/zombies/_prefab/IronPeaDoorZombie.prefab",
+      "sourceParticleFileId": 198703931505913403,
+      "sourceRendererFileId": 199121005239445321,
+      "nodePath": "LoseBucket",
+      "serializedParticleSha256": "bdf31ba0a7765e0d2db1883b7e9149c9f678649150d5481942520e21fbb82018",
+      "serializedRendererSha256": "4a3dafdb69ec769633579f78aab3ba7fa83f91fe3f827d54738e246419911ffd",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "sourceZombieKind": 118,
+      "resourceKind": 5776,
+      "sourcePrefab": "Resources/zombies/_prefab/GatlingFootballZombie.prefab",
+      "sourceParticleFileId": 198995682140751655,
+      "sourceRendererFileId": 199293198502218400,
+      "nodePath": "LoseArm",
+      "serializedParticleSha256": "b28a7f55ed2f6b265f5f1fd79a30013dd907b7dc5f0e252634927736b075dc22",
+      "serializedRendererSha256": "1447314ecd3c99b3d2c1159e9b3bca2417f6c3276bb14d5f801f60aab6ad864a",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "sourceZombieKind": 119,
+      "resourceKind": 5777,
+      "sourcePrefab": "Resources/zombies/_prefab/IronBalloonZombie2.prefab",
+      "sourceParticleFileId": 198651560128206891,
+      "sourceRendererFileId": 199964469411310401,
+      "nodePath": "LoseArm",
+      "serializedParticleSha256": "1c532a0f8a89a9c1eb151c321e43faa324b40840b25ea891510e791df42a08f3",
+      "serializedRendererSha256": "5d1620660e360485c32a8e8a61822638ffecce277df254b5afe79759e22c5635",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "sourceZombieKind": 47,
+      "resourceKind": 5760,
+      "sourcePrefab": "Resources/zombies/_prefab/SnowZombie.prefab",
+      "sourceParticleFileId": 198571718729274231,
+      "sourceRendererFileId": 199581786255902400,
+      "nodePath": "LoseHead",
+      "serializedParticleSha256": "5eb88f34ef4c04a6be4b31424f6e25307e8cbd8e7282c146bc0ab9aaf188ee39",
+      "serializedRendererSha256": "5fe5dd5679f7638bebb951278d53346a45de94ab03cf25d17cd31588b200289d",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "sourceZombieKind": 47,
+      "resourceKind": 5761,
+      "sourcePrefab": "Resources/zombies/_prefab/SnowZombie.prefab",
+      "sourceParticleFileId": 198045458335737618,
+      "sourceRendererFileId": 199722951815217645,
+      "nodePath": "LoseArm",
+      "serializedParticleSha256": "91be2c73bdc90c02b21ddd5bb85a9fa8f9e06ea3bf7c7cc9907eaee9c6f7372c",
+      "serializedRendererSha256": "3d04b56177283bd79a594943b1ff574b7927fb5e6cbcfb14ff46a097dfd21bad",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "sourceZombieKind": 47,
+      "resourceKind": 5762,
+      "sourcePrefab": "Resources/zombies/_prefab/SnowZombie.prefab",
+      "sourceParticleFileId": 198026196548002408,
+      "sourceRendererFileId": 199572839542275309,
+      "nodePath": "Circle/Particle System",
+      "serializedParticleSha256": "a6a72538dea6af12d949245fdd1bf69fcb87664365ee6030a3cec176e2de7b01",
+      "serializedRendererSha256": "39acfbc78b8be2f1742855d2ffec3bec397eafb228ee51780cf10233fc635cfc",
+      "defaultNodeActive": true,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "sourceZombieKind": 47,
+      "resourceKind": 5763,
+      "sourcePrefab": "Resources/zombies/_prefab/SnowZombie.prefab",
+      "sourceParticleFileId": 198384403120170545,
+      "sourceRendererFileId": 199149520701623706,
+      "nodePath": "Circle/Particle System_1",
+      "serializedParticleSha256": "b6aebb3b1d837e75a96a735d1e22f9b0e094c58e56b2f9369ab2db26a97cf63a",
+      "serializedRendererSha256": "16df6a4807bc70752e92f53af20191bbd8b528f31af39cacbdf0a4104a66f595",
+      "defaultNodeActive": true,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "sourceZombieKind": 47,
+      "resourceKind": 5764,
+      "sourcePrefab": "Resources/zombies/_prefab/SnowZombie.prefab",
+      "sourceParticleFileId": 198693062532245359,
+      "sourceRendererFileId": 199630643969539439,
+      "nodePath": "Circle/Particle System_2",
+      "serializedParticleSha256": "2740f46204bc6dcfcdea8e2d25c26984530c3190238132fd839485ba97aa1432",
+      "serializedRendererSha256": "14a882a0d0fd089daeb132f7a2137981c20d25fd46e7eb550b6d6177ad940f19",
+      "defaultNodeActive": true,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "sourceZombieKind": 48,
+      "resourceKind": 5765,
+      "sourcePrefab": "Resources/zombies/_prefab/NewYearZombie.prefab",
+      "sourceParticleFileId": 198215879266689626,
+      "sourceRendererFileId": 199689364072382846,
+      "nodePath": "LoseHead",
+      "serializedParticleSha256": "35dbb85ab1a2bb8ab1f4d8f9a75e821589c33f9a49a9c84656c9728fbbcb7ff0",
+      "serializedRendererSha256": "c7dffba35710a9356fe2f219960141425465bb61c1c9c47de2c4651f0498a54f",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "sourceZombieKind": 48,
+      "resourceKind": 5766,
+      "sourcePrefab": "Resources/zombies/_prefab/NewYearZombie.prefab",
+      "sourceParticleFileId": 198743393880019028,
+      "sourceRendererFileId": 199094320201520353,
+      "nodePath": "LoseArm",
+      "serializedParticleSha256": "e104ca5148371a61ffc03ebae6ec0522572c4754ab9ac8bd4aa60339b358e79d",
+      "serializedRendererSha256": "be442ce23e5a9174a0c6ff5dce1c82c45498b9eeb319c0a7a07d93f8dca36c68",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
+    },
+    {
+      "sourceZombieKind": 48,
+      "resourceKind": 5767,
+      "sourcePrefab": "Resources/zombies/_prefab/NewYearZombie.prefab",
+      "sourceParticleFileId": 198572839542275309,
+      "sourceRendererFileId": 199279359913592680,
+      "nodePath": "LoseCone",
+      "serializedParticleSha256": "42ba216d058b4a866f84ac03ee42e13b6c7534fed134f4bfe425e739dd728a4b",
+      "serializedRendererSha256": "91c3825d9137b883ea1dd2f8ee0fb1cf67de41e33de0f3f33187ed0a4be0803b",
+      "defaultNodeActive": false,
+      "defaultEmissionEnabled": true,
+      "status": "Passed"
     }
   ],
   "resources": [
@@ -2396,6 +2730,186 @@
       "files": {
         "effect.json": "5f628ac66af8b364580b0405408910081ed7d02e65682c6955312f00368a2606",
         "textures/aeb977421e0565c419657cf4a88c4e15.png": "19463216ef4fa8e47d39dc39666a7cf2c82cd219b7a3dc130b17f8372fe17ff5"
+      }
+    },
+    {
+      "resourceKind": 5750,
+      "package": "5750/effect.json",
+      "effectSha256": "43c9ece9750da0e28747945a7a8b7b9dbfccdf8fe9714c6556bf7574730369e7",
+      "status": "Passed",
+      "files": {
+        "effect.json": "43c9ece9750da0e28747945a7a8b7b9dbfccdf8fe9714c6556bf7574730369e7",
+        "textures/d267652cb4669274a9e70f29dcba7dc9.png": "5bba2603a15c48a57e8f38866735ca3148e854779018f04fb6f72ff1e244ac5e"
+      }
+    },
+    {
+      "resourceKind": 5751,
+      "package": "5751/effect.json",
+      "effectSha256": "8672be0c98529debb992415664cae8664006a7c5bff3b8ea2acd483cbdc05829",
+      "status": "Passed",
+      "files": {
+        "effect.json": "8672be0c98529debb992415664cae8664006a7c5bff3b8ea2acd483cbdc05829",
+        "textures/390d63e9784ea414e987e7dd9574f3fe.png": "962ebb581e774af5271b43c0ad4a39449fda8b81c47f9c8b1de10f0a533bfe46"
+      }
+    },
+    {
+      "resourceKind": 5752,
+      "package": "5752/effect.json",
+      "effectSha256": "8844ba1b74357bfe421322a7242d44e4876911f2ad9c4e854c6207d162531b2a",
+      "status": "Passed",
+      "files": {
+        "effect.json": "8844ba1b74357bfe421322a7242d44e4876911f2ad9c4e854c6207d162531b2a",
+        "textures/390d63e9784ea414e987e7dd9574f3fe.png": "962ebb581e774af5271b43c0ad4a39449fda8b81c47f9c8b1de10f0a533bfe46"
+      }
+    },
+    {
+      "resourceKind": 5787,
+      "package": "5787/effect.json",
+      "effectSha256": "6eaa983e848ae995de9fa3593542f43be605c317230aeb2e108236ff459e5367",
+      "status": "Passed",
+      "files": {
+        "effect.json": "6eaa983e848ae995de9fa3593542f43be605c317230aeb2e108236ff459e5367",
+        "textures/03389a0ea4d6a5b42a5a4456d20242e4.png": "451dca84143e9a73263dd02a4d2de802e6c3160b0f7b176f8b81e2bf5654db90"
+      }
+    },
+    {
+      "resourceKind": 5788,
+      "package": "5788/effect.json",
+      "effectSha256": "726e174a0364159e767a1f808c24ba792bb8ad71e182f84cc2e2299d47e4ec3a",
+      "status": "Passed",
+      "files": {
+        "effect.json": "726e174a0364159e767a1f808c24ba792bb8ad71e182f84cc2e2299d47e4ec3a",
+        "textures/b71ec0464a2f6274b8cc46adf7aae305.png": "248a12e28ca2a931c1e76eab77d134525eeadba7c51fd37c320ad65bfec3209e"
+      }
+    },
+    {
+      "resourceKind": 5770,
+      "package": "5770/effect.json",
+      "effectSha256": "53d991b4071d0acb00f910f3e3c2c1b6c942a23df64ab379cb64f31271fbebd5",
+      "status": "Passed",
+      "files": {
+        "effect.json": "53d991b4071d0acb00f910f3e3c2c1b6c942a23df64ab379cb64f31271fbebd5",
+        "textures/2e67bba4fb3124540b8494d17fbd2d60.png": "3d273d923933f1084737800fcab5d50230bd8f388ca63cc8810a745d87c77bde"
+      }
+    },
+    {
+      "resourceKind": 5771,
+      "package": "5771/effect.json",
+      "effectSha256": "1b50f7ad1cc98085c4655c8010ed5a627833adad99580f5c5b21c21e38970707",
+      "status": "Passed",
+      "files": {
+        "effect.json": "1b50f7ad1cc98085c4655c8010ed5a627833adad99580f5c5b21c21e38970707",
+        "textures/813f561bb8fa1dd4fa211738250bfb6a.png": "efce59c879a8e242013f6f833d05bacc95bebb5c41d3ac63a792c0a4c7f1812f"
+      }
+    },
+    {
+      "resourceKind": 5772,
+      "package": "5772/effect.json",
+      "effectSha256": "dff612803c258574e4fea4bc7fd3c46daf15771a41b991539f28c3812b097f33",
+      "status": "Passed",
+      "files": {
+        "effect.json": "dff612803c258574e4fea4bc7fd3c46daf15771a41b991539f28c3812b097f33",
+        "textures/0db632679a200bb448926cfe9b68e831.png": "614696c9df143bddb3bde6b0d5e5f9aa74f37fdc3cc2e2d54595d7b2ba01ffce"
+      }
+    },
+    {
+      "resourceKind": 5776,
+      "package": "5776/effect.json",
+      "effectSha256": "f65bb1799397a4e2a6ada6bd7a7d09ca17e6a5238fd158d1b59d4583d5417b83",
+      "status": "Passed",
+      "files": {
+        "effect.json": "f65bb1799397a4e2a6ada6bd7a7d09ca17e6a5238fd158d1b59d4583d5417b83",
+        "textures/12ce42e645eb9754c9740531a98aa74b.png": "d0a3d9963e2bc657af39d0851e2a4239c137721697ab6959c238c420d51e67d6"
+      }
+    },
+    {
+      "resourceKind": 5777,
+      "package": "5777/effect.json",
+      "effectSha256": "c9bbab0fc2c71d89a4193b54414fa0365d8b5b70519fc2342dee08ed15425dad",
+      "status": "Passed",
+      "files": {
+        "effect.json": "c9bbab0fc2c71d89a4193b54414fa0365d8b5b70519fc2342dee08ed15425dad",
+        "textures/28fc0538fa38510429f0b7766eaa9572.png": "8ee27668f8e07c715c83a514df98348f8230421127afd43944b7db11917e5219"
+      }
+    },
+    {
+      "resourceKind": 5760,
+      "package": "5760/effect.json",
+      "effectSha256": "738183fc988cae23581a980166e595d9f8b32eb2513ad866d81ccd2fe63788e7",
+      "status": "Passed",
+      "files": {
+        "effect.json": "738183fc988cae23581a980166e595d9f8b32eb2513ad866d81ccd2fe63788e7",
+        "textures/a89261ba45ccc354eb0abf9ed713fa17.png": "2d9953ce5276c40663be794ab4743a2fc8f4d66e9abfbec8f28cfa0d47d457b2"
+      }
+    },
+    {
+      "resourceKind": 5761,
+      "package": "5761/effect.json",
+      "effectSha256": "664f108cd6d943bfebd61832a1e9f1fe2a65626a526212443da0646598b53131",
+      "status": "Passed",
+      "files": {
+        "effect.json": "664f108cd6d943bfebd61832a1e9f1fe2a65626a526212443da0646598b53131",
+        "textures/e553447de39fed048a236e3b6881989b.png": "e75a07ceaddf435ada0c9834ce0740414e0fa4d766e34139eae01ed393b3bdb4"
+      }
+    },
+    {
+      "resourceKind": 5762,
+      "package": "5762/effect.json",
+      "effectSha256": "4080cfbb561a66c993969ba0add239be1235cbbf4a1141b8f288787777926d79",
+      "status": "Passed",
+      "files": {
+        "effect.json": "4080cfbb561a66c993969ba0add239be1235cbbf4a1141b8f288787777926d79",
+        "textures/79e21d9b8b7afcf4c8d9fdc9cd9c490d.png": "f89fc2e5b3826aae5b2b953e303e9fcae71dc3aca2bc413dedcf5a8bba02eec9"
+      }
+    },
+    {
+      "resourceKind": 5763,
+      "package": "5763/effect.json",
+      "effectSha256": "17c521b9d64561eca11765752b6b7805cda17176db0395211a403e1bd038df9a",
+      "status": "Passed",
+      "files": {
+        "effect.json": "17c521b9d64561eca11765752b6b7805cda17176db0395211a403e1bd038df9a",
+        "textures/98b469a306611a64a8de4473236e2aac.png": "5a6dcea82e0f8c217d0f46dd3dc2b4d013a686e8d6bd4cafe6169ec654e361f6"
+      }
+    },
+    {
+      "resourceKind": 5764,
+      "package": "5764/effect.json",
+      "effectSha256": "70ea4dc2d834a539ef58e11030ff0e749673f98fb58487081c3d1fb216cf2ec9",
+      "status": "Passed",
+      "files": {
+        "effect.json": "70ea4dc2d834a539ef58e11030ff0e749673f98fb58487081c3d1fb216cf2ec9",
+        "textures/0bb6c9a88dd3a8848a5ea195894ed418.png": "c836998031794f01cc14a0327565324fb0b1440848e8fae4a16e514fda750f29"
+      }
+    },
+    {
+      "resourceKind": 5765,
+      "package": "5765/effect.json",
+      "effectSha256": "9ab42c619899566a724db6f289e25e50f4e5b1ea4b765ce61b9fb3007bc6ad0a",
+      "status": "Passed",
+      "files": {
+        "effect.json": "9ab42c619899566a724db6f289e25e50f4e5b1ea4b765ce61b9fb3007bc6ad0a",
+        "textures/c366ec0dd347f024ab1b81a193162079.png": "a8011d3f50d227fe39a9b535333012009aaf200c2fdbc6db16fe242cebe813d9"
+      }
+    },
+    {
+      "resourceKind": 5766,
+      "package": "5766/effect.json",
+      "effectSha256": "aa40a7dcec6453553a31018391fce553e96f797f47ba69c5f7af865c4acc3f51",
+      "status": "Passed",
+      "files": {
+        "effect.json": "aa40a7dcec6453553a31018391fce553e96f797f47ba69c5f7af865c4acc3f51",
+        "textures/e553447de39fed048a236e3b6881989b.png": "e75a07ceaddf435ada0c9834ce0740414e0fa4d766e34139eae01ed393b3bdb4"
+      }
+    },
+    {
+      "resourceKind": 5767,
+      "package": "5767/effect.json",
+      "effectSha256": "260697e344e906bcdaee697cd7aeb6ab2db8ca466bc5977e04b5344ab8c772d9",
+      "status": "Passed",
+      "files": {
+        "effect.json": "260697e344e906bcdaee697cd7aeb6ab2db8ca466bc5977e04b5344ab8c772d9",
+        "textures/5ace8383e875ae14a83753765e5b5eed.png": "ddf8fda6d13171e86edfc3a7e35723bd9b6d4b6a0d7b1ca77b4a6c6543e0b5dd"
       }
     }
   ],

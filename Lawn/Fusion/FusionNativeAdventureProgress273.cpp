@@ -1,5 +1,6 @@
 #include "FusionNativeAdventureProgress273.h"
 #include "FusionNativeAdventure273.h"
+#include "FusionNativeAdventureLesson346.h"
 #include "FusionNative.h"
 #include "FusionNativeVisual.h"
 #include "FusionNativeGlove.h"
@@ -88,6 +89,30 @@ SexyString Text(FusionAdventureMessage273 message)
     case FusionAdventureMessage273::IceIntro:return _S("Познакомимся с новой механикой ледяных растений — шкалой заморозки.");
     case FusionAdventureMessage273::IceDefense:return _S("Ледяные атаки заполняют шкалу заморозки. Полная шкала замораживает зомби и обнуляется. Замороженный зомби получает вчетверо больше урона от ледяных снарядов.");
     case FusionAdventureMessage273::IceLessonReady:return _S("Предел заморозки растёт с каждым замораживанием");
+    case FusionAdventureMessage273::KelpBullets:return _S("Водорослевые снаряды особенно сильны на водных дорожках.");
+    case FusionAdventureMessage273::KelpMillion:return _S("Посмотрим, как они справятся с подлодкой с миллионом здоровья.");
+    case FusionAdventureMessage273::KelpPercent:return _S("Попадания по водным зомби наносят дополнительный процентный урон. Более 30 попаданий уничтожают зомби!");
+    case FusionAdventureMessage273::WarmIntro:return _S("Познакомимся с новым состоянием зомби — перегревом.");
+    case FusionAdventureMessage273::WarmBonus:return _S("«Перегретый» зомби получает +50% урона");
+    case FusionAdventureMessage273::WarmChain:return _S("Смерть перегретого зомби: 100 урона соседям + передача перегрева");
+    case FusionAdventureMessage273::LightIntro:return _S("Здесь фонарь полезнее, чем в оригинальной игре.");
+    case FusionAdventureMessage273::LightSystem:return _S("Познакомимся с системой освещения фонаря.");
+    case FusionAdventureMessage273::LightOne:return _S("Фонарь добавляет один уровень света клеткам в области 3×3 вокруг себя.");
+    case FusionAdventureMessage273::LightFusion:return _S("Растения, объединённые с фонарём, становятся сильнее при освещении.");
+    case FusionAdventureMessage273::LightStack:return _S("Чем больше света, тем сильнее растения. Обычно максимальная сила достигается при трёх уровнях света.");
+    case FusionAdventureMessage273::LightReady:return _S("Свет усиливает световые растения. Высаживайте растения и защищайтесь от зомби!");
+    case FusionAdventureMessage273::MagnetIntro:return _S("Познакомимся с магнитной системой.");
+    case FusionAdventureMessage273::MagnetNear:return _S("Магнитные растения на соседних восьми клетках входят в одну систему и соединяются белой линией.");
+    case FusionAdventureMessage273::MagnetUnlimited:return _S("Число растений в магнитной системе не ограничено: достаточно соединения с одним её участником.");
+    case FusionAdventureMessage273::MagnetChain:return _S("Пока магнитная цепь не разорвана, все растения принадлежат одной системе.");
+    case FusionAdventureMessage273::MagnetSeparate:return _S("Несвязанные растения образуют отдельную магнитную систему.");
+    case FusionAdventureMessage273::MagnetConnect:return _S("Соедините две системы, посадив магнитные растения между ними.");
+    case FusionAdventureMessage273::MagnetReady:return _S("Некоторые растения усиливаются магнитной системой. Высаживайте растения и защищайтесь от зомби!");
+    case FusionAdventureMessage273::MoneyIntro:return _S("Познакомимся с денежной системой бархатцев.");
+    case FusionAdventureMessage273::MoneyEnable:return _S("Посадка бархатцев включает кошелёк в левом нижнем углу.");
+    case FusionAdventureMessage273::MoneyUpgrade:return _S("Деньгами можно улучшать серебряные растения. Выберите кофейное зерно внизу слева и примените к серебряному капустомёту.");
+    case FusionAdventureMessage273::MoneyAbility:return _S("Улучшение запускает особую атаку. Золотые растения могут повторять её за деньги. Каждая трата также даёт солнце!");
+    case FusionAdventureMessage273::MoneyLink:return _S("Особая атака растения в золотом горшке может запустить атаки других золотых горшков. Попробуйте золотой кукурузомёт.");
     default:return _S("");
     }
 }
@@ -612,6 +637,7 @@ bool PreflightNativeFusionAdventureLesson278(Board* b,int level,std::string* err
     if(error)error->clear();
     // Six bodies cover the fresh3-Puff preparation plus the later3-child
     // replacement peak; no old actor/animation is credited as already freed.
+    if(FusionAdventureLesson346Supported(level))return PreflightNativeFusionAdventureLesson346(b,level,error);
     if(level==10)return Lesson10World281(b,error)&&Lesson10Peak281(b,6,error);
     if(level==13||level==15)
     {
@@ -649,14 +675,14 @@ bool UpdateNativeFusionAdventureTutorial273(Board* b,FusionAdventureRun273& r,Fu
 {
     out={};
     if(!Playing(b)||!FusionAdventureRunValid273(r)||!r.level||
-        (r.tutorial.active&&r.level!=1&&r.level!=4&&r.level!=7&&r.level!=8&&r.level!=10&&r.level!=13&&r.level!=15))return false;
+        (r.tutorial.active&&!FusionAdventureLesson346Supported(r.level)&&r.level!=1&&r.level!=4&&r.level!=7&&r.level!=8&&r.level!=10&&r.level!=13&&r.level!=15))return false;
     auto* context=GetNativeContext(b);if(!context)return false;
     if(!r.tutorial.active||!((r.level==4&&r.tutorial.stage>=3)||(r.level==7&&r.tutorial.stage==2)||
         (r.level==13&&r.tutorial.stage>=7)))context->adventureMissionPlantUID=0;
-    if(!r.tutorial.active||(r.level!=7&&r.level!=8)||(r.level==7&&r.tutorial.stage<4)||
-        (r.level==8&&r.tutorial.stage<2))context->adventureMissionZombieUID=0;
+    if(!r.tutorial.active||(r.level!=7&&r.level!=8&&r.level!=22)||(r.level==7&&r.tutorial.stage<4)||
+        ((r.level==8||r.level==22)&&r.tutorial.stage<2))context->adventureMissionZombieUID=0;
     auto candidate=r;FusionAdventureTutorialEffects273 effects;
-    if(r.level==4||r.level==7||r.level==8||r.level==10||r.level==13||r.level==15)
+    if(FusionAdventureLesson346Supported(r.level)||r.level==4||r.level==7||r.level==8||r.level==10||r.level==13||r.level==15)
     {
         FusionAdventureLessonInput274 input;
         auto* mission=b->mPlants.DataArrayTryToGet(context->adventureMissionPlantUID);
@@ -676,7 +702,7 @@ bool UpdateNativeFusionAdventureTutorial273(Board* b,FusionAdventureRun273& r,Fu
         auto* enemy=b->mZombies.DataArrayTryToGet(context->adventureMissionZombieUID);
         const auto* source=GetNativeSourceZombieData(enemy);
         input.hasMissionZombie=enemy&&!enemy->mNetGhost&&source&&source->instanceToken==context->adventureMissionZombieUID&&
-            source->kind==(r.level==7?104:106);
+            source->kind==(r.level==7?104:r.level==22?14:106);
         if(input.hasMissionZombie)
         {input.missionZombieBeforeDying=!enemy->mHasHead;input.missionZombieDying=GetNativeFusionZombieStatus(enemy)==1;}
         if(r.level==8)
@@ -686,10 +712,18 @@ bool UpdateNativeFusionAdventureTutorial273(Board* b,FusionAdventureRun273& r,Fu
                 identity->instanceToken==b->mPlants.DataArrayGetID(plant)&&(identity->kind==1020||identity->kind==1029))
                 input.hasBucketPlant1020or1029=true;
         }
+        if(FusionAdventureLesson346Supported(r.level))ObserveNativeFusionAdventureLesson346(b,input);
         if(!StepFusionAdventureTutorial273(candidate,1,input,effects))return false;
         switch(effects.missionAction)
         {
         case FusionAdventureMissionAction274::None:break;
+        case FusionAdventureMissionAction274::ExecuteSourceLesson346:
+        {
+            std::string error;
+            if(!ExecuteNativeFusionAdventureLesson346(b,r.level,r.tutorial.stage,context->adventureMissionZombieUID,&error))
+            {if(b->mMainCounter%100==0)LawnNet::NetTrace("Fusion source lesson346 blocked level=%u stage=%u reason=%s",r.level,r.tutorial.stage,error.c_str());return false;}
+            break;
+        }
         case FusionAdventureMissionAction274::Prepare4:if(!PrepareLesson4(b,context->adventureMissionPlantUID))return false;break;
         case FusionAdventureMissionAction274::Prepare7:if(!PrepareLesson7(b,context->adventureMissionPlantUID))return false;break;
         case FusionAdventureMissionAction274::Spawn7EnemyAndCard:if(!SpawnLessonEnemyAndCards278(b,7,context->adventureMissionZombieUID))return false;break;

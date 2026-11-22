@@ -1,0 +1,276 @@
+{
+  "schema": 1,
+  "sourcePrefab": "Resources/Zombies/InTravel/SuperKirov/Superbomb/SuperBomb.prefab",
+  "unitsPerNativePixel": 0.01,
+  "applyRootMotion": false,
+  "static": true,
+  "root": 0,
+  "nodes": [
+    {
+      "name": "SuperBomb",
+      "active": true,
+      "tag": "Untagged",
+      "parent": -1,
+      "path": "",
+      "position": {
+        "x": 0.376364,
+        "y": -0.069909334,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5
+      }
+    }
+  ],
+  "sourceHierarchy": null,
+  "sprites": [
+    {
+      "texture": "textures/48be3bf18471.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Superbomb\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 1619\n    width: 82\n    height: 83\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    4314e3d4be1ba584eac6b00a42611be1: 2957706857873069894\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 541fe810dd4748b4a93768cfc9d9297d, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 12\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 6\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 050004000300000003000400010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 6\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 128\n      _typelessdata: 295c8f3ee17ad43e0000000085ebd13ee17ad4be0000000085ebd13e48e1ba3e00000000ec5138bee17ad4be0000000085ebd1bee17ad43e0000000085ebd1beae47a1be000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 1619\n      width: 82\n      height: 83\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 45, z: 100, w: 1660.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.2800000011920929,
+            "y": 0.41499999165534973,
+            "z": 0.0,
+            "u": 0.07128906261641532,
+            "v": 0.16894531290745363
+          },
+          {
+            "x": 0.4099999964237213,
+            "y": -0.41499999165534973,
+            "z": 0.0,
+            "u": 0.08398437465075403,
+            "v": 0.20947265584254637
+          },
+          {
+            "x": 0.4099999964237213,
+            "y": 0.36500000953674316,
+            "z": 0.0,
+            "u": 0.08398437465075403,
+            "v": 0.1713867182843387
+          },
+          {
+            "x": -0.18000000715255737,
+            "y": -0.41499999165534973,
+            "z": 0.0,
+            "u": 0.02636718680150807,
+            "v": 0.20947265584254637
+          },
+          {
+            "x": -0.4099999964237213,
+            "y": 0.41499999165534973,
+            "z": 0.0,
+            "u": 0.0039062503492459655,
+            "v": 0.16894531290745363
+          },
+          {
+            "x": -0.4099999964237213,
+            "y": -0.3149999976158142,
+            "z": 0.0,
+            "u": 0.0039062503492459655,
+            "v": 0.20458984363358468
+          }
+        ],
+        "indices": [
+          5,
+          4,
+          3,
+          0,
+          3,
+          4,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/intravel/superkirov/Superbomb.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 1619.0,
+        "width": 82.0,
+        "height": 83.0,
+        "yTop": 346.0
+      },
+      "logicalSize": {
+        "width": 82.0,
+        "height": 83.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "4107b6f734959ad4dba57b10e02bd7da",
+      "node": 0,
+      "sortingOrder": 1,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false,
+      "maskInteraction": 0
+    }
+  ],
+  "spriteVariants": {
+    "4107b6f734959ad4dba57b10e02bd7da": {
+      "texture": "textures/48be3bf18471.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Superbomb\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 1619\n    width: 82\n    height: 83\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    4314e3d4be1ba584eac6b00a42611be1: 2957706857873069894\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 541fe810dd4748b4a93768cfc9d9297d, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 12\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 6\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 050004000300000003000400010003000000020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 6\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 128\n      _typelessdata: 295c8f3ee17ad43e0000000085ebd13ee17ad4be0000000085ebd13e48e1ba3e00000000ec5138bee17ad4be0000000085ebd1bee17ad43e0000000085ebd1beae47a1be000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 1619\n      width: 82\n      height: 83\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 45, z: 100, w: 1660.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.2800000011920929,
+            "y": 0.41499999165534973,
+            "z": 0.0,
+            "u": 0.07128906261641532,
+            "v": 0.16894531290745363
+          },
+          {
+            "x": 0.4099999964237213,
+            "y": -0.41499999165534973,
+            "z": 0.0,
+            "u": 0.08398437465075403,
+            "v": 0.20947265584254637
+          },
+          {
+            "x": 0.4099999964237213,
+            "y": 0.36500000953674316,
+            "z": 0.0,
+            "u": 0.08398437465075403,
+            "v": 0.1713867182843387
+          },
+          {
+            "x": -0.18000000715255737,
+            "y": -0.41499999165534973,
+            "z": 0.0,
+            "u": 0.02636718680150807,
+            "v": 0.20947265584254637
+          },
+          {
+            "x": -0.4099999964237213,
+            "y": 0.41499999165534973,
+            "z": 0.0,
+            "u": 0.0039062503492459655,
+            "v": 0.16894531290745363
+          },
+          {
+            "x": -0.4099999964237213,
+            "y": -0.3149999976158142,
+            "z": 0.0,
+            "u": 0.0039062503492459655,
+            "v": 0.20458984363358468
+          }
+        ],
+        "indices": [
+          5,
+          4,
+          3,
+          0,
+          3,
+          4,
+          1,
+          3,
+          0,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/intravel/superkirov/Superbomb.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 1619.0,
+        "width": 82.0,
+        "height": 83.0,
+        "yTop": 346.0
+      },
+      "logicalSize": {
+        "width": 82.0,
+        "height": 83.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    }
+  },
+  "extraSpriteGuids": {},
+  "anchors": {},
+  "visualBounds": {
+    "minX": -0.20499999821186066,
+    "maxX": 0.20499999821186066,
+    "minY": -0.20749999582767487,
+    "maxY": 0.20749999582767487
+  },
+  "clips": {},
+  "controller": {
+    "states": [],
+    "layers": [],
+    "serializedController": ""
+  },
+  "nonRenderingComponents": [],
+  "colliders": [],
+  "ignoredBindings": [],
+  "omittedInactiveNodes": [],
+  "spritePrefix": null,
+  "unusedSpriteBonesExplicitlyAllowed": false,
+  "sources": [
+    {
+      "path": "Resources/Zombies/InTravel/SuperKirov/Superbomb/SuperBomb.prefab",
+      "sha256": "57c2b10646a45240a623648c2e7d03e101044530aaeea068bfb7aa4b565ca86d"
+    },
+    {
+      "path": "Resources/zombies/intravel/superkirov/Superbomb.asset",
+      "sha256": "d9ad7fccec5c90f4d9a4ec9705a23641652182b9eea4cf98fa884213afec740e"
+    },
+    {
+      "path": "Resources/zombies/intravel/superkirov/Superbomb.asset.meta",
+      "sha256": "357531cee996dacc4fce9b27aa0d28b2a29a1d4a2bc23b63f11a937591ae202f"
+    },
+    {
+      "path": "Resources/zombies/intravel/superkirov/SuperKirov.png",
+      "sha256": "48be3bf184714319a62940ce6bd2a2c629966830ffec18b4e0fb62a3881bffad"
+    },
+    {
+      "path": "Resources/zombies/intravel/superkirov/SuperKirov.png.meta",
+      "sha256": "560aa03ce83a9cace34e53166b8fba69a13d8922717dd6e421c3df5f732754fd"
+    }
+  ],
+  "deferredComponents": [],
+  "validation": "Exported source data. Native rendering and source-runtime comparison are separate verification steps.",
+  "rendererFeatures": [
+    "spriteMaskV1",
+    "spriteSkinV1"
+  ],
+  "sourceMasks": [],
+  "sourceSkins": []
+}

@@ -6,7 +6,7 @@ namespace LawnFusion
 {
 // Root owns the NativeContext member/save/snapshot codec. Each adapter receives
 // that one room state by reference; clients never step it or mutate the profile.
-// Native lessons1/4/7/8/10/13/15. Prepare4/7 currently support
+// Native source lessons1/4/7/8/10/13/15 plus data-driven22/24/30/35/42. Prepare4/7 currently support
 // empty cells or audited removal-only kinds0/1/2/3/1000/1030/1032/1033; other
 // occupants refuse before mutation until their source callback budgets/order
 // are closed. Root keeps public/campaign admission separate from this adapter.

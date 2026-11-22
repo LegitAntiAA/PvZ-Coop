@@ -5,6 +5,8 @@
 #include "FusionNativeZombiePreflight280.h"
 #include "FusionSourceZombieClosure280.h"
 #include "FusionCampaign272Rules.h"
+#include "FusionCampaign342Rules.h"
+#include "FusionNativeSourceLifecycle313.h"
 #include "FusionNativeZombieVisual.h"
 #include "../Board.h"
 #include "../Zombie.h"
@@ -24,11 +26,13 @@ struct Adapter
     Board* board;
     std::string* error;
     std::vector<uint16_t> prepared;
+    FusionCampaign342Plan plan;
+    FusionAdventureScheduler273Random random;
 };
 bool Reject(Adapter& a,const char* message)
 {if(a.error)*a.error=message;return false;}
 bool Current(Board* b)
-{return IsNativeSourceAdventureGrassWorld281(b);}
+{return IsNativeSourceAdventureWorld342(b);}
 bool Ready(void* user,uint16_t kind)
 {
     auto& a=*static_cast<Adapter*>(user);
@@ -54,7 +58,25 @@ bool CanSpawn(void* user,std::span<const uint16_t> kinds)
     auto& a=*static_cast<Adapter*>(user);auto* b=a.board;
     if(!Current(b)||b->mApp->NetIsClient()||b->mPaused||b->mApp->mGameScene!=SCENE_PLAYING)
         return Reject(a,"Source scheduler cannot spawn outside its active host Board.");
-    return CanAllocateNativeSourceZombieBatch280(b,kinds,a.error);
+    if(a.plan.source->rows==5)return CanAllocateNativeSourceZombieBatch280(b,kinds,a.error);
+    FusionSourceDeathBudget319 peak;
+    for(auto kind:kinds)
+    {
+        std::vector<uint16_t> variants;
+        if(!FusionCampaign342SpawnKinds(a.plan,kind,variants))return Reject(a,"Invalid source row variants before row RNG.");
+        FusionSourceDeathBudget319 maximum;
+        for(auto variant:variants)
+        {
+            FusionSourceDeathBudget319 own;const uint16_t one[]={variant};
+            if(!GetNativeSourceZombieBirthBudget319(b,one,own,a.error))return false;
+#define MAXIMUM(field) maximum.field=(std::max)(maximum.field,own.field)
+            MAXIMUM(zombies);MAXIMUM(projectiles);MAXIMUM(reanimations);MAXIMUM(attachments);
+            MAXIMUM(coins);MAXIMUM(droppedCards);MAXIMUM(particleSystems);MAXIMUM(emitters);
+#undef MAXIMUM
+        }
+        if(!AddFusionSourceDeathBudget319(peak,maximum,peak))return Reject(a,"Source whole-wave row-variant peak overflow.");
+    }
+    return CanAllocateNativeSourceBudget319(b,peak,a.error);
 }
 bool Spawn(void* user,int wave,std::span<const FusionAdventureScheduler273Spawn> batch,float& output)
 {
@@ -64,8 +86,19 @@ bool Spawn(void* user,int wave,std::span<const FusionAdventureScheduler273Spawn>
     const float sourceRootX=float(b->GetCellCenterX(b->GetColumnCount()-1,0))+
         2.6f*(float(b->GetCellPitchX())/1.35f);
     if(!std::isfinite(sourceRootX))return Reject(a,"Source scheduler spawn projection is invalid.");
-    std::vector<FusionAdventureScheduler273Health> health;health.reserve(batch.size());
+    std::vector<uint8_t> ice(size_t(a.plan.source->rows));
+    // Native projection of source iceRoadX==35 (no road), not a new ice clock.
+    for(size_t row=0;row<ice.size();++row)ice[row]=b->mIceTimer[row]>0?1:0;
+    std::vector<FusionAdventureScheduler273Spawn> projected;projected.reserve(batch.size());
     for(const auto& spawn:batch)
+    {
+        FusionAdventureScheduler273Spawn actual;
+        if(!ResolveFusionCampaign342Spawn(a.plan,spawn.kind,spawn.row,ice,a.random,actual))
+            return Reject(a,"Source row/canonical-kind projection failed before birth.");
+        projected.push_back(actual);
+    }
+    std::vector<FusionAdventureScheduler273Health> health;health.reserve(projected.size());
+    for(const auto& spawn:projected)
     {
         auto* z=SpawnNativeSourceZombie(b,spawn.kind,spawn.row,wave);
         const auto* source=GetNativeSourceZombieData(z);float rootX=0,rootY=0;
@@ -78,8 +111,8 @@ bool Spawn(void* user,int wave,std::span<const FusionAdventureScheduler273Spawn>
         health.push_back({source->health,z->mHelmHealth,z->mShieldHealth,false});
     }
     if(!TrySumFusionAdventureBirthHealth273(health,output))return Reject(a,"Source scheduler actual birth health is invalid.");
-    LawnNet::NetTrace("Fusion source Adventure273 wave=%d count=%zu birthHP=%.9g rootX=%.9g sourceRows=1 nativeSlotAdaptation=0",
-        wave,batch.size(),output,sourceRootX);
+    LawnNet::NetTrace("Fusion source Adventure273 wave=%d count=%zu birthHP=%.9g rootX=%.9g sourceRows=%u nativeSlotAdaptation=0",
+        wave,batch.size(),output,sourceRootX,a.plan.source->rows);
     return true;
 }
 }
@@ -88,13 +121,12 @@ Result InitializeNativeAdventureScheduler273(Board* board,FusionAdventureSchedul
 {
     if(error)error->clear();
     if(!board||!board->mApp||board->mApp->NetIsClient())return Result::NotHost;
-    Adapter adapter{board,error};
+    Adapter adapter{board,error};adapter.random=random;
     if(!Current(board)||!NativeSourceAdventureLevelReady273(level,uint32_t(cycle)))
-    {Reject(adapter,"Source scheduler requires the shared admitted ordinary grass campaign policy.");return Result::NotReady;}
+    {Reject(adapter,"Source scheduler requires the shared admitted source scene/controller policy.");return Result::NotReady;}
     const auto* config=FindFusionSourceAdventure272(level);
-    if(!config){Reject(adapter,"Source scheduler descriptor is unavailable.");return Result::NotReady;}
-    std::vector<uint16_t> roots(config->allowedZombieKinds.begin(),config->allowedZombieKinds.end());
-    roots.push_back(0); // Exact source budget fallback, independently of the allow-list.
+    if(!config||!BuildFusionCampaign342Plan(level,uint32_t(cycle),adapter.plan,error)){Reject(adapter,"Source scheduler descriptor is unavailable.");return Result::NotReady;}
+    const auto& roots=adapter.plan.possibleKinds; // Full row variants and exact Normal0 fallback, before RNG.
     if(!BuildFusionSourceZombieClosure280(roots,adapter.prepared,error)||
         !EnsureNativeSourceZombieClosure280(board,adapter.prepared,error))return Result::NotReady;
     return InitializeFusionAdventureScheduler273(state,true,level,cycle,difficulty,random,&adapter,Ready);
@@ -105,9 +137,10 @@ Result UpdateNativeAdventureScheduler273(Board* board,FusionAdventureScheduler27
 {
     events={};if(error)error->clear();
     if(!board||!board->mApp||board->mApp->NetIsClient())return Result::NotHost;
-    Adapter adapter{board,error};
+    Adapter adapter{board,error};adapter.random=random;
     if(!Current(board)||!NativeSourceAdventureLevelReady273(state.level,uint32_t(state.cycle)))
-    {Reject(adapter,"Source scheduler lost its admitted native grass Board.");return Result::NotReady;}
+    {Reject(adapter,"Source scheduler lost its admitted native source Board.");return Result::NotReady;}
+    if(!BuildFusionCampaign342Plan(state.level,uint32_t(state.cycle),adapter.plan,error))return Result::NotReady;
     auto effective=input;effective.host=input.host&&!board->mApp->NetIsClient();
     effective.paused=input.paused||board->mPaused||board->mApp->mGameScene!=SCENE_PLAYING;
     FusionAdventureScheduler273Callbacks callbacks;

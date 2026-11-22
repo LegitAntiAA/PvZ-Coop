@@ -5,7 +5,7 @@
 class Board;class Projectile;class Zombie;class Plant;
 namespace LawnFusion
 {
-enum class FusionSourceObstacle313Kind:uint8_t {DrownWeapon=1,KirovBomb=2,SuperBall=3,MachineBall=4};
+enum class FusionSourceObstacle313Kind:uint8_t {DrownWeapon=1,KirovBomb=2,SuperBall=3,MachineBall=4,SpiderWeapon=5};
 struct FusionSourceObstacle313View
 {
     FusionSourceObstacle313Kind kind=FusionSourceObstacle313Kind::DrownWeapon;
@@ -13,17 +13,21 @@ struct FusionSourceObstacle313View
     uint16_t ownerId=0,targetPlantId=0;
     uint32_t ownerToken=0,targetPlantToken=0;
     bool landed=false,hit=false,fromHypno=false,exploded=false;
-    uint8_t variant=0,hitCount=0;
-    uint32_t lastHitAge=0; // Source .3s flashTime, relative to raw native age.
+    uint8_t variant=0;uint16_t hitCount=0;
+    bool drownLongFlash=false; // Big Drown:5s warning vs .3s bullet flash, origin below.
+    uint32_t lastHitAge=0; // Actual raw-age flash origin; no independent timer.
     int32_t ageTicks=0; // Snapshot mirror of actual Projectile.mProjectileAge.
     float velocityX=0,velocityY=0,velocityZ=0,accelerationZ=0;
     LawnNet::NetZombieAnimState clock; // Genuine MachineBall Animator only.
 };
 inline bool FusionSourceObstacle313ControllerValid(const FusionSourceObstacle313View& d)
 {
-    if(!d.instanceToken||!d.ownerId||!d.ownerToken||bool(d.targetPlantId)!=bool(d.targetPlantToken))return false;
-    if(d.kind==FusionSourceObstacle313Kind::DrownWeapon)return !d.fromHypno&&!d.exploded&&!d.variant&&!d.hitCount&&!d.lastHitAge;
-    if(d.kind==FusionSourceObstacle313Kind::KirovBomb)return !d.targetPlantId&&!d.targetPlantToken&&!d.landed&&!d.hit&&!d.variant&&!d.hitCount&&!d.lastHitAge;
+    if(!d.instanceToken||!d.ownerId||!d.ownerToken||bool(d.targetPlantId)!=bool(d.targetPlantToken)||
+       (d.drownLongFlash&&(d.kind!=FusionSourceObstacle313Kind::DrownWeapon||!(d.variant&2))))return false;
+    if(d.kind==FusionSourceObstacle313Kind::DrownWeapon)return !d.fromHypno&&d.variant<=3&&d.hitCount<=301&&
+        (!(d.variant&1)||!d.targetPlantId)&&((d.variant&2)?!d.hit:(!d.exploded&&!d.hitCount&&!d.lastHitAge&&!d.drownLongFlash));
+    if(d.kind==FusionSourceObstacle313Kind::KirovBomb)return !d.targetPlantId&&!d.targetPlantToken&&!d.landed&&!d.hit&&d.variant<=1&&!d.hitCount&&!d.lastHitAge;
+    if(d.kind==FusionSourceObstacle313Kind::SpiderWeapon)return !d.targetPlantId&&!d.targetPlantToken&&!d.landed&&!d.hit&&!d.variant&&!d.hitCount&&!d.lastHitAge;
     if(d.kind==FusionSourceObstacle313Kind::SuperBall)return !d.targetPlantId&&!d.targetPlantToken&&!d.landed&&!d.hit&&!d.fromHypno&&d.variant<=1&&!d.hitCount&&!d.lastHitAge;
     if(d.kind==FusionSourceObstacle313Kind::MachineBall)return !d.targetPlantId&&!d.targetPlantToken&&!d.landed&&!d.hit&&!d.fromHypno&&d.variant<=1&&d.hitCount<=31&&(!d.hitCount?d.lastHitAge==0:true);
     return false;

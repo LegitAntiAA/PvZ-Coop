@@ -1,4 +1,5 @@
 #include "FusionNative.h"
+#include "FusionNativeConveyor308.h"
 #include "FusionNativeCharred311.h"
 #include "FusionNativeObstacle313.h"
 #include "FusionNativeCapturedSourcePlant314.h"

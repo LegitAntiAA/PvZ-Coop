@@ -50,6 +50,8 @@ bool MoveNativeSpecialZombie269Driver(Zombie*,float sourceCurrentSpeed,bool behi
 using NativeSpecialZombie269PlantTraits=bool(*)(const Plant*,bool& isCaltrop,bool& isNut,int& sourceLevel);
 using NativeSpecialZombie269VehicleFx=bool(*)(Zombie*,uint16_t sourceParticle,float x,float y);
 bool IsNativeSpecialZombie269Vehicle(const Zombie*);
+// Source Start sets inWater, independently of actual native row/mInPool.
+bool NativeSubmarine343SourceInWater(const Zombie*);
 bool NativeSpecialZombie269VehicleTerrainValid(const Zombie*);
 bool NativeSpecialZombie269VehicleColliderEnabled(const Zombie*);
 bool StartNativeSpecialZombie269Vehicle(Zombie*);

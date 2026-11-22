@@ -10,6 +10,7 @@ struct NativeExtendedZombie313State:FusionExtendedZombie313View
     // HOST ONLY. Source frame-yield/contact-enter/lifecycle bookkeeping.
     int bornFrame=-1,logicTick=-1;
     bool initialized=false,failed=false,deathConsumed=false;
+    bool boardCounted347=false; // HOST ONLY successful hostile218 factory commit.
     std::vector<uint32_t> ironEnterContacts;
 };
 struct NativeExtendedZombie313Input

@@ -12,6 +12,8 @@ constexpr size_t kFusionBankCapacity = 14;
 constexpr size_t kFusionBankPlayers = 4;
 
 enum class FusionBankPhase : uint8_t { Closed, Choosing, Intro, Playing };
+// Derived by the authoritative descriptor, never inferred from wire fields.
+enum class FusionBankPolicy : uint8_t { Selected, SourceConveyor };
 
 // Supplied by the host's source unlock/scene/implemented-behavior policy.
 // No catalog-wide default pool and no client-supplied prices are accepted.
@@ -44,6 +46,7 @@ struct FusionBankPacket
     int price = 0;
     float rechargeSeconds = 0.0f;
     float remainingRechargeSeconds = 0.0f;
+    uint8_t conveyorUses = 0; // Successful uses of this identity; Selected requires zero.
     bool operator==(const FusionBankPacket&) const = default;
 };
 
@@ -72,6 +75,12 @@ public:
     // Fresh selection or added participants use a strictly newer epoch.
     bool Open(uint32_t epoch, int difficulty, const std::vector<FusionBankEligibleCard>& eligible, uint8_t activeMask,
         size_t capacity = kFusionBankCapacity);
+    // Source-only normal, free, zero-CD eligibility; capacity is exactly13.
+    // Skips Choosing and starts the existing native Intro barrier with no cards.
+    bool OpenConveyor(uint32_t epoch, int difficulty, const std::vector<FusionBankEligibleCard>& eligible, uint8_t activeMask);
+    bool AppendConveyor(uint32_t epoch, FusionPlantId kind, uint16_t* packetId = nullptr);
+    // Call only after successful world placement, using the authenticated slot.
+    bool ConsumeConveyor(uint32_t epoch, int slot, uint16_t packetId);
     bool Choose(uint32_t epoch, int slot, FusionPlantId kind, bool isExtra, uint16_t* packetId = nullptr);
     bool Unchoose(uint32_t epoch, int slot, uint16_t packetId);
     bool ToggleMystery(uint32_t epoch, int slot, bool enabled);
@@ -92,13 +101,15 @@ public:
     bool ReassignOwners(uint32_t epoch, uint8_t activeMask);
     // Disconnect-only reconciliation. Choosing retains surviving choices and
     // refills opaque mystery quotas; Playing preserves all packet identities.
-    // Intro/additions reject. An unchanged valid roster is an idempotent no-op.
+    // Selected Intro/additions reject. SourceConveyor permits removal-only in
+    // Intro/Playing and retains all shared identities. Unchanged is a no-op.
     bool ReconcilePlayers(uint32_t epoch, uint8_t activeMask);
 
     const FusionBankState& State() const { return mState; }
+    FusionBankPolicy Policy() const { return mPolicy; }
     static bool ValidateSnapshot(const FusionBankState& state, const std::vector<FusionBankEligibleCard>& eligible,
-        size_t capacity = kFusionBankCapacity);
-    // Initialize the same source eligibility via Open before applying a state.
+        size_t capacity = kFusionBankCapacity, FusionBankPolicy policy = FusionBankPolicy::Selected);
+    // Initialize the same eligibility/policy via Open or OpenConveyor first.
     // Wrong epoch, old revision, phase rollback and malformed states are rejected.
     bool ApplySnapshot(const FusionBankState& state);
 
@@ -106,6 +117,7 @@ private:
     FusionBankState mState;
     std::vector<FusionBankEligibleCard> mEligible;
     size_t mCapacity = kFusionBankCapacity;
+    FusionBankPolicy mPolicy = FusionBankPolicy::Selected;
     bool HasContext(uint32_t epoch, FusionBankPhase phase) const;
     bool CanChoose(uint32_t epoch, int slot) const;
     void Commit(FusionBankState& state);

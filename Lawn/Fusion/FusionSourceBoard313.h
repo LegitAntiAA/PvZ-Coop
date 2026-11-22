@@ -8,5 +8,6 @@ struct FusionExtendedBoard313State
 {
     int32_t ultimateCount=0;
     float punishTime=0;
+    int32_t ultimateFootballDrownCount=0; // Source Board+0x120; hostile factory218++ / DieEvent--.
 };
 }

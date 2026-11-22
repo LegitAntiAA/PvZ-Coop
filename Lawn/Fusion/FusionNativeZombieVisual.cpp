@@ -9,9 +9,14 @@
 #include "FusionNativeJackbox300.h"
 #include "FusionNativeSourceClock313.h"
 #include "FusionNativeWaterZombie313.h"
+#include "FusionNativeWaterShoot343.h"
 #include "FusionNativeSourceGraph313.h"
 #include "FusionNativeHeavyZombie313B.h"
 #include "FusionNativeExtendedZombie313.h"
+#include "FusionExtendedZombie347Rules.h"
+#include "FusionNextZombie343Rules.h"
+#include "FusionGroundShooter343Rules.h"
+#include "FusionSnowZombie363Rules.h"
 #include "FusionNativeProjection313.h"
 
 #include "../Board.h"
@@ -45,6 +50,25 @@ const char* CohortPrefab316(uint16_t kind)
 {
     switch(kind)
     {
+    case 202:return "Resources/zombies/_prefab/FootballDrownZombie.prefab";
+    case 204:return "Resources/zombies/_prefab/BlackFootballZombie.prefab";
+    case 205:return "Resources/zombies/_prefab/KirovZombie.prefab";
+    case 206:return "Resources/zombies/_prefab/BombThrowerZombie.prefab";
+    case 210:return "Resources/zombies/_prefab/SuperMachineNutZombie.prefab";
+    case 218:return "Resources/zombies/_prefab/UltimateFootballDrown.prefab";
+    case 219:return "Resources/zombies/_prefab/UltimateMachineNutZombie.prefab";
+    case 220:return "Resources/zombies/_prefab/UltimateFootballZombie.prefab";
+    case 221:return "Resources/zombies/_prefab/MachineSpiderZombie.prefab";
+    case 224:return "Resources/zombies/_prefab/UltimateJackboxZombie.prefab";
+    case 113:return "Resources/zombies/_prefab/DolphinPeaZombie.prefab";
+    case 214:return "Resources/zombies/_prefab/DolphinGatlingZombie.prefab";
+    case 47:return "Resources/zombies/_prefab/SnowZombie.prefab";
+    case 48:return "Resources/zombies/_prefab/NewYearZombie.prefab";
+    case 114:return "Resources/zombies/_prefab/IronPeaDoorZombie.prefab";
+    case 118:return "Resources/zombies/_prefab/GatlingFootballZombie.prefab";
+    case 119:return "Resources/zombies/_prefab/IronBalloonZombie2.prefab";
+    case 112:return "Resources/zombies/_prefab/CherryCatapultZombie.prefab";
+    case 216:return "Resources/zombies/_prefab/DrownpultZombie.prefab";
     case 16:return "Resources/zombies/_prefab/DriverZombie.prefab";
     case 17:return "Resources/zombies/_prefab/SnorkleZombie.prefab";
     case 19:return "Resources/zombies/_prefab/DolphinriderZombie.prefab";
@@ -78,6 +102,25 @@ const char* CohortPackage316(uint16_t kind)
 {
     switch(kind)
     {
+    case 202:return "zombie351-202";
+    case 204:return "zombie351-204";
+    case 205:return "zombie351-205";
+    case 206:return "zombie351-206";
+    case 210:return "zombie351-210";
+    case 218:return "zombie351-218";
+    case 219:return "zombie351-219";
+    case 220:return "zombie351-220";
+    case 221:return "zombie351-221";
+    case 224:return "zombie351-224";
+    case 113:return "zombie343-113";
+    case 214:return "zombie343-214";
+    case 47:return "zombie363-47";
+    case 48:return "zombie363-48";
+    case 114:return "zombie343-114";
+    case 118:return "zombie343-118";
+    case 119:return "zombie343-119";
+    case 112:return "zombie351-112";
+    case 216:return "zombie351-216";
     case 16:return "zombie313-16";
     case 17:return "zombie313-17";
     case 19:return "zombie313-19";
@@ -110,6 +153,9 @@ const char* CohortPackage316(uint16_t kind)
 const char* PackageName(uint16_t kind)
 {
     if(const auto* name=CohortPackage316(kind))return name;
+    if(kind==200)return "zombie351-200";
+    if(kind==211)return "zombie351-211";
+    if(kind==217)return "zombie351-217";
     if (kind == 0) return "zombie";
     if (kind == 2) return "zombie-cone";
     switch(kind){case 4:return "zombie-batch-4";case 8:return "zombie-batch-8";
@@ -134,6 +180,7 @@ const char* BatchPrefab282(uint16_t kind)
 {
     switch(kind)
     {
+    case 217:return "Resources/zombies/_prefab/SuperDancePolZombie.prefab";
     case 5:return "Resources/zombies/_prefab/PaperZombie.prefab";
     case 6:return "Resources/zombies/_prefab/DancePolevaulterZombie.prefab";
     case 7:return "Resources/zombies/_prefab/DancePolevaulter2Zombie.prefab";
@@ -154,6 +201,7 @@ const char* DayPrefab273(uint16_t kind)
 {
     switch(kind)
     {
+    case 217:return "Resources/zombies/_prefab/SuperDancePolZombie.prefab";
     case 3:return "Resources/zombies/_prefab/PolevaulterZombie.prefab";
     case 6:case 7:return BatchPrefab282(kind);
     case 21:return "Resources/zombies/_prefab/DollDiamondZombie.prefab";
@@ -189,6 +237,7 @@ struct ZombieModel
     std::map<std::string,std::vector<std::string>,std::less<>> children316;
     std::vector<std::string> spriteNodes316;
     std::set<std::string,std::less<>> nodePaths316;
+    std::map<std::string,std::vector<std::string>,std::less<>> fields351;
 
     FusionAnimationDrawOptions options;
     float shadowX = 0, shadowY = 0;
@@ -255,6 +304,59 @@ std::string ExtraSprite(const Json& package,const char* path)
 }
 
 
+void Fields351(uint16_t kind,ZombieModel& model)
+{
+    switch(kind)
+    {
+    case 202:
+        model.fields351["theFirstArmor"]={"Zombie_head/head1"};
+        break;
+    case 204:
+        model.fields351["theFirstArmor"]={"Zombie_football_head"};
+        break;
+    case 218:
+        model.fields351["theFirstArmor"]={"Naodai"};
+        model.fields351["w"]={"组 4 拷贝"};
+        break;
+    case 220:
+        model.fields351["theFirstArmor"]={"Zombie_football_head/head"};
+        model.fields351["flags"]={"Zombie_football_upperbody/Zombie_football_upperbody/flag1/1_1","Zombie_football_upperbody/Zombie_football_upperbody/flag2/2_1","Zombie_football_upperbody/Zombie_football_upperbody/flag3/3_1"};
+        break;
+    case 221:
+        model.fields351["changeSprites"]={"bodytop","body","bLS","Fei yi 1","Fei yi 2","Fei yi 3","K_2","zhong bu shen ti bone/Paoguanguge/eye0","sbjiyu","guanzi","front","head"};
+        break;
+    case 224:
+        model.fields351["changeSprites"]={"ZombieHead","ZombieHead/hairfront","ZombieHead/hairmid","ZombieHead/hairmid/yellowball3-A","ZombieHead/hairmid/yellowball4-A","ZombieHead/hairmid/yellowball5-A","ZombieHead/hairmid/yellowball1","ZombieHead/hairmid/yellowball2-A","ZombieHead/leafbunch2_2/hairback1","ZombieHead/leafbunch2_2/hairback2","ZombieHead/leafbunch2_2/hairback3","ZombieHead/leafbunch2_2/hairback4","ZombieHead/eye-A","LeftArmLower","LeftArmLower/armleft1top","LeftArmUpper","body","body/color1","body/color2","body/color5","body/color6","body/color7","RightArm/RightArm/rightarm1top","RightArm/RightArm/hand1"};
+        break;
+    case 48:
+        model.fields351["theFirstArmor"]={"Zombie_yeti_head/head1"};
+        break;
+    case 114:
+        model.fields351["theFirstArmor"]={"Zombie_head/Bucket"};
+        model.fields351["theSecondArmor"]={"Zombie_screendoor1"};
+        model.fields351["doorHands"]={"Zombie_outerarm_screendoor","Zombie_innerarm_screendoor_hand","Zombie_innerarm_screendoor"};
+        break;
+    case 118:
+        model.fields351["theFirstArmor"]={"Zombie_football_head/HeadPos/GatlingPea_head/GatlingPea_helmet"};
+        break;
+    case 214:
+        model.fields351["head1"]={"Zombie_dolphinrider_head/Pos"};
+        model.fields351["head2"]={"Zombie_dolphinrider_head/head2"};
+        break;
+    case 216:
+        model.fields351["theFirstArmor"]={"Zombie_catapult_driver_head"};
+        model.fields351["weapons"]={"1","2","3","4","5","6","7"};
+        model.fields351["weapons2"]={"1_2","2_2","3_2","4_2","5_2","6_2","7_2","1_3","2_3","3_3","4_3","5_3","6_3","7_3"};
+        model.fields351["damaged"]={"back2_1","Zombie_catapult_basket_overlay1_1","back2","Zombie_catapult_basket_overlay1","Zombie_catapult_siding"};
+        break;
+    }
+    for(const auto& [field,nodes]:model.fields351)for(const auto& node:nodes)
+        if(!model.nodePaths316.contains(node))throw std::runtime_error("source351 serialized field target missing: "+field+"/"+node);
+    const auto armor=model.fields351.find("theFirstArmor");
+    if(armor!=model.fields351.end())
+    {if(armor->second.size()!=1)throw std::runtime_error("source351 first armor identity differs");model.conePath=armor->second.front();}
+}
+
 std::unique_ptr<ZombieModel> LoadCohort316(Board* board,uint16_t kind,const std::filesystem::path& path,const Json& package)
 {
     if(package.at("sourcePrefab")!=CohortPrefab316(kind))throw std::runtime_error("source313 prefab identity differs");
@@ -264,12 +366,14 @@ std::unique_ptr<ZombieModel> LoadCohort316(Board* board,uint16_t kind,const std:
     model->shadowX=shadow.at("x").get<float>();model->shadowY=shadow.at("y").get<float>();
     if(!std::isfinite(model->shadowX)||!std::isfinite(model->shadowY))throw std::runtime_error("source313 invalid Shadow");
     const auto shadowPath=shadow.at("path").get<std::string>();bool foundShadow=false;
+    size_t sourceNodeIndex=0;
     for(const auto& node:package.at("nodes"))
     {
         const auto nodePath=node.at("path").get<std::string>();const auto tag=node.value("tag",std::string());
         model->nodePaths316.insert(nodePath);
         if(nodePath==shadowPath)foundShadow=true;
-        if(node.at("parent")==0)model->rootChildren.push_back(nodePath);
+        if(node.at("parent")==0)model->rootChildren.push_back("@node:"+std::to_string(sourceNodeIndex));
+        ++sourceNodeIndex;
         if(tag=="ZombieHead")model->headPaths.push_back(nodePath);
         if(tag=="ZombieHand")model->handPaths.push_back(nodePath);
         if(tag=="ZombieArmUpper")model->upperArmPaths.push_back(nodePath);
@@ -288,6 +392,7 @@ std::unique_ptr<ZombieModel> LoadCohort316(Board* board,uint16_t kind,const std:
             throw std::runtime_error("source313 ambiguous node SpriteRenderer");
     }
     if(!foundShadow)throw std::runtime_error("source313 missing Shadow");
+    Fields351(kind,*model);
     if(kind==29)model->conePath="Zombie_balloon_head/ironNut1";
     if(kind==43||kind==212)model->conePath="Zombie_gargantuar_head/SuperGargantuar_helmet";
     model->options.hiddenNodePaths.push_back(shadowPath);
@@ -297,12 +402,21 @@ std::unique_ptr<ZombieModel> LoadCohort316(Board* board,uint16_t kind,const std:
     {if(!model->extras316.contains(asset))throw std::runtime_error(std::string("source313 missing genuine runtime replacement: ")+asset);};
     switch(kind)
     {
+    case 114:
+        requireExtra("Resources/Zombies/Image/reanim/Zombie_outerarm_upper2.asset");
+        requireExtra("Resources/Zombies/Image/reanim/Zombie_bucket2.asset");requireExtra("Resources/Zombies/Image/reanim/Zombie_bucket3.asset");
+        requireExtra("Resources/Zombies/Door/Zombie_screendoor2.asset");requireExtra("Resources/Zombies/Door/Zombie_screendoor3.asset");break;
+    case 118:requireExtra("Resources/Zombies/Image/reanim/Zombie_outerarm_upper2.asset");break;
+    case 119:requireExtra("Resources/Zombies/BalloonZombie/upperarm2.asset");break;
+    case 202:requireExtra("Resources/zombies/zombie_drown/losearm.asset");
+        requireExtra("Resources/zombies/zombie_football/tallnutfootballz/tnf2.asset");requireExtra("Resources/zombies/zombie_football/tallnutfootballz/tnf3.asset");break;
+    case 204:requireExtra("Resources/zombies/intravel/blackfootball/head1.asset");requireExtra("Resources/zombies/intravel/blackfootball/head2.asset");break;
     case 16:requireExtra("Resources/zombies/zombie_driver/Zombie_zamboni_1_damage1.asset");
         requireExtra("Resources/zombies/zombie_driver/Zombie_zamboni_1_damage2.asset");requireExtra("Resources/zombies/zombie_driver/Zombie_zamboni_2_damage2.asset");break;
     case 17:requireExtra("Resources/zombies/zombie_snorkle/Zombie_snorkle_outerarm_upper2.asset");break;
     case 19:requireExtra("Resources/zombies/zombie_dolphinrider/Zombie_dolphinrider_outerarm_upper2.asset");break;
     case 20:requireExtra("Resources/zombies/zombie_drown/losearm.asset");break;
-    case 27:requireExtra("Resources/zombies/zombie_dolphinrider/snowdolphinrider/arm.asset");break;
+    case 113:case 214:case 27:requireExtra("Resources/zombies/zombie_dolphinrider/snowdolphinrider/arm.asset");break;
     case 25:case 29:requireExtra("Resources/zombies/balloonzombie/upperarm2.asset");
         if(kind==29){requireExtra("Resources/zombies/plantzombie/ironNut2.asset");requireExtra("Resources/zombies/plantzombie/ironNut3.asset");}break;
     case 43:case 212:requireExtra("Resources/zombies/jackbox/superjackboxzombie/SuperJackbox_cone2.asset");
@@ -318,7 +432,7 @@ std::unique_ptr<ZombieModel> LoadCohort316(Board* board,uint16_t kind,const std:
         if(model->rootBox313)throw std::runtime_error("source313 ambiguous root BoxCollider2D");
         model->rootBox313=box.at("fileId").get<int64_t>();
     }
-    if((kind==26)!=(!model->rootBox313))throw std::runtime_error("source313 root BoxCollider2D identity missing");
+    if((kind==26||kind==205)!=(!model->rootBox313))throw std::runtime_error("source313 root BoxCollider2D identity missing");
     std::vector<int64_t> particles;
     for(const auto& c:package.at("nonRenderingComponents"))if(c.at("typeId")==198||c.at("typeId")==199)particles.push_back(c.at("fileId").get<int64_t>());
     std::string error;
@@ -395,7 +509,7 @@ std::unique_ptr<ZombieModel> LoadModel(Board* board,uint16_t kind,const std::fil
         throw std::runtime_error("incomplete source Zombie hierarchy/animation bindings");
     if(CohortPrefab316(kind))return LoadCohort316(board,kind,path,package);
     const bool day=DayPrefab273(kind)!=nullptr,jackbox=FusionJackbox300Kind(kind);
-    const char* expectedPrefab=day?DayPrefab273(kind):jackbox?JackboxPrefab300(kind):BatchPrefab282(kind);
+    const char* expectedPrefab=kind==200?"Resources/zombies/_prefab/SuperSubmarineZombie.prefab":kind==211?"Resources/zombies/_prefab/LandSubmarineZombie.prefab":day?DayPrefab273(kind):jackbox?JackboxPrefab300(kind):BatchPrefab282(kind);
     if(expectedPrefab&&package.at("sourcePrefab").get<std::string>()!=expectedPrefab)
         throw std::runtime_error("source Zombie prefab identity differs");
     if(kind==111||kind==109)
@@ -453,11 +567,13 @@ std::unique_ptr<ZombieModel> LoadModel(Board* board,uint16_t kind,const std::fil
         throw std::runtime_error("invalid source Zombie Shadow anchor");
     const std::string shadowPath = shadow.at("path").get<std::string>();
     bool foundShadow = false;
+    size_t sourceNodeIndex=0;
     for (const auto& node : package.at("nodes"))
     {
         const std::string nodePath = node.at("path").get<std::string>();
         const std::string tag = node.value("tag",std::string());
-        if(node.at("parent")==0)model->rootChildren.push_back(nodePath);
+        if(node.at("parent")==0)model->rootChildren.push_back("@node:"+std::to_string(sourceNodeIndex));
+        ++sourceNodeIndex;
         if (nodePath == shadowPath) foundShadow = true;
         if (tag == "ZombieHead") model->headPaths.push_back(nodePath);
         else if (tag == "ZombieHand") model->handPaths.push_back(nodePath);
@@ -469,7 +585,7 @@ std::unique_ptr<ZombieModel> LoadModel(Board* board,uint16_t kind,const std::fil
         if(kind==8&&(nodePath=="Zombie_outerarm_screendoor"||nodePath=="Zombie_innerarm_screendoor_hand"||nodePath=="Zombie_innerarm_screendoor"))model->shieldHandPaths.push_back(nodePath);
         if(day&&nodePath==(FusionDayZombie273Doll(kind)?"Zombie_head/Cone":"Zombie_head"))model->dayArmorPath=nodePath;
     }
-    const bool money=kind==41||kind==42,vehicle=kind==14||kind==18,helmet=kind==2||kind==4||kind==9||kind==12||kind==13;
+    const bool money=kind==41||kind==42,vehicle=FusionSubmarine343Kind(kind)||kind==18,helmet=kind==2||kind==4||kind==9||kind==12||kind==13;
     if (shadowPath.empty() || !foundShadow || (!money&&!vehicle&&(model->headPaths.empty() ||
         (!jackbox&&model->handPaths.empty()) || (kind!=109&&kind!=9&&model->upperArmPaths.empty()))) || (helmet && model->conePath.empty())||
         (kind==8&&(model->shieldPath.empty()||model->shieldHandPaths.size()!=3)))
@@ -495,7 +611,7 @@ std::unique_ptr<ZombieModel> LoadModel(Board* board,uint16_t kind,const std::fil
     // The real native shadow remains in Board's separate shadow render pass.
     model->options.hiddenNodePaths.push_back(shadowPath);
     // Football.ChangeArmSpirte is a no-op and has no ZombieArmUpper tag.
-    if(!money&&kind!=9)model->damagedArm = ExtraSprite(package,jackbox?
+    if(!money&&kind!=9&&kind!=200&&kind!=211)model->damagedArm = ExtraSprite(package,jackbox?
         "Resources/zombies/jackbox/Zombie_jackbox_outerarm_lower2.asset":FusionDayZombie273Pole(kind)?
         "Resources/zombies/zombie_polevaulter/Zombie_polevaulter_outerarm_upper2.asset":
         kind==5?"Resources/zombies/paperzombie/paper_bone.asset":
@@ -562,7 +678,7 @@ std::unique_ptr<ZombieModel> LoadModel(Board* board,uint16_t kind,const std::fil
     if (!model->animation.Load(app,path.string(),error,particleComponents)) throw std::runtime_error(error);
     std::vector<const char*> required=money?std::vector<const char*>{"idle","walk"}:std::vector<const char*>{"idle","walk","walk2","attack","die"};
     if(kind==111||kind==109||kind==9)required={"idle","walk","attack","die"};
-    if(kind==14)required={"idle","walk"};
+    if(FusionSubmarine343Kind(kind))required={"idle","walk"};
     if(kind==18)required={"idle","die","shake"};
     if(SpecialZombie269PaperKind(kind))required={"idle","walk","walk2","attack","attack2","losePaper","die"};
     if(kind==104)required.push_back("shoot");
@@ -717,7 +833,7 @@ void SpecialPose(const Zombie* zombie,const ZombieModel& model,FusionAnimationDr
         const auto duration=model.durations.find(addon);
         if(duration!=model.durations.end())options.extraStates.push_back({addon,phase*duration->second,model.animation.GetStateLayer(addon)});
     }
-    if(data->kind==14)
+    if(FusionSubmarine343Kind(data->kind))
     {
         uint8_t stage=0;
         if(model.rootChildren.size()>=6&&GetNativeSpecialZombie269BodyStage(zombie,stage))
@@ -1264,6 +1380,96 @@ bool BrokenChildren316(const ZombieModel& model,FusionAnimationDrawOptions& opti
     options.nodeActivityOverrides.push_back({children->second[0],stage==1});
     options.nodeActivityOverrides.push_back({children->second[1],stage==2});return true;
 }
+
+bool FieldChildren351(const ZombieModel& m,FusionAnimationDrawOptions& o,const char* field,int stage,bool spriteChildren=false)
+{
+    const auto f=m.fields351.find(field);if(f==m.fields351.end())return false;
+    for(const auto& parent:f->second)
+    {
+        const auto c=m.children316.find(parent);if(c==m.children316.end()||c->second.size()<2)return false;
+        o.spriteEnabledOverrides.push_back({parent,stage==0});
+        if(spriteChildren)
+        {o.spriteEnabledOverrides.push_back({c->second[0],stage==1});o.spriteEnabledOverrides.push_back({c->second[1],stage==2});}
+        else
+        {o.nodeActivityOverrides.push_back({c->second[0],stage==1});o.nodeActivityOverrides.push_back({c->second[1],stage==2});}
+    }
+    return true;
+}
+bool VariantPose351(const Zombie* z,const ZombieModel& m,const FusionExtendedZombie313View& v,FusionAnimationDrawOptions& o)
+{
+    const auto* d=GetNativeSourceZombieData(z);if(!d)return false;const auto kind=d->kind;
+    if(kind==205||kind==210||kind==219)
+    {
+        const char* a=kind==205?"11":"yuan1";const char* b=kind==205?"21":"yuan2";const char* c=kind==205?"31":"yuan3";
+        for(const auto* name:{a,b,c})if(!m.nodePaths316.contains(name))return false;
+        if(v.bodyStage){o.nodeActivityOverrides.push_back({a,false});o.nodeActivityOverrides.push_back({b,v.bodyStage==1});o.nodeActivityOverrides.push_back({c,v.bodyStage==2});}
+    }
+    if(kind==221&&v.bodyStage&&!FieldChildren351(m,o,"changeSprites",v.bodyStage,true))return false;
+    if(kind==224&&!FieldChildren351(m,o,"changeSprites",v.bodyStage))return false;
+    if(kind==218)
+    {
+        const auto held=m.fields351.find("w");if(held==m.fields351.end()||held->second.size()!=1)return false;
+        o.nodeActivityOverrides.push_back({held->second.front(),v.bombPresent});
+    }
+    if(kind==202||kind==204||kind==218||kind==220)
+    {
+        if(!z->mHasHead)o.hiddenNodePaths.insert(o.hiddenNodePaths.end(),m.headPaths.begin(),m.headPaths.end());
+        if(!z->mHasArm)
+        {
+            o.hiddenNodePaths.insert(o.hiddenNodePaths.end(),m.handPaths.begin(),m.handPaths.end());
+            // TallNut/UltimateFootball/Drown218 ChangeArmSpirte30F780 is empty.
+            if(kind==202)for(const auto& arm:m.upperArmPaths)if(!Extra316(m,o,arm,"Resources/zombies/zombie_drown/losearm.asset",1.5f))return false;
+        }
+        if(kind==202||kind==204)
+        {
+            if(v.firstArmorStage&&!Extra316(m,o,m.conePath,kind==202?(v.firstArmorStage==1?
+                "Resources/zombies/zombie_football/tallnutfootballz/tnf2.asset":"Resources/zombies/zombie_football/tallnutfootballz/tnf3.asset"):
+                (v.firstArmorStage==1?"Resources/zombies/intravel/blackfootball/head1.asset":"Resources/zombies/intravel/blackfootball/head2.asset")))return false;
+        }
+        else if((kind==220||v.firstArmorStage)&&!FieldChildren351(m,o,"theFirstArmor",v.firstArmorStage))return false;
+        if(kind==220)
+        {
+            const auto flags=m.fields351.find("flags");if(flags==m.fields351.end())return false;
+            for(const auto& parent:flags->second)
+            {
+                const auto child=m.child316.find(parent);if(child==m.child316.end())return false;
+                o.spriteEnabledOverrides.push_back({parent,v.firstArmorStage==0});o.nodeActivityOverrides.push_back({child->second,v.firstArmorStage!=0});
+            }
+        }
+        // WallNutZ.FirstArmorTakeDamage356B70 clears the reference/HP/type
+        // without destroying this GameObject. Keep its last damaged art.
+        // Actual base head removal independently removes only tagged nodes.
+    }
+    return true;
+}
+bool CatapultPose351(const ZombieModel& m,uint16_t kind,const NativeHeavyZombie313BState& v,FusionAnimationDrawOptions& o)
+{
+    if(kind==112)
+    {
+        for(size_t n=3;n<=8;++n)
+        {
+            const unsigned threshold=n==3?24:n==4?23:n==5?22:n==6?21:20;
+            if(v.ammo>threshold)continue;
+            if(m.rootChildren.size()<=n)return false;const auto& parent=m.rootChildren[n];const auto c=m.child316.find(parent);if(c==m.child316.end())return false;
+            o.spriteEnabledOverrides.push_back({parent,false});o.nodeActivityOverrides.push_back({c->second,true});
+        }
+        for(size_t n=3;n<=6;++n)if(v.ammo<=7-n)
+        {if(m.rootChildren.size()<=n)return false;o.hiddenNodePaths.push_back(m.rootChildren[n]);}
+    }
+    if(kind==216)
+    {
+        if(v.catapultFlags343&1)
+        {
+            const auto fields=m.fields351.find("damaged");if(fields==m.fields351.end())return false;
+            for(const auto& parent:fields->second){const auto c=m.child316.find(parent);if(c==m.child316.end())return false;o.spriteEnabledOverrides.push_back({parent,false});o.nodeActivityOverrides.push_back({c->second,true});}
+        }
+        for(const auto& pair:{std::pair<const char*,uint8_t>{"weapons",uint8_t(2)},{"weapons2",uint8_t(4)}})if(v.catapultFlags343&pair.second)
+        {const auto fields=m.fields351.find(pair.first);if(fields==m.fields351.end())return false;o.hiddenNodePaths.insert(o.hiddenNodePaths.end(),fields->second.begin(),fields->second.end());}
+        if(v.armorStage&&!FieldChildren351(m,o,"theFirstArmor",v.armorStage))return false;
+    }
+    return true;
+}
+
 bool NewPose316(const Zombie* z,const ZombieModel& model,Pose316& out)
 {
     const auto* data=GetNativeSourceZombieData(z);const auto* context=GetNativeContext(z?z->mBoard:nullptr);
@@ -1284,6 +1490,24 @@ bool NewPose316(const Zombie* z,const ZombieModel& model,Pose316& out)
             if(!GetNativeWaterZombie313Auxiliary(z,*state,aux,seconds,w,layer))return false;
             pose.options.extraStates.push_back({aux,seconds,layer,w});
         }
+
+        if(FusionWaterShooter343Kind(kind))
+        {
+            const char* shot=nullptr,*old=nullptr;float elapsed=0,oldElapsed=0,w=1;
+            if(!GetNativeWaterShoot343Presentation(z,shot,elapsed,old,oldElapsed,w))return false;
+            const auto* source=FindFusionSourceGraph313(kind);if(!source||source->layerCount!=3)return false;
+            // The genuine null state is a no-op sampled from the same baseline.
+            // Its state name is retained so additive null<->shoot fades share
+            // the established two-pose sampler; no synthetic zero-length clip.
+            if(!shot)shot=source->states[state->shoot343.state].name;
+            if(state->shoot343.fadeDuration&&!old)old=source->states[state->shoot343.outgoing].name;
+            FusionAnimationDrawOptions::ExtraState extra{shot,elapsed,2};
+            if(old)extra.baseBlend=FusionAnimationDrawOptions::BaseBlend{old,oldElapsed,w};
+            pose.options.extraStates.push_back(std::move(extra));
+            if(kind==214)
+            {pose.options.nodeActivityOverrides.push_back({model.fields351.at("head1").front(),state->gatlingReady343});
+             pose.options.nodeActivityOverrides.push_back({model.fields351.at("head2").front(),!state->gatlingReady343});}
+        }
         if(kind==16)
         {
             pose.options.nodeActivityOverrides.push_back({"Zombie_zamboni_2/SmokePos",state->driverStage==2});
@@ -1298,14 +1522,14 @@ bool NewPose316(const Zombie* z,const ZombieModel& model,Pose316& out)
         else
         {
             if(!z->mHasHead)pose.options.hiddenNodePaths.insert(pose.options.hiddenNodePaths.end(),model.headPaths.begin(),model.headPaths.end());
-            const bool arm=!z->mHasArm&&(!(kind==19||kind==27)||(state->sourceStatus!=8&&state->sourceStatus!=9));
+            const bool arm=!z->mHasArm&&(!FusionDolphin343Kind(kind)||(state->sourceStatus!=8&&state->sourceStatus!=9));
             if(arm)
             {
                 pose.options.hiddenNodePaths.insert(pose.options.hiddenNodePaths.end(),model.handPaths.begin(),model.handPaths.end());
                 const char* asset=kind==17?"Resources/zombies/zombie_snorkle/Zombie_snorkle_outerarm_upper2.asset":kind==19?
                     "Resources/zombies/zombie_dolphinrider/Zombie_dolphinrider_outerarm_upper2.asset":kind==20?
                     "Resources/zombies/zombie_drown/losearm.asset":"Resources/zombies/zombie_dolphinrider/snowdolphinrider/arm.asset";
-                for(const auto& node:model.upperArmPaths)if(!Extra316(model,pose.options,node,asset,kind==20?1.5f:kind==27?1.f:0.f))return false;
+                for(const auto& node:model.upperArmPaths)if(!Extra316(model,pose.options,node,asset,kind==20?1.5f:(kind==27||FusionWaterShooter343Kind(kind))?1.f:0.f))return false;
             }
         }
     }
@@ -1316,6 +1540,7 @@ bool NewPose316(const Zombie* z,const ZombieModel& model,Pose316& out)
         {
             pose.options.rootFlipX=state->rootFlip;pose.visible=state->visible;
             ExtendedMutations316(kind,*state,pose.options);
+            if(FusionExtendedZombie347Kind(kind)&&!VariantPose351(z,model,*state,pose.options))return false;
             if(kind==37)
             {
                 // The genuine one-source-frame yield then enables every
@@ -1334,7 +1559,29 @@ bool NewPose316(const Zombie* z,const ZombieModel& model,Pose316& out)
                     }
                 }
             }
-            else if(kind==25||kind==29||kind==213)
+            else if(FusionSnowZombie363Kind(kind))
+            {
+                if(!z->mHasHead)pose.options.hiddenNodePaths.insert(pose.options.hiddenNodePaths.end(),model.headPaths.begin(),model.headPaths.end());
+                if(!z->mHasArm)
+                {
+                    pose.options.hiddenNodePaths.insert(pose.options.hiddenNodePaths.end(),model.handPaths.begin(),model.handPaths.end());
+                    for(const auto& arm:model.upperArmPaths)
+                    {
+                        const auto child=model.child316.find(arm);if(child==model.child316.end())return false;
+                        pose.options.spriteEnabledOverrides.push_back({arm,false});pose.options.nodeActivityOverrides.push_back({child->second,true});
+                    }
+                }
+            }
+            else if(kind==114||kind==118)
+            {
+                if(!z->mHasHead)pose.options.hiddenNodePaths.insert(pose.options.hiddenNodePaths.end(),model.headPaths.begin(),model.headPaths.end());
+                if(!z->mHasArm)
+                {
+                    pose.options.hiddenNodePaths.insert(pose.options.hiddenNodePaths.end(),model.handPaths.begin(),model.handPaths.end());
+                    for(const auto& arm:model.upperArmPaths)if(!Extra316(model,pose.options,arm,"Resources/Zombies/Image/reanim/Zombie_outerarm_upper2.asset",4.f))return false;
+                }
+            }
+            else if(kind==25||kind==29||kind==119||kind==213)
             {
                 if(!z->mHasHead)pose.options.hiddenNodePaths.insert(pose.options.hiddenNodePaths.end(),model.headPaths.begin(),model.headPaths.end());
                 if(!z->mHasArm)
@@ -1342,9 +1589,24 @@ bool NewPose316(const Zombie* z,const ZombieModel& model,Pose316& out)
                     pose.options.hiddenNodePaths.insert(pose.options.hiddenNodePaths.end(),model.handPaths.begin(),model.handPaths.end());
                     for(const auto& node:model.upperArmPaths)
                         if(!Extra316(model,pose.options,node,kind==213?"Resources/zombies/image/reanim/Zombie_outerarm_upper2.asset":
-                            "Resources/zombies/balloonzombie/upperarm2.asset",kind==213?4.f:0.f))return false;
+                            kind==119?"Resources/Zombies/BalloonZombie/upperarm2.asset":"Resources/zombies/balloonzombie/upperarm2.asset",kind==213?4.f:0.f))return false;
                 }
             }
+            if(kind==48)
+            {
+                if(!FieldChildren351(model,pose.options,"theFirstArmor",state->firstArmorStage))return false;
+                if(z->mHelmType==HELMTYPE_NONE||z->mHelmHealth<=0)pose.options.hiddenNodePaths.push_back(model.conePath);
+            }
+            if(kind==114)
+            {
+                if(state->firstArmorStage&&!Extra316(model,pose.options,model.conePath,state->firstArmorStage==1?"Resources/Zombies/Image/reanim/Zombie_bucket2.asset":"Resources/Zombies/Image/reanim/Zombie_bucket3.asset"))return false;
+                if(z->mHelmType==HELMTYPE_NONE||z->mHelmHealth<=0)pose.options.hiddenNodePaths.push_back(model.conePath);
+                const auto& shield=model.fields351.at("theSecondArmor").front();
+                if(state->secondArmorStage343&&!Extra316(model,pose.options,shield,state->secondArmorStage343==1?"Resources/Zombies/Door/Zombie_screendoor2.asset":"Resources/Zombies/Door/Zombie_screendoor3.asset"))return false;
+                if(z->mShieldType==SHIELDTYPE_NONE||z->mShieldHealth<=0)
+                {pose.options.hiddenNodePaths.push_back(shield);const auto& hands=model.fields351.at("doorHands");pose.options.hiddenNodePaths.insert(pose.options.hiddenNodePaths.end(),hands.begin(),hands.end());}
+            }
+            if(kind==118&&state->firstArmorStage&&!FieldChildren351(model,pose.options,"theFirstArmor",state->firstArmorStage))return false;
             if(kind==29&&state->firstArmorStage&&!Extra316(model,pose.options,model.conePath,state->firstArmorStage==1?
                 "Resources/zombies/plantzombie/ironNut2.asset":"Resources/zombies/plantzombie/ironNut3.asset"))return false;
             if((kind==43||kind==212)&&state->firstArmorStage)
@@ -1367,11 +1629,11 @@ bool NewPose316(const Zombie* z,const ZombieModel& model,Pose316& out)
             if(kind==28&&!heavy->axePresent)pose.options.hiddenNodePaths.push_back("Zombie_digger_pickaxe");
             if(kind==32&&(heavy->lostJumper||heavy->status==0))for(const char* node:{"Zombie_pogo_stick2","Zombie_pogo_stick3"})pose.options.hiddenNodePaths.push_back(node);
             if(kind==33&&!heavy->ladderVisible)pose.options.hiddenNodePaths.push_back("Zombie_ladder_1");
-            if(kind==31)
+            if(FusionCatapult343Kind(kind))
             {
                 // Source3515B0 permanently switches its damaged renderers.
                 // The canonical latch survives a later legitimate heal.
-                if(heavy->armorStage)for(size_t index:{size_t(1),size_t(2)})
+                if(kind!=216&&heavy->armorStage)for(size_t index:{size_t(1),size_t(2)})
                 {
                     if(model.rootChildren.size()<=index)return false;
                     const auto& parent=model.rootChildren[index];const auto child=model.child316.find(parent);
@@ -1416,6 +1678,7 @@ bool NewPose316(const Zombie* z,const ZombieModel& model,Pose316& out)
                     // renderer must not receive an invented base replacement.
                 }
             }
+            if((kind==112||kind==216)&&!CatapultPose351(model,kind,*heavy,pose.options))return false;
             if(kind==34&&!BrokenChildren316(model,pose.options,"Zombie_pogo_head",heavy->armorStage))return false;
             if(kind==33)
             {
@@ -1458,8 +1721,9 @@ bool NewPose316(const Zombie* z,const ZombieModel& model,Pose316& out)
         }
         else return false;
     }
-    const bool baseParts=kind==17||kind==19||kind==20||kind==27||kind==25||kind==29||kind==37||kind==213||
-        kind==28||kind==32||kind==33||kind==34||kind==45||kind==203||kind==223;
+    const bool baseParts=FusionSnowZombie363Kind(kind)||kind==114||kind==118||kind==119||kind==17||kind==19||kind==20||kind==27||FusionWaterShooter343Kind(kind)||kind==25||kind==29||kind==37||kind==213||
+        kind==28||kind==32||kind==33||kind==34||kind==45||kind==203||kind==223||
+        kind==202||kind==204||kind==218||kind==220;
     if(baseParts)
     {
         if(model.nodePaths316.contains("LoseHead"))pose.options.nodeActivityOverrides.push_back({"LoseHead",!z->mHasHead});
@@ -1501,7 +1765,7 @@ bool SharedPose316(const Zombie* z,const ZombieModel& model,Pose316& out,bool al
         }
     }
     if(CohortPrefab316(data->kind))return NewPose316(z,model,out);
-    if(!FusionJackbox300Kind(data->kind)&&data->kind!=101&&data->kind!=102&&data->kind!=103)return false;
+    if(!FusionJackbox300Kind(data->kind)&&data->kind!=101&&data->kind!=102&&data->kind!=103&&data->kind!=200&&data->kind!=211&&data->kind!=217)return false;
     const char* name=nullptr;float phase=0,sx=0,sy=0;
     if(!SourcePose273(z,name,phase)||!name||!const_cast<Zombie*>(z)->GetShadowCenter(sx,sy))return false;
     name=PresentationState(model,name);if(!name)return false;
@@ -1521,7 +1785,7 @@ bool SharedPose316(const Zombie* z,const ZombieModel& model,Pose316& out,bool al
     out=std::move(pose);return true;
 }
 bool SharedKind316(uint16_t kind)
-{return CohortPrefab316(kind)||FusionJackbox300Kind(kind)||kind==101||kind==102||kind==103;}
+{return CohortPrefab316(kind)||FusionJackbox300Kind(kind)||kind==101||kind==102||kind==103||kind==200||kind==211||kind==217;}
 
 }
 
@@ -1696,7 +1960,13 @@ bool NativeZombieVisuals::Node(const Zombie* zombie,const char* path,float& x,fl
     const auto& model=*found->second;
     if(SharedKind316(data->kind))
     {
-        Pose316 pose;if(!SharedPose316(zombie,model,pose,true))return false;float nx=0,ny=0;bool enabled=false;
+        Pose316 pose;if(!SharedPose316(zombie,model,pose,true))
+        {
+            const char* state=nullptr;float phase=0,sx=0,sy=0;
+            const bool source=SourcePose273(zombie,state,phase),shadow=const_cast<Zombie*>(zombie)->GetShadowCenter(sx,sy);
+            LawnNet::NetTrace("Fusion source node pose refused kind=%u id=%u path=%s source=%d state=%s phase=%.9g shadow=%d pool=%d height=%d",data->kind,zombie->mNetId,path,source?1:0,state?state:"null",phase,shadow?1:0,zombie->mInPool?1:0,int(zombie->mZombieHeight));
+            return false;
+        }float nx=0,ny=0;bool enabled=false;
         if(!model.animation.TryGetNodeOffset(path,nx,ny,pose.state,pose.seconds,nullptr,-1,1,&pose.options)||
            (active&&!model.animation.TryGetNodeActivity(path,enabled,pose.state,pose.seconds,nullptr,-1,1,&pose.options)))return false;
         const float px=pose.rootX+nx*pose.pixels,py=pose.rootY-ny*pose.pixels;
@@ -1799,7 +2069,7 @@ bool DrawNativeSourceZombie(Sexy::Graphics* graphics,Zombie* zombie)
 {
     auto* context = GetNativeContext(zombie ? zombie->mBoard : nullptr);
     const auto* data=GetNativeSourceZombieData(zombie);
-    if(data&&(CohortPrefab316(data->kind)||data->kind==10||FusionJackbox300Kind(data->kind))&&(!context||!context->zombieVisuals))return true;
+    if(data&&(SharedKind316(data->kind)||data->kind==10)&&(!context||!context->zombieVisuals))return true;
     return context && context->zombieVisuals && context->zombieVisuals->Draw(graphics,zombie);
 }
 bool GetNativeSourceZombie269NodePoint(const Zombie* zombie,const char* path,float& x,float& y)

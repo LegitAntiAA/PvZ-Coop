@@ -5,8 +5,8 @@ namespace LawnFusion
 {
 // Bounded source phase tables, not a Unity object/controller interpreter.
 // Indices are local to the genuine source kind; no source paths on the wire.
-enum class FusionSourceGraph313Param:uint8_t {Speed,Attacking,JumpSpeed,Shooting,Wait,Die,Throw,Fall,Landing,Crash,Walk2,Shake,Walk,Ladder,LoseLadder,LadderOver,Back,Jump,JumpOver,Steal,IdleToWalk,LosePaper,Shoot,Shoot2,Stop,Rise,Surprise};
-enum class FusionSourceGraph313Event:uint8_t {Throw,Crash,DieSound,FallSound,Destroy,Bite,StartLand,Land,FallComplete,Particle,Bomb,ReplaceBomb,Shoot,JumpFail,LandSound,SetLadder,BigJump,Catch,Angry,AngrySound,Shoot2,Status6,ChangeStatus=FallComplete};
+enum class FusionSourceGraph313Param:uint8_t {Speed,Attacking,JumpSpeed,Shooting,Wait,Die,Throw,Fall,Landing,Crash,Walk2,Shake,Walk,Ladder,LoseLadder,LadderOver,Back,Jump,JumpOver,Steal,IdleToWalk,LosePaper,Shoot,Shoot2,Stop,Rise,Surprise,Pop,Fly};
+enum class FusionSourceGraph313Event:uint8_t {Throw,Crash,DieSound,FallSound,Destroy,Bite,StartLand,Land,FallComplete,Particle,Bomb,ReplaceBomb,Shoot,JumpFail,LandSound,SetLadder,BigJump,Catch,Angry,AngrySound,Shoot2,Status6,ChangeStatus=FallComplete,Pop=22,FootballThrowExit=23,SpiderRaised=24};
 struct FusionSourceGraph313Condition {FusionSourceGraph313Param parameter;uint8_t mode;float threshold;};
 struct FusionSourceGraph313Edge
 {

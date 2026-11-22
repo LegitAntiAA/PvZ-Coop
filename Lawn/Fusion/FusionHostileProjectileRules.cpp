@@ -1,6 +1,7 @@
 #include "FusionHostileProjectileRules.h"
 #include "FusionBasePlantRules.h"
 #include "FusionCatalog.h"
+#include "FusionShooterBatchRules.h"
 #include "SpecialZombie269Rules.h"
 #include <cmath>
 
@@ -11,7 +12,7 @@ bool FusionSuperCherryProjectileMetadataValid(uint16_t kind,int damage,uint8_t w
     bool hostile,ProjectileType type,ProjectileMotion motion)
 {
     return kind==3&&type==PROJECTILE_PEA&&(hostile?
-        damage==300&&way==9&&motion==MOTION_BACKWARDS:
+        damage==300&&((way==9&&motion==MOTION_BACKWARDS)||(way==0&&motion==MOTION_STRAIGHT)):
         (damage==300||damage==1000||damage==2000)&&way==0&&motion==MOTION_STRAIGHT);
 }
 bool FusionSuperCherryPlantShort(uint16_t kind)
@@ -76,6 +77,8 @@ bool TryPlanFusionSuperCherryRebound(uint16_t kind,bool running,bool pot,int& da
     damage=pot?2000:1000;return true;
 }
 
+bool FusionCatapultCherry343MetadataValid(uint16_t k,int damage,uint8_t way,bool hostile,ProjectileType type,ProjectileMotion motion)
+{return k==3&&damage==60&&way==13&&hostile&&type==PROJECTILE_PEA&&motion==MOTION_LOBBED;}
 bool FusionHostilePlanarShotValid(const FusionHostilePlanarShot& s)
 {
     return std::isfinite(s.x)&&std::isfinite(s.y)&&std::isfinite(s.velocityX)&&
@@ -101,6 +104,7 @@ bool AdvanceFusionHostilePlanarShot(FusionHostilePlanarShot& s)
 }
 bool TryMakeFusionHostileProjectileRect(uint16_t kind,double x,double y,double py,FusionRecipientRect& r)
 {
+    if(kind==3){FusionRecipientRect raw;if(!TryMakeFusionShooterBatchProjectileRect(3,x,y,raw)||!std::isfinite(py)||py<=0)return false;raw.y=y+(raw.y-y)*py/kFusionBasePixelsY;raw.height*=py/kFusionBasePixelsY;r=raw;return true;}
     if((kind!=58&&kind!=59)||!std::isfinite(x)||!std::isfinite(y)||!std::isfinite(py)||py<=0)return false;
     // Enabled root BoxCollider2D dimensions, including source rootScale .4.
     const double w=kind==58?.80700292:.88958872,h=kind==58?.52539464:.680243;

@@ -26,6 +26,7 @@ template<class IO> void Fields(IO& io,FusionWaterZombie313View& v)
     io.U8(v.sourceStatus);io.U8(v.driverStage);io.Bool(v.facingRight);io.Bool(v.colliderEnabled);io.Bool(v.auxiliaryActive);
     io.F32(v.driverSpeed);io.F32(v.outgoingSourceSeconds);io.F32(v.transitionElapsed);io.F32(v.transitionTotal);
     io.F32(v.auxiliaryTransitionElapsed);io.F32(v.auxiliaryTransitionTotal);Fields(io,v.auxiliary);
+    Fields(io,v.shoot343);Fields(io,v.shootClock343);io.Bool(v.gatlingReady343);
 }
 template<class IO> void Fields(IO& io,FusionExtendedZombie313View& v)
 {
@@ -33,6 +34,7 @@ template<class IO> void Fields(IO& io,FusionExtendedZombie313View& v)
     io.U8(v.bodyStage);io.U8(v.weapon);io.U8(v.machineType);io.U8(v.uniqueType);io.U8(v.firstArmorStage);
     io.Bool(v.carriedImpRemoved);io.Bool(v.ballRemoved);io.Bool(v.bombPresent);io.Bool(v.fallen);io.Bool(v.visible);io.Bool(v.adjustingImp);
     io.Bool(v.beforeDying);io.Bool(v.rootFlip);io.F32(v.impVerticalSpeed);io.F32(v.impMaximumVx);io.F32(v.uniqueSpeed);
+    io.F32(v.attributeCountdown);io.F32(v.throwTime);io.Bool(v.isThrow);io.I32(v.attackDamage);io.U8(v.secondArmorStage343);
 }
 template<class IO> void Fields(IO& io,FusionBungee313BView& v)
 {
@@ -42,7 +44,7 @@ template<class IO> void Fields(IO& io,FusionBungee313BView& v)
 }
 template<class IO> void Fields(IO& io,FusionHeavyZombie313BView& v)
 {
-    io.U8(v.status);io.U8(v.ammo);io.U8(v.armorStage);io.U8(v.pogoWait);io.U16(v.deliveryKind);
+    io.U8(v.status);io.U8(v.ammo);io.U8(v.armorStage);io.U8(v.pogoWait);io.U8(v.catapultFlags343);io.U16(v.deliveryKind);
     io.Bool(v.shooting);io.Bool(v.ladderVisible);io.Bool(v.axePresent);io.Bool(v.lookBack);io.Bool(v.caltropDying);
     io.Bool(v.pogoPaused);io.Bool(v.pogoStarted);io.Bool(v.jumped);io.Bool(v.lostJumper);io.Bool(v.shadowEnabled);
     io.F32(v.jumpSpeed);Fields(io,v.bungee);

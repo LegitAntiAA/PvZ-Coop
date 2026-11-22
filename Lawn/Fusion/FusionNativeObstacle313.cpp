@@ -1,4 +1,6 @@
+#include "FusionNativeExtendedZombie347.h"
 #include "FusionNativeObstacle313.h"
+#include "FusionDrown343Rules.h"
 #include "FusionNative.h"
 #include "FusionNativeProjection313.h"
 #include "FusionNativeSourceClock313.h"
@@ -41,7 +43,7 @@ bool Touch(const Sexy::Rect& a,const Sexy::Rect& b){return a.mX<=b.mX+b.mWidth&&
 NativeSourceObstacle313Visuals* Visuals(Board* b,bool create)
 {auto* c=GetNativeContext(b);if(!c)return nullptr;if(!c->sourceObstacleVisuals313&&create)c->sourceObstacleVisuals313=std::make_unique<NativeSourceObstacle313Visuals>(b);return c->sourceObstacleVisuals313.get();}
 std::filesystem::path Path(FusionSourceObstacle313Kind kind,uint8_t variant)
-{wchar_t exe[MAX_PATH]{};GetModuleFileNameW(nullptr,exe,MAX_PATH);return std::filesystem::path(exe).parent_path()/"fusion"/"pilot"/(kind==FusionSourceObstacle313Kind::DrownWeapon?"source-obstacle313-1":("obstacle313-"+std::to_string(unsigned(kind))+"-"+std::to_string(variant)))/"animation.json";}
+{wchar_t exe[MAX_PATH]{};GetModuleFileNameW(nullptr,exe,MAX_PATH);return std::filesystem::path(exe).parent_path()/"fusion"/"pilot"/(kind==FusionSourceObstacle313Kind::DrownWeapon?(variant&2?"source-obstacle343-1-big":"source-obstacle313-1"):("obstacle313-"+std::to_string(unsigned(kind))+"-"+std::to_string(variant)))/"animation.json";}
 Reanimation* Clock(const Projectile* p,const NativeSourceObstacle313Data& d){return p&&d.clockUID?p->mApp->ReanimationTryToGet(ReanimationID(d.clockUID)):nullptr;}
 bool ClockReady(Board* b,const Projectile* p=nullptr)
 {
@@ -151,32 +153,36 @@ bool Machine(Projectile* p,NativeSourceObstacle313Data& d)
 }
 struct NativeSourceObstacle313Visuals::Impl
 {
-    Board* board;std::map<unsigned,std::unique_ptr<FusionAnimation>> models;int64_t drownBox=0;
+    Board* board;std::map<unsigned,std::unique_ptr<FusionAnimation>> models;std::map<unsigned,int64_t> drownBoxes;
     explicit Impl(Board* b):board(b){}
-    const FusionAnimation* Find(FusionSourceObstacle313Kind k,uint8_t v)const{auto i=models.find(unsigned(k)*2+v);return i==models.end()?nullptr:i->second.get();}
+    const FusionAnimation* Find(FusionSourceObstacle313Kind k,uint8_t v)const{auto i=models.find(unsigned(k)*256+v);return i==models.end()?nullptr:i->second.get();}
 };
 NativeSourceObstacle313Visuals::NativeSourceObstacle313Visuals(Board* b):mImpl(std::make_unique<Impl>(b)){}
 NativeSourceObstacle313Visuals::~NativeSourceObstacle313Visuals()=default;
 bool NativeSourceObstacle313Visuals::Ensure(FusionSourceObstacle313Kind k,uint8_t v,std::string& error)
-{if(unsigned(k)<1||unsigned(k)>4||v>1||((k==FusionSourceObstacle313Kind::KirovBomb||k==FusionSourceObstacle313Kind::DrownWeapon)&&v))return false;if(mImpl->Find(k,v))return true;auto a=std::make_unique<FusionAnimation>();if(!a->Load(mImpl->board->mApp,Path(k,v).string(),error))return false;if(k==FusionSourceObstacle313Kind::DrownWeapon){
+{if(unsigned(k)<1||unsigned(k)>5||(k==FusionSourceObstacle313Kind::DrownWeapon?v>3:k==FusionSourceObstacle313Kind::SpiderWeapon?v!=0:v>1))return false;if(mImpl->Find(k,v))return true;auto a=std::make_unique<FusionAnimation>();if(!a->Load(mImpl->board->mApp,Path(k,v).string(),error))return false;if(k==FusionSourceObstacle313Kind::DrownWeapon){
  try{std::ifstream file(Path(k,v));nlohmann::json j;file>>j;
-  if(!j.value("static",false)||j.value("sourcePrefab",std::string{})!="Resources/zombies/zombie_drown/weapon.prefab"||j.at("colliders").size()!=1){error="Drown genuine static prefab/collider contract differs";return false;}
+  if(!j.value("static",false)||j.value("sourcePrefab",std::string{})!=((v&2)?"Resources/zombies/zombie_poseidon/weapon.prefab":"Resources/zombies/zombie_drown/weapon.prefab")||j.at("colliders").size()!=1){error="Drown genuine static prefab/collider contract differs";return false;}
   const auto& box=j.at("colliders").at(0);if(box.value("type",std::string{})!="box"||box.value("node",-1)!=0||!box.value("enabled",false)||!box.value("trigger",false)){error="Drown genuine root BoxCollider2D differs";return false;}
   const int64_t id=box.at("fileId").get<int64_t>();if(id<=0)return false;
+  if(v&2){auto found=std::find_if(j.at("nodes").begin(),j.at("nodes").end(),[](const auto& n){return n.value("path",std::string{})=="dirt";});
+   if(found==j.at("nodes").end()||found->at("parent")!=0){error="Drown big dirt world rotation hierarchy is not supported";return false;}}
+
   FusionAnimationBoxCollider303 test;FusionAnimationDrawOptions options;options.nodeRotations.push_back({"",0,true});
   if(!a->TryGetBoxCollider303(id,test,"",0,nullptr,-1,1,&options)||!test.enabled||!test.nodeActive){error="Drown actual root collider cannot be sampled";return false;}
-  mImpl->drownBox=id;
+  mImpl->drownBoxes[unsigned(k)*256+v]=id;
  }catch(const std::exception& ex){error=ex.what();return false;}}
-if(k==FusionSourceObstacle313Kind::MachineBall&&(!a->GetDefaultStateName()||std::string(a->GetDefaultStateName())!="move"||std::abs(a->GetStateDurationSeconds("move")-1.f/.3f)>.0001f)){error="MachineBall genuine move Animator duration/speed differs.";return false;}mImpl->models.emplace(unsigned(k)*2+v,std::move(a));return true;}
+if(k==FusionSourceObstacle313Kind::MachineBall&&(!a->GetDefaultStateName()||std::string(a->GetDefaultStateName())!="move"||std::abs(a->GetStateDurationSeconds("move")-1.f/.3f)>.0001f)){error="MachineBall genuine move Animator duration/speed differs.";return false;}mImpl->models.emplace(unsigned(k)*256+v,std::move(a));return true;}
 float NativeObstacle313Brightness(const Projectile* p,const FusionSourceObstacle313View& d)
-{if(!p||d.kind!=FusionSourceObstacle313Kind::MachineBall||!d.hitCount||p->mProjectileAge<int(d.lastHitAge))return 1;float t=.3f;const int steps=(p->mProjectileAge-int(d.lastHitAge))/2;if(steps>16)return 1;for(int i=0;i<steps;++i)t-=.02f;if(t<=0)return 1;return std::clamp(t>.2f?10-30*t:1+15*t,1.f,4.f);}
+{if(p&&d.kind==FusionSourceObstacle313Kind::DrownWeapon)return (d.variant&2)?FusionDrown343Brightness(p->mProjectileAge,d.lastHitAge,d.drownLongFlash):1;
+ if(!p||d.kind!=FusionSourceObstacle313Kind::MachineBall||!d.hitCount||p->mProjectileAge<int(d.lastHitAge))return 1;float t=.3f;const int steps=(p->mProjectileAge-int(d.lastHitAge))/2;if(steps>16)return 1;for(int i=0;i<steps;++i)t-=.02f;if(t<=0)return 1;return std::clamp(t>.2f?10-30*t:1+15*t,1.f,4.f);}
 namespace {bool Pose(const Projectile* p,const NativeSourceObstacle313Data& d,const char*& state,float& seconds,FusionAnimationDrawOptions& options)
-{state=d.kind==FusionSourceObstacle313Kind::MachineBall?"move":"";seconds=0;options.brightnessGain=NativeObstacle313Brightness(p,d);if(d.kind==FusionSourceObstacle313Kind::DrownWeapon){if(!std::isfinite(p->mRotation))return false;options.nodeRotations.push_back({"",p->mRotation,true});}if(d.kind!=FusionSourceObstacle313Kind::MachineBall)return true;auto* r=Clock(p,d);if(!r||r->mDead||r->mFrameCount<=0)return false;seconds=(float(r->mLoopCount)+r->mAnimTime)/.3f;return std::isfinite(seconds);}}
+{state=d.kind==FusionSourceObstacle313Kind::MachineBall?"move":"";seconds=0;options.brightnessGain=NativeObstacle313Brightness(p,d);if(d.kind==FusionSourceObstacle313Kind::DrownWeapon){if(!std::isfinite(p->mRotation))return false;options.nodeRotations.push_back({"",p->mRotation,true});if(d.variant&2){options.nodeActivityOverrides.push_back({"dirt",d.landed});if(d.landed)options.nodeRotations.push_back({"dirt",-p->mRotation,true});}}if(d.kind!=FusionSourceObstacle313Kind::MachineBall)return true;auto* r=Clock(p,d);if(!r||r->mDead||r->mFrameCount<=0)return false;seconds=(float(r->mLoopCount)+r->mAnimTime)/.3f;return std::isfinite(seconds);}}
 bool NativeSourceObstacle313Visuals::Draw(Sexy::Graphics* g,Projectile* p,const NativeSourceObstacle313Data& d)const
 {const auto* a=mImpl->Find(d.kind,d.variant);if(!a)return false;const char* state=nullptr;float t=0;FusionAnimationDrawOptions o;if(!Pose(p,d,state,t,o))return false;a->DrawPose(g,p->mPosX+20-p->mX,p->mPosY+20-p->mY,.6f,state,t,nullptr,-1,1,&o);return true;}
 bool NativeSourceObstacle313Visuals::Box313(const Projectile* p,const NativeSourceObstacle313Data& d,FusionAnimationBoxCollider303& out)const
 {const auto* a=mImpl->Find(d.kind,d.variant);if(!a||(d.kind!=FusionSourceObstacle313Kind::MachineBall&&d.kind!=FusionSourceObstacle313Kind::DrownWeapon))return false;const char* state=nullptr;float t=0;FusionAnimationDrawOptions o;
- if(!Pose(p,d,state,t,o))return false;return a->TryGetBoxCollider303(d.kind==FusionSourceObstacle313Kind::DrownWeapon?mImpl->drownBox:61025901758691103LL,out,state,t,nullptr,-1,1,&o);}
+ if(!Pose(p,d,state,t,o))return false;return a->TryGetBoxCollider303(d.kind==FusionSourceObstacle313Kind::DrownWeapon?mImpl->drownBoxes.at(unsigned(d.kind)*256+d.variant):61025901758691103LL,out,state,t,nullptr,-1,1,&o);}
 bool NativeSourceObstacle313Visuals::Rect(const Projectile* p,const NativeSourceObstacle313Data& d,Sexy::Rect& out)const
 {FusionAnimationBoxCollider303 box;if(!Box313(p,d,box)||!box.enabled||!box.nodeActive)return false;const float x=p->mPosX+20,y=p->mPosY+20;const int left=int(std::floor(x+60*box.aabb[0])),top=int(std::floor(y-60*box.aabb[3]));out=Sexy::Rect(left,top,int(std::ceil(x+60*box.aabb[2]))-left,int(std::ceil(y-60*box.aabb[1]))-top);return true;}
 bool GetNativeSourceObstacle313Box(const Projectile* p,FusionAnimationBoxCollider303& out)
@@ -186,8 +192,8 @@ NativeSourceObstacle313Data* EditNativeSourceObstacle313(Projectile* p,bool crea
 const NativeSourceObstacle313Data* GetNativeSourceObstacle313(const Projectile* p){return EditNativeSourceObstacle313(const_cast<Projectile*>(p));}
 namespace {bool Resources(Board* b,const FusionSourceObstacle313Spawn& s,std::string* error)
 {
-    if(!World(b)||unsigned(s.kind)<2||unsigned(s.kind)>4||s.row<0||s.row>=GetNativeFusionRowCount(b)||!s.ownerId||!s.ownerToken||s.variant>1||!std::isfinite(s.centerX)||!std::isfinite(s.centerY)||!std::isfinite(s.groundY))return Reject("Source obstacle actual world/factory identity unavailable.",error);
-    if(s.targetPlantId||s.targetPlantToken||(s.kind!=FusionSourceObstacle313Kind::KirovBomb&&s.fromHypno)||(s.kind==FusionSourceObstacle313Kind::KirovBomb&&s.variant))return false;
+    if(!World(b)||unsigned(s.kind)<2||unsigned(s.kind)>5||s.row<0||s.row>=GetNativeFusionRowCount(b)||!s.ownerId||!s.ownerToken||s.variant>1||!std::isfinite(s.centerX)||!std::isfinite(s.centerY)||!std::isfinite(s.groundY))return Reject("Source obstacle actual world/factory identity unavailable.",error);
+    if(s.targetPlantId||s.targetPlantToken||(s.kind!=FusionSourceObstacle313Kind::KirovBomb&&s.kind!=FusionSourceObstacle313Kind::SpiderWeapon&&s.fromHypno)||(s.kind==FusionSourceObstacle313Kind::SpiderWeapon&&s.variant))return false;
     std::string e;auto* v=Visuals(b,true);if(!v||!v->Ensure(s.kind,s.variant,e)){if(error)*error=e;return false;}
     for(uint16_t fx:s.kind==FusionSourceObstacle313Kind::MachineBall?std::initializer_list<uint16_t>{63,64}:std::initializer_list<uint16_t>{41,42})if(NativeSourceEffectParticle269(fx)<0||!EnsureNativeSourceEffect269(b,fx,error))return false;
     if(s.kind==FusionSourceObstacle313Kind::MachineBall){ReanimatorEnsureDefinitionLoaded(REANIM_ZOMBIE,false);if(!ClockReady(b))return Reject("MachineBall actual R/A peak unavailable.",error);}
@@ -197,7 +203,8 @@ namespace {bool Resources(Board* b,const FusionSourceObstacle313Spawn& s,std::st
 bool CanCreateNativeExtendedObstacle313(Board* b,const FusionSourceObstacle313Spawn& s,std::string* error)
 {return Resources(b,s,error)&&b->mProjectiles.mBlock&&b->mProjectiles.mSize<b->mProjectiles.mMaxSize;}
 bool InitializeNativeExtendedObstacle313(Projectile* p,const FusionSourceObstacle313Spawn& s,NativeSourceObstacle313Data& d,std::string* error)
-{if(!p||!Resources(p->mBoard,s,error))return false;d={};d.kind=s.kind;d.instanceToken=p->mBoard->mProjectiles.DataArrayGetID(p);d.ownerId=s.ownerId;d.ownerToken=s.ownerToken;d.fromHypno=s.fromHypno;d.variant=s.variant;p->mPosX=s.centerX-20;p->mPosY=s.centerY-20;p->mPosZ=0;p->mShadowY=s.groundY;p->mRenderOrder=s.renderOrder;p->mVelX=p->mVelY=p->mVelZ=p->mAccZ=0;p->mRotation=0;p->mProjectileAge=0;p->mX=int(p->mPosX);p->mY=int(p->mPosY);if(s.kind==FusionSourceObstacle313Kind::SuperBall){p->mVelX=-3.f*float(kFusionBasePixelsX)*.01f;p->mVelY=-2.f*float(GetNativeFusionPixelsY(p->mBoard))*.01f;}if(s.kind==FusionSourceObstacle313Kind::MachineBall){p->mVelX=-.5f*float(kFusionBasePixelsX)*.01f;if(!AllocateClock(p,d))return false;}return FusionSourceObstacle313ControllerValid(d);}
+{if(!p||!Resources(p->mBoard,s,error))return false;d={};d.kind=s.kind;d.instanceToken=p->mBoard->mProjectiles.DataArrayGetID(p);d.ownerId=s.ownerId;d.ownerToken=s.ownerToken;d.fromHypno=s.fromHypno;d.variant=s.variant;p->mPosX=s.centerX-20;p->mPosY=s.centerY-20;p->mPosZ=0;p->mShadowY=s.groundY;p->mRenderOrder=s.renderOrder;p->mVelX=p->mVelY=p->mVelZ=p->mAccZ=0;p->mRotation=0;p->mProjectileAge=0;p->mX=int(p->mPosX);p->mY=int(p->mPosY);if(s.kind==FusionSourceObstacle313Kind::SpiderWeapon)p->mVelX=(s.fromHypno?4.f:-4.f)*float(kFusionBasePixelsX)*.01f;
+if(s.kind==FusionSourceObstacle313Kind::SuperBall){p->mVelX=-3.f*float(kFusionBasePixelsX)*.01f;p->mVelY=-2.f*float(GetNativeFusionPixelsY(p->mBoard))*.01f;}if(s.kind==FusionSourceObstacle313Kind::MachineBall){p->mVelX=-.5f*float(kFusionBasePixelsX)*.01f;if(!AllocateClock(p,d))return false;}return FusionSourceObstacle313ControllerValid(d);}
 bool UpdateNativeExtendedObstacle313(Projectile* p)
 {auto* d=EditNativeSourceObstacle313(p);if(!d||d->kind==FusionSourceObstacle313Kind::DrownWeapon)return false;if(!Host(p)||p->mDead||p->mBoard->mPaused||p->mApp->mGameScene!=SCENE_PLAYING||d->failed||d->tick==p->mBoard->mMainCounter)return true;d->tick=p->mBoard->mMainCounter;bool ok=false;if(d->kind==FusionSourceObstacle313Kind::KirovBomb)ok=Kirov(p,*d);else if(d->kind==FusionSourceObstacle313Kind::SuperBall)ok=Super(p,*d);else if(d->kind==FusionSourceObstacle313Kind::MachineBall)ok=Machine(p,*d);if(!ok&&!p->mDead)Failed(p,"Prepared source obstacle operation failed; no replay after mutation.");return true;}
 bool DrawNativeExtendedObstacle313(Sexy::Graphics* g,Projectile* p){const auto* d=GetNativeSourceObstacle313(p);if(!d||d->kind==FusionSourceObstacle313Kind::DrownWeapon)return false;auto* v=Visuals(p->mBoard,false);if(v)v->Draw(g,p,*d);return true;}

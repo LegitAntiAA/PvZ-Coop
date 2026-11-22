@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="PakLib">
@@ -1471,5 +1471,17 @@
     <ClInclude Include="..\Lawn\Fusion\NativeSpecialZombie269.h"><Filter>Lawn\Common\Common Include</Filter></ClInclude>
     <ClInclude Include="..\Lawn\Fusion\FusionZombieBatch270Rules.h"><Filter>Lawn\Common\Common Include</Filter></ClInclude>
     <ClInclude Include="..\Lawn\Fusion\FusionParticleCollision269Rules.h"><Filter>Lawn\Common\Common Include</Filter></ClInclude>
+    <ClCompile Include="..\Lawn\Fusion\FusionGroundShooter343Rules.cpp"><Filter>Lawn\Common\Common Source</Filter></ClCompile>
+    <ClCompile Include="..\Lawn\Fusion\FusionSourceGraphGround343Generated.cpp"><Filter>Lawn\Common\Common Source</Filter></ClCompile>
+    <ClCompile Include="..\Lawn\Fusion\FusionSourceRootGround343.cpp"><Filter>Lawn\Common\Common Source</Filter></ClCompile>
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeGroundShooter343.cpp"><Filter>Lawn\Common\Common Source</Filter></ClCompile>
+    <ClInclude Include="..\Lawn\Fusion\FusionGroundShooter343Rules.h"><Filter>Lawn\Common\Common Include</Filter></ClInclude>
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeGroundShooter343.h"><Filter>Lawn\Common\Common Include</Filter></ClInclude>
+    <ClCompile Include="..\Lawn\Fusion\FusionSnowZombie363Rules.cpp"><Filter>Lawn\Common\Common Source</Filter></ClCompile>
+    <ClCompile Include="..\Lawn\Fusion\FusionSourceGraphSnow363Generated.cpp"><Filter>Lawn\Common\Common Source</Filter></ClCompile>
+    <ClCompile Include="..\Lawn\Fusion\FusionSourceRootSnow363.cpp"><Filter>Lawn\Common\Common Source</Filter></ClCompile>
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeSnowZombie363.cpp"><Filter>Lawn\Common\Common Source</Filter></ClCompile>
+    <ClInclude Include="..\Lawn\Fusion\FusionSnowZombie363Rules.h"><Filter>Lawn\Common\Common Include</Filter></ClInclude>
+    <ClInclude Include="..\Lawn\Fusion\FusionNativeSnowZombie363.h"><Filter>Lawn\Common\Common Include</Filter></ClInclude>
   </ItemGroup>
 </Project>

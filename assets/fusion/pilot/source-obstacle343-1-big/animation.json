@@ -1,0 +1,859 @@
+{
+  "schema": 1,
+  "sourcePrefab": "Resources/zombies/zombie_poseidon/weapon.prefab",
+  "unitsPerNativePixel": 0.01,
+  "applyRootMotion": false,
+  "static": true,
+  "root": 0,
+  "nodes": [
+    {
+      "name": "weapon",
+      "active": true,
+      "tag": "Untagged",
+      "parent": -1,
+      "path": "",
+      "position": {
+        "x": 6.66,
+        "y": 3.42,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": -0.14780933,
+        "w": 0.9890159
+      },
+      "scale": {
+        "x": 1.2,
+        "y": 1.2,
+        "z": 1.2
+      }
+    },
+    {
+      "name": "image",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "image",
+      "position": {
+        "x": 1.778,
+        "y": 0.124,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": 0.023877233,
+        "w": 0.9997149
+      },
+      "scale": {
+        "x": 0.40000004,
+        "y": 0.40000004,
+        "z": 1.3333333
+      }
+    },
+    {
+      "name": "haicao5",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 1,
+      "path": "image/haicao5",
+      "position": {
+        "x": -2.21,
+        "y": -0.3699999,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "haicao4",
+      "active": true,
+      "tag": "Untagged",
+      "parent": 1,
+      "path": "image/haicao4",
+      "position": {
+        "x": -2.345,
+        "y": 0.80999947,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.0,
+        "w": 1.0
+      },
+      "scale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+      }
+    },
+    {
+      "name": "dirt",
+      "active": false,
+      "tag": "Untagged",
+      "parent": 0,
+      "path": "dirt",
+      "position": {
+        "x": 0.208,
+        "y": 0.007,
+        "z": 0.0
+      },
+      "rotation": {
+        "x": -0.0,
+        "y": -0.0,
+        "z": -0.69847107,
+        "w": 0.7156383
+      },
+      "scale": {
+        "x": 1.2298,
+        "y": 1.7105087,
+        "z": 1.2298
+      }
+    }
+  ],
+  "sourceHierarchy": null,
+  "sprites": [
+    {
+      "texture": "textures/a797163dd0f5.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: 组 4 拷贝\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 4\n    width: 876\n    height: 231\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    b0d595aefadffb145af8f052f9f9fcc4: -8610109456843125475\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 86819772ba6d6754c8ec8b8ed999d600, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: f6288cc00ad7933f00000000f6288c400ad7933f00000000f6288cc00ad793bf00000000f6288c400ad793bf000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 4\n      width: 876\n      height: 231\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 0\n    uvTransform: {x: 100, y: 442, z: 100, w: 119.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -4.380000114440918,
+            "y": 1.1549999713897705,
+            "z": 0.0,
+            "u": 0.0039062388241291046,
+            "v": 0.8852539076469839
+          },
+          {
+            "x": 4.380000114440918,
+            "y": 1.1549999713897705,
+            "z": 0.0,
+            "u": 0.8593750111758709,
+            "v": 0.8852539076469839
+          },
+          {
+            "x": -4.380000114440918,
+            "y": -1.1549999713897705,
+            "z": 0.0,
+            "u": 0.0039062388241291046,
+            "v": 0.9980468736030161
+          },
+          {
+            "x": 4.380000114440918,
+            "y": -1.1549999713897705,
+            "z": 0.0,
+            "u": 0.8593750111758709,
+            "v": 0.9980468736030161
+          }
+        ],
+        "indices": [
+          0,
+          1,
+          2,
+          2,
+          1,
+          3
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/zombie_poseidon/组 4 拷贝.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 4.0,
+        "width": 876.0,
+        "height": 231.0,
+        "yTop": 1813.0
+      },
+      "logicalSize": {
+        "width": 876.0,
+        "height": 231.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "415f07a9223501d44805a23c2944bbc4",
+      "node": 1,
+      "sortingOrder": 7,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false,
+      "maskInteraction": 0
+    },
+    {
+      "texture": "textures/a797163dd0f5.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: haicao5\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 1964\n    width: 106\n    height: 53\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    b0d595aefadffb145af8f052f9f9fcc4: 7289811896759838778\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 86819772ba6d6754c8ec8b8ed999d600, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: 14ae07bf14ae873e0000000014ae073f14ae873e0000000014ae07bf14ae87be0000000014ae073f14ae87be000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 1964\n      width: 106\n      height: 53\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 0\n    uvTransform: {x: 100, y: 57, z: 100, w: 1990.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -0.5299999713897705,
+            "y": 0.26499998569488525,
+            "z": 0.0,
+            "u": 0.003906252793967724,
+            "v": 0.015136719448491931
+          },
+          {
+            "x": 0.5299999713897705,
+            "y": 0.26499998569488525,
+            "z": 0.0,
+            "u": 0.10742187220603228,
+            "v": 0.015136719448491931
+          },
+          {
+            "x": -0.5299999713897705,
+            "y": -0.26499998569488525,
+            "z": 0.0,
+            "u": 0.003906252793967724,
+            "v": 0.04101562430150807
+          },
+          {
+            "x": 0.5299999713897705,
+            "y": -0.26499998569488525,
+            "z": 0.0,
+            "u": 0.10742187220603228,
+            "v": 0.04101562430150807
+          }
+        ],
+        "indices": [
+          0,
+          1,
+          2,
+          2,
+          1,
+          3
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/zombie_poseidon/haicao5.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 1964.0,
+        "width": 106.0,
+        "height": 53.0,
+        "yTop": 31.0
+      },
+      "logicalSize": {
+        "width": 106.0,
+        "height": 53.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "20196738dc7a4f74a9652e32feb8bfa4",
+      "node": 2,
+      "sortingOrder": 10,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false,
+      "maskInteraction": 0
+    },
+    {
+      "texture": "textures/a797163dd0f5.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: haicao4\n  m_Rect:\n    serializedVersion: 2\n    x: 257\n    y: 957\n    width: 79\n    height: 57\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    b0d595aefadffb145af8f052f9f9fcc4: -7176690407911459823\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 86819772ba6d6754c8ec8b8ed999d600, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: 713dcabe85eb913e00000000713dca3e85eb913e00000000713dcabe85eb91be00000000713dca3e85eb91be000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 257\n      y: 957\n      width: 79\n      height: 57\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 0\n    uvTransform: {x: 100, y: 296.5, z: 100, w: 985.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -0.39500001072883606,
+            "y": 0.2849999964237213,
+            "z": 0.0,
+            "u": 0.2509765614522621,
+            "v": 0.504882812674623
+          },
+          {
+            "x": 0.39500001072883606,
+            "y": 0.2849999964237213,
+            "z": 0.0,
+            "u": 0.3281250010477379,
+            "v": 0.504882812674623
+          },
+          {
+            "x": -0.39500001072883606,
+            "y": -0.2849999964237213,
+            "z": 0.0,
+            "u": 0.2509765614522621,
+            "v": 0.532714843575377
+          },
+          {
+            "x": 0.39500001072883606,
+            "y": -0.2849999964237213,
+            "z": 0.0,
+            "u": 0.3281250010477379,
+            "v": 0.532714843575377
+          }
+        ],
+        "indices": [
+          0,
+          1,
+          2,
+          2,
+          1,
+          3
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/zombie_poseidon/haicao4.asset",
+      "textureRect": {
+        "x": 257.0,
+        "y": 957.0,
+        "width": 79.0,
+        "height": 57.0,
+        "yTop": 1034.0
+      },
+      "logicalSize": {
+        "width": 79.0,
+        "height": 57.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "a0c2f9aa0c6f8904686c57bba11632b8",
+      "node": 3,
+      "sortingOrder": 10,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false,
+      "maskInteraction": 0
+    },
+    {
+      "texture": "textures/b7e48d33967f.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Digger_rising_dirt8\n  m_Rect:\n    serializedVersion: 2\n    x: 0\n    y: 0.026750982\n    width: 111\n    height: 31.946499\n  m_Offset: {x: 0, y: 2.4999998}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.57825583}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    d6e45f16fc120cf409b056ee29ed18be: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 781b85724a97db0468a642a14b0de3cc, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 9\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 5\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 040003000100000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 5\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 104\n      _typelessdata: ae47013f713d0a3e000000007b140e3fa4703dbe000000007b140e3fae47613d000000007b140ebf713d0a3e000000007b140ebfa4703dbe000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0.026750982\n      width: 111\n      height: 31.946499\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 55.5, z: 100, w: 18.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape:\n  - - {x: 0.555, y: -0.13499999}\n    - {x: 0.555, y: -0.035}\n    - {x: 0.475, y: 0.055}\n    - {x: 0.355, y: 0.085}\n    - {x: 0.275, y: 0.125}\n    - {x: -0.21499999, y: 0.125}\n    - {x: -0.375, y: 0.074999996}\n    - {x: -0.53499997, y: -0.035}\n    - {x: -0.555, y: -0.085}\n    - {x: -0.555, y: -0.13499999}\n    - {x: -0.465, y: -0.175}\n    - {x: -0.185, y: -0.175}\n    - {x: 0.105, y: -0.145}\n    - {x: 0.13499999, y: -0.175}\n    - {x: 0.475, y: -0.175}\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.5049999952316284,
+            "y": 0.13500000536441803,
+            "z": 0.0,
+            "u": 0.9549549506591247,
+            "v": 0.13513512063670807
+          },
+          {
+            "x": 0.5550000071525574,
+            "y": -0.1850000023841858,
+            "z": 0.0,
+            "u": 1.0000000064437453,
+            "v": 1.0000000064437453
+          },
+          {
+            "x": 0.5550000071525574,
+            "y": 0.054999999701976776,
+            "z": 0.0,
+            "u": 1.0000000064437453,
+            "v": 0.35135135215681956
+          },
+          {
+            "x": -0.5550000071525574,
+            "y": 0.13500000536441803,
+            "z": 0.0,
+            "u": -6.443745381123311e-09,
+            "v": 0.13513512063670807
+          },
+          {
+            "x": -0.5550000071525574,
+            "y": -0.1850000023841858,
+            "z": 0.0,
+            "u": -6.443745381123311e-09,
+            "v": 1.0000000064437453
+          }
+        ],
+        "indices": [
+          4,
+          3,
+          1,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/zombie_digger/Digger_rising_dirt8.asset",
+      "textureRect": {
+        "x": 0.0,
+        "y": 0.026750982,
+        "width": 111.0,
+        "height": 31.946499,
+        "yTop": 5.026750017999998
+      },
+      "logicalSize": {
+        "width": 111.0,
+        "height": 31.946499
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.57825583
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0,
+      "guid": "21809bc9e160e394f8e1f087e2fa10d5",
+      "node": 4,
+      "sortingOrder": 11,
+      "sortingLayerId": 0,
+      "enabled": true,
+      "color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "flipX": false,
+      "flipY": false,
+      "maskInteraction": 0
+    }
+  ],
+  "spriteVariants": {
+    "415f07a9223501d44805a23c2944bbc4": {
+      "texture": "textures/a797163dd0f5.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: 组 4 拷贝\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 4\n    width: 876\n    height: 231\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    b0d595aefadffb145af8f052f9f9fcc4: -8610109456843125475\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 86819772ba6d6754c8ec8b8ed999d600, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: f6288cc00ad7933f00000000f6288c400ad7933f00000000f6288cc00ad793bf00000000f6288c400ad793bf000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 4\n      width: 876\n      height: 231\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 0\n    uvTransform: {x: 100, y: 442, z: 100, w: 119.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -4.380000114440918,
+            "y": 1.1549999713897705,
+            "z": 0.0,
+            "u": 0.0039062388241291046,
+            "v": 0.8852539076469839
+          },
+          {
+            "x": 4.380000114440918,
+            "y": 1.1549999713897705,
+            "z": 0.0,
+            "u": 0.8593750111758709,
+            "v": 0.8852539076469839
+          },
+          {
+            "x": -4.380000114440918,
+            "y": -1.1549999713897705,
+            "z": 0.0,
+            "u": 0.0039062388241291046,
+            "v": 0.9980468736030161
+          },
+          {
+            "x": 4.380000114440918,
+            "y": -1.1549999713897705,
+            "z": 0.0,
+            "u": 0.8593750111758709,
+            "v": 0.9980468736030161
+          }
+        ],
+        "indices": [
+          0,
+          1,
+          2,
+          2,
+          1,
+          3
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/zombie_poseidon/组 4 拷贝.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 4.0,
+        "width": 876.0,
+        "height": 231.0,
+        "yTop": 1813.0
+      },
+      "logicalSize": {
+        "width": 876.0,
+        "height": 231.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "20196738dc7a4f74a9652e32feb8bfa4": {
+      "texture": "textures/a797163dd0f5.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: haicao5\n  m_Rect:\n    serializedVersion: 2\n    x: 4\n    y: 1964\n    width: 106\n    height: 53\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    b0d595aefadffb145af8f052f9f9fcc4: 7289811896759838778\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 86819772ba6d6754c8ec8b8ed999d600, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: 14ae07bf14ae873e0000000014ae073f14ae873e0000000014ae07bf14ae87be0000000014ae073f14ae87be000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 4\n      y: 1964\n      width: 106\n      height: 53\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 0\n    uvTransform: {x: 100, y: 57, z: 100, w: 1990.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -0.5299999713897705,
+            "y": 0.26499998569488525,
+            "z": 0.0,
+            "u": 0.003906252793967724,
+            "v": 0.015136719448491931
+          },
+          {
+            "x": 0.5299999713897705,
+            "y": 0.26499998569488525,
+            "z": 0.0,
+            "u": 0.10742187220603228,
+            "v": 0.015136719448491931
+          },
+          {
+            "x": -0.5299999713897705,
+            "y": -0.26499998569488525,
+            "z": 0.0,
+            "u": 0.003906252793967724,
+            "v": 0.04101562430150807
+          },
+          {
+            "x": 0.5299999713897705,
+            "y": -0.26499998569488525,
+            "z": 0.0,
+            "u": 0.10742187220603228,
+            "v": 0.04101562430150807
+          }
+        ],
+        "indices": [
+          0,
+          1,
+          2,
+          2,
+          1,
+          3
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/zombie_poseidon/haicao5.asset",
+      "textureRect": {
+        "x": 4.0,
+        "y": 1964.0,
+        "width": 106.0,
+        "height": 53.0,
+        "yTop": 31.0
+      },
+      "logicalSize": {
+        "width": 106.0,
+        "height": 53.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "a0c2f9aa0c6f8904686c57bba11632b8": {
+      "texture": "textures/a797163dd0f5.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: haicao4\n  m_Rect:\n    serializedVersion: 2\n    x: 257\n    y: 957\n    width: 79\n    height: 57\n  m_Offset: {x: 0, y: 0}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.5}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    b0d595aefadffb145af8f052f9f9fcc4: -7176690407911459823\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 86819772ba6d6754c8ec8b8ed999d600, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 6\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 4\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 000001000200020001000300\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 4\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 80\n      _typelessdata: 713dcabe85eb913e00000000713dca3e85eb913e00000000713dcabe85eb91be00000000713dca3e85eb91be000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 257\n      y: 957\n      width: 79\n      height: 57\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 0\n    uvTransform: {x: 100, y: 296.5, z: 100, w: 985.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape: []\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": -0.39500001072883606,
+            "y": 0.2849999964237213,
+            "z": 0.0,
+            "u": 0.2509765614522621,
+            "v": 0.504882812674623
+          },
+          {
+            "x": 0.39500001072883606,
+            "y": 0.2849999964237213,
+            "z": 0.0,
+            "u": 0.3281250010477379,
+            "v": 0.504882812674623
+          },
+          {
+            "x": -0.39500001072883606,
+            "y": -0.2849999964237213,
+            "z": 0.0,
+            "u": 0.2509765614522621,
+            "v": 0.532714843575377
+          },
+          {
+            "x": 0.39500001072883606,
+            "y": -0.2849999964237213,
+            "z": 0.0,
+            "u": 0.3281250010477379,
+            "v": 0.532714843575377
+          }
+        ],
+        "indices": [
+          0,
+          1,
+          2,
+          2,
+          1,
+          3
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/zombie_poseidon/haicao4.asset",
+      "textureRect": {
+        "x": 257.0,
+        "y": 957.0,
+        "width": 79.0,
+        "height": 57.0,
+        "yTop": 1034.0
+      },
+      "logicalSize": {
+        "width": 79.0,
+        "height": 57.0
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    },
+    "21809bc9e160e394f8e1f087e2fa10d5": {
+      "texture": "textures/b7e48d33967f.png",
+      "serializedSprite": "%YAML 1.1\n%TAG !u! tag:unity3d.com,2011:\n--- !u!213 &21300000\nSprite:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_Name: Digger_rising_dirt8\n  m_Rect:\n    serializedVersion: 2\n    x: 0\n    y: 0.026750982\n    width: 111\n    height: 31.946499\n  m_Offset: {x: 0, y: 2.4999998}\n  m_Border: {x: 0, y: 0, z: 0, w: 0}\n  m_PixelsToUnits: 100\n  m_Pivot: {x: 0.5, y: 0.57825583}\n  m_Extrude: 1\n  m_IsPolygon: 0\n  m_AtlasName:\n  m_PackingTag:\n  m_RenderDataKey:\n    d6e45f16fc120cf409b056ee29ed18be: 21300000\n  m_AtlasTags: []\n  m_SpriteAtlas: {fileID: 0}\n  m_RD:\n    serializedVersion: 3\n    texture: {fileID: 2800000, guid: 781b85724a97db0468a642a14b0de3cc, type: 3}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes:\n    - serializedVersion: 2\n      firstByte: 0\n      indexCount: 9\n      topology: 0\n      baseVertex: 0\n      firstVertex: 0\n      vertexCount: 5\n      localAABB:\n        m_Center: {x: 0, y: 0, z: 0}\n        m_Extent: {x: 0, y: 0, z: 0}\n    m_IndexBuffer: 040003000100000001000300020001000000\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 5\n      m_Channels:\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 3\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 1\n        offset: 0\n        format: 0\n        dimension: 2\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      - stream: 0\n        offset: 0\n        format: 0\n        dimension: 0\n      m_DataSize: 104\n      _typelessdata: ae47013f713d0a3e000000007b140e3fa4703dbe000000007b140e3fae47613d000000007b140ebf713d0a3e000000007b140ebfa4703dbe000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0.026750982\n      width: 111\n      height: 31.946499\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: -1, y: -1}\n    settingsRaw: 64\n    uvTransform: {x: 100, y: 55.5, z: 100, w: 18.5}\n    downscaleMultiplier: 1\n  m_AtlasRD:\n    serializedVersion: 3\n    texture: {fileID: 0}\n    alphaTexture: {fileID: 0}\n    secondaryTextures: []\n    m_SubMeshes: []\n    m_IndexBuffer:\n    m_VertexData:\n      serializedVersion: 3\n      m_VertexCount: 0\n      m_Channels: []\n      m_DataSize: 0\n      _typelessdata:\n    m_Bindpose: []\n    textureRect:\n      serializedVersion: 2\n      x: 0\n      y: 0\n      width: 0\n      height: 0\n    textureRectOffset: {x: 0, y: 0}\n    atlasRectOffset: {x: 0, y: 0}\n    settingsRaw: 0\n    uvTransform: {x: 0, y: 0, z: 0, w: 0}\n    downscaleMultiplier: 0\n  m_PhysicsShape:\n  - - {x: 0.555, y: -0.13499999}\n    - {x: 0.555, y: -0.035}\n    - {x: 0.475, y: 0.055}\n    - {x: 0.355, y: 0.085}\n    - {x: 0.275, y: 0.125}\n    - {x: -0.21499999, y: 0.125}\n    - {x: -0.375, y: 0.074999996}\n    - {x: -0.53499997, y: -0.035}\n    - {x: -0.555, y: -0.085}\n    - {x: -0.555, y: -0.13499999}\n    - {x: -0.465, y: -0.175}\n    - {x: -0.185, y: -0.175}\n    - {x: 0.105, y: -0.145}\n    - {x: 0.13499999, y: -0.175}\n    - {x: 0.475, y: -0.175}\n  m_Bones: []\n  m_SpriteID:\n",
+      "hasBoneMetadata": false,
+      "mesh": {
+        "vertices": [
+          {
+            "x": 0.5049999952316284,
+            "y": 0.13500000536441803,
+            "z": 0.0,
+            "u": 0.9549549506591247,
+            "v": 0.13513512063670807
+          },
+          {
+            "x": 0.5550000071525574,
+            "y": -0.1850000023841858,
+            "z": 0.0,
+            "u": 1.0000000064437453,
+            "v": 1.0000000064437453
+          },
+          {
+            "x": 0.5550000071525574,
+            "y": 0.054999999701976776,
+            "z": 0.0,
+            "u": 1.0000000064437453,
+            "v": 0.35135135215681956
+          },
+          {
+            "x": -0.5550000071525574,
+            "y": 0.13500000536441803,
+            "z": 0.0,
+            "u": -6.443745381123311e-09,
+            "v": 0.13513512063670807
+          },
+          {
+            "x": -0.5550000071525574,
+            "y": -0.1850000023841858,
+            "z": 0.0,
+            "u": -6.443745381123311e-09,
+            "v": 1.0000000064437453
+          }
+        ],
+        "indices": [
+          4,
+          3,
+          1,
+          0,
+          1,
+          3,
+          2,
+          1,
+          0
+        ],
+        "uvSource": "serializedUvTransform"
+      },
+      "sourceSprite": "Resources/zombies/zombie_digger/Digger_rising_dirt8.asset",
+      "textureRect": {
+        "x": 0.0,
+        "y": 0.026750982,
+        "width": 111.0,
+        "height": 31.946499,
+        "yTop": 5.026750017999998
+      },
+      "logicalSize": {
+        "width": 111.0,
+        "height": 31.946499
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.57825583
+      },
+      "textureRectOffset": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pixelsPerUnit": 100.0
+    }
+  },
+  "extraSpriteGuids": {},
+  "anchors": {},
+  "visualBounds": {
+    "minX": -0.09030655102560559,
+    "maxX": 4.258060185146109,
+    "minY": -1.5368115137644445,
+    "maxY": 0.5737999235907147
+  },
+  "clips": {},
+  "controller": {
+    "states": [],
+    "layers": [],
+    "serializedController": ""
+  },
+  "nonRenderingComponents": [
+    {
+      "typeId": 61,
+      "fileId": 61099118695303065,
+      "serializedComponent": "BoxCollider2D:\n  serializedVersion: 2\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1709254077376921}\n  m_Enabled: 1\n  m_Density: 1\n  m_Material: {fileID: 0}\n  m_IncludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_ExcludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_LayerOverridePriority: 0\n  m_ForceSendLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_ForceReceiveLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_ContactCaptureLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_CallbackLayers:\n    serializedVersion: 2\n    m_Bits: 4294967295\n  m_IsTrigger: 1\n  m_UsedByEffector: 0\n  m_UsedByComposite: 0\n  m_Offset: {x: 0.7043274, y: 0.08492333}\n  m_SpriteTilingProperty:\n    border: {x: 0, y: 0, z: 0, w: 0}\n    pivot: {x: 0.5, y: 0.5}\n    oldSize: {x: 0.2, y: 0.2}\n    newSize: {x: 0.2, y: 0.2}\n    adaptiveTilingThreshold: 0.5\n    drawMode: 0\n    adaptiveTiling: 0\n  m_AutoTiling: 0\n  m_Size: {x: 1.3485409, y: 0.85179126}\n  m_EdgeRadius: 0\n"
+    },
+    {
+      "typeId": 50,
+      "fileId": 50243736805655561,
+      "serializedComponent": "Rigidbody2D:\n  serializedVersion: 4\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1709254077376921}\n  m_BodyType: 1\n  m_Simulated: 1\n  m_UseFullKinematicContacts: 0\n  m_UseAutoMass: 0\n  m_Mass: 1\n  m_LinearDrag: 0\n  m_AngularDrag: 0.05\n  m_GravityScale: 1\n  m_Material: {fileID: 0}\n  m_IncludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_ExcludeLayers:\n    serializedVersion: 2\n    m_Bits: 0\n  m_Interpolate: 0\n  m_SleepingMode: 1\n  m_CollisionDetection: 0\n  m_Constraints: 0\n"
+    },
+    {
+      "typeId": 210,
+      "fileId": 210061268324235159,
+      "serializedComponent": "SortingGroup:\n  m_ObjectHideFlags: 0\n  m_CorrespondingSourceObject: {fileID: 0}\n  m_PrefabInstance: {fileID: 0}\n  m_PrefabAsset: {fileID: 0}\n  m_GameObject: {fileID: 1709254077376921}\n  m_Enabled: 1\n  m_SortingLayerID: 0\n  m_SortingLayer: 0\n  m_SortingOrder: 0\n  m_SortAtRoot: 0\n"
+    }
+  ],
+  "colliders": [
+    {
+      "type": "box",
+      "node": 0,
+      "fileId": 61099118695303065,
+      "enabled": true,
+      "trigger": true,
+      "offset": {
+        "x": 0.7043274,
+        "y": 0.08492333
+      },
+      "size": {
+        "x": 1.3485409,
+        "y": 0.85179126
+      }
+    }
+  ],
+  "ignoredBindings": [],
+  "omittedInactiveNodes": [],
+  "spritePrefix": null,
+  "unusedSpriteBonesExplicitlyAllowed": false,
+  "sources": [
+    {
+      "path": "Resources/zombies/zombie_digger/Digger_rising_dirt8.asset",
+      "sha256": "d382537be6f8c485867d1223e559e025a05f07fcb98451b7684b5761d834a89a"
+    },
+    {
+      "path": "Resources/zombies/zombie_digger/Digger_rising_dirt8.asset.meta",
+      "sha256": "aaee5a05510c8650a2e1baeeb447f061a7967a6426ca89ffdeff580730fcbcb0"
+    },
+    {
+      "path": "Resources/zombies/zombie_digger/Digger_rising_dirt8.png",
+      "sha256": "b7e48d33967f49391ab0153da91b3808c6789cc11b52c8ef64972e1d1bcd5142"
+    },
+    {
+      "path": "Resources/zombies/zombie_digger/Digger_rising_dirt8.png.meta",
+      "sha256": "8efcf11d7d242c0adc87a80e8f4ad9a83b906eb20604ba625e80c4d3cc8661ca"
+    },
+    {
+      "path": "Resources/zombies/zombie_poseidon/haicao4.asset",
+      "sha256": "533d2f20f2c08cd12b3c0271a259971983f64ce43ff10a3255aea9d7a11e9f88"
+    },
+    {
+      "path": "Resources/zombies/zombie_poseidon/haicao4.asset.meta",
+      "sha256": "1e81f0b2b9de7c7caa39f50b133d31ddfbdf189bd5a89f3f6494245af7f0e695"
+    },
+    {
+      "path": "Resources/zombies/zombie_poseidon/haicao5.asset",
+      "sha256": "d352418da8f68e4fcc826d458240b5f5ba9570cf01b80ab9bbbd04594988583e"
+    },
+    {
+      "path": "Resources/zombies/zombie_poseidon/haicao5.asset.meta",
+      "sha256": "5b1054567f0e52807a2c731affd8cbfab76194b78edc58e03b61a3b92bcee16e"
+    },
+    {
+      "path": "Resources/zombies/zombie_poseidon/weapon.prefab",
+      "sha256": "de98c621c8dbf12d973277ce5b1e5ca320e2366bd38c32c197dfdabb8689dc1e"
+    },
+    {
+      "path": "Resources/zombies/zombie_poseidon/Zombie_Poseidon.png",
+      "sha256": "a797163dd0f5fdaa5d16ba57bf526adcd7459e3525c45441d7fa21655878d31d"
+    },
+    {
+      "path": "Resources/zombies/zombie_poseidon/Zombie_Poseidon.png.meta",
+      "sha256": "0800c9debfcfad95c4c7128380b504b072f11e6dce7cc9394723ec414219efd5"
+    },
+    {
+      "path": "Resources/zombies/zombie_poseidon/组 4 拷贝.asset",
+      "sha256": "87f9ad64044b31b8c00d852362a630685e77c5b0b3a1c7e882c4656a495dc4e0"
+    },
+    {
+      "path": "Resources/zombies/zombie_poseidon/组 4 拷贝.asset.meta",
+      "sha256": "cb352ceaa6c18ebd678ea3b5ae0e7b6f30abe4b1785cd380ea780ce5a904f077"
+    }
+  ],
+  "deferredComponents": [],
+  "validation": "Exported source data. Native rendering and source-runtime comparison are separate verification steps.",
+  "physicsFeatures": [
+    "boxY303"
+  ],
+  "rendererFeatures": [
+    "spriteMaskV1",
+    "spriteSkinV1"
+  ],
+  "sourceMasks": [],
+  "sourceSkins": []
+}

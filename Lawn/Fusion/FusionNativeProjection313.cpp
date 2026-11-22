@@ -74,7 +74,10 @@ bool SetNativeSourceAxis313(Zombie* z,float x,float y)
  if(!GetNativeSourceZombie269NodePoint(z,"Shadow",oldX,oldY)||!NativeSourceGroundAnchor313(z,gx,gy)||
     !NativeSourcePointToBoard313(z->mBoard,z->mRow,gy,x,y,desiredX,desiredY))return false;
  const float nextX=z->mPosX+desiredX-oldX;
- const float nextY=z->mBoard->GetPosYBasedOnRow(nextX+40,z->mRow)-30;
+ float nextY=0;
+ if(z->mBoard->StageHasRoof())
+ {if(!GetNativeFusionRoofZombieRowY350(z,nextX,z->mRow,nextY))return false;}
+ else nextY=z->mBoard->GetPosYBasedOnRow(nextX+40,z->mRow)-30;
  float land=0;if(!NativeSourceRowLandY313(z->mBoard,x,z->mRow,land))return false;
  const float nextAltitude=z->mAltitude+(oldY-gy)+(y-land)*float(GetNativeFusionPixelsY(z->mBoard));
  if(!std::isfinite(nextX)||!std::isfinite(nextY)||!std::isfinite(nextAltitude)||std::abs(nextX)>1000000||std::abs(nextY)>1000000||std::abs(nextAltitude)>1000000)return false;

@@ -1,4 +1,5 @@
 #include "SpecialZombie269Rules.h"
+#include "FusionNextZombie343Rules.h"
 #include "FusionCatalog.h"
 #include <cmath>
 #include <limits>
@@ -23,14 +24,14 @@ bool Position(FusionZombieClipPosition p,float duration)
 }
 bool SpecialZombie269PaperKind(uint16_t kind){return kind==5||kind==15||kind==104;}
 const FusionZombieProfile* FindSpecialZombie269Profile(uint16_t kind)
-{for(const auto& p:profiles)if(p.kind==kind)return &p;return nullptr;}
+{if(kind==200||kind==211)return FindFusionNextZombie343Profile(kind);for(const auto& p:profiles)if(p.kind==kind)return &p;return nullptr;}
 bool SpecialZombie269RejectEffect(uint16_t kind,int status,SpecialZombie269StatusEffect effect)
 {return kind==18||(kind==15&&status==5&&effect!=SpecialZombie269StatusEffect::Cold);}
 uint32_t SpecialZombie269RequiredCapabilities(uint16_t kind)
 {
     switch(kind)
     {
-    case 14:return Special269Model|Special269Crash|Special269BodyParts|Special269DeathEffect|
+    case 14:case 200:case 211:return Special269Model|Special269Crash|Special269BodyParts|Special269DeathEffect|
         Special269VehicleMotion|Special269VehicleContacts|Special269IncomingDamage|Special269Water;
     case 5:case 15:return Special269Model|Special269PaperTransition|Special269PaperMotion|Special269PaperBite;
     case 18:return Special269Model|Special269Crash|Special269BodyParts|Special269DeathEffect|Special269DriverTerrain|
@@ -43,12 +44,12 @@ bool SpecialZombie269CapabilitiesReady(uint16_t kind,uint32_t actual)
 {const auto required=SpecialZombie269RequiredCapabilities(kind);return required&&(actual&required)==required;}
 bool TryGetSpecialZombie269BodyStage(uint16_t kind,float hp,int maximum,uint8_t& stage)
 {
-    if((kind!=14&&kind!=18)||!std::isfinite(hp)||maximum<=0||hp>maximum)return false;
+    if((!FusionSubmarine343Kind(kind)&&kind!=18)||!std::isfinite(hp)||maximum<=0||hp>maximum)return false;
     // Source14 doubles I32 before converting; source18 adds two F32 maxima.
     // Equality retains the higher-health image in both actual source bodies.
     const uint32_t twice=uint32_t(maximum)*2U;
     const int64_t wrapped=(twice&0x80000000U)?int64_t(twice)-0x100000000LL:twice;
-    const volatile float numerator=kind==14?float(wrapped):float(maximum)+float(maximum);
+    const volatile float numerator=FusionSubmarine343Kind(kind)?float(wrapped):float(maximum)+float(maximum);
     stage=hp<float(maximum)/3?2:hp<numerator/3?1:0;return true;
 }
 bool TryGetSpecialZombie269PaperClip(uint16_t kind,int status,bool eating,SpecialZombie269PaperClip& out)
@@ -99,14 +100,14 @@ bool StepSpecialZombie269PaperShootCounter(int& ticks,bool angry,bool stopped,bo
 }
 bool TryPlanSpecialZombie269Crash(uint16_t sourceKind,uint16_t plantKind,bool caltrop,bool isNut,int level,SpecialZombie269CrashPlan& out)
 {
-    if((sourceKind!=14&&sourceKind!=18&&sourceKind!=40)||level<0)return false;
+    if((!FusionSubmarine343Kind(sourceKind)&&sourceKind!=18&&sourceKind!=40)||level<0)return false;
     SpecialZombie269CrashPlan p;
     if(!caltrop)
     {
         // Zombie.CrashEntity381060, mask0x40401 over kinds903..921.
         if(plantKind==903||plantKind==913||plantKind==921||plantKind==925||plantKind==1151)
             p={SpecialZombie269CrashAction::Damage,500,true,false};
-        else if(plantKind==931||(plantKind==1048&&sourceKind!=14))
+        else if(plantKind==931||(plantKind==1048&&!FusionSubmarine343Kind(sourceKind)))
             p={SpecialZombie269CrashAction::Damage,500,true,true};
         else if(isNut&&level>=3)p={SpecialZombie269CrashAction::Damage,1000,true,false};
         else p.action=SpecialZombie269CrashAction::Crush;
@@ -138,7 +139,8 @@ bool TryGetSpecialZombie269SourcePlantTraits(uint16_t kind,bool& caltrop,bool& n
 }
 bool TryGetSpecialZombie269VehicleClip(uint16_t kind,bool pending,SpecialZombie269PaperClip& out,bool severe)
 {
-    if(kind!=14&&kind!=18)return false;
+    if(!FusionSubmarine343Kind(kind)&&kind!=18)return false;
+    if(kind==200){out={"walk",1.0166667f,.5f};return true;}if(kind==211){out={"walk",1.f,.5f};return true;}
     out=kind==14?SpecialZombie269PaperClip{"walk",1.6833333f,1}:
         pending?SpecialZombie269PaperClip{"die",1,.9f}:severe?SpecialZombie269PaperClip{"shake",.15f,1}:SpecialZombie269PaperClip{"idle",2,2};
     return true;
@@ -168,7 +170,7 @@ struct VehiclePoint {double x,y;};
 bool VehiclePolygon(uint16_t kind,double x,double y,double scale,bool right,double px,double py,
     std::array<VehiclePoint,8>& out,unsigned& count)
 {
-    if((kind!=14&&kind!=18)||!std::isfinite(x)||!std::isfinite(y)||!std::isfinite(scale)||scale<=0||
+    if((!FusionSubmarine343Kind(kind)&&kind!=18)||!std::isfinite(x)||!std::isfinite(y)||!std::isfinite(scale)||scale<=0||
         !std::isfinite(px)||!std::isfinite(py)||px<=0||py<=0)return false;
     std::array<VehiclePoint,8> polygon{};
     if(kind==14)

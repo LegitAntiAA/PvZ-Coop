@@ -138,7 +138,7 @@ bool Events(Run& r,Phase phase,FusionZombieClipPosition a,FusionZombieClipPositi
  if(bits&Water313JumpOver)
  {
   if(r.s->sourceStatus!=1)r.s->sourceStatus=0;
-  if(r.kind==27){if(!r.h.facingKeepShadow(r.z,true))return false;r.s->facingRight=true;}
+  if(r.kind==27||FusionWaterShooter343Kind(r.kind)){if(!r.h.facingKeepShadow(r.z,true))return false;r.s->facingRight=true;}
  }
  if(bits&Water313Throw)
  {if(!r.z->mMindControlled&&!GetNativeSourceZombieData(r.z)->beforeDying&&!r.h.throwWeapon(r.z))return false;if(!Refresh(r))return true;}
@@ -231,7 +231,7 @@ bool InitializeNativeWaterZombie313(Zombie* z,NativeWaterZombie313State& s,const
  if(kind==20){const int draw=h.randomInt(z->mBoard,5,10);if(draw<5||draw>=10){s.failed=true;return false;}s.throwCountdown=float(draw);}
  auto r=Capture(z,s,h);if(!Enter(r,s.phase,0)){s.failed=true;return false;}
  z->mInPool=z->mBoard->mPlantRow[z->mRow]==PLANTROW_POOL;z->mZombieHeight=HEIGHT_ZOMBIE_NORMAL;
- if(kind==16)h.sound(z,76,1);if(kind==19||kind==27)h.sound(z,78,1);
+ if(kind==16)h.sound(z,76,1);if(FusionDolphin343Kind(kind))h.sound(z,78,1);
  return true;
 }
 bool UpdateNativeWaterZombie313Animation(Zombie* z,NativeWaterZombie313State& s)
@@ -269,7 +269,7 @@ bool UpdateNativeWaterZombie313(Zombie* z,NativeWaterZombie313State& s,const Nat
  {
   // Dolphin's source override allows base contact only atstatus0. Drown
   // initial contact requests its one throw without binding an eating target.
-  if(r.kind==17||((r.kind==19||r.kind==27)&&r.s->sourceStatus==0)||
+  if(r.kind==17||(FusionDolphin343Kind(r.kind)&&r.s->sourceStatus==0)||
      (r.kind==20&&r.s->phase!=Phase::DrownWalk))contact=h.contact(r.z,true);
   if(r.kind==20&&r.s->phase==Phase::DrownWalk&&!r.z->mMindControlled&&h.drownContact(r.z))r.s->throwRequested=true;
   if(FusionDolphin313CanProbe(r.kind,r.s->sourceStatus,r.z->mMindControlled,r.z->mIceTrapCounter>0))
@@ -300,7 +300,7 @@ bool BeginNativeWaterZombie313Death(Zombie* z,NativeWaterZombie313State& s,int r
  if(!Host(z)||!Ready(h)||!s.initialized||s.failed)return false;if(s.deathCallbackHandled)return true;std::string error;
  if(!h.prepare(z,NativeWaterZombie313Operation::Death,&error))return false;
  const auto k=GetNativeSourceZombieData(z)->kind;
- const bool dolphin=(k==19||k==27)&&(s.phase==Phase::DolphinRide||s.phase==Phase::DolphinJump||
+ const bool dolphin=(FusionDolphin343Kind(k))&&(s.phase==Phase::DolphinRide||s.phase==Phase::DolphinJump||
     (s.transitionTotal>0&&(s.outgoing==Phase::DolphinRide||s.outgoing==Phase::DolphinJump)));
  s.deathCallbackHandled=true;
  if(k==16)
@@ -400,7 +400,7 @@ bool GetNativeWaterZombie313Auxiliary(const Zombie* z,const NativeWaterZombie313
 bool TryMakeNativeWaterZombie313Splash(const Zombie* z,NativeWaterZombie313Splash& out)
 {
  const auto* d=GetNativeSourceZombieData(z);float x=0,y=0;
- if(!d||(d->kind!=19&&d->kind!=27)||!z->mNetId||!d->instanceToken||!GetNativeSourceZombie269NodePoint(z,"Shadow",x,y))return false;
+ if(!d||(!FusionDolphin343Kind(d->kind))||!z->mNetId||!d->instanceToken||!GetNativeSourceZombie269NodePoint(z,"Shadow",x,y))return false;
  out={z->mNetId,d->instanceToken,z->mRow,x,y};return true;
 }
 }

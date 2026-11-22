@@ -44,6 +44,8 @@ namespace
 using namespace LawnFusion;using LawnNet::NetTrace;
 constexpr std::array<uint16_t,25> ground={24,30,101,102,103,28,31,32,33,34,45,203,223,25,26,29,35,36,37,38,39,40,43,212,213};
 constexpr std::array<uint16_t,5> water={16,17,19,20,27};
+constexpr std::array<uint16_t,20> nextGround352={112,216,211,217,202,204,205,206,210,218,219,220,221,31,35,114,118,119,47,48};
+constexpr std::array<uint16_t,5> nextWater352={200,113,214,17,27};
 bool Behavior();int BehaviorGroup329();
 struct State
 {
@@ -56,7 +58,8 @@ const char* Role(LawnApp* a){return a->NetIsHost()?"host":"client";}
 int Slot(LawnApp* a){return a->mNetManager->GetMySlot();}
 uint32_t Samples(LawnApp* a){return a->NetIsHost()?a->mCoopSmokeSnapshotsSent:a->mCoopSmokeSnapshotsApplied;}
 bool Require(LawnApp* a,bool okay,const char* why){if(!okay)a->CoopSmokeFail(why);return okay;}
-std::span<const uint16_t> Kinds(int level){return level>=21?std::span<const uint16_t>(water):std::span<const uint16_t>(ground);}
+bool NextBatch352(){return Enabled("PVZ_COOP_SMOKE_FUSION_ZOMBIE313_NEXT");}
+std::span<const uint16_t> Kinds(int level){if(NextBatch352())return level>=21?std::span<const uint16_t>(nextWater352):std::span<const uint16_t>(nextGround352);return level>=21?std::span<const uint16_t>(water):std::span<const uint16_t>(ground);}
 const char* Biome(int level){return level==1?"day":level==11?"night":level==21?"pool":"fog";}
 void Advance(LawnApp* a,int next){s.stage=next;s.since=GetTickCount();NetTrace("SMOKE_ZOMBIE313_STAGE role=%s biome=%s stage=%d epoch=%u",Role(a),Biome(LawnNet::NetSmokeFusionZombie313Level325(a)),next,s.epoch);}
 bool Has(LawnApp* a,int slot,const std::string& tag){for(const auto& line:a->mNetManager->mChatLines)if(line.mSlot==slot&&line.mText==tag)return true;return false;}
@@ -188,9 +191,9 @@ struct BehaviorState329
     Actor329 imp;float probeHealth=0,probeShadowX=0,probeShadowY=0;
 }h;
 int BehaviorGroup329(){return h.group;}
-int Groups329(int level){return level>=21?1:5;}
+int Groups329(int level){return level>=21?1:NextBatch352()?4:5;}
 std::span<const uint16_t> Group329(int level)
-{return level>=21?std::span<const uint16_t>(water):std::span<const uint16_t>(ground).subspan(size_t(h.group)*5,5);}
+{return level>=21?Kinds(level):Kinds(level).subspan(size_t(h.group)*5,5);}
 uint64_t Key329(uint16_t id,uint32_t token){return (uint64_t(token)<<16)|id;}
 Zombie* Resolve329(Board* b,const Actor329& ref)
 {Zombie* z=nullptr;while(b->mZombies.IterateNext(z))if(!z->mDead&&z->mNetId==ref.id)if(const auto* d=GetNativeSourceZombieData(z);d&&d->instanceToken==ref.token)return z;return nullptr;}
@@ -233,7 +236,7 @@ bool Setup329(LawnApp* a,int level)
     if(!Require(a,CanAllocateNativeSourceZombieBatch280(b,kinds,&error),"Zombie329 whole actual birth group allocation refused")){NetTrace("SMOKE_ZOMBIE329_BIRTH_REFUSED group=%d error=%s",h.group,error.c_str());return false;}
     for(size_t i=0;i<kinds.size();++i)
     {
-        NativeSourceZombieSpawnRequest request;request.kind=kinds[i];request.row=level>=21?std::array<int,5>{0,2,2,4,3}[i]:int(i);request.fromWave=0;
+        NativeSourceZombieSpawnRequest request;request.kind=kinds[i];request.row=level>=21?(NextBatch352()?std::array<int,5>{2,2,3,2,3}[i]:std::array<int,5>{0,2,2,4,3}[i]):int(i);request.fromWave=0;
         request.positioned=true;request.shadowX=kinds[i]==35?740.f:kinds[i]==26?500.f:level>=21&&i==2?720.f:640.f;
         auto* z=SpawnNativeSourceZombie(b,request);const auto* d=GetNativeSourceZombieData(z);
         if(!Require(a,z&&!z->mDead&&d&&d->kind==kinds[i]&&z->mNetId&&d->instanceToken,"Zombie329 actual typed root factory refused"))return false;
@@ -389,7 +392,7 @@ bool BehaviorUpdate329(LawnApp* a,int level)
     else if(s.stage==13)
     {if(!Paused329(a)||!Observe329(a,true)||!Canonical329(a,"MOVED")||!Capture(a,"moved")||!Barrier329(a,"MOVED_CAPTURED"))return true;Report329(a,"moved");
         if(auto* r=Find329(16))h.probeHealth=GetNativeSourceZombieData(Resolve329(b,*r))->health;
-        if(Find329(16)||Find329(32)||Find329(35))Advance(a,14);else Advance(a,16);}
+        if(Find329(16)||Find329(17)||Find329(32)||Find329(35))Advance(a,14);else Advance(a,16);}
     else if(s.stage==14)
     {if(a->NetIsClient()){h.sample=0;Advance(a,17);return true;}
         if(!Resumed329(a)||!Probe329(a))return true;h.sample=0;h.pause=Escape329(a);Advance(a,17);}
@@ -402,7 +405,7 @@ bool BehaviorUpdate329(LawnApp* a,int level)
         if(!ProbeObserved329(a)||Samples(a)-h.sample<20||!Barrier329(a,"CALLBACKS_OBSERVED"))return true;h.sample=0;h.resume=false;Advance(a,16);}
     else if(s.stage==16)
     {if(!Paused329(a)||!ProbeObserved329(a)||!Canonical329(a,"CALLBACKS")||!Capture(a,"paused")||!Barrier329(a,"CALLBACKS_CAPTURED"))return true;
-        if(!h.caseLogged){h.caseLogged=true;Report329(a,"api");NetTrace("SMOKE_ZOMBIE329_CASE_COMPLETE role=%s biome=%s group=%d roots=5 actualBirths=5 pausedCanonical=1 sourceAPIProbe=%d MC32=%d ColdFreezeCaltrop16=%d HeadLoss17=%d ThrowThreshold35=%d child37=%u/%u naturalPlayerCombat=NotExecuted fullAIParity=0",Role(a),Biome(level),h.group,(Find329(16)||Find329(32)||Find329(35))?1:0,Find329(32)?1:0,Find329(16)?1:0,Find329(17)?1:0,Find329(35)?1:0,h.imp.id,h.imp.token);}
+        if(!h.caseLogged){h.caseLogged=true;Report329(a,"api");NetTrace("SMOKE_ZOMBIE329_CASE_COMPLETE role=%s biome=%s group=%d roots=5 actualBirths=5 pausedCanonical=1 sourceAPIProbe=%d MC32=%d ColdFreezeCaltrop16=%d HeadLoss17=%d ThrowThreshold35=%d child37=%u/%u naturalPlayerCombat=NotExecuted fullAIParity=0",Role(a),Biome(level),h.group,(Find329(16)||Find329(17)||Find329(32)||Find329(35))?1:0,Find329(32)?1:0,Find329(16)?1:0,Find329(17)?1:0,Find329(35)?1:0,h.imp.id,h.imp.token);}
         Advance(a,29);}
     return true;
 }
@@ -444,7 +447,7 @@ bool NetSmokeUpdateFusionZombie313(LawnApp* a)
         if(!Barrier329(a,"GROUP_COMPLETE"))return true;
         if(h.group+1<Groups329(level))
         {if(a->NetIsHost()&&!h.startedNext){h.startedNext=true;std::string error;if(!a->StartFusionValidation(&error))a->CoopSmokeFail(error.c_str());}return true;}
-        if(!s.logged){s.logged=true;NetTrace("SMOKE_ZOMBIE329_COMPLETE role=%s biome=%s groups=%d rootsBorn=%zu resourceKinds=%zu pausedCanonicalStages=3 sourceAPIProbe=1 casesMC32=%d casesDriver16=%d casesHead17=%d casesGarg35=%d fullAIParity=0 fullCampaign=0 naturalPlayerCombat=NotExecuted",Role(a),Biome(level),Groups329(level),Kinds(level).size(),Kinds(level).size(),level<21?1:0,level>=21?1:0,level>=21?1:0,level<21?1:0);}
+        if(!s.logged){s.logged=true;NetTrace("SMOKE_ZOMBIE329_COMPLETE role=%s biome=%s groups=%d rootsBorn=%zu resourceKinds=%zu pausedCanonicalStages=3 sourceAPIProbe=1 casesMC32=%d casesDriver16=%d casesHead17=%d casesGarg35=%d fullAIParity=0 fullCampaign=0 naturalPlayerCombat=NotExecuted",Role(a),Biome(level),Groups329(level),Kinds(level).size(),Kinds(level).size(),level<21&&!NextBatch352()?1:0,level>=21&&!NextBatch352()?1:0,level>=21?1:0,level<21?1:0);}
         if(Barrier329(a,"ALL_COMPLETE"))a->CoopSmokeWriteResult(true,nullptr);return true;
     }
     if(!a->mBoard||!World(a,level))return true;auto* b=a->mBoard;const auto& bank=GetNativeContext(b)->selection.State();

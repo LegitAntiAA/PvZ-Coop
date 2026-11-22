@@ -11,6 +11,7 @@ namespace LawnFusion
 struct FusionHeavyZombie313BView
 {
     uint8_t status=0,ammo=0,armorStage=0,pogoWait=0;
+    uint8_t catapultFlags343=0; //216 only:bodyBroken1, weaponSet1removed2, set2removed4.
     uint16_t deliveryKind=0;
     bool shooting=false,ladderVisible=false,axePresent=true,lookBack=false,caltropDying=false;
     bool pogoPaused=false,pogoStarted=false,jumped=false,lostJumper=false,shadowEnabled=true;

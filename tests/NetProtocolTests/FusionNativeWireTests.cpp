@@ -31,7 +31,7 @@ FusionNativeWireTestResult result;
 // vectors. FNS23 adds a16-byte Board singleton and two U16 counts to FNS22.
 // FNS28 suffix: six U16 empty graph/water/heavy/extended/obstacle/captured
 // vectors, sourcePoints F32, ultimateCount I32, punishTime F32.
-constexpr size_t empty313TailBytes=6*2+4+4+4;
+constexpr size_t empty313TailBytes=6*2+4+4+4+4;
 constexpr size_t empty269FamilyCountBytes=10*2+20+2+2+2+2+empty313TailBytes;
 constexpr size_t emptyNight291CountBytes=4+empty313TailBytes; // Jackson/Jackbox counts +313 suffix after Day.
 constexpr size_t emptyJackbox306CountBytes=2+empty313TailBytes;
@@ -214,7 +214,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
     const auto original = body.mData;
     CHECK(EncodeNativeSnapshot(source, eligible, body));
     CHECK(body.Size() > original.size());
-    constexpr std::array<uint8_t,24> empty313Golden={0,0,0,0,0,0,0,0,0,0,0,0,0,0,250,67,0,0,0,0,0,0,0,0}; //500.f,0,0.f.
+    constexpr std::array<uint8_t,28> empty313Golden={0,0,0,0,0,0,0,0,0,0,0,0,0,0,250,67,0,0,0,0,0,0,0,0,0,0,0,0}; //500.f,0,0,0.f.
     const size_t defaultMetadataEnd=14+body.mData[6]+(size_t(body.mData[7])<<8);
     CHECK(empty313TailBytes==empty313Golden.size()&&std::equal(empty313Golden.begin(),empty313Golden.end(),body.mData.begin()+defaultMetadataEnd-empty313TailBytes));
     NativeSnapshotFrame decoded;
@@ -224,7 +224,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
     CHECK(wire.Remaining() == 0 && native.mData == original);
     CHECK(decoded.plants.size() == 1 && decoded.plants[0].data.kind == 1000);
     CHECK(decoded.plants[0].data.producerRewardFlags == 0 && decoded.plants[0].data.deathEventFlags == 0 &&
-        body.mData[4] == 28 && body.mData[5] == 0 && body.mData[18]==BACKGROUND_1_DAY && body.mData[19]==1);
+        body.mData[4] == kNativeFusionSnapshotVersion && body.mData[5] == 0 && body.mData[18]==BACKGROUND_1_DAY && body.mData[19]==1);
     CHECK(decoded.packets[0].id != decoded.packets[0].data.selectionId);
     CHECK(decoded.plants[0].data.firstParent == 0 && decoded.plants[0].data.secondParent == 1);
     CHECK(decoded.coins.size() == 1 && decoded.coins[0].data.value == 5 && !decoded.coins[0].data.money);
@@ -602,7 +602,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
 
     // Producer field order is unchanged: flags follow the twoI32 deadlines. Altered
     // metadata must reject even with a changed opaque body and valid checksum.
-    constexpr size_t headerBytes = 14, bankStateBytes = 22, selectedPacketBytes = 20, nativePacketBytes = 17;
+    constexpr size_t headerBytes = 14, bankStateBytes = 22, selectedPacketBytes = 21, nativePacketBytes = 17;
     const size_t firstPlant = headerBytes + 6 + bankStateBytes + 2 + source.selection.packets.size()*selectedPacketBytes +
         2 + source.packets.size()*nativePacketBytes + 2;
     constexpr size_t plantBytes = 54, flagsAfterRecordId = 20, deathFlagsAfterRecordId = 21;
@@ -842,7 +842,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
         CHECK(!DecodeNativeSnapshot(forgedProducer, eligible, 19, preservedFrame, preservedBody));
         CHECK(forgedProducer.mReadPos == 0 && preservedFrame.epoch == 777 && preservedBody.Size() == 1 && preservedBody.mData[0] == 0x99);
     }
-    for (uint16_t version : {uint16_t(2), uint16_t(3), uint16_t(4), uint16_t(5), uint16_t(6), uint16_t(7), uint16_t(8), uint16_t(9), uint16_t(10), uint16_t(11), uint16_t(12), uint16_t(13), uint16_t(14), uint16_t(15), uint16_t(16), uint16_t(17), uint16_t(18), uint16_t(19), uint16_t(20), uint16_t(21), uint16_t(22),uint16_t(23),uint16_t(24),uint16_t(25),uint16_t(26),uint16_t(27),uint16_t(29)})
+    for (uint16_t version : {uint16_t(2), uint16_t(3), uint16_t(4), uint16_t(5), uint16_t(6), uint16_t(7), uint16_t(8), uint16_t(9), uint16_t(10), uint16_t(11), uint16_t(12), uint16_t(13), uint16_t(14), uint16_t(15), uint16_t(16), uint16_t(17), uint16_t(18), uint16_t(19), uint16_t(20), uint16_t(21), uint16_t(22),uint16_t(23),uint16_t(24),uint16_t(25),uint16_t(26),uint16_t(27),uint16_t(28),uint16_t(30)})
     {
         NetBuffer wrongVersion = producerWire; wrongVersion.mReadPos = 0;
         wrongVersion.mData[4] = static_cast<uint8_t>(version); wrongVersion.mData[5] = 0;
@@ -2246,7 +2246,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
         // A duplicate wire entry still has a valid framing/body checksum.
         auto duplicate=encoded;duplicate.mData.insert(duplicate.mData.begin()+end-emptyNight291CountBytes-2,encoded.mData.begin()+record,encoded.mData.begin()+record+7);
         duplicate.mData[count]=2;const size_t metadata=end-14+7;duplicate.mData[6]=uint8_t(metadata);duplicate.mData[7]=uint8_t(metadata>>8);RejectAtomically(duplicate);
-        for(uint16_t badVersion:{uint16_t(23),uint16_t(24),uint16_t(25),uint16_t(26),uint16_t(27),uint16_t(29)})
+        for(uint16_t badVersion:{uint16_t(23),uint16_t(24),uint16_t(25),uint16_t(26),uint16_t(27),uint16_t(28),uint16_t(30)})
         {auto bad=encoded;bad.mData[4]=uint8_t(badVersion);bad.mData[5]=0;RejectAtomically(bad);}
         auto cleared=source;NetBuffer clearWire;clearWire.mData=original;
         CHECK(EncodeNativeSnapshot(cleared,eligible,clearWire)&&DecodeNativeSnapshot(clearWire,eligible,19,restored,opaque)&&restored.wheatPlants269.empty());

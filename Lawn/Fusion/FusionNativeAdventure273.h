@@ -16,6 +16,8 @@ bool IsNativeSourceAdventure273(const Board*);
 // Actual source Day/Night five-grass world, including INTRO resource preflight.
 // This does not admit a controller/NPC family or relax native allocation pools.
 bool IsNativeSourceAdventureGrassWorld281(const Board*);
+// Exact imported scene/terrain for the same source session; no controller admission.
+bool IsNativeSourceAdventureWorld342(const Board*);
 // After stock Board initialization, before chooser/intro. Source geometry and
 // economy replace stock defaults; clients adopt boot view without RNG/planning.
 bool InitializeNativeSourceAdventure273(Board*,const FusionAdventureSession273& boot,std::string* error=nullptr);

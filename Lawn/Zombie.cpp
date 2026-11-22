@@ -1,3 +1,5 @@
+#include "Fusion/FusionNativeLadder355.h"
+#include "Fusion/FusionNativeExtendedZombie347.h"
 #include "Plant.h"
 #include "Fusion/FusionNativeAdventure273.h"
 #include "Fusion/FusionNativeAdventureProgress273.h"
@@ -5,6 +7,7 @@
 #include "Fusion/FusionNativeNightZombie291Bridge.h"
 #include "Fusion/FusionNativeJackbox309Bridge.h"
 #include "Fusion/FusionNativeSourceDamage315.h"
+#include "Fusion/FusionNativeGroundShooter343.h"
 #include "Fusion/FusionNativeZombie313Dispatch.h"
 #include "Fusion/FusionNativeWaterZombie313Bridge.h"
 #include "Fusion/FusionNativeHeavyZombie313BBridge.h"
@@ -75,9 +78,9 @@ bool GetNativeZombie313Semantics(const Zombie* z,NativeZombie313Semantics& out)
   // GetShadowCenter calls IsWalkingBackwards/IsFlying during those queries.
   v.status=s->sourceStatus;v.beforeDying=s->beforeDying;v.rootFlip=s->rootFlip;
   v.inWater=z->mBoard&&z->mRow>=0&&z->mRow<GetNativeFusionRowCount(z->mBoard)&&z->mBoard->mPlantRow[z->mRow]==PLANTROW_POOL;
-  v.flying=v.kind==26||((v.kind==25||v.kind==29)&&v.status==10);
+  v.flying=v.kind==26||v.kind==205||v.kind==206||((v.kind==25||v.kind==29||v.kind==221)&&v.status==10);
   v.offGround=(v.kind==37&&(v.status==16||v.status==17))||(v.kind==213&&v.status==16);
-  v.colliderEnabled=v.kind!=26&&(v.kind!=37||s->visible);
+  v.colliderEnabled=v.kind!=26&&v.kind!=205&&(v.kind!=37||s->visible);
   v.ownBodyDamage=FusionExtendedZombie313OwnBodyDamage(v.kind);
  }
  if(v.status==1||z->mDead)v.colliderEnabled=false;out=v;return true;
@@ -127,7 +130,16 @@ bool Source313BodyRect(Zombie* z,Sexy::Rect& out)
 }
 bool Source313FirstArmor(Zombie* z,int damage,int& overflow)
 {
- const auto* d=GetNativeSourceZombieData(z);if(!d||(d->kind!=43&&d->kind!=212))return false;
+ const auto* d=GetNativeSourceZombieData(z);if(!d)return false;
+ if(FusionExtended347BaseLimbs(d->kind))
+ {
+  overflow=0;if(!Source313Host(z)||damage<0)return true;auto* s=EditNativeExtendedZombie313(z);if(!s)return true;
+  const int hp=z->mHelmHealth;z->mHelmHealth=(std::max)(0,hp-damage);overflow=(std::max)(0,damage-hp);
+  if(!z->mHelmHealth)z->mHelmType=HELMTYPE_NONE;
+  else s->firstArmorStage=FusionExtended347ArmorStage(d->kind,z->mHelmHealth,z->mHelmMaxHealth,s->firstArmorStage);
+  return true; // Genuine inherited FirstArmorFall30F780 is empty.
+ }
+ if(d->kind!=43&&d->kind!=212)return false;
  overflow=0;if(!Source313Host(z)||damage<0)return true;auto* s=EditNativeExtendedZombie313(z);if(!s)return true;
  const int hp=z->mHelmHealth;if(hp>0&&damage>=hp&&!PlayNativeSourceZombieArmor284(z,true))return true;
  z->mHelmHealth=(std::max)(0,hp-damage);overflow=(std::max)(0,damage-hp);
@@ -5276,7 +5288,7 @@ void Zombie::UpdateZombiePosition()
     const auto* aGarlicAction = LawnFusion::GetNativeZombieGarlicData(this);
     if (!aUseTowerDefensePath && mZombieHeight == ZombieHeight::HEIGHT_ZOMBIE_NORMAL &&
         !(aGarlicAction && aGarlicAction->phase == LawnFusion::GarlicActionPhase::Moving) &&
-        !LawnFusion::NativeJackbox309RowMoving(this))
+        !LawnFusion::NativeJackbox309RowMoving(this)&&!LawnFusion::NativeDayLadderPositionOwned355(this))
     {
         float aDesiredY = GetPosYBasedOnRow(mRow);
         if (mPosY < aDesiredY)
@@ -8836,6 +8848,9 @@ void Zombie::EatPlant(Plant* thePlant)
         return;
     }
 
+    LawnFusion::NativeExtended347BiteCapture source220Bite;
+    const auto source220Prepared=LawnFusion::PrepareNativeExtended347Bite(this,thePlant,source220Bite);
+    if(source220Prepared==LawnFusion::NativeExtended347BitePreparation::Refused)return;
     StartEating();
 
     // Source10 remains a live target while its fuse runs, but is invincible.
@@ -8899,6 +8914,8 @@ void Zombie::EatPlant(Plant* thePlant)
     }
 
     int aBiteDamage = LawnFusion::GetNativeSourceZombieBiteDamage(this,DAMAGE_PER_EAT);
+    if(source220Prepared==LawnFusion::NativeExtended347BitePreparation::Ready)
+    {LawnFusion::ApplyNativeExtended347CapturedBite(source220Bite,aBiteDamage);return;}
     if (LawnFusion::IsNativeGarlicPlant(thePlant))
     {
         auto* garlic = LawnFusion::GetOrCreateNativeZombieGarlicData(this);
@@ -9709,7 +9726,8 @@ void Zombie::DropShield(unsigned int theDamageFlags)
 int Zombie::TakeShieldDamage(int theDamage, unsigned int theDamageFlags)
 {
     if(LawnFusion::IsNativeZombie313(this)&&(mNetGhost||mApp->NetIsClient()||mDead))return 0;
-    int typed313=0;if(LawnFusion::ApplyNativeHeavyArmorDamage313B(this,false,theDamage,typed313))return typed313;
+    int typed313=0;if(LawnFusion::ApplyNativeGround343SecondArmor(this,theDamage,typed313))return typed313;
+    if(LawnFusion::ApplyNativeHeavyArmorDamage313B(this,false,theDamage,typed313))return typed313;
     if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);
         source&&source->kind==5&&!mNetGhost&&!mApp->NetIsClient()&&mShieldHealth>0&&theDamage>=mShieldHealth&&
         !LawnFusion::PlayNativeSourceZombieArmor284(this,false))return 0;
@@ -10306,7 +10324,10 @@ void Zombie::TakeDamage(int theDamage, unsigned int theDamageFlags, const LawnFu
     if(LawnFusion::GetNativeSourceZombieData(this)&&!mNetGhost&&!mApp->NetIsClient())
     {
         int sourceResolved=0;
-        if(!LawnFusion::ResolveNativeSourceBaseDamage315(this,theDamage,false,sourceResolved))return;
+        const auto* damageSource=LawnFusion::GetNativeSourceZombieData(this);
+        if(damageSource&&LawnFusion::FusionExtendedZombie347Kind(damageSource->kind))
+        {if(!LawnFusion::ResolveNativeExtended347Damage(this,theDamage,false,sourceResolved))return;}
+        else if(!LawnFusion::ResolveNativeSourceBaseDamage315(this,theDamage,false,sourceResolved))return;
         theDamage=LawnFusion::ResolveNativeHeavyDamage313B(this,sourceResolved);
         if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);source&&LawnFusion::FindFusionExtendedZombie313Profile(source->kind))
             if(!LawnFusion::TryCapFusionExtendedZombie313Damage(source->kind,theDamage,theDamage))return;
@@ -10359,6 +10380,8 @@ float Zombie::GetPosYBasedOnRow(int theRow)
         mOnHighGround = true;
     }
 
+    float sourceRoofY=0;
+    if(LawnFusion::GetNativeFusionRoofZombieRowY350(this,mPosX,theRow,sourceRoofY))return sourceRoofY;
     float aPosY = mBoard->GetPosYBasedOnRow(mPosX + 40.0f, theRow) - 30.0f;
     if (mZombieType == ZombieType::ZOMBIE_BALLOON)
     {

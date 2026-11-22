@@ -1,4 +1,7 @@
 #include "FusionNativeExtendedZombie313.h"
+#include "FusionNativeGroundShooter343.h"
+#include "FusionNativeSnowZombie363.h"
+#include "FusionNativeExtendedZombie347.h"
 #include "FusionNative.h"
 #include "FusionNativeZombies.h"
 #include "FusionNativeZombieVisual.h"
@@ -124,9 +127,9 @@ bool ProbeGarg(Run& r,const NativeExtendedZombie313Input& i)
 }
 bool BodyContacts(Run& r,const NativeExtendedZombie313Input& input)
 {
-    if(r.kind!=25&&r.kind!=29&&r.kind!=38&&r.kind!=39&&r.kind!=40)return true;
+    if(!FusionBalloon343Kind(r.kind)&&r.kind!=38&&r.kind!=39&&r.kind!=40&&r.kind!=210&&r.kind!=219)return true;
     std::vector<NativeExtendedZombie313Ref> hits;if(!r.h.bodyContacts(r.z,hits))return false;
-    if(r.kind==25||r.kind==29)
+    if(FusionBalloon343Kind(r.kind))
     {
         if(r.s->sourceStatus!=10)return true;
         for(const auto& ref:hits)if(!ref.zombie){auto* p=r.board->mPlants.DataArrayTryToGet(ref.localUID);if(PlantLive(p)&&p->mRow==r.z->mRow&&GetNativePlantData(p)->kind==913)return FallNativeExtendedZombie313(r.z,*r.s,r.h);}
@@ -148,7 +151,7 @@ bool BodyContacts(Run& r,const NativeExtendedZombie313Input& input)
         }
         r.s->ironEnterContacts=std::move(contacts);return true;
     }
-    if(r.kind!=40||input.changingRow)return true;
+    if((r.kind!=40&&r.kind!=210&&r.kind!=219)||input.changingRow)return true;
     for(const auto& ref:hits)if(!ref.zombie&&!r.z->mMindControlled)
     {
         auto* p=r.board->mPlants.DataArrayTryToGet(ref.localUID);if(!PlantLive(p)||p->mRow!=r.z->mRow)continue;
@@ -179,13 +182,14 @@ bool InitializeNativeExtendedZombie313(Zombie* z,NativeExtendedZombie313State& s
     NativeExtendedZombie313Input input;if(!Input(r,input)||!Preflight(r,NativeExtendedZombie313Operation::Initialize)||!NativeSourceGraph313ClockTracksReady(z,h.graph))return false;
     if(!h.graph.stateFor(z))return false;
     s={};s.initialized=true;s.bornFrame=input.frame;
-    s.sourceStatus=(r.kind==35||r.kind==36||r.kind==43||r.kind==212)?15:r.kind==213?16:(r.kind==25||r.kind==29||r.kind==26)?10:0;
+    s.sourceStatus=(r.kind==35||r.kind==36||r.kind==43||r.kind==212)?15:r.kind==213?16:(FusionBalloon343Kind(r.kind)||r.kind==26)?10:0;
     s.uniqueType=r.kind==38?4:r.kind==39?5:0;s.visible=r.kind!=37;s.rootFlip=z->mMindControlled;s.bombPresent=r.kind==26;
+    if(FusionExtendedZombie347Kind(r.kind)&&!InitializeNativeExtended347Fields(z,s,h))return Fail(r,"Source347 genuine initialization failed after preflight.");
     if(r.kind==37)s.impMaximumVx=input.factoryAxisColumn<6?-2.f:-3.f;
     if(r.kind==35||r.kind==36){const int weapon=h.randomInt(r.board,0,3);if(weapon<0||weapon>2)return Fail(r,"Source313 weapon RNG invalid after preflight.");s.weapon=uint8_t(weapon);}
     if(r.kind==40){const int first=h.randomInt(r.board,0,3);if(first<0||first>2)return Fail(r,"Source313 Machine RNG invalid.");int type=first;if(input.eveWorld)type=h.randomInt(r.board,1,3);if(type<0||type>2)return Fail(r,"Source313 Machine alternate RNG invalid.");s.machineType=uint8_t(type);h.sound(z,53,.5f);}
     if(r.kind==26&&input.playMachineSound)h.sound(z,input.alternateMachineSound?92:76,1.f);
-    if((r.kind==25||r.kind==29)&&input.playMachineSound)h.sound(z,86,.5f);
+    if(FusionBalloon343Kind(r.kind)&&input.playMachineSound)h.sound(z,86,.5f);
     if(r.kind==212&&!h.sourceBoard212(z,true))return Fail(r,"Source212 Board lifetime initialization failed after preflight.");
     if(!InitializeNativeSourceGraph313(z,*h.graph.stateFor(z),h.graph))return Fail(r,"Source313 native graph initialization failed.");if(!Refresh(r))return true;
     return PlayNativeSourceGraph313(r.z,*h.graph.stateFor(r.z),0,"walk",0,h.graph);
@@ -203,7 +207,7 @@ bool ApplyNativeExtendedZombie313BodyDamage(Zombie* z,NativeExtendedZombie313Sta
     if(!TryPlanFusionExtendedBody313(data->kind,data->health,z->mBodyMaxHealth,damage,s.bodyStage,s.uniqueType,s.sourceStatus,z->mMindControlled,input.sourceShadowX,plan))return Fail(r,"Invalid source313 body subtraction plan.");
     if((plan.triggerThrow||plan.removeIronHead)&&!Preflight(r,NativeExtendedZombie313Operation::BodyChange))return Fail(r,"Source313 body callback unavailable before subtraction.");
     data->health=plan.health;z->mBodyHealth=NativeSourceZombieLivenessHealth(plan.health);s.bodyStage=plan.bodyStage;s.sourceStatus=int8_t(plan.sourceStatus);s.uniqueType=plan.uniqueType;
-    if(plan.triggerThrow)h.graph.stateFor(z)->parameters.triggers|=FusionSourceGraph313Trigger(FusionSourceGraph313Param::Throw);
+    if(plan.triggerThrow)h.graph.stateFor(z)->parameters.triggers|=FusionSourceGraph313Trigger(data->kind==221?FusionSourceGraph313Param::Fly:FusionSourceGraph313Param::Throw);
     if(plan.removeIronHead&&!h.ironHead(z))return Fail(r,"Source313 prepared LoseIronHead failed after source subtraction.");return true;
 }
 bool FallNativeExtendedZombie313(Zombie* z,NativeExtendedZombie313State& s,const NativeExtendedZombie313Hooks& h)
@@ -217,6 +221,8 @@ bool FallNativeExtendedZombie313(Zombie* z,NativeExtendedZombie313State& s,const
 }
 bool ApplyNativeExtendedZombie313ArmorDamage(Zombie* z,NativeExtendedZombie313State& s,int damage,int& remaining,const NativeExtendedZombie313Hooks& h)
 {
+    if(ApplyNativeSnow363FirstArmor(z,damage,remaining))return true;
+    if(FusionGroundShooter343Kind(GetNativeSourceZombieData(z)?GetNativeSourceZombieData(z)->kind:0xffff)&&ApplyNativeGround343FirstArmor(z,damage,remaining))return true;
     if(!Host(z)||!Ready(h))return false;auto r=Capture(z,s,h);NativeExtendedZombie313Input input;FusionFlightArmor313Plan plan;
     if(!Input(r,input)||!TryPlanFusionFlightArmor313(r.kind,s.sourceStatus,s.fallen,input.inWater,z->mHelmHealth,z->mHelmMaxHealth,damage,plan))return false;
     if(plan.fallTriggered){if(!FallNativeExtendedZombie313(z,s,h))return false;remaining=0;return true;}
@@ -231,12 +237,14 @@ bool UpdateNativeExtendedZombie313(Zombie* z,NativeExtendedZombie313State& s,con
     if(!s.initialized||s.failed)return true;if(s.logicTick==z->mBoard->mMainCounter)return true;s.logicTick=z->mBoard->mMainCounter;
     auto r=Capture(z,s,h);NativeExtendedZombie313Input i;if(!Input(r,i))return Fail(r,"Source313 actual world input unavailable.");
     if(r.kind==37&&!s.visible&&i.frame>s.bornFrame)s.visible=true;
-    if(FusionExtendedZombie313BaseLimbCallbacks(r.kind)&&s.sourceStatus==0&&!i.beforeDying)
+    if(FusionExtendedZombie313BaseLimbCallbacks(r.kind)&&s.sourceStatus==0&&!i.beforeDying&&((r.kind!=202&&r.kind!=218)||s.isThrow))
     {bool attacking=false;if(!h.baseContact(z,attacking))return Fail(r,"Source313 shared base contact unavailable.");if(!Refresh(r))return true;r.z->mIsEating=attacking;}
     if(r.kind==35||r.kind==36||r.kind==43||r.kind==212){if(!ProbeGarg(r,i))return Fail(r,"Source313 Garg contact failed.");}
-    if(r.kind==26&&!i.beforeDying)
+    if(FusionExtendedZombie347Kind(r.kind))
+    {if(!UpdateNativeExtended347Fields(z,s,h))return Fail(r,"Source347 prepared update failed.");if(!Refresh(r))return true;}
+    if((r.kind==26||r.kind==205||r.kind==206)&&!i.beforeDying)
     {
-        float vx=0,vy=0;if(!TryGetFusionKirov313Velocity(i.sourceSpeed,s.rootFlip,i.travelDebuff6,i.slope,i.sourceRootX,vx,vy)||!h.setVelocity(z,vx,vy))return Fail(r,"Source313 Kirov native rigid velocity unavailable.");
+        float vx=0,vy=0;if(r.kind!=206&&(!TryGetFusionKirov313Velocity(i.sourceSpeed,s.rootFlip,i.travelDebuff6,i.slope,i.sourceRootX,vx,vy)||!h.setVelocity(z,vx,vy)))return Fail(r,"Source313 Kirov native rigid velocity unavailable.");
         if(s.bombPresent)
         {
             std::vector<NativeExtendedZombie313Ref> hits;if(!h.contacts(z,{i.sourceShadowX,i.sourceShadowY,1,1},hits))return Fail(r,"Source313 Kirov contact query failed.");
@@ -258,13 +266,14 @@ bool UpdateNativeExtendedZombie313(Zombie* z,NativeExtendedZombie313State& s,con
         {if(i.sourceShadowY>i.landY){if(!h.translateRoot(z,0,-.03f))return false;}else{s.adjustingImp=false;if(!h.alignShadow(z,i.sourceShadowX,i.landY))return false;}}
         if(!i.changingRow&&!h.adjustImpFlyNode(z,i.sourceShadowX,i.landY))return Fail(r,"Source313 Imp genuine Fly subtree anchor unavailable.");
     }
-    if(r.kind==40&&i.slope)
+    if((r.kind==40||r.kind==210||r.kind==219)&&i.slope)
     {if(i.sourceShadowX>=1.5f)s.uniqueSpeed=1;else if(z->mMindControlled)s.uniqueSpeed=.5f;else s.uniqueSpeed+=.01f;}
     if(!BodyContacts(r,i))return Fail(r,"Source313 actual body contact callback failed.");if(!Refresh(r))return true;
     return UpdateNativeSourceGraph313(r.z,*h.graph.stateFor(r.z),h.graph);
 }
-bool DispatchNativeExtendedZombie313Event(Zombie* z,FusionSourceGraph313Event event,int,const NativeExtendedZombie313Hooks& h)
+bool DispatchNativeExtendedZombie313Event(Zombie* z,FusionSourceGraph313Event event,int sourceInt,const NativeExtendedZombie313Hooks& h)
 {
+    if(FusionExtendedZombie347Kind(GetNativeSourceZombieData(z)?GetNativeSourceZombieData(z)->kind:0xffff))return DispatchNativeExtended347Event(z,event,sourceInt,h);
     if(!Host(z)||!Ready(h))return false;auto* s=h.stateFor(z);if(!s||!s->initialized||s->failed)return false;auto r=Capture(z,*s,h);NativeExtendedZombie313Input i;
     switch(event)
     {
@@ -322,6 +331,7 @@ NativeExtendedZombie313Death BeginNativeExtendedZombie313Death(Zombie* z,NativeE
     const auto operation=r.kind==40?NativeExtendedZombie313Operation::MachineDeath:r.kind==26?NativeExtendedZombie313Operation::KirovDeath:NativeExtendedZombie313Operation::IronDeath;
     if(!Preflight(r,operation))return NativeExtendedZombie313Death::Refused;
     s.deathConsumed=true;reason=normalized;s.sourceStatus=1;
+    if(FusionExtendedZombie347Kind(r.kind))return BeforeRetireNativeExtended347(z,reason,h)?(Refresh(r)?NativeExtendedZombie313Death::Proceed:NativeExtendedZombie313Death::OwnerRetired):NativeExtendedZombie313Death::Refused;
     if(r.kind==212&&!h.sourceBoard212(z,false))return NativeExtendedZombie313Death::Refused;
     if(!Refresh(r))return NativeExtendedZombie313Death::OwnerRetired;
     if(r.kind==40)

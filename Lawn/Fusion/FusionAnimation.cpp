@@ -13,6 +13,7 @@
 #include <wincrypt.h>
 #include <algorithm>
 #include <array>
+#include <charconv>
 #include <cmath>
 #include <cstdint>
 #include <cstring>
@@ -374,7 +375,7 @@ bool IsColorCurve(CurveKind kind)
 struct Key { float time = 0; Vector value{}, inSlope{}, outSlope{}; const Variant* sprite = nullptr; };
 struct Curve { int node; CurveKind kind; std::vector<Key> keys; };
 struct Clip { float duration = 0; bool loop = false; std::vector<Curve> curves; std::vector<FusionAnimationEvent> events; };
-struct State { std::string clip, speedParameterName; float speed = 1; bool speedParameter = false; int layer = -1; bool additive = false, supported = true; bool writeDefaultsKnown = false, writeDefaults = false; };
+struct State { std::string clip, speedParameterName; float speed = 1; bool speedParameter = false; int layer = -1; bool additive = false, supported = true; bool writeDefaultsKnown = false, writeDefaults = false; bool initialRest347 = false; };
 
 // Preserve legacy packages/calls without inventing default-write history.
 // A new stateless blend requires both exact source states to prove WD1.
@@ -553,7 +554,17 @@ struct FusionAnimation::Impl
     {
         if(!path)return -1;
         const auto found=nodeIndex.find(path);
-        return found==nodeIndex.end()?-1:found->second;
+        if(found!=nodeIndex.end())return found->second;
+        // Unity can address same-named siblings by Transform child index.
+        // Imported node indices preserve that identity without deleting nodes
+        // or resolving an ambiguous source path to an arbitrary sibling.
+        if(!std::strncmp(path,"@node:",6))
+        {
+            int index=-1;const char* end=path+std::strlen(path);
+            const auto parsed=std::from_chars(path+6,end,index);
+            if(parsed.ec==std::errc{}&&parsed.ptr==end&&index>=0&&size_t(index)<nodes.size())return index;
+        }
+        return -1;
     }
     std::vector<Sprite> sprites;
     std::vector<BoxCollider303> boxes;
@@ -1046,6 +1057,18 @@ bool FusionAnimation::Load(LawnApp* app, const std::string& path, std::string& e
             for (const auto& event : it.value().at("events")) clip.events.push_back({event.at("time").get<float>(), event.at("functionName").get<std::string>()});
             result->clips.emplace(it.key(), std::move(clip));
         }
+        // The exact source218 package has one WD0 walk entry. Fresh source
+        // SetZombie451130 directly plays it from idle; no edge enters it.
+        // Its five unkeyed properties are untouched by idle. Keep WD0 genuine,
+        // and permit only its outgoing rest-based fade, never an incoming one.
+        bool initialRest347=false;
+        if(data.value("sourcePrefab",std::string())=="Resources/zombies/_prefab/UltimateFootballDrown.prefab")
+        {
+            std::ifstream original(path,std::ios::binary);
+            const std::vector<unsigned char> bytes((std::istreambuf_iterator<char>(original)),std::istreambuf_iterator<char>());
+            Sha256 hash;
+            initialRest347=original&&hash.Digest(bytes)=="300175ec9d1d311aacaee4caa4c9911696b24990147f3c816b0de86256cf5d04";
+        }
         const auto writeDefaults = SourceWriteDefaults(data.at("controller").value("serializedController",std::string()));
         const auto& layers = data.at("controller").at("layers");
         // An actual source Animator may contain an empty state machine (LilyPad).
@@ -1072,6 +1095,7 @@ bool FusionAnimation::Load(LawnApp* app, const std::string& path, std::string& e
             const auto id = item.at("id").get<int64_t>();
             if (const auto found = writeDefaults.find(id); found != writeDefaults.end())
             { state.writeDefaultsKnown = true; state.writeDefaults = found->second; }
+            state.initialRest347=initialRest347&&id==1102061268324235159LL&&state.writeDefaultsKnown&&!state.writeDefaults;
             // A no-motion WD1 state samples the genuine rest/prior-layer pose.
             // WD0 would retain history that this stateless sampler does not own.
             if(nullMotion)state.supported=state.supported&&state.writeDefaultsKnown&&state.writeDefaults;
@@ -1185,7 +1209,7 @@ bool FusionAnimation::Impl::SamplePose(const char* baseName,float baseElapsed,co
         const auto& blend = *options->baseBlend;
         const State* outgoing = FindState(blend.outgoingState.c_str());
         if (!base || !outgoing || base->layer < 0 || base->layer != outgoing->layer || base->additive || outgoing->additive ||
-            !base->writeDefaultsKnown || !outgoing->writeDefaultsKnown || !base->writeDefaults || !outgoing->writeDefaults ||
+            !base->writeDefaultsKnown || !outgoing->writeDefaultsKnown || !base->writeDefaults || (!outgoing->writeDefaults&&!outgoing->initialRest347) ||
             !std::isfinite(blend.outgoingElapsedSeconds) || blend.outgoingElapsedSeconds < 0 ||
             !std::isfinite(blend.incomingWeight) || blend.incomingWeight < 0 || blend.incomingWeight > 1) return false;
         std::vector<Pose> previous;
@@ -1251,22 +1275,22 @@ bool FusionAnimation::Impl::SamplePose(const char* baseName,float baseElapsed,co
     {
         for (size_t i = 0; i < pose.size(); ++i)
         {
-            if (std::find(options->hiddenNodePaths.begin(), options->hiddenNodePaths.end(), nodes[i].path) != options->hiddenNodePaths.end())
+            if (std::any_of(options->hiddenNodePaths.begin(),options->hiddenNodePaths.end(),[&](const auto& path){return FindNode(path.c_str())==int(i);}))
                 pose[i].active = false;
             for (const auto& activity : options->nodeActivityOverrides)
-                if (activity.nodePath == nodes[i].path) pose[i].active = activity.active;
+                if (FindNode(activity.nodePath.c_str()) == int(i)) pose[i].active = activity.active;
             for (const auto& renderer : options->spriteEnabledOverrides)
-                if (renderer.nodePath == nodes[i].path)
+                if (FindNode(renderer.nodePath.c_str()) == int(i))
                 { pose[i].enabled=renderer.enabled;pose[i].enabledChanged=true; }
             for (const auto& rotation : options->nodeRotations)
-                if (rotation.nodePath == nodes[i].path && std::isfinite(rotation.radiansZ))
+                if (FindNode(rotation.nodePath.c_str()) == int(i) && std::isfinite(rotation.radiansZ))
                 {
                     const float half = rotation.radiansZ * .5f;
                     const Quaternion value{0, 0, std::sin(half), std::cos(half)};
                     pose[i].rotation = rotation.replace ? value : Multiply(pose[i].rotation, value);
                 }
             for (const auto& replacement : options->spriteReplacements)
-                if (replacement.nodePath == nodes[i].path)
+                if (FindNode(replacement.nodePath.c_str()) == int(i))
                 {
                     const auto variant = variants.find(replacement.spriteGuid);
                     if (variant != variants.end())

@@ -1,3 +1,5 @@
+#include "../Fusion/FusionNativeConveyor308.h"
+#include "../Fusion/FusionConveyor348Rules.h"
 #include "../Board.h"
 #include "../../LawnApp.h"
 #include "../../Sexy.TodLib/TodFoley.h"
@@ -427,6 +429,22 @@ bool NetPreflightNativeFusionBody(const NetBuffer& body, const LawnFusion::Nativ
 	scan.mReadPos = coreBytes + 6;
 	const uint8_t packetCount = scan.ReadU8Or();
 	if (packetCount > SEEDBANK_CAPACITY || scan.Remaining() < packetCount * NET_SEED_PACKET_WIRE_BYTES) return false;
+    const bool sourceConveyor=LawnFusion::FusionAdventureBankPolicy308(frame.adventure)==LawnFusion::FusionBankPolicy::SourceConveyor;
+    if(sourceConveyor)
+    {
+        NetBuffer raw=body;raw.mReadPos=coreBytes;
+        const int x=raw.ReadI16Or(),y=raw.ReadI16Or();
+        if(x< -2048||x>2048||y< -1024||y>1024)return false;
+        raw.mReadPos=scan.mReadPos;
+        std::array<NetMysterySeedSnapshot,13> packets;
+        if(packetCount!=packets.size())return false;
+        const NetMysteryLimits limits={(uint8_t)NUM_SEEDS_IN_CHOOSER,(uint8_t)SEED_IMITATER,(uint8_t)SEED_GATLINGPEA};
+        for(auto& packet:packets)
+            if(!NetDecodeMysterySeedSnapshot(raw,packet,limits,(uint8_t)NUM_SEED_TYPES,
+                [](uint8_t type){return type==255||type<(uint8_t)NUM_SEED_TYPES;},[](uint8_t type){return type==255;}))return false;
+        if(!LawnFusion::FusionConveyorRaw348Valid(frame.selection,std::span(frame.packets),std::span<const NetMysterySeedSnapshot>(packets),
+            [](uint16_t kind){return uint8_t(LawnFusion::GetNativeSeedForPlant(kind));}))return false;
+    }
 	std::set<uint16_t> allIds, packetIds, plantIds, zombieIds, projectileIds, coinIds;
 	for (int i = 0; i < packetCount; ++i)
 	{
@@ -465,7 +483,7 @@ bool NetPreflightNativeFusionBody(const NetBuffer& body, const LawnFusion::Nativ
 				plantIds.insert(id);
 				const auto record = std::find_if(frame.plants.begin(), frame.plants.end(), [=](const auto& r) { return r.id == id; });
 				if (record == frame.plants.end() || type != static_cast<uint8_t>(LawnFusion::GetNativeSeedForPlant(record->data.kind)) ||
-					(record->data.packetId && !packetIds.contains(record->data.packetId))) return false;
+					(record->data.packetId && !sourceConveyor && !packetIds.contains(record->data.packetId))) return false;
                 NetBuffer plantBody=scan;plantBody.mReadPos=start+6;
                 const int current=plantBody.ReadU16Or(),maximum=plantBody.ReadU16Or();
                 const auto state=plantBody.ReadU8Or(),flags=plantBody.ReadU8Or();const int x=plantBody.ReadI16Or(),y=plantBody.ReadI16Or(),order=plantBody.ReadI32Or();
@@ -684,9 +702,9 @@ bool NetPreflightNativeFusionBody(const NetBuffer& body, const LawnFusion::Nativ
     for(const auto& record:frame.sourceObstacles313)if(!projectileIds.contains(record.id))return false;
     for(const auto& record:frame.capturedPlants314)if(!zombieIds.contains(record.id))return false;
     if((!frame.sourceGraphs313.empty()||!frame.waterZombies313.empty()||!frame.sourceObstacles313.empty()||!frame.capturedPlants314.empty())&&
-       (frame.background>BACKGROUND_4_FOG||frame.sourceZombies.size()!=zombieIds.size()))return false;
-    // Heavy313B gameplay remains the independently verified grass-world contract.
-    if(!frame.heavyZombies313.empty()&&LawnFusion::NativeFusionRowsForBackground(frame.background)!=5)return false;
+       (frame.background>BACKGROUND_5_ROOF||frame.sourceZombies.size()!=zombieIds.size()))return false;
+    // Raw source row bounds also cover six-row dry births and genuine Bungee
+    // target-row movement; canonical family state is validated above.
 	for (const auto& record : frame.coins) if (!coinIds.contains(record.id)) return false;
     for(const auto& record:frame.companions269)if(!projectileIds.contains(record.id))return false;
     for(const auto& record:frame.companionPlants269)if(!plantIds.contains(record.id))return false;
@@ -706,7 +724,7 @@ bool NetPreflight313Resources(Board* board,const NetBuffer& body,const LawnFusio
 {
     using namespace LawnFusion;
     if(!NetHas313(frame)){out={};return true;}
-    if(!board||!board->mApp||board->mApp->mBoard!=board||!board->mTDPath.empty()||board->GetColumnCount()!=10||frame.background>BACKGROUND_4_FOG)return false;
+    if(!board||!board->mApp||board->mApp->mBoard!=board||!board->mTDPath.empty()||board->GetColumnCount()!=10||frame.background>BACKGROUND_5_ROOF)return false;
     std::vector<Native313Snapshot> mirrors;std::vector<Native313GhostRequest> requests;
     mirrors.reserve(frame.sourceZombies.size());requests.reserve(frame.sourceZombies.size());
     NetBuffer scan=body;scan.mReadPos=43+MAX_GRID_SIZE_Y*4+9+10+NET_CHALLENGE_RUNTIME_WIRE_BYTES+NET_ENDLESS_WEATHER_WIRE_BYTES+NET_ZEN_GARDEN_WIRE_BYTES+6;
@@ -1139,7 +1157,7 @@ uint32_t NetGetReanimationFrameCapacity(const Reanimation* theReanim)
 
 bool NetDay273AllocationCapacity(Board* board,const NetBuffer& body,const LawnFusion::NativeSnapshotFrame& frame,const LawnFusion::FusionSourceDeathBudget319& extra)
 {
-    const bool cohort313=NetHas313(frame);
+    const bool cohort313=NetHas313(frame)||frame.adventure.enabled;
     if(!cohort313&&frame.dayZombies273.empty()&&frame.nightZombies281.empty()&&frame.jackboxZombies300.empty()&&!(frame.adventure.enabled&&frame.background==BACKGROUND_2_NIGHT))return true;
     const auto reject=[](const char* reason,int section=-1,unsigned type=0)
     {
@@ -1148,7 +1166,7 @@ bool NetDay273AllocationCapacity(Board* board,const NetBuffer& body,const LawnFu
     if(!board||!board->mApp||!LawnFusion::GetNativeContext(board))return reject("no-board-context");
     auto* app=board->mApp;auto* effects=app->mEffectSystem;
     if(app->mUpdateAppDepth>1||!board->mTDPath.empty()||board->GetColumnCount()!=10||
-       (cohort313?frame.background>BACKGROUND_4_FOG:
+       (cohort313?frame.background>BACKGROUND_5_ROOF:
         (!LawnFusion::IsNativeSourceWorld313(board)||LawnFusion::GetNativeFusionRowCount(board)!=5||app->mGameMode!=GAMEMODE_ADVENTURE||frame.background!=board->mBackground)))
         return reject("only-nonreentrant-ordinary-source-world");
     if(!effects||effects!=gEffectSystem||!effects->mReanimationHolder||!effects->mAttachmentHolder||!effects->mParticleHolder)
@@ -1229,13 +1247,13 @@ bool NetDay273AllocationCapacity(Board* board,const NetBuffer& body,const LawnFu
                 case SEED_PEASHOOTER:case SEED_SNOWPEA:case SEED_REPEATER:case SEED_LEFTPEATER:case SEED_GATLINGPEA:heads=1;break;
                 case SEED_SPLITPEA:heads=2;break;
                 case SEED_THREEPEATER:heads=3;break;
-                case SEED_SUNFLOWER:case SEED_TWINSUNFLOWER:case SEED_CHERRYBOMB:case SEED_WALLNUT:case SEED_TALLNUT:
-                case SEED_PUMPKINSHELL:case SEED_FLOWERPOT:case SEED_LILYPAD:case SEED_POTATOMINE:case SEED_GARLIC:case SEED_BLOVER:
-                case SEED_JALAPENO:case SEED_SQUASH:case SEED_TORCHWOOD:case SEED_CHOMPER:case SEED_CABBAGEPULT:
-                case SEED_KERNELPULT:case SEED_MELONPULT:case SEED_WINTERMELON:case SEED_CATTAIL:case SEED_CACTUS:
-                case SEED_MARIGOLD:case SEED_SPIKEWEED:case SEED_SPIKEROCK:case SEED_FUMESHROOM:case SEED_PUFFSHROOM:
-                case SEED_SUNSHROOM:case SEED_HYPNOSHROOM:case SEED_SCAREDYSHROOM:case SEED_IMITATER:break;
-                default:return reject("plant-factory-not-budgeted",section,type);
+                default:
+                    // The raw/Fusion joint preflight has already matched this
+                    // carrier to its typed plant. All native chooser seeds use
+                    // one body; the few extra initializer resources are counted
+                    // explicitly below. Keep the real definition/attacher check.
+                    if(type>=NUM_SEEDS_IN_CHOOSER)return reject("plant-factory-not-budgeted",section,type);
+                    break;
                 }
                 const auto reanim=GetPlantDefinition(SeedType(type)).mReanimationType;
                 // Present's IMITATER carrier initializes one body. Its typed
@@ -1245,9 +1263,14 @@ bool NetDay273AllocationCapacity(Board* board,const NetBuffer& body,const LawnFu
                 reanims+=1+heads;attachments+=heads; // Each Attach call can require at most one container.
                 // A raw daytime mushroom initializes before Fusion metadata
                 // is bound and can allocate its sleep reanimation (PlantInitialize).
-                if(frame.background!=BACKGROUND_2_NIGHT&&frame.background!=BACKGROUND_4_FOG&&(type==SEED_FUMESHROOM||type==SEED_PUFFSHROOM||type==SEED_SUNSHROOM||type==SEED_HYPNOSHROOM||type==SEED_SCAREDYSHROOM))
+                if(Plant::IsNocturnal(SeedType(type)))
                 {++reanims;if(!plainDefinition(REANIM_SLEEPING))return reject("mushroom-initial-sleep-definition",section,type);}
                 if(scan.mData[start+11]&1){++reanims;if(!plainDefinition(REANIM_SLEEPING))return reject("sleep-definition",section,type);}
+                if(type==SEED_PLANTERN)
+                {
+                    ++attachments;
+                    if(!particleUpper({PARTICLE_LANTERN_SHINE},1))return reject("plantern-particle-definition",section,type);
+                }
                 if(type==SEED_POTATOMINE)
                 {
                     ++reanims;++attachments; // Initializer/presentation glow uses one resource, never both.
@@ -1331,9 +1354,9 @@ bool NetDay273AllocationCapacity(Board* board,const NetBuffer& body,const LawnFu
             {
                 NetBuffer mowerWire=scan;mowerWire.mReadPos=start;
                 NetMowerSnapshotState mower;
-                if(!NetDecodeMowerSnapshotState(mowerWire,mower)||(mower.mType!=LAWNMOWER_LAWN&&(!cohort313||mower.mType!=LAWNMOWER_POOL)))
+                if(!NetDecodeMowerSnapshotState(mowerWire,mower)||(mower.mType!=LAWNMOWER_LAWN&&(!cohort313||(mower.mType!=LAWNMOWER_POOL&&!(mower.mType==LAWNMOWER_ROOF&&frame.background==BACKGROUND_5_ROOF)))))
                     return reject("unsupported-source-mower",section,mower.mType);
-                ++reanims;const auto reanim=mower.mType==LAWNMOWER_POOL?REANIM_POOL_CLEANER:REANIM_LAWNMOWER;
+                ++reanims;const auto reanim=mower.mType==LAWNMOWER_POOL?REANIM_POOL_CLEANER:mower.mType==LAWNMOWER_ROOF?REANIM_ROOF_CLEANER:REANIM_LAWNMOWER;
                 if(!plainDefinition(reanim))return reject("mower-definition",section,type);
             }
             else if(section==5&&type!=GRIDITEM_LADDER)return reject("only-source-native-ladder-grid",section,type);
@@ -2035,6 +2058,7 @@ int SourceSound284(uint16_t kind)
     case 7:return Sexy::SOUND_LIMBS_POP;
     case 8:return Sexy::SOUND_CHOMP;
     case 9:return Sexy::SOUND_CHOMP2;
+    case 40:return Sexy::SOUND_CHERRYBOMB; // Source LoadSound[40]: Sound/Bomb/cherrybomb.
     case 43:return Sexy::SOUND_EXPLOSION;
     case 44:return Sexy::SOUND_NEWSPAPER_RIP;
     case 45:return Sexy::SOUND_NEWSPAPER_RARRGH;
@@ -3609,6 +3633,7 @@ void Board::NetApplySnapshot(NetBuffer& b, bool* theApplied)
 	const uint32_t aSmokeSnapshotHash = NetFnv1a32(b.Data(), b.Size());
 	LawnFusion::NativeSnapshotFrame aFusionFrame;
 	LawnFusion::FusionSeedBank aFusionSelection;
+    LawnFusion::NativeConveyor308CursorState aConveyorCursors;
     NetCaptured314Staging aCaptured314Staging;
 	const bool aNativeFusion = LawnFusion::IsNativeFusionBoard(this);
 	bool aZombieTerrainChanged = false;
@@ -3674,6 +3699,7 @@ void Board::NetApplySnapshot(NetBuffer& b, bool* theApplied)
             for(const auto& record:aFusionFrame.capturedPlants314)
                 if(!aCaptured314Staging.helper->StageExistingBeforeRaw(record.data,error)){NetTrace("FNS28 captured staging rejected: %s",error.c_str());return;}
         }
+        if(LawnFusion::IsNativeSourceConveyor308(this))aConveyorCursors=LawnFusion::CaptureNativeConveyorCursors308(this);
 		aZombieTerrainChanged = static_cast<uint8_t>(mBackground) != aFusionFrame.background;
 		if (!LawnFusion::ConfigureNativeFusionBackground(this,aFusionFrame.background)) return;
 		b = std::move(nativeBody);
@@ -4121,7 +4147,7 @@ void Board::NetApplySnapshot(NetBuffer& b, bool* theApplied)
 	mSeedBank->Move(aSeedBankX, aSeedBankY);
 	mSeedBank->mConveyorBeltCounter = aConveyorCounter;
 	mSeedBank->mCutSceneDarken = aSeedBankDarken;
-	if (aNativeFusion) mSeedBank->SortPacketsForViewer(mApp->mNetManager->GetMySlot());
+	if (aNativeFusion&&!LawnFusion::IsNativeSourceConveyor308(this)) mSeedBank->SortPacketsForViewer(mApp->mNetManager->GetMySlot());
 	if (HasConveyorBeltSeedBank() || aNativeFusion)
 	{
 		// A client starts with an empty/local bank in several challenge entry
@@ -5427,6 +5453,12 @@ void Board::NetApplySnapshot(NetBuffer& b, bool* theApplied)
 		NetTrace("native Fusion snapshot missing native allocation epoch=%u", aFusionFrame.epoch);
 		return;
 	}
+    if(aNativeFusion&&LawnFusion::IsNativeSourceConveyor308(this))
+    {
+        std::string error;
+        if(!LawnFusion::AdoptNativeConveyor308(this,aConveyorCursors,&error))
+        {NetTrace("Fusion source conveyor adoption invariant failed epoch=%u error=%s",aFusionFrame.epoch,error.c_str());return;}
+    }
 	if(aNativeFusion)LawnFusion::SyncNativeTools268Cursors(this);
 	// Commit the fog cache and weather together only after the complete snapshot
 	// validates. Drawing consumes this native grid directly; no local fog warmup.

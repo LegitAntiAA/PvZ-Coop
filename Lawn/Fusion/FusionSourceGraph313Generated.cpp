@@ -1,5 +1,9 @@
+#include "FusionExtendedZombie347Rules.h"
+#include "FusionNextZombie343Rules.h"
 // Generated from exact serialized source controllers; edit generator, not tables.
 #include "FusionSourceGraph313.h"
+#include "FusionGroundShooter343Rules.h"
+#include "FusionSnowZombie363Rules.h"
 namespace LawnFusion { namespace {
 static const FusionSourceGraph313Condition g25_conditions0[]={{FusionSourceGraph313Param::Fall,1,0.f}};
 static const FusionSourceGraph313Edge g25_edges1[]={{2,0.25f,0.f,0.75f,false,true,true,g25_conditions0,1}};
@@ -338,5 +342,5 @@ case 203:return &g203;
 case 212:return &g212;
 case 213:return &g213;
 case 223:return &g223;
-default:return nullptr;}}
+default:if(FusionSnowZombie363Kind(kind))return FindFusionSnow363Graph(kind);if(FusionGroundShooter343Kind(kind))return FindFusionGround343Graph(kind);if(kind==112||kind==216||kind==113||kind==214)return FindFusionSourceGraph343(kind);return FindFusionSourceGraph347(kind);}}
 }

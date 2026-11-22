@@ -39,7 +39,8 @@ FusionAdventureLessons274TestResult RunFusionAdventureLessons274Tests()
     // The full source activation subset, independently from public campaign admission.
     for(int level=1;level<=45;++level)
     {
-        const bool lesson=level==1||level==4||level==7||level==8||level==10||level==13||level==15;
+        const bool lesson=level==1||level==4||level==7||level==8||level==10||level==13||level==15||
+            level==22||level==24||level==30||level==35||level==42;
         auto run=Begin(level);CHECK(run.tutorial.active==lesson);
         run=Begin(level,true);CHECK(!run.tutorial.active&&run.tutorial.stage==0);
         run=Begin(level,false,2);CHECK(!run.tutorial.active&&run.tutorial.message==M::None);

@@ -1,3 +1,4 @@
+#include "FusionNextZombie343Rules.h"
 #include "FusionHeavyZombie313BRules.h"
 #include <algorithm>
 #include <cmath>
@@ -25,7 +26,7 @@ float Sample(std::span<const RootKey> keys,float t)
 }
 }
 const FusionZombieProfile* FindFusionHeavyZombie313BProfile(uint16_t kind)
-{for(const auto& profile:profiles)if(profile.kind==kind)return &profile;return nullptr;}
+{if(kind==112||kind==216)return FindFusionNextZombie343Profile(kind);for(const auto& profile:profiles)if(profile.kind==kind)return &profile;return nullptr;}
 bool FusionCatapult313BPlantAllowed(const FusionHeavy313BPlant& p,int row,float axisX)
 {return p.uid&&p.alive&&p.row==row&&!p.flying&&!p.caltrop&&p.kind!=1095&&Finite(p.shadowX)&&p.shadowX<=axisX;}
 bool SelectFusionCatapult313BTarget(std::span<const FusionHeavy313BPlant> plants,int row,float axisX,float shadowX,uint32_t& uid)

@@ -1,4 +1,9 @@
 #include "NativeSpecialZombie269.h"
+#include "FusionNextZombie343Rules.h"
+#include "FusionNativeZombieVisual.h"
+#include "FusionAnimation.h"
+#include "FusionWaterBridge321Rules.h"
+#include <cstring>
 #include "FusionBasePlantRules.h"
 #include "FusionNative.h"
 #include "FusionNativeZombies.h"
@@ -43,6 +48,13 @@ bool ReadPhase(const Reanimation* body,float duration,FusionZombieClipPosition& 
     if(!body||body->mDead||body->mLoopCount<0||!std::isfinite(body->mAnimTime)||body->mAnimTime<0||body->mAnimTime>1)return false;
     p={uint32_t(body->mLoopCount),body->mAnimTime*duration};return true;
 }
+
+bool TryNativeSubmarine343Delta(uint16_t kind,FusionZombieClipPosition a,FusionZombieClipPosition b,bool right,double projection,double& out)
+{
+ if(kind==14)return TryGetSpecialZombie269SubmarineRootDelta(a,b,right,.9*projection,out);
+ const auto* g=FindFusionSourceGraph343(kind);if(!g||!std::isfinite(projection)||projection<=0)return false;
+ for(uint8_t i=0;i<g->stateCount;++i)if(!std::strcmp(g->states[i].name,"walk")){double raw=0;if(!SourceRootDelta343(kind,i,{a.loop,a.seconds},{b.loop,b.seconds},raw))return false;out=raw*projection*(right?-1:1);return std::isfinite(out);}return false;
+}
 bool Factor(Zombie* z,float& factor)
 {
     const auto* garlic=GetNativeZombieGarlicData(z);
@@ -82,7 +94,7 @@ bool InitializeNativeSpecialZombie269(Zombie* z)
     if(!IsNativeSpecialZombie269(z))return false;if(!Host(z))return true;
     const auto kind=GetNativeSourceZombieData(z)->kind;
     if(Paper(z)){z->mZombiePhase=PHASE_NEWSPAPER_READING;z->mSummonCounter=0;z->mBossHeadCounter=0;StartNativeSpecialZombie269Walk(z,0);}
-    if(kind==14||kind==18)StartNativeSpecialZombie269Vehicle(z);
+    if(FusionSubmarine343Kind(kind)||kind==18)StartNativeSpecialZombie269Vehicle(z);
     return true;
 }
 bool BeginNativeSpecialZombie269PaperFall(Zombie* z)
@@ -123,6 +135,9 @@ bool UpdateNativeSpecialZombie269(Zombie* z)
             StartNativeSpecialZombie269Walk(z,0);UpdateNativeSpecialZombie269Animation(z);
         }
     }
+
+    if(GetNativeSourceZombieData(z)->kind==211)
+    {auto* d=GetNativeSourceZombieData(z);float hp=0;if(TryApplyFusionLandSubmarine343Drain(d->health,z->mBodyMaxHealth,z->mMindControlled,.01f,hp)){d->health=hp;z->mBodyHealth=NativeSourceZombieLivenessHealth(hp);}}
     return Paper(z)||IsNativeSpecialZombie269Vehicle(z); // Vehicle hooks suppress stock Zamboni AI.
 }
 bool GetNativeSpecialZombie269Presentation(const Zombie* z,const char*& clip,float& phase)
@@ -133,7 +148,7 @@ bool GetNativeSpecialZombie269Presentation(const Zombie* z,const char*& clip,flo
     if(const_cast<Zombie*>(z)->IsDeadOrDying())clip="die";
     else if(Paper(z))
     {SpecialZombie269PaperClip p;if(!TryGetSpecialZombie269PaperClip(kind,PaperStatus(z),z->mIsEating,p))return false;clip=p.name;}
-    else clip=kind==14?"walk":z->mFlatTires?"die":GetNativeSourceZombieData(z)->health<float(z->mBodyMaxHealth)/3?"shake":"idle";
+    else clip=FusionSubmarine343Kind(kind)?"walk":z->mFlatTires?"die":GetNativeSourceZombieData(z)->health<float(z->mBodyMaxHealth)/3?"shake":"idle";
     phase=body->mAnimTime;return true;
 }
 bool GetNativeSpecialZombie269BodyStage(const Zombie* z,uint8_t& stage)
@@ -289,7 +304,7 @@ bool ApplyNativeSpecialZombie269VehicleDamage4(Zombie* target,int damage)
 bool HandleNativeSpecialZombie269DriverCaltrop(Zombie* z)
 {
     if(!Host(z))return false;
-    if(GetNativeSourceZombieData(z)->kind==14)return true; // Source base slot50=30F780 is empty.
+    if(FusionSubmarine343Kind(GetNativeSourceZombieData(z)->kind))return true; // Source base slot50=30F780 is empty.
     if(GetNativeSourceZombieData(z)->kind!=18)return false;
     if(z->mFlatTires)return true;
     SpecialZombie269CaltropPlan plan;
@@ -320,11 +335,13 @@ bool MoveNativeSpecialZombie269Driver(Zombie* z,float currentSpeed,bool behind)
 }
 
 bool IsNativeSpecialZombie269Vehicle(const Zombie* z)
-{const auto* d=GetNativeSourceZombieData(z);return IsNativeSpecialZombie269(z)&&d&&(d->kind==14||d->kind==18);}
+{const auto* d=GetNativeSourceZombieData(z);return IsNativeSpecialZombie269(z)&&d&&(FusionSubmarine343Kind(d->kind)||d->kind==18);}
+bool NativeSubmarine343SourceInWater(const Zombie* z)
+{const auto* d=GetNativeSourceZombieData(z);return d&&FusionSubmarine343Kind(d->kind);}
 bool NativeSpecialZombie269VehicleTerrainValid(const Zombie* z)
 {
     if(!IsNativeSpecialZombie269Vehicle(z)||z->mRow<0||z->mRow>=GetNativeFusionRowCount(z->mBoard))return false;
-    return z->mBoard->mPlantRow[z->mRow]==(GetNativeSourceZombieData(z)->kind==14?PLANTROW_POOL:PLANTROW_NORMAL);
+    return z->mBoard->mPlantRow[z->mRow]==((GetNativeSourceZombieData(z)->kind==14||GetNativeSourceZombieData(z)->kind==200)?PLANTROW_POOL:PLANTROW_NORMAL);
 }
 bool NativeSpecialZombie269VehicleColliderEnabled(const Zombie* z)
 {return IsNativeSpecialZombie269Vehicle(z)&&!z->mDead&&!(GetNativeSourceZombieData(z)->kind==18&&z->mFlatTires);}
@@ -334,10 +351,10 @@ bool StartNativeSpecialZombie269Vehicle(Zombie* z)
     auto* body=Body(z);if(!body||!body->TrackExists("anim_drive"))return true;
     if(z->mFlatTires)return true; // A walk request cannot cancel source Invoke("DieAndExplode",2).
     z->mIsEating=false;z->mZombiePhase=PHASE_ZOMBIE_NORMAL;z->mZombieHeight=HEIGHT_ZOMBIE_NORMAL;
-    z->mInPool=GetNativeSourceZombieData(z)->kind==14;
+    z->mInPool=z->mBoard->mPlantRow[z->mRow]==PLANTROW_POOL;
     z->PlayZombieReanim("anim_drive",REANIM_LOOP,0,0);UpdateNativeSpecialZombie269VehicleAnimation(z);
     if(auto* c=Cursor(z))
-    {c->motionFrameStart=body->mFrameStart;c->motionValid=ReadPhase(body,1.6833333f,c->motion);c->attackValid=false;}
+    {SpecialZombie269PaperClip clip;if(!TryGetSpecialZombie269VehicleClip(GetNativeSourceZombieData(z)->kind,false,clip))return true;c->motionFrameStart=body->mFrameStart;c->motionValid=ReadPhase(body,clip.duration,c->motion);c->attackValid=false;}
     return true;
 }
 bool UpdateNativeSpecialZombie269VehicleAnimation(Zombie* z)
@@ -345,7 +362,7 @@ bool UpdateNativeSpecialZombie269VehicleAnimation(Zombie* z)
     if(!IsNativeSpecialZombie269Vehicle(z))return false;if(!Host(z))return true;
     auto* body=Body(z);const auto* d=GetNativeSourceZombieData(z);SpecialZombie269PaperClip clip;float factor=0;
     if(!body||body->mFrameCount<=0||!TryGetSpecialZombie269VehicleClip(d->kind,z->mFlatTires,clip,d->health<float(z->mBodyMaxHealth)/3))return true;
-    if(!TryGetFusionZombieStatusSpeedFactor(0,d->kind==14&&z->mChilledCounter>0,d->kind==14&&z->mIceTrapCounter>0,
+    if(!TryGetFusionZombieStatusSpeedFactor(0,FusionSubmarine343Kind(d->kind)&&z->mChilledCounter>0,FusionSubmarine343Kind(d->kind)&&z->mIceTrapCounter>0,
         z->mButteredCounter>0,false,factor))return true;
     factor*=GetNativeWater268GrapSpeedFactor(z);
     z->mOriginalAnimRate=body->mFrameCount*clip.speed*d->originSpeed*factor/clip.duration;body->mAnimRate=z->mOriginalAnimRate;
@@ -356,6 +373,12 @@ bool NativeSpecialZombie269VehicleTouchesRect(const Zombie* z,NativeSpecialZombi
 {
     if(!NativeSpecialZombie269VehicleColliderEnabled(z)||!query)return false;float x=0,y=0;
     if(!query(z,"",x,y))return false;
+
+    const auto kind=GetNativeSourceZombieData(z)->kind;
+    if(kind==200||kind==211)
+    {FusionAnimationBoxCollider303 box;if(!GetNativeSourceZombieBox313(z,box)||!box.enabled||!box.nodeActive)return false;
+     FusionContactQuad321 q;for(size_t i=0;i<4;++i)q[i]={x+60*z->mScaleZombie*box.corners[i][0],y-60*z->mScaleZombie*box.corners[i][1]};
+     const float l=float(left),t=float(top),r=float(left+width),bottom=float(top+height);return FusionContactQuads321(q,{{{l,t},{r,t},{r,bottom},{l,bottom}}});}
     return SpecialZombie269VehicleTouchesRect(GetNativeSourceZombieData(z)->kind,x,y,z->mScaleZombie,z->mMindControlled,
         kFusionBasePixelsX,GetNativeFusionPixelsY(z->mBoard),left,top,width,height);
 }
@@ -374,10 +397,10 @@ bool MoveNativeSpecialZombie269Vehicle(Zombie* z,NativeSpecialZombie269NodeQuery
         return MoveNativeSpecialZombie269Driver(z,.8f,frontX<boundary);
     }
     auto* c=Cursor(z);auto* body=Body(z);if(!c||!body)return true;FusionZombieClipPosition now;
-    if(!ReadPhase(body,1.6833333f,now))return true;
+    SpecialZombie269PaperClip clip;if(!TryGetSpecialZombie269VehicleClip(d->kind,false,clip)||!ReadPhase(body,clip.duration,now))return true;
     double delta=0;
     if(c->motionValid&&c->motionFrameStart==body->mFrameStart&&!NativeWater268ZombieCaptured(z)&&
-        TryGetSpecialZombie269SubmarineRootDelta(c->motion,now,z->mMindControlled,.9*kFusionBasePixelsX*z->mScaleZombie,delta)&&
+        TryNativeSubmarine343Delta(d->kind,c->motion,now,z->mMindControlled,kFusionBasePixelsX*z->mScaleZombie,delta)&&
         std::isfinite(z->mPosX+delta))z->mPosX+=float(delta);
     // Existing source-root native projection, not an unmeasured assertion of
     // Unity's builtin root-motion world-scale parity. No visual root translation.
@@ -417,7 +440,7 @@ bool DieNativeSpecialZombie269Vehicle(Zombie* z,NativeSpecialZombie269VehicleFx 
 {
     if(!IsNativeSpecialZombie269Vehicle(z))return false;if(!Host(z))return true;
     float x=0,y=0;if(!effect||!z->GetShadowCenter(x,y))return true;
-    const uint16_t particle=GetNativeSourceZombieData(z)->kind==14?35:36;
+    const uint16_t particle=FusionSubmarine343Kind(GetNativeSourceZombieData(z)->kind)?35:36;
     if(!effect(z,particle,x,y-float(.6*GetNativeFusionPixelsY(z->mBoard))))return true;
     z->mVelX=0;z->mSummonCounter=0;
     // Shared native retirement runs existing tags, parent links and wave counts.

@@ -14,11 +14,12 @@ enum class FusionAdventureMessage273:uint8_t
     PuffIntro,PuffStack,PuffMix,PuffReady,
     FertilizeIntro,FertilizeGrow,FertilizeUpgrade,FertilizeLesson,UseFertilizeNut,
     FertilizeNutReady,RepairNutChomper,FertilizeRepairReady,FertilizeReady,
-    IceIntro,IceDefense,IceLessonReady,IceReady
+    IceIntro,IceDefense,IceLessonReady,IceReady,
+    KelpBullets,KelpMillion,KelpPercent,WarmIntro,WarmBonus,WarmChain,LightIntro,LightSystem,LightOne,LightFusion,LightStack,LightReady,MagnetIntro,MagnetNear,MagnetUnlimited,MagnetChain,MagnetSeparate,MagnetConnect,MagnetReady,MoneyIntro,MoneyEnable,MoneyUpgrade,MoneyAbility,MoneyLink
 };
 enum class FusionAdventureMissionAction274:uint8_t
 {None,Prepare4,Prepare7,Spawn7EnemyAndCard,Prepare8,Prepare10,Mix10,
- Prepare13Nut,Prepare13Chomper,Prepare15,Clear15};
+ Prepare13Nut,Prepare13Chomper,Prepare15,Clear15,ExecuteSourceLesson346};
 
 // Host observations of the exact bound mission actors, not any matching type.
 // beforeDying/status1 differ from actual destruction in the source lessons.
@@ -30,6 +31,7 @@ struct FusionAdventureLessonInput274
     bool missionZombieBeforeDying=false,missionZombieDying=false;
     bool hasBucketPlant1020or1029=false;
     bool hasTallNut1027=false,missionPlantFullyRepaired=false;
+    bool hasGoldCabbage1135=false;
     int sourceEnemyCount=0;
 };
 

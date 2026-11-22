@@ -1,5 +1,6 @@
 #include "FusionAdventureProgress273.h"
 #include "FusionCampaign272Rules.h"
+#include "FusionAdventureLesson346Rules.h"
 #include <cmath>
 #include <limits>
 
@@ -11,10 +12,11 @@ constexpr uint64_t mask=(uint64_t{1}<<kFusionAdventureLevels273)-1;
 bool Level(int level){return level>=1&&level<=kFusionAdventureLevels273;}
 bool Cycle(uint32_t cycle){return cycle>0&&cycle<=uint32_t((std::numeric_limits<int32_t>::max)());}
 uint16_t Minus(uint16_t value,uint32_t ticks){return ticks>=value?0:uint16_t(value-ticks);}
-bool TutorialLevel(int level){return level==1||level==4||level==7||level==8||level==10||level==13||level==15;}
+bool TutorialLevel(int level){return level==1||level==4||level==7||level==8||level==10||level==13||level==15||FusionAdventureLesson346Supported(level);}
 bool TutorialValid(const FusionAdventureTutorial273& t,int level)
 {
-    if(uint8_t(t.message)>uint8_t(FusionAdventureMessage273::IceReady)||
+    if(FusionAdventureLesson346Supported(level))return FusionAdventureLesson346TutorialValid(t,level);
+    if(uint8_t(t.message)>uint8_t(FusionAdventureMessage273::MoneyLink)||
         t.messageTicks>FusionAdventureMessageDuration273(t.message))return false;
     if(t.stage==0)return t.timerTicks==0&&t.message==FusionAdventureMessage273::None&&t.messageTicks==0;
     if(level==1)
@@ -127,7 +129,7 @@ uint16_t FusionAdventureMessageDuration273(FusionAdventureMessage273 message)
     case FusionAdventureMessage273::EquipmentReady:case FusionAdventureMessage273::PuffReady:
     case FusionAdventureMessage273::FertilizeReady:case FusionAdventureMessage273::IceReady:return 500;
     }
-    return 0;
+    return FusionAdventureLesson346MessageDuration(message);
 }
 bool StepFusionAdventureTutorial273(FusionAdventureRun273& r,uint32_t ticks,bool sunflower,bool peaSunflower,
     bool gatling,FusionAdventureTutorialEffects273& effects)
@@ -161,6 +163,7 @@ bool StepFusionAdventureTutorial273(FusionAdventureRun273& r,uint32_t ticks,bool
 bool StepFusionAdventureTutorial273(FusionAdventureRun273& r,uint32_t ticks,
     const FusionAdventureLessonInput274& input,FusionAdventureTutorialEffects273& effects)
 {
+    if(FusionAdventureLesson346Supported(r.level))return StepFusionAdventureLesson346(r,ticks,input,effects);
     if(!FusionAdventureRunValid273(r)||!r.level||(r.tutorial.active&&r.level==1))return false;
     auto next=r;FusionAdventureTutorialEffects273 e;auto& t=next.tutorial;
     t.messageTicks=Minus(t.messageTicks,ticks);
@@ -249,7 +252,8 @@ bool StepFusionAdventureTutorial273(FusionAdventureRun273& r,uint32_t ticks,
 bool FusionAdventureCardsIgnoreExpiry273(const FusionAdventureRun273& r)
 {return FusionAdventureRunValid273(r)&&r.level&&r.tutorial.active;}
 bool FusionAdventureTutorialShowsZombieHealth284(const FusionAdventureRun273& r)
-{return FusionAdventureRunValid273(r)&&r.level==15&&r.tutorial.active&&r.tutorial.stage==2;}
+{return FusionAdventureRunValid273(r)&&r.tutorial.active&&r.tutorial.stage==2&&
+    (r.level==15||r.level==22||r.level==24);}
 bool TryArmFusionAdventureReward273(FusionAdventureRun273& r,int wave,int maximum,int enemies,bool iz)
 {
     if(!FusionAdventureRunValid273(r)||!r.level||r.over||r.tutorial.active||iz||maximum<=0||wave<maximum||enemies>0)return false;

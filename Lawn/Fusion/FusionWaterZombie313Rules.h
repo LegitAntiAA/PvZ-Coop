@@ -3,6 +3,7 @@
 #include "../Net/NetCommon.h"
 #include <cstdint>
 #include <span>
+#include "FusionSourceGraph313.h"
 namespace LawnFusion
 {
 enum class FusionWaterZombie313Phase:uint8_t
@@ -23,6 +24,9 @@ struct FusionWaterZombie313View
     // Actual auxiliary native Reanimation: Driver additiveShake, or water
     // Animator layer. No private age/Draw clock is used by ghosts.
     LawnNet::NetZombieAnimState auxiliary;
+    FusionSourceGraph313View shoot343; //113/214 actualthirdsourceLayer only.
+    LawnNet::NetZombieAnimState shootClock343;
+    bool gatlingReady343=false; //214 Start(MC)/firstAttribute head1ON/head2OFF latch.
 };
 struct FusionWaterZombie313Clip
 {
@@ -34,6 +38,8 @@ struct FusionWaterZombie313Clip
 struct FusionWaterZombie313Transition
 {FusionWaterZombie313Phase to;float exitSeconds=0,duration=0;bool needsExit=false;};
 const FusionZombieProfile* FindFusionWaterZombie313Profile(uint16_t);
+constexpr bool FusionWaterShooter343Kind(uint16_t k){return k==113||k==214;}
+constexpr bool FusionDolphin343Kind(uint16_t k){return k==19||k==27||FusionWaterShooter343Kind(k);}
 bool FusionWaterZombie313Kind(uint16_t);
 bool FusionWaterZombie313SourceInWater(uint16_t);
 bool FusionWaterZombie313ViewValid(uint16_t,const FusionWaterZombie313View&);

@@ -1,3 +1,4 @@
+#include "FusionNativeExtendedZombie347.h"
 #include "FusionNativeSourceDamage315.h"
 #include "FusionSourceDamage315Rules.h"
 #include "FusionNative.h"
@@ -72,6 +73,7 @@ bool ResolveNativeSourceBaseDamage315(Zombie* z,int raw,bool fix,int& resolved)
 bool CanApplyNativeSourceCharred315(Zombie* z,int damage,std::string* error)
 {
     if(!Authority(z)||damage<0){if(error)*error="Source Charred requires an authoritative ordinary source world.";return false;}
+    if(const auto* d=GetNativeSourceZombieData(z);d&&(d->kind==218||d->kind==219||d->kind==220||d->kind==221||d->kind==224))return true;
     if(UsesNativeHeavyCharred313B(z))return CanApplyNativeHeavyCharred313B(z,damage,false,error);
     // Validate the exact current picture before any shield/armor callback. A
     // status/flag that excludes standalone art still permits genuine Die2.
@@ -86,6 +88,7 @@ bool CanApplyNativeSourceCharred315(Zombie* z,int damage,std::string* error)
 bool ApplyNativeSourceCharred315(Zombie* z,int damage)
 {
     if(!CanApplyNativeSourceCharred315(z,damage))return false;
+    if(ApplyNativeExtended347Charred(z,damage,false))return true;
     if(UsesNativeHeavyCharred313B(z))return ApplyNativeHeavyCharred313B(z,damage,false);
     const auto* d=GetNativeSourceZombieData(z);
     if(SourceCharred315Direct(d->health,z->mHelmHealth,damage,kFusionZombieSourcePreset))return Terminal(z);
@@ -97,7 +100,9 @@ bool ApplyNativeSourceTypedDamage313(Zombie* z,int sourceType,int raw,bool fix)
     if(sourceType==12&&!CanApplyNativeSourceCharred315(z,raw))return false;
     int filtered=raw;if(FilterNativeJackbox309Damage(z,raw,filtered)&&filtered==0)return true;
     int remaining=0;
-    if(!ResolveNativeSourceBaseDamage315(z,filtered,fix,remaining))return false;
+    if(const auto* d=GetNativeSourceZombieData(z);d&&FusionExtendedZombie347Kind(d->kind))
+    {if(!ResolveNativeExtended347Damage(z,filtered,fix,remaining))return false;}
+    else if(!ResolveNativeSourceBaseDamage315(z,filtered,fix,remaining))return false;
     remaining=ResolveNativeHeavyDamage313B(z,remaining);
     if(const auto* d=GetNativeSourceZombieData(z);d&&FindFusionExtendedZombie313Profile(d->kind))
         if(!TryCapFusionExtendedZombie313Damage(d->kind,remaining,remaining))return false;

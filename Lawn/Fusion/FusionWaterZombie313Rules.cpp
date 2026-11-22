@@ -1,4 +1,5 @@
 #include "FusionWaterZombie313Rules.h"
+#include "FusionNextZombie343Rules.h"
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -13,7 +14,7 @@ bool Range(uint16_t k,Phase p)
 {
     if(k==16)return p==Phase::DriverIdle||p==Phase::DriverDamaged;
     if(k==17)return p>=Phase::SnorkelSwim&&p<=Phase::SnorkelDeath;
-    if(k==19||k==27)return p>=Phase::DolphinRide&&p<=Phase::DolphinDeath;
+    if(FusionDolphin343Kind(k))return p>=Phase::DolphinRide&&p<=Phase::DolphinDeath;
     if(k==20)return p>=Phase::DrownWalk&&p<=Phase::DrownDeath;
     return false;
 }
@@ -46,8 +47,8 @@ constexpr Event events[]={
     {Phase::DrownThrow,.68333334f,Water313Throw},{Phase::DrownEat,.98333335f,Water313Bite},{Phase::DrownEat,2.f,Water313Bite},
     {Phase::DrownDeath,1.5f,Water313Fall},{Phase::DrownDeath,2.1666667f,Water313Destroy}};
 }
-bool FusionWaterZombie313Kind(uint16_t k){return k==16||k==17||k==19||k==20||k==27;}
-bool FusionWaterZombie313SourceInWater(uint16_t k){return k==17||k==19||k==27;}
+bool FusionWaterZombie313Kind(uint16_t k){return k==16||k==17||k==19||k==20||k==27||FusionWaterShooter343Kind(k);}
+bool FusionWaterZombie313SourceInWater(uint16_t k){return k==17||FusionDolphin343Kind(k);}
 bool TryGetFusionWaterZombie313Clip(uint16_t k,Phase p,FusionWaterZombie313Clip& out)
 {
     if(!Range(k,p))return false;FusionWaterZombie313Clip c;
@@ -76,6 +77,7 @@ bool TryGetFusionWaterZombie313Clip(uint16_t k,Phase p,FusionWaterZombie313Clip&
 }
 bool FusionWaterZombie313ViewValid(uint16_t k,const FusionWaterZombie313View& v)
 {
+    if(k!=214&&v.gatlingReady343)return false;
     if(!Range(k,v.phase)||!Range(k,v.outgoing)||!std::isfinite(v.driverSpeed)||
         !std::isfinite(v.outgoingSourceSeconds)||!std::isfinite(v.transitionElapsed)||!std::isfinite(v.transitionTotal)||
         v.outgoingSourceSeconds<0||v.transitionElapsed<0||v.transitionTotal<0||v.transitionElapsed>v.transitionTotal||v.transitionTotal>1||
@@ -84,9 +86,17 @@ bool FusionWaterZombie313ViewValid(uint16_t k,const FusionWaterZombie313View& v)
     if(k==16){if(v.driverSpeed<0||v.driverSpeed>.8f||v.driverStage>2||v.sourceStatus>1)return false;}
     else if(v.driverSpeed||v.driverStage||!v.colliderEnabled)return false;
     if(k==17&&v.sourceStatus!=0&&v.sourceStatus!=1&&v.sourceStatus!=7)return false;
-    if((k==19||k==27)&&v.sourceStatus!=0&&v.sourceStatus!=1&&v.sourceStatus!=8&&v.sourceStatus!=9)return false;
+    if((FusionDolphin343Kind(k))&&v.sourceStatus!=0&&v.sourceStatus!=1&&v.sourceStatus!=8&&v.sourceStatus!=9)return false;
     if(k==20&&v.sourceStatus>1)return false;
     if(!v.transitionTotal&&(v.transitionElapsed||v.outgoingSourceSeconds||v.outgoing!=v.phase))return false;
+
+    const auto zeroAnim=[](const LawnNet::NetZombieAnimState& a){return !a.mPresent&&!a.mDead&&!a.mFrameStart&&!a.mFrameCount&&a.mAnimTime==0&&a.mAnimRate==0&&!a.mLoopType&&!a.mLoopCount;};
+    if(FusionWaterShooter343Kind(k))
+    {const auto* graph=FindFusionSourceGraph313(k);const auto& a=v.shootClock343;
+     if(!graph||graph->layerCount!=3||!FusionSourceGraph313ViewValid(*graph,2,v.shoot343)||
+        !std::isfinite(a.mAnimTime)||a.mAnimTime<0||a.mAnimTime>1||!std::isfinite(a.mAnimRate)||std::abs(a.mAnimRate)>10000||
+        a.mLoopType>5||!LawnNet::NetZombieAnimStateFitsFrames(a,65535)||(!a.mPresent&&!zeroAnim(a)))return false;}
+    else if(!zeroAnim(v.shootClock343)||v.shoot343.state||v.shoot343.outgoing||v.shoot343.outgoingSeconds||v.shoot343.fadeElapsed||v.shoot343.fadeDuration||v.shoot343.fadeNormalized)return false;
     const auto& h=v.auxiliary;
     if(!std::isfinite(h.mAnimTime)||h.mAnimTime<0||h.mAnimTime>1||!std::isfinite(h.mAnimRate)||std::abs(h.mAnimRate)>10000||
         h.mLoopType>5||!LawnNet::NetZombieAnimStateFitsFrames(h,65535))return false;
@@ -96,15 +106,16 @@ bool FusionWaterZombie313ViewValid(uint16_t k,const FusionWaterZombie313View& v)
     return true;
 }
 bool FusionWaterZombie313WireViewValid(uint16_t k,const FusionWaterZombie313View& v)
-{return FusionWaterZombie313ViewValid(k,v)&&(k==20?!v.auxiliary.mPresent:v.auxiliary.mPresent&&!v.auxiliary.mDead);}
+{return FusionWaterZombie313ViewValid(k,v)&&(k==20?!v.auxiliary.mPresent:v.auxiliary.mPresent&&!v.auxiliary.mDead)&&(!FusionWaterShooter343Kind(k)||(v.shootClock343.mPresent&&!v.shootClock343.mDead));}
 bool InitializeFusionWaterZombie313View(uint16_t k,FusionWaterZombie313View& out)
 {
     FusionWaterZombie313View v;
     switch(k){case 16:v.phase=Phase::DriverIdle;v.driverSpeed=.8f;break;
         case 17:v.phase=Phase::SnorkelSwim;v.sourceStatus=7;break;
-        case 19:case 27:v.phase=Phase::DolphinRide;v.sourceStatus=8;break;
+        case 19:case 27:case 113:case 214:v.phase=Phase::DolphinRide;v.sourceStatus=8;break;
         case 20:v.phase=Phase::DrownWalk;break;default:return false;}
-    v.auxiliaryActive=k==17||k==19||k==27;v.outgoing=v.phase;out=v;return true;
+    if(FusionWaterShooter343Kind(k)){const auto* g=FindFusionSourceGraph313(k);if(!g||g->layerCount!=3)return false;v.shoot343.state=v.shoot343.outgoing=g->layers[2].defaultState;}
+    v.auxiliaryActive=k==17||FusionDolphin343Kind(k);v.outgoing=v.phase;out=v;return true;
 }
 bool TrySelectFusionWaterZombie313Transition(uint16_t k,const FusionWaterZombie313View& v,bool attack,bool jump,bool throwing,float speed,FusionWaterZombie313Transition& out)
 {
@@ -144,7 +155,7 @@ bool TryAdvanceFusionWaterZombie313Clock(uint16_t k,Phase p,FusionZombieClipPosi
 bool TryGetFusionWaterZombie313RootDelta(uint16_t k,Phase p,FusionZombieClipPosition a,FusionZombieClipPosition b,double& out)
 {
     if(!Position(k,p,a,b))return false;double delta=0;
-    for(const auto& r:roots)if(r.kind==k&&r.phase==p)
+    for(const auto& r:roots)if(r.kind==(FusionWaterShooter343Kind(k)?27:k)&&r.phase==p)
     {delta=double(b.loop-a.loop)*(r.keys[r.count-1].value-r.keys[0].value)+Sample(r,b.seconds)-Sample(r,a.seconds);break;}
     if(!std::isfinite(delta))return false;out=delta;return true;
 }
@@ -184,7 +195,7 @@ bool TryStepFusionDrown313Countdown(float before,bool throwing,bool controlled,b
     after=next;trigger=due;return std::isfinite(next);
 }
 bool FusionDolphin313CanProbe(uint16_t k,int status,bool controlled,bool frozen)
-{return (k==19||k==27)&&status==8&&!controlled&&!frozen;}
+{return (FusionDolphin343Kind(k))&&status==8&&!controlled&&!frozen;}
 bool FusionDolphin313CanJumpPlant(bool flying,bool kelp,bool sameRow){return !flying&&!kelp&&sameRow;}
 bool FusionDrown313PlantEligible(bool invincible,bool pumpkin,bool flying,bool pot){return !invincible&&!pumpkin&&!flying&&!pot;}
 bool TryMakeFusionDrown313Velocity(double dx,double dy,bool target,double& vx,double& vy)
@@ -222,6 +233,7 @@ const FusionZombieProfile* FindFusionWaterZombie313Profile(uint16_t kind)
     static constexpr FusionZombieProfile rows[]={
         {16,1350,0,0,500,false,false,true},{17,270,0,0,50},
         {19,720,0,0,50},{20,720,0,0,50},{27,720,0,0,50}};
+    if(FusionWaterShooter343Kind(kind))return FindFusionNextZombie343Profile(kind);
     for(const auto& row:rows)if(row.kind==kind)return &row;return nullptr;
 }
 }

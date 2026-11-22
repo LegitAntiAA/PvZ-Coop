@@ -8,6 +8,7 @@
 #include "LawnMower.h"
 #include "Challenge.h"
 #include "SeedPacket.h"
+#include "Fusion/FusionNativeConveyor308.h"
 #include "Projectile.h"
 #include "../LawnApp.h"
 #include "../Resources.h"
@@ -1749,6 +1750,13 @@ void Challenge::UpdateBeghouled()
 //0x422CD0
 void Challenge::UpdateConveyorBelt()
 {
+    if(LawnFusion::IsNativeSourceConveyor308(mBoard))
+    {
+        if(mApp->mGameScene==SCENE_PLAYING&&!mBoard->mPaused&&!mBoard->HasLevelAwardDropped())
+            mBoard->mSeedBank->UpdateConveyorBelt();
+        LawnFusion::UpdateNativeSourceConveyor308(mBoard);
+        return;
+    }
 	if (mBoard->HasLevelAwardDropped())
 		return;
 

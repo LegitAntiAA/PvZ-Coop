@@ -35,7 +35,8 @@ inline bool Native313GraphViewValid(uint16_t kind,const NativeSourceGraph313Snap
 }
 inline bool Native313WaterViewValid(uint16_t kind,const FusionWaterZombie313View& v)
 {return FusionWaterZombie313Kind(kind)&&FusionWaterZombie313WireViewValid(kind,v)&&
-    (kind==20?Native313AnimationZero(v.auxiliary):Native313AnimationViewValid(v.auxiliary));}
+    (kind==20?Native313AnimationZero(v.auxiliary):Native313AnimationViewValid(v.auxiliary))&&
+    (FusionWaterShooter343Kind(kind)?Native313AnimationViewValid(v.shootClock343):Native313AnimationZero(v.shootClock343));}
 inline bool Native313ExtendedViewValid(uint16_t kind,const FusionExtendedZombie313View& v)
 {return FusionExtendedZombie313ViewValid(kind,v)&&(FusionExtendedZombie313OwnBodyDamage(kind)||v.bodyStage==0);}
 inline bool Native313HeavyViewValid(uint16_t kind,const NativeHeavyZombie313Snapshot& v)

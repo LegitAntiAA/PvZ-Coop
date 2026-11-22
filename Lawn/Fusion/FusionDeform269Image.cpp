@@ -1,6 +1,7 @@
 #include "FusionDeform269.h"
 #include "../../SexyAppFramework/MemoryImage.h"
 #include "../../SexyAppFramework/Graphics.h"
+#include "../../SexyAppFramework/SDL3Image.h"
 #include "../../SexyAppFramework/TriVertex.h"
 #include <algorithm>
 #include <cmath>
@@ -36,6 +37,21 @@ bool FusionMask269DrawTriangles(Sexy::Graphics& graphics,Sexy::Image& texture,
     }
     for(auto index:indices)if(index>=vertices.size())return false;
     for(const auto& mask:masks){bool ignored=false;if(!FusionMask269Coverage(mask,0,0,ignored))return false;}
+    // Outside every mask is the ordinary sprite when this domain has no
+    // masks at all. Keep the normal native triangle backend/texture identity;
+    // Inside with an empty domain must still become transparent.
+    if(interaction==2&&masks.empty())
+    {
+        std::vector<std::array<Sexy::TriVertex,3>> direct(indices.size()/3);
+        for(size_t i=0;i<indices.size();++i)
+        {const auto& v=vertices[indices[i]];direct[i/3][i%3]=Sexy::TriVertex(float(v.x),float(v.y),float(v.u),float(v.v));}
+        const auto raw=reinterpret_cast<const Sexy::TriVertex (*)[3]>(direct.data());
+        // vertices already include the caller's Graphics translation.
+        if(auto* target=dynamic_cast<Sexy::SDL3Image*>(graphics.mDestImage))
+            target->BltTrianglesTex(&texture,raw,int(direct.size()),graphics.mClipRect,color,graphics.mDrawMode,0,0,graphics.mLinearBlend,graphics.mPixelArtBlend);
+        else graphics.mDestImage->BltTrianglesTex(&texture,raw,int(direct.size()),graphics.mClipRect,color,graphics.mDrawMode,0,0,graphics.mLinearBlend);
+        return true;
+    }
     const auto& clip=graphics.mClipRect;
     const int left=int((std::max)(std::floor(minX),double(clip.mX))),top=int((std::max)(std::floor(minY),double(clip.mY)));
     const int right=int((std::min)(std::ceil(maxX),double(clip.mX)+clip.mWidth)),bottom=int((std::min)(std::ceil(maxY),double(clip.mY)+clip.mHeight));

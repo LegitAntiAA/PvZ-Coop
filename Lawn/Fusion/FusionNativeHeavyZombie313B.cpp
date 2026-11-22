@@ -1,4 +1,6 @@
 #include "FusionNativeHeavyZombie313B.h"
+#include "FusionNextZombie343Rules.h"
+#include "FusionNativeNextZombie343.h"
 #include "FusionSourceZombieTypes313.h"
 #include "FusionBasePlantRules.h"
 #include "FusionNative.h"
@@ -90,7 +92,9 @@ bool Shot(Zombie* z,NativeHeavyZombie313BState& s,const NativeHeavyZombie313BHoo
 {
  auto* target=Resolve(z,s.targetPlantUID);if(z->mMindControlled||!target)return true;
  float x=0,y=0;std::string error;
- if(!h.node(z,"shoot",x,y)||!h.prepareShot(z,target,&error)||!TryMakeNativeHostileBasketball(z->mBoard,target,z->mRow,x,y))return false;
+ if(!h.node(z,"shoot",x,y)||!h.prepareShot(z,target,&error))return false;
+ if(Kind(z)==112)return ShootNativeCherryCatapult343(z,s,target,x,y,h);
+ if(!TryMakeNativeHostileBasketball(z->mBoard,target,z->mRow,x,y))return false;
  if(s.ammo)--s.ammo;s.targetPlantUID=0;h.sound(z,101);if(!s.ammo)Trigger(z,s,h,Param::Walk2);return true;
 }
 }
@@ -99,7 +103,7 @@ bool InitializeNativeHeavyZombie313B(Zombie* z,NativeHeavyZombie313BState& s,con
 {
  if(!Authority(z)||!Hooks(h)||!NativeSourceGraph313ClockTracksReady(z,graph,nullptr))return false;
  auto* gs=h.graphStateFor(z);if(!gs)return false;s={};s.initialized=true;
- const auto kind=Kind(z);if(kind==28)s.status=12;if(kind==31)s.ammo=25;
+ const auto kind=Kind(z);if(kind==28)s.status=12;if(FusionCatapult343Kind(kind))s.ammo=kind==216?2:25;
  if(kind==32||kind==34){s.status=14;s.jumpSpeed=RandRangeFloat(1.1f,1.4f);z->mPhaseCounter=0;}
  if(kind==33){s.status=18;s.ladderVisible=true;}
  if(kind==45){s.status=22;s.bungee.status=22;z->mPhaseCounter=250;z->mSummonCounter=200;}
@@ -115,8 +119,8 @@ bool GetNativeHeavyZombie313BParameters(Zombie* z,NativeHeavyZombie313BState& s,
 {
  if(!Authority(z)||!Hooks(h))return false;
  auto* gs=h.graphStateFor(z);if(!gs)return false;auto p=gs->parameters;if(!Speed(z,p.speed))return false;
- p.jumpSpeed=s.jumpSpeed;p.shooting=s.shooting;p.wait=s.status==19;
- p.attacking=Kind(z)==31?false:h.contact(z,s.status==0||Gold(Kind(z)));
+ p.jumpSpeed=s.jumpSpeed;p.shooting=s.shooting;p.wait=Kind(z)==112?s.ammo<=20:s.status==19;
+ p.attacking=FusionCatapult343Kind(Kind(z))?false:h.contact(z,s.status==0||Gold(Kind(z)));
  out=p;return true;
 }
 bool UpdateNativeHeavyZombie313B(Zombie* z,NativeHeavyZombie313BState& s,const NativeHeavyZombie313BHooks& h,const NativeSourceGraph313Hooks& graph)
@@ -135,7 +139,7 @@ bool UpdateNativeHeavyZombie313B(Zombie* z,NativeHeavyZombie313BState& s,const N
   const auto rise=FusionMiner313BCheckRise(s.status,shadowX,s.axePresent,false);
   if(rise!=FusionMiner313BRise::None)NativeMiner313BAxeLost(z,s,rise==FusionMiner313BRise::Natural,h);
  }
- if(k==31)
+ if(FusionCatapult343Kind(k))
  {
   if(s.caltropDying){if(z->mPhaseCounter>0)--z->mPhaseCounter;if(!z->mPhaseCounter){h.sourceDie(z,0);return true;}}
   else if(!z->IsDeadOrDying())
@@ -203,7 +207,8 @@ bool DispatchNativeHeavyZombie313BEvent(Zombie* z,NativeHeavyZombie313BState& s,
  case Event::Destroy:h.sourceDie(z,2);return true;
  case Event::FallSound:h.fallSound(z);return true;
  case Event::Bite:h.bite(z);return true;
- case Event::Shoot:return k==31&&Shot(z,s,h);
+ case Event::Shoot:return k==216?ShootNativeDrownCatapult343(z,s,h):FusionCatapult343Kind(k)&&Shot(z,s,h);
+ case Event::ReplaceBomb:if(k!=216)return false;s.catapultFlags343|=2;return true; // Exact AnimRelodeOver.
  case Event::SetLadder:return k==33&&SetLadder(z,s,h);
  case Event::LandSound:if(k==32||k==34){auto p=Pogo(s);if(!FusionPogo313BLandSound(p))return false;Pogo(s,p);h.sound(z,109);return true;}return false;
  case Event::JumpFail:
@@ -219,19 +224,20 @@ bool RootDeltaNativeHeavyZombie313B(Zombie* z,const NativeHeavyZombie313BState& 
 {
  const auto* graph=FindFusionSourceGraph313(Kind(z));if(!graph||state>=graph->stateCount)return false;
  const char* name=graph->states[state].name;bool moving=false;
- const auto k=Kind(z);if(k==31)moving=(!std::strcmp(name,"walk")||!std::strcmp(name,"walk2"))&&!s.caltropDying;
+ const auto k=Kind(z);if(FusionCatapult343Kind(k))moving=(!std::strcmp(name,"walk")||!std::strcmp(name,"walk2")||(k==112&&!std::strcmp(name,"walk1")))&&!s.caltropDying;
  else if(k==33)moving=!std::strcmp(name,"walk")||!std::strcmp(name,"walk2");
  else if(k==32||k==34)moving=s.status==0&&!std::strcmp(name,"walk2");
  else if(k==28)moving=!std::strcmp(name,"mine")||!std::strcmp(name,"walk1")||!std::strcmp(name,"landing");
  else if(Gold(k))moving=!std::strcmp(name,"walk")||!std::strcmp(name,"walk2");
  if(!moving||z->mIsEating||z->IsDeadOrDying()){out=0;return true;}
+ if(k==112||k==216){double delta=0;if(!SourceRootDelta343(k,state,a,b,delta))return false;out=z->mMindControlled!=s.lookBack?-delta:delta;return true;}
  return TryGetFusionHeavy313BRootDelta(k,name,{a.loop,a.seconds},{b.loop,b.seconds},z->mMindControlled!=s.lookBack,out);
 }
 bool NativeHeavyZombie313BContact(Zombie* z,NativeHeavyZombie313BState& s,Plant* p,const NativeHeavyZombie313BHooks& h)
 {
  if(!NativeHeavyZombie313BKind(Kind(z)))return false;if(!Playing(z)||!p||!Hooks(h))return true;
  const auto k=Kind(z);
- if(k==31||Gold(k)){h.crash(z);return true;}
+ if(FusionCatapult343Kind(k)||Gold(k)){h.crash(z);return true;}
  FusionHeavy313BPlant t;if(!h.plantTraits(p,t))return true;
  if(k==33&&FusionLadder313BCanSet(s.status,z->mMindControlled,z->IsDeadOrDying(),z->mRow,t))
  {s.targetPlantUID=z->mBoard->mPlants.DataArrayGetID(p);Trigger(z,s,h,Param::Ladder);return true;}
@@ -252,9 +258,9 @@ bool NativeMiner313BAxeLost(Zombie* z,NativeHeavyZombie313BState& s,bool natural
 bool BeginNativeHeavyZombie313BDeath(Zombie* z,NativeHeavyZombie313BState& s,const NativeHeavyZombie313BHooks& h)
 {if(!NativeHeavyZombie313BKind(Kind(z)))return false;if(!Authority(z))return true;if(Gold(Kind(z))){s.status=0;s.gold.status=1;}else s.status=1;Trigger(z,s,h,Param::Die);return true;}
 bool KillNativeCatapult313BByCaltrop(Zombie* z,NativeHeavyZombie313BState& s,const NativeHeavyZombie313BHooks& h)
-{if(Kind(z)!=31)return false;if(!Authority(z))return true;s.caltropDying=true;if(auto* d=GetNativeSourceZombieData(z))d->beforeDying=true;z->mPhaseCounter=200;Trigger(z,s,h,Param::Shake);Trigger(z,s,h,Param::Die);return true;}
+{if(!FusionCatapult343Kind(Kind(z)))return false;if(!Authority(z))return true;s.caltropDying=true;if(auto* d=GetNativeSourceZombieData(z))d->beforeDying=true;z->mPhaseCounter=200;Trigger(z,s,h,Param::Shake);Trigger(z,s,h,Param::Die);return true;}
 bool ApplyNativeCatapult313BBodyDamage(Zombie* z,int damage,const NativeHeavyZombie313BHooks& h)
-{if(Kind(z)!=31)return false;if(!Playing(z)||damage<0||!Hooks(h))return true;auto* d=GetNativeSourceZombieData(z);if(!d||!std::isfinite(d->health-damage))return true;d->health-=damage;z->mBodyHealth=NativeSourceZombieLivenessHealth(d->health);
+{if(!FusionCatapult343Kind(Kind(z)))return false;if(!Playing(z)||damage<0||!Hooks(h))return true;auto* d=GetNativeSourceZombieData(z);if(!d||!std::isfinite(d->health-damage))return true;d->health-=damage;z->mBodyHealth=NativeSourceZombieLivenessHealth(d->health);
  if(FusionCatapult313BBroken(d->health,z->mBodyMaxHealth))if(auto* c=GetNativeContext(z->mBoard)){const auto uid=z->mBoard->mZombies.DataArrayGetID(z);const auto it=c->heavyZombies313B.find(uid);if(it!=c->heavyZombies313B.end())it->second.armorStage=1;}
  if(d->health<=0)h.sourceDie(z,2);return true;}
 bool ConfigureNativeBungee313BDelivery(Zombie* z,NativeHeavyZombie313BState& s,uint16_t child)

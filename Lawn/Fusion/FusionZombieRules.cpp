@@ -42,13 +42,14 @@ int GetNativeSourceZombieCarrier(uint16_t kind)
 {
     switch(kind){case 0:case 10:case 11:case 41:case 42:return ZOMBIE_NORMAL;case 2:case 12:return ZOMBIE_TRAFFIC_CONE;
     case 4:case 13:case 111:return ZOMBIE_PAIL;case 9:case 109:return ZOMBIE_FOOTBALL;case 8:return ZOMBIE_DOOR;
-    case 5:case 15:case 104:return ZOMBIE_NEWSPAPER;case 14:case 18:return ZOMBIE_ZAMBONI;
-    case 3:case 6:case 7:return ZOMBIE_POLEVAULTER;case 21:case 22:case 23:return ZOMBIE_TRAFFIC_CONE;
+    case 5:case 15:case 104:return ZOMBIE_NEWSPAPER;case 14:case 18:case 200:case 211:return ZOMBIE_ZAMBONI;
+    case 3:case 6:case 7:case 217:return ZOMBIE_POLEVAULTER;case 21:case 22:case 23:return ZOMBIE_TRAFFIC_CONE;
     case 100:case 101:case 102:case 103:case 106:case 107:case 108:return ZOMBIE_NORMAL;
     case 16:return ZOMBIE_ZAMBONI;
     case 17:case 19:case 20:case 24:case 25:case 26:case 27:case 28:case 29:case 30:
     case 31:case 32:case 33:case 34:case 35:case 36:case 37:case 38:case 39:case 40:
-    case 43:case 45:case 203:case 212:case 213:case 223:return ZOMBIE_NORMAL;
+    case 43:case 45:case 203:case 212:case 213:case 223:
+    case 47:case 48:case 114:case 118:case 119:case 112:case 216:case 113:case 214:case 202:case 204:case 205:case 206:case 210:case 218:case 219:case 220:case 221:return ZOMBIE_NORMAL;
     default:return -1;}
 }
 

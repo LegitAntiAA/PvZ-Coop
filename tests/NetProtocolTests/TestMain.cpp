@@ -1,3 +1,13 @@
+int RunFusionSnowZombie363Tests(int&);
+int RunFusionGroundShooter343Tests(int&);
+int RunFusionWaterShoot343Tests(int&);
+int RunFusionExtendedZombie347Tests(int&);
+#include "FusionRoof350Tests.h"
+int RunFusionNextZombie343Tests(int&);
+#include "FusionCampaign342Tests.h"
+#include "FusionAdventureLesson346Tests.h"
+#include "FusionConveyor305Tests.h"
+#include "FusionConveyor348Tests.h"
 #include "../../Lawn/Net/NetCommon.h"
 #include "LocalizedTextTests.h"
 #include "NetChallengeRuntimeTests.h"
@@ -1202,6 +1212,16 @@ int main(int argc, char** argv)
 	const auto aFusionCampaign272Result = RunFusionCampaign272Tests();
 	gChecks += aFusionCampaign272Result.mChecks;
 	gFailures += aFusionCampaign272Result.mFailures;
+    gFailures+=RunFusionNextZombie343Tests(gChecks);
+    gFailures+=RunFusionSnowZombie363Tests(gChecks);
+    gFailures+=RunFusionGroundShooter343Tests(gChecks);
+    gFailures+=RunFusionWaterShoot343Tests(gChecks);
+    gFailures+=RunFusionExtendedZombie347Tests(gChecks);
+    {const auto v=RunFusionRoof350Tests();gChecks+=v.mChecks;gFailures+=v.mFailures;}
+    { const auto result=RunFusionCampaign342Tests();gChecks+=result.mChecks;gFailures+=result.mFailures; }
+    { const auto result=RunFusionAdventureLesson346Tests();gChecks+=result.mChecks;gFailures+=result.mFailures; }
+    { const auto result=RunFusionConveyor305Tests();gChecks+=result.mChecks;gFailures+=result.mFailures; }
+    { const auto result=RunFusionConveyor348Tests();gChecks+=result.mChecks;gFailures+=result.mFailures; }
 	const auto aScheduler273=RunFusionAdventureScheduler273Tests();
 	gChecks+=aScheduler273.mChecks;gFailures+=aScheduler273.mFailures;
 	const auto aProgress273=RunFusionAdventureProgress273Tests();

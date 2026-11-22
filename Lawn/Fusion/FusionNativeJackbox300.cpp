@@ -1,4 +1,6 @@
+#include "FusionNativeDryGround353.h"
 #include "FusionNativeJackbox300.h"
+#include "FusionNativeJackbox309Bridge.h"
 #include "FusionNative.h"
 #include "FusionNativeSourceClock313.h"
 #include "FusionNativeZombies.h"
@@ -19,10 +21,10 @@ namespace
 using Phase=FusionJackbox300Phase;
 bool Authority(const Zombie* z)
 {
-    const auto* d=GetNativeSourceZombieData(z);
+    const auto* d=GetNativeSourceZombieData(z);const auto* state=GetNativeJackbox309(z);
     return z&&d&&FusionJackbox300Kind(d->kind)&&z->mApp&&z->mBoard&&z->mApp->mBoard==z->mBoard&&
         !z->mNetGhost&&!z->mApp->NetIsClient()&&IsNativeSourceWorld313(z->mBoard)&&
-        GetNativeFusionRowCount(z->mBoard)==5;
+        (NativeSourceDryRow353(z->mBoard,z->mRow)||(state&&state->rowMoving&&z->mRow>=0&&z->mRow<GetNativeFusionRowCount(z->mBoard)));
 }
 bool Ready(const NativeJackbox300Hooks& h)
 {return h.stateFor&&h.input&&h.randomInt&&h.randomFloat&&h.preflight&&h.canPlayLoop&&h.audio&&h.sound&&

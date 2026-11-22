@@ -1,3 +1,4 @@
+#include "FusionExtendedZombie347Rules.h"
 #pragma once
 #include "FusionZombieRules.h"
 #include "FusionDayZombie273Rules.h"
@@ -20,6 +21,7 @@ inline bool BuildFusionSourceZombieClosure280(std::span<const uint16_t> roots,
         {if(error)*error="Source NPC factory unavailable rootKind="+std::to_string(root)+" dependencyKind="+std::to_string(kind);return false;}
         if(std::find(pending.begin(),pending.end(),kind)!=pending.end())return true;
         pending.push_back(kind);
+        for(auto child:FusionExtended347Dependencies(kind))if(!self(self,child,root))return false;
         for(auto child:FusionDayZombie273NpcDependencies(kind))if(!self(self,child,root))return false;
         if((kind==35||kind==36||kind==40||kind==43||kind==212)&&!self(self,37,root))return false;
         if((kind==43||kind==212)&&!self(self,40,root))return false;

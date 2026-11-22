@@ -1,3 +1,6 @@
+#include "FusionExtendedZombie347Rules.h"
+#include "FusionDrown343Rules.h"
+#include "FusionNativeConveyor308.h"
 #include "FusionNativeWire.h"
 #include "FusionMorePlants269Rules.h"
 #include "FusionRollingActors269Rules.h"
@@ -82,7 +85,7 @@ template<class IO>void Fields(IO& io,FusionSourceObstacle313View& v)
     uint8_t kind=uint8_t(v.kind);io.U8(kind);v.kind=FusionSourceObstacle313Kind(kind);
     io.U32(v.instanceToken);io.U16(v.ownerId);io.U16(v.targetPlantId);io.U32(v.ownerToken);io.U32(v.targetPlantToken);
     io.Bool(v.landed);io.Bool(v.hit);io.Bool(v.fromHypno);io.Bool(v.exploded);
-    io.U8(v.variant);io.U8(v.hitCount);io.U32(v.lastHitAge);Fields(io,v.clock);
+    io.U8(v.variant);io.U16(v.hitCount);io.Bool(v.drownLongFlash);io.U32(v.lastHitAge);Fields(io,v.clock);
     io.I32(v.ageTicks);io.F32(v.velocityX);io.F32(v.velocityY);io.F32(v.velocityZ);io.F32(v.accelerationZ);
 }
 
@@ -112,7 +115,7 @@ template <typename IO> void Fields(IO& io, FusionBankState& v)
 template <typename IO> void Fields(IO& io, FusionBankPacket& v)
 {
     io.U16(v.id); io.U16(v.kind); io.Bool(v.isExtra); io.U8(v.owner); io.U8(v.randomOrigin);
-    io.Bool(v.mysteryPending); io.I32(v.price); io.F32(v.rechargeSeconds); io.F32(v.remainingRechargeSeconds);
+    io.Bool(v.mysteryPending); io.I32(v.price); io.F32(v.rechargeSeconds); io.F32(v.remainingRechargeSeconds); io.U8(v.conveyorUses);
 }
 template <typename IO> void Fields(IO& io, NativePacketData& v)
 {
@@ -435,8 +438,10 @@ bool ValidNativeAncestry(const NativePlantData& data)
 
 bool ValidateNativeSnapshotFrame(const NativeSnapshotFrame& frame, const std::vector<FusionBankEligibleCard>& eligible)
 {
+    const auto bankPolicy=FusionAdventureBankPolicy308(frame.adventure);
+    const auto bankCapacity=bankPolicy==FusionBankPolicy::SourceConveyor?kFusionSourceConveyor305Capacity:kNativeFusionBankCapacity;
     if (!NativeFusionBackgroundValid(frame.background) || !frame.epoch || frame.epoch != frame.selection.epoch || frame.gloveCooldownTicks < 0 || frame.gloveCooldownTicks > 1000 ||
-        !FusionSeedBank::ValidateSnapshot(frame.selection, eligible, kNativeFusionBankCapacity) ||
+        !FusionSeedBank::ValidateSnapshot(frame.selection, eligible, bankCapacity, bankPolicy) ||
         !UniqueIds(frame.packets, 32) || !UniqueIds(frame.plants, 1024) ||
         !UniqueIds(frame.projectiles, 1024) || !UniqueIds(frame.coldZombies, 1024) ||
         !UniqueIds(frame.butterZombies, 1024) || !UniqueIds(frame.zombieActions, 1024) ||
@@ -453,7 +458,7 @@ bool ValidateNativeSnapshotFrame(const NativeSnapshotFrame& frame, const std::ve
         !UniqueIds(frame.sourceGraphs313,1024)||!UniqueIds(frame.waterZombies313,1024)||
         !UniqueIds(frame.heavyZombies313,1024)||!UniqueIds(frame.extendedZombies313,1024)||
         !UniqueIds(frame.sourceObstacles313,1024)||!UniqueIds(frame.capturedPlants314,1024)||
-        !std::isfinite(frame.sourcePoints)||frame.sourcePoints<0||frame.extendedBoard313.ultimateCount<0||
+        !std::isfinite(frame.sourcePoints)||frame.sourcePoints<0||frame.extendedBoard313.ultimateCount<0||frame.extendedBoard313.ultimateFootballDrownCount<0||
         !std::isfinite(frame.extendedBoard313.punishTime)||frame.extendedBoard313.punishTime<0) return false;
     const auto family313=[&](const auto& records,const auto& owns,const auto& valid)
     {
@@ -466,11 +471,11 @@ bool ValidateNativeSnapshotFrame(const NativeSnapshotFrame& frame, const std::ve
             if(owns(source.data.kind)&&std::none_of(records.begin(),records.end(),[&](const auto& v){return v.id==source.id;}))return false;
         return true;
     };
-    if(!family313(frame.sourceGraphs313,[](uint16_t k){return FindFusionSourceGraph313(k)!=nullptr;},Native313GraphViewValid)||
+    if(!family313(frame.sourceGraphs313,[](uint16_t k){return !FusionWaterZombie313Kind(k)&&FindFusionSourceGraph313(k)!=nullptr;},Native313GraphViewValid)||
        !family313(frame.waterZombies313,FusionWaterZombie313Kind,Native313WaterViewValid)||
        !family313(frame.heavyZombies313,NativeHeavyZombie313BKind,Native313HeavyViewValid)||
        !family313(frame.extendedZombies313,[](uint16_t k){return FindFusionExtendedZombie313Profile(k)!=nullptr;},Native313ExtendedViewValid))return false;
-    if((!frame.sourceGraphs313.empty()||!frame.waterZombies313.empty()||!frame.sourceObstacles313.empty())&&frame.background>BACKGROUND_4_FOG)return false;
+    if((!frame.sourceGraphs313.empty()||!frame.waterZombies313.empty()||!frame.sourceObstacles313.empty())&&frame.background>BACKGROUND_5_ROOF)return false;
     std::set<uint32_t> obstacleTokens;
     for(const auto& record:frame.sourceObstacles313)
     {
@@ -480,7 +485,13 @@ bool ValidateNativeSnapshotFrame(const NativeSnapshotFrame& frame, const std::ve
         const auto owner=std::find_if(frame.sourceZombies.begin(),frame.sourceZombies.end(),[&](const auto& z){return z.id==v.ownerId&&z.data.instanceToken==v.ownerToken;});
         const uint16_t expected=v.kind==FusionSourceObstacle313Kind::DrownWeapon?20:v.kind==FusionSourceObstacle313Kind::KirovBomb?26:
             v.kind==FusionSourceObstacle313Kind::SuperBall?(v.variant?212:43):40;
-        if(owner!=frame.sourceZombies.end()&&owner->data.kind!=expected)return false;
+        FusionExtended347Family ownerFamily;
+        const bool machineOwner=owner!=frame.sourceZombies.end()&&(owner->data.kind==40||
+            (TryGetFusionExtended347Family(owner->data.kind,ownerFamily)&&ownerFamily==FusionExtended347Family::Machine));
+        if(owner!=frame.sourceZombies.end()&&(v.kind==FusionSourceObstacle313Kind::DrownWeapon?
+            !FusionDrown343OwnerVariant(owner->data.kind,v.variant):v.kind==FusionSourceObstacle313Kind::KirovBomb?
+            owner->data.kind!=(v.variant?206:26):v.kind==FusionSourceObstacle313Kind::MachineBall?
+            !machineOwner:unsigned(v.kind)==5?owner->data.kind!=221:owner->data.kind!=expected))return false;
     }
     std::set<std::pair<uint16_t,uint32_t>> capturedOriginals;
     for(const auto& record:frame.capturedPlants314)
@@ -536,7 +547,7 @@ bool ValidateNativeSnapshotFrame(const NativeSnapshotFrame& frame, const std::ve
     for (const auto& record : frame.packets)
     {
         const auto& v = record.data;
-        if (v.owner >= kFusionBankPlayers || v.randomOrigin > 10 || !std::isfinite(v.rechargeSeconds)) return false;
+        if ((bankPolicy==FusionBankPolicy::SourceConveyor?v.owner!=0xff:v.owner>=kFusionBankPlayers) || v.randomOrigin > 10 || !std::isfinite(v.rechargeSeconds)) return false;
         const auto selected = std::find_if(frame.selection.packets.begin(), frame.selection.packets.end(), [&](const auto& p) { return p.id == v.selectionId; });
         if (!v.selectionId || !selectionIds.insert(v.selectionId).second || selected == frame.selection.packets.end() || selected->kind != v.kind || selected->isExtra != v.isExtra ||
             selected->owner != v.owner || selected->randomOrigin != v.randomOrigin || selected->price != v.price || selected->rechargeSeconds != v.rechargeSeconds) return false;
@@ -554,7 +565,8 @@ bool ValidateNativeSnapshotFrame(const NativeSnapshotFrame& frame, const std::ve
         const auto& v = record.data;
         const bool validOwner = v.owner < kFusionBankPlayers || (v.owner == LawnNet::NET_SHARED_OWNER && v.packetId == 0);
         if (!v.instanceToken || !instanceTokens.insert(v.instanceToken).second ||
-            !SupportedPlant(v.kind) || !validOwner || v.randomOrigin > 10 || (!v.packetId && v.randomOrigin) ||
+            !SupportedPlant(v.kind) || !validOwner || v.randomOrigin > 10 ||
+            (bankPolicy==FusionBankPolicy::SourceConveyor&&v.randomOrigin) || (!v.packetId && v.randomOrigin) ||
             (v.productionTicks < 0 && !(v.kind==924 && v.productionTicks==-100)) || v.productionTicks > 1000000 || v.pendingProductionTicks < 0 || v.pendingProductionTicks > 1000000 ||
             !std::isfinite(v.idleSeconds) || v.idleSeconds < 0 || v.idleSeconds > 10000000 ||
             !std::isfinite(v.shootSeconds) || v.shootSeconds < -1 || v.shootSeconds > 10000000 ||
@@ -953,7 +965,7 @@ bool EncodeNativeSnapshot(const NativeSnapshotFrame& frame, const std::vector<Fu
     Vector(writer,copy.dayZombies273);Vector(writer,copy.nightZombies281);Vector(writer,copy.jackboxZombies300);
     Vector(writer,copy.sourceGraphs313);Vector(writer,copy.waterZombies313);Vector(writer,copy.heavyZombies313);Vector(writer,copy.extendedZombies313);
     Vector(writer,copy.sourceObstacles313);Vector(writer,copy.capturedPlants314);
-    writer.F32(copy.sourcePoints);writer.I32(copy.extendedBoard313.ultimateCount);writer.F32(copy.extendedBoard313.punishTime);
+    writer.F32(copy.sourcePoints);writer.I32(copy.extendedBoard313.ultimateCount);writer.I32(copy.extendedBoard313.ultimateFootballDrownCount);writer.F32(copy.extendedBoard313.punishTime);
     if(!writer.valid)return false;
     constexpr size_t headerBytes = 14;
     if (metadata.Size() > 65535 || headerBytes + metadata.Size() > kMaximumBytes - nativeBody.Size()) return false;
@@ -998,7 +1010,7 @@ bool DecodeNativeSnapshot(LawnNet::NetBuffer& wire, const std::vector<FusionBank
     Vector(reader,decoded.dayZombies273,1024);Vector(reader,decoded.nightZombies281,1024);Vector(reader,decoded.jackboxZombies300,1024);
     Vector(reader,decoded.sourceGraphs313,1024);Vector(reader,decoded.waterZombies313,1024);Vector(reader,decoded.heavyZombies313,1024);Vector(reader,decoded.extendedZombies313,1024);
     Vector(reader,decoded.sourceObstacles313,1024);Vector(reader,decoded.capturedPlants314,1024);
-    reader.F32(decoded.sourcePoints);reader.I32(decoded.extendedBoard313.ultimateCount);reader.F32(decoded.extendedBoard313.punishTime);
+    reader.F32(decoded.sourcePoints);reader.I32(decoded.extendedBoard313.ultimateCount);reader.I32(decoded.extendedBoard313.ultimateFootballDrownCount);reader.F32(decoded.extendedBoard313.punishTime);
     if (!reader.valid || metadata.Remaining() || decoded.epoch != expectedEpoch || !ValidateNativeSnapshotFrame(decoded, eligible)) return false;
     LawnNet::NetBuffer body;
     body.mData.resize(bodyBytes);
