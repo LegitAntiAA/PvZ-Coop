@@ -11,6 +11,7 @@ struct FusionAdventureSession273
 {
     bool enabled=false;
     uint8_t sourceDifficulty=2;
+    uint8_t coopDifficulty=1; // Frozen host choice, independent of source tutorial tiers.
     FusionAdventureProfile273 profile;
     FusionAdventureRun273 run;
     uint16_t wave=0,maximumWaves=0;

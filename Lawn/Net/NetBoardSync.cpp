@@ -3695,6 +3695,7 @@ void Board::NetApplySnapshot(NetBuffer& b, bool* theApplied)
 			 (aFusionFrame.adventure.run.level!=context->adventure.run.level ||
 			  aFusionFrame.adventure.run.cycle!=context->adventure.run.cycle ||
 			  aFusionFrame.adventure.sourceDifficulty!=context->adventure.sourceDifficulty ||
+              aFusionFrame.adventure.coopDifficulty!=context->adventure.coopDifficulty ||
 			  aFusionFrame.adventure.wave<context->adventure.wave ||
 			  aFusionFrame.adventure.run.tutorial.stage<context->adventure.run.tutorial.stage ||
 			  (context->adventure.run.over&&!aFusionFrame.adventure.run.over) ||

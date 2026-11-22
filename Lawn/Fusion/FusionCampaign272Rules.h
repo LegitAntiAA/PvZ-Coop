@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <span>
 #include <string>
+#include <vector>
 
 namespace LawnFusion
 {
@@ -48,6 +49,9 @@ bool NativeSourceAdventureLevelReady280(int level,uint32_t cycle,std::string* er
 const FusionSourceChallenge272* FindFusionSourceChallenge272(int level);
 std::span<const FusionSourceZombieWeight272> FusionSourceZombieWeights272();
 bool TryGetFusionSourceAdventureWaves272(int level,int cycle,int& waves);
+// Existing co-op policy over source data; D1 preserves the authored campaign.
+bool TryGetFusionCoopAdventureWaves272(int level,int cycle,int difficulty,int& waves);
+bool BuildFusionCoopAdventureRoster272(int level,int difficulty,std::vector<uint16_t>& roster);
 // Native layout reuse only. This number must NOT determine source progress,
 // unlocks, source wave generation, source tutorial or reward completion.
 bool TryProjectFusionSourceAdventure272(int level,FusionSourceNativeProjection272& projection);
@@ -55,7 +59,7 @@ bool TryProjectFusionSourceAdventure272(int level,FusionSourceNativeProjection27
 // require their own completion state and are not inferred from Adventure.
 bool TryGetFusionSourceBaseUnlock272(uint16_t kind,int& completedAdventureLevel);
 bool FusionSourceAdventureAllowsZombie272(int level,uint16_t kind);
-bool TryGetFusionSourceWaveBudget272(int level,int cycle,int wave,int sourceDifficulty,int& budget);
+bool TryGetFusionSourceWaveBudget272(int level,int cycle,int wave,int sourceDifficulty,int& budget,int coopDifficulty=1);
 bool TryGetFusionSourceZombieWeightTotal272(int level,int& total);
 // Caller owns the source integer RNG draw in [1,totalWeight]. No local RNG.
 bool TryPickFusionSourceAdventureZombie272(int level,int draw,uint16_t& kind);

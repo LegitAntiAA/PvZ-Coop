@@ -117,7 +117,7 @@ bool Spawn(void* user,int wave,std::span<const FusionAdventureScheduler273Spawn>
 }
 }
 Result InitializeNativeAdventureScheduler273(Board* board,FusionAdventureScheduler273State& state,
-    int level,int cycle,int difficulty,const FusionAdventureScheduler273Random& random,std::string* error)
+    int level,int cycle,int difficulty,const FusionAdventureScheduler273Random& random,std::string* error,int coopDifficulty)
 {
     if(error)error->clear();
     if(!board||!board->mApp||board->mApp->NetIsClient())return Result::NotHost;
@@ -125,11 +125,11 @@ Result InitializeNativeAdventureScheduler273(Board* board,FusionAdventureSchedul
     if(!Current(board)||!NativeSourceAdventureLevelReady273(level,uint32_t(cycle)))
     {Reject(adapter,"Source scheduler requires the shared admitted source scene/controller policy.");return Result::NotReady;}
     const auto* config=FindFusionSourceAdventure272(level);
-    if(!config||!BuildFusionCampaign342Plan(level,uint32_t(cycle),adapter.plan,error)){Reject(adapter,"Source scheduler descriptor is unavailable.");return Result::NotReady;}
+    if(!config||!BuildFusionCampaign342Plan(level,uint32_t(cycle),adapter.plan,error,coopDifficulty)){Reject(adapter,"Source scheduler descriptor is unavailable.");return Result::NotReady;}
     const auto& roots=adapter.plan.possibleKinds; // Full row variants and exact Normal0 fallback, before RNG.
     if(!BuildFusionSourceZombieClosure280(roots,adapter.prepared,error)||
         !EnsureNativeSourceZombieClosure280(board,adapter.prepared,error))return Result::NotReady;
-    return InitializeFusionAdventureScheduler273(state,true,level,cycle,difficulty,random,&adapter,Ready);
+    return InitializeFusionAdventureScheduler273(state,true,level,cycle,difficulty,random,&adapter,Ready,coopDifficulty);
 }
 Result UpdateNativeAdventureScheduler273(Board* board,FusionAdventureScheduler273State& state,
     const FusionAdventureScheduler273Input& input,const FusionAdventureScheduler273Random& random,
@@ -140,7 +140,7 @@ Result UpdateNativeAdventureScheduler273(Board* board,FusionAdventureScheduler27
     Adapter adapter{board,error};adapter.random=random;
     if(!Current(board)||!NativeSourceAdventureLevelReady273(state.level,uint32_t(state.cycle)))
     {Reject(adapter,"Source scheduler lost its admitted native source Board.");return Result::NotReady;}
-    if(!BuildFusionCampaign342Plan(state.level,uint32_t(state.cycle),adapter.plan,error))return Result::NotReady;
+    if(!BuildFusionCampaign342Plan(state.level,uint32_t(state.cycle),adapter.plan,error,state.coopDifficulty))return Result::NotReady;
     auto effective=input;effective.host=input.host&&!board->mApp->NetIsClient();
     effective.paused=input.paused||board->mPaused||board->mApp->mGameScene!=SCENE_PLAYING;
     FusionAdventureScheduler273Callbacks callbacks;

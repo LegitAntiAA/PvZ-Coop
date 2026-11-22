@@ -1,5 +1,6 @@
 #include "FusionAdventureScheduler273.h"
 #include "FusionCampaign272Rules.h"
+#include "../Net/NetGameplayPolicy.h"
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -14,7 +15,7 @@ bool Valid(const FusionAdventureScheduler273State& s)
 {
     const auto* config=FindFusionSourceAdventure272(s.level);int waves=0;
     return s.initialized&&config&&s.sourceDifficulty>=0&&s.sourceDifficulty<=5&&
-        TryGetFusionSourceAdventureWaves272(s.level,s.cycle,waves)&&waves==s.maximumWaves&&
+        TryGetFusionCoopAdventureWaves272(s.level,s.cycle,s.coopDifficulty,waves)&&waves==s.maximumWaves&&
         s.rows==config->rows&&s.wave>=0&&s.wave<=waves&&s.waves.size()==size_t(waves)&&
         std::isfinite(s.countdown)&&std::isfinite(s.hold)&&s.hold>=0&&
         std::isfinite(s.healthElapsed)&&s.healthElapsed>=0&&
@@ -66,36 +67,44 @@ float SignedFloat(uint32_t bits)
 }
 Result InitializeFusionAdventureScheduler273(FusionAdventureScheduler273State& state,bool host,
     int level,int cycle,int difficulty,const FusionAdventureScheduler273Random& random,
-    void* user,bool (*ready)(void*,uint16_t))
+    void* user,bool (*ready)(void*,uint16_t),int coopDifficulty)
 {
     if(!host)return Result::NotHost;
     const auto* config=FindFusionSourceAdventure272(level);int maximum=0,total=0;
     if(!config||difficulty<0||difficulty>5||!ready||!random.integer||!random.real||
-        !TryGetFusionSourceAdventureWaves272(level,cycle,maximum)||
-        !TryGetFusionSourceZombieWeightTotal272(level,total))return Result::Invalid;
+        !TryGetFusionCoopAdventureWaves272(level,cycle,coopDifficulty,maximum))return Result::Invalid;
     // NewZombieUpdate0x180319250 has extra high-D5 slot rewrites here. They
     // require distinct source actors; the ordinary pure tables cannot admit it.
-    if(difficulty==5&&maximum>40)return Result::NotReady;
+    int sourceMaximum=0;TryGetFusionSourceAdventureWaves272(level,cycle,sourceMaximum);
+    if(difficulty==5&&sourceMaximum>40)return Result::NotReady;
     if(!ready(user,0))return Result::NotReady;
-    for(auto kind:config->allowedZombieKinds)if(kind!=0&&!ready(user,kind))return Result::NotReady;
+    std::vector<uint16_t> roster;if(!BuildFusionCoopAdventureRoster272(level,coopDifficulty,roster))return Result::Invalid;
+    for(auto kind:roster)if(kind!=0&&!ready(user,kind))return Result::NotReady;
+    std::vector<FusionSourceZombieWeight272> weights;
+    for(const auto& row:FusionSourceZombieWeights272())if(std::find(roster.begin(),roster.end(),row.kind)!=roster.end())
+    {weights.push_back(row);total+=row.weight;}
+    if(total<=0)return Result::Invalid;
     FusionAdventureScheduler273State candidate;
     candidate.level=level;candidate.cycle=cycle;candidate.sourceDifficulty=difficulty;
-    candidate.rows=config->rows;candidate.maximumWaves=maximum;candidate.countdown=15.f;
+    candidate.coopDifficulty=coopDifficulty;candidate.rows=config->rows;candidate.maximumWaves=maximum;candidate.countdown=15.f;
     candidate.waves.resize(size_t(maximum));
     for(int wave=1;wave<=maximum;++wave)
     {
         auto& kinds=candidate.waves[size_t(wave-1)];int remaining=0;
-        if(!TryGetFusionSourceWaveBudget272(level,cycle,wave,difficulty,remaining))return Result::Invalid;
-        while(remaining>0)
+        if(!TryGetFusionSourceWaveBudget272(level,cycle,wave,difficulty,remaining,coopDifficulty))return Result::Invalid;
+        remaining=LawnNet::DifficultyWavePoints(remaining,coopDifficulty);
+        while(remaining>0&&(coopDifficulty==1||kinds.size()<size_t(LawnNet::kGameplayMaximumZombiesPerWave)))
         {
             int draw=0;uint16_t chosen=0;FusionSourceWavePick272 pick;
             if(!Integer(random,1,total+1,draw))return Result::RandomFailed;
-            if(!TryPickFusionSourceAdventureZombie272(level,draw,chosen)||
-                !TryResolveFusionSourceAdventurePick272(remaining,chosen,pick))return Result::Invalid;
+            int weight=0;for(const auto& row:weights){weight+=row.weight;if(draw<=weight){chosen=row.kind;break;}}
+            if(!TryResolveFusionSourceAdventurePick272(remaining,chosen,pick))return Result::Invalid;
             kinds.push_back(pick.emittedKind);remaining=pick.remainingBudget;
         }
         std::span<const uint16_t> tail;
-        if(!TryGetFusionSourceFinalWaveKinds272(level,cycle,wave,tail))return Result::Invalid;
+        if(!TryGetFusionSourceFinalWaveKinds272(level,cycle,wave==maximum?sourceMaximum:(std::min)(wave,sourceMaximum-1),tail))return Result::Invalid;
+        if(coopDifficulty>1&&kinds.size()+tail.size()>size_t(LawnNet::kGameplayMaximumZombiesPerWave))
+            kinds.resize(size_t(LawnNet::kGameplayMaximumZombiesPerWave)-tail.size());
         kinds.insert(kinds.end(),tail.begin(),tail.end());
     }
     candidate.initialized=true;state=std::move(candidate);return Result::Okay;
@@ -137,7 +146,7 @@ Result UpdateFusionAdventureScheduler273(FusionAdventureScheduler273State& state
     }
     if(next.countdown>=0){Commit(state,next);return Result::Okay;}
     const int wave=next.wave+1;
-    if(wave%10==0)
+    if(wave%10==0||wave==state.maximumWaves)
     {
         if(!next.hugeWarning){next.hugeWarning=true;events.hugeWarning=true;}
         next.hugeElapsed+=dt;

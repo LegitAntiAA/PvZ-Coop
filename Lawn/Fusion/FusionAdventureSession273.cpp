@@ -8,10 +8,10 @@ namespace LawnFusion
 bool FusionAdventureSessionValid273(const FusionAdventureSession273& s)
 {
     if(!FusionAdventureProfileValid273(s.profile)||!FusionAdventureRunValid273(s.run)||
-        s.sourceDifficulty>5||!std::isfinite(s.countdown)||!std::isfinite(s.hugeElapsed)||
+        s.sourceDifficulty>5||s.coopDifficulty<1||s.coopDifficulty>10||!std::isfinite(s.countdown)||!std::isfinite(s.hugeElapsed)||
         std::abs(s.countdown)>3600||s.hugeElapsed<0||s.hugeElapsed>3600)return false;
     if(!s.enabled)return !s.run.level&&!s.wave&&!s.maximumWaves&&s.countdown==0&&s.hugeElapsed==0&&
-        !s.hugeWarning&&!s.schedulerFailed&&s.sourceDifficulty==2&&
+        !s.hugeWarning&&!s.schedulerFailed&&s.sourceDifficulty==2&&s.coopDifficulty==1&&
         !s.profile.completedLevels&&s.profile.cycle==1&&s.profile.frontierLevel==1;
     const auto& r=s.run;const auto& p=s.profile;
     if(!r.rewardCollected)
@@ -33,10 +33,10 @@ bool FusionAdventureSessionValid273(const FusionAdventureSession273& s)
         else if(p.cycle!=r.cycle||p.frontierLevel!=r.level+1)return false;
     }
     int waves=0;
-    return s.run.level&&TryGetFusionSourceAdventureWaves272(s.run.level,int(s.run.cycle),waves)&&
+    return s.run.level&&TryGetFusionCoopAdventureWaves272(s.run.level,int(s.run.cycle),s.coopDifficulty,waves)&&
         s.maximumWaves==waves&&s.wave<=s.maximumWaves&&
         (!s.run.over||s.wave==s.maximumWaves)&&
-        (!s.hugeWarning||(s.wave<s.maximumWaves&&(s.wave+1)%10==0));
+        (!s.hugeWarning||(s.wave<s.maximumWaves&&((s.wave+1)%10==0||s.wave+1==s.maximumWaves)));
 }
 bool EncodeFusionAdventureSession273(const FusionAdventureSession273& s,LawnNet::NetBuffer& out)
 {
@@ -44,7 +44,7 @@ bool EncodeFusionAdventureSession273(const FusionAdventureSession273& s,LawnNet:
     LawnNet::NetBuffer b;b.WriteU8(s.enabled?1:0);
     if(s.enabled)
     {
-        b.WriteU8(s.sourceDifficulty);
+        b.WriteU8(uint8_t(s.sourceDifficulty|((s.coopDifficulty-1)<<3)));
         b.WriteU32(uint32_t(s.profile.completedLevels));b.WriteU32(uint32_t(s.profile.completedLevels>>32));
         b.WriteU32(s.profile.cycle);b.WriteU16(s.profile.frontierLevel);
         const auto& r=s.run;
@@ -78,6 +78,7 @@ bool DecodeFusionAdventureSession273(LawnNet::NetBuffer& in,FusionAdventureSessi
             !b.ReadF32(&r.trophySpawnX)||!b.ReadF32(&r.trophySpawnY)||!b.ReadU8(&runFlags)||(runFlags&~31U)||
             !b.ReadU16(&s.wave)||!b.ReadU16(&s.maximumWaves)||!b.ReadF32(&s.countdown)||
             !b.ReadF32(&s.hugeElapsed)||!b.ReadU8(&flags)||(flags&~3U))return false;
+        s.coopDifficulty=uint8_t((s.sourceDifficulty>>3)+1);s.sourceDifficulty&=7;
         s.profile.completedLevels=uint64_t(low)|(uint64_t(high)<<32);
         r.tutorial.active=active!=0;r.tutorial.message=FusionAdventureMessage273(message);
         r.replay=(runFlags&1)!=0;r.over=(runFlags&2)!=0;r.rewardCollected=(runFlags&4)!=0;

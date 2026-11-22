@@ -44,7 +44,7 @@ bool FusionCampaign342SpawnKinds(const FusionCampaign342Plan& p,uint16_t kind,st
     if(kind==18)Add(next,16); // Source no-ice sentinel35 changes SuperDriver to Driver.
     out=std::move(next);return true;
 }
-bool BuildFusionCampaign342Plan(int level,uint32_t cycle,FusionCampaign342Plan& out,std::string* error)
+bool BuildFusionCampaign342Plan(int level,uint32_t cycle,FusionCampaign342Plan& out,std::string* error,int coopDifficulty)
 {
     if(error)error->clear();const auto reject=[&](const char* why){if(error)*error=why;return false;};
     const auto* s=FindFusionSourceAdventure272(level);int waves=0;
@@ -52,10 +52,11 @@ bool BuildFusionCampaign342Plan(int level,uint32_t cycle,FusionCampaign342Plan& 
        !s->firstCycleWaves||s->initialSun<0||s->initialMoney<0||s->allowedZombieKinds.empty()||
        (s->tutorialId&&s->tutorialId!=s->level)||s->roofPreplantColumns>s->columns||
        !cycle||cycle>uint32_t((std::numeric_limits<int>::max)())||
-       !TryGetFusionSourceAdventureWaves272(level,int(cycle),waves))return reject("descriptor: invalid source campaign descriptor/cycle.");
+       !TryGetFusionCoopAdventureWaves272(level,int(cycle),coopDifficulty,waves))return reject("descriptor: invalid source campaign descriptor/cycle.");
     FusionCampaign342Plan next;next.source=s;next.maximumWaves=waves;
     next.waterRows=s->scene==2||s->scene==3?uint8_t((1<<2)|(1<<3)):0;next.night=s->scene==1||s->scene==3;
-    for(auto kind:s->allowedZombieKinds)
+    std::vector<uint16_t> roster;if(!BuildFusionCoopAdventureRoster272(level,coopDifficulty,roster))return false;
+    for(auto kind:roster)
     {std::vector<uint16_t> variants;if(!FusionCampaign342SpawnKinds(next,kind,variants))return false;for(auto v:variants)Add(next.possibleKinds,v);}
     std::vector<uint16_t> fallback;if(!FusionCampaign342SpawnKinds(next,0,fallback))return false;
     for(auto v:fallback)Add(next.possibleKinds,v);out=std::move(next);return true;

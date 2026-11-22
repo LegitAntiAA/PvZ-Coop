@@ -1,8 +1,8 @@
 #requires -Version 5.1
 [CmdletBinding()]
-param([string]$GameExe='', [string]$ArtifactsRoot='', [ValidateRange(600,1800)][int]$TimeoutSeconds=900,[int]$ExpectedProtocol=0,[ValidateSet(19,20,21,22,23,24,25,26,27,28,37)][int]$StartAtLevel=19)
+param([string]$GameExe='', [string]$ArtifactsRoot='', [ValidateRange(600,1800)][int]$TimeoutSeconds=900,[int]$ExpectedProtocol=0,[ValidateSet(19,20,21,22,23,24,25,26,27,28,37)][int]$StartAtLevel=19,[ValidateRange(1,10)][int]$Difficulty=1)
 $ErrorActionPreference='Stop'
-$levels=@(19,20,21,22,23,24,25,26,27,28,37) | Where-Object {$_ -ge $StartAtLevel}
+$levels=@(@(19,20,21,22,23,24,25,26,27,28,37) | Where-Object {$_ -ge $StartAtLevel})
 $completedFixture=([uint64]1 -shl ($StartAtLevel-1))-1
 $repoPath=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..'))
 if(!$GameExe){$GameExe=Join-Path $repoPath 'build\ReleaseGOTY_Win32\bin\PlantsVsZombies.exe'}
@@ -18,7 +18,7 @@ $hostDir=Join-Path $runDir 'host';$clientDir=Join-Path $runDir 'client'
 $hostLogs=Join-Path $hostDir 'logs';$clientLogs=Join-Path $clientDir 'logs'
 $hostProcess=$null;$clientProcess=$null;$failure='';$frames=@();$common=@();$environment=@{}
 foreach($entry in @(Get-ChildItem Env: | Where-Object Name -like 'PVZ_COOP_SMOKE_FUSION_*')){$environment[$entry.Name]=$entry.Value}
-foreach($name in @('PVZ_COOP_SMOKE_FUSION_NATIVE','PVZ_COOP_SMOKE_FUSION_SOURCE273','PVZ_COOP_SMOKE_FUSION_CAMPAIGN356','PVZ_COOP_SMOKE_HIDE_CONTROL_CHAT')){
+foreach($name in @('PVZ_COOP_SMOKE_FUSION_NATIVE','PVZ_COOP_SMOKE_FUSION_SOURCE273','PVZ_COOP_SMOKE_FUSION_CAMPAIGN356','PVZ_COOP_SMOKE_HIDE_CONTROL_CHAT','PVZ_COOP_SMOKE_FUSION_CAMPAIGN356_DIFFICULTY')){
     $environment[$name]=[Environment]::GetEnvironmentVariable($name,'Process')
 }
 try{
@@ -38,7 +38,7 @@ try{
         Write-SmokeManifest -Path (Join-Path $root 'smoke.ini') -Role $role -Nickname ('C356'+$role) -AppDataDirectory $appDir -ConfigPath (Join-Path $root 'coop.ini') -LogDirectory $logDir -ResultPath (Join-Path $root 'result.json') -SelectedPort $port -SelectedMode fusion_validation -SelectedLevel 1 -SelectedSeed 424242 -SelectedTimeoutMs ($TimeoutSeconds*1000) -RequiredSnapshots 8 -SelectedSkipIntro 0
     }
     foreach($name in $environment.Keys){[Environment]::SetEnvironmentVariable($name,$null,'Process')}
-    $environment['PVZ_COOP_SMOKE_FUSION_CAMPAIGN356_FIRST']=[Environment]::GetEnvironmentVariable('PVZ_COOP_SMOKE_FUSION_CAMPAIGN356_FIRST','Process');$env:PVZ_COOP_SMOKE_FUSION_CAMPAIGN356_FIRST=[string]$StartAtLevel;$env:PVZ_COOP_SMOKE_FUSION_NATIVE='1';$env:PVZ_COOP_SMOKE_FUSION_SOURCE273='1';$env:PVZ_COOP_SMOKE_FUSION_CAMPAIGN356='1';$env:PVZ_COOP_SMOKE_HIDE_CONTROL_CHAT='1'
+    $environment['PVZ_COOP_SMOKE_FUSION_CAMPAIGN356_FIRST']=[Environment]::GetEnvironmentVariable('PVZ_COOP_SMOKE_FUSION_CAMPAIGN356_FIRST','Process');$env:PVZ_COOP_SMOKE_FUSION_CAMPAIGN356_FIRST=[string]$StartAtLevel;$env:PVZ_COOP_SMOKE_FUSION_NATIVE='1';$env:PVZ_COOP_SMOKE_FUSION_SOURCE273='1';$env:PVZ_COOP_SMOKE_FUSION_CAMPAIGN356='1';$env:PVZ_COOP_SMOKE_FUSION_CAMPAIGN356_DIFFICULTY=[string]$Difficulty;$env:PVZ_COOP_SMOKE_HIDE_CONTROL_CHAT='1'
     Write-SmokeStatus ('Campaign356 owned hidden pair: '+$runDir)
     $hostProcess=Start-SmokeProcess -Executable $GameExe -WorkingDirectory $gameDir -ManifestPath (Join-Path $hostDir 'smoke.ini') -Role host -RunId $runId -EnableUnicodeChat $false
     Save-PidLedger -Path (Join-Path $runDir 'pids.json') -Executable $GameExe -HostProcess $hostProcess -ClientProcess $null

@@ -1,5 +1,7 @@
 #include "FusionAdventureScheduler273Tests.h"
 #include "../../Lawn/Fusion/FusionAdventureScheduler273.h"
+#include "../../Lawn/Fusion/FusionCampaign342Rules.h"
+#include "../../Lawn/Net/NetGameplayPolicy.h"
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
@@ -67,6 +69,44 @@ bool Near(float a,float b){return std::abs(a-b)<.00001f;}
 FusionAdventureScheduler273TestResult RunFusionAdventureScheduler273Tests()
 {
     result={};std::printf("[ RUN      ] Fusion.AdventureScheduler273\n");
+    {
+        Fixture f;FusionAdventureScheduler273State plan;
+        CHECK(InitializeFusionAdventureScheduler273(plan,true,1,1,2,f.Random(),&f,Fixture::Ready,2)==Result::Okay);
+        plan.wave=plan.maximumWaves-1;plan.countdown=-1;FusionAdventureScheduler273Events event;
+        CHECK(UpdateFusionAdventureScheduler273(plan,Playing(.01f),f.Callbacks(),event)==Result::Okay&&event.hugeWarning&&f.spawnCalls==0);
+        CHECK(UpdateFusionAdventureScheduler273(plan,Playing(5.1f),f.Callbacks(),event)==Result::Okay&&event.finalWave&&f.spawnCalls==1);
+    }
+    // All source worlds and all lobby difficulties share the Classic scalars.
+    for(int level=1;level<=45;++level)for(int d=1;d<=10;++d)
+    {
+        Fixture f;FusionAdventureScheduler273State plan;
+        CHECK(InitializeFusionAdventureScheduler273(plan,true,level,1,2,f.Random(),&f,Fixture::Ready,d)==Result::Okay);
+        const auto* source=FindFusionSourceAdventure272(level);
+        CHECK(plan.maximumWaves==LawnNet::DifficultyWaveCount(source->firstCycleWaves,d,LawnNet::kGameplayMaximumWaves));
+        CHECK(plan.coopDifficulty==d&&plan.waves.size()==size_t(plan.maximumWaves));
+        FusionCampaign342Plan actual;CHECK(BuildFusionCampaign342Plan(level,1,actual,nullptr,d));
+        CHECK(actual.maximumWaves==plan.maximumWaves);
+        for(const auto& wave:plan.waves)for(auto kind:wave)
+            CHECK(std::find(actual.possibleKinds.begin(),actual.possibleKinds.end(),kind)!=actual.possibleKinds.end());
+        std::vector<uint16_t> roster;CHECK(BuildFusionCoopAdventureRoster272(level,d,roster));
+        if(source->conveyor||d==1)CHECK(roster==std::vector<uint16_t>(source->allowedZombieKinds.begin(),source->allowedZombieKinds.end()));
+        if(source->rows==5)for(auto k:roster)CHECK(k!=14&&k!=27&&k!=200&&k!=214);
+    }
+    {
+        std::vector<uint16_t> roster;CHECK(BuildFusionCoopAdventureRoster272(1,10,roster));
+        CHECK(std::find(roster.begin(),roster.end(),109)!=roster.end());
+        uint16_t fusion=0;int draw=1;
+        for(const auto& row:FusionSourceZombieWeights272())
+        {if(std::find(roster.begin(),roster.end(),row.kind)==roster.end())continue;if(row.kind==109){fusion=row.kind;break;}draw+=row.weight;}
+        CHECK(fusion>=100&&!FusionSourceAdventureAllowsZombie272(1,fusion));
+        Fixture f;f.weightDraw=draw;FusionAdventureScheduler273State high,low;
+        CHECK(InitializeFusionAdventureScheduler273(high,true,1,1,2,f.Random(),&f,Fixture::Ready,10)==Result::Okay);
+        bool emitted=false;size_t highCount=0,lowCount=0;for(const auto& w:high.waves){highCount+=w.size();emitted|=std::find(w.begin(),w.end(),fusion)!=w.end();}CHECK(emitted);
+        Fixture baseline;CHECK(baseline.Init(low)==Result::Okay);for(const auto& w:low.waves)lowCount+=w.size();CHECK(highCount>lowCount);
+        Fixture denied;denied.refused=fusion;FusionAdventureScheduler273State unchanged;
+        CHECK(InitializeFusionAdventureScheduler273(unchanged,true,1,1,2,denied.Random(),&denied,Fixture::Ready,10)==Result::NotReady&&denied.integers==0&&!unchanged.initialized);
+    }
+
     {
         Fixture f;FusionAdventureScheduler273State s;
         CHECK(f.Init(s)==Result::Okay);CHECK(s.initialized&&s.wave==0&&s.maximumWaves==10&&s.rows==5);

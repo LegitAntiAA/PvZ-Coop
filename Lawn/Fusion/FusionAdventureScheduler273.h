@@ -10,6 +10,7 @@ namespace LawnFusion
 struct FusionAdventureScheduler273State
 {
     int level=0,cycle=0,sourceDifficulty=0,rows=0,wave=0,maximumWaves=0;
+    int coopDifficulty=1;
     float countdown=0,hold=0,healthElapsed=0,hugeElapsed=0;
     float currentHealth=0,latestWaveHealth=0;
     bool initialized=false,hugeWarning=false,failed=false;
@@ -66,7 +67,7 @@ struct FusionAdventureScheduler273Health
 // only kinds and Normal0 budget fallback. Checked before any RNG consumption.
 FusionAdventureScheduler273Result InitializeFusionAdventureScheduler273(
     FusionAdventureScheduler273State&,bool host,int sourceLevel,int cycle,int sourceDifficulty,
-    const FusionAdventureScheduler273Random&,void* readinessUser,bool (*ready)(void*,uint16_t));
+    const FusionAdventureScheduler273Random&,void* readinessUser,bool (*ready)(void*,uint16_t),int coopDifficulty=1);
 FusionAdventureScheduler273Result UpdateFusionAdventureScheduler273(
     FusionAdventureScheduler273State&,const FusionAdventureScheduler273Input&,
     const FusionAdventureScheduler273Callbacks&,FusionAdventureScheduler273Events&);

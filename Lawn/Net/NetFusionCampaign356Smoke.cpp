@@ -34,6 +34,7 @@
 namespace
 {
 using namespace LawnFusion;using LawnNet::NetTrace;
+int RequestedDifficulty376(){const char* v=std::getenv("PVZ_COOP_SMOKE_FUSION_CAMPAIGN356_DIFFICULTY");return v?std::atoi(v):1;}
 constexpr std::array<int,11> levels={19,20,21,22,23,24,25,26,27,28,37};
 struct Ref {uint16_t id=0,kind=0;uint32_t token=0;int column=0,row=0;};
 struct Enemy {Ref ref;float firstX=0;bool moved=false;};
@@ -42,7 +43,7 @@ struct State
  int index=0,firstIndex=0,stage=0,waiting=0,input=0,classicLevel=-1,classicFinished=-1,playingFrame=-1,completed=0;
  int beforeSun=0,price=0,buyColumn=0,buyRow=4;uint16_t buyPacket=0,buyKind=0;
  uint32_t started=0,caseStarted=0,since=0,chat=0,wheel=0,epoch=0,samples=0,pickSamples=0;
- bool startRequested=false,pauseRequested=false,localProof=false,boot=false,beltSeen=false,visible=false;
+ bool difficultyConfigured=false,startRequested=false,pauseRequested=false,localProof=false,boot=false,beltSeen=false,visible=false;
  unsigned adviceMask=0;Ref purchase;FusionAdventureProfile273 clientProfile;
  std::map<uint16_t,Enemy> waves;std::map<std::tuple<int,int,int>,Ref> authored;
  std::map<uint16_t,Ref> missionEnemies;std::vector<Ref> pots;
@@ -90,7 +91,7 @@ bool World(LawnApp* a)
  auto* b=a->mBoard;const auto* c=GetNativeContext(b);const auto* d=FindFusionSourceAdventure272(Level());if(!c||!d)return false;
  FusionSourceNativeProjection272 projection;if(!TryProjectFusionSourceAdventure272(Level(),projection))return false;
  const auto& v=c->adventure;
- if(!Require(a,IsNativeSourceAdventure273(b)&&!c->validation&&!a->mFusionRuntime&&v.enabled&&v.run.level==Level()&&v.run.cycle==1&&v.sourceDifficulty==2&&!v.run.replay&&!v.run.over&&!v.schedulerFailed&&
+ if(!Require(a,IsNativeSourceAdventure273(b)&&!c->validation&&!a->mFusionRuntime&&v.enabled&&v.run.level==Level()&&v.run.cycle==1&&v.sourceDifficulty==2&&v.coopDifficulty==RequestedDifficulty376()&&!v.run.replay&&!v.run.over&&!v.schedulerFailed&&
   Same(v.profile,Profile(Level()))&&c->money==d->initialMoney&&b->GetColumnCount()==10&&GetNativeFusionRowCount(b)==d->rows&&int(b->mBackground)==projection.background&&
   a->mPlayerInfo&&a->mPlayerInfo->mLevel==s.classicLevel&&a->mPlayerInfo->mFinishedAdventure==s.classicFinished&&
   Same(a->mNetManager->mConfig.mFusionSourceProfile,a->NetIsHost()?Profile(Level()):s.clientProfile)&&IsNativeSourceConveyor308(b)==d->conveyor,
@@ -134,15 +135,16 @@ bool Boot(LawnApp* a)
  if(!d->conveyor)
  {const auto& bank=c->selection.State();if(!Require(a,b->mSeedBank->mNumPackets==bank.targetCount,"Campaign356 native selected bank size differs"))return false;
   for(int i=0;i<b->mSeedBank->mNumPackets;++i){const auto* p=GetNativePacketData(&b->mSeedBank->mSeedPackets[i]);if(!Require(a,p&&p->owner==(i<bank.quotas[size_t(Slot(a))]?Slot(a):1-Slot(a)),"Campaign356 own native packets not displayed first"))return false;}}
+ int expectedWaves=0;if(!TryGetFusionCoopAdventureWaves272(Level(),1,RequestedDifficulty376(),expectedWaves))return false;
  if(a->NetIsHost())
- {const auto& plan=c->adventureScheduler;if(!Require(a,plan.initialized&&!plan.failed&&plan.level==Level()&&plan.maximumWaves==int(d->firstCycleWaves)&&plan.waves.size()==d->firstCycleWaves,"Campaign356 real host campaign plan differs"))return false;}
+ {const auto& plan=c->adventureScheduler;if(!Require(a,plan.initialized&&!plan.failed&&plan.level==Level()&&plan.maximumWaves==expectedWaves&&plan.coopDifficulty==RequestedDifficulty376()&&plan.waves.size()==size_t(expectedWaves),"Campaign356 real host campaign plan differs"))return false;}
  if(d->roofPreplantColumns)
  {
   std::set<std::pair<int,int>> cells;Plant* p=nullptr;while(b->IteratePlants(p))if(!p->mDead)if(const auto* x=GetNativePlantData(p);x&&x->kind==27)
   {if(!Require(a,p->mPlantCol>=0&&p->mPlantCol<5&&p->mRow>=0&&p->mRow<5&&x->owner==LawnNet::NET_SHARED_OWNER&&!x->packetId&&p->mNetId&&x->instanceToken&&p->mPlantHealth==p->mPlantMaxHealth,"Campaign356 authored Roof Pot identity/cell/default differs"))return false;cells.emplace(p->mPlantCol,p->mRow);s.pots.push_back({p->mNetId,x->kind,x->instanceToken,p->mPlantCol,p->mRow});}
   if(!Require(a,cells.size()==25&&s.pots.size()==25,"Campaign356 Roof requires exact25 genuine preplanted Pots"))return false;
  }
- s.boot=true;NetTrace("SMOKE_CAMPAIGN356_BOOT role=%s level=%d epoch=%u scene=%u rows=%u cols=10 sun=%d money=%d maximumWaves=%u conveyor=%d pots=%zu profileFixture=1 earned=0",Role(a),Level(),s.epoch,d->scene,d->rows,b->mSunMoney,c->money,d->firstCycleWaves,d->conveyor,s.pots.size());return true;
+ s.boot=true;NetTrace("SMOKE_CAMPAIGN356_BOOT role=%s level=%d epoch=%u scene=%u rows=%u cols=10 sun=%d money=%d maximumWaves=%u conveyor=%d pots=%zu profileFixture=1 earned=0",Role(a),Level(),s.epoch,d->scene,d->rows,b->mSunMoney,c->money,c->adventure.maximumWaves,d->conveyor,s.pots.size());return true;
 }
 bool Belt(LawnApp* a)
 {
@@ -265,8 +267,11 @@ bool NetSmokeUpdateFusionCampaign356(LawnApp* a)
  if(!a->mNetManager->IsActive())return true;a->mCoopSmokePeerReady=true;
  if(!s.stage)
  {
+  const int requested=RequestedDifficulty376();if(!Require(a,requested>=1&&requested<=10,"Campaign356 invalid requested difficulty"))return true;
+  if(a->NetIsHost()&&!s.difficultyConfigured){a->mNetManager->SetDifficulty(requested);s.difficultyConfigured=true;}
   if(a->mNetManager->GetPlayerCount()!=2||(a->NetIsClient()&&!a->mNetManager->IsConnectedToHost()))return true;
-  if(!Require(a,Slot(a)>=0&&Slot(a)<2&&a->mNetManager->GetDifficulty()==1&&a->mPlayerInfo,"Campaign356 requires two native peers/difficulty1/local profile"))return true;
+  if(a->mNetManager->GetDifficulty()!=requested)return true;
+  if(!Require(a,Slot(a)>=0&&Slot(a)<2&&a->mNetManager->GetDifficulty()==requested&&a->mPlayerInfo,"Campaign356 requires two native peers/frozen difficulty/local profile"))return true;
   if(s.classicLevel<0){s.classicLevel=a->mPlayerInfo->mLevel;s.classicFinished=a->mPlayerInfo->mFinishedAdventure;s.clientProfile=a->mNetManager->mConfig.mFusionSourceProfile;}
   if(a->NetIsClient()){if(Send(a,"C356_BEGIN"))Advance(a,1);return true;}
   if(!Has(a,1,"C356_BEGIN"))return true;

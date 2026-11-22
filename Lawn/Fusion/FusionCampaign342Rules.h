@@ -16,7 +16,7 @@ struct FusionCampaign342Plan
     std::vector<uint16_t> possibleKinds; // Includes Normal0 budget fallback and row variants.
 };
 bool BuildFusionCampaign342Plan(int level,uint32_t cycle,FusionCampaign342Plan&,
-    std::string* error=nullptr);
+    std::string* error=nullptr,int coopDifficulty=1);
 // Actual factory/world capability gate, separate from imported data and profile unlocks.
 bool NativeSourceAdventureLevelReady342(int level,uint32_t cycle,std::string* error=nullptr);
 // Source NewZombieUpdate repairs the pre-shuffled row before SetZombie; it

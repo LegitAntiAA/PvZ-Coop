@@ -1,5 +1,6 @@
 #include "FusionCampaign272Rules.h"
 #include "FusionCampaign342Rules.h"
+#include "../Net/NetGameplayPolicy.h"
 #include <algorithm>
 
 namespace LawnFusion
@@ -25,6 +26,39 @@ bool TryGetFusionSourceAdventureWaves272(int level,int cycle,int& waves)
     if(!config||cycle<1)return false;
     waves=config->firstCycleWaves+(cycle>1?10:0);return true;
 }
+bool TryGetFusionCoopAdventureWaves272(int level,int cycle,int difficulty,int& waves)
+{
+ int base=0;if(difficulty<1||difficulty>10||!TryGetFusionSourceAdventureWaves272(level,cycle,base))return false;
+ waves=LawnNet::DifficultyWaveCount(base,difficulty,LawnNet::kGameplayMaximumWaves);return true;
+}
+bool BuildFusionCoopAdventureRoster272(int level,int difficulty,std::vector<uint16_t>& roster)
+{
+ const auto* source=FindFusionSourceAdventure272(level);if(!source||difficulty<1||difficulty>10)return false;
+ std::vector<uint16_t> next(source->allowedZombieKinds.begin(),source->allowedZombieKinds.end());
+ if(difficulty>1&&!source->conveyor)
+ {
+  // Classic unlocks introductions through difficulty*5. Fusion omits each
+  // native tenth (boss) slot, so project that same frontier into source IDs.
+  const int frontier=difficulty*5-difficulty/2;
+  for(const auto& weight:zombieWeights272)
+  {
+   const auto kind=weight.kind;
+   if(std::find(next.begin(),next.end(),kind)!=next.end())continue;
+   if((kind==14||kind==27||kind==200||kind==214)&&source->rows!=6)continue;
+   // Keep Classic's unavailable-air-counter and night vehicle restrictions.
+   if(kind==25||kind==26||kind==29||kind==205||kind==206)continue;
+   if((source->scene==1||source->scene==3)&&(kind==16||kind==18||kind==201))continue;
+   if(source->scene==4)
+   {
+    bool roof=false;for(int id=37;id<=45;++id)roof|=FusionSourceAdventureAllowsZombie272(id,kind);
+    if(!roof)continue;
+   }
+   for(int id=1;id<=frontier;++id)if(FusionSourceAdventureAllowsZombie272(id,kind))
+   {next.push_back(kind);break;}
+  }
+ }
+ roster=std::move(next);return true;
+}
 bool TryProjectFusionSourceAdventure272(int level,FusionSourceNativeProjection272& output)
 {
     const auto* config=FindFusionSourceAdventure272(level);if(!config)return false;
@@ -43,13 +77,13 @@ bool FusionSourceAdventureAllowsZombie272(int level,uint16_t kind)
     const auto* config=FindFusionSourceAdventure272(level);
     return config&&std::find(config->allowedZombieKinds.begin(),config->allowedZombieKinds.end(),kind)!=config->allowedZombieKinds.end();
 }
-bool TryGetFusionSourceWaveBudget272(int level,int cycle,int wave,int sourceDifficulty,int& output)
+bool TryGetFusionSourceWaveBudget272(int level,int cycle,int wave,int sourceDifficulty,int& output,int coopDifficulty)
 {
     int count=0;
-    if(!TryGetFusionSourceAdventureWaves272(level,cycle,count)||wave<1||wave>count||sourceDifficulty<0||sourceDifficulty>5)return false;
+    if(!TryGetFusionCoopAdventureWaves272(level,cycle,coopDifficulty,count)||wave<1||wave>count||sourceDifficulty<0||sourceDifficulty>5)return false;
     constexpr int multiplier[]={1,3,5,7,10,10};
     const int budget=(std::max)(1,wave*multiplier[sourceDifficulty]/3);
-    output=budget*(wave%10==0?2:1);return true;
+    output=budget*(wave%10==0||wave==count?2:1);return true;
 }
 bool TryGetFusionSourceZombieWeightTotal272(int level,int& total)
 {

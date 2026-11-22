@@ -7,6 +7,7 @@
 #include "../Net/NetManager.h"
 #include "../../SexyAppFramework/Dialog.h"
 #include <cstdlib>
+#include <algorithm>
 #include <cstring>
 
 namespace
@@ -49,10 +50,11 @@ bool LawnApp::StartFusionSourceAdventure(int level,bool disableTutorial)
         return false;
     }
     FusionAdventureSession273 session;session.enabled=true;session.profile=profile;
+    session.coopDifficulty=uint8_t(mNetManager?std::clamp(mNetManager->GetDifficulty(),1,10):1);
     FusionSourceNativeProjection272 projection;int waves=0;
     if(!BeginFusionAdventureRun273(profile,level,disableTutorial,session.run)||
         !TryProjectFusionSourceAdventure272(level,projection)||
-        !TryGetFusionSourceAdventureWaves272(level,int(session.run.cycle),waves))return false;
+        !TryGetFusionCoopAdventureWaves272(level,int(session.run.cycle),session.coopDifficulty,waves))return false;
     if(IsFusionSourceAdventure())session.sourceDifficulty=FusionAdventureRuntimeDifficulty346(mSourceAdventure);
     session.maximumWaves=uint16_t(waves);session.countdown=15;
     if(!FusionAdventureSessionValid273(session))return false;

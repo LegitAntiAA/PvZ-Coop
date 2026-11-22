@@ -36,7 +36,7 @@ int RunFusionLimbEvent276Tests(int& checks)
     using namespace LawnNet;int failures=0;
     const auto check=[&](bool okay,int line){++checks;if(!okay){++failures;std::printf("FusionLimbEvent276Tests:%d failed\n",line);}};
 #define CHECK(x) check(bool(x),__LINE__)
-    CHECK(NET_PROTOCOL_VERSION==71&&BOARDEV_PRESENTATION_FWOOSH==27&&BOARDEV_FUSION_LIMB276==28&&BOARDEV_FUSION_CHARRED315==29);
+    CHECK(NET_PROTOCOL_VERSION==72&&BOARDEV_PRESENTATION_FWOOSH==27&&BOARDEV_FUSION_LIMB276==28&&BOARDEV_FUSION_CHARRED315==29);
     CHECK(NET_FUSION_LIMB276_WIRE_BYTES==26);
     constexpr std::array<uint8_t,26> golden={
         0x04,0x03,0x02,0x01,0x05,0x06,0x07,0x08,0x09,0x0a,0x03,0x00,0x01,0x04,

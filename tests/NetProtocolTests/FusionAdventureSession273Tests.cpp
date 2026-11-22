@@ -1,5 +1,6 @@
 #include "FusionAdventureSession273Tests.h"
 #include "../../Lawn/Fusion/FusionAdventureSession273.h"
+#include "../../Lawn/Fusion/FusionCampaign272Rules.h"
 #include "../../Lawn/Net/NetCommon.h"
 #include <cstdio>
 #include <cstring>
@@ -74,6 +75,15 @@ FusionAdventureSession273TestResult RunFusionAdventureSession273Tests()
 {
     result={};std::printf("[ RUN      ] Fusion.AdventureSession273\n");
     const auto tutorial=Tutorial(),waiting=Reward(false),collected=Reward(true);
+    for(int d=1;d<=10;++d)
+    {
+        auto session=tutorial;session.coopDifficulty=uint8_t(d);int waves=0;
+        CHECK(TryGetFusionCoopAdventureWaves272(1,1,d,waves));session.maximumWaves=uint16_t(waves);
+        auto bytes=Encoded(session);CHECK(bytes.Size()==59);FusionAdventureSession273 restored;
+        CHECK(DecodeFusionAdventureSession273(bytes,restored)&&restored.coopDifficulty==d&&restored.sourceDifficulty==2&&restored.maximumWaves==waves);
+        auto invalid=session;invalid.coopDifficulty=11;CHECK(!FusionAdventureSessionValid273(invalid));
+    }
+
     FusionAdventureSession273 disabled;
     CHECK(Encoded(disabled).mData==std::vector<uint8_t>{0});
     CHECK(Encoded(tutorial).Size()==59);

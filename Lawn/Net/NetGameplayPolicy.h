@@ -7,6 +7,9 @@
 
 namespace LawnNet
 {
+inline constexpr int kGameplayMaximumWaves=100;
+inline constexpr int kGameplayMaximumZombiesPerWave=50;
+
 enum class DifficultyFamily
 {
     Waves, FiniteAmmo, Whack, Boss, MatchThree, Aquarium, Vases, IZombie,
