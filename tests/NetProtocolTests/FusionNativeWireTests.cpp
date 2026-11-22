@@ -29,9 +29,9 @@ namespace
 FusionNativeWireTestResult result;
 // These offset fixtures have empty Star/Doom/Companion/World/Card/Rolling/Fert
 // vectors. FNS23 adds a16-byte Board singleton and two U16 counts to FNS22.
-// FNS28 suffix: six U16 empty graph/water/heavy/extended/obstacle/captured
-// vectors, sourcePoints F32, ultimateCount I32, punishTime F32.
-constexpr size_t empty313TailBytes=6*2+4+4+4+4;
+// FNS30 suffix: six empty313 vectors, four source/board scalars, then
+// empty Boss vector,33 canonical room bytes and absent Travel ledger Bool.
+constexpr size_t empty313TailBytes=6*2+4*4+2+33+1;
 constexpr size_t empty269FamilyCountBytes=10*2+20+2+2+2+2+empty313TailBytes;
 constexpr size_t emptyNight291CountBytes=4+empty313TailBytes; // Jackson/Jackbox counts +313 suffix after Day.
 constexpr size_t emptyJackbox306CountBytes=2+empty313TailBytes;
@@ -214,7 +214,13 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
     const auto original = body.mData;
     CHECK(EncodeNativeSnapshot(source, eligible, body));
     CHECK(body.Size() > original.size());
-    constexpr std::array<uint8_t,28> empty313Golden={0,0,0,0,0,0,0,0,0,0,0,0,0,0,250,67,0,0,0,0,0,0,0,0,0,0,0,0}; //500.f,0,0,0.f.
+    constexpr auto empty313Golden=[]
+    {
+        std::array<uint8_t,64> bytes{};
+        bytes[14]=250;bytes[15]=67; // sourcePoints500.f after six U16 counts.
+        bytes[39]=0x70;bytes[40]=0x17; // disabled room's source Hammer CD6000.
+        return bytes;
+    }();
     const size_t defaultMetadataEnd=14+body.mData[6]+(size_t(body.mData[7])<<8);
     CHECK(empty313TailBytes==empty313Golden.size()&&std::equal(empty313Golden.begin(),empty313Golden.end(),body.mData.begin()+defaultMetadataEnd-empty313TailBytes));
     NativeSnapshotFrame decoded;
@@ -605,7 +611,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
     constexpr size_t headerBytes = 14, bankStateBytes = 22, selectedPacketBytes = 21, nativePacketBytes = 17;
     const size_t firstPlant = headerBytes + 6 + bankStateBytes + 2 + source.selection.packets.size()*selectedPacketBytes +
         2 + source.packets.size()*nativePacketBytes + 2;
-    constexpr size_t plantBytes = 56, flagsAfterRecordId = 20, deathFlagsAfterRecordId = 21;
+    constexpr size_t plantBytes = 66, flagsAfterRecordId = 20, deathFlagsAfterRecordId = 21;
     // These live recipes preserve the Puff kind but replace its generation.
     // Refusing the resulting ancestry drops every snapshot until the plant dies.
     for (const uint16_t incoming : {7, 9})
@@ -666,9 +672,9 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
         NetBuffer encoded;encoded.mData=original;
         const bool encodedOk=EncodeNativeSnapshot(batch,eligible,encoded);CHECK(encodedOk);
         if(!encodedOk)continue;
-        CHECK(encoded.mData[firstPlant+39]==static_cast<uint8_t>(actor.batchShotCount) &&
-            encoded.mData[firstPlant+43]==static_cast<uint8_t>(actor.batchRageTicks) &&
-            encoded.mData[firstPlant+45]==actor.batchBagCount && encoded.mData[firstPlant+47]==actor.batchMode);
+        CHECK(encoded.mData[firstPlant+48]==static_cast<uint8_t>(actor.batchShotCount) &&
+            encoded.mData[firstPlant+52]==static_cast<uint8_t>(actor.batchRageTicks) &&
+            encoded.mData[firstPlant+54]==actor.batchBagCount && encoded.mData[firstPlant+56]==actor.batchMode);
         NativeSnapshotFrame copy;NetBuffer restored;
         const bool decodedOk=DecodeNativeSnapshot(encoded,eligible,19,copy,restored);CHECK(decodedOk);
         if(decodedOk)
@@ -683,7 +689,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
         for(int field=0;field<4;++field)
         {
             NetBuffer forged=encoded;
-            const size_t offset=firstPlant+(field==0?39:field==1?43:field==2?45:47);
+            const size_t offset=firstPlant+(field==0?48:field==1?52:field==2?54:56);
             uint32_t value=1;
             if(field==0)value=actor.kind==1042?15:actor.kind==1109||actor.kind==1167?6:actor.kind==1161?0x80000000u:1;
             if(field==1&&(actor.kind==1165||actor.kind==1168))value=501;
@@ -770,7 +776,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
                 NetBuffer preserved;preserved.mData=original;
                 CHECK(!EncodeNativeSnapshot(invalid,eligible,preserved)&&preserved.mData==original&&!preserved.mReadPos);
                 auto forged=encoded;
-                if(mismatch==0)forged.mData[firstPlant+47]=0;
+                if(mismatch==0)forged.mData[firstPlant+56]=0;
                 else for(int byte=0;byte<4;++byte)forged.mData[firstPlant+16+byte]=0;
                 RejectAtomically(forged);
             }
@@ -778,7 +784,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
         for(int field=0;field<5;++field)
         {
             auto forged=encoded;
-            const size_t offset=firstPlant+(field==0?39:field==1?43:field==2?45:field==3?47:4);
+            const size_t offset=firstPlant+(field==0?48:field==1?52:field==2?54:field==3?56:4);
             const uint32_t value=field==0?(actor.kind==1188?201:actor.kind==907?16:1):field==1?1:
                 field==2?1:field==3?(actor.kind==1015?3:actor.kind==933||actor.kind==1170||actor.kind==1031||actor.kind==1188||actor.kind==1135?2:1):65534;
             const int width=field==0?4:field==3?1:2;
@@ -998,7 +1004,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
     NetBuffer rejectedCount; rejectedCount.mData = original;
     CHECK(!EncodeNativeSnapshot(maximumCold, eligible, rejectedCount) && rejectedCount.mData == original);
 
-    constexpr size_t projectileMetadataBytes = 26, coldRecordBytes = 18; // FNS20 appends goldAttracted Bool.
+    constexpr size_t projectileMetadataBytes = 39, coldRecordBytes = 18; // FNS30 appends base damage and Steel birth provenance.
     const size_t coldCount = firstPlant + source.plants.size()*plantBytes + 2 + source.projectiles.size()*projectileMetadataBytes;
     const size_t firstCold = coldCount + 2;
     // FNS12 appends source projectile traits, action masks, typed cash and the
@@ -1888,7 +1894,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
         if(!IsFusionExtras268Kind(kind))for(float speed:{.9f,1.1f}){auto edge=frame;edge.plants[0].data.animationSpeed=speed;CHECK(ValidateNativeSnapshotFrame(edge,eligible));}
         {auto bad=frame;bad.plants[0].data.animationSpeed=1.1001f;CHECK(!ValidateNativeSnapshotFrame(bad,eligible));}
         for(int invalid=0;invalid<3;++invalid)
-        {auto forged=encoded;if(invalid==0)forged.mData[firstPlant+47]=255;if(invalid==1)forged.mData[firstPlant+43]=255;if(invalid==2)forged.mData[firstPlant+48]=1;RejectAtomically(forged);}
+        {auto forged=encoded;if(invalid==0)forged.mData[firstPlant+56]=255;if(invalid==1)forged.mData[firstPlant+52]=255;if(invalid==2)forged.mData[firstPlant+57]=1;RejectAtomically(forged);}
     }
     // Grap count survives duration expiry; unbounded checked source stacking is
     // represented without inventing a narrower cap or a second cold clock.
@@ -1907,8 +1913,8 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
         NetBuffer encoded;encoded.mData=original;const bool ok=EncodeNativeSnapshot(frame,eligible,encoded);CHECK(ok);
         if(ok)
         {
-            CHECK(encoded.mData[firstPlant+48]==43&&encoded.mData[firstPlant+49]==2&&encoded.mData[firstPlant+50]==3);
-            for(int invalid=0;invalid<4;++invalid){auto forged=encoded;if(invalid==0){forged.mData[firstPlant+50]=forged.mData[firstPlant+52]=0;}if(invalid==1)forged.mData[firstPlant+47]=0;if(invalid==2)forged.mData[firstPlant+12]=255;if(invalid==3)forged.mData[firstPlant+50]^=1;RejectAtomically(forged);}
+            CHECK(encoded.mData[firstPlant+57]==43&&encoded.mData[firstPlant+58]==2&&encoded.mData[firstPlant+59]==3);
+            for(int invalid=0;invalid<4;++invalid){auto forged=encoded;if(invalid==0){forged.mData[firstPlant+59]=forged.mData[firstPlant+61]=0;}if(invalid==1)forged.mData[firstPlant+56]=0;if(invalid==2)forged.mData[firstPlant+12]=255;if(invalid==3)forged.mData[firstPlant+59]^=1;RejectAtomically(forged);}
             auto duplicate=frame;auto copy=duplicate.plants[0];copy.id=22;copy.data.instanceToken=0x10002;duplicate.plants.push_back(copy);CHECK(!ValidateNativeSnapshotFrame(duplicate,eligible));
             copy.data.kind=1050;copy.data.batchMode=3;copy.data.productionTicks=0;copy.data.shootSeconds=0;duplicate.plants.back()=copy;CHECK(ValidateNativeSnapshotFrame(duplicate,eligible));
             auto missing=frame;missing.zombieIdentities.clear();CHECK(!ValidateNativeSnapshotFrame(missing,eligible));
@@ -2006,7 +2012,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
         auto forged=encoded;
         if(kind==915)forged.mData[firstPlant+16]=118;
         if(kind==1139)forged.mData[firstPlant+12]=1;
-        if(kind==1129)forged.mData[firstPlant+47]=3;
+        if(kind==1129)forged.mData[firstPlant+56]=3;
         RejectAtomically(forged);
     }
     // Protocol57 keeps native clock fields exact across the old U16 lifetime
@@ -2099,7 +2105,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
         NetBuffer encoded;encoded.mData=original;const bool ok=EncodeNativeSnapshot(frame,eligible,encoded);CHECK(ok);if(!ok)continue;
         NativeSnapshotFrame restored;NetBuffer opaque;CHECK(DecodeNativeSnapshot(encoded,eligible,19,restored,opaque));
         CHECK(restored.plants[0].data.batchMode==mode&&!restored.plants[0].data.waterTargetId&&!restored.plants[0].data.waterTargetToken);
-        auto mixed=encoded;mixed.mData[firstPlant+48]=1;RejectAtomically(mixed);
+        auto mixed=encoded;mixed.mData[firstPlant+57]=1;RejectAtomically(mixed);
     }
     {
         // SetParent(Board,true) retains its current world basis after Drop.
@@ -2118,7 +2124,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
         {
             NativeSnapshotFrame decoded;NetBuffer opaque;CHECK(DecodeNativeSnapshot(encoded,eligible,19,decoded,opaque));
             CHECK(decoded.droppedCards269.size()==1&&decoded.droppedCards269[0].id==501&&decoded.droppedCards269[0].data.instanceToken==card.instanceToken&&decoded.droppedCards269[0].data.heldSlot==1&&decoded.droppedCards269[0].data.landed&&!decoded.droppedCards269[0].data.flashing&&opaque.mData==original);
-            const size_t end=14+(encoded.mData[6]|(size_t(encoded.mData[7])<<8)),firstCard=end-emptyNight291CountBytes-24-4-15;
+            const size_t end=14+(encoded.mData[6]|(size_t(encoded.mData[7])<<8)),firstCard=end-emptyNight291CountBytes-24-4-16;
             CHECK(encoded.mData[firstCard]==(501&255)&&encoded.mData[firstCard+12]==1&&encoded.mData[firstCard+13]==1&&encoded.mData[firstCard+14]==0);
             for(size_t flag:{firstCard+13,firstCard+14})for(uint8_t invalid:{uint8_t(2),uint8_t(255)})
             {auto forged=encoded;forged.mData[flag]=invalid;RejectAtomically(forged);}
@@ -2629,8 +2635,8 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
         for(auto bad:{std::vector<uint16_t>{0},std::vector<uint16_t>{501},std::vector<uint16_t>{500,1}})
         {auto invalid=source;invalid.plants[0].data.disable363=bad;NetBuffer untouched;untouched.WriteU8(0x55);const auto original=untouched.mData;CHECK(!EncodeNativeSnapshot(invalid,eligible,untouched)&&untouched.mData==original);}
         NetBuffer bad;bad.WriteU32(0x12345678);CHECK(EncodeNativeSnapshot(disabled,eligible,bad));
-        // Current fixed prefix ends54bytes after this sole metadata record ID.
-        const size_t ttl=firstPlant+54+2;bad.mData[ttl]=0;bad.mData[ttl+1]=0;RejectAtomically(bad);
+        // Fixed prefix ends63bytes after this sole metadata record ID; first TTL follows its U16 count.
+        const size_t ttl=firstPlant+63+2;bad.mData[ttl]=0;bad.mData[ttl+1]=0;RejectAtomically(bad);
     }
     return result;
 }

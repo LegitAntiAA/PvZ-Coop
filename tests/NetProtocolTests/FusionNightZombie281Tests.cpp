@@ -246,9 +246,9 @@ int RunFusionNightZombie281Tests(int& checks)
     // New registry coverage does not prove a resource/native/runtime gate.
     const uint16_t goldOverlap[]={6,203};
     CHECK(BuildFusionSourceZombieClosure280(goldOverlap,closure,&error)&&closure==std::vector<uint16_t>({6,7,203}));
-    const auto savedClosure=closure;const uint16_t unsupported[]={6,44};
+    const auto savedClosure=closure;const uint16_t unsupported[]={6,1};
     CHECK(!BuildFusionSourceZombieClosure280(unsupported,closure,&error)&&closure==savedClosure);
-    CHECK(error.find("rootKind=44")!=std::string::npos&&error.find("dependencyKind=44")!=std::string::npos);
+    CHECK(error.find("rootKind=1")!=std::string::npos&&error.find("dependencyKind=1")!=std::string::npos);
     const uint16_t all[]={0,2,4,8,11,12,13,14,15,18,41,42,104,109,111,3,21,22,23,100,106,107,108,5,6,7,9};
     CHECK(BuildFusionSourceZombieClosure280(all,closure,&error)&&closure.size()==27&&error.empty());
 #undef CHECK

@@ -634,14 +634,14 @@ Zombie* SpawnNativeSourceZombie(Board* board,const NativeSourceZombieSpawnReques
     {if(request.withEffect)zombie->StartMindControlled();else{zombie->mMindControlled=true;zombie->mLastPortalX=-1;}}
     if(typed313&&request.positioned)
     {
-        float x=0,y=0;if(!GetNativeSourceZombie269NodePoint(zombie,"Shadow",x,y))return nullptr;
+        float x=0,y=0;if(!GetNativeSourceZombie269NodePoint(zombie,"Shadow",x,y)){LawnNet::NetTrace("Fusion source factory initialization rejected kind=%u stage=position-shadow",kind);return nullptr;}
         zombie->mPosX+=request.shadowX-x;zombie->mX=int(zombie->mPosX);
     }
     if(!ReconcileNativeRoofZombie350(zombie))return nullptr;
     if(bossFamily&&!InitializeNativeBoss361Actor(zombie))return nullptr;
     if(waterFamily&&!InitializeNativeWaterZombie313Actor(zombie))return nullptr;
     if(heavyFamily&&!InitializeNativeHeavyZombie313BActor(zombie))return nullptr;
-    if(extendedFamily&&!InitializeNativeExtendedZombie313Bridge(zombie))return nullptr;
+    if(extendedFamily&&!InitializeNativeExtendedZombie313Bridge(zombie)){LawnNet::NetTrace("Fusion source factory initialization rejected kind=%u stage=extended-init",kind);return nullptr;}
     if(typed313&&request.friendly&&request.withEffect)
     {
         auto* app=board->mApp;zombie->StartMindControlled();
@@ -653,7 +653,7 @@ Zombie* SpawnNativeSourceZombie(Board* board,const NativeSourceZombieSpawnReques
     if(FusionJacksonFamily367Kind(kind)&&!InitializeNativeJackson291(zombie))
     {zombie->DieNoLoot();return nullptr;}
     if(!typed313){if(profile->nativeLocomotion)zombie->StartWalkAnim(0);else StartNativeSourceZombieWalk(zombie,0);}
-    if(extendedFamily&&!CommitNativeExtended347Factory(zombie))return nullptr;
+    if(extendedFamily&&!CommitNativeExtended347Factory(zombie)){LawnNet::NetTrace("Fusion source factory initialization rejected kind=%u stage=family-commit",kind);return nullptr;}
     sourceInitialization.Commit();
     RegisterNativeSourceAdventureEnemy273(zombie);
     LawnNet::NetTrace("Fusion source Zombie spawn id=%u token=%u kind=%u preset=%d speed=%.9g body=%d max=%d helm=%d walk2=%d tick=%d",

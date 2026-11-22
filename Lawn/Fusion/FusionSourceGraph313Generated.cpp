@@ -1,3 +1,4 @@
+#include "FusionBoss361Rules.h"
 #include "FusionLateZombie363Rules.h"
 #include "FusionDriver363Rules.h"
 #include "FusionNativeFinish363.h"
@@ -347,5 +348,5 @@ case 203:return &g203;
 case 212:return &g212;
 case 213:return &g213;
 case 223:return &g223;
-default:if(FusionFinish363Kind(kind))return FindFusionFinish363Graph(kind);if(FusionDriver363Kind(kind))return FindFusionDriver363Graph(kind);if(kind==209)return FindFusionLate363Graph(kind);if(kind==208)return FindFusionSourceGraph208(kind);if(kind==49)return FindFusionSnowGun363Graph(kind);if(FusionSnowZombie363Kind(kind))return FindFusionSnow363Graph(kind);if(FusionGroundShooter343Kind(kind))return FindFusionGround343Graph(kind);if(kind==112||kind==216||kind==113||kind==214)return FindFusionSourceGraph343(kind);return FindFusionSourceGraph347(kind);}}
+default:if(FusionBoss361Kind(kind))return FindFusionBoss361Graph(kind);if(FusionFinish363Kind(kind))return FindFusionFinish363Graph(kind);if(FusionDriver363Kind(kind))return FindFusionDriver363Graph(kind);if(kind==209)return FindFusionLate363Graph(kind);if(kind==208)return FindFusionSourceGraph208(kind);if(kind==49)return FindFusionSnowGun363Graph(kind);if(FusionSnowZombie363Kind(kind))return FindFusionSnow363Graph(kind);if(FusionGroundShooter343Kind(kind))return FindFusionGround343Graph(kind);if(kind==112||kind==216||kind==113||kind==214)return FindFusionSourceGraph343(kind);return FindFusionSourceGraph347(kind);}}
 }

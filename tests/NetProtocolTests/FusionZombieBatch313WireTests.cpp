@@ -1,7 +1,10 @@
+#include "../../Lawn/Fusion/FusionLateZombie363Rules.h"
 #include "../../Lawn/Fusion/FusionNativeWire.h"
 #include "../../Lawn/Net/NetCommon.h"
 #include <cstdio>
 #include <limits>
+#include <algorithm>
+#include <cstring>
 namespace
 {
 using namespace LawnFusion;using LawnNet::NetBuffer;
@@ -23,7 +26,7 @@ NativeSnapshotFrame Actor(uint16_t kind)
     if(!FusionWaterZombie313Kind(kind)&&FindFusionSourceGraph313(kind)){NativeSourceGraph313Snapshot graph;MakeNative313GraphFixture(kind,graph);f.sourceGraphs313.push_back({41,graph});}
     if(FusionWaterZombie313Kind(kind))
     {FusionWaterZombie313View water;InitializeFusionWaterZombie313View(kind,water);if(kind!=20){water.auxiliary.mPresent=true;water.auxiliary.mFrameCount=1;}if(FusionWaterShooter343Kind(kind)){water.shootClock343.mPresent=true;water.shootClock343.mFrameCount=1;}f.waterZombies313.push_back({41,water});f.background=BACKGROUND_3_POOL;}
-    if(NativeHeavyZombie313BKind(kind)){NativeHeavyZombie313Snapshot heavy;if(kind==32||kind==34){heavy.actor.status=14;heavy.actor.jumpSpeed=1.2f;}if(kind==45)heavy.actor.status=heavy.actor.bungee.status;f.heavyZombies313.push_back({41,heavy});}
+    if(NativeHeavyZombie313BKind(kind)){NativeHeavyZombie313Snapshot heavy;if(kind==32||FusionSuperPogo363Kind(kind)){heavy.actor.status=14;heavy.actor.jumpSpeed=1.2f;}if(kind==45)heavy.actor.status=heavy.actor.bungee.status;f.heavyZombies313.push_back({41,heavy});}
     if(FindFusionExtendedZombie313Profile(kind)){FusionExtendedZombie313View v;if(kind==220)v.attackDamage=200;f.extendedZombies313.push_back({41,v});}
     return f;
 }
@@ -37,7 +40,7 @@ int RunFusionZombieBatch313WireTests(int& checks)
     for(uint16_t kind=0;kind<256;++kind)
     {
         if(!FusionWaterZombie313Kind(kind)&&!NativeHeavyZombie313BKind(kind)&&!FindFusionExtendedZombie313Profile(kind))continue;
-        auto f=Actor(kind);C313(ValidateNativeSnapshotFrame(f,eligible));bool okay=false;auto bytes=Encode(f,okay);C313(okay);
+        auto f=Actor(kind);if(!ValidateNativeSnapshotFrame(f,eligible))std::printf("Batch313 invalid canonical fixture kind=%u\n",unsigned(kind));C313(ValidateNativeSnapshotFrame(f,eligible));bool okay=false;auto bytes=Encode(f,okay);C313(okay);
         NativeSnapshotFrame restored;NetBuffer body;
         C313(DecodeNativeSnapshot(bytes,eligible,epoch,restored,body)&&body.Size()==1&&body.mData[0]==0xa3);
         bool again=false;auto roundtrip=Encode(restored,again);C313(again&&roundtrip.mData==bytes.mData);
@@ -79,6 +82,111 @@ int RunFusionZombieBatch313WireTests(int& checks)
         f.sourceObstacles313.push_back({64,ball});
         C313(ValidateNativeSnapshotFrame(f,eligible)==(ownerKind!=205));
         if(ownerKind!=205){bool okay=false;auto bytes=Encode(f,okay);C313(okay);}
+    }
+    // Boss uses the same canonical source actor/three-layer snapshot. These
+    // are pure codec fixtures, not claimed native body/driver/RV frame spans.
+    for(uint16_t kind:{uint16_t(44),uint16_t(46)})
+    {
+        const auto* profile=FindFusionZombieProfile(kind);C313(profile!=nullptr);if(!profile)continue;
+        C313(FindFusionSourceGraph313(kind)==FindFusionBoss361Graph(kind)&&FindFusionSourceGraph313(kind)!=nullptr);
+        auto f=Actor(kind);f.background=BACKGROUND_6_BOSS;
+        C313(f.sourceGraphs313.size()==1&&f.sourceGraphs313[0].data.layerCount==3);
+        FusionBoss361View view;view.kind=kind; // Same source defaults as native Initialize.
+        C313(FusionBoss361ViewValid(view));
+        FusionBoss361Plan plan;uint64_t main=0,driver=0;
+        C313(PlanFusionBoss361Skill(view,float(profile->maxHealth)/4,profile->maxHealth,plan));
+        C313(ResolveFusionBoss361Plan(plan,3,2,0,view,main,driver));
+        C313(view.phase==FusionBoss361Phase::Rv&&view.targetRow==3&&view.targetColumn==2);
+        view.summonCount=7;view.spawnCount=3;view.summonBallCount=5;
+        view.summonTime=2.25f;view.ballCountdown=.75f;view.ballType=1;view.eyeMask=3;
+        C313(PlanFusionBoss361BodyStage(kind,profile->maxHealth,float(profile->maxHealth)/2,0,view.bodyStage));
+        view.bodyHistoryMask=3;view.rvOffsetX=1.25f;view.rvOffsetY=-2.5f;view.rvAligned=true;
+        view.ballBusy=true;view.rvVisible=true;
+        if(kind==46){view.dying=true;view.sourceStatus=1;view.eyeBlackSeconds=.5f;}
+        f.sourceZombies[0].data.health=float(profile->maxHealth)/2;
+        const auto* graph=FindFusionBoss361Graph(kind);C313(graph!=nullptr);if(!graph||f.sourceGraphs313.empty())continue;
+        bool rvState=false;
+        for(uint8_t state=0;state<graph->stateCount;++state)
+            if(FusionSourceGraph313OwnsState(*graph,0,state)&&std::strcmp(graph->states[state].name,"RV_1")==0)
+            {f.sourceGraphs313[0].data.layers[0].state=f.sourceGraphs313[0].data.layers[0].outgoing=state;rvState=true;break;}
+        C313(rvState);
+        f.bossZombies361={{41,view}};
+        auto& room=f.bossRoom366;room.enabled=true;room.boss2=kind==46;room.fastBoard=true;
+        room.hammerGranted=true;room.gloveGranted=true;room.fakeTrophyNext=kind==44;
+        room.hammerCooldownTicks=1234;room.enemyCount=1;room.lastTick=7654321;
+        C313(ValidateNativeSnapshotFrame(f,eligible));
+        bool okay=false;const auto bytes=Encode(f,okay);C313(okay);if(!okay)continue;
+        auto input=bytes;NativeSnapshotFrame decoded;NetBuffer body;
+        const bool read=DecodeNativeSnapshot(input,eligible,epoch,decoded,body);C313(read);
+        C313(read&&input.Remaining()==0&&body.Size()==1&&body.mData[0]==0xa3&&decoded.bossZombies361.size()==1);
+        if(read&&decoded.bossZombies361.size()==1)
+        {
+            const auto& v=decoded.bossZombies361[0].data;const auto& r=decoded.bossRoom366;
+            C313(decoded.bossZombies361[0].id==41&&v.kind==kind&&v.phase==view.phase&&v.sourceStatus==view.sourceStatus&&
+                v.targetRow==3&&v.targetColumn==2&&v.ballType==1&&v.bodyStage==view.bodyStage&&v.eyeMask==3&&
+                v.summonCount==7&&v.spawnCount==3&&v.summonBallCount==5&&v.summonTime==2.25f&&v.ballCountdown==.75f&&
+                v.bodyHistoryMask==3&&v.rvOffsetX==1.25f&&v.rvOffsetY==-2.5f&&v.rvAligned&&v.eyeBlackSeconds==(kind==46?.5f:0.f)&&
+                v.ballBusy&&!v.colliderEnabled&&v.rvVisible&&v.dying==(kind==46));
+            C313(r.enabled&&r.boss2==(kind==46)&&r.fastBoard&&r.hammerGranted&&r.gloveGranted&&r.fakeTrophyNext==(kind==44)&&
+                !r.won&&!r.trophyFake&&!r.trophyClaimed&&r.hammerCooldownTicks==1234&&r.enemyCount==1&&
+                !r.trophyId&&!r.trophyToken&&!r.trophyAnimationBaseAge&&r.trophyStartX==0&&r.trophyStartY==0&&r.lastTick==-1);
+            C313(decoded.sourceZombies[0].data.instanceToken==0x10029&&decoded.sourceGraphs313.size()==1&&
+                decoded.sourceGraphs313[0].data.layerCount==3&&decoded.sourceGraphs313[0].data.layers[0].state==f.sourceGraphs313[0].data.layers[0].state);
+            bool again=false;C313(Encode(decoded,again).mData==bytes.mData&&again);
+        }
+        // Whole decode transaction at a nonzero cursor: every canonical field,
+        // opaque body and private destination sentinel must remain unchanged.
+        const auto rejectWire=[&](NetBuffer malformed)
+        {
+            NetBuffer prefixed;prefixed.WriteU8(0x77);prefixed.WriteBytes(malformed.Data(),malformed.Size());prefixed.mReadPos=1;
+            const auto original=prefixed.mData;auto previous=f;previous.sourcePoints=123;previous.bossRoom366.lastTick=4242;
+            previous.bossRoom366.hammerCooldownTicks=4321;bool saved=false;const auto before=Encode(previous,saved);C313(saved);
+            NetBuffer raw;raw.WriteU8(0x55);C313(!DecodeNativeSnapshot(prefixed,eligible,epoch,previous,raw));
+            bool after=false;const auto preserved=Encode(previous,after);
+            C313(after&&preserved.mData==before.mData&&previous.bossRoom366.lastTick==4242&&
+                prefixed.mReadPos==1&&prefixed.mData==original&&raw.Size()==1&&raw.mData[0]==0x55);
+        };
+        const auto rejectFrame=[&](const NativeSnapshotFrame& bad)
+        {NetBuffer raw;raw.WriteU8(0x55);C313(!ValidateNativeSnapshotFrame(bad,eligible));C313(!EncodeNativeSnapshot(bad,eligible,raw)&&raw.Size()==1&&raw.mData[0]==0x55);};
+        auto bad=f;bad.bossZombies361.clear();rejectFrame(bad);
+        bad=f;bad.bossRoom366=NativeBossRoom366{};rejectFrame(bad);
+        bad=f;bad.bossZombies361[0].data.kind=kind==44?46:44;rejectFrame(bad);
+        bad=f;bad.sourceGraphs313.clear();rejectFrame(bad);
+        bad=f;bad.sourceGraphs313[0].id=42;rejectFrame(bad);
+        bad=f;bad.sourceGraphs313[0].data.layerCount=2;rejectFrame(bad);
+        bad=f;bad.bossZombies361[0].data.summonTime=std::numeric_limits<float>::quiet_NaN();rejectFrame(bad);
+        bad=f;bad.bossRoom366.trophyStartX=std::numeric_limits<float>::quiet_NaN();rejectFrame(bad);
+        const size_t end=14+bytes.mData[6]+(size_t(bytes.mData[7])<<8);
+        constexpr size_t bossRecordBytes=49,roomBytes=33,emptyTravelBytes=1,graphRecordBytes=80;
+        const size_t boss=end-emptyTravelBytes-roomBytes-bossRecordBytes,roomAt=boss+bossRecordBytes;
+        const size_t graphAt=boss-2-16-5*2-graphRecordBytes;
+        C313(bytes.mData[boss]==41&&bytes.mData[boss+2]==kind&&bytes.mData[graphAt]==41&&bytes.mData[graphAt+2]==3);
+        auto forged=bytes;forged.mData[boss+2]=uint8_t(kind==44?46:44);rejectWire(forged);
+        forged=bytes;forged.mData[boss+4]=255;rejectWire(forged);
+        forged=bytes;forged.mData[boss+46]=2;rejectWire(forged);
+        forged=bytes;forged.mData[graphAt+2]=2;rejectWire(forged);
+        forged=bytes;forged.mData[graphAt]=42;rejectWire(forged);
+        forged=bytes;std::fill(forged.mData.begin()+roomAt,forged.mData.begin()+roomAt+roomBytes,0);
+        forged.mData[roomAt+9]=0x70;forged.mData[roomAt+10]=0x17;rejectWire(forged);
+        for(size_t at:{boss+23,roomAt+25})
+        {forged=bytes;const uint32_t nan=0x7fc00000;for(unsigned n=0;n<4;++n)forged.mData[at+n]=uint8_t(nan>>(8*n));rejectWire(forged);}
+        // Remove the Boss record without truncating metadata or corrupting the
+        // unchanged native-body checksum: only the missing semantic view fails.
+        forged=bytes;forged.mData[boss-2]=0;forged.mData.erase(forged.mData.begin()+boss,forged.mData.begin()+boss+bossRecordBytes);
+        const size_t smaller=end-14-bossRecordBytes;forged.mData[6]=uint8_t(smaller);forged.mData[7]=uint8_t(smaller>>8);rejectWire(forged);
+        auto privateTick=f;privateTick.bossRoom366.lastTick=-100;bool same=false;C313(Encode(privateTick,same).mData==bytes.mData&&same);
+        // Post-death room retains the host's opaque trophy generation. No Boss
+        // actor or proxy client UID is required to preserve that canonical view.
+        auto trophy=Empty();trophy.background=BACKGROUND_6_BOSS;auto& t=trophy.bossRoom366;
+        t.enabled=true;t.boss2=kind==46;t.trophyId=77;t.trophyToken=0xf123004d;t.trophyAnimationBaseAge=42;
+        t.trophyStartX=312.5f;t.trophyStartY=204.25f;t.trophyFake=kind==44;t.trophyClaimed=true;t.won=kind==46;
+        bool trophyOkay=false;auto trophyBytes=Encode(trophy,trophyOkay);C313(trophyOkay);NativeSnapshotFrame trophyOut;NetBuffer trophyBody;
+        C313(DecodeNativeSnapshot(trophyBytes,eligible,epoch,trophyOut,trophyBody)&&trophyOut.bossZombies361.empty()&&
+            trophyOut.bossRoom366.trophyToken==0xf123004d&&trophyOut.bossRoom366.trophyId==77&&
+            trophyOut.bossRoom366.trophyStartX==312.5f&&trophyOut.bossRoom366.trophyStartY==204.25f&&
+            trophyOut.bossRoom366.trophyAnimationBaseAge==42&&trophyOut.bossRoom366.trophyClaimed&&
+            trophyOut.bossRoom366.won==(kind==46)&&trophyOut.bossRoom366.trophyFake==(kind==44));
+        bad=trophy;bad.bossRoom366.trophyToken=0;rejectFrame(bad);
     }
     auto money=Empty();money.sourcePoints=1234.5f;money.extendedBoard313={7,100000};bool moneyOkay=false;auto moneyBytes=Encode(money,moneyOkay);C313(moneyOkay);
     NativeSnapshotFrame moneyOut;NetBuffer moneyBody;C313(DecodeNativeSnapshot(moneyBytes,eligible,epoch,moneyOut,moneyBody)&&moneyOut.sourcePoints==1234.5f&&moneyOut.extendedBoard313.ultimateCount==7&&moneyOut.extendedBoard313.punishTime==100000);

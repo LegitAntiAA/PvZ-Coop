@@ -436,7 +436,7 @@ bool NetCaptureNativeFusionFrame(Board* board, LawnFusion::NativeSnapshotFrame& 
 // Structural preflight adds reference validation for Fusion metadata before the
 // existing native decoder touches the board. It deliberately does not recreate
 // that decoder's gameplay, animation or presentation validation.
-bool NetPreflightNativeFusionBody(const NetBuffer& body, const LawnFusion::NativeSnapshotFrame& frame)
+bool NetPreflightNativeFusionBody(const Board* board,const NetBuffer& body, const LawnFusion::NativeSnapshotFrame& frame)
 {
 	const size_t coreBytes = 43 + MAX_GRID_SIZE_Y * 4 + 9 + 10 +
 		NET_CHALLENGE_RUNTIME_WIRE_BYTES + NET_ENDLESS_WEATHER_WIRE_BYTES + NET_ZEN_GARDEN_WIRE_BYTES;
@@ -583,7 +583,7 @@ bool NetPreflightNativeFusionBody(const NetBuffer& body, const LawnFusion::Nativ
                         [=](const auto& value){return value.id==id;});
                     if(day!=frame.dayZombies273.end()&&!NetPaperHeadFitsNativeFrames(day->data.head))return false;
 					const int sourceRow=scan.mData[start+3];
-					const bool incomingDirect362=frame.adventure.enabled||LawnFusion::GetNativeContext(board)->validation;
+					const bool incomingDirect362=frame.adventure.enabled||(LawnFusion::GetNativeContext(board)&&LawnFusion::GetNativeContext(board)->validation);
                     if(sourceProfile&&sourceProfile->waterOnly&&!incomingDirect362&&(LawnFusion::NativeFusionRowsForBackground(frame.background)!=6||(sourceRow!=2&&sourceRow!=3)))return false;
 					const auto sourcePhase = sourceBody.ReadU8Or(), sourceHeight = sourceBody.ReadU8Or();
 					const bool sourcePoolTransition=(sourceHeight==HEIGHT_IN_TO_POOL||sourceHeight==HEIGHT_OUT_OF_POOL)&&
@@ -2957,7 +2957,7 @@ void Board::NetEncodeSnapshot(NetBuffer& b)
 		LawnFusion::NativeSnapshotFrame frame;
         const bool captured=NetCaptureNativeFusionFrame(this,frame);
         const bool metadata=captured && LawnFusion::ValidateNativeSnapshotFrame(frame,context->eligible);
-        const bool body=captured && NetPreflightNativeFusionBody(b,frame);
+        const bool body=captured && NetPreflightNativeFusionBody(this,b,frame);
         if (!captured || !metadata || !body || !LawnFusion::EncodeNativeSnapshot(frame,context->eligible,b))
         {
             NetTrace("native Fusion snapshot encode rejected epoch=%u capture=%d metadata=%d body=%d",context->epoch,captured?1:0,metadata?1:0,body?1:0);
@@ -3701,7 +3701,7 @@ void Board::NetApplySnapshot(NetBuffer& b, bool* theApplied)
 			  (context->adventure.run.rewardCollected&&!aFusionFrame.adventure.run.rewardCollected) ||
 			  (aFusionFrame.adventure.profile.completedLevels|context->adventure.profile.completedLevels)!=aFusionFrame.adventure.profile.completedLevels)) ||
 			!aFusionSelection.ApplySnapshot(aFusionFrame.selection) ||
-			!NetPreflightNativeFusionBody(nativeBody, aFusionFrame))
+			!NetPreflightNativeFusionBody(this,nativeBody, aFusionFrame))
 		{
 			NetTrace("native Fusion snapshot preflight rejected epoch=%u bytes=%zu", context->epoch, b.Remaining());
 			return;
@@ -5899,7 +5899,7 @@ bool Board::NetApplyStartPlaying(NetBuffer& b)
 		LawnFusion::NativeSnapshotFrame frame;
 		if (!LawnFusion::DecodeNativeSnapshot(candidate, context->eligible, context->epoch, frame, nativeBody) ||
 			frame.selection.phase != LawnFusion::FusionBankPhase::Playing || !frame.selectionCommitted ||
-			!NetPreflightNativeFusionBody(nativeBody, frame)) return false;
+			!NetPreflightNativeFusionBody(this,nativeBody, frame)) return false;
 		bool applied = false;
 		NetApplySnapshot(b, &applied);
 		if (!applied) return false;

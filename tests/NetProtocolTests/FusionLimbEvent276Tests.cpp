@@ -156,7 +156,6 @@ int RunFusionLimbEvent276Tests(int& checks)
     }
     auto invalidCursor=Raw(valid);invalidCursor.mReadPos=invalidCursor.Size()+1;auto out=valid;
     CHECK(!NetDecodeFusionLimbEvent276(invalidCursor,out));CHECK(invalidCursor.mReadPos==27&&Same(out,valid));
-#undef CHECK
     // Source208's frequency ratio must round-trip independently of volume.
     {NetBuffer pitched;pitched.WriteU16(42);pitched.WriteF32(.3f);pitched.WriteF32(1.6f);
      uint16_t sound=0;float volume=0,pitch=0;CHECK(NetDecodeSoundEvent284(pitched,sound,volume,pitch));
@@ -166,5 +165,6 @@ int RunFusionLimbEvent276Tests(int& checks)
       CHECK(!NetDecodeSoundEvent284(raw,sound,volume,pitch));CHECK(raw.mReadPos==0&&sound==17&&volume==.8f&&pitch==1.2f);}
      NetBuffer ordinary;ordinary.WriteU16(42);CHECK(NetDecodeSoundEvent284(ordinary,sound,volume,pitch));
      CHECK(sound==42&&volume==1&&pitch==1);}
+#undef CHECK
     return failures;
 }

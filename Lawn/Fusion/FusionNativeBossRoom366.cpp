@@ -98,7 +98,7 @@ bool BeginNativeBossRoom366(Board* b,bool stronger,std::string* error)
  const uint16_t kind=44;FusionSourceDeathBudget319 peak;
  if(!CanSpawnNativeBoss361Actor(b,kind,error)||!GetNativeSourceZombieBirthBudget319(b,std::span(&kind,1),peak,error)||
     !CanAllocateNativeSourceBudget319(b,peak,error))return false;
- if(!ConfigureNativeFusionBackground(b,BACKGROUND_6_BOSS))return false;
+ // The source mode descriptor owns the scene (Boss77 uses Roof4).
  *room={};room->enabled=true;room->fakeTrophyNext=!stronger;
  room->spawnPending375=true;room->strongerStart375=stronger;
  // InitBoard.MoveOverEvent omits CreateMower for either real source Boss tag.

@@ -31,7 +31,8 @@ int RunFusionSourceGraph313Tests(int& checks)
             }
         }
     }
-    Check(!FindFusionSourceGraph313(44)&&!FindFusionSourceGraph313(65535),"no unrelated graph admitted");
+    Check(FindFusionSourceGraph313(44)&&FindFusionSourceGraph313(46),"both source Boss graphs admitted");
+    Check(!FindFusionSourceGraph313(1)&&!FindFusionSourceGraph313(65535),"no unrelated graph admitted");
     const auto& g=*FindFusionSourceGraph313(35);FusionSourceGraph313View v;v.state=v.outgoing=State(g,"walk");
     const FusionSourceGraph313Edge* edge=nullptr;uint32_t consumed=255;FusionSourceGraph313Parameters p;p.attacking=true;p.triggers=FusionSourceGraph313Trigger(FusionSourceGraph313Param::Throw);
     Check(SelectFusionSourceGraph313Edge(g,0,v,{},{},p,false,false,edge,consumed)&&edge&&edge->target==State(g,"attack")&&consumed==0,"ordered attack precedes throw on source walk");

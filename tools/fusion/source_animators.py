@@ -86,13 +86,19 @@ def unbound_bindings(docs,nodes,clips,clip_sources,clip_roots,assets,prefab,reso
         return '/'.join(filter(None,(source_path(parent,ancestors+(ident,)),name)))if parent else ''
     paths=[source_path(i)for i in transforms]
     if sorted(paths)!=sorted(n['path']for n in nodes):raise ValueError('exported source hierarchy path differs')
-    if len(paths)!=len(set(paths)):raise ValueError('ambiguous source node path')
+    duplicate_paths={p for p in paths if paths.count(p)>1}
+    # Source can have repeated unanimated SpriteRenderer siblings. Preserve
+    # every indexed Transform/renderer; missing-target membership needs the
+    # complete multiset, not a synthetic unique hierarchy. Existing path-query
+    # and curve-target ambiguity guards remain strict.
+    if any(c['path']in duplicate_paths for cl in clips.values()for c in cl['curves']):
+        raise ValueError('ambiguous animated source node path')
     roots={}
     for root in set(clip_roots.values()):
         if root not in paths:raise ValueError('source Animator root is absent')
         relative=[p[len(root)+1:]if root and p!=root else '' if p==root else p for p in paths if not root or p==root or p.startswith(root+'/')]
         hashes=[zlib.crc32(p.encode())for p in relative]
-        if len(hashes)!=len(set(hashes)):raise ValueError('ambiguous source path CRC32')
+        if len(set(relative))!=len(set(hashes)):raise ValueError('different source paths collide in CRC32')
         roots[root]={'paths':relative,'hashes':hashes}
     records=[]
     for name,clip in clips.items():

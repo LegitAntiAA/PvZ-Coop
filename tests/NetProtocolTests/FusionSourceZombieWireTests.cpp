@@ -20,7 +20,13 @@ void Check(bool condition,int line)
 }
 #define CHECK(condition) Check(!!(condition),__LINE__)
 constexpr uint32_t kEpoch = 19;
-constexpr size_t kHeaderBytes = 14, kSourceRecordBytes = 55, kEmptyEquipmentTailBytes = 82; // Existing54 + FNS28 six empty313/314 counts12 + Board ledger12.
+constexpr size_t kHeaderBytes = 14, kSourceRecordBytes = 55;
+// FNS30 empty tail AFTER sourceZombies, independently counted from the wire
+// contract:26 family-vector U16 counts (including Boss361), remainder Board
+// Bool+3I32+pending U16, GoldHypno Bool, source/extended ledger4x32 bits,
+// BossRoom9Bool+2U16+3x32+2F32, and the absent Travel369 Bool.
+constexpr size_t kEmptyEquipmentTailBytes = 26*2+(1+3*4+2)+1+4*4+(9+2*2+3*4+2*4)+1;
+static_assert(kEmptyEquipmentTailBytes==118);
 constexpr size_t kDisabledAdventureSessionBytes=1; // FNS26, between temporaryLightLevel and Garlic count.
 const std::vector<FusionBankEligibleCard> eligible = {{0,false,100,7.5f},{1,false,50,7.5f}};
 
@@ -74,9 +80,10 @@ void PutF32(NetBuffer& buffer,size_t offset,float value)
 size_t SourceCountOffset(const NetBuffer& wire)
 {
     // Example has no equipment Coins, equipment Plants or zombie identities.
-    // FNS19 adds three state counts and seven parent bytes per source record;
-    // FNS20 adds four Companion/World U16 counts, FNS21 Card/Rolling, FNS22 Fert.
-    // Each FNS22 source record appends firstArmorStageU8 after dieWithParent.
+    // This fixture keeps all26 families, pending items and Travel ledger empty.
+    // Source record55 includes the actual16-byte Paper head, vehicleStopped,
+    // beforeDying and sourceStatusLevel. Plant/Projectile variable tails cannot
+    // move this backward-derived position in our plant/projectile-free cases.
     return kHeaderBytes+U16(wire,6)-kEmptyEquipmentTailBytes-2-2*kSourceRecordBytes;
 }
 

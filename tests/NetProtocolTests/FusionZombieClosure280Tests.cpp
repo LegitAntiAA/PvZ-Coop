@@ -26,8 +26,9 @@ int RunFusionZombieClosure280Tests(int& checks)
     // Registry availability is distinct from resource/native/co-op admission.
     CHECK(GetNativeSourceZombieCarrier(203)==ZOMBIE_NORMAL&&GetNativeSourceZombieCarrier(223)==ZOMBIE_NORMAL);
     const uint16_t gold[]={223};CHECK(BuildFusionSourceZombieClosure280(gold,result,&error));CHECK(result==std::vector<uint16_t>({223,203}));
-    CHECK(GetNativeSourceZombieCarrier(44)<0); // Unrelated staged classes do not open factories.
-    const uint16_t staged[]={44};const auto saved=result;CHECK(!BuildFusionSourceZombieClosure280(staged,result,&error));CHECK(result==saved);
+    CHECK(GetNativeSourceZombieCarrier(44)==ZOMBIE_BOSS);
+    const uint16_t boss[]={44};CHECK(BuildFusionSourceZombieClosure280(boss,result,&error));CHECK(result==std::vector<uint16_t>({44}));
+    const auto saved=result;
     const uint16_t unknown[]={65535};CHECK(!BuildFusionSourceZombieClosure280(unknown,result,&error));CHECK(result==saved);
     const uint16_t implemented[]={0,2,4,8,11,12,13,14,15,18,41,42,104,109,111,3,21,22,23,100,106,107,108};
     CHECK(BuildFusionSourceZombieClosure280(implemented,result,&error));CHECK(result.size()==23);

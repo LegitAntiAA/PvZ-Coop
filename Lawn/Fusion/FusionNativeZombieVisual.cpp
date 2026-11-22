@@ -1,4 +1,5 @@
 #include "FusionQuickJackson367Rules.h"
+#include "FusionRandomZombie360Rules.h"
 #include "FusionNativeZombieVisual.h"
 #include "FusionAnimation.h"
 #include "FusionNative.h"
@@ -175,6 +176,9 @@ const char* CohortPackage316(uint16_t kind)
 const char* PackageName(uint16_t kind)
 {
     if(const auto* name=CohortPackage316(kind))return name;
+    if(kind==105)return "zombie360-105";
+    if(kind==110)return "zombie360-110";
+    if(kind==215)return "zombie360-215";
     if(kind==207)return "zombie343-207";
     if(kind==200)return "zombie351-200";
     if(kind==211)return "zombie351-211";
@@ -203,6 +207,9 @@ const char* BatchPrefab282(uint16_t kind)
 {
     switch(kind)
     {
+    case 105:return "Resources/zombies/_prefab/RandomZombie.prefab";
+    case 110:return "Resources/zombies/_prefab/RandomPlusZombie.prefab";
+    case 215:return "Resources/zombies/_prefab/DiamondRandomZombie.prefab";
     case 217:return "Resources/zombies/_prefab/SuperDancePolZombie.prefab";
     case 5:return "Resources/zombies/_prefab/PaperZombie.prefab";
     case 6:return "Resources/zombies/_prefab/DancePolevaulterZombie.prefab";
@@ -418,6 +425,14 @@ std::unique_ptr<ZombieModel> LoadCohort316(Board* board,uint16_t kind,const std:
     model->shadowX=shadow.at("x").get<float>();model->shadowY=shadow.at("y").get<float>();
     if(!std::isfinite(model->shadowX)||!std::isfinite(model->shadowY))throw std::runtime_error("source313 invalid Shadow");
     const auto shadowPath=shadow.at("path").get<std::string>();bool foundShadow=false;
+    std::map<std::string,size_t,std::less<>> pathCounts;
+    for(const auto& node:package.at("nodes"))++pathCounts[node.at("path").get<std::string>()];
+    const auto indexedNode=[](size_t index){return "@node:"+std::to_string(index);};
+    const auto nodeReference=[&](size_t index)
+    {
+        const auto nodePath=package.at("nodes").at(index).at("path").get<std::string>();
+        return pathCounts.at(nodePath)==1?nodePath:indexedNode(index);
+    };
     size_t sourceNodeIndex=0;
     for(const auto& node:package.at("nodes"))
     {
@@ -433,15 +448,24 @@ std::unique_ptr<ZombieModel> LoadCohort316(Board* board,uint16_t kind,const std:
         if(parent>=0)
         {
             const auto parentPath=package.at("nodes").at(parent).at("path").get<std::string>();
-            model->child316.try_emplace(parentPath,nodePath);model->children316[parentPath].push_back(nodePath);
+            const auto child=nodeReference(sourceNodeIndex-1);
+            // Source GetChild(n) identifies an imported node, including genuine
+            // siblings with equal names. Plain-path aliases remain unique only.
+            model->child316.try_emplace(indexedNode(parent),child);
+            model->children316[indexedNode(parent)].push_back(child);
+            if(pathCounts.at(parentPath)==1)
+            {model->child316.try_emplace(parentPath,child);model->children316[parentPath].push_back(child);}
         }
     }
     for(const auto& sprite:package.at("sprites"))
     {
-        const auto node=package.at("nodes").at(sprite.at("node").get<size_t>()).at("path").get<std::string>();
-        model->spriteNodes316.push_back(node);
-        if(!model->sprite316.emplace(node,sprite.at("guid").is_null()?std::string():sprite.at("guid").get<std::string>()).second)
+        const auto index=sprite.at("node").get<size_t>();
+        const auto node=package.at("nodes").at(index).at("path").get<std::string>();
+        const auto guid=sprite.at("guid").is_null()?std::string():sprite.at("guid").get<std::string>();
+        model->spriteNodes316.push_back(nodeReference(index));
+        if(!model->sprite316.emplace(indexedNode(index),guid).second)
             throw std::runtime_error("source313 ambiguous node SpriteRenderer");
+        if(pathCounts.at(node)==1)model->sprite316.emplace(node,guid);
     }
     if(!foundShadow)throw std::runtime_error("source313 missing Shadow");
     Fields351(kind,*model);
@@ -633,14 +657,14 @@ std::unique_ptr<ZombieModel> LoadModel(Board* board,uint16_t kind,const std::fil
         if (tag == "ZombieHead") model->headPaths.push_back(nodePath);
         else if (tag == "ZombieHand") model->handPaths.push_back(nodePath);
         else if (tag == "ZombieArmUpper") model->upperArmPaths.push_back(nodePath);
-        if ((kind == 2||kind==12) && nodePath == "Zombie_head/Cone") model->conePath = nodePath;
+        if ((kind == 2||kind==12||FusionRandomZombie360Kind(kind)) && nodePath == "Zombie_head/Cone") model->conePath = nodePath;
         if ((kind==4||kind==13)&&nodePath=="Zombie_head/Bucket") model->conePath=nodePath;
         if(kind==9&&nodePath=="Zombie_football_helmet")model->conePath=nodePath;
         if(kind==8&&nodePath=="Zombie_screendoor1")model->shieldPath=nodePath;
         if(kind==8&&(nodePath=="Zombie_outerarm_screendoor"||nodePath=="Zombie_innerarm_screendoor_hand"||nodePath=="Zombie_innerarm_screendoor"))model->shieldHandPaths.push_back(nodePath);
         if(day&&nodePath==(FusionDayZombie273Doll(kind)?"Zombie_head/Cone":"Zombie_head"))model->dayArmorPath=nodePath;
     }
-    const bool money=kind==41||kind==42,vehicle=FusionSubmarine343Kind(kind)||kind==18,helmet=kind==2||kind==4||kind==9||kind==12||kind==13;
+    const bool money=kind==41||kind==42,vehicle=FusionSubmarine343Kind(kind)||kind==18,helmet=kind==2||kind==4||kind==9||kind==12||kind==13||FusionRandomZombie360Kind(kind);
     if (shadowPath.empty() || !foundShadow || (!money&&!vehicle&&(model->headPaths.empty() ||
         (!jackbox&&model->handPaths.empty()) || (kind!=109&&kind!=9&&model->upperArmPaths.empty()))) || (helmet && model->conePath.empty())||
         (kind==8&&(model->shieldPath.empty()||model->shieldHandPaths.size()!=3)))
@@ -692,6 +716,11 @@ std::unique_ptr<ZombieModel> LoadModel(Board* board,uint16_t kind,const std::fil
         case 107:first="Resources/plants/_mixer/cherrynut/crack1.asset";second="Resources/plants/_mixer/cherrynut/crack2.asset";break;
         }
         model->damagedCone[0]=ExtraSprite(package,first);model->damagedCone[1]=ExtraSprite(package,second);
+    }
+    if(kind==105||kind==110)
+    {
+        model->damagedCone[0]=ExtraSprite(package,kind==105?"Resources/zombies/zombie/Zombie_cone2.asset":"Resources/zombies/zombie/Gold2.asset");
+        model->damagedCone[1]=ExtraSprite(package,kind==105?"Resources/zombies/zombie/Zombie_cone3.asset":"Resources/zombies/zombie/Gold3.asset");
     }
     if(kind==30)
     {
@@ -1066,7 +1095,28 @@ bool SourceBodyPose276(const Zombie* zombie,const char*& state,float& phase)
 
 bool DayPose273(const Zombie* zombie,const ZombieModel& model,FusionAnimationDrawOptions& options)
 {
-    const auto* data=GetNativeSourceZombieData(zombie);if(!data||!DayPrefab273(data->kind))return true;
+    const auto* data=GetNativeSourceZombieData(zombie);
+    if(data&&FusionRandomZombie360Kind(data->kind))
+    {
+        if(data->firstArmorStage>2)return false;
+        if(!zombie->mHasHead)options.hiddenNodePaths.insert(options.hiddenNodePaths.end(),model.headPaths.begin(),model.headPaths.end());
+        if(!zombie->mHasArm)
+        {
+            options.hiddenNodePaths.insert(options.hiddenNodePaths.end(),model.handPaths.begin(),model.handPaths.end());
+            for(const auto& path:model.upperArmPaths)ReplaceSprite(options,path,model.damagedArm);
+        }
+        options.nodeActivityOverrides.push_back({"LoseArm",!zombie->mHasArm});
+        if(zombie->mHelmHealth<=0||zombie->mHelmType==HELMTYPE_NONE)options.hiddenNodePaths.push_back(model.conePath);
+        else if(data->kind==215)
+        {
+            options.nodeActivityOverrides.push_back({"Zombie_head/Cone/Cone_1",data->firstArmorStage==1});
+            options.nodeActivityOverrides.push_back({"Zombie_head/Cone/Cone_2",data->firstArmorStage==2});
+            options.spriteEnabledOverrides.push_back({model.conePath,data->firstArmorStage==0});
+        }
+        else if(data->firstArmorStage)ReplaceSprite(options,model.conePath,model.damagedCone[data->firstArmorStage-1]);
+        return true;
+    }
+    if(!data||!DayPrefab273(data->kind))return true;
     const auto* day=GetNativeDayZombie273(zombie);
     if(!day||!NativeDayZombie273ControllerValid(data->kind,*day))return false;
     if(FusionDayZombie273Pole(data->kind))options.nodeActivityOverrides.push_back({"Shadow",day->shadowEnabled});

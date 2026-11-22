@@ -56026,10 +56026,7 @@
       }
     }
   ],
-  "ignoredBindings": [
-    "Zombie_hair",
-    "Zombie_jaw"
-  ],
+  "ignoredBindings": [],
   "omittedInactiveNodes": [],
   "spritePrefix": null,
   "unusedSpriteBonesExplicitlyAllowed": false,
@@ -56345,6 +56342,10 @@
     {
       "path": "Scripts/Assembly-CSharp/JalapenoZombie.cs",
       "sha256": "f76847dcd0976fde5e750ceb57ee6349dfe2bec7218dc136262ebece410b5d88"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/Zombie.cs",
+      "sha256": "60ca737e3f1e3af5ca2924a9848c25563ca4cf9ea92c898ab22d8f29a356d808"
     }
   ],
   "deferredComponents": [
@@ -56361,6 +56362,341 @@
   ],
   "sourceMasks": [],
   "sourceSkins": [],
+  "sourceUnboundBindings": [
+    {
+      "path": "Zombie_jaw",
+      "sourceBindingPath": "Zombie_jaw",
+      "animatorRoot": "",
+      "rawPathHash": "0x832191F0",
+      "clip": "idle",
+      "curveIndex": 2,
+      "curveKind": "euler",
+      "sourceClip": "Resources/zombies/zombie/anim/idle.anim",
+      "sourceClipSha256": "8c6963e36ae163cf26e5d0e105924060270213a953b579250ebb9d981135f809"
+    },
+    {
+      "path": "Zombie_hair",
+      "sourceBindingPath": "Zombie_hair",
+      "animatorRoot": "",
+      "rawPathHash": "0xAF7FDB44",
+      "clip": "idle",
+      "curveIndex": 3,
+      "curveKind": "euler",
+      "sourceClip": "Resources/zombies/zombie/anim/idle.anim",
+      "sourceClipSha256": "8c6963e36ae163cf26e5d0e105924060270213a953b579250ebb9d981135f809"
+    },
+    {
+      "path": "Zombie_jaw",
+      "sourceBindingPath": "Zombie_jaw",
+      "animatorRoot": "",
+      "rawPathHash": "0x832191F0",
+      "clip": "idle",
+      "curveIndex": 17,
+      "curveKind": "position",
+      "sourceClip": "Resources/zombies/zombie/anim/idle.anim",
+      "sourceClipSha256": "8c6963e36ae163cf26e5d0e105924060270213a953b579250ebb9d981135f809"
+    },
+    {
+      "path": "Zombie_hair",
+      "sourceBindingPath": "Zombie_hair",
+      "animatorRoot": "",
+      "rawPathHash": "0xAF7FDB44",
+      "clip": "idle",
+      "curveIndex": 18,
+      "curveKind": "position",
+      "sourceClip": "Resources/zombies/zombie/anim/idle.anim",
+      "sourceClipSha256": "8c6963e36ae163cf26e5d0e105924060270213a953b579250ebb9d981135f809"
+    },
+    {
+      "path": "Zombie_jaw",
+      "sourceBindingPath": "Zombie_jaw",
+      "animatorRoot": "",
+      "rawPathHash": "0x832191F0",
+      "clip": "attack",
+      "curveIndex": 7,
+      "curveKind": "euler",
+      "sourceClip": "Resources/zombies/zombie/anim/attack.anim",
+      "sourceClipSha256": "bd7743c351bc5c9126682c626110bcb13994011c683aa712222e0f308eadca0f"
+    },
+    {
+      "path": "Zombie_hair",
+      "sourceBindingPath": "Zombie_hair",
+      "animatorRoot": "",
+      "rawPathHash": "0xAF7FDB44",
+      "clip": "attack",
+      "curveIndex": 9,
+      "curveKind": "euler",
+      "sourceClip": "Resources/zombies/zombie/anim/attack.anim",
+      "sourceClipSha256": "bd7743c351bc5c9126682c626110bcb13994011c683aa712222e0f308eadca0f"
+    },
+    {
+      "path": "Zombie_jaw",
+      "sourceBindingPath": "Zombie_jaw",
+      "animatorRoot": "",
+      "rawPathHash": "0x832191F0",
+      "clip": "attack",
+      "curveIndex": 25,
+      "curveKind": "position",
+      "sourceClip": "Resources/zombies/zombie/anim/attack.anim",
+      "sourceClipSha256": "bd7743c351bc5c9126682c626110bcb13994011c683aa712222e0f308eadca0f"
+    },
+    {
+      "path": "Zombie_hair",
+      "sourceBindingPath": "Zombie_hair",
+      "animatorRoot": "",
+      "rawPathHash": "0xAF7FDB44",
+      "clip": "attack",
+      "curveIndex": 26,
+      "curveKind": "position",
+      "sourceClip": "Resources/zombies/zombie/anim/attack.anim",
+      "sourceClipSha256": "bd7743c351bc5c9126682c626110bcb13994011c683aa712222e0f308eadca0f"
+    },
+    {
+      "path": "Zombie_hair",
+      "sourceBindingPath": "Zombie_hair",
+      "animatorRoot": "",
+      "rawPathHash": "0xAF7FDB44",
+      "clip": "attack",
+      "curveIndex": 35,
+      "curveKind": "scale",
+      "sourceClip": "Resources/zombies/zombie/anim/attack.anim",
+      "sourceClipSha256": "bd7743c351bc5c9126682c626110bcb13994011c683aa712222e0f308eadca0f"
+    },
+    {
+      "path": "Zombie_jaw",
+      "sourceBindingPath": "Zombie_jaw",
+      "animatorRoot": "",
+      "rawPathHash": "0x832191F0",
+      "clip": "attack",
+      "curveIndex": 36,
+      "curveKind": "scale",
+      "sourceClip": "Resources/zombies/zombie/anim/attack.anim",
+      "sourceClipSha256": "bd7743c351bc5c9126682c626110bcb13994011c683aa712222e0f308eadca0f"
+    },
+    {
+      "path": "Zombie_hair",
+      "sourceBindingPath": "Zombie_hair",
+      "animatorRoot": "",
+      "rawPathHash": "0xAF7FDB44",
+      "clip": "walk",
+      "curveIndex": 0,
+      "curveKind": "euler",
+      "sourceClip": "Resources/zombies/zombie/anim/walk.anim",
+      "sourceClipSha256": "8ba53789a9181f973d43181ac9f22e1a67a833e135666682ff3419c873690c92"
+    },
+    {
+      "path": "Zombie_jaw",
+      "sourceBindingPath": "Zombie_jaw",
+      "animatorRoot": "",
+      "rawPathHash": "0x832191F0",
+      "clip": "walk",
+      "curveIndex": 2,
+      "curveKind": "euler",
+      "sourceClip": "Resources/zombies/zombie/anim/walk.anim",
+      "sourceClipSha256": "8ba53789a9181f973d43181ac9f22e1a67a833e135666682ff3419c873690c92"
+    },
+    {
+      "path": "Zombie_hair",
+      "sourceBindingPath": "Zombie_hair",
+      "animatorRoot": "",
+      "rawPathHash": "0xAF7FDB44",
+      "clip": "walk",
+      "curveIndex": 18,
+      "curveKind": "position",
+      "sourceClip": "Resources/zombies/zombie/anim/walk.anim",
+      "sourceClipSha256": "8ba53789a9181f973d43181ac9f22e1a67a833e135666682ff3419c873690c92"
+    },
+    {
+      "path": "Zombie_jaw",
+      "sourceBindingPath": "Zombie_jaw",
+      "animatorRoot": "",
+      "rawPathHash": "0x832191F0",
+      "clip": "walk",
+      "curveIndex": 20,
+      "curveKind": "position",
+      "sourceClip": "Resources/zombies/zombie/anim/walk.anim",
+      "sourceClipSha256": "8ba53789a9181f973d43181ac9f22e1a67a833e135666682ff3419c873690c92"
+    },
+    {
+      "path": "Zombie_hair",
+      "sourceBindingPath": "Zombie_hair",
+      "animatorRoot": "",
+      "rawPathHash": "0xAF7FDB44",
+      "clip": "walk2",
+      "curveIndex": 0,
+      "curveKind": "euler",
+      "sourceClip": "Resources/zombies/zombie/anim/walk2.anim",
+      "sourceClipSha256": "caa0970ccd8983c8d837f0738cbdc02046f9afc3aa7fe7a7e973de1fc2fc2003"
+    },
+    {
+      "path": "Zombie_jaw",
+      "sourceBindingPath": "Zombie_jaw",
+      "animatorRoot": "",
+      "rawPathHash": "0x832191F0",
+      "clip": "walk2",
+      "curveIndex": 2,
+      "curveKind": "euler",
+      "sourceClip": "Resources/zombies/zombie/anim/walk2.anim",
+      "sourceClipSha256": "caa0970ccd8983c8d837f0738cbdc02046f9afc3aa7fe7a7e973de1fc2fc2003"
+    },
+    {
+      "path": "Zombie_hair",
+      "sourceBindingPath": "Zombie_hair",
+      "animatorRoot": "",
+      "rawPathHash": "0xAF7FDB44",
+      "clip": "walk2",
+      "curveIndex": 18,
+      "curveKind": "position",
+      "sourceClip": "Resources/zombies/zombie/anim/walk2.anim",
+      "sourceClipSha256": "caa0970ccd8983c8d837f0738cbdc02046f9afc3aa7fe7a7e973de1fc2fc2003"
+    },
+    {
+      "path": "Zombie_jaw",
+      "sourceBindingPath": "Zombie_jaw",
+      "animatorRoot": "",
+      "rawPathHash": "0x832191F0",
+      "clip": "walk2",
+      "curveIndex": 20,
+      "curveKind": "position",
+      "sourceClip": "Resources/zombies/zombie/anim/walk2.anim",
+      "sourceClipSha256": "caa0970ccd8983c8d837f0738cbdc02046f9afc3aa7fe7a7e973de1fc2fc2003"
+    }
+  ],
+  "sourceUnboundHierarchyProof": {
+    "method": "complete audited Animator-relative source hierarchy; absent binding is a Unity no-op",
+    "sourcePrefabSha256": "34b31d8ab432c5eea9369e7ee56c6c0e4c3da47010de14adf2551930523fd5d9",
+    "documentCount": 87,
+    "animatorRoots": {
+      "": {
+        "paths": [
+          "",
+          "Zombie_outerarm_lower",
+          "Zombie_outerarm_upper",
+          "Zombie_outerarm_hand",
+          "Zombie_tie",
+          "Zombie_body",
+          "Zombie_outerleg_lower",
+          "Zombie_outerleg_foot",
+          "Zombie_outerleg_upper",
+          "Zombie_innerleg_foot",
+          "Zombie_innerleg_lower",
+          "Zombie_innerleg_upper",
+          "Zombie_head",
+          "Zombie_head/Jalapeno",
+          "Zombie_head/Jalapeno/Jalapeno_body",
+          "Zombie_head/Jalapeno/Jalapeno_body/Jalapeno_eyebrow1",
+          "Zombie_head/Jalapeno/Jalapeno_body/Jalapeno_eyebrow2",
+          "Zombie_head/Jalapeno/Jalapeno_body/Jalapeno_cheek",
+          "Zombie_head/Jalapeno/Jalapeno_body/Jalapeno_eye2",
+          "Zombie_head/Jalapeno/Jalapeno_body/Jalapeno_eye1",
+          "Zombie_head/Jalapeno/Jalapeno_body/Jalapeno_mouth",
+          "Zombie_head/Jalapeno/Jalapeno_body/Jalapeno_stem",
+          "Zombie_neck",
+          "Zombie_innerarm_upper",
+          "Zombie_innerarm_lower",
+          "Zombie_innerarm_hand",
+          "Shadow",
+          "LoseArm"
+        ],
+        "pathHashes": [
+          "0x00000000",
+          "0xAAC326B3",
+          "0xCA06820C",
+          "0xAFFBBFE9",
+          "0xAEF9E4CA",
+          "0xE820B1EF",
+          "0x8982A698",
+          "0xD9F15002",
+          "0xE9470227",
+          "0x48C75A62",
+          "0xC4A1F1CA",
+          "0xA4645575",
+          "0x947B4CC1",
+          "0x4FFFD2EE",
+          "0x6E896C11",
+          "0x47321DF6",
+          "0xDE3B4C4C",
+          "0x4356FB32",
+          "0xFDF87AE9",
+          "0x64F12B53",
+          "0xB747AC30",
+          "0x7B86AD9C",
+          "0x13996C0E",
+          "0x8725D55E",
+          "0xE7E071E1",
+          "0x3ECDB589",
+          "0x72DA871B",
+          "0x0ABD01B4"
+        ]
+      },
+      "Zombie_head/Jalapeno": {
+        "paths": [
+          "",
+          "Jalapeno_body",
+          "Jalapeno_body/Jalapeno_eyebrow1",
+          "Jalapeno_body/Jalapeno_eyebrow2",
+          "Jalapeno_body/Jalapeno_cheek",
+          "Jalapeno_body/Jalapeno_eye2",
+          "Jalapeno_body/Jalapeno_eye1",
+          "Jalapeno_body/Jalapeno_mouth",
+          "Jalapeno_body/Jalapeno_stem"
+        ],
+        "pathHashes": [
+          "0x00000000",
+          "0x55969150",
+          "0xA4F52375",
+          "0x3DFC72CF",
+          "0x187C96BE",
+          "0x093BEB56",
+          "0x9032BAEC",
+          "0xEC6DC1BC",
+          "0x8F453C23"
+        ]
+      }
+    },
+    "startupHierarchyAudit": {
+      "manifestSha256": "1bc29b5e41b62e473707084c2941adda98b00aa08ef1ea0a7c0497386b18970a",
+      "audit": {
+        "schema": 1,
+        "sourcePrefab": "Resources/zombies/_prefab/JalapenoZombie.prefab",
+        "sourcePrefabSha256": "34b31d8ab432c5eea9369e7ee56c6c0e4c3da47010de14adf2551930523fd5d9",
+        "runtimeClassBinding": {
+          "path": "C:\\PvZ\\stabledecompile-master\\assets\\fusion\\catalog\\zombies.json",
+          "sha256": "91bd103faf6f0cc22a13b9947ed691d3544860ac0f1aa35b51e5213405e0ff6b",
+          "className": "JalapenoZombie"
+        },
+        "scriptChain": [
+          {
+            "path": "Scripts/Assembly-CSharp/JalapenoZombie.cs",
+            "sha256": "f76847dcd0976fde5e750ceb57ee6349dfe2bec7218dc136262ebece410b5d88"
+          },
+          {
+            "path": "Scripts/Assembly-CSharp/Zombie.cs",
+            "sha256": "60ca737e3f1e3af5ca2924a9848c25563ca4cf9ea92c898ab22d8f29a356d808"
+          }
+        ],
+        "primaryEvidence": "C:\\PvZ\\stabledecompile-master\\work\\fusion\\stage375\\source-unbound117209\\startup117209.json",
+        "primaryEvidenceSha256": "cc6e3c83c7c1d02d20b2c00c698633125745ce7f7bd869d7291f3ab102dde89c",
+        "methods": [
+          {
+            "method": "JalapenoZombie$$Awake",
+            "address": "0x180358F30",
+            "codeSha256": "1d9b9747cc0d47b6e04d98160ab786682c684d3e9697fa93e2e4a06f0595ad13"
+          },
+          {
+            "method": "Zombie$$Awake",
+            "address": "0x18037F7F0",
+            "codeSha256": "1a9cc185821a30bde18aa5d571a14c7c52eeb5ec404393b1720dfea97e3346ca"
+          },
+          {
+            "method": "Zombie$$Start",
+            "address": "0x18038A300",
+            "codeSha256": "a1b716b16be70725ff7ed9114c4d952c446919d3bcc6ef29042837638c2ca764"
+          }
+        ]
+      }
+    }
+  },
   "sourceAnimators": [
     {
       "fileId": 95642988549198181,

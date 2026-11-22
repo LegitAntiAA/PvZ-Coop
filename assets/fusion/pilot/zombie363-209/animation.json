@@ -54125,9 +54125,7 @@
       }
     }
   ],
-  "ignoredBindings": [
-    "Zombie_innerleg_foot"
-  ],
+  "ignoredBindings": [],
   "omittedInactiveNodes": [],
   "spritePrefix": null,
   "unusedSpriteBonesExplicitlyAllowed": false,
@@ -54431,6 +54429,10 @@
     {
       "path": "Scripts/Assembly-CSharp/SuperPogoZombie.cs",
       "sha256": "0bab65032011507c8e196ce8e29cc1d405001731dc46219f859519da7e474906"
+    },
+    {
+      "path": "Scripts/Assembly-CSharp/Zombie.cs",
+      "sha256": "60ca737e3f1e3af5ca2924a9848c25563ca4cf9ea92c898ab22d8f29a356d808"
     }
   ],
   "deferredComponents": [
@@ -54446,5 +54448,183 @@
     "spriteSkinV1"
   ],
   "sourceMasks": [],
-  "sourceSkins": []
+  "sourceSkins": [],
+  "sourceUnboundBindings": [
+    {
+      "path": "Zombie_innerleg_foot",
+      "sourceBindingPath": "Zombie_innerleg_foot",
+      "animatorRoot": "",
+      "rawPathHash": "0x48C75A62",
+      "clip": "die",
+      "curveIndex": 27,
+      "curveKind": "float",
+      "sourceClip": "Resources/zombies/zombie_pogo/jackboxjump/die.anim",
+      "sourceClipSha256": "6a5825b0615c10e3dee7e705ae0cfbb771a121d4241719452939dbc2b8b38eba"
+    },
+    {
+      "path": "Zombie_innerleg_foot",
+      "sourceBindingPath": "Zombie_innerleg_foot",
+      "animatorRoot": "",
+      "rawPathHash": "0x48C75A62",
+      "clip": "jump",
+      "curveIndex": 30,
+      "curveKind": "position",
+      "sourceClip": "Resources/zombies/zombie_pogo/jackboxjump/jump.anim",
+      "sourceClipSha256": "a7ebaadaae20c545f929c847295e90ce1b1beb65c12f4d20fd3d5e004783cc81"
+    },
+    {
+      "path": "Zombie_innerleg_foot",
+      "sourceBindingPath": "Zombie_innerleg_foot",
+      "animatorRoot": "",
+      "rawPathHash": "0x48C75A62",
+      "clip": "jump2",
+      "curveIndex": 16,
+      "curveKind": "position",
+      "sourceClip": "Resources/zombies/zombie_pogo/jackboxjump/jump2.anim",
+      "sourceClipSha256": "e3da70fba6094f9f58f172c221e3d57559fb697ba5ce2f0cf6ca52eed3e30cdb"
+    }
+  ],
+  "sourceUnboundHierarchyProof": {
+    "method": "complete audited Animator-relative source hierarchy; absent binding is a Unity no-op",
+    "sourcePrefabSha256": "fc162f51578cb11ed9706a8a2942cea4c7f26610e294c34178552683214e733b",
+    "documentCount": 104,
+    "animatorRoots": {
+      "": {
+        "paths": [
+          "",
+          "Zombie_pogo_stickhands",
+          "Zombie_pogo_stickhands/Zombie_pogo_stickhands_1",
+          "Zombie_pogo_stickhands/Zombie_pogo_stickhands_1",
+          "Zombie_pogo_stick",
+          "Zombie_pogo_stick/Zombie_pogo_stick",
+          "Zombie_pogo_stick/Umbrellaleaf_leaf6_1",
+          "Zombie_pogo_stick/Umbrellaleaf_leaf4_1",
+          "Zombie_pogo_stick/图层 22",
+          "Zombie_pogo_outerarm_lower",
+          "Zombie_pogo_outerarm_upper",
+          "Zombie_pogo_outerarm_upper/Zombie_pogo_outerarm_upper2_1",
+          "Zombie_pogo_jaw",
+          "Zombie_pogo_head",
+          "Zombie_pogo_head/Zombie_pogo_head_1",
+          "Zombie_pogo_head/Zombie_pogo_head_2",
+          "Zombie_pogo_head/back",
+          "Zombie_pogo_body",
+          "Zombie_pogo_body/Zombie_pogo_body_1",
+          "Zombie_pogo_body/Zombie_pogo_body_1/Zombie_jackbox_body2_1",
+          "Zombie_pogo_body/Zombie_pogo_body_1/back_2",
+          "Zombie_pogo_outerleg_foot",
+          "Zombie_pogo_outerleg_upper",
+          "Zombie_pogo_outerleg_upper/Zombie_pogo_outerleg_upper_1",
+          "Zombie_pogo_outerleg_lower",
+          "Zombie_innerleg_upper",
+          "Zombie_pogo_innerleg_foot",
+          "Zombie_pogo_innerleg_lower",
+          "Zombie_pogo_innerarm_lower",
+          "Zombie_pogo_innerarm_lower/Zombie_pogo_innerarm_lower_1",
+          "Zombie_pogo_innerarm_upper",
+          "Zombie_innerarm_hand",
+          "LoseHead",
+          "LoseArm",
+          "Shadow"
+        ],
+        "pathHashes": [
+          "0x00000000",
+          "0x3203E3C5",
+          "0x469014F5",
+          "0x469014F5",
+          "0xA12F9F59",
+          "0x45FCE1AE",
+          "0xA3885F0B",
+          "0xA00C8B65",
+          "0x8FEE76AC",
+          "0x6FE92E64",
+          "0x0F2C8ADB",
+          "0x2CBF63AB",
+          "0x63929D1C",
+          "0x3D27519E",
+          "0x96B36829",
+          "0x0FBA3993",
+          "0x8354B88E",
+          "0x417CACB0",
+          "0xFF30C61D",
+          "0x0997A0F5",
+          "0x638EB440",
+          "0x49C239BA",
+          "0x2C6D0AF0",
+          "0x3E61850C",
+          "0x4CA8AE4F",
+          "0xA4645575",
+          "0xD8F433DA",
+          "0x018BF91D",
+          "0x22CA7936",
+          "0xB8C3CA58",
+          "0x420FDD89",
+          "0x3ECDB589",
+          "0x9C0F352B",
+          "0x0ABD01B4",
+          "0x72DA871B"
+        ]
+      }
+    },
+    "startupHierarchyAudit": {
+      "manifestSha256": "19f82d7c8719ab02a6c9e8e46934f3215160cbdd0bc50bd512a38c2458728d19",
+      "audit": {
+        "schema": 1,
+        "sourcePrefab": "Resources/zombies/_prefab/JackboxJumpZombie.prefab",
+        "sourcePrefabSha256": "fc162f51578cb11ed9706a8a2942cea4c7f26610e294c34178552683214e733b",
+        "runtimeClassBinding": {
+          "path": "C:\\PvZ\\stabledecompile-master\\assets\\fusion\\catalog\\zombies.json",
+          "sha256": "91bd103faf6f0cc22a13b9947ed691d3544860ac0f1aa35b51e5213405e0ff6b",
+          "className": "JackboxJumpZombie"
+        },
+        "scriptChain": [
+          {
+            "path": "Scripts/Assembly-CSharp/JackboxJumpZombie.cs",
+            "sha256": "edda15f38272324a5b5ba81612bb43064561afc7e6a603b71d979595eecf5364"
+          },
+          {
+            "path": "Scripts/Assembly-CSharp/SuperPogoZombie.cs",
+            "sha256": "0bab65032011507c8e196ce8e29cc1d405001731dc46219f859519da7e474906"
+          },
+          {
+            "path": "Scripts/Assembly-CSharp/PogoZombie.cs",
+            "sha256": "259a5316ea5886e83814649b024e860b2826f11e0d7792ee30654d0d225eb602"
+          },
+          {
+            "path": "Scripts/Assembly-CSharp/Zombie.cs",
+            "sha256": "60ca737e3f1e3af5ca2924a9848c25563ca4cf9ea92c898ab22d8f29a356d808"
+          }
+        ],
+        "primaryEvidence": "C:\\PvZ\\stabledecompile-master\\work\\fusion\\stage375\\source-unbound117209\\startup117209.json",
+        "primaryEvidenceSha256": "cc6e3c83c7c1d02d20b2c00c698633125745ce7f7bd869d7291f3ab102dde89c",
+        "methods": [
+          {
+            "method": "SuperPogoZombie$$Start",
+            "address": "0x180374250",
+            "codeSha256": "3ab8efc49a8272a67f68e935f96dd0de2e9e3b5b1834f4f74f8d77788ac1b113"
+          },
+          {
+            "method": "PogoZombie$$Start",
+            "address": "0x18036ED30",
+            "codeSha256": "bd5b1ad497bdfc09e06c04e599085559722e2bb12ea39ab194c35dc9ed6ac600"
+          },
+          {
+            "method": "PogoZombie$$Awake",
+            "address": "0x18036DFD0",
+            "codeSha256": "aa6df151644381568c261bcfb9c559b663068424959201b5aad091fe30b3cc5f"
+          },
+          {
+            "method": "Zombie$$Awake",
+            "address": "0x18037F7F0",
+            "codeSha256": "1a9cc185821a30bde18aa5d571a14c7c52eeb5ec404393b1720dfea97e3346ca"
+          },
+          {
+            "method": "Zombie$$Start",
+            "address": "0x18038A300",
+            "codeSha256": "a1b716b16be70725ff7ed9114c4d952c446919d3bcc6ef29042837638c2ca764"
+          }
+        ]
+      }
+    }
+  }
 }
