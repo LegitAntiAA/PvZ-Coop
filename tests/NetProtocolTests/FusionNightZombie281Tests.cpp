@@ -39,7 +39,7 @@ int RunFusionNightZombie281Tests(int& checks)
     // Five distinct source identities/stats, rather than carrier aliases.
     struct Profile {uint16_t kind;int body,first,second,carrier;};
     constexpr Profile profiles[]={{5,270,0,200,ZOMBIE_NEWSPAPER},{6,720,0,0,ZOMBIE_POLEVAULTER},
-        {7,270,0,0,ZOMBIE_POLEVAULTER},{9,270,1400,0,ZOMBIE_FOOTBALL},{10,720,0,0,-1}};
+        {7,270,0,0,ZOMBIE_POLEVAULTER},{9,270,1400,0,ZOMBIE_FOOTBALL},{10,720,0,0,ZOMBIE_NORMAL}};
     for(const auto& oracle:profiles)
     {
         const auto* p=FindFusionZombieProfile(oracle.kind);
@@ -237,9 +237,8 @@ int RunFusionNightZombie281Tests(int& checks)
     // atomic failure. Missing actors are never replaced with original PvZ types.
     std::vector<uint16_t> closure{999};std::string error;
     const uint16_t jackson[]={10};
-    // Jackson data/dependencies are recovered, but its canonical controller
-    // and transition view are not wired. Never admit a BasicZombie substitute.
-    CHECK(!BuildFusionSourceZombieClosure280(jackson,closure,&error)&&closure==std::vector<uint16_t>({999}));
+    // Jackson now requires its complete genuine controller/child closure.
+    CHECK(BuildFusionSourceZombieClosure280(jackson,closure,&error)&&closure==std::vector<uint16_t>({10,6,7}));
     CHECK(std::vector<uint16_t>(FusionDayZombie273NpcDependencies(10).begin(),FusionDayZombie273NpcDependencies(10).end())==std::vector<uint16_t>({6,7}));
     const uint16_t overlap[]={6,7,6,5,9};
     CHECK(BuildFusionSourceZombieClosure280(overlap,closure,&error)&&closure==std::vector<uint16_t>({6,7,5,9}));

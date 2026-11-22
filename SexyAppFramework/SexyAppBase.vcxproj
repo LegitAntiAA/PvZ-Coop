@@ -693,6 +693,7 @@ EXIT /B 0</Command>
     <ClCompile Include="..\Lawn\Fusion\FusionNativeDayZombie273Bridge.cpp" />
     <ClCompile Include="..\Lawn\Fusion\FusionNightZombie281Rules.cpp" />
     <ClCompile Include="..\Lawn\Fusion\FusionNativeNightZombie281.cpp" />
+    <ClCompile Include="..\Lawn\Fusion\FusionNativeNightZombie291Bridge.cpp" />
     <ClCompile Include="..\Lawn\Fusion\FusionNativeAdventureLesson284Bridge.cpp" />
     <ClCompile Include="..\Lawn\Net\NetFusionAdventure273Smoke.cpp" />
     <ClCompile Include="..\Lawn\Net\NetFusionDayZombie274Smoke.cpp" />

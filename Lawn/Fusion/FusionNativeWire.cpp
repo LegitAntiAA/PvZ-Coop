@@ -137,6 +137,17 @@ template <typename IO> void Fields(IO& io, NativeZombieActionData& v)
     io.I32(v.waterGrapTicks); io.I32(v.waterGrapCount);
 }
 
+template <typename IO> void Fields(IO& io,FusionNightZombie281View& v)
+{
+    uint8_t phase=static_cast<uint8_t>(v.phase),outgoing=static_cast<uint8_t>(v.outgoing);
+    uint8_t flags=uint8_t(v.lookBack)|(uint8_t(v.moonWalkFinished)<<1)|(uint8_t(v.canAttack)<<2)|(uint8_t(v.loseDancer)<<3);
+    io.U8(phase);io.U8(flags);io.U8(outgoing);
+    if(flags&0xf0)io.valid=false;
+    v.phase=static_cast<FusionNightZombie281Phase>(phase);v.outgoing=static_cast<FusionNightZombie281Phase>(outgoing);
+    v.lookBack=bool(flags&1);v.moonWalkFinished=bool(flags&2);v.canAttack=bool(flags&4);v.loseDancer=bool(flags&8);
+    io.F32(v.outgoingSourceSeconds);io.F32(v.transitionElapsed);io.F32(v.transitionTotal);
+}
+
 template <typename IO> void Fields(IO& io, NativeSourceZombieData& v)
 {
     io.U16(v.kind); io.U32(v.instanceToken); io.F32(v.originSpeed); io.F32(v.health);
@@ -411,13 +422,22 @@ bool ValidateNativeSnapshotFrame(const NativeSnapshotFrame& frame, const std::ve
         !UniqueIds(frame.worldPlants269,1024)||!UniqueIds(frame.worldBeams269,1024)||!UniqueIds(frame.droppedCards269,128)||
         !UniqueIds(frame.rollingPlants269,1024)||!UniqueIds(frame.fertilizeCoins269,1024)||
         !UniqueIds(frame.worldRemainder269Aux,1024)||!UniqueIds(frame.worldRemainder269Shots,1024)||!UniqueIds(frame.wheatPlants269,1024)||
-        !UniqueIds(frame.dayZombies273,1024)||!NativeWorldRemainder269BoardStateValid(frame.worldRemainder269Board)||
+        !UniqueIds(frame.dayZombies273,1024)||!UniqueIds(frame.nightZombies281,1024)||!NativeWorldRemainder269BoardStateValid(frame.worldRemainder269Board)||
         !FusionAdventureSessionValid273(frame.adventure)||frame.money < 0 || frame.money > 99999) return false;
     if(frame.adventure.enabled)
     {
         const int sourceBackground=(frame.adventure.run.level-1)/9;
         if(frame.background!=sourceBackground)return false;
     }
+    for(const auto& record:frame.nightZombies281)
+    {
+        const auto source=std::find_if(frame.sourceZombies.begin(),frame.sourceZombies.end(),
+            [&](const auto& value){return value.id==record.id;});
+        if(source==frame.sourceZombies.end()||source->data.kind!=10||!FusionNightZombie281ViewValid(record.data))return false;
+    }
+    for(const auto& source:frame.sourceZombies)
+        if(source.data.kind==10&&std::none_of(frame.nightZombies281.begin(),frame.nightZombies281.end(),
+            [&](const auto& value){return value.id==source.id;}))return false;
     for(const auto& record:frame.dayZombies273)
     {
         const auto source=std::find_if(frame.sourceZombies.begin(),frame.sourceZombies.end(),
@@ -851,7 +871,7 @@ bool EncodeNativeSnapshot(const NativeSnapshotFrame& frame, const std::vector<Fu
     Fields(writer,copy.worldRemainder269Board);writer.Bool(copy.goldHypnoSummoned);
     Vector(writer,copy.worldRemainder269Aux);Vector(writer,copy.worldRemainder269Shots);
     Vector(writer,copy.wheatPlants269);
-    Vector(writer,copy.dayZombies273);
+    Vector(writer,copy.dayZombies273);Vector(writer,copy.nightZombies281);
     if(!writer.valid)return false;
     constexpr size_t headerBytes = 14;
     if (metadata.Size() > 65535 || headerBytes + metadata.Size() > kMaximumBytes - nativeBody.Size()) return false;
@@ -893,7 +913,7 @@ bool DecodeNativeSnapshot(LawnNet::NetBuffer& wire, const std::vector<FusionBank
     Fields(reader,decoded.worldRemainder269Board);reader.Bool(decoded.goldHypnoSummoned);
     Vector(reader,decoded.worldRemainder269Aux,1024);Vector(reader,decoded.worldRemainder269Shots,1024);
     Vector(reader,decoded.wheatPlants269,1024);
-    Vector(reader,decoded.dayZombies273,1024);
+    Vector(reader,decoded.dayZombies273,1024);Vector(reader,decoded.nightZombies281,1024);
     if (!reader.valid || metadata.Remaining() || decoded.epoch != expectedEpoch || !ValidateNativeSnapshotFrame(decoded, eligible)) return false;
     LawnNet::NetBuffer body;
     body.mData.resize(bodyBytes);

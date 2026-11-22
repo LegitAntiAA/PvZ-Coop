@@ -78,6 +78,7 @@ int RunFusionTools268CommandTests(int& checks);
 #include "FusionZombieClosure280Tests.h"
 int RunFusionNightZombie281Tests(int& checks);
 int RunNetSoundEvent284Tests(int& checks);
+int RunFusionJackson291Tests(int& checks);
 #include "FusionSimulationTests.h"
 #include "FusionWireTests.h"
 #include "FusionRoomWireTests.h"
@@ -1211,6 +1212,7 @@ int main(int argc, char** argv)
 	int aClosure280Checks=0;gFailures+=RunFusionZombieClosure280Tests(aClosure280Checks);gChecks+=aClosure280Checks;
 	int aNight281Checks=0;gFailures+=RunFusionNightZombie281Tests(aNight281Checks);gChecks+=aNight281Checks;
 	int aSourceSound284Checks=0;gFailures+=RunNetSoundEvent284Tests(aSourceSound284Checks);gChecks+=aSourceSound284Checks;
+	int aJackson291Checks=0;gFailures+=RunFusionJackson291Tests(aJackson291Checks);gChecks+=aJackson291Checks;
 	gChecks += aFusionModeResult.mChecks;
 	gFailures += aFusionModeResult.mFailures;
 	const auto aFusionSimulationResult = RunFusionSimulationTests();

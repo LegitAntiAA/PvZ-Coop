@@ -282,6 +282,13 @@ bool NetCaptureNativeFusionFrame(Board* board, LawnFusion::NativeSnapshotFrame& 
                     captured.paperShootEvent=uint8_t(zombie->mBossHeadCounter);
                 }
                 frame.sourceZombies.push_back({zombie->mNetId,captured});
+                if(data->kind==10)
+                {
+                    const auto found=context->nightZombies281.find(token);
+                    if(found==context->nightZombies281.end()||!found->second.initialized||found->second.failed)return false;
+                    frame.nightZombies281.push_back({zombie->mNetId,static_cast<const LawnFusion::FusionNightZombie281View&>(found->second)});
+                }
+
                 if(const auto* day=LawnFusion::GetNativeDayZombie273(zombie))
                 {
                     auto state=*day;
@@ -568,6 +575,7 @@ bool NetPreflightNativeFusionBody(const NetBuffer& body, const LawnFusion::Nativ
 	for (const auto& record : frame.garlicZombies) if (!zombieIds.contains(record.id)) return false;
 	for (const auto& record : frame.sourceZombies) if (!zombieIds.contains(record.id)) return false;
     for(const auto& record:frame.dayZombies273)if(!zombieIds.contains(record.id))return false;
+    for(const auto& record:frame.nightZombies281)if(!zombieIds.contains(record.id))return false;
 	for (const auto& record : frame.coins) if (!coinIds.contains(record.id)) return false;
     for(const auto& record:frame.companions269)if(!projectileIds.contains(record.id))return false;
     for(const auto& record:frame.companionPlants269)if(!plantIds.contains(record.id))return false;
@@ -716,6 +724,16 @@ bool NetBindNativeFusionFrame(Board* board, const LawnFusion::NativeSnapshotFram
             NetApplyReanimState(board->mApp,zombie->mSpecialHeadReanimID,record.data.paperHead);
         }
 
+    }
+    context->nightZombies281.clear();
+    for(const auto& record:frame.nightZombies281)
+    {
+        auto* zombie=board->NetGetGhostZombie(record.id);
+        const auto* source=LawnFusion::GetNativeSourceZombieData(zombie);
+        if(!zombie||!source||source->kind!=10)return false;
+        auto& state=context->nightZombies281[board->mZombies.DataArrayGetID(zombie)];
+        static_cast<LawnFusion::FusionNightZombie281View&>(state)=record.data;
+        state.initialized=true; // Ghosts adopt this view and never tick source callbacks.
     }
 	context->dayZombies273.clear();
 	for(const auto& record:frame.dayZombies273)
@@ -908,7 +926,7 @@ uint32_t NetGetReanimationFrameCapacity(const Reanimation* theReanim)
 
 bool NetDay273AllocationCapacity(Board* board,const NetBuffer& body,const LawnFusion::NativeSnapshotFrame& frame)
 {
-    if(frame.dayZombies273.empty()&&!(frame.adventure.enabled&&frame.background==BACKGROUND_2_NIGHT))return true;
+    if(frame.dayZombies273.empty()&&frame.nightZombies281.empty()&&!(frame.adventure.enabled&&frame.background==BACKGROUND_2_NIGHT))return true;
     const auto reject=[](const char* reason,int section=-1,unsigned type=0)
     {
         NetTrace("Day274 snapshot allocation rejected reason=%s section=%d type=%u",reason,section,type);return false;

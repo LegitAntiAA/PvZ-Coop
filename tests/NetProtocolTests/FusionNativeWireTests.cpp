@@ -29,7 +29,8 @@ namespace
 FusionNativeWireTestResult result;
 // These offset fixtures have empty Star/Doom/Companion/World/Card/Rolling/Fert
 // vectors. FNS23 adds a16-byte Board singleton and two U16 counts to FNS22.
-constexpr size_t empty269FamilyCountBytes=10*2+20+2+2; // FNS24 Wheat and FNS26 Day counts.
+constexpr size_t empty269FamilyCountBytes=10*2+20+2+2+2; // Wheat, Day and Jackson family counts.
+constexpr size_t emptyNight291CountBytes=2; // U16 count after the existing Day vector.
 constexpr size_t disabledAdventureSessionBytes=1; // FNS26, after temporaryLightLevel and before Garlic.
 void Check(bool condition, int line)
 {
@@ -88,6 +89,7 @@ void RejectAtomically(LawnNet::NetBuffer forged,std::source_location caller=std:
     previous.wheatPlants269={{704,{true,31.5f}}};
     LawnFusion::NativeDayZombie273State day;day.status=3;day.shadowEnabled=false;
     previous.dayZombies273={{705,day}};
+    previous.nightZombies281={{706,{}}};previous.nightZombies281[0].data.lookBack=false;
     previous.zombieActions.push_back({700,{42,2.0f,true,true,6,1234,37}});
     previous.garlicZombies.push_back({701,{LawnFusion::GarlicActionPhase::Waiting,true,44,0,32,-1,-1,0,0}});
     LawnNet::NetBuffer native; native.WriteU8(0x99);
@@ -111,6 +113,7 @@ void RejectAtomically(LawnNet::NetBuffer forged,std::source_location caller=std:
         previous.wheatPlants269.size()==1&&previous.wheatPlants269[0].id==704&&previous.wheatPlants269[0].data.isFromWheat&&previous.wheatPlants269[0].data.wheatTime==31.5f&&
         previous.dayZombies273.size()==1&&previous.dayZombies273[0].id==705&&previous.dayZombies273[0].data.status==3&&
         !previous.dayZombies273[0].data.shadowEnabled&&previous.dayZombies273[0].data.shootCountdown==1.5f&&
+        previous.nightZombies281.size()==1&&previous.nightZombies281[0].id==706&&!previous.nightZombies281[0].data.lookBack&&
         previous.equipmentCoins.size()==1&&previous.equipmentCoins[0].id==703&&previous.equipmentCoins[0].data.instanceToken==33&&native.Size()==1 && native.mData[0]==0x99);
 }
 }
@@ -214,7 +217,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
     CHECK(wire.Remaining() == 0 && native.mData == original);
     CHECK(decoded.plants.size() == 1 && decoded.plants[0].data.kind == 1000);
     CHECK(decoded.plants[0].data.producerRewardFlags == 0 && decoded.plants[0].data.deathEventFlags == 0 &&
-        body.mData[4] == 26 && body.mData[5] == 0 && body.mData[18]==BACKGROUND_1_DAY && body.mData[19]==1);
+        body.mData[4] == 27 && body.mData[5] == 0 && body.mData[18]==BACKGROUND_1_DAY && body.mData[19]==1);
     CHECK(decoded.packets[0].id != decoded.packets[0].data.selectionId);
     CHECK(decoded.plants[0].data.firstParent == 0 && decoded.plants[0].data.secondParent == 1);
     CHECK(decoded.coins.size() == 1 && decoded.coins[0].data.value == 5 && !decoded.coins[0].data.money);
@@ -819,7 +822,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
         CHECK(!DecodeNativeSnapshot(forgedProducer, eligible, 19, preservedFrame, preservedBody));
         CHECK(forgedProducer.mReadPos == 0 && preservedFrame.epoch == 777 && preservedBody.Size() == 1 && preservedBody.mData[0] == 0x99);
     }
-    for (uint16_t version : {uint16_t(2), uint16_t(3), uint16_t(4), uint16_t(5), uint16_t(6), uint16_t(7), uint16_t(8), uint16_t(9), uint16_t(10), uint16_t(11), uint16_t(12), uint16_t(13), uint16_t(14), uint16_t(15), uint16_t(16), uint16_t(17), uint16_t(18), uint16_t(19), uint16_t(20), uint16_t(21), uint16_t(22),uint16_t(23),uint16_t(24),uint16_t(25),uint16_t(27)})
+    for (uint16_t version : {uint16_t(2), uint16_t(3), uint16_t(4), uint16_t(5), uint16_t(6), uint16_t(7), uint16_t(8), uint16_t(9), uint16_t(10), uint16_t(11), uint16_t(12), uint16_t(13), uint16_t(14), uint16_t(15), uint16_t(16), uint16_t(17), uint16_t(18), uint16_t(19), uint16_t(20), uint16_t(21), uint16_t(22),uint16_t(23),uint16_t(24),uint16_t(25),uint16_t(26),uint16_t(28)})
     {
         NetBuffer wrongVersion = producerWire; wrongVersion.mReadPos = 0;
         wrongVersion.mData[4] = static_cast<uint8_t>(version); wrongVersion.mData[5] = 0;
@@ -1205,7 +1208,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
         } // Otherwise valid kind8 cannot carry a Melon enhancement.
         if (variant==12) { forged.mData[actionCount]=1; forged.mData[actionCount+1]=4; } // Bounded vector rejects1025 before allocation.
         if (variant==13) write32(firstAction+3,0); // Zero scale.
-        if (variant==14) write32(firstAction+3,0xbf800000u); // Negative scaleРІв‚¬вЂ™1.
+        if (variant==14) write32(firstAction+3,0xbf800000u); // Negative scaleР Р†РІвЂљВ¬РІР‚в„ў1.
         if (variant==15) write32(firstAction+3,0x7fc00000u); // NaN.
         if (variant==16) write32(firstAction+3,0x41100000u); // Scale9 exceeds8.
         if (variant==17) write32(firstAction+3,0x7f800000u); // Infinity.
@@ -2095,7 +2098,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
         {
             NativeSnapshotFrame decoded;NetBuffer opaque;CHECK(DecodeNativeSnapshot(encoded,eligible,19,decoded,opaque));
             CHECK(decoded.droppedCards269.size()==1&&decoded.droppedCards269[0].id==501&&decoded.droppedCards269[0].data.instanceToken==card.instanceToken&&decoded.droppedCards269[0].data.heldSlot==1&&decoded.droppedCards269[0].data.landed&&!decoded.droppedCards269[0].data.flashing&&opaque.mData==original);
-            const size_t end=14+(encoded.mData[6]|(size_t(encoded.mData[7])<<8)),firstCard=end-24-4-15;
+            const size_t end=14+(encoded.mData[6]|(size_t(encoded.mData[7])<<8)),firstCard=end-emptyNight291CountBytes-24-4-15;
             CHECK(encoded.mData[firstCard]==(501&255)&&encoded.mData[firstCard+12]==1&&encoded.mData[firstCard+13]==1&&encoded.mData[firstCard+14]==0);
             for(size_t flag:{firstCard+13,firstCard+14})for(uint8_t invalid:{uint8_t(2),uint8_t(255)})
             {auto forged=encoded;forged.mData[flag]=invalid;RejectAtomically(forged);}
@@ -2146,7 +2149,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
             if(invalid==4)bad.plants.clear();
             CHECK(!ValidateNativeSnapshotFrame(bad,eligible));
         }
-        const size_t end=14+(encoded.mData[6]|(size_t(encoded.mData[7])<<8)),firstRolling=end-24-2-34;
+        const size_t end=14+(encoded.mData[6]|(size_t(encoded.mData[7])<<8)),firstRolling=end-emptyNight291CountBytes-24-2-34;
         auto forged=encoded;forged.mData[firstRolling+6]^=1;RejectAtomically(forged); // Mismatched opaque actor token.
     }
     // FNS22 Fert extends a real Coin. Its nullable target is an opaque current
@@ -2161,7 +2164,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
         {
             NativeSnapshotFrame copy;NetBuffer opaque;CHECK(DecodeNativeSnapshot(encoded,eligible,19,copy,opaque));
             CHECK(copy.fertilizeCoins269.size()==1&&copy.fertilizeCoins269[0].id==541&&copy.fertilizeCoins269[0].data.instanceToken==item.instanceToken&&copy.fertilizeCoins269[0].data.targetId==item.targetId&&copy.fertilizeCoins269[0].data.targetToken==item.targetToken&&copy.fertilizeCoins269[0].data.phase==NativeFertilize269Phase::Using&&copy.fertilizeCoins269[0].data.phaseStartAge==10&&copy.fertilizeCoins269[0].data.anchorX==125&&opaque.mData==original);
-            const size_t end=14+(encoded.mData[6]|(size_t(encoded.mData[7])<<8)),firstFert=end-24-26;
+            const size_t end=14+(encoded.mData[6]|(size_t(encoded.mData[7])<<8)),firstFert=end-emptyNight291CountBytes-24-26;
             CHECK(encoded.mData[firstFert]==(541&255)&&encoded.mData[firstFert+12]==3&&encoded.mData[firstFert+13]==255);
             auto bad=encoded;bad.mData[firstFert+12]=4;RejectAtomically(bad); // Unknown phase cannot masquerade as a Bool.
         }
@@ -2197,7 +2200,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
         CHECK(DecodeNativeSnapshot(encoded,eligible,19,restored,opaque));
         CHECK(restored.wheatPlants269.size()==1&&restored.wheatPlants269[0].id==frame.plants[0].id&&
             restored.wheatPlants269[0].data.isFromWheat&&restored.wheatPlants269[0].data.wheatTime==time&&opaque.mData==original);
-        const size_t end=14+(encoded.mData[6]|(size_t(encoded.mData[7])<<8)),count=end-11,record=end-9;
+        const size_t end=14+(encoded.mData[6]|(size_t(encoded.mData[7])<<8)),count=end-emptyNight291CountBytes-11,record=end-emptyNight291CountBytes-9;
         CHECK(encoded.mData[count]==1&&encoded.mData[count+1]==0&&encoded.mData[record+2]==1);
         for(uint8_t badBool:{uint8_t(0),uint8_t(2),uint8_t(255)})
         {auto bad=encoded;bad.mData[record+2]=badBool;RejectAtomically(bad);}
@@ -2221,9 +2224,9 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
             CHECK(!ValidateNativeSnapshotFrame(invalid,eligible)&&!EncodeNativeSnapshot(invalid,eligible,preserved)&&preserved.mData==bytes);
         }
         // A duplicate wire entry still has a valid framing/body checksum.
-        auto duplicate=encoded;duplicate.mData.insert(duplicate.mData.begin()+end-2,encoded.mData.begin()+record,encoded.mData.begin()+record+7);
+        auto duplicate=encoded;duplicate.mData.insert(duplicate.mData.begin()+end-emptyNight291CountBytes-2,encoded.mData.begin()+record,encoded.mData.begin()+record+7);
         duplicate.mData[count]=2;const size_t metadata=end-14+7;duplicate.mData[6]=uint8_t(metadata);duplicate.mData[7]=uint8_t(metadata>>8);RejectAtomically(duplicate);
-        for(uint16_t badVersion:{uint16_t(23),uint16_t(24),uint16_t(25),uint16_t(27)})
+        for(uint16_t badVersion:{uint16_t(23),uint16_t(24),uint16_t(25),uint16_t(26),uint16_t(28)})
         {auto bad=encoded;bad.mData[4]=uint8_t(badVersion);bad.mData[5]=0;RejectAtomically(bad);}
         auto cleared=source;NetBuffer clearWire;clearWire.mData=original;
         CHECK(EncodeNativeSnapshot(cleared,eligible,clearWire)&&DecodeNativeSnapshot(clearWire,eligible,19,restored,opaque)&&restored.wheatPlants269.empty());
@@ -2263,7 +2266,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
             const bool ok=EncodeNativeSnapshot(frame,eligible,encoded);CHECK(ok);if(!ok)continue;
             const size_t end=14+(encoded.mData[6]|(size_t(encoded.mData[7])<<8));
             constexpr size_t dayRecordBytes=2+8+LawnNet::NET_ZOMBIE_ANIM_WIRE_BYTES;
-            const size_t record=end-dayRecordBytes,count=record-2;
+            const size_t record=end-emptyNight291CountBytes-dayRecordBytes,count=record-2;
             CHECK(dayRecordBytes==21&&encoded.mData[count]==1&&encoded.mData[count+1]==0&&
                 encoded.mData[record]==(601&255)&&encoded.mData[record+1]==(601>>8)&&
                 encoded.mData[record+6]==expected.status&&encoded.mData[record+7]==expected.armorStage&&
@@ -2342,7 +2345,7 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
         const bool ok=EncodeNativeSnapshot(frame,eligible,encoded);CHECK(ok);
         if(ok)
         {
-            const size_t end=14+(encoded.mData[6]|(size_t(encoded.mData[7])<<8)),record=end-21,count=record-2;
+            const size_t end=14+(encoded.mData[6]|(size_t(encoded.mData[7])<<8)),record=end-emptyNight291CountBytes-21,count=record-2;
             for(int fault=0;fault<12;++fault)
             {
                 auto forged=encoded;
@@ -2361,17 +2364,17 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
                 RejectAtomically(forged);
             }
             auto duplicate=encoded;
-            duplicate.mData.insert(duplicate.mData.begin()+end,encoded.mData.begin()+record,encoded.mData.begin()+end);
+            duplicate.mData.insert(duplicate.mData.begin()+end-emptyNight291CountBytes,encoded.mData.begin()+record,encoded.mData.begin()+end-emptyNight291CountBytes);
             duplicate.mData[count]=2;const size_t larger=end-14+21;
             duplicate.mData[6]=uint8_t(larger);duplicate.mData[7]=uint8_t(larger>>8);RejectAtomically(duplicate);
-            auto missing=encoded;missing.mData.erase(missing.mData.begin()+record,missing.mData.begin()+end);missing.mData[count]=0;
+            auto missing=encoded;missing.mData.erase(missing.mData.begin()+record,missing.mData.begin()+end-emptyNight291CountBytes);missing.mData[count]=0;
             const size_t smaller=end-14-21;missing.mData[6]=uint8_t(smaller);missing.mData[7]=uint8_t(smaller>>8);RejectAtomically(missing);
             // Truncate every head suffix while preserving the original native body.
             for(size_t retained=0;retained<11;++retained)
             {
                 auto truncated=encoded;const size_t cut=record+10+retained;
-                truncated.mData.erase(truncated.mData.begin()+cut,truncated.mData.begin()+end);
-                const size_t size=cut-14;truncated.mData[6]=uint8_t(size);truncated.mData[7]=uint8_t(size>>8);RejectAtomically(truncated);
+                truncated.mData.erase(truncated.mData.begin()+cut,truncated.mData.begin()+end-emptyNight291CountBytes);
+                const size_t size=cut-14+emptyNight291CountBytes;truncated.mData[6]=uint8_t(size);truncated.mData[7]=uint8_t(size>>8);RejectAtomically(truncated);
             }
         }
     }
@@ -2423,6 +2426,100 @@ FusionNativeWireTestResult RunFusionNativeWireTests()
     {NativeProjectileData foreign;foreign.kind=3;foreign.damage=300;foreign.specialType=9;foreign.isZombieBullet=true;
         CHECK(!NativeDay273ProjectileMetadataValid(foreign,PROJECTILE_PEA,MOTION_BACKWARDS));
         CHECK(NativeProjectileMetadataValid(foreign,PROJECTILE_PEA,MOTION_BACKWARDS));}
+    // FNS27: one Jackson view for the same real Zombie. Private controller
+    // references/cursors are excluded, and malformed records reject atomically.
+    {
+        using Phase=FusionNightZombie281Phase;
+        const auto nightFrame=[](const FusionNightZombie281View& view)
+        {
+            auto frame=Example();NativeSourceZombieData source;
+            source.kind=10;source.instanceToken=0x29101;source.health=720;
+            frame.sourceZombies={{601,source}};frame.zombieIdentities={{601,source.instanceToken}};
+            frame.nightZombies281={{601,view}};return frame;
+        };
+        const auto rejectNight=[&](const NativeSnapshotFrame& frame)
+        {
+            NetBuffer body;body.mData=original;const auto bytes=body.mData;
+            CHECK(!ValidateNativeSnapshotFrame(frame,eligible));
+            CHECK(!EncodeNativeSnapshot(frame,eligible,body)&&body.mData==bytes);
+        };
+        const auto roundtripNight=[&](const FusionNightZombie281View& view)
+        {
+            auto frame=nightFrame(view);CHECK(ValidateNativeSnapshotFrame(frame,eligible));
+            NetBuffer encoded;encoded.mData=original;CHECK(EncodeNativeSnapshot(frame,eligible,encoded));
+            NativeSnapshotFrame restored;NetBuffer body;
+            const bool read=DecodeNativeSnapshot(encoded,eligible,19,restored,body);
+            CHECK(read&&restored.nightZombies281.size()==1&&body.mData==original);
+            if(read&&restored.nightZombies281.size()==1)
+            {
+                const auto& actual=restored.nightZombies281[0].data;
+                CHECK(actual.phase==view.phase&&actual.outgoing==view.outgoing&&actual.lookBack==view.lookBack&&
+                    actual.moonWalkFinished==view.moonWalkFinished&&actual.canAttack==view.canAttack&&actual.loseDancer==view.loseDancer&&
+                    actual.outgoingSourceSeconds==view.outgoingSourceSeconds&&actual.transitionElapsed==view.transitionElapsed&&actual.transitionTotal==view.transitionTotal);
+                CHECK(EncodeNativeSnapshot(restored,eligible,body)&&body.mData==encoded.mData);
+            }
+            return encoded;
+        };
+        for(unsigned phase=0;phase<7;++phase)
+        {
+            FusionNightZombie281View view;view.phase=Phase(phase);
+            view.moonWalkFinished=phase!=0;view.canAttack=phase>=2;
+            roundtripNight(view);
+        }
+        const std::pair<Phase,Phase> edges[]={
+            {Phase::Moonwalk,Phase::Point},{Phase::Point,Phase::ArmRaise},
+            {Phase::Walk,Phase::ArmRaise},{Phase::Walk,Phase::EatFromWalk},{Phase::Walk,Phase::Point},
+            {Phase::ArmRaise,Phase::Walk},{Phase::ArmRaise,Phase::EatFromRaise},
+            {Phase::EatFromWalk,Phase::Walk},{Phase::EatFromRaise,Phase::ArmRaise},
+            {Phase::Moonwalk,Phase::Death},{Phase::Point,Phase::Death},{Phase::Walk,Phase::Death},
+            {Phase::ArmRaise,Phase::Death},{Phase::EatFromWalk,Phase::Death},{Phase::EatFromRaise,Phase::Death}};
+        for(const auto& [from,to]:edges)
+        {
+            FusionNightZombie281Clip clip;CHECK(TryGetFusionNightZombie281Clip(from,clip));
+            FusionNightZombie281View view;view.phase=to;view.outgoing=from;
+            view.moonWalkFinished=true;view.canAttack=to!=Phase::Point;
+            view.outgoingSourceSeconds=.5f*clip.seconds;
+            view.transitionTotal=from==Phase::ArmRaise&&to==Phase::Walk?.02f:.25f;
+            view.transitionElapsed=.5f*view.transitionTotal;roundtripNight(view);
+        }
+        FusionNightZombie281View good;good.phase=Phase::Point;good.outgoing=Phase::Moonwalk;
+        good.moonWalkFinished=true;good.outgoingSourceSeconds=1;good.transitionTotal=.25f;good.transitionElapsed=.125f;
+        const auto encoded=roundtripNight(good);
+        const size_t metadata=size_t(encoded.mData[6])+(size_t(encoded.mData[7])<<8);
+        const size_t first=14+metadata-17; // id U16, two phases/flags U8,3F32.
+        for(unsigned fault=0;fault<14;++fault)
+        {
+            auto bad=nightFrame(good);auto& view=bad.nightZombies281[0].data;
+            if(fault==0)bad.nightZombies281.clear();
+            if(fault==1)bad.sourceZombies.clear();
+            if(fault==2)bad.sourceZombies[0].data.kind=0;
+            if(fault==3)bad.nightZombies281.push_back(bad.nightZombies281[0]);
+            if(fault==4)bad.nightZombies281[0].id=602;
+            if(fault==5)view.phase=Phase(7);
+            if(fault==6)view.outgoing=Phase(7);
+            if(fault==7)view.moonWalkFinished=false,view.canAttack=true;
+            if(fault==8)view.outgoingSourceSeconds=-.1f;
+            if(fault==9)view.outgoingSourceSeconds=2.1f;
+            if(fault==10)view.transitionElapsed=-.1f;
+            if(fault==11)view.transitionElapsed=.3f;
+            if(fault==12)view.transitionTotal=-.25f;
+            if(fault==13)view.transitionTotal=0;
+            rejectNight(bad);
+        }
+        for(size_t at:{first+2,first+3,first+4})
+        {auto bad=encoded;bad.mData[at]=255;RejectAtomically(bad);}
+        for(size_t at:{first+5,first+9,first+13})
+        {
+            auto bad=encoded;const uint32_t bits=0x7fc00000;
+            for(unsigned i=0;i<4;++i)bad.mData[at+i]=uint8_t(bits>>(i*8));RejectAtomically(bad);
+        }
+        NativeNightZombie281State state;
+        static_cast<FusionNightZombie281View&>(state)=good;
+        state.dancers={1,2,3,0xffffffff};state.tick=123;state.moonWalkElapsed=2.5f;state.eventPosition={7,.5f};
+        auto privateCopy=nightFrame(static_cast<const FusionNightZombie281View&>(state));
+        NetBuffer canonical;canonical.mData=original;
+        CHECK(EncodeNativeSnapshot(privateCopy,eligible,canonical)&&canonical.mData==encoded.mData);
+    }
     std::printf(result.mFailures ? "[  FAILED  ] Fusion.NativeWire\n" : "[       OK ] Fusion.NativeWire\n");
     return result;
 }

@@ -757,7 +757,7 @@ bool NetFusionZombiePart284Supported(uint16_t kind,NetFusionZombiePart284 part)
 	if(part==Part::FirstArmor)return kind==9;
 	if(part==Part::SecondArmor||part==Part::Glasses)return kind==5;
 	if(part!=Part::Arm&&part!=Part::Head)return false;
-	if(kind==3||kind==5||kind==6||kind==7||kind==9)return true;
+	if(kind==3||kind==5||kind==6||kind==7||kind==9||kind==10)return true;
 	if(part==Part::Head)return false;
 	switch(kind){case 21:case 22:case 23:case 100:case 106:case 107:case 108:return true;default:return false;}
 }

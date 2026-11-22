@@ -5,6 +5,9 @@
 #include "FusionNativeZombies.h"
 #include "FusionNativeZombieVisual.h"
 #include "FusionNativeDayZombie273Bridge.h"
+#include "FusionNativeNightZombie291Bridge.h"
+#include "FusionNativeWire.h"
+#include "../Net/NetPresentation.h"
 #include "FusionNativeEffects269.h"
 #include "FusionNativeEquipment.h"
 #include "FusionNativeVisual.h"
@@ -66,7 +69,10 @@ bool EnsureNativeSourceZombieClosure280(Board* board,std::span<const uint16_t> r
         if(!CanQueryNativeSourceZombieRoot273(board,kind))return Reject(kind,"actual loaded model root/state pose is unavailable",error);
         const auto effect=[&](uint16_t fx)
         {return EnsureNativeSourceEffect269(board,fx,&detail);};
-        if(FusionDayZombie273Doll(kind)&&!effect(11))return Reject(kind,detail,error);
+        if((FusionDayZombie273Doll(kind)||kind==6||kind==10)&&!effect(11))return Reject(kind,detail,error);
+        if(kind==10&&kNativeFusionSnapshotVersion<27)return Reject(kind,"Jackson view requires FNS27",error);
+        if(kind==10&&!LawnNet::NetSourceSound284Ready(board->mApp,69))return Reject(kind,"source Sound69 unavailable",error);
+        if(kind==10&&!board->mApp->NetIsClient()&&!CanSpawnNativeJackson291(board,&detail))return Reject(kind,detail,error);
         if(FusionDayZombie273Pole(kind)&&(Sexy::SOUND_GRASSSTEP<0||Sexy::SOUND_POLEVAULT<0||!effect(23)))return Reject(kind,"Pole sound/effect23 dependency unavailable: "+detail,error);
         if(kind==100&&!effect(0))return Reject(kind,detail,error);
         if(kind==108&&!effect(18))return Reject(kind,detail,error);

@@ -121,6 +121,12 @@ bool StartNativeSourceZombieWalk(Zombie* zombie,int blendTime);
 bool UpdateNativeSourceZombieWalking(Zombie* zombie);
 bool UpdateNativeSourceZombieAttack(Zombie* zombie);
 
+// Source Jackson contact/real native bites without a stock body-track switch.
+// contact(canAttack=false) is a read-only eligibility probe: no target assignment.
+bool NativeJackson291Contact(Zombie*,bool canAttack);
+void NativeJackson291Bite(Zombie*);
+void ClearNativeJackson291Target(Zombie*);
+
 // Read-only source state plus existing normalized native body phase. Renderer
 // maps this to its actual source clip duration; it must not apply speed twice.
 bool GetNativeSourceZombiePresentation(const Zombie* zombie,const char*& stateName,float& normalizedPhase);

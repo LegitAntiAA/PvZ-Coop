@@ -2,6 +2,7 @@
 #include "FusionNative.h"
 #include "FusionNativeAdventure273.h"
 #include "FusionNativeDayZombie273Bridge.h"
+#include "FusionNativeNightZombie291Bridge.h"
 #include "FusionNativeZombieVisual.h"
 #include "FusionZombieMotion.h"
 #include "FusionGarlicRules.h"
@@ -95,11 +96,12 @@ bool EatingBlocked(Zombie* zombie)
     const auto* garlic=GetNativeZombieGarlicData(zombie);
     return zombie->IsImmobilizied() || (garlic && FusionGarlicPreventsEating(*garlic));
 }
-void ClearTarget(Zombie* zombie,NativeSourceZombieData& data)
+void ClearTarget(Zombie* zombie,NativeSourceZombieData& data,bool sourceClockOnly=false)
 {
     data.targetEntity=NativeZombieTargetEntity::None; data.targetId=0; data.targetGeneration=0;
-    if (auto* cursor=Cursor(zombie)) cursor->attackValid=false;
-    if (zombie->mIsEating) zombie->StopEating();
+    if(!sourceClockOnly)if (auto* cursor=Cursor(zombie)) cursor->attackValid=false;
+    if(sourceClockOnly)zombie->mIsEating=false;
+    else if (zombie->mIsEating) zombie->StopEating();
 }
 Plant* LockedPlant(Zombie* zombie,const NativeSourceZombieData& data)
 {
@@ -121,8 +123,48 @@ Zombie* LockedZombie(Zombie* zombie,const NativeSourceZombieData& data)
         target->mRow != zombie->mRow || target->IsFlying()||NativeWater268ZombieCaptured(target)) return nullptr;
     return GetRectOverlap(zombie->GetZombieAttackRect(),target->GetZombieRect())>0 ? target : nullptr;
 }
-bool Acquire(Zombie* zombie,NativeSourceZombieData& data)
+bool JacksonPlantAllowed(Zombie* zombie,Plant* plant)
 {
+    bool caltrop=false,nut=false;int level=0;
+    return plant&&GetNativeSpecialZombie269PlantTraits(plant,caltrop,nut,level)&&!caltrop&&
+        !zombie->mBoard->GetLadderAt(plant->mPlantCol,plant->mRow);
+}
+bool Acquire(Zombie* zombie,NativeSourceZombieData& data,bool sourceClockOnly=false,bool assign=true)
+{
+    if(sourceClockOnly)
+    {
+        // Source contact before PointOver may trigger summon but must not bind
+        // a target or switch the real native body clock. Keep the same locked
+        // ID/full-generation and native collider eligibility when binding is allowed.
+        auto picked=data;picked.targetEntity=NativeZombieTargetEntity::None;
+        picked.targetId=0;picked.targetGeneration=0;
+        if(auto* target=zombie->FindZombieTarget())
+        {
+            picked.targetEntity=NativeZombieTargetEntity::Zombie;picked.targetId=target->mNetId;
+            picked.targetGeneration=zombie->mBoard->mZombies.DataArrayGetID(target);
+            if(!target->mNetId||!LockedZombie(zombie,picked))picked.targetEntity=NativeZombieTargetEntity::None;
+        }
+        if(picked.targetEntity==NativeZombieTargetEntity::None&&!zombie->mMindControlled)
+        {
+            Plant* plant=nullptr;
+            while(zombie->mBoard->IteratePlants(plant))
+            {
+                if(!plant->mNetId||plant->mRow!=zombie->mRow||!JacksonPlantAllowed(zombie,plant)||
+                    GetRectOverlap(zombie->GetZombieAttackRect(),plant->GetPlantRect())<20||
+                    !zombie->CanTargetPlant(plant,ATTACKTYPE_CHEW))continue;
+                picked.targetEntity=NativeZombieTargetEntity::Plant;picked.targetId=plant->mNetId;
+                picked.targetGeneration=zombie->mBoard->mPlants.DataArrayGetID(plant);
+                if(LockedPlant(zombie,picked))break;picked.targetEntity=NativeZombieTargetEntity::None;
+            }
+        }
+        if(picked.targetEntity==NativeZombieTargetEntity::None)return false;
+        if(assign)
+        {
+            data.targetEntity=picked.targetEntity;data.targetId=picked.targetId;data.targetGeneration=picked.targetGeneration;
+            zombie->mIsEating=true; // Native bookkeeping only; Core owns the source phase.
+        }
+        return true;
+    }
     if (auto* target=zombie->FindZombieTarget())
     {
         if (!target->mNetId) return false;
@@ -147,6 +189,59 @@ bool Acquire(Zombie* zombie,NativeSourceZombieData& data)
         zombie->mNetId,data.kind,static_cast<unsigned>(data.targetEntity),data.targetId,data.targetGeneration,zombie->mBoard->mMainCounter);
     return true;
 }
+}
+
+void ClearNativeJackson291Target(Zombie* zombie)
+{
+    auto* data=GetNativeSourceZombieData(zombie);
+    if(data&&data->kind==10&&!zombie->mNetGhost&&!zombie->mApp->NetIsClient())ClearTarget(zombie,*data,true);
+}
+bool NativeJackson291Contact(Zombie* zombie,bool canAttack)
+{
+    auto* data=GetNativeSourceZombieData(zombie);
+    if(!data||data->kind!=10||!FlatLive(zombie)||!zombie->mHasHead)return false;
+    if(!canAttack)return Acquire(zombie,*data,true,false);
+    if(auto* plant=LockedPlant(zombie,*data);plant&&JacksonPlantAllowed(zombie,plant))
+    {zombie->mIsEating=true;return true;}
+    if(LockedZombie(zombie,*data)){zombie->mIsEating=true;return true;}
+    ClearTarget(zombie,*data,true);
+    return Acquire(zombie,*data,true,true);
+}
+void NativeJackson291Bite(Zombie* zombie)
+{
+    auto* data=GetNativeSourceZombieData(zombie);const auto* controller=GetNativeJackson291(zombie);
+    if(!data||data->kind!=10||!controller||!controller->canAttack||!FlatLive(zombie)||
+        !zombie->mHasHead||EatingBlocked(zombie))return;
+    const auto actorId=zombie->mNetId;const auto actorToken=data->instanceToken;
+    const auto entity=data->targetEntity;const auto targetId=data->targetId;const auto targetGeneration=data->targetGeneration;
+    const auto phase=controller->phase;const auto eventPosition=controller->eventPosition;
+    int beforeHP=0,afterHP=0;bool afterKnown=false;
+    if(auto* plant=LockedPlant(zombie,*data);plant&&JacksonPlantAllowed(zombie,plant))
+    {
+        beforeHP=plant->mPlantHealth;
+        if(!HandleNativeBatchPlantEaten(zombie,plant))zombie->EatPlant(plant);
+        if(auto* actual=zombie->mBoard->mPlants.DataArrayTryToGet(targetGeneration);actual&&actual->mNetId==targetId)
+        {afterKnown=true;afterHP=actual->mPlantHealth;}
+    }
+    else if(auto* target=LockedZombie(zombie,*data))
+    {
+        beforeHP=target->mBodyHealth;zombie->EatZombie(target);
+        if(auto* actual=zombie->mBoard->mZombies.DataArrayTryToGet(targetGeneration);actual&&actual->mNetId==targetId)
+        {afterKnown=true;afterHP=actual->mBodyHealth;}
+    }
+    else{ClearTarget(zombie,*data,true);return;}
+    if(afterKnown)
+        LawnNet::NetTrace("Fusion Jackson291 bite id=%u token=%u entity=%u target=%u generation=%u phase=%u loop=%u sourceSeconds=%.9g beforeHP=%d afterHP=%d actualNativeCallback=1",actorId,actorToken,unsigned(entity),targetId,targetGeneration,unsigned(phase),eventPosition.loop,eventPosition.seconds,beforeHP,afterHP);
+    else
+        LawnNet::NetTrace("Fusion Jackson291 bite id=%u token=%u entity=%u target=%u generation=%u phase=%u loop=%u sourceSeconds=%.9g beforeHP=%d targetRetired=1 actualNativeCallback=1",actorId,actorToken,unsigned(entity),targetId,targetGeneration,unsigned(phase),eventPosition.loop,eventPosition.seconds,beforeHP);
+    // Root's typed10 StartEating/StopEating guards retain real native bite
+    // effects/counters while consuming every stock animation-track switch.
+    zombie->mApp->PlayFoley(FOLEY_CHOMP);
+    if(!zombie->mDead)
+    {
+        data=GetNativeSourceZombieData(zombie);
+        if(data&&!LockedPlant(zombie,*data)&&!LockedZombie(zombie,*data))ClearTarget(zombie,*data,true);
+    }
 }
 
 bool IsNativeSourceZombieBirth(const Board* board)
@@ -318,7 +413,12 @@ Zombie* SpawnNativeSourceZombie(Board* board,const NativeSourceZombieSpawnReques
         LawnNet::NetTrace("Fusion source111 spawn bounded refusal row=%d effect=%d reason=onlyGroundWithEffectFalseAdmitted",row,request.withEffect?1:0);
         return nullptr;
     }
-    if(kind==10)return nullptr; // Jackson controller/wire/blend is deliberately not admitted.
+    if(kind==10)
+    {
+        std::string error;
+        if(!CanSpawnNativeJackson291(board,&error))
+        {LawnNet::NetTrace("Fusion Jackson291 spawn gated row=%d reason=%s",row,error.c_str());return nullptr;}
+    }
     if((kind==9||kind==109||kind==18)&&board->mPlantRow[row]==PLANTROW_POOL)return nullptr;
     if(kind==5||kind==9)
     {
@@ -413,6 +513,8 @@ Zombie* SpawnNativeSourceZombie(Board* board,const NativeSourceZombieSpawnReques
         if(profile->waterOnly&&!zombie->mInPool){zombie->DieNoLoot();return nullptr;}
     }
     if(request.friendly){if(request.withEffect)zombie->StartMindControlled();else{zombie->mMindControlled=true;zombie->mLastPortalX=-1;}}
+    if(kind==10&&!InitializeNativeJackson291(zombie))
+    {zombie->DieNoLoot();return nullptr;}
     if(profile->nativeLocomotion)zombie->StartWalkAnim(0);else StartNativeSourceZombieWalk(zombie,0);
     RegisterNativeSourceAdventureEnemy273(zombie);
     LawnNet::NetTrace("Fusion source Zombie spawn id=%u token=%u kind=%u preset=%d speed=%.9g body=%d max=%d helm=%d walk2=%d tick=%d",
@@ -470,6 +572,7 @@ int GetNativeSourceZombieBiteDamage(const Zombie* zombie,int nativeDamage)
 
 bool ApplyNativeSourceZombieDeathClock284(Zombie* zombie)
 {
+    if(UpdateNativeJackson291Animation(zombie))return true;
     if(!IsNativeSourceZombie(zombie)||!HostPlaying(zombie)||zombie->mZombiePhase!=PHASE_ZOMBIE_DYING)return false;
     const auto* data=GetNativeSourceZombieData(zombie);auto* body=Body(zombie);
     if(!body||body->mFrameCount<=0)return false;
@@ -487,6 +590,7 @@ bool ApplyNativeSourceZombieDeathClock284(Zombie* zombie)
 
 bool UpdateNativeSourceZombieDeath284(Zombie* zombie)
 {
+    if(UpdateNativeJackson291(zombie))return true;
     if(!IsNativeSourceZombie(zombie))return false;
     const auto* data=GetNativeSourceZombieData(zombie);
     if(data->kind!=5&&data->kind!=6&&data->kind!=7&&data->kind!=9)return false;
@@ -528,6 +632,7 @@ bool TryShrinkNativeSourceZombie(Zombie* zombie)
 
 bool UpdateNativeSourceZombieAnimation(Zombie* zombie)
 {
+    if(UpdateNativeJackson291Animation(zombie))return true;
     if(UpdateNativeDayZombie273Animation(zombie))return true;
     if(UpdateNativeSpecialZombie269VehicleAnimation(zombie))return true;
     if(UpdateNativeSpecialZombie269Animation(zombie))return true;
@@ -571,6 +676,7 @@ bool UpdateNativeSourceZombieAnimation(Zombie* zombie)
 
 bool StartNativeSourceZombieWalk(Zombie* zombie,int blendTime)
 {
+    if(StartNativeJackson291Walk(zombie))return true;
     if(StartNativeDayZombie273Walk(zombie,blendTime))return true;
     if(StartNativeSpecialZombie269Vehicle(zombie))return true;
     if(StartNativeSpecialZombie269Walk(zombie,blendTime))return true;
@@ -596,6 +702,7 @@ bool StartNativeSourceZombieWalk(Zombie* zombie,int blendTime)
 
 bool UpdateNativeSourceZombieWalking(Zombie* zombie)
 {
+    if(MoveNativeJackson291(zombie))return true;
     if(MoveNativeDayZombie273(zombie))return true;
     if(IsNativeSpecialZombie269Vehicle(zombie))return true; // Exact source position callback is outside the stock action gate.
     if(MoveNativeSpecialZombie269Paper(zombie))return true;
@@ -636,6 +743,7 @@ bool UpdateNativeSourceZombieWalking(Zombie* zombie)
 
 bool UpdateNativeSourceZombieAttack(Zombie* zombie)
 {
+    if(UpdateNativeJackson291(zombie))return true;
     if(UpdateNativeSpecialZombie269PaperAttack(zombie))return true;
     if (!IsNativeSourceZombie(zombie)) return false;
     if (!HostPlaying(zombie)) return true;
@@ -680,6 +788,8 @@ bool UpdateNativeSourceZombieAttack(Zombie* zombie)
 
 bool GetNativeSourceZombiePresentation(const Zombie* zombie,const char*& stateName,float& normalizedPhase)
 {
+    if(const auto* data=GetNativeSourceZombieData(zombie);data&&data->kind==10)
+        return GetNativeJackson291Presentation(zombie,stateName,normalizedPhase);
     if(GetNativeDayZombie273Presentation(zombie,stateName,normalizedPhase))return true;
     if(GetNativeSpecialZombie269Presentation(zombie,stateName,normalizedPhase))return true;
     if (!IsNativeSourceZombie(zombie)) return false;

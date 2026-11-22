@@ -875,6 +875,7 @@ void PruneNativeMetadata(Board* board)
     // ScoreCoin, which asks GetSunValue after calling Die.
     Prune(board->mCoins, context->coinValues);
     Prune(board->mZombies,context->dayZombies273);
+    Prune(board->mZombies,context->nightZombies281);
     for (auto item = context->packets.begin(); item != context->packets.end(); )
     {
         bool live = false;

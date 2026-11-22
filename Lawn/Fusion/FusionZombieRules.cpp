@@ -33,7 +33,7 @@ const FusionZombieProfile* FindFusionZombieProfile(uint16_t kind)
 }
 int GetNativeSourceZombieCarrier(uint16_t kind)
 {
-    switch(kind){case 0:case 11:case 41:case 42:return ZOMBIE_NORMAL;case 2:case 12:return ZOMBIE_TRAFFIC_CONE;
+    switch(kind){case 0:case 10:case 11:case 41:case 42:return ZOMBIE_NORMAL;case 2:case 12:return ZOMBIE_TRAFFIC_CONE;
     case 4:case 13:case 111:return ZOMBIE_PAIL;case 9:case 109:return ZOMBIE_FOOTBALL;case 8:return ZOMBIE_DOOR;
     case 5:case 15:case 104:return ZOMBIE_NEWSPAPER;case 14:case 18:return ZOMBIE_ZAMBONI;
     case 3:case 6:case 7:return ZOMBIE_POLEVAULTER;case 21:case 22:case 23:return ZOMBIE_TRAFFIC_CONE;

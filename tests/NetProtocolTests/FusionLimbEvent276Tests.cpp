@@ -36,7 +36,7 @@ int RunFusionLimbEvent276Tests(int& checks)
     using namespace LawnNet;int failures=0;
     const auto check=[&](bool okay,int line){++checks;if(!okay){++failures;std::printf("FusionLimbEvent276Tests:%d failed\n",line);}};
 #define CHECK(x) check(bool(x),__LINE__)
-    CHECK(NET_PROTOCOL_VERSION==67&&BOARDEV_PRESENTATION_FWOOSH==27&&BOARDEV_FUSION_LIMB276==28);
+    CHECK(NET_PROTOCOL_VERSION==68&&BOARDEV_PRESENTATION_FWOOSH==27&&BOARDEV_FUSION_LIMB276==28);
     CHECK(NET_FUSION_LIMB276_WIRE_BYTES==26);
     constexpr std::array<uint8_t,26> golden={
         0x04,0x03,0x02,0x01,0x05,0x06,0x07,0x08,0x09,0x0a,0x03,0x00,0x01,0x04,
@@ -57,7 +57,7 @@ int RunFusionLimbEvent276Tests(int& checks)
     constexpr CallbackOracle callbacks[]={
         {3,0x03},{5,0x1b},{6,0x03},{7,0x03},{9,0x07},
         {21,0x01},{22,0x01},{23,0x01},{100,0x01},{106,0x01},{107,0x01},{108,0x01},
-        {0,0},{1,0},{2,0},{4,0},{8,0},{10,0},{15,0},{104,0},{109,0},{111,0},{203,0},{65535,0}};
+        {0,0},{1,0},{2,0},{4,0},{8,0},{10,0x03},{15,0},{104,0},{109,0},{111,0},{203,0},{65535,0}};
     for(size_t i=0;i<std::size(callbacks);++i)for(uint8_t part=0;part<5;++part)
     {
         auto e=valid;e.mSourceKind=callbacks[i].kind;e.mPart=NetFusionZombiePart284(part);e.mRow=uint8_t(i%5);
@@ -84,7 +84,7 @@ int RunFusionLimbEvent276Tests(int& checks)
     }
     // Legacy Head3 byte1 is unchanged. New armor/glasses use that same single
     // byte position; the complete other24 bytes retain their established layout.
-    constexpr uint8_t newGoldenParts[][2]={{9,2},{5,3},{5,4}};
+    constexpr uint8_t newGoldenParts[][2]={{9,2},{5,3},{5,4},{10,0},{10,1}};
     for(const auto& oracle:newGoldenParts)
     {
         auto e=valid;e.mSourceKind=oracle[0];e.mPart=NetFusionZombiePart284(oracle[1]);

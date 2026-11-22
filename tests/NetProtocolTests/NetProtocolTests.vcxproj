@@ -196,6 +196,7 @@
     <ClCompile Include="FusionLimbEvent276Tests.cpp" />
     <ClCompile Include="FusionZombieClosure280Tests.cpp" />
     <ClCompile Include="FusionNightZombie281Tests.cpp" />
+    <ClCompile Include="FusionJackson291Tests.cpp" />
     <ClCompile Include="NetSoundEvent284Tests.cpp" />
     <ClCompile Include="..\..\Lawn\Fusion\FusionNightZombie281Rules.cpp" />
     <ClInclude Include="FusionZombieClosure280Tests.h" />

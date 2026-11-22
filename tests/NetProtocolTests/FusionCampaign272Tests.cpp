@@ -37,8 +37,7 @@ FusionCampaign272TestResult RunFusionCampaign272Tests()
         const bool grassWorld=source->scene==0||source->scene==1;
         const bool lessonSupported=source->tutorialId==0||source->tutorialId==1||source->tutorialId==4||
             source->tutorialId==7||source->tutorialId==8||source->tutorialId==10||source->tutorialId==13||source->tutorialId==15;
-        const bool controllerSupported=std::find(source->allowedZombieKinds.begin(),source->allowedZombieKinds.end(),uint16_t(10))==source->allowedZombieKinds.end();
-        if(grassWorld&&lessonSupported&&controllerSupported)
+        if(grassWorld&&lessonSupported&&!source->conveyor&&!source->roofPreplantColumns)
         {
             // Configuration/closure readiness has no integer level cutoff.
             // Actual models/controllers/pools are still checked at native entry.
@@ -83,7 +82,7 @@ FusionCampaign272TestResult RunFusionCampaign272Tests()
     CHECK(NativeSourceAdventureLevelReady280(9,1));
     CHECK(NativeSourceAdventureLevelReady280(10,1)&&NativeSourceAdventureLevelReady280(11,1));
     CHECK(NativeSourceAdventureLevelReady280(13,1)&&NativeSourceAdventureLevelReady280(15,1));
-    CHECK(!NativeSourceAdventureLevelReady280(16,1)&&!NativeSourceAdventureLevelReady280(17,1));
+    CHECK(NativeSourceAdventureLevelReady280(16,1)&&NativeSourceAdventureLevelReady280(17,1));
     CHECK(!NativeSourceAdventureLevelReady280(19,1));
     CHECK(!NativeSourceAdventureLevelReady280(28,1)&&!NativeSourceAdventureLevelReady280(37,1));
     CHECK(FindFusionSourceAdventure272(1)->initialSun==500);

@@ -60,6 +60,14 @@ def section(text, name):
     return "" if match[1].strip() == "[]" else match[2]
 
 
+def _validate_box_targets303(clips,nodes,boxes):
+    for clip in clips.values():
+        for curve in clip["curves"]:
+            if curve["kind"]=="float" and curve["classID"]==61:
+                matches=[box for box in boxes if nodes[box["node"]]["path"]==curve["path"]]
+                if len(matches)!=1:raise ValueError("BoxCollider2D animation requires one exact component: "+curve["path"])
+
+
 def read_clip(path, source_skin=False):
     text = path.read_text(encoding="utf-8")
     if section(text, "m_RotationCurves") or section(text, "m_CompressedRotationCurves"):
@@ -84,8 +92,8 @@ def read_clip(path, source_skin=False):
             if kind == "float":
                 curve["attribute"] = required(block, "attribute")
                 curve["classID"] = int(required(block, "classID"))
-                supported = {(1, "m_IsActive"), (212, "m_Color.r"), (212, "m_Color.g"), (212, "m_Color.b"),
-                             (212, "m_Color.a"), (212, "m_Enabled"), (212, "m_SortingOrder")}
+                supported = {(61, "m_Offset.y"), (61, "m_Size.y"), (1, "m_IsActive"), (212, "m_Color.r"), (212, "m_Color.g"), (212, "m_Color.b"),
+                             (212, "m_Color.a"), (212, "m_Enabled"), (212, "m_FlipX"), (212, "m_FlipY"), (212, "m_SortingOrder")}
                 if source_skin and curve["classID"]==114 and curve["attribute"]=="m_AutoRebind":
                     script=required(block,"script")
                     if reference(block,"script")!=-972417856 or "f68e4d9210748575b7313c5ba1460876" not in script or any(key["value"]!=0 for key in keys):
@@ -93,6 +101,11 @@ def read_clip(path, source_skin=False):
                     curve["kind"]="skinAutoRebind";curve["scriptFileId"]=-972417856;curve["scriptGuid"]="f68e4d9210748575b7313c5ba1460876";supported.add((114,"m_AutoRebind"))
                 if (curve["classID"], curve["attribute"]) not in supported:
                     raise ValueError(str(path) + ": unsupported float binding " + str(curve["classID"]) + "/" + curve["attribute"])
+                if curve["classID"]==61:
+                    curve["scriptFileId"]=reference(block,"script")
+                    if curve["scriptFileId"]!=0 or any(not math.isfinite(k["time"]) or k["time"]<0 or not math.isfinite(k["value"]) or math.isnan(float(k["inSlope"])) or math.isnan(float(k["outSlope"])) for k in keys):
+                        raise ValueError("invalid BoxCollider2D Y binding")
+                    if curve["attribute"]=="m_Size.y" and any(k["value"]<=0 for k in keys):raise ValueError("nonpositive BoxCollider2D Y size")
                 if curve["classID"] == 212:
                     curve["scriptFileId"] = reference(block, "script")
                     if curve["scriptFileId"] != 0 or any(not math.isfinite(key["value"]) for key in keys):
@@ -106,6 +119,13 @@ def read_clip(path, source_skin=False):
                         for a, b in zip(keys, keys[1:]):
                             if a["value"] != b["value"] and math.isfinite(float(a["outSlope"])) and math.isfinite(float(b["inSlope"])):
                                 raise ValueError(str(path) + ": interpolated SpriteRenderer enabled curve is unsupported")
+                if curve["classID"] == 212 and curve["attribute"] in ("m_FlipX", "m_FlipY"):
+                    if any(key["value"] not in (0, 1) for key in keys):
+                        raise ValueError(str(path) + ": nonbinary SpriteRenderer flip curve")
+                    for a, b in zip(keys, keys[1:]):
+                        if math.isfinite(float(a["outSlope"])) and math.isfinite(float(b["inSlope"])) and (
+                                a["value"] != b["value"] or a["outSlope"] != 0 or b["inSlope"] != 0):
+                            raise ValueError(str(path) + ": interpolated SpriteRenderer flip curve is unsupported")
             curves.append(curve)
     for block in re.split(r"\n  - serializedVersion: 2\n", section(text, "m_PPtrCurves"))[1:]:
         if required(block, "attribute") != "m_Sprite" or int(required(block, "classID")) != 212:
@@ -347,6 +367,17 @@ def source_unbound_bindings(assets, prefab, docs, clips, clip_sources, node_path
     if particle_proof is not None:
         proof['decodedNativeParticleProof'] = particle_proof
     return records, proof if records else None
+
+
+def validate_animated_flips(nodes, skins, clips, states=(), layers=()):
+    flipped = {name: {curve["path"] for curve in clip["curves"] if curve["kind"] == "float" and
+        curve.get("classID") == 212 and curve.get("attribute") in ("m_FlipX", "m_FlipY")} for name, clip in clips.items()}
+    paths = set().union(*flipped.values()) if flipped else set()
+    if any(skin["enabled"] and nodes[skin["node"]]["path"] in paths for skin in skins):
+        raise ValueError("animated SpriteRenderer flip on active SpriteSkin requires proven deformation frame")
+    for state in states:
+        if flipped.get(state["clip"]) and any(layer["blendingMode"] == 1 and state["id"] in layer["states"] for layer in layers):
+            raise ValueError("additive SpriteRenderer flip requires proved reference semantics")
 
 
 def export(assets, prefab_path, output, active_only=False, sprite_prefix=None, allow_unused_sprite_bones=False, extra_sprites=(),
@@ -715,6 +746,15 @@ def export(assets, prefab_path, output, active_only=False, sprite_prefix=None, a
             colliders.append({"type": "box", "node": object_to_node[reference(text, "m_GameObject")],
                               "fileId": component["fileId"], "enabled": bool(int(required(text, "m_Enabled"))),
                               "trigger": bool(int(required(text, "m_IsTrigger"))), "offset": vector(text, "m_Offset"), "size": vector(text, "m_Size")})
+    for collider in colliders:
+        if any(not math.isfinite(v)for value in (collider["offset"],collider["size"])for v in value.values()) or any(v<=0 for v in collider["size"].values()):
+            raise ValueError("invalid source BoxCollider2D geometry")
+    for clip in clips.values():
+        for curve in clip["curves"]:
+            if curve["kind"]=="float" and curve["classID"]==61:
+                matches=[box for box in colliders if nodes[box["node"]]["path"]==curve["path"]]
+                if len(matches)!=1:raise ValueError("BoxCollider2D animation requires one exact component: "+curve["path"])
+    _validate_box_targets303(clips,nodes,colliders)
     omitted_nodes = []
     if active_only:
         source_nodes = nodes
@@ -726,6 +766,8 @@ def export(assets, prefab_path, output, active_only=False, sprite_prefix=None, a
         remap = {old: new for new, old in enumerate(kept)}
         sprites = [dict(sprite, node=remap[sprite["node"]]) for sprite in sprites if sprite["node"] in remap and sprite["enabled"]]
         nodes = [dict(nodes[old], parent=remap.get(nodes[old]["parent"], -1)) for old in kept]
+        colliders=[dict(box,node=remap[box["node"]])for box in colliders if box["node"]in remap]
+        _validate_box_targets303(clips,nodes,colliders)
         node_paths = {node["path"] for node in nodes}
     else:
         source_nodes = nodes
@@ -756,6 +798,7 @@ def export(assets, prefab_path, output, active_only=False, sprite_prefix=None, a
     if skins_enabled:
         from source_skin import rigs
         source_skins=rigs(docs,object_to_node,{ident:index for index,ident in enumerate(transform_ids)},nodes,sprites,sprite_variants,clips,resolve_guid,read,field,required,reference,section)
+    validate_animated_flips(nodes,source_skins,clips,states,layers)
     unbound_bindings, unbound_proof = [], None
     if ignored_bindings and not (active_only or sprite_prefix is not None or allow_unused_sprite_bones or portrait_extraction):
         unbound_bindings, unbound_proof = source_unbound_bindings(
@@ -827,6 +870,7 @@ def export(assets, prefab_path, output, active_only=False, sprite_prefix=None, a
                "sources": [{"path": path.relative_to(assets).as_posix(), "sha256": hashlib.sha256(path.read_bytes()).hexdigest()} for path in sorted(used)],
                "deferredComponents": sorted({kind for kind, _, _ in docs if kind in ((198,199) if masks_enabled else (198,199,331))}),
                "validation": "Exported source data. Native rendering and source-runtime comparison are separate verification steps."}
+    if colliders:package["physicsFeatures"]=["boxY303"]
     if masks_enabled:
         package["rendererFeatures"]=["spriteMaskV1"]
         package["sourceMasks"]=source_masks

@@ -10,4 +10,8 @@ class LawnApp;
 // four actual backup7 births, passive contact/jump then natural armor/rage/death.
 // Six frames per peer; runner validates reliable source parts by full identity.
 // Initial/second source factory setups do not exercise acquisition/fusion recipes.
+// Optional JACKSON291=1 uses genuine source Night10, its automatic tutorial,
+// actual4 Dance children and complete accepted Dance backup batches; pauses
+// only for real capture/setup, with canonical FNS27 transition/body proofs.
+// Initial typed factory setup is not acquisition or full-campaign acceptance.
 namespace LawnNet {bool NetSmokeUpdateFusionDayZombie274(LawnApp*);}

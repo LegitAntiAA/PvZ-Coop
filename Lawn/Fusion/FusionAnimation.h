@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <span>
+#include <optional>
 
 class LawnApp;
 namespace Sexy { class Graphics; }
@@ -34,8 +35,27 @@ struct FusionAnimationMask
     double alphaCutoff=.2;
     FusionMask269View View() const;
 };
+// Read-only BoxCollider2D geometry, in the SAME source-unit placed-root XY
+// contract as TryGetNodeOffset. Full 3D TRS is composed before XY projection.
+// Sprite flips/skin do not affect a physics box. Native callers apply their
+// boardBasis/placement exactly once to corners before constructing native AABB.
+// Original enabled and nodeActive are separate; runtime script enable is NOT
+// inferred here. Geometry remains queryable when either flag is false.
+struct FusionAnimationBoxCollider303
+{
+    std::array<float,2> localOffset{},localSize{};
+    std::array<std::array<float,2>,4> corners{};
+    std::array<float,4> aabb{}; // minX,minY,maxX,maxY.
+    bool enabled=false,trigger=false,nodeActive=false;
+};
 struct FusionAnimationDrawOptions
 {
+    struct BaseBlend
+    {
+        std::string outgoingState;
+        float outgoingElapsedSeconds = 0;
+        float incomingWeight = 1;
+    };
     bool rootFlipX = false; // Reflect the complete source hierarchy around its placed root.
     std::array<int,4> colorMultiplierRGBA{255,255,255,255};
     float attackSpeed = 1.0f; // Verified source Animator parameter, distinct from Speed.
@@ -106,6 +126,9 @@ struct FusionAnimationDrawOptions
     // Explicit extra source layers; default empty preserves all existing poses.
     std::vector<ExtraState> extraStates;
     std::vector<SpriteReplacement> spriteReplacements;
+    // Optional same-layer base transition. All consumers share SamplePose;
+    // rendering/querying never owns a transition clock or dispatches events.
+    std::optional<BaseBlend> baseBlend;
 };
 
 // Source curves remain in Unity units. Draw uses 100 pixels per Unity unit,
@@ -158,6 +181,12 @@ public:
         float actionElapsedSeconds=-1,float animatorSpeed=1,
         const FusionAnimationDrawOptions* options=nullptr) const;
     bool TryGetNodeTransform(const char* path,std::array<float,6>& result,
+        const char* baseState,float baseElapsedSeconds,const char* actionState=nullptr,
+        float actionElapsedSeconds=-1,float animatorSpeed=1,
+        const FusionAnimationDrawOptions* options=nullptr) const;
+    // Exact serialized component identity, including static sibling boxes.
+    // Unknown/ambiguous/invalid samples preserve the ENTIRE output unchanged.
+    bool TryGetBoxCollider303(int64_t sourceFileId,FusionAnimationBoxCollider303& result,
         const char* baseState,float baseElapsedSeconds,const char* actionState=nullptr,
         float actionElapsedSeconds=-1,float animatorSpeed=1,
         const FusionAnimationDrawOptions* options=nullptr) const;

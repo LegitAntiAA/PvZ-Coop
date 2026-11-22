@@ -2,6 +2,7 @@
 #include "Fusion/FusionNativeAdventure273.h"
 #include "Fusion/FusionNativeAdventureProgress273.h"
 #include "Fusion/FusionNativeDayZombie273Bridge.h"
+#include "Fusion/FusionNativeNightZombie291Bridge.h"
 #include <cmath>
 #include "Board.h"
 #include "Zombie.h"
@@ -4070,7 +4071,7 @@ void Zombie::DropHead(unsigned int theDamageFlags)
     mHasHead = false;
     SetupReanimForLostHead();
     if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);
-        LawnFusion::IsNativeDayZombie273(this)||(source&&(source->kind==5||source->kind==9)))
+        LawnFusion::IsNativeDayZombie273(this)||(source&&LawnNet::NetFusionZombiePart284Supported(source->kind,LawnNet::NetFusionZombiePart284::Arm)))
     {
         // Flags/stump and source106/108 Bucket gameplay above are independent
         // of the genuine cosmetic callback. Other Day heads have no fall PS.
@@ -4462,7 +4463,7 @@ void Zombie::SetupReanimForLostArm(unsigned int theDamageFlags)
     }
 
     if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);
-        LawnFusion::IsNativeDayZombie273(this)||(source&&(source->kind==5||source->kind==9)))
+        LawnFusion::IsNativeDayZombie273(this)||(source&&LawnNet::NetFusionZombiePart284Supported(source->kind,LawnNet::NetFusionZombiePart284::Arm)))
         return; // Hydration-safe native stump only; actual DropArm owns the event.
 
     if (!mInPool && !TestBit(theDamageFlags, DamageFlags::DAMAGE_DOESNT_LEAVE_BODY))
@@ -4588,7 +4589,7 @@ void Zombie::DropArm(unsigned int theDamageFlags)
     mHasArm = false;
     SetupReanimForLostArm(theDamageFlags);
     if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);
-        LawnFusion::IsNativeDayZombie273(this)||(source&&(source->kind==5||source->kind==9)))
+        LawnFusion::IsNativeDayZombie273(this)||(source&&LawnNet::NetFusionZombiePart284Supported(source->kind,LawnNet::NetFusionZombiePart284::Arm)))
         LawnFusion::PlayNativeSourceZombieLimb276(this,false);
     mApp->PlayFoley(FoleyType::FOLEY_LIMBS_POP);
 }
@@ -5650,6 +5651,7 @@ void Zombie::UpdatePlaying()
             UpdateAnimSpeed();
     }
     LawnFusion::UpdateNativeSpecialZombie269PaperShoot(this,LawnFusion::GetNativeSourceZombie269NodePoint);
+    if(LawnFusion::UpdateNativeJackson291(this)&& (mDead||IsDeadOrDying()))return;
     if(LawnFusion::IsNativeDayZombie273(this))
     {
         LawnFusion::UpdateNativeDayZombie273(this,LawnFusion::GetNativeDayZombie273Hooks());
@@ -8233,6 +8235,8 @@ void Zombie::ConvertToNormalZombie()
 //0x52F250
 void Zombie::StartEating()
 {
+    if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);source&&source->kind==10)
+    {mIsEating=true;return;} // The source controller owns the existing body clock.
     if (mIsEating)
         return;
 
@@ -8348,6 +8352,8 @@ void Zombie::StartWalkAnim(int theBlendTime)
 //0x52F440
 void Zombie::StopEating()
 {
+    if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);source&&source->kind==10)
+    {mIsEating=false;return;}
     if (!mIsEating)
         return;
 
@@ -11156,6 +11162,18 @@ void Zombie::PlayDeathAnim(unsigned int theDamageFlags)
     if (mZombiePhase == ZombiePhase::PHASE_ZOMBIE_DYING || mZombiePhase == ZombiePhase::PHASE_ZOMBIE_BURNED || mZombiePhase == ZombiePhase::PHASE_ZOMBIE_MOWERED)
         return;
 
+    if(const auto* source=LawnFusion::GetNativeSourceZombieData(this);source&&source->kind==10)
+    {
+        // Capture the actual outgoing source pose before stock track selection.
+        // The ordinary typed health path still owns its one native loot action.
+        if(TestBit(theDamageFlags,DamageFlags::DAMAGE_DOESNT_LEAVE_BODY))
+        {DieNoLoot();return;}
+        LawnFusion::BeginNativeJackson291Death(this);
+        LawnFusion::RetireNativeSourceAdventureEnemy273(this);
+        mVelX=0;mIsEating=false;mZombiePhase=PHASE_ZOMBIE_DYING;
+        LawnFusion::NativeBatchZombieDying(this);
+        return;
+    }
     LawnFusion::RetireNativeSourceAdventureEnemy273(this);
     Reanimation* aBodyReanim = mApp->ReanimationTryToGet(mBodyReanimID);
     if (aBodyReanim == nullptr || !aBodyReanim->TrackExists("anim_death"))

@@ -29,7 +29,7 @@ namespace LawnNet
 // (the host broadcasts the same sounds via events).
 extern bool gNetSuppressSounds;
 
-static const uint32_t NET_PROTOCOL_VERSION = 67; // Reliable source armor/head-accessory callbacks; FNS26 unchanged.
+static const uint32_t NET_PROTOCOL_VERSION = 68; // FNS27 canonical Jackson controller view.
 static const uint16_t NET_DEFAULT_PORT = 27713;			// PvZ co-op port
 static const int NET_MAX_PLAYERS = 4;					// 1 host + 3 clients
 static const int NET_MAX_NICK_CHARS = 16;

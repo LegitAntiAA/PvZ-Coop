@@ -20,6 +20,7 @@
 #include "FusionAdventureSession273.h"
 #include "FusionAdventureScheduler273.h"
 #include "FusionNativeDayZombie273.h"
+#include "FusionNativeNightZombie281.h"
 #include "../../ConstEnums.h"
 #include <cstdint>
 #include <array>
@@ -265,6 +266,7 @@ struct NativeContext
     std::unordered_map<uint32_t, GarlicActionState> garlicZombies;
     std::unordered_map<uint32_t, NativeSourceZombieData> sourceZombies;
     std::unordered_map<uint32_t, NativeDayZombie273State> dayZombies273;
+    std::unordered_map<uint32_t, NativeNightZombie281State> nightZombies281;
     std::unordered_map<uint32_t, NativeSourceZombieCursor> sourceZombieCursors; // Host-only consumed native animation spans.
     FusionRollingHitHistory rollingHits; // Host-only full-generation impact history.
     std::unordered_map<uint32_t,std::unordered_set<uint32_t>> fireContacts; // Current native contact episodes only.

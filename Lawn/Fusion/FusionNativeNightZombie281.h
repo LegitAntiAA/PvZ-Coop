@@ -4,23 +4,16 @@
 class Zombie;class Board;
 namespace LawnFusion
 {
-struct NativeNightZombie281State
+struct NativeNightZombie281State : FusionNightZombie281View
 {
-    // Replicated controller view. Native raw body Reanimation is the phase clock.
-    FusionNightZombie281Phase phase=FusionNightZombie281Phase::Moonwalk;
-    bool lookBack=true,moonWalkFinished=false,canAttack=false,loseDancer=false;
-    // HOST ONLY: never encode/hash or tick on ghosts.
+    // HOST ONLY: never encode/hash, run on ghosts or use as presentation time.
     float moonWalkElapsed=0;
-    std::array<uint32_t,4> dancers{}; // Actual full-generation DataArray UIDs.
-    int tick=-1,motionTick=-1;
-    FusionZombieClipPosition eventPosition{},motionPosition{};
-    FusionNightZombie281Phase motionPhase=FusionNightZombie281Phase::Moonwalk;
-    bool initialized=false,entering=true,motionValid=false,summonPending=false,summonSoundPlayed=false,failed=false;
-    bool wasControlled=false;
-    // Source outgoing clip continues callbacks during Animator crossfade.
-    FusionNightZombie281Phase outgoing=FusionNightZombie281Phase::Moonwalk;
-    FusionZombieClipPosition outgoingPosition{};
-    float transitionRemaining=0;
+    std::array<uint32_t,4> dancers{};
+    int tick=-1;
+    FusionZombieClipPosition eventPosition{},outgoingPosition{};
+    bool initialized=false,entering=true,summonPending=false,summonSoundPlayed=false,failed=false;
+    bool wasControlled=false,transitionDeferred=false;
+    FusionNightZombie281Transition deferredTransition{}; // Only normalized entry at Speed0.
 };
 struct NativeNightZombie281Hooks
 {
@@ -45,10 +38,19 @@ struct NativeNightZombie281Hooks
 };
 bool NativeNightZombie281StateValid(const NativeNightZombie281State&);
 bool InitializeNativeJackson281(Zombie*,NativeNightZombie281State&,const NativeNightZombie281Hooks&);
+// Owns source events AND root motion, once per actual unpaused native update.
+// Invoke before generic movement/bites; the native body is the incoming clock.
 bool UpdateNativeJackson281(Zombie*,NativeNightZombie281State&,const NativeNightZombie281Hooks&);
+// Consume before stock PlayDeathAnim resets the actual outgoing body clock.
+bool BeginNativeJackson281Death(Zombie*,NativeNightZombie281State&,const NativeNightZombie281Hooks&);
 bool UpdateNativeJackson281Animation(Zombie*,const NativeNightZombie281State&);
+// Consuming guard only: Update already applied root deltas; never move twice.
 bool MoveNativeJackson281(Zombie*,NativeNightZombie281State&);
 bool GetNativeJackson281Presentation(const Zombie*,const NativeNightZombie281State&,const char*&,float&);
+// Optional outgoing sampler input. No transition => nullptr/0/1, atomically.
+// outgoingElapsedSeconds=sourceSeconds/stateMultiplier, animatorSpeed=1.
+bool GetNativeJackson281BlendPresentation(const Zombie*,const NativeNightZombie281State&,
+    const char*& outgoingState,float& outgoingElapsedSeconds,float& incomingWeight);
 // Call once after genuine SetMindControl, clearing references without controlling old dancers.
 void NativeJackson281MindControlled(NativeNightZombie281State&);
 // Bridge's existing Day273JumpOver callback calls this only for source6 after base landing.

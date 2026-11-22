@@ -23,6 +23,8 @@
 #include <map>
 #include <mutex>
 #include <set>
+#include <sstream>
+#include <iterator>
 #include <stdexcept>
 #include <utility>
 #include <tuple>
@@ -306,6 +308,9 @@ struct Pose
     const Variant* sprite = nullptr;
     float alpha = 1.0f;
     bool alphaChanged = false, enabled = true, enabledChanged = false;
+    bool flipX = false, flipXChanged = false, flipY = false, flipYChanged = false; // Renderer-only; never a Transform/child reflection.
+    float boxOffsetY=0,boxSizeY=1;
+    bool boxOffsetYChanged=false,boxSizeYChanged=false;
     Vector colorRGB{1, 1, 1};
     std::array<bool,3> colorRGBChanged{};
     float sortingOrder = 0;
@@ -313,14 +318,189 @@ struct Pose
 };
 
 struct Node { std::string path; int parent = -1; Pose rest; };
+struct BoxCollider303
+{
+    int64_t fileId=0;int node=-1;
+    std::array<float,2> offset{},size{};
+    bool enabled=false,trigger=false;
+};
+std::vector<BoxCollider303> ReadBoxes303(const Json& data,size_t nodeCount)
+{
+    bool enabled=false;
+    if(data.contains("physicsFeatures")&&!data.at("physicsFeatures").is_array())throw std::runtime_error("invalid source physics feature list");
+    for(const auto& feature:data.value("physicsFeatures",Json::array()))
+    {
+        if(feature!="boxY303"||enabled)throw std::runtime_error("unsupported/duplicate source physics feature");
+        enabled=true;
+    }
+    if(!enabled)return {};
+    if(!data.contains("colliders")||!data.at("colliders").is_array())throw std::runtime_error("invalid source collider list");
+    std::vector<BoxCollider303> boxes;
+        // Component IDs are integer Unity IDs, never binary64 identities.
+        std::set<int64_t> colliderIds303;
+        for(const auto& item:data.value("colliders",Json::array()))
+        {
+            if(item.at("type")!="box")throw std::runtime_error("unsupported collider geometry");
+            const auto& identity=item.at("fileId");
+            if(!identity.is_number_integer()||(identity.is_number_unsigned()&&identity.get<uint64_t>()>uint64_t(INT64_MAX)))
+                throw std::runtime_error("invalid BoxCollider2D component identity");
+            BoxCollider303 box;box.fileId=identity.get<int64_t>();box.node=item.at("node").get<int>();
+            if(!box.fileId||!colliderIds303.insert(box.fileId).second||box.node<0||box.node>=int(nodeCount))
+                throw std::runtime_error("invalid/duplicate BoxCollider2D identity/node");
+            box.enabled=item.at("enabled").get<bool>();box.trigger=item.at("trigger").get<bool>();
+            const auto readXY=[](const Json& value)
+            {
+                if(!value.is_object()||value.size()!=2||!value.contains("x")||!value.contains("y"))throw std::runtime_error("invalid box vector");
+                std::array<float,2> xy{value.at("x").get<float>(),value.at("y").get<float>()};
+                if(!std::isfinite(xy[0])||!std::isfinite(xy[1]))throw std::runtime_error("nonfinite box vector");
+                return xy;
+            };
+            box.offset=readXY(item.at("offset"));box.size=readXY(item.at("size"));
+            if(box.size[0]<=0||box.size[1]<=0)throw std::runtime_error("nonpositive source box size");
+            boxes.push_back(box);
+        }
+    return boxes;
+}
+void BindBoxDefaults303(std::span<Node> nodes,const std::vector<BoxCollider303>& boxes)
+{
+        for(const auto& box:boxes)
+            if(std::count_if(boxes.begin(),boxes.end(),[&](const auto& other){return other.node==box.node;})==1)
+            {nodes[box.node].rest.boxOffsetY=box.offset[1];nodes[box.node].rest.boxSizeY=box.size[1];}
+}
 struct Sprite { int node; const Variant* variant; Sexy::Color color; bool flipX, flipY, enabled; int sortingLayerRank, sortingOrder;uint8_t maskInteraction=0; };
-enum class CurveKind { Position, Scale, Euler, Active, Sprite, Alpha, Red, Green, Blue, Enabled, SortingOrder };
+enum class CurveKind { Position, Scale, Euler, Active, Sprite, Alpha, Red, Green, Blue, Enabled, FlipX, FlipY, BoxOffsetY, BoxSizeY, SortingOrder };
 bool IsColorCurve(CurveKind kind)
 { return kind == CurveKind::Alpha || kind == CurveKind::Red || kind == CurveKind::Green || kind == CurveKind::Blue; }
 struct Key { float time = 0; Vector value{}, inSlope{}, outSlope{}; const Variant* sprite = nullptr; };
 struct Curve { int node; CurveKind kind; std::vector<Key> keys; };
 struct Clip { float duration = 0; bool loop = false; std::vector<Curve> curves; std::vector<FusionAnimationEvent> events; };
-struct State { std::string clip, speedParameterName; float speed = 1; bool speedParameter = false; int layer = -1; bool additive = false, supported = true; };
+struct State { std::string clip, speedParameterName; float speed = 1; bool speedParameter = false; int layer = -1; bool additive = false, supported = true; bool writeDefaultsKnown = false, writeDefaults = false; };
+
+// Preserve legacy packages/calls without inventing default-write history.
+// A new stateless blend requires both exact source states to prove WD1.
+std::map<int64_t,bool> SourceWriteDefaults(const std::string& serialized)
+{
+    std::map<int64_t,bool> result;
+    std::set<int64_t> seen;
+    std::istringstream stream(serialized);
+    std::string line;
+    std::optional<int64_t> state;
+    while (std::getline(stream,line))
+    {
+        if (!line.empty() && line.back() == '\r') line.pop_back();
+        if (line.starts_with("--- !u!"))
+        {
+            state.reset();
+            const std::string prefix = "--- !u!1102 &";
+            if (line.starts_with(prefix))
+            {
+                try
+                {
+                    size_t length = 0;
+                    const auto id = std::stoll(line.substr(prefix.size()),&length);
+                    if (id && length == line.size()-prefix.size())
+                    {
+                        if (seen.insert(id).second) state = id;
+                        else result.erase(id); // Duplicate source identity cannot prove WD1.
+                    }
+                }
+                catch (const std::exception&) {} // Unknown metadata refuses only new blends.
+            }
+        }
+        else if (state && line.starts_with("  m_WriteDefaultValues:"))
+        {
+            if ((line != "  m_WriteDefaultValues: 0" && line != "  m_WriteDefaultValues: 1") ||
+                !result.emplace(*state,line.back() == '1').second)
+            { result.erase(*state); state.reset(); }
+        }
+    }
+    return result;
+}
+
+bool BlendRotation(const Quaternion& from,const Quaternion& to,float weight,Quaternion& output)
+{
+    auto a = from, b = to;
+    const auto normalize = [](Quaternion& q)
+    {
+        double length = 0;
+        for (float value : q) { if (!std::isfinite(value)) return false; length += double(value)*value; }
+        if (length <= 1e-20) return false;
+        const float inverse = float(1/std::sqrt(length));
+        for (auto& value : q) value *= inverse;
+        return true;
+    };
+    if (!normalize(a) || !normalize(b)) return false;
+    float dot = 0;
+    for (size_t i = 0; i < 4; ++i) dot += a[i]*b[i];
+    if (dot < 0) { for (auto& value : b) value = -value; dot = -dot; }
+    dot = std::clamp(dot,0.0f,1.0f);
+    float left = 1-weight, right = weight;
+    if (dot < .9995f)
+    {
+        const float angle = std::acos(dot), sine = std::sin(angle);
+        left = std::sin((1-weight)*angle)/sine;
+        right = std::sin(weight*angle)/sine;
+    }
+    Quaternion value;
+    for (size_t i = 0; i < 4; ++i) value[i] = left*a[i]+right*b[i];
+    if (!normalize(value)) return false;
+    output = value;
+    return true;
+}
+
+bool BlendBasePoses(const std::vector<Pose>& outgoing,std::vector<Pose>& incoming,
+    const std::vector<Sprite>& sprites,float weight)
+{
+    if (!std::isfinite(weight) || weight < 0 || weight > 1 || outgoing.size() != incoming.size()) return false;
+    if (weight == 1) return true;
+    if (weight == 0) { incoming = outgoing; return true; }
+    std::vector<Pose> blended;
+    blended.reserve(incoming.size());
+    for (size_t i = 0; i < incoming.size(); ++i)
+    {
+        const auto& a = outgoing[i]; const auto& b = incoming[i];
+        // Active/enabled/sorting/Sprite are discrete. Copy all change flags too,
+        // so an explicit null Sprite stays different from an unkeyed default.
+        Pose value = weight < .5f ? a : b;
+        for (size_t axis = 0; axis < 3; ++axis)
+        {
+            value.position[axis] = a.position[axis]+weight*(b.position[axis]-a.position[axis]);
+            value.scale[axis] = a.scale[axis]+weight*(b.scale[axis]-a.scale[axis]);
+        }
+        if (!BlendRotation(a.rotation,b.rotation,weight,value.rotation)) return false;
+        // One actual Box61 per animated node; its original Y defaults are
+        // already in Node.rest, so an unkeyed transition side is not zero.
+        value.boxOffsetY=a.boxOffsetY+weight*(b.boxOffsetY-a.boxOffsetY);
+        value.boxSizeY=a.boxSizeY+weight*(b.boxSizeY-a.boxSizeY);
+        value.boxOffsetYChanged=a.boxOffsetYChanged||b.boxOffsetYChanged;
+        value.boxSizeYChanged=a.boxSizeYChanged||b.boxSizeYChanged;
+        if (a.alphaChanged || b.alphaChanged ||
+            std::any_of(a.colorRGBChanged.begin(),a.colorRGBChanged.end(),[](bool changed){return changed;}) ||
+            std::any_of(b.colorRGBChanged.begin(),b.colorRGBChanged.end(),[](bool changed){return changed;}))
+        {
+            const auto sprite = std::find_if(sprites.begin(),sprites.end(),[&](const Sprite& source){return source.node == int(i);});
+            if (sprite == sprites.end() || std::find_if(std::next(sprite),sprites.end(),
+                [&](const Sprite& source){return source.node == int(i);}) != sprites.end()) return false;
+            if (a.alphaChanged || b.alphaChanged)
+            {
+                const float rest = sprite->color.mAlpha/255.0f;
+                const float left = a.alphaChanged ? a.alpha : rest, right = b.alphaChanged ? b.alpha : rest;
+                value.alpha = left+weight*(right-left); value.alphaChanged = true;
+            }
+            const std::array<int,3> rest{sprite->color.mRed,sprite->color.mGreen,sprite->color.mBlue};
+            for (size_t axis = 0; axis < 3; ++axis)
+                if (a.colorRGBChanged[axis] || b.colorRGBChanged[axis])
+                {
+                    const float left = a.colorRGBChanged[axis] ? a.colorRGB[axis] : rest[axis]/255.0f;
+                    const float right = b.colorRGBChanged[axis] ? b.colorRGB[axis] : rest[axis]/255.0f;
+                    value.colorRGB[axis] = left+weight*(right-left); value.colorRGBChanged[axis] = true;
+                }
+        }
+        blended.push_back(value);
+    }
+    incoming = std::move(blended);
+    return true;
+}
 
 Vector Sample(const Curve& curve, float time)
 {
@@ -376,6 +556,7 @@ struct FusionAnimation::Impl
         return found==nodeIndex.end()?-1:found->second;
     }
     std::vector<Sprite> sprites;
+    std::vector<BoxCollider303> boxes;
     std::map<std::string, Variant> variants;
     std::map<std::string, Clip> clips;
     std::map<std::string, State> states;
@@ -418,6 +599,14 @@ struct FusionAnimation::Impl
                 target.sprite = key->sprite;
                 continue;
             }
+            if (curve.kind == CurveKind::FlipX || curve.kind == CurveKind::FlipY)
+            {
+                const Key* key = &curve.keys.front();
+                for (const Key& candidate : curve.keys) { if (candidate.time > time) break; key = &candidate; }
+                if(curve.kind == CurveKind::FlipX){target.flipX = key->value[0] != 0; target.flipXChanged = true;}
+                else{target.flipY = key->value[0] != 0; target.flipYChanged = true;}
+                continue;
+            }
             const Vector value = Sample(curve, time);
             const Vector reference = curve.keys.front().value;
             if (curve.kind == CurveKind::Active) target.active = value[0] >= 0.5f;
@@ -431,6 +620,10 @@ struct FusionAnimation::Impl
                 target.sortingOrder = additive ? target.sortingOrder+value[0]-reference[0] : value[0];
                 target.sortingOrderChanged = true;
             }
+            else if(curve.kind == CurveKind::BoxOffsetY)
+            {target.boxOffsetY=additive?target.boxOffsetY+value[0]-reference[0]:value[0];target.boxOffsetYChanged=true;}
+            else if(curve.kind == CurveKind::BoxSizeY)
+            {target.boxSizeY=additive?target.boxSizeY+value[0]-reference[0]:value[0];target.boxSizeYChanged=true;}
             else if (curve.kind == CurveKind::Euler)
             {
                 if (!additive) target.rotation = EulerRotation(value);
@@ -739,6 +932,8 @@ bool FusionAnimation::Load(LawnApp* app, const std::string& path, std::string& e
         {
             return a.sortingLayerRank != b.sortingLayerRank ? a.sortingLayerRank < b.sortingLayerRank : a.sortingOrder < b.sortingOrder;
         });
+        result->boxes=ReadBoxes303(data,result->nodes.size());
+        BindBoxDefaults303(result->nodes,result->boxes);
         for (auto it = data.at("clips").begin(); it != data.at("clips").end(); ++it)
         {
             Clip clip;
@@ -770,6 +965,10 @@ bool FusionAnimation::Load(LawnApp* app, const std::string& path, std::string& e
                     else if (type == 212 && item.value("scriptFileId", int64_t(0)) == 0 && attribute == "m_Color.g") curve.kind = CurveKind::Green;
                     else if (type == 212 && item.value("scriptFileId", int64_t(0)) == 0 && attribute == "m_Color.b") curve.kind = CurveKind::Blue;
                     else if (type == 212 && item.value("scriptFileId", int64_t(0)) == 0 && attribute == "m_Enabled") curve.kind = CurveKind::Enabled;
+                    else if(type==61&&item.value("scriptFileId",int64_t(-1))==0&&attribute=="m_Offset.y")curve.kind=CurveKind::BoxOffsetY;
+                    else if(type==61&&item.value("scriptFileId",int64_t(-1))==0&&attribute=="m_Size.y")curve.kind=CurveKind::BoxSizeY;
+                    else if (type == 212 && item.value("scriptFileId", int64_t(0)) == 0 && attribute == "m_FlipY") curve.kind = CurveKind::FlipY;
+                    else if (type == 212 && item.value("scriptFileId", int64_t(0)) == 0 && attribute == "m_FlipX") curve.kind = CurveKind::FlipX;
                     else if (type == 212 && item.value("scriptFileId", int64_t(0)) == 0 && attribute == "m_SortingOrder") curve.kind = CurveKind::SortingOrder;
                     else throw std::runtime_error("unsupported animation float target at node: "+item.at("path").get<std::string>());
                 }
@@ -789,7 +988,15 @@ bool FusionAnimation::Load(LawnApp* app, const std::string& path, std::string& e
                     curve.keys.push_back(key);
                 }
                 if (curve.keys.empty()) throw std::runtime_error("empty animation curve");
-                if (IsColorCurve(curve.kind) || curve.kind == CurveKind::Enabled || curve.kind == CurveKind::SortingOrder)
+                if(curve.kind==CurveKind::BoxOffsetY||curve.kind==CurveKind::BoxSizeY)
+                {
+                    if(curve.node<0||std::count_if(result->boxes.begin(),result->boxes.end(),[&](const auto& box){return box.node==curve.node;})!=1)
+                        throw std::runtime_error("BoxCollider2D animation requires one exact component: "+path);
+                    for(const auto& key:curve.keys)
+                        if(!std::isfinite(key.time)||key.time<0||!std::isfinite(key.value[0])||std::isnan(key.inSlope[0])||std::isnan(key.outSlope[0])||
+                            (curve.kind==CurveKind::BoxSizeY&&key.value[0]<=0))throw std::runtime_error("invalid source BoxCollider2D Y curve");
+                }
+                if (IsColorCurve(curve.kind) || curve.kind == CurveKind::Enabled || curve.kind == CurveKind::FlipX || curve.kind == CurveKind::FlipY || curve.kind == CurveKind::SortingOrder)
                 {
                     if (curve.node >= 0 && std::count_if(result->sprites.begin(), result->sprites.end(),
                         [&](const Sprite& sprite) { return sprite.node == curve.node; }) != 1)
@@ -797,7 +1004,7 @@ bool FusionAnimation::Load(LawnApp* app, const std::string& path, std::string& e
                     for (size_t i = 0; i < curve.keys.size(); ++i)
                     {
                         const auto& key = curve.keys[i];
-                        if (!std::isfinite(key.value[0]) || (curve.kind == CurveKind::Enabled && key.value[0] != 0 && key.value[0] != 1))
+                        if (!std::isfinite(key.value[0]) || ((curve.kind == CurveKind::Enabled || curve.kind == CurveKind::FlipX || curve.kind == CurveKind::FlipY) && key.value[0] != 0 && key.value[0] != 1))
                             throw std::runtime_error("invalid SpriteRenderer float value");
                         if (curve.kind == CurveKind::SortingOrder && (key.value[0] != std::trunc(key.value[0]) || key.value[0] < -32768 || key.value[0] > 32767))
                             throw std::runtime_error("invalid SpriteRenderer sorting order");
@@ -806,11 +1013,24 @@ bool FusionAnimation::Load(LawnApp* app, const std::string& path, std::string& e
                             throw std::runtime_error("interpolated SpriteRenderer enabled curve is unsupported");
                     }
                 }
+                if (curve.kind == CurveKind::FlipX || curve.kind == CurveKind::FlipY)
+                {
+                    if (const auto skin=result->skins.find(curve.node);skin!=result->skins.end()&&skin->second.enabled)
+                        throw std::runtime_error("animated SpriteRenderer flip on active SpriteSkin requires proven deformation frame");
+                    for (size_t i=1;i<curve.keys.size();++i)
+                    {
+                        const auto& a=curve.keys[i-1];const auto& b=curve.keys[i];
+                        if (std::isfinite(a.outSlope[0])&&std::isfinite(b.inSlope[0])&&
+                            (a.value[0]!=b.value[0]||a.outSlope[0]!=0||b.inSlope[0]!=0))
+                            throw std::runtime_error("interpolated SpriteRenderer flip curve is unsupported");
+                    }
+                }
                 clip.curves.push_back(std::move(curve));
             }
             for (const auto& event : it.value().at("events")) clip.events.push_back({event.at("time").get<float>(), event.at("functionName").get<std::string>()});
             result->clips.emplace(it.key(), std::move(clip));
         }
+        const auto writeDefaults = SourceWriteDefaults(data.at("controller").value("serializedController",std::string()));
         const auto& layers = data.at("controller").at("layers");
         // An actual source Animator may contain an empty state machine (LilyPad).
         // The exporter's static flag denotes absence of an Animator, not this
@@ -832,11 +1052,15 @@ bool FusionAnimation::Load(LawnApp* app, const std::string& path, std::string& e
             // gameplay parameter is the shared animator Speed value.
             state.supported = !state.speedParameter || state.speedParameterName == "Speed" || state.speedParameterName == "attackSpeed";
             const auto id = item.at("id").get<int64_t>();
+            if (const auto found = writeDefaults.find(id); found != writeDefaults.end())
+            { state.writeDefaultsKnown = true; state.writeDefaults = found->second; }
             for (size_t layer = 0; layer < layers.size(); ++layer) for (const auto& stateId : layers[layer].at("states")) if (stateId.get<int64_t>() == id)
             { state.layer = static_cast<int>(layer); state.additive = layers[layer].at("blendingMode").get<int>() == 1; }
             if (state.additive)
                 for (const auto& curve : result->clips.at(state.clip).curves)
-                    if (curve.kind == CurveKind::Alpha || curve.kind == CurveKind::Enabled)
+                    if (curve.kind == CurveKind::FlipX || curve.kind == CurveKind::FlipY)
+                        throw std::runtime_error("additive SpriteRenderer flip requires proved reference semantics");
+                    else if (curve.kind == CurveKind::Alpha || curve.kind == CurveKind::Enabled)
                     {
                         // The existing additive transform sampler uses the clip's
                         // time-zero reference. Apply the same delta to alpha and
@@ -924,6 +1148,20 @@ bool FusionAnimation::Impl::SamplePose(const char* baseName,float baseElapsed,co
     pose.clear(); pose.reserve(nodes.size());
     for (const Node& node : nodes) pose.push_back(node.rest);
     if (base) Apply(pose, *base, baseElapsed, parameterSpeed(*base), false);
+    if (options && options->baseBlend)
+    {
+        const auto& blend = *options->baseBlend;
+        const State* outgoing = FindState(blend.outgoingState.c_str());
+        if (!base || !outgoing || base->layer < 0 || base->layer != outgoing->layer || base->additive || outgoing->additive ||
+            !base->writeDefaultsKnown || !outgoing->writeDefaultsKnown || !base->writeDefaults || !outgoing->writeDefaults ||
+            !std::isfinite(blend.outgoingElapsedSeconds) || blend.outgoingElapsedSeconds < 0 ||
+            !std::isfinite(blend.incomingWeight) || blend.incomingWeight < 0 || blend.incomingWeight > 1) return false;
+        std::vector<Pose> previous;
+        previous.reserve(nodes.size());
+        for (const Node& node : nodes) previous.push_back(node.rest);
+        Apply(previous,*outgoing,blend.outgoingElapsedSeconds,parameterSpeed(*outgoing),false);
+        if (!BlendBasePoses(previous,pose,sprites,blend.incomingWeight)) return false;
+    }
     const State* action = FindState(actionName);
     if (action && actionElapsed >= 0)
     {
@@ -991,6 +1229,42 @@ bool FusionAnimation::Impl::SamplePose(const char* baseName,float baseElapsed,co
             pose[index].position[1]+=float((-parent.m[1][0]*dx+parent.m[0][0]*dy)/determinant);
         }
     return true;
+}
+
+bool FusionAnimation::TryGetBoxCollider303(int64_t fileId,FusionAnimationBoxCollider303& result,
+    const char* baseName,float baseElapsed,const char* actionName,float actionElapsed,
+    float speed,const FusionAnimationDrawOptions* options) const
+{
+    if(!mImpl||!fileId)return false;
+    const auto found=std::find_if(mImpl->boxes.begin(),mImpl->boxes.end(),[&](const auto& box){return box.fileId==fileId;});
+    if(found==mImpl->boxes.end()||std::find_if(std::next(found),mImpl->boxes.end(),[&](const auto& box){return box.fileId==fileId;})!=mImpl->boxes.end())return false;
+    std::vector<Pose> pose;if(!mImpl->SamplePose(baseName,baseElapsed,actionName,actionElapsed,speed,options,pose))return false;
+    if(found->node<0||found->node>=int(pose.size()))return false;
+    FusionAnimationBoxCollider303 pending;pending.localOffset=found->offset;pending.localSize=found->size;
+    const auto& local=pose[found->node];
+    if(local.boxOffsetYChanged)pending.localOffset[1]=local.boxOffsetY;
+    if(local.boxSizeYChanged)pending.localSize[1]=local.boxSizeY;
+    if(!std::isfinite(pending.localOffset[0])||!std::isfinite(pending.localOffset[1])||
+        !std::isfinite(pending.localSize[0])||!std::isfinite(pending.localSize[1])||pending.localSize[0]<=0||pending.localSize[1]<=0)return false;
+    std::vector<Matrix> world;std::vector<bool> active;mImpl->World(pose,world,active);
+    const auto& transform=world[found->node];
+    const std::array<std::array<float,2>,4> signs={{{-1,-1},{1,-1},{1,1},{-1,1}}};
+    for(size_t i=0;i<4;++i)
+    {
+        const float x=pending.localOffset[0]+signs[i][0]*pending.localSize[0]*.5f;
+        const float y=pending.localOffset[1]+signs[i][1]*pending.localSize[1]*.5f;
+        // Compose actual 3D ancestor matrices FIRST. Local collider Z is0;
+        // transformed Z has already influenced parent XY through World().
+        const float px=transform.m[0][0]*x+transform.m[0][1]*y+transform.position[0];
+        const float py=transform.m[1][0]*x+transform.m[1][1]*y+transform.position[1];
+        if(!std::isfinite(px)||!std::isfinite(py))return false;
+        pending.corners[i]={px,py};
+        if(i==0)pending.aabb={px,py,px,py};
+        else{pending.aabb[0]=(std::min)(pending.aabb[0],px);pending.aabb[1]=(std::min)(pending.aabb[1],py);
+             pending.aabb[2]=(std::max)(pending.aabb[2],px);pending.aabb[3]=(std::max)(pending.aabb[3],py);}
+    }
+    pending.enabled=found->enabled;pending.trigger=found->trigger;pending.nodeActive=active[found->node];
+    result=pending;return true;
 }
 
 bool FusionAnimation::TryGetNodeTransform(const char* path,std::array<float,6>& result,
@@ -1166,7 +1440,8 @@ void FusionAnimation::DrawPose(Sexy::Graphics* graphics, float x, float y, float
         Sexy::Image* image = variant->pixels;
         if (!image) continue;
         const Matrix& transform = world[sprite.node];
-        const float flipX = sprite.flipX ? -1.0f : 1.0f, flipY = sprite.flipY ? -1.0f : 1.0f;
+        const float flipX = (spritePose.flipXChanged ? spritePose.flipX : sprite.flipX) ? -1.0f : 1.0f;
+        const float flipY = (spritePose.flipYChanged ? spritePose.flipY : sprite.flipY) ? -1.0f : 1.0f;
         if (!variant->indices.empty())
         {
             std::vector<FusionDeform269Vertex> deformed;

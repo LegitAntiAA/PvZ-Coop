@@ -127,7 +127,7 @@ FusionCherryShooterTestResult RunFusionCherryShooterTests()
     invalid=frame; invalid.projectiles[0].data.kind=3; CHECK(!ValidateNativeSnapshotFrame(invalid,eligible));
     NetBuffer wire; wire.WriteU32(0x12345678);
     CHECK(EncodeNativeSnapshot(frame,eligible,wire));
-    CHECK(wire.Size()>6 && wire.mData[4]==26 && wire.mData[5]==0);
+    CHECK(wire.Size()>6 && wire.mData[4]==27 && wire.mData[5]==0);
     NativeSnapshotFrame decoded; NetBuffer body,input=wire;
     CHECK(DecodeNativeSnapshot(input,eligible,4242,decoded,body) && input.Remaining()==0 && body.Size()==4);
     CHECK(decoded.plants[0].data.animationSpeed == plant.animationSpeed && decoded.plants[0].data.shootSeconds == .1f);

@@ -23,6 +23,7 @@
 #include "../Projectile.h"
 #include "../Coin.h"
 #include "../Net/NetCommon.h"
+#include "../Net/NetPresentation.h"
 #include "../../LawnApp.h"
 #include "../../Resources.h"
 #include <algorithm>
@@ -40,8 +41,8 @@ bool GroundController(uint16_t kind)
     if(!profile||profile->waterOnly||profile->noAttack)return false;
     if(FindFusionDayZombie273Profile(kind)||SpecialZombie269PaperKind(kind))return true;
     // Existing actual ordinary, Door, TallIceNut and Football mechanisms.
-    // A catalog/carrier alone cannot admit Jackson, vehicles or Money.
-    return kind==0||kind==2||kind==4||kind==8||kind==111||kind==9||kind==109;
+    // Jackson additionally requires the FNS27 source controller contract below.
+    return kind==0||kind==2||kind==4||kind==8||kind==111||kind==9||kind==109||kind==10;
 }
 bool OrdinarySourceGrass(Board* b,uint16_t candidate,std::vector<uint16_t>& closure)
 {
@@ -96,12 +97,14 @@ bool PrepareDanceChildren(Zombie* parent,std::span<const uint16_t> kinds,std::st
 }
 bool DanceChildEffect(Zombie* parent,Zombie* child,bool dance)
 {
-    if(!dance||!Host(parent)||!child||child->mBoard!=parent->mBoard)return false;
-    float x=0,y=0;if(!GetNativeSourceZombie269NodePoint(child,"",x,y))return false;
+    const auto* source=GetNativeSourceZombieData(parent);const auto* born=GetNativeSourceZombieData(child);
+    if(!Host(parent)||!child||child->mBoard!=parent->mBoard||!source||!born||
+        (dance?(source->kind!=6||born->kind!=7):(source->kind!=10||born->kind!=6)))return false;
+    float x=0,y=0;if(!GetNativeSourceZombie269NodePoint(child,dance?"":"Shadow",x,y))return false;
     // The resource was validated before any RNG/birth. Native cosmetic pool
     // exhaustion is an acknowledged one-shot drop, never another child batch.
     const bool played=SpawnNativeSourceEffect269(parent->mBoard,11,x,
-        y-float(.5*GetNativeFusionPixelsY(parent->mBoard)),child->mRenderOrder+1,true)!=nullptr;
+        y-float((dance?.5:.7)*GetNativeFusionPixelsY(parent->mBoard)),child->mRenderOrder+1,true)!=nullptr;
     if(!played)LawnNet::NetTrace("Fusion Dance284 cosmetic capacity drop parent=%u child=%u kind=11",parent->mNetId,child->mNetId);
     return true;
 }
@@ -215,6 +218,8 @@ const NativeDayZombie273Hooks& GetNativeDayZombie273Hooks()
     static const NativeDayZombie273Hooks hooks{PlantTraits,PoleContact,PoleEvent,PrepareDoll,FinishDoll,ProjectileContact};
     return hooks;
 }
+bool PlayNativeNightChildEffect291(Zombie* parent,Zombie* child,bool dance)
+{return DanceChildEffect(parent,child,dance);}
 bool CanSpawnNativeGrassZombie284(Board* b,uint16_t kind,std::string* error)
 {
     if(error)error->clear();
@@ -225,6 +230,8 @@ bool CanSpawnNativeGrassZombie284(Board* b,uint16_t kind,std::string* error)
     if(kNativeFusionSnapshotVersion<26)return reject("Source controller state is absent from the native wire contract.");
     for(auto dependency:closure)
     {
+        if(dependency==10&&(kNativeFusionSnapshotVersion<27||!LawnNet::NetSourceSound284Ready(b->mApp,69)||!FxReady(b,11,error)))
+            return reject("Jackson requires FNS27, real Sound69 and source effect11.");
         if(!EnsureNativeSourceZombieVisuals(b,dependency,error))return false;
         if(!CanQueryNativeSourceZombieRoot273(b,dependency))
             return reject("Source family actual model/root/state dependency is unavailable.");
